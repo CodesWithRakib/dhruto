@@ -23,7 +23,7 @@ import {
 import { useParcelBooking } from "../hooks/use-parcel-booking";
 import { Package, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, Truck } from "lucide-react";
 
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 
 export function BookingForm() {
   const t = useTranslations("BookingForm");

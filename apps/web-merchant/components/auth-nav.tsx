@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/lib/navigation";
 import { Button } from "@dhruto/ui";
 import { LogIn, LogOut, User } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";

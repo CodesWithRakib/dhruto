@@ -21,7 +21,7 @@ import {
   Copy,
 } from "lucide-react";
 import { useGetHubInventoryQuery } from "../api/hubs.api";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { toast } from "sonner";
 
 interface HubInventoryViewProps {

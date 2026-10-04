@@ -13,7 +13,7 @@ import {
   Input,
 } from "@dhruto/ui";
 import { PackageSearch, Plus, MapPin, Phone, Hash, Search, Printer, Eye } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { ParcelStatus } from "@dhruto/contracts";
 
 function getStatusColor(status: ParcelStatus) {

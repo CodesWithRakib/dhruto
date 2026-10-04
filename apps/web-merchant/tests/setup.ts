@@ -19,3 +19,18 @@ class ResizeObserverMock {
 }
 
 window.ResizeObserver = ResizeObserverMock;
+
+import { vi } from "vitest";
+import React from "react";
+
+vi.mock("@/lib/navigation", () => ({
+  Link: ({ href, children, ...props }: any) =>
+    React.createElement("a", { href, ...props }, children),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => "/en",
+  redirect: vi.fn(),
+}));

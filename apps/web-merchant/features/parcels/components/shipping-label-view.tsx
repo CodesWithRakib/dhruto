@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
 import { Button, Card, CardTitle, CardDescription } from "@dhruto/ui";
 import { Printer, ArrowLeft, AlertCircle, Truck } from "lucide-react";

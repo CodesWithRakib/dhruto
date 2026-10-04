@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link, useRouter } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
 import {
   Button,

@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse } from "lucide-react";
+import { Link } from "@/lib/navigation";
+import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike } from "lucide-react";
 import { Button, LanguageSwitcher } from "@dhruto/ui";
 import { useLocale } from "next-intl";
 import { AuthNav } from "./auth-nav";
@@ -48,6 +48,13 @@ export function Navbar() {
             >
               <Warehouse className="h-4 w-4" />
               Hub Operations
+            </Link>
+            <Link
+              href="/rider"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <Bike className="h-4 w-4" />
+              Rider Terminal
             </Link>
             <Link
               href="/track"

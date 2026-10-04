@@ -141,5 +141,13 @@
     "bagsTab": "Bag Consolidation Station",
     "manifestTab": "Vehicle Line-Haul Manifests",
     "inventoryTab": "Hub Inventory"
+  },
+  "Rider": {
+    "title": "Rider Delivery Terminal",
+    "subtitle": "Last-mile dispatch, OTP verification, and cash collection ledger.",
+    "startDelivery": "Start Delivery Run",
+    "verifyOtp": "Verify Customer OTP",
+    "complete": "Complete & Deliver",
+    "handInCash": "Cash Hand-In"
   }
 }
