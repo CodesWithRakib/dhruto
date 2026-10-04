@@ -149,5 +149,25 @@
     "verifyOtp": "Verify Customer OTP",
     "complete": "Complete & Deliver",
     "handInCash": "Cash Hand-In"
+  },
+  "Finance": {
+    "title": "Merchant Finance & Wallet",
+    "subtitle": "Real-time earnings, automated COD settlements, payout withdrawals, and cash reconciliation audit.",
+    "availableBalance": "Available Balance",
+    "pendingSettlement": "Pending Settlements",
+    "lifetimeWithdrawn": "Lifetime Withdrawn",
+    "requestPayout": "Withdraw Funds",
+    "payoutModalTitle": "Request Payout Withdrawal",
+    "payoutModalDesc": "Transfer available funds to your bKash, Nagad, Rocket or Bank Account.",
+    "selectMethod": "Select Payment Channel",
+    "accountNumber": "Account / Wallet Number",
+    "amount": "Withdrawal Amount (BDT)",
+    "submitting": "Processing Withdrawal...",
+    "submitPayout": "Submit Withdrawal Request",
+    "statementTab": "Transaction Statement",
+    "payoutsTab": "Payout History",
+    "reconciliationTab": "Hub Cash Reconciliation Desk",
+    "verifyCash": "Verify Cash & Settle",
+    "netSettled": "Net Settled to Merchant"
   }
 }

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link } from "@/lib/navigation";
-import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike } from "lucide-react";
+import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike, Wallet } from "lucide-react";
 import { Button, LanguageSwitcher } from "@dhruto/ui";
 import { useLocale } from "next-intl";
 import { AuthNav } from "./auth-nav";
@@ -41,6 +41,13 @@ export function Navbar() {
             >
               <Package className="h-4 w-4" />
               My Parcels
+            </Link>
+            <Link
+              href="/finance"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <Wallet className="h-4 w-4 text-emerald-500" />
+              Finance & Wallet
             </Link>
             <Link
               href="/hub"

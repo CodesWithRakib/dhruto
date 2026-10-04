@@ -11,3 +11,6 @@ export * from './IdempotencyRecord.entity.js';
 export * from './Bag.entity.js';
 export * from './BagParcel.entity.js';
 export * from './Manifest.entity.js';
+export * from './Wallet.entity.js';
+export * from './WalletTransaction.entity.js';
+export * from './PayoutRequest.entity.js';

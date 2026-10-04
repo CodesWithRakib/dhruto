@@ -33,11 +33,15 @@ import {
 } from "@dhruto/contracts";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
+import { CustomJwtService } from "../auth/jwt/custom-jwt.service.js";
 
 @ApiTags("Parcels")
 @Controller("parcels")
 export class ParcelsController {
-  constructor(private readonly parcelsService: ParcelsService) {}
+  constructor(
+    private readonly parcelsService: ParcelsService,
+    private readonly jwtService: CustomJwtService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -67,10 +71,26 @@ export class ParcelsController {
     @CurrentUser() user: AuthenticatedUser | null,
     @Req() req: RequestWithId,
   ): Promise<ApiResponse<ParcelCreatedResponse>> {
+    let userId = user?.id;
+    if (!userId) {
+      const authHeader = (req as any)?.headers?.authorization;
+      if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+        try {
+          const token = authHeader.substring(7);
+          const payload = this.jwtService.verifyAccessToken(token);
+          if (payload?.sub) {
+            userId = payload.sub;
+          }
+        } catch {
+          // Ignore invalid token and use default fallback
+        }
+      }
+    }
+
     const parcel = await this.parcelsService.createParcel(
       createParcelDto,
       idempotencyKey,
-      user?.id,
+      userId,
     );
 
     return {

@@ -17,6 +17,7 @@ import { RidersModule } from "./riders/riders.module.js";
 import { HubsModule } from "./hubs/hubs.module.js";
 import { PricingModule } from "./pricing/pricing.module.js";
 import { MerchantsModule } from "./merchants/merchants.module.js";
+import { FinanceModule } from "./finance/finance.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
@@ -40,6 +41,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     ParcelsModule,
     RidersModule,
     HubsModule,
+    FinanceModule,
   ],
   providers: [
     {

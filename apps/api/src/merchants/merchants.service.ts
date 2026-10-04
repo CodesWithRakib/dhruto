@@ -92,6 +92,27 @@ export class MerchantsService {
   }
 
   /**
+   * Finds an existing merchant profile by user ID without auto-creating.
+   */
+  async findByUserId(userId: string): Promise<Merchant | null> {
+    return this.merchantRepo.findOne({
+      where: { userId },
+      relations: ["user"],
+    });
+  }
+
+  /**
+   * Retrieves the first/default merchant profile for demo fallback.
+   */
+  async getDefaultMerchant(): Promise<Merchant | null> {
+    return this.merchantRepo.findOne({
+      where: {},
+      order: { createdAt: "ASC" },
+      relations: ["user"],
+    });
+  }
+
+  /**
    * Updates merchant business profile.
    */
   async updateProfile(userId: string, dto: UpdateMerchantDto): Promise<Merchant> {
