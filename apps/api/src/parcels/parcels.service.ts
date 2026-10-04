@@ -27,6 +27,7 @@ import { IdempotencyService } from "../common/idempotency/idempotency.service.js
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { WebhooksService } from "../webhooks/webhooks.service.js";
+import { IntelligenceService } from "../intelligence/intelligence.service.js";
 
 const STATUS_DESCRIPTIONS: Record<string, { en: string; bn: string }> = {
   [ParcelStatus.CREATED]: { en: "Booking Created", bn: "বুকিং সম্পন্ন হয়েছে" },
@@ -75,6 +76,8 @@ export class ParcelsService {
     private readonly notificationsService?: NotificationsService,
     @Optional()
     private readonly webhooksService?: WebhooksService,
+    @Optional()
+    private readonly intelligenceService?: IntelligenceService,
   ) {}
 
   /**
@@ -145,6 +148,31 @@ export class ParcelsService {
       await this.merchantRepo.save(merchant);
     }
 
+    // 4. Intelligence scoring (Address confidence + RTO risk profile)
+    let intelligenceData: Record<string, any> = {};
+    if (this.intelligenceService) {
+      try {
+        const intel = await this.intelligenceService.analyzeBooking({
+          recipientPhone: booking.recipientPhone,
+          codAmount: Number(booking.codAmount),
+          rawAddress: booking.deliveryAddress,
+          district: booking.district,
+          thana: booking.thana,
+          weight: Number(booking.weight),
+        });
+        intelligenceData = {
+          confidenceScore: intel.parsedAddress.confidenceScore,
+          confidenceTier: intel.parsedAddress.confidenceTier,
+          riskScore: intel.riskProfile.riskScore,
+          riskTier: intel.riskProfile.riskTier,
+          rtoProbability: intel.riskProfile.rtoProbability,
+          recommendations: intel.riskProfile.operationalRecommendations,
+        };
+      } catch (err: any) {
+        this.logger.warn(`Intelligence analysis skipped: ${err.message}`);
+      }
+    }
+
     const parcel = this.parcelRepo.create({
       merchantId: merchant.id,
       trackingCode,
@@ -155,6 +183,7 @@ export class ParcelsService {
         district: booking.district,
         thana: booking.thana,
         zone: pricing.zone,
+        ...intelligenceData,
       },
       weight: Number(booking.weight),
       codAmount: Number(booking.codAmount),
@@ -187,6 +216,7 @@ export class ParcelsService {
       weight: Number(parcel.weight),
       deliveryFee: Number(parcel.deliveryFee),
       status: parcel.status as any,
+      normalizedAddress: parcel.normalizedAddress as any,
       createdAt: parcel.createdAt.toISOString(),
     };
 
@@ -269,6 +299,7 @@ export class ParcelsService {
       weight: Number(parcel.weight),
       deliveryFee: Number(parcel.deliveryFee),
       status: parcel.status as any,
+      normalizedAddress: parcel.normalizedAddress as any,
       createdAt: parcel.createdAt.toISOString(),
       merchantId: parcel.merchantId,
       merchantName: parcel.merchant?.businessName || "Dhruto Merchant",

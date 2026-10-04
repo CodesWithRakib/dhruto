@@ -75,6 +75,7 @@ export const parcelCreatedResponseSchema = z.object({
   weight: z.number(),
   deliveryFee: z.number(),
   status: z.nativeEnum(ParcelStatus),
+  normalizedAddress: z.record(z.any()).optional(),
   createdAt: z.string(),
 });
 

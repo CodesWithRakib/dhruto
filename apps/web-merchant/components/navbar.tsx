@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link } from "@/lib/navigation";
-import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike, Wallet, Webhook } from "lucide-react";
+import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike, Wallet, Webhook, Sparkles } from "lucide-react";
 import { Button, LanguageSwitcher } from "@dhruto/ui";
 import { useLocale } from "next-intl";
 import { AuthNav } from "./auth-nav";
@@ -49,6 +49,13 @@ export function Navbar() {
             >
               <Wallet className="h-4 w-4 text-emerald-500" />
               Finance & Wallet
+            </Link>
+            <Link
+              href="/intelligence"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              AI Intelligence
             </Link>
             <Link
               href="/hub"

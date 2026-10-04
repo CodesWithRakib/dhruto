@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Button,
@@ -21,7 +21,22 @@ import {
   Badge,
 } from "@dhruto/ui";
 import { useParcelBooking } from "../hooks/use-parcel-booking";
-import { Package, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, Truck } from "lucide-react";
+import {
+  Package,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  RotateCcw,
+  Truck,
+  Sparkles,
+  ShieldCheck,
+  ShieldAlert,
+  Search,
+  Check,
+} from "lucide-react";
+import { useParseAddressMutation, useEvaluateRecipientRiskMutation } from "../../intelligence/api/intelligence.api";
+import { type AddressParseResult, type RecipientRiskResult } from "@dhruto/contracts";
+import { toast } from "sonner";
 
 import { Link } from "@/lib/navigation";
 
@@ -29,6 +44,14 @@ export function BookingForm() {
   const t = useTranslations("BookingForm");
   const { form, onSubmit, isLoading, createdParcel, serverError, resetForm } =
     useParcelBooking();
+
+  const [showSmartFill, setShowSmartFill] = useState(false);
+  const [smartAddressInput, setSmartAddressInput] = useState("");
+  const [parsedMeta, setParsedMeta] = useState<AddressParseResult | null>(null);
+
+  const [parseAddress, { isLoading: isParsingAddress }] = useParseAddressMutation();
+  const [evaluateRisk, { data: riskResp, isLoading: isEvaluatingRisk }] = useEvaluateRecipientRiskMutation();
+  const riskProfile: RecipientRiskResult | undefined = riskResp?.data;
 
   const watchWeight = form.watch("weight") || 1;
   const watchDistrict = (form.watch("district") || "").toLowerCase().trim();
@@ -42,7 +65,50 @@ export function BookingForm() {
   const extraKg = Math.max(0, Math.ceil(watchWeight - 1));
   const estimatedFee = base + extraKg * (isOutside ? 25 : 20);
 
+  const handleSmartParseAndFill = async () => {
+    const query = smartAddressInput.trim();
+    if (!query || query.length < 3) {
+      toast.error("Please enter a raw address to parse.");
+      return;
+    }
+    try {
+      const res = await parseAddress({ rawAddress: query }).unwrap();
+      if (res.data) {
+        setParsedMeta(res.data);
+        form.setValue("district", res.data.district, { shouldValidate: true, shouldDirty: true });
+        form.setValue("thana", res.data.thana, { shouldValidate: true, shouldDirty: true });
+        form.setValue("deliveryAddress", query, { shouldValidate: true, shouldDirty: true });
+        toast.success(`Auto-filled: ${res.data.thana}, ${res.data.district} (${res.data.confidenceScore}% confidence)`);
+      }
+    } catch {
+      toast.error("Failed to parse address.");
+    }
+  };
+
+  const handleRiskPreCheck = async () => {
+    const phone = form.getValues("recipientPhone")?.trim();
+    const address = form.getValues("deliveryAddress")?.trim() || form.getValues("thana") || "Dhaka";
+    const cod = form.getValues("codAmount") || 0;
+
+    if (!phone || phone.length < 10) {
+      toast.error("Enter a valid recipient phone number first");
+      return;
+    }
+
+    try {
+      await evaluateRisk({
+        recipientPhone: phone,
+        codAmount: Number(cod),
+        rawAddress: address,
+      }).unwrap();
+      toast.success("Recipient risk evaluated!");
+    } catch {
+      toast.error("Failed to evaluate risk");
+    }
+  };
+
   if (createdParcel) {
+    const normalized = (createdParcel as any).normalizedAddress;
     return (
       <Card className="max-w-2xl mx-auto border-primary/20 shadow-md">
         <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
@@ -115,6 +181,31 @@ export function BookingForm() {
                 ৳{createdParcel.deliveryFee}
               </p>
             </div>
+
+            {normalized && (
+              <div className="col-span-full border-t pt-3 mt-1 bg-primary/5 rounded-lg p-3 space-y-1.5 border border-primary/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                    <span>Cognitive Intelligence Normalized</span>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] bg-background">
+                    {normalized.confidenceScore}% Confidence ({normalized.confidenceTier})
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Zone: <strong className="text-foreground">{normalized.zone}</strong></span>
+                  {normalized.riskTier && (
+                    <span>
+                      RTO Risk:{" "}
+                      <strong className={normalized.riskTier === "LOW" ? "text-emerald-600" : normalized.riskTier === "MEDIUM" ? "text-amber-600" : "text-rose-600"}>
+                        {normalized.riskTier} ({normalized.rtoProbability ?? 0}%)
+                      </strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
 
@@ -145,20 +236,87 @@ export function BookingForm() {
   return (
     <Card className="max-w-2xl mx-auto shadow-sm">
       <CardHeader>
-        <div className="flex items-center space-x-2">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <Package className="h-5 w-5" />
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center space-x-2">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <Package className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle>{t("title")}</CardTitle>
+              <CardDescription>
+                {t("description")}
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>
-              {t("description")}
-            </CardDescription>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSmartFill(!showSmartFill)}
+            className="flex items-center gap-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            {showSmartFill ? "Hide Smart Auto-Fill" : "✨ Smart Address Auto-Fill"}
+          </Button>
         </div>
       </CardHeader>
 
       <CardContent>
+        {/* Smart Auto-Fill Drawer/Accordion */}
+        {showSmartFill && (
+          <div className="mb-6 p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                AI Address Extractor & Normalizer
+              </span>
+              <span className="text-[11px] text-muted-foreground font-medium">
+                Supports English & Bengali
+              </span>
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                value={smartAddressInput}
+                onChange={(e) => setSmartAddressInput(e.target.value)}
+                placeholder="e.g. House 42, Road 7, Banani, Dhaka-1213 or মিরপুর ১০, ঢাকা"
+                className="text-sm bg-background"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSmartParseAndFill();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleSmartParseAndFill}
+                disabled={isParsingAddress || !smartAddressInput.trim()}
+                className="shrink-0 flex items-center gap-1 text-xs"
+              >
+                <Search className="h-3.5 w-3.5" />
+                {isParsingAddress ? "Parsing..." : "Auto-Fill"}
+              </Button>
+            </div>
+
+            {parsedMeta && (
+              <div className="flex items-center justify-between text-xs pt-1 border-t border-primary/10">
+                <div className="flex items-center gap-2 text-foreground font-medium">
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>
+                    Detected: <strong>{parsedMeta.thana}</strong>, <strong>{parsedMeta.district}</strong>
+                    {parsedMeta.postalCode && ` (${parsedMeta.postalCode})`}
+                  </span>
+                </div>
+                <Badge variant={parsedMeta.confidenceTier === "HIGH" ? "success" : parsedMeta.confidenceTier === "MEDIUM" ? "warning" : "destructive"}>
+                  {parsedMeta.confidenceScore}% Confidence
+                </Badge>
+              </div>
+            )}
+          </div>
+        )}
+
         {serverError && (
           <div
             role="alert"
@@ -198,7 +356,20 @@ export function BookingForm() {
                 name="recipientPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("recipientPhone")}</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>{t("recipientPhone")}</FormLabel>
+                      {field.value && field.value.length === 11 && (
+                        <button
+                          type="button"
+                          onClick={handleRiskPreCheck}
+                          disabled={isEvaluatingRisk}
+                          className="text-[11px] text-primary hover:underline flex items-center gap-1 font-medium"
+                        >
+                          <ShieldCheck className="h-3 w-3" />
+                          {isEvaluatingRisk ? "Checking Risk..." : "Pre-Check RTO Risk"}
+                        </button>
+                      )}
+                    </div>
                     <FormControl>
                       <Input
                         placeholder={t("recipientPhonePlaceholder")}
@@ -213,6 +384,24 @@ export function BookingForm() {
                 )}
               />
             </div>
+
+            {/* Live Risk Badge if evaluated */}
+            {riskProfile && (
+              <div className={`p-3 rounded-lg border flex items-center justify-between text-xs ${riskProfile.riskTier === "LOW" ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" : riskProfile.riskTier === "MEDIUM" ? "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300" : "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"}`}>
+                <div className="flex items-center gap-2">
+                  {riskProfile.riskTier === "LOW" ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                  <span>
+                    Recipient Risk: <strong>{riskProfile.riskTier}</strong> (RTO Prob: {riskProfile.rtoProbability}%)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono">{riskProfile.deliveryHistory.deliveredOrders} delivered / {riskProfile.deliveryHistory.returnedOrders} returns</span>
+                  <Badge variant={riskProfile.safeToDispatch ? "success" : "destructive"}>
+                    {riskProfile.safeToDispatch ? "Safe" : "Review"}
+                  </Badge>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField

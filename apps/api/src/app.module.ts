@@ -20,6 +20,7 @@ import { MerchantsModule } from "./merchants/merchants.module.js";
 import { FinanceModule } from "./finance/finance.module.js";
 import { NotificationsModule } from "./notifications/notifications.module.js";
 import { WebhooksModule } from "./webhooks/webhooks.module.js";
+import { IntelligenceModule } from "./intelligence/intelligence.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
@@ -46,6 +47,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     FinanceModule,
     NotificationsModule,
     WebhooksModule,
+    IntelligenceModule,
   ],
   providers: [
     {

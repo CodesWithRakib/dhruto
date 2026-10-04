@@ -184,5 +184,19 @@
     "markAllRead": "Mark all read",
     "testSms": "Test SMS Gateway",
     "noNotifications": "No notifications yet"
+  },
+  "Intelligence": {
+    "title": "Logistics AI & RTO Prediction Suite",
+    "subtitle": "Bilingual natural language address parsing, phonetic typo correction, and pre-dispatch customer risk assessment for Bangladesh e-commerce.",
+    "parserTitle": "Smart BD Address Parser",
+    "parserDesc": "Bilingual (English & Bengali) NLP address extractor with fuzzy typo correction",
+    "riskTitle": "Recipient Risk & RTO Predictor",
+    "riskDesc": "Predict Return-To-Origin (RTO) probability and prevent fake order losses",
+    "parseBtn": "Parse & Extract",
+    "predictBtn": "Predict RTO Risk",
+    "safeDispatch": "Safe to Dispatch",
+    "holdReview": "Hold for Review",
+    "callNeeded": "Call Verification Needed",
+    "advanceNeeded": "Advance Fee Suggested"
   }
 }
