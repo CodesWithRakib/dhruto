@@ -60,8 +60,8 @@ export class AuthService implements OnModuleInit {
       hub = this.hubRepo.create({
         code: "HUB-DHK-01",
         name: "Dhaka Central Sorting Hub",
-        districtId: "Dhaka",
-        thanaId: "Tejgaon",
+        districtId: undefined,
+        thanaId: undefined,
         address: "Tejgaon Industrial Area, Dhaka",
         status: HubStatus.ACTIVE,
       });
@@ -134,7 +134,37 @@ export class AuthService implements OnModuleInit {
       await this.riderRepo.save(rider);
     }
 
-    this.logger.log("✅ Default Admin, Merchant, and Rider ready (Password: dhruto123)");
+    // 5. Chittagong Regional Hub
+    let ctgHub = await this.hubRepo.findOne({ where: { code: "HUB-CTG-01" } });
+    if (!ctgHub) {
+      ctgHub = this.hubRepo.create({
+        code: "HUB-CTG-01",
+        name: "Chittagong Regional Hub",
+        districtId: undefined,
+        thanaId: undefined,
+        address: "GEC Circle, Nasirabad, Chittagong",
+        status: HubStatus.ACTIVE,
+      });
+      await this.hubRepo.save(ctgHub);
+    }
+
+    // 6. Hub Manager User
+    let hubManager = await this.userRepo.findOne({
+      where: { email: "hubmanager@dhruto.com" },
+    });
+    if (!hubManager) {
+      hubManager = this.userRepo.create({
+        name: "Tareq Hub Manager",
+        email: "hubmanager@dhruto.com",
+        phone: "01700000004",
+        passwordHash: defaultPassword,
+        role: UserRole.HUB_MANAGER,
+        status: UserStatus.ACTIVE,
+      });
+      await this.userRepo.save(hubManager);
+    }
+
+    this.logger.log("✅ Default Admin, Merchant, Rider, and Hub Manager ready (Password: dhruto123)");
   }
 
   /**

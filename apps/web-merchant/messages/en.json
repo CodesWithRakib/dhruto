@@ -133,5 +133,13 @@
     "timeline": "Milestone Journey",
     "notFound": "Shipment Not Found",
     "notFoundDesc": "Please double-check the tracking ID and try again."
+  },
+  "Hub": {
+    "title": "Hub Operations Center",
+    "subtitle": "Terminal sorting, bag consolidation, vehicle manifests, and inventory operations.",
+    "scannerTab": "Barcode Scanner Terminal",
+    "bagsTab": "Bag Consolidation Station",
+    "manifestTab": "Vehicle Line-Haul Manifests",
+    "inventoryTab": "Hub Inventory"
   }
 }

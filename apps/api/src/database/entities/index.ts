@@ -7,4 +7,7 @@ export * from './Parcel.entity';
 export * from './ParcelStatusHistory.entity';
 export * from './ParcelAssignment.entity';
 export * from './CashLedger.entity';
-export * from './IdempotencyRecord.entity';
+export * from './IdempotencyRecord.entity.js';
+export * from './Bag.entity.js';
+export * from './BagParcel.entity.js';
+export * from './Manifest.entity.js';

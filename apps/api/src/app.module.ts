@@ -14,6 +14,7 @@ import { HealthModule } from "./health/health.module.js";
 import { ParcelsModule } from "./parcels/parcels.module.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { RidersModule } from "./riders/riders.module.js";
+import { HubsModule } from "./hubs/hubs.module.js";
 import { PricingModule } from "./pricing/pricing.module.js";
 import { MerchantsModule } from "./merchants/merchants.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
@@ -38,6 +39,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     MerchantsModule,
     ParcelsModule,
     RidersModule,
+    HubsModule,
   ],
   providers: [
     {
