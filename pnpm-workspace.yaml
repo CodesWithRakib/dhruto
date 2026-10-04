@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  msgpackr-extract: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.52.0
