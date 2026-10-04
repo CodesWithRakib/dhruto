@@ -169,5 +169,20 @@
     "reconciliationTab": "Hub Cash Reconciliation Desk",
     "verifyCash": "Verify Cash & Settle",
     "netSettled": "Net Settled to Merchant"
+  },
+  "Webhooks": {
+    "title": "Webhooks & Real-time Integrations",
+    "subtitle": "Configure secure HMAC-SHA256 signed HTTP endpoints to receive real-time updates.",
+    "register": "Register Webhook",
+    "active": "Active Subscriptions",
+    "logs": "Delivery Audit Logs & Dead Letter Queue",
+    "testPing": "Test Ping",
+    "signingSecret": "Signing Secret"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "testSms": "Test SMS Gateway",
+    "noNotifications": "No notifications yet"
   }
 }

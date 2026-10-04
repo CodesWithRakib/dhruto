@@ -3,3 +3,5 @@ export * from "./common/index.js";
 export * from "./hub/index.js";
 export * from "./rider/index.js";
 export * from "./finance/index.js";
+export * from "./notifications/index.js";
+export * from "./webhooks/index.js";

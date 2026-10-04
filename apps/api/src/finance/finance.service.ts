@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, DataSource } from "typeorm";
@@ -26,7 +27,12 @@ import {
   type WalletTransactionItem,
   type PayoutRequestItem,
   type PendingReconciliationItem,
+  WebhookEvent,
+  NotificationChannel,
+  NotificationType,
 } from "@dhruto/contracts";
+import { NotificationsService } from "../notifications/notifications.service.js";
+import { WebhooksService } from "../webhooks/webhooks.service.js";
 
 @Injectable()
 export class FinanceService {
@@ -44,6 +50,10 @@ export class FinanceService {
     @InjectRepository(Parcel)
     private readonly parcelRepo: Repository<Parcel>,
     private readonly dataSource: DataSource,
+    @Optional()
+    private readonly notificationsService?: NotificationsService,
+    @Optional()
+    private readonly webhooksService?: WebhooksService,
   ) {}
 
   /**
@@ -403,6 +413,36 @@ export class FinanceService {
         `Reconciled cash for parcel ${parcel.trackingCode}: COD ৳${verifiedCodAmount}, fee ৳${deliveryFee}, settled ৳${netSettled} to ${merchant.businessName}`,
       );
 
+      // Trigger Webhook & Notification
+      if (this.webhooksService) {
+        await this.webhooksService
+          .dispatchEvent(WebhookEvent.CASH_VERIFIED, merchant.id, {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            verifiedAmount: verifiedCodAmount,
+            deliveryFee,
+            netSettled,
+            newWalletBalance: newBalance,
+          })
+          .catch((err) =>
+            this.logger.warn(`Failed to dispatch cash.verified webhook: ${err.message}`),
+          );
+      }
+      if (this.notificationsService) {
+        await this.notificationsService
+          .createNotification({
+            merchantId: merchant.id,
+            channel: NotificationChannel.IN_APP,
+            type: NotificationType.CASH_COLLECTED,
+            title: "Cash Verified & Settled",
+            message: `COD ৳${verifiedCodAmount} verified for ${parcel.trackingCode}. ৳${netSettled} credited to wallet.`,
+            metadata: { parcelId: parcel.id, trackingCode: parcel.trackingCode, netSettled },
+          })
+          .catch((err) =>
+            this.logger.warn(`Failed to dispatch cash verified notification: ${err.message}`),
+          );
+      }
+
       return {
         cashLedger: ledger,
         netSettled,
@@ -448,6 +488,35 @@ export class FinanceService {
       this.logger.log(
         `Payout ${payout.id} (৳${payout.amount}) marked as COMPLETED. Ref: ${dto.transactionReference}`,
       );
+
+      // Trigger Webhook & Notification
+      if (this.webhooksService) {
+        await this.webhooksService
+          .dispatchEvent(WebhookEvent.PAYOUT_COMPLETED, payout.merchantId, {
+            payoutRequestId: payout.id,
+            amount: Number(payout.amount),
+            payoutMethod: payout.payoutMethod,
+            accountDetails: payout.accountDetails,
+            transactionReference: payout.transactionReference,
+          })
+          .catch((err) =>
+            this.logger.warn(`Failed to dispatch payout.completed webhook: ${err.message}`),
+          );
+      }
+      if (this.notificationsService) {
+        await this.notificationsService
+          .createNotification({
+            merchantId: payout.merchantId,
+            channel: NotificationChannel.IN_APP,
+            type: NotificationType.PAYOUT_UPDATE,
+            title: "Payout Disbursed",
+            message: `Payout of ৳${Number(payout.amount).toLocaleString()} via ${payout.payoutMethod} completed. Ref: ${payout.transactionReference || "N/A"}.`,
+            metadata: { payoutId: payout.id, amount: Number(payout.amount) },
+          })
+          .catch((err) =>
+            this.logger.warn(`Failed to dispatch payout notification: ${err.message}`),
+          );
+      }
     } else if (dto.status === PayoutStatus.REJECTED) {
       // Refund the deducted amount back to the merchant wallet
       const queryRunner = this.dataSource.createQueryRunner();

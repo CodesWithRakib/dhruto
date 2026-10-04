@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, In } from "typeorm";
@@ -20,6 +21,9 @@ import {
   FailDeliveryDto,
   CashHandInDto,
 } from "./dto/rider-delivery.dto.js";
+import { NotificationsService } from "../notifications/notifications.service.js";
+import { WebhooksService } from "../webhooks/webhooks.service.js";
+import { WebhookEvent } from "@dhruto/contracts";
 
 @Injectable()
 export class RidersService {
@@ -34,6 +38,10 @@ export class RidersService {
     private readonly cashLedgerRepo: Repository<CashLedger>,
     @InjectRepository(Rider)
     private readonly riderRepo: Repository<Rider>,
+    @Optional()
+    private readonly notificationsService?: NotificationsService,
+    @Optional()
+    private readonly webhooksService?: WebhooksService,
   ) {}
 
   /**
@@ -155,6 +163,37 @@ export class RidersService {
       `Parcel ${parcel.trackingCode} is OUT_FOR_DELIVERY by rider ${riderId}`,
     );
 
+    // Trigger Notification & Webhook
+    if (this.notificationsService) {
+      await this.notificationsService
+        .notifyOutForDelivery(
+          parcel.id,
+          parcel.trackingCode,
+          parcel.recipientPhone,
+          parcel.deliveryOtp,
+          parcel.merchantId,
+        )
+        .catch((err) =>
+          this.logger.warn(`Failed to dispatch out-for-delivery notification: ${err.message}`),
+        );
+    }
+    if (this.webhooksService) {
+      await this.webhooksService
+        .dispatchEvent(
+          WebhookEvent.PARCEL_OUT_FOR_DELIVERY,
+          parcel.merchantId,
+          {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            status: parcel.status,
+            riderId,
+          },
+        )
+        .catch((err) =>
+          this.logger.warn(`Failed to dispatch out-for-delivery webhook: ${err.message}`),
+        );
+    }
+
     return {
       parcelId: parcel.id,
       trackingCode: parcel.trackingCode,
@@ -268,6 +307,38 @@ export class RidersService {
       this.logger.log(
         `COD Collected: ৳${collectedAmount} for Parcel ${parcel.trackingCode}. Recorded in CashLedger.`,
       );
+    }
+
+    // Trigger Notification & Webhook
+    if (this.notificationsService) {
+      await this.notificationsService
+        .notifyDeliveryComplete(
+          parcel.id,
+          parcel.trackingCode,
+          parcel.recipientPhone,
+          collectedAmount,
+          parcel.merchantId,
+        )
+        .catch((err) =>
+          this.logger.warn(`Failed to dispatch delivery complete notification: ${err.message}`),
+        );
+    }
+    if (this.webhooksService) {
+      await this.webhooksService
+        .dispatchEvent(
+          WebhookEvent.PARCEL_DELIVERED,
+          parcel.merchantId,
+          {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            status: parcel.status,
+            codAmountCollected: collectedAmount,
+            cashLedgerId: cashLedger?.id || null,
+          },
+        )
+        .catch((err) =>
+          this.logger.warn(`Failed to dispatch parcel delivered webhook: ${err.message}`),
+        );
     }
 
     return {

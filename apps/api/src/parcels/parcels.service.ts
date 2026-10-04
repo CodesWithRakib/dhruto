@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, Optional } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Like, FindOptionsWhere } from "typeorm";
 import {
@@ -9,6 +9,9 @@ import {
   type ShippingLabelResponse,
   type TimelineEvent,
   ParcelStatus,
+  WebhookEvent,
+  NotificationChannel,
+  NotificationType,
 } from "@dhruto/contracts";
 import { randomUUID } from "node:crypto";
 import {
@@ -22,6 +25,8 @@ import {
 import { PricingService } from "../pricing/pricing.service.js";
 import { IdempotencyService } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
+import { NotificationsService } from "../notifications/notifications.service.js";
+import { WebhooksService } from "../webhooks/webhooks.service.js";
 
 const STATUS_DESCRIPTIONS: Record<string, { en: string; bn: string }> = {
   [ParcelStatus.CREATED]: { en: "Booking Created", bn: "বুকিং সম্পন্ন হয়েছে" },
@@ -66,6 +71,10 @@ export class ParcelsService {
     private readonly hubRepo: Repository<Hub>,
     private readonly pricingService: PricingService,
     private readonly idempotencyService: IdempotencyService,
+    @Optional()
+    private readonly notificationsService?: NotificationsService,
+    @Optional()
+    private readonly webhooksService?: WebhooksService,
   ) {}
 
   /**
@@ -190,6 +199,29 @@ export class ParcelsService {
         response as any,
         merchant.userId,
       );
+    }
+
+    // 6. Webhook dispatch & In-app notification
+    if (this.webhooksService) {
+      await this.webhooksService
+        .dispatchEvent(WebhookEvent.PARCEL_CREATED, merchant.id, response)
+        .catch((err) =>
+          this.logger.warn(`Failed to dispatch parcel.created webhook: ${err.message}`),
+        );
+    }
+    if (this.notificationsService) {
+      await this.notificationsService
+        .createNotification({
+          merchantId: merchant.id,
+          channel: NotificationChannel.IN_APP,
+          type: NotificationType.PARCEL_STATUS_UPDATE,
+          title: "Parcel Booking Created",
+          message: `Parcel ${parcel.trackingCode} booked for ${parcel.recipientName}.`,
+          metadata: { parcelId: parcel.id, trackingCode: parcel.trackingCode },
+        })
+        .catch((err) =>
+          this.logger.warn(`Failed to dispatch in-app notification: ${err.message}`),
+        );
     }
 
     return response;

@@ -2,10 +2,11 @@
 
 import React from "react";
 import { Link } from "@/lib/navigation";
-import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike, Wallet } from "lucide-react";
+import { Package, PlusCircle, LayoutDashboard, Truck, Search, Warehouse, Bike, Wallet, Webhook } from "lucide-react";
 import { Button, LanguageSwitcher } from "@dhruto/ui";
 import { useLocale } from "next-intl";
 import { AuthNav } from "./auth-nav";
+import { NotificationBell } from "./notification-bell";
 
 export function Navbar() {
   const locale = useLocale();
@@ -64,6 +65,13 @@ export function Navbar() {
               Rider Terminal
             </Link>
             <Link
+              href="/developer/webhooks"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <Webhook className="h-4 w-4 text-indigo-500" />
+              Webhooks
+            </Link>
+            <Link
               href="/track"
               className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
             >
@@ -82,6 +90,7 @@ export function Navbar() {
 
         <div className="flex items-center space-x-3">
           <LanguageSwitcher currentLocale={locale} />
+          <NotificationBell />
           <AuthNav />
           <Link href="/bookings/new" className="hidden sm:inline-block">
             <Button size="sm" className="flex items-center gap-1.5">
