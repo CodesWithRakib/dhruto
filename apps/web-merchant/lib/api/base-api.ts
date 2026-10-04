@@ -11,14 +11,24 @@ export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: getBaseUrl(),
-    prepareHeaders: (headers) => {
+    prepareHeaders: (headers, { getState }) => {
       headers.set("Content-Type", "application/json");
-      // In future phases: retrieve auth token from state/cookies
-      // const token = (getState() as RootState).auth?.token;
-      // if (token) headers.set("Authorization", `Bearer ${token}`);
+
+      // Retrieve auth token from state or localStorage
+      const state = getState() as any;
+      const token =
+        state?.auth?.accessToken ||
+        (typeof window !== "undefined"
+          ? localStorage.getItem("dhruto_access_token")
+          : null);
+
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
       return headers;
     },
   }),
-  tagTypes: ["Parcel", "Merchant", "Wallet"],
+  tagTypes: ["Parcel", "Merchant", "Wallet", "Auth"],
   endpoints: () => ({}),
 });

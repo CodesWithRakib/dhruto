@@ -45,7 +45,9 @@ async function bootstrap() {
     )
     .setVersion("0.1.0")
     .addTag("Health", "System health and Kubernetes liveness/readiness probes")
+    .addTag("Auth", "Custom JWT Authentication, session management, and role-based access")
     .addTag("Parcels", "Parcel creation, validation, and lifecycle management")
+    .addTag("Riders", "Rider delivery execution, OTP verification, and cash hand-in")
     .addBearerAuth(
       {
         type: "http",

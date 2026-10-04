@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { BookingForm } from "../../../features/parcels/components/booking-form";
+import { BookingForm } from "../../../../features/parcels/components/booking-form";
 
 export const metadata: Metadata = {
   title: "New Parcel Booking — Dhruto Merchant",

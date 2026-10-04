@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Button,
   Input,
@@ -22,103 +23,120 @@ import {
 import { useParcelBooking } from "../hooks/use-parcel-booking";
 import { Package, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, Truck } from "lucide-react";
 
+import Link from "next/link";
+
 export function BookingForm() {
+  const t = useTranslations("BookingForm");
   const { form, onSubmit, isLoading, createdParcel, serverError, resetForm } =
     useParcelBooking();
 
   const watchWeight = form.watch("weight") || 1;
-  const estimatedFee =
-    watchWeight <= 1 ? 60 : 60 + Math.ceil(watchWeight - 1) * 20;
+  const watchDistrict = (form.watch("district") || "").toLowerCase().trim();
+  const isOutside =
+    watchDistrict &&
+    watchDistrict !== "dhaka" &&
+    watchDistrict !== "gazipur" &&
+    watchDistrict !== "narayanganj";
+  const isSuburb = watchDistrict === "gazipur" || watchDistrict === "narayanganj";
+  const base = isOutside ? 130 : isSuburb ? 100 : 60;
+  const extraKg = Math.max(0, Math.ceil(watchWeight - 1));
+  const estimatedFee = base + extraKg * (isOutside ? 25 : 20);
 
   if (createdParcel) {
     return (
-      <Card className="max-w-2xl mx-auto border-emerald-200 shadow-md">
-        <CardHeader className="bg-emerald-50/50 border-b border-emerald-100 rounded-t-xl">
+      <Card className="max-w-2xl mx-auto border-primary/20 shadow-md">
+        <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
           <div className="flex items-center space-x-3">
-            <CheckCircle2 className="h-8 w-8 text-emerald-600 flex-shrink-0" />
+            <CheckCircle2 className="h-8 w-8 text-primary flex-shrink-0" />
             <div>
-              <CardTitle className="text-xl text-emerald-950">
-                Parcel Booking Confirmed!
+              <CardTitle className="text-xl text-foreground">
+                {t("successTitle")}
               </CardTitle>
-              <CardDescription className="text-emerald-700">
-                Your parcel order has been created and assigned tracking code.
+              <CardDescription className="text-muted-foreground">
+                {t("successDescription")}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-6 pt-6">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
-              <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Tracking Code
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {t("trackingCode")}
               </span>
-              <p className="text-xl font-mono font-bold text-slate-900">
+              <p className="text-xl font-mono font-bold text-foreground">
                 {createdParcel.trackingCode}
               </p>
             </div>
             <Badge variant="success" className="w-fit">
-              Status: {createdParcel.status}
+              {t("status", { status: createdParcel.status })}
             </Badge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="space-y-1">
-              <span className="text-xs font-semibold text-slate-500 uppercase">
-                Recipient
+              <span className="text-xs font-semibold text-muted-foreground uppercase">
+                {t("recipient")}
               </span>
-              <p className="font-medium text-slate-900">{createdParcel.recipientName}</p>
-              <p className="font-mono text-slate-600">{createdParcel.recipientPhone}</p>
+              <p className="font-medium text-foreground">{createdParcel.recipientName}</p>
+              <p className="font-mono text-muted-foreground">{createdParcel.recipientPhone}</p>
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-semibold text-slate-500 uppercase">
-                Destination
+              <span className="text-xs font-semibold text-muted-foreground uppercase">
+                {t("destination")}
               </span>
-              <p className="font-medium text-slate-900">
+              <p className="font-medium text-foreground">
                 {createdParcel.thana}, {createdParcel.district}
               </p>
-              <p className="text-slate-600 text-xs">{createdParcel.deliveryAddress}</p>
+              <p className="text-muted-foreground text-xs">{createdParcel.deliveryAddress}</p>
             </div>
 
             <div className="space-y-1 border-t pt-3">
-              <span className="text-xs font-semibold text-slate-500 uppercase">
-                Weight
+              <span className="text-xs font-semibold text-muted-foreground uppercase">
+                {t("weight")}
               </span>
-              <p className="font-medium text-slate-900">{createdParcel.weight} kg</p>
+              <p className="font-medium text-foreground">{createdParcel.weight} kg</p>
             </div>
 
             <div className="space-y-1 border-t pt-3">
-              <span className="text-xs font-semibold text-slate-500 uppercase">
-                Collection on Delivery (COD)
+              <span className="text-xs font-semibold text-muted-foreground uppercase">
+                {t("codAmount")}
               </span>
-              <p className="font-medium text-slate-900">৳{createdParcel.codAmount}</p>
+              <p className="font-medium text-foreground">৳{createdParcel.codAmount}</p>
             </div>
 
             <div className="space-y-1 border-t pt-3 col-span-full">
-              <span className="text-xs font-semibold text-slate-500 uppercase">
-                Standard Delivery Charge
+              <span className="text-xs font-semibold text-muted-foreground uppercase">
+                {t("deliveryCharge")}
               </span>
-              <p className="text-lg font-bold text-slate-900">
+              <p className="text-lg font-bold text-foreground">
                 ৳{createdParcel.deliveryFee}
               </p>
             </div>
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between border-t bg-slate-50/50 p-4">
+        <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 p-4">
           <Button variant="outline" onClick={resetForm} className="flex items-center gap-2">
             <RotateCcw className="h-4 w-4" />
-            Book Another Parcel
+            {t("bookAnother")}
           </Button>
-          <Button
-            onClick={() => window.print()}
-            variant="default"
-            className="flex items-center gap-2"
-          >
-            <Truck className="h-4 w-4" />
-            Print Shipping Label
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href={`/parcels/${createdParcel.id}`}>
+              <Button variant="outline" className="flex items-center gap-1.5">
+                <ArrowRight className="h-4 w-4" />
+                {t("viewDetails")}
+              </Button>
+            </Link>
+            <Link href={`/parcels/${createdParcel.id}/label`}>
+              <Button variant="default" className="flex items-center gap-2">
+                <Truck className="h-4 w-4" />
+                {t("printLabel")}
+              </Button>
+            </Link>
+          </div>
         </CardFooter>
       </Card>
     );
@@ -132,9 +150,9 @@ export function BookingForm() {
             <Package className="h-5 w-5" />
           </div>
           <div>
-            <CardTitle>Create New Parcel Booking</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
             <CardDescription>
-              Enter delivery recipient information and parcel specifications.
+              {t("description")}
             </CardDescription>
           </div>
         </div>
@@ -148,7 +166,7 @@ export function BookingForm() {
           >
             <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-semibold">Submission Error</p>
+              <p className="font-semibold">{t("submissionError")}</p>
               <p>{serverError}</p>
             </div>
           </div>
@@ -162,10 +180,10 @@ export function BookingForm() {
                 name="recipientName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Recipient Full Name *</FormLabel>
+                    <FormLabel>{t("recipientName")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. Tanvir Ahmed"
+                        placeholder={t("recipientNamePlaceholder")}
                         disabled={isLoading}
                         {...field}
                       />
@@ -180,16 +198,16 @@ export function BookingForm() {
                 name="recipientPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Recipient Mobile (BD) *</FormLabel>
+                    <FormLabel>{t("recipientPhone")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="01712345678"
+                        placeholder={t("recipientPhonePlaceholder")}
                         maxLength={11}
                         disabled={isLoading}
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>11-digit Bangladesh phone number</FormDescription>
+                    <FormDescription>{t("recipientPhoneHint")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -202,10 +220,10 @@ export function BookingForm() {
                 name="district"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>District *</FormLabel>
+                    <FormLabel>{t("district")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. Dhaka"
+                        placeholder={t("districtPlaceholder")}
                         disabled={isLoading}
                         {...field}
                       />
@@ -220,10 +238,10 @@ export function BookingForm() {
                 name="thana"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thana / Upazila *</FormLabel>
+                    <FormLabel>{t("thana")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. Dhanmondi"
+                        placeholder={t("thanaPlaceholder")}
                         disabled={isLoading}
                         {...field}
                       />
@@ -239,10 +257,10 @@ export function BookingForm() {
               name="deliveryAddress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Detailed Delivery Address *</FormLabel>
+                  <FormLabel>{t("address")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="House, road, sector, or landmark details"
+                      placeholder={t("addressPlaceholder")}
                       disabled={isLoading}
                       {...field}
                     />
@@ -258,7 +276,7 @@ export function BookingForm() {
                 name="weight"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Weight (kg) *</FormLabel>
+                    <FormLabel>{t("weight")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -271,7 +289,7 @@ export function BookingForm() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Estimated standard fee: ৳{estimatedFee}
+                      {t("weightHint", { fee: estimatedFee })}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -283,7 +301,7 @@ export function BookingForm() {
                 name="codAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cash on Delivery (BDT) *</FormLabel>
+                    <FormLabel>{t("cod")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -295,7 +313,7 @@ export function BookingForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>Set 0 if prepaid order</FormDescription>
+                    <FormDescription>{t("codHint")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -305,14 +323,14 @@ export function BookingForm() {
         </Form>
       </CardContent>
 
-      <CardFooter className="flex justify-end gap-3 border-t bg-slate-50/50 p-4">
+      <CardFooter className="flex justify-end gap-3 border-t bg-muted/30 p-4">
         <Button
           type="button"
           variant="outline"
           onClick={() => form.reset()}
           disabled={isLoading}
         >
-          Reset
+          {t("reset")}
         </Button>
         <Button
           type="submit"
@@ -323,11 +341,11 @@ export function BookingForm() {
           {isLoading ? (
             <>
               <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              Processing Booking...
+              {t("confirming")}
             </>
           ) : (
             <>
-              Confirm Booking
+              {t("confirm")}
               <ArrowRight className="h-4 w-4" />
             </>
           )}

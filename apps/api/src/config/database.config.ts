@@ -8,7 +8,7 @@ export const databaseConfig = registerAs<TypeOrmModuleOptions>("database", () =>
   const baseConfig: TypeOrmModuleOptions = {
     type: "postgres",
     autoLoadEntities: true,
-    synchronize: false, // Never use synchronize: true in production or foundation
+    synchronize: process.env.DB_SYNCHRONIZE === "true" || !isProduction,
     logging: !isProduction,
   };
 

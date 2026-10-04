@@ -2,7 +2,8 @@
   "extends": "@dhruto/tsconfig/nestjs.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "strictPropertyInitialization": false
   },
   "include": ["src/**/*"]
 }

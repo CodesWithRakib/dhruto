@@ -79,3 +79,97 @@ export const parcelCreatedResponseSchema = z.object({
 });
 
 export type ParcelCreatedResponse = z.infer<typeof parcelCreatedResponseSchema>;
+
+export enum DeliveryZone {
+  INSIDE_DHAKA = "INSIDE_DHAKA",
+  DHAKA_SUBURBS = "DHAKA_SUBURBS",
+  OUTSIDE_DHAKA = "OUTSIDE_DHAKA",
+}
+
+export const pricingCalculationSchema = z.object({
+  district: z.string().trim().min(1, "District is required"),
+  thana: z.string().trim().optional(),
+  weight: z.coerce.number().positive("Weight must be greater than 0"),
+  codAmount: z.coerce.number().min(0).default(0),
+});
+
+export type PricingCalculation = z.infer<typeof pricingCalculationSchema>;
+
+export const pricingResultSchema = z.object({
+  zone: z.nativeEnum(DeliveryZone),
+  baseFee: z.number(),
+  weightFee: z.number(),
+  codFee: z.number(),
+  totalFee: z.number(),
+  estimatedDays: z.string(),
+});
+
+export type PricingResult = z.infer<typeof pricingResultSchema>;
+
+export const timelineEventSchema = z.object({
+  status: z.nativeEnum(ParcelStatus),
+  labelEn: z.string(),
+  labelBn: z.string(),
+  timestamp: z.string(),
+  note: z.string().optional(),
+});
+
+export type TimelineEvent = z.infer<typeof timelineEventSchema>;
+
+export const publicTrackingResponseSchema = z.object({
+  trackingCode: z.string(),
+  status: z.nativeEnum(ParcelStatus),
+  recipientDistrict: z.string(),
+  recipientThana: z.string(),
+  recipientPhoneMasked: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  currentHubName: z.string().nullable(),
+  timeline: z.array(timelineEventSchema),
+});
+
+export type PublicTrackingResponse = z.infer<typeof publicTrackingResponseSchema>;
+
+export const statusHistoryEntrySchema = z.object({
+  id: z.string().uuid(),
+  fromStatus: z.string().nullable(),
+  toStatus: z.nativeEnum(ParcelStatus),
+  changedByRole: z.string(),
+  reason: z.string().nullable(),
+  createdAt: z.string(),
+});
+
+export type StatusHistoryEntry = z.infer<typeof statusHistoryEntrySchema>;
+
+export const parcelDetailsResponseSchema = parcelCreatedResponseSchema.extend({
+  merchantId: z.string().uuid(),
+  merchantName: z.string().optional(),
+  pickupAddress: z.string().optional(),
+  currentRiderName: z.string().nullable().optional(),
+  currentRiderPhone: z.string().nullable().optional(),
+  currentHubName: z.string().nullable().optional(),
+  statusHistory: z.array(statusHistoryEntrySchema).default([]),
+});
+
+export type ParcelDetailsResponse = z.infer<typeof parcelDetailsResponseSchema>;
+
+export const shippingLabelResponseSchema = z.object({
+  trackingCode: z.string(),
+  barcodeSvg: z.string(),
+  merchantName: z.string(),
+  merchantPhone: z.string(),
+  pickupAddress: z.string(),
+  recipientName: z.string(),
+  recipientPhone: z.string(),
+  deliveryAddress: z.string(),
+  district: z.string(),
+  thana: z.string(),
+  weightKg: z.number(),
+  codAmount: z.number(),
+  deliveryFee: z.number(),
+  zone: z.string(),
+  createdDate: z.string(),
+  routingHub: z.string(),
+});
+
+export type ShippingLabelResponse = z.infer<typeof shippingLabelResponseSchema>;

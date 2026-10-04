@@ -2,9 +2,11 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  '@parcel/watcher': set this to true or false
   '@scarf/scarf': true
   '@swc/core': true
   esbuild: true
   msgpackr-extract: true
+  sharp: set this to true or false
 minimumReleaseAgeExclude:
   - lucide-react@1.52.0

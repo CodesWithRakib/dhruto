@@ -7,11 +7,16 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { ZodValidationPipe } from "nestjs-zod";
 
-import { appConfig, databaseConfig, redisConfig } from "./config/index.js";
+import { appConfig, databaseConfig, redisConfig, authConfig } from "./config/index.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { QueuesModule } from "./queues/queues.module.js";
 import { HealthModule } from "./health/health.module.js";
 import { ParcelsModule } from "./parcels/parcels.module.js";
+import { AuthModule } from "./auth/auth.module.js";
+import { RidersModule } from "./riders/riders.module.js";
+import { PricingModule } from "./pricing/pricing.module.js";
+import { MerchantsModule } from "./merchants/merchants.module.js";
+import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor.js";
@@ -21,13 +26,18 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig],
+      load: [appConfig, databaseConfig, redisConfig, authConfig],
       envFilePath: [".env.local", ".env"],
     }),
     DatabaseModule,
     QueuesModule,
     HealthModule,
+    AuthModule,
+    IdempotencyModule,
+    PricingModule,
+    MerchantsModule,
     ParcelsModule,
+    RidersModule,
   ],
   providers: [
     {

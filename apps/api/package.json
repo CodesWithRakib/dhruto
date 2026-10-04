@@ -21,6 +21,8 @@
     "@nestjs/platform-express": "^11.2.7",
     "@nestjs/swagger": "^11.4.7",
     "@nestjs/typeorm": "^11.0.3",
+    "@types/bcryptjs": "^3.0.0",
+    "bcryptjs": "^3.0.3",
     "bullmq": "^5.40.0",
     "helmet": "^8.0.0",
     "ioredis": "^5.4.1",
