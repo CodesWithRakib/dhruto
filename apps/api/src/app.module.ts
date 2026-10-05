@@ -29,6 +29,7 @@ import { CacheModule } from "./common/cache/cache.module.js";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor.js";
 import { TelemetryInterceptor } from "./common/interceptors/telemetry.interceptor.js";
+import { ResponseTransformInterceptor } from "./common/interceptors/response-transform.interceptor.js";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
 
 @Module({
@@ -64,6 +65,10 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseTransformInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

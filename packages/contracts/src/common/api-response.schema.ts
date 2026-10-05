@@ -1,8 +1,27 @@
 import { z } from "zod";
 
+export const paginationMetaSchema = z.object({
+  // Offset pagination
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().optional(),
+  total: z.number().int().nonnegative().optional(),
+  totalPages: z.number().int().nonnegative().optional(),
+  hasNextPage: z.boolean().optional(),
+  hasPreviousPage: z.boolean().optional(),
+
+  // Cursor pagination
+  nextCursor: z.string().nullable().optional(),
+  prevCursor: z.string().nullable().optional(),
+  hasMore: z.boolean().optional(),
+});
+
+export type PaginationMeta = z.infer<typeof paginationMetaSchema>;
+
 export const apiResponseMetaSchema = z.object({
   requestId: z.string(),
   timestamp: z.string(),
+  path: z.string().optional(),
+  pagination: paginationMetaSchema.optional(),
 });
 
 export type ApiResponseMeta = z.infer<typeof apiResponseMetaSchema>;
@@ -13,6 +32,7 @@ export const apiSuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) 
     statusCode: z.number(),
     message: z.string(),
     data: dataSchema,
+    path: z.string().optional(),
     meta: apiResponseMetaSchema,
   });
 
@@ -29,6 +49,7 @@ export const apiErrorResponseSchema = z.object({
   statusCode: z.number(),
   message: z.string(),
   errorCode: z.string(),
+  path: z.string().optional(),
   errors: z.array(apiValidationErrorItemSchema).optional(),
   meta: apiResponseMetaSchema,
 });
@@ -41,6 +62,7 @@ export interface ApiResponse<T> {
   message: string;
   data?: T;
   errorCode?: string;
+  path?: string;
   errors?: ApiValidationErrorItem[];
   meta: ApiResponseMeta;
 }

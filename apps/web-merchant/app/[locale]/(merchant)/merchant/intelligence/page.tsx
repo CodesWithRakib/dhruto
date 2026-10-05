@@ -21,7 +21,7 @@ export default function IntelligencePage() {
   const [activeTab, setActiveTab] = useState<"both" | "address" | "risk">("both");
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+    <div className="w-full space-y-8">
       {/* Hero Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b pb-6">
         <div>

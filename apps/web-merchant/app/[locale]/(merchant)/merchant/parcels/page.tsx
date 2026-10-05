@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function ParcelsPage() {
   return (
-    <div className="max-w-6xl mx-auto space-y-6 py-6">
+    <div className="w-full space-y-6">
       <ParcelList />
     </div>
   );

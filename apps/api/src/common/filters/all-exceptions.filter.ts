@@ -23,6 +23,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const requestId = request.requestId || "unknown";
     const timestamp = new Date().toISOString();
+    const path = request.originalUrl || request.url || "unknown";
 
     // 1. Zod Validation Exceptions
     if (exception instanceof ZodValidationException) {
@@ -41,10 +42,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: "Validation failed",
         errorCode: "VALIDATION_ERROR",
+        path,
         errors: validationErrors,
         meta: {
           requestId,
           timestamp,
+          path,
         },
       });
       return;
@@ -65,10 +68,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         message: "Validation failed",
         errorCode: "VALIDATION_ERROR",
+        path,
         errors: validationErrors,
         meta: {
           requestId,
           timestamp,
+          path,
         },
       });
       return;
@@ -99,9 +104,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         statusCode: status,
         message,
         errorCode,
+        path,
         meta: {
           requestId,
           timestamp,
+          path,
         },
       });
       return;
@@ -115,9 +122,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: "An internal server error occurred",
       errorCode: "INTERNAL_SERVER_ERROR",
+      path,
       meta: {
         requestId,
         timestamp,
+        path,
       },
     });
   }
