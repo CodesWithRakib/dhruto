@@ -1,6 +1,7 @@
 import React from "react";
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
+import { PublicMobileBottomNav } from "@/components/layout/public-mobile-bottom-nav";
 
 /**
  * Public surface: marketing pages and public tracking.
@@ -8,7 +9,7 @@ import { PublicFooter } from "@/components/layout/public-footer";
  */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
@@ -20,6 +21,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
       <PublicFooter />
+      <PublicMobileBottomNav />
     </div>
   );
 }

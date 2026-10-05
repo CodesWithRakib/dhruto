@@ -10,6 +10,7 @@ import {
   Button,
   Input,
   Badge,
+  DataTable,
 } from "@dhruto/ui";
 import {
   Truck,
@@ -313,101 +314,115 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
       )}
 
       {/* Manifests Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Dispatched & Active Manifests</CardTitle>
-          <CardDescription>
-            Inter-hub vehicle line-haul dispatches originating or arriving at this terminal
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoadingManifests ? (
-            <div className="py-12 text-center text-muted-foreground text-sm">
-              Loading manifests...
-            </div>
-          ) : manifests.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground text-sm">
-              <Truck className="h-10 w-10 mx-auto mb-2 text-muted-foreground/40" />
-              No vehicle manifests recorded yet. Create a manifest to initiate line-haul transit.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40 text-muted-foreground text-xs uppercase tracking-wider">
-                    <th className="py-3 px-4 text-left">Manifest Code</th>
-                    <th className="py-3 px-4 text-left">Route</th>
-                    <th className="py-3 px-4 text-left">Vehicle & Driver</th>
-                    <th className="py-3 px-4 text-center">Bags</th>
-                    <th className="py-3 px-4 text-center">Status</th>
-                    <th className="py-3 px-4 text-left">Created</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {manifests.map((man: any) => (
-                    <tr key={man.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="py-3 px-4 font-mono font-medium text-xs">
-                        {man.manifestCode}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span className="font-medium">{man.originHub}</span>
-                          <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                          <span className="font-medium text-primary">{man.destinationHub}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-xs">
-                        <div className="font-semibold">{man.vehicleNumber}</div>
-                        {man.driverName && (
-                          <div className="text-muted-foreground text-[11px]">
-                            {man.driverName} {man.driverPhone && `(${man.driverPhone})`}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <Badge variant="secondary" className="font-mono">
-                          {man.bagCount} bags
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {getStatusBadge(man.status)}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(man.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {man.status === "CREATED" && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleDispatch(man.id)}
-                              disabled={isDispatching}
-                              className="h-8 gap-1.5 bg-info hover:bg-info text-primary-foreground"
-                            >
-                              <Send className="h-3.5 w-3.5" />
-                              Dispatch Run
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setViewingManifest(man)}
-                            className="h-8 gap-1"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            Details
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="w-full space-y-4">
+        <Card className="border-border shadow-sm">
+          <CardHeader className="border-b border-border">
+            <CardTitle className="text-lg">Dispatched & Active Manifests</CardTitle>
+            <CardDescription>
+              Inter-hub vehicle line-haul dispatches originating or arriving at this terminal
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <DataTable
+          columns={[
+            {
+              accessorKey: "manifestCode",
+              header: "Manifest Code",
+              cell: ({ row }: { row: any }) => (
+                <span className="font-mono font-medium text-xs">
+                  {row.original.manifestCode}
+                </span>
+              ),
+            },
+            {
+              id: "route",
+              header: "Route",
+              cell: ({ row }: { row: any }) => (
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="font-medium">{row.original.originHub}</span>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                  <span className="font-medium text-primary">{row.original.destinationHub}</span>
+                </div>
+              ),
+            },
+            {
+              id: "vehicle",
+              header: "Vehicle & Driver",
+              cell: ({ row }: { row: any }) => (
+                <div className="text-xs">
+                  <div className="font-semibold">{row.original.vehicleNumber}</div>
+                  {row.original.driverName && (
+                    <div className="text-muted-foreground text-[11px]">
+                      {row.original.driverName} {row.original.driverPhone && `(${row.original.driverPhone})`}
+                    </div>
+                  )}
+                </div>
+              ),
+            },
+            {
+              accessorKey: "bagCount",
+              header: () => <span className="text-center block">Bags</span>,
+              cell: ({ row }: { row: any }) => (
+                <div className="text-center">
+                  <Badge variant="secondary" className="font-mono">
+                    {row.original.bagCount} bags
+                  </Badge>
+                </div>
+              ),
+            },
+            {
+              accessorKey: "status",
+              header: () => <span className="text-center block">Status</span>,
+              cell: ({ row }: { row: any }) => (
+                <div className="text-center">
+                  {getStatusBadge(row.original.status)}
+                </div>
+              ),
+            },
+            {
+              accessorKey: "createdAt",
+              header: "Created",
+              cell: ({ row }: { row: any }) => (
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {new Date(row.original.createdAt).toLocaleDateString()}
+                </span>
+              ),
+            },
+            {
+              id: "actions",
+              header: () => <span className="text-right block">Actions</span>,
+              cell: ({ row }: { row: any }) => (
+                <div className="flex items-center justify-end gap-2">
+                  {row.original.status === "CREATED" && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleDispatch(row.original.id)}
+                      disabled={isDispatching}
+                      className="h-8 gap-1.5 bg-info hover:bg-info text-primary-foreground shadow-sm"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      Dispatch Run
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setViewingManifest(row.original)}
+                    className="h-8 gap-1"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Details
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+          data={manifests}
+          isLoading={isLoadingManifests}
+          emptyMessage="No vehicle manifests recorded yet. Create a manifest to initiate line-haul transit."
+        />
+      </div>
 
       {/* Manifest Detail Modal */}
       {viewingManifest && (

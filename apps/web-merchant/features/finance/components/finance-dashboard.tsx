@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   useGetMyWalletQuery,
   useGetWalletTransactionsQuery,
@@ -21,7 +21,16 @@ import {
   Smartphone,
   Building2,
 } from "lucide-react";
-import { Button } from "@dhruto/ui";
+import {
+  Button,
+  DataTable,
+  type ColumnDef,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@dhruto/ui";
+import type { PayoutRequestItem } from "@dhruto/contracts";
 
 export function FinanceDashboard() {
   const [activeTab, setActiveTab] = useState<"statement" | "payouts" | "reconciliation">("statement");
@@ -85,18 +94,97 @@ export function FinanceDashboard() {
     }
   };
 
+  const payoutColumns: ColumnDef<PayoutRequestItem>[] = useMemo(
+    () => [
+      {
+        accessorKey: "createdAt",
+        header: "Date",
+        cell: ({ row }) => {
+          const dateObj = new Date(row.original.createdAt);
+          return (
+            <div className="text-caption text-muted-foreground whitespace-nowrap">
+              <span className="font-medium text-foreground">{dateObj.toLocaleDateString()}</span>{" "}
+              <span>{dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "payoutMethod",
+        header: "Channel",
+        cell: ({ row }) => (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground">
+            {row.original.payoutMethod === "BANK_TRANSFER" ? (
+              <Building2 className="w-4 h-4 text-primary" />
+            ) : (
+              <Smartphone className="w-4 h-4 text-primary" />
+            )}
+            {row.original.payoutMethod}
+          </span>
+        ),
+      },
+      {
+        id: "account",
+        header: "Account / Reference",
+        cell: ({ row }) => (
+          <div>
+            <div className="font-mono text-xs font-semibold text-foreground">
+              {row.original.accountDetails.accountNumber}
+            </div>
+            {row.original.transactionReference && (
+              <div className="text-[11px] text-primary font-mono mt-0.5">
+                Gateway Ref: {row.original.transactionReference}
+              </div>
+            )}
+            {row.original.rejectionReason && (
+              <div className="text-[11px] text-danger mt-0.5">
+                Reason: {row.original.rejectionReason}
+              </div>
+            )}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: () => <span className="text-right block">Amount</span>,
+        cell: ({ row }) => (
+          <div className="text-right font-bold text-body-sm tabular-nums text-foreground">
+            ৳{Number(row.original.amount).toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: () => <span className="text-center block">Status</span>,
+        cell: ({ row }) => {
+          const badge = getPayoutStatusBadge(row.original.status);
+          const Icon = badge.icon;
+          return (
+            <div className="text-center">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold border ${badge.bg}`}>
+                <Icon className="w-3.5 h-3.5" />
+                <span>{badge.label}</span>
+              </span>
+            </div>
+          );
+        },
+      },
+    ],
+    [],
+  );
+
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-primary-foreground flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <span>Finance & Wallet Hub</span>
-            <span className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-success-soft border border-success text-success">
+            <span className="text-xs uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-full bg-success-soft border border-success text-success">
               Live Settlement
             </span>
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-body-sm text-muted-foreground">
             Real-time cash reconciliation, double-entry automated COD credit, and instant multi-channel payouts.
           </p>
         </div>
@@ -106,7 +194,7 @@ export function FinanceDashboard() {
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            className="rounded-2xl border-border text-foreground hover:bg-surface-muted flex items-center gap-2 text-xs"
+            className="flex items-center gap-2 text-xs"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Sync Ledger</span>
@@ -122,13 +210,13 @@ export function FinanceDashboard() {
       />
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-surface-muted border border-border backdrop-blur-xl w-fit">
+      <div className="flex items-center gap-1.5 p-1 rounded-lg bg-surface-muted border border-border w-fit">
         <button
           onClick={() => setActiveTab("statement")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-semibold transition-all ${
             activeTab === "statement"
-              ? "bg-success text-primary-foreground  shadow-emerald-950/30"
-              : "text-muted-foreground hover:text-primary-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <ReceiptText className="w-4 h-4" />
@@ -137,10 +225,10 @@ export function FinanceDashboard() {
 
         <button
           onClick={() => setActiveTab("payouts")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-semibold transition-all ${
             activeTab === "payouts"
-              ? "bg-success text-primary-foreground  shadow-emerald-950/30"
-              : "text-muted-foreground hover:text-primary-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <History className="w-4 h-4" />
@@ -149,10 +237,10 @@ export function FinanceDashboard() {
 
         <button
           onClick={() => setActiveTab("reconciliation")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-semibold transition-all ${
             activeTab === "reconciliation"
-              ? "bg-success text-primary-foreground  shadow-emerald-950/30"
-              : "text-muted-foreground hover:text-primary-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <Building className="w-4 h-4" />
@@ -166,103 +254,27 @@ export function FinanceDashboard() {
       )}
 
       {activeTab === "payouts" && (
-        <div className="rounded-3xl bg-surface-muted backdrop-blur-xl border border-border overflow-hidden ">
-          <div className="p-6 border-b border-border">
-            <h4 className="text-lg font-bold text-primary-foreground flex items-center gap-2">
-              <History className="w-5 h-5 text-success" />
-              Withdrawal Payout Requests
-            </h4>
-            <p className="text-xs text-muted-foreground mt-1">
-              Historical record of your withdrawal disbursement requests across bKash, Nagad, Rocket, and Bank accounts.
-            </p>
-          </div>
+        <div className="w-full space-y-4">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
+              <div>
+                <CardTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <History className="w-5 h-5 text-primary" />
+                  Withdrawal Payout Requests
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-1">
+                  Historical record of your withdrawal disbursement requests across bKash, Nagad, Rocket, and Bank accounts.
+                </CardDescription>
+              </div>
+            </CardHeader>
+          </Card>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-foreground">
-              <thead className="bg-surface-muted text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-                <tr>
-                  <th className="px-6 py-4 font-semibold">Date</th>
-                  <th className="px-6 py-4 font-semibold">Channel</th>
-                  <th className="px-6 py-4 font-semibold">Account / Reference</th>
-                  <th className="px-6 py-4 font-semibold text-right">Amount</th>
-                  <th className="px-6 py-4 font-semibold text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {isPayoutsLoading ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-xs">
-                      Loading payout history...
-                    </td>
-                  </tr>
-                ) : payouts.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-16 text-center">
-                      <div className="flex flex-col items-center justify-center text-muted-foreground">
-                        <History className="w-10 h-10 text-muted-foreground mb-2" />
-                        <p className="font-semibold text-foreground">No payout requests yet</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          When your balance reaches at least ৳100, you can request an instant withdrawal.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  payouts.map((p) => {
-                    const badge = getPayoutStatusBadge(p.status);
-                    const Icon = badge.icon;
-                    const dateObj = new Date(p.createdAt);
-
-                    return (
-                      <tr key={p.id} className="hover:bg-surface-muted transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                          {dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </td>
-
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground">
-                            {p.payoutMethod === "BANK_TRANSFER" ? (
-                              <Building2 className="w-4 h-4 text-primary" />
-                            ) : (
-                              <Smartphone className="w-4 h-4 text-success" />
-                            )}
-                            {p.payoutMethod}
-                          </span>
-                        </td>
-
-                        <td className="px-6 py-4">
-                          <div className="font-mono text-xs font-semibold text-primary-foreground">
-                            {p.accountDetails.accountNumber}
-                          </div>
-                          {p.transactionReference && (
-                            <div className="text-[11px] text-success font-mono mt-0.5">
-                              Gateway Ref: {p.transactionReference}
-                            </div>
-                          )}
-                          {p.rejectionReason && (
-                            <div className="text-[11px] text-danger mt-0.5">
-                              Reason: {p.rejectionReason}
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-foreground">
-                          ৳{Number(p.amount).toLocaleString()}
-                        </td>
-
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.bg}`}>
-                            <Icon className="w-3.5 h-3.5" />
-                            <span>{badge.label}</span>
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={payoutColumns}
+            data={payouts}
+            isLoading={isPayoutsLoading}
+            emptyMessage="No payout requests yet. When your balance reaches at least ৳100, you can request an instant withdrawal."
+          />
         </div>
       )}
 

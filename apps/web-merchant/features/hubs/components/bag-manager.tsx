@@ -7,6 +7,7 @@ import {
   Button,
   Input,
   Badge,
+  DataTable,
 } from "@dhruto/ui";
 import {
   Package,
@@ -196,49 +197,73 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
               </p>
             </div>
           ) : (
-            <table className="w-full text-xs text-left">
-              <thead className="bg-muted/40 text-muted-foreground uppercase border-b">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Bag Code</th>
-                  <th className="px-4 py-3 font-semibold">Origin Hub</th>
-                  <th className="px-4 py-3 font-semibold">Destination Hub</th>
-                  <th className="px-4 py-3 font-semibold">Parcels</th>
-                  <th className="px-4 py-3 font-semibold">Seal Tag</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {bags.map((bag) => (
-                  <tr key={bag.id} className="hover:bg-muted/30">
-                    <td className="px-4 py-3 font-mono font-bold text-foreground">
-                      {bag.bagCode}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{bag.originHub}</td>
-                    <td className="px-4 py-3 font-medium text-foreground">{bag.destinationHub}</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-                        {bag.parcelCount}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-muted-foreground">
-                      {bag.sealTag || "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant={
-                          bag.status === "RECEIVED"
-                            ? "success"
-                            : bag.status === "IN_TRANSIT"
-                              ? "default"
-                              : "outline"
-                        }
-                        className="text-[10px] font-semibold"
-                      >
-                        {bag.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-right">
+            <DataTable
+              columns={[
+                {
+                  accessorKey: "bagCode",
+                  header: "Bag Code",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="font-mono font-bold text-foreground">
+                      {row.original.bagCode}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "originHub",
+                  header: "Origin Hub",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="text-muted-foreground">{row.original.originHub}</span>
+                  ),
+                },
+                {
+                  accessorKey: "destinationHub",
+                  header: "Destination Hub",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="font-medium text-foreground">{row.original.destinationHub}</span>
+                  ),
+                },
+                {
+                  accessorKey: "parcelCount",
+                  header: "Parcels",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                      {row.original.parcelCount}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "sealTag",
+                  header: "Seal Tag",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="font-mono text-muted-foreground">
+                      {row.original.sealTag || "—"}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "status",
+                  header: "Status",
+                  cell: ({ row }: { row: any }) => (
+                    <Badge
+                      variant={
+                        row.original.status === "RECEIVED"
+                          ? "success"
+                          : row.original.status === "IN_TRANSIT"
+                            ? "default"
+                            : "outline"
+                      }
+                      className="text-[10px] font-semibold"
+                    >
+                      {row.original.status}
+                    </Badge>
+                  ),
+                },
+                {
+                  id: "actions",
+                  header: () => <span className="text-right block">Actions</span>,
+                  cell: ({ row }: { row: any }) => {
+                    const bag = row.original;
+                    return (
                       <div className="flex items-center justify-end gap-1.5">
                         {bag.status === "OPEN" && (
                           <>
@@ -300,11 +325,13 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                           </Button>
                         )}
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    );
+                  },
+                },
+              ]}
+              data={bags}
+              isLoading={isLoading}
+            />
           )}
         </CardContent>
       </Card>

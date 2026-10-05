@@ -14,7 +14,7 @@ import { InstallPrompt } from "@/components/pwa/install-prompt";
 /** Latin face — variable font, used for all English copy. */
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -94,7 +94,7 @@ export default async function LocaleLayout({
       dir="ltr"
       className={`${inter.variable} ${notoSansBengali.variable}`}
     >
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className={`min-h-screen bg-background ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <NetworkStatus />

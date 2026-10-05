@@ -13,7 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from "@dhruto/ui";
-import { Sparkles, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "../api/auth.api";
 import { useAppDispatch } from "../../../store/hooks";
 import { setCredentials } from "../../../store/auth.slice";
@@ -34,12 +34,6 @@ export function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [loginMutation, { isLoading }] = useLoginMutation();
-
-  const handleDemoFill = () => {
-    setEmailOrPhone("merchant@dhruto.com");
-    setPassword("dhruto123");
-    setErrorMessage(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,27 +162,16 @@ export function LoginForm() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
               />
-              <span>আমাকে মনে রাখুন</span>
+              <span>{t("rememberMe")}</span>
             </label>
 
             <Link
               href="/contact"
               className="text-xs font-semibold text-primary hover:underline"
             >
-              পাসওয়ার্ড ভুলে গেছেন?
+              {t("forgotPassword")}
             </Link>
           </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleDemoFill}
-            className="flex w-full items-center justify-center gap-1.5 border-dashed text-body-sm mt-2"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-            {t("demoFill")}
-          </Button>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
@@ -198,17 +181,17 @@ export function LoginForm() {
             className="w-full flex items-center justify-center gap-2 h-11 text-base font-semibold shadow-sm"
             disabled={isLoading}
           >
-            {isLoading ? t("signingIn") : "লগইন"}
+            {isLoading ? t("signingIn") : t("signIn")}
             <ArrowRight className="h-4 w-4" />
           </Button>
 
           <div className="text-center text-caption text-muted-foreground">
-            অ্যাকাউন্ট নেই?{" "}
+            {t("noAccount")}{" "}
             <Link
               href="/register"
               className="text-primary font-semibold hover:underline"
             >
-              রেজিস্টার করুন
+              {t("registerNow")}
             </Link>
           </div>
         </CardFooter>

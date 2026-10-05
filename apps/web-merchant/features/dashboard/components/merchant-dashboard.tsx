@@ -9,6 +9,8 @@ import {
   CardTitle,
   CardContent,
   Button,
+  DataTable,
+  type ColumnDef,
 } from "@dhruto/ui";
 import {
   PackagePlus,
@@ -17,7 +19,6 @@ import {
   Clock,
   ArrowRight,
   TrendingUp,
-  RotateCcw,
   UploadCloud,
   Printer,
   FileText,
@@ -42,49 +43,6 @@ interface ShipmentRow {
   codAmount: number;
 }
 
-const DEFAULT_SAMPLE_PARCELS: ShipmentRow[] = [
-  {
-    id: "p-1",
-    trackingCode: "TRK123456789",
-    recipientName: "Rahim Uddin",
-    district: "Dhaka",
-    status: ParcelStatus.OUT_FOR_DELIVERY,
-    codAmount: 1250,
-  },
-  {
-    id: "p-2",
-    trackingCode: "TRK123456788",
-    recipientName: "Ayesha Akter",
-    district: "Chattogram",
-    status: ParcelStatus.IN_TRANSIT,
-    codAmount: 850,
-  },
-  {
-    id: "p-3",
-    trackingCode: "TRK123456787",
-    recipientName: "Md. Hasan",
-    district: "Sylhet",
-    status: ParcelStatus.PICKED_UP,
-    codAmount: 2300,
-  },
-  {
-    id: "p-4",
-    trackingCode: "TRK123456786",
-    recipientName: "Fatema Begum",
-    district: "Rajshahi",
-    status: ParcelStatus.ORIGIN_HUB_RECEIVED,
-    codAmount: 1450,
-  },
-  {
-    id: "p-5",
-    trackingCode: "TRK123456785",
-    recipientName: "Kamal Hossain",
-    district: "Khulna",
-    status: ParcelStatus.DELIVERED,
-    codAmount: 980,
-  },
-];
-
 export function MerchantDashboard() {
   const t = useTranslations("Index");
   const { user } = useAppSelector((state) => state.auth);
@@ -92,18 +50,78 @@ export function MerchantDashboard() {
   const [showPromo, setShowPromo] = useState(true);
 
   const stats = data?.data?.stats || {
-    totalOrders: 124,
-    pendingOrders: 8,
-    inTransitOrders: 18,
-    deliveredOrders: 98,
+    totalOrders: 0,
+    pendingOrders: 0,
+    inTransitOrders: 0,
+    deliveredOrders: 0,
     returnedOrders: 0,
-    totalCodAmount: 97980,
-    collectedCodAmount: 85420,
+    totalCodAmount: 0,
+    collectedCodAmount: 0,
   };
 
   const rawParcels = data?.data?.recentParcels || [];
-  const displayParcels: ShipmentRow[] =
-    rawParcels.length > 0 ? (rawParcels as ShipmentRow[]) : DEFAULT_SAMPLE_PARCELS;
+  const displayParcels: ShipmentRow[] = (rawParcels as ShipmentRow[]) ?? [];
+
+  const columns: ColumnDef<ShipmentRow>[] = [
+    {
+      accessorKey: "trackingCode",
+      header: t("colTracking"),
+      cell: ({ row }) => (
+        <Link
+          href={MERCHANT_ROUTES.parcel(row.original.id)}
+          className="font-mono font-medium text-xs text-foreground hover:text-primary transition-colors"
+        >
+          {row.original.trackingCode}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "recipientName",
+      header: t("colRecipient"),
+      cell: ({ row }) => (
+        <span className="font-medium text-body-sm text-foreground">
+          {row.original.recipientName}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "district",
+      header: t("colDestination"),
+      cell: ({ row }) => (
+        <span className="text-body-sm text-muted-foreground">
+          {row.original.district}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: t("colStatus"),
+      cell: ({ row }) => <StatusBadge status={row.original.status as any} />,
+    },
+    {
+      accessorKey: "codAmount",
+      header: t("colCod"),
+      cell: ({ row }) => (
+        <span className="font-medium tabular-nums text-foreground">
+          ৳ {row.original.codAmount.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <span className="text-right block">{t("colAction")}</span>,
+      cell: ({ row }) => (
+        <div className="text-right">
+          <Link
+            href={MERCHANT_ROUTES.parcel(row.original.id)}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            {t("view")}
+          </Link>
+        </div>
+      ),
+    },
+  ];
 
   const todayFormatted = new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -237,72 +255,12 @@ export function MerchantDashboard() {
             </CardHeader>
 
             <CardContent className="p-0">
-              {isLoading ? (
-                <p className="p-8 text-center text-body-sm text-muted-foreground">
-                  {t("loadingRecent")}
-                </p>
-              ) : displayParcels.length === 0 ? (
-                <div className="space-y-3 p-12 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-muted-foreground">
-                    <RotateCcw className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <p className="font-medium text-body-sm text-muted-foreground">
-                    {t("emptyRecent")}
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-table">
-                    <thead className="border-b border-border bg-surface-muted/60 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      <tr>
-                        <th className="px-5 py-3">{t("colTracking")}</th>
-                        <th className="px-5 py-3">{t("colRecipient")}</th>
-                        <th className="px-5 py-3">{t("colDestination")}</th>
-                        <th className="px-5 py-3">{t("colStatus")}</th>
-                        <th className="px-5 py-3">{t("colCod")}</th>
-                        <th className="px-5 py-3 text-right">{t("colAction")}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {displayParcels.map((parcel) => (
-                        <tr
-                          key={parcel.id}
-                          className="transition-colors hover:bg-surface-muted/50"
-                        >
-                          <td className="px-5 py-3 font-mono font-medium text-xs">
-                            <Link
-                              href={MERCHANT_ROUTES.parcel(parcel.id)}
-                              className="text-foreground hover:text-primary transition-colors"
-                            >
-                              {parcel.trackingCode}
-                            </Link>
-                          </td>
-                          <td className="px-5 py-3 font-medium text-body-sm text-foreground">
-                            {parcel.recipientName}
-                          </td>
-                          <td className="px-5 py-3 text-body-sm text-muted-foreground">
-                            {parcel.district}
-                          </td>
-                          <td className="px-5 py-3">
-                            <StatusBadge status={parcel.status} />
-                          </td>
-                          <td className="px-5 py-3 font-medium tabular-nums text-foreground">
-                            ৳ {parcel.codAmount.toLocaleString()}
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            <Link
-                              href={MERCHANT_ROUTES.parcel(parcel.id)}
-                              className="text-xs font-semibold text-primary hover:underline"
-                            >
-                              {t("view")}
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <DataTable
+                columns={columns}
+                data={displayParcels}
+                isLoading={isLoading}
+                emptyMessage={t("emptyRecent")}
+              />
             </CardContent>
           </Card>
         </div>

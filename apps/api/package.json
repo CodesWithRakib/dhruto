@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "seed": "node dist/database/seed/seed-cli.js",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {

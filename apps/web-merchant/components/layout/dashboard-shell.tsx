@@ -2,12 +2,26 @@
 
 import * as React from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { LogOut, Menu, MoreHorizontal, X } from "lucide-react";
-import { Button, LanguageSwitcher, Logo } from "@dhruto/ui";
+import { ChevronDown, LogOut, Menu, User, X } from "lucide-react";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  LanguageSwitcher,
+  Logo,
+} from "@dhruto/ui";
 import { Link, usePathname, useRouter } from "@/lib/navigation";
 import {
   bottomNavForRole,
-  hasMoreForRole,
   navForRole,
   type NavItem,
 } from "@/config/navigation";
@@ -23,6 +37,7 @@ import { cn } from "@/lib/cn";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/auth.slice";
 import { NotificationBell } from "@/components/notification-bell";
+import { MobileBottomNav } from "./mobile-bottom-nav";
 
 /** Dashboard sections that render inside this shell. */
 type DashboardSection = Extract<AppSection, "merchant" | "admin" | "hub" | "rider">;
@@ -83,6 +98,7 @@ export function DashboardShell({
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
   // Guards must not run during SSR (the store is not hydrated yet).
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
@@ -91,7 +107,7 @@ export function DashboardShell({
   const roleConfig = roleConfigFor(role);
   const groups = navForRole(role);
   const bottomItems = bottomNavForRole(role);
-  const showMore = hasMoreForRole(role);
+  // const showMore = hasMoreForRole(role);
   const showBottomNav = bottomItems.length > 0;
 
   // Close the drawer whenever the route changes.
@@ -121,7 +137,8 @@ export function DashboardShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [drawerOpen]);
 
-  const handleLogout = () => {
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
     dispatch(logout());
     router.push("/login");
   };
@@ -129,7 +146,7 @@ export function DashboardShell({
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
+      <aside className="sticky top-0 h-screen hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
         <div className="flex h-16 items-center border-b border-border px-5">
           <Link href="/" aria-label="Dhruto" className="rounded-md">
             <Logo size="sm" />
@@ -172,30 +189,100 @@ export function DashboardShell({
           <div className="flex items-center gap-2">
             <LanguageSwitcher currentLocale={locale} label={t("language")} />
             <NotificationBell />
-            <div className="hidden items-center gap-2.5 sm:flex border-l border-border pl-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] font-bold text-white text-xs shadow-sm">
-                {(user?.name || "M").charAt(0).toUpperCase()}
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="max-w-[150px] truncate text-xs font-bold text-foreground leading-tight">
-                  {user?.name ?? "Merchant Name"}
-                </span>
-                <span className="max-w-[150px] truncate text-[11px] text-muted-foreground leading-tight">
-                  {user?.email ?? "merchant@dhruto.com"}
-                </span>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleLogout}
-              aria-label={t("signOut")}
-              title={t("signOut")}
-            >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-            </Button>
+            {/* User Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2.5 rounded-lg p-1.5 text-left transition-colors hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 border-l border-border pl-3 ml-1"
+                  aria-label="User account menu"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] font-bold text-white text-xs shadow-sm">
+                    {(user?.name || "M").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="hidden flex-col text-left sm:flex">
+                    <span className="max-w-[150px] truncate text-xs font-bold text-foreground leading-tight">
+                      {user?.name ?? "Merchant Name"}
+                    </span>
+                    <span className="max-w-[150px] truncate text-[11px] text-muted-foreground leading-tight">
+                      {user?.email ?? "merchant@dhruto.com"}
+                    </span>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground hidden sm:block" aria-hidden="true" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-xl border border-border bg-surface shadow-xl">
+                <div className="px-3 py-2 border-b border-border mb-1">
+                  <p className="text-xs font-bold text-foreground truncate">
+                    {user?.name ?? "Merchant"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {user?.email ?? "merchant@dhruto.com"}
+                  </p>
+                  <div className="mt-1.5 inline-flex items-center rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary-soft-foreground uppercase tracking-wider">
+                    {t(roleConfig.labelKey)}
+                  </div>
+                </div>
+
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors"
+                >
+                  <Link href={`/${section}/settings`}>
+                    <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <span>{t("profile")}</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="my-1 bg-border" />
+
+                <DropdownMenuItem
+                  onClick={() => setShowLogoutModal(true)}
+                  className="cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-danger hover:bg-danger-soft hover:text-danger-soft-foreground transition-colors focus:bg-danger-soft focus:text-danger-soft-foreground"
+                >
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                  <span>{t("signOut")}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
+
+        {/* Confirmation Modal for Logout */}
+        <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+          <DialogContent className="max-w-md rounded-2xl p-6">
+            <DialogHeader className="space-y-2 text-left">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger-soft text-danger">
+                <LogOut className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <DialogTitle className="text-lg font-bold text-foreground">
+                {t("logoutConfirmTitle")}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {t("logoutConfirmMessage")}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowLogoutModal(false)}
+                className="w-full sm:w-auto"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleConfirmLogout}
+                className="w-full sm:w-auto bg-danger text-danger-foreground hover:bg-danger/90"
+              >
+                <LogOut className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                {t("confirmSignOut")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <main
           id="main-content"
@@ -204,51 +291,11 @@ export function DashboardShell({
             showBottomNav ? "pb-28 lg:pb-6" : undefined,
           )}
         >
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="w-full">{children}</div>
         </main>
 
         {/* Mobile bottom navigation — role specific, safe-area aware. */}
-        {showBottomNav ? (
-          <nav
-            aria-label={t("primaryLabel")}
-            className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe lg:hidden"
-          >
-            <ul className="mx-auto flex max-w-md items-stretch justify-around px-1">
-              {bottomItems.map((item) => {
-                const active = isActiveRoute(pathname, item.href);
-                const Icon = item.icon;
-                return (
-                  <li key={item.href} className="flex-1">
-                    <Link
-                      href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      className={cn(
-                        "flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-caption font-medium",
-                        active ? "text-primary" : "text-muted-foreground",
-                      )}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                      <span className="truncate">{t(item.labelKey)}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-              {showMore ? (
-                <li className="flex-1">
-                  <button
-                    type="button"
-                    onClick={() => setDrawerOpen(true)}
-                    aria-haspopup="dialog"
-                    className="flex min-h-[56px] w-full flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-caption font-medium text-muted-foreground"
-                  >
-                    <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-                    <span className="truncate">{t("more")}</span>
-                  </button>
-                </li>
-              ) : null}
-            </ul>
-          </nav>
-        ) : null}
+        <MobileBottomNav onOpenMore={() => setDrawerOpen(true)} />
       </div>
 
       {/* Mobile drawer */}
@@ -294,8 +341,11 @@ export function DashboardShell({
               <div className="mt-2 border-t border-border pt-2">
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="flex h-12 w-full items-center gap-2.5 rounded-md px-3 text-body font-medium text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    setShowLogoutModal(true);
+                  }}
+                  className="flex h-12 w-full items-center gap-2.5 rounded-md px-3 text-body font-medium text-danger hover:bg-danger-soft hover:text-danger-soft-foreground"
                 >
                   <LogOut className="h-4 w-4" aria-hidden="true" />
                   {t("signOut")}

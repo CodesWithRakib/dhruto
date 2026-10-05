@@ -23,6 +23,7 @@ import { WebhooksModule } from "./webhooks/webhooks.module.js";
 import { IntelligenceModule } from "./intelligence/intelligence.module.js";
 import { AnalyticsModule } from "./analytics/analytics.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
+import { SeederModule } from "./database/seed/seeder.module.js";
 
 import { CacheModule } from "./common/cache/cache.module.js";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
@@ -53,6 +54,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     WebhooksModule,
     IntelligenceModule,
     AnalyticsModule,
+    SeederModule,
   ],
   providers: [
     {

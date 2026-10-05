@@ -1,15 +1,32 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Globe } from 'lucide-react';
+import { Globe, Check } from 'lucide-react';
+import { Button } from '../button.js';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../dropdown-menu.js';
 import { cn } from '../../lib/utils.js';
 
 export interface LanguageSwitcherProps {
   currentLocale: string;
+  variant?: 'default' | 'ghost' | 'outline';
+  size?: 'default' | 'sm' | 'lg' | 'icon' | 'icon-sm';
   className?: string;
+  showLabel?: boolean;
   /** Optional label resolver, e.g. next-intl `t('label')`. */
   label?: string;
 }
+
+const LANGUAGES = [
+  { code: 'bn', label: 'বাংলা', shortLabel: 'বাং', flag: '🇧🇩' },
+  { code: 'en', label: 'English', shortLabel: 'EN', flag: '🇬🇧' },
+] as const;
+
+const LOCALES = ['en', 'bn'] as const;
 
 function persistLocalePreference(newLocale: string) {
   if (typeof window !== 'undefined') {
@@ -18,25 +35,24 @@ function persistLocalePreference(newLocale: string) {
     try {
       localStorage.setItem('dhruto_locale', newLocale);
     } catch {
-      // Ignore storage failures (private mode).
+      // Ignore private browsing error
     }
   }
 }
 
-const LOCALES = ['en', 'bn'] as const;
-
-/**
- * Bilingual EN ⇄ BN switch. Bangla is LTR, so no direction handling is needed;
- * the switch only swaps the locale segment of the current URL.
- */
 export function LanguageSwitcher({
   currentLocale,
-  className,
-  label,
+  variant = 'ghost',
+  size = 'sm',
+  className = '',
+  showLabel = true,
+  label = 'Change language',
 }: LanguageSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
+
+  const activeLang = LANGUAGES.find((l) => l.code === currentLocale) ?? LANGUAGES[0];
 
   const handleLocaleChange = (newLocale: string) => {
     if (newLocale === currentLocale || !LOCALES.includes(newLocale as 'en' | 'bn')) return;
@@ -54,38 +70,51 @@ export function LanguageSwitcher({
     }
 
     const queryString = searchParams?.toString();
-    router.push(queryString ? `${targetPath}?${queryString}` : targetPath);
+    const finalUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
+
+    router.push(finalUrl);
   };
 
   return (
-    <div
-      role="group"
-      aria-label={label ?? 'Change language'}
-      className={cn(
-        'inline-flex items-center gap-0.5 rounded-md border border-border bg-surface p-0.5',
-        className,
-      )}
-    >
-      <Globe className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-      {LOCALES.map((locale) => {
-        const active = locale === currentLocale;
-        return (
-          <button
-            key={locale}
-            type="button"
-            onClick={() => handleLocaleChange(locale)}
-            aria-pressed={active}
-            className={cn(
-              'rounded px-2 py-1 text-caption font-semibold uppercase transition-colors',
-              active
-                ? 'bg-primary-soft text-primary-soft-foreground'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {locale}
-          </button>
-        );
-      })}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={variant}
+          size={size}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-md px-2.5 font-medium transition-colors hover:bg-surface-muted',
+            className
+          )}
+          aria-label={`${label}. Current language: ${activeLang.label}`}
+        >
+          <Globe className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          {showLabel && (
+            <span className="text-caption font-semibold uppercase">{activeLang.shortLabel}</span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-36 p-1 rounded-lg border border-border bg-surface shadow-md">
+        {LANGUAGES.map((lang) => {
+          const isSelected = lang.code === currentLocale;
+          return (
+            <DropdownMenuItem
+              key={lang.code}
+              onSelect={() => handleLocaleChange(lang.code)}
+              onClick={() => handleLocaleChange(lang.code)}
+              className={cn(
+                'flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer transition-colors',
+                isSelected ? 'bg-primary-soft text-primary-soft-foreground font-semibold' : 'text-foreground hover:bg-surface-muted'
+              )}
+            >
+              <span className="flex items-center gap-2">
+                <span>{lang.flag}</span>
+                <span>{lang.label}</span>
+              </span>
+              {isSelected && <Check className="h-4 w-4 text-primary" aria-hidden="true" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

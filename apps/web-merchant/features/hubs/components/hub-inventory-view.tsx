@@ -10,6 +10,7 @@ import {
   Button,
   Input,
   Badge,
+  DataTable,
 } from "@dhruto/ui";
 import {
   Package,
@@ -232,69 +233,92 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40 text-muted-foreground text-xs uppercase tracking-wider">
-                    <th className="py-3 px-4 text-left">Tracking Code</th>
-                    <th className="py-3 px-4 text-left">Recipient</th>
-                    <th className="py-3 px-4 text-left">Destination</th>
-                    <th className="py-3 px-4 text-right">COD Amount</th>
-                    <th className="py-3 px-4 text-center">Status</th>
-                    <th className="py-3 px-4 text-left">Last Activity</th>
-                    <th className="py-3 px-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filteredParcels.map((parcel) => (
-                    <tr key={parcel.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="py-3 px-4 font-mono font-medium text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <span>{parcel.trackingCode}</span>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(parcel.trackingCode)}
-                            className="text-muted-foreground hover:text-foreground p-0.5 rounded"
-                            title="Copy Code"
-                          >
-                            <Copy className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-xs">
-                        <div className="font-semibold">{parcel.recipientName}</div>
-                        <div className="text-muted-foreground text-[11px]">
-                          {parcel.recipientPhone}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-xs font-medium">
-                        {parcel.district || "Default District"}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-medium text-xs">
-                        ৳{Number(parcel.codAmount || 0).toLocaleString()}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {getStatusBadge(parcel.status)}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(parcel.updatedAt).toLocaleTimeString([], {
+              <DataTable
+                columns={[
+                  {
+                    accessorKey: "trackingCode",
+                    header: "Tracking Code",
+                    cell: ({ row }) => (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-medium text-xs">{row.original.trackingCode}</span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(row.original.trackingCode)}
+                          className="text-muted-foreground hover:text-foreground p-0.5 rounded"
+                          title="Copy Code"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ),
+                  },
+                  {
+                    id: "recipient",
+                    header: "Recipient",
+                    cell: ({ row }) => (
+                      <div className="text-xs">
+                        <div className="font-semibold">{row.original.recipientName}</div>
+                        <div className="text-muted-foreground text-[11px]">{row.original.recipientPhone}</div>
+                      </div>
+                    ),
+                  },
+                  {
+                    accessorKey: "district",
+                    header: "Destination",
+                    cell: ({ row }) => (
+                      <div className="text-xs font-medium">{row.original.district || "Default District"}</div>
+                    ),
+                  },
+                  {
+                    accessorKey: "codAmount",
+                    header: () => <span className="text-right block">COD Amount</span>,
+                    cell: ({ row }) => (
+                      <div className="text-right font-mono font-medium text-xs">
+                        ৳{Number(row.original.codAmount || 0).toLocaleString()}
+                      </div>
+                    ),
+                  },
+                  {
+                    accessorKey: "status",
+                    header: () => <span className="text-center block">Status</span>,
+                    cell: ({ row }) => (
+                      <div className="text-center">
+                        {getStatusBadge(row.original.status)}
+                      </div>
+                    ),
+                  },
+                  {
+                    accessorKey: "updatedAt",
+                    header: "Last Activity",
+                    cell: ({ row }) => (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(row.original.updatedAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
-                      </td>
-                      <td className="py-3 px-4 text-right">
+                      </span>
+                    ),
+                  },
+                  {
+                    id: "actions",
+                    header: () => <span className="text-right block">Action</span>,
+                    cell: ({ row }) => (
+                      <div className="text-right">
                         <Link
-                          href={`/track/${parcel.trackingCode}`}
+                          href={`/track/${row.original.trackingCode}`}
                           target="_blank"
                           className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
                         >
                           <ExternalLink className="h-3 w-3" />
                           Track
                         </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    ),
+                  },
+                ]}
+                data={filteredParcels}
+                isLoading={isLoading}
+              />
             </div>
           )}
         </CardContent>

@@ -46,7 +46,7 @@ export function PublicHeader() {
   const ctaHref = isAuthenticated ? home.href : "/login";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
+    <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className="dhruto-container flex h-16 items-center justify-between gap-4">
         <Link href="/" aria-label="Dhruto" className="shrink-0 rounded-md">
           <Logo />

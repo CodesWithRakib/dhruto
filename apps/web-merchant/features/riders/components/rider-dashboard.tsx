@@ -23,7 +23,7 @@ import {
   useStartDeliveryMutation,
   useGetCashSummaryQuery,
 } from "../api/riders.api";
-import { useLoginMutation } from "../../auth/api/auth.api";
+import { Link } from "@/lib/navigation";
 import { type RiderTaskItem } from "@dhruto/contracts";
 import { RiderTaskCard } from "./rider-task-card";
 import { DeliveryOtpModal } from "./delivery-otp-modal";
@@ -42,7 +42,6 @@ export function RiderDashboard() {
   const { data: cashData, refetch: refetchCash } = useGetCashSummaryQuery();
 
   const [startDeliveryMutation, { isLoading: isStarting }] = useStartDeliveryMutation();
-  const [loginMutation, { isLoading: isLoggingIn }] = useLoginMutation();
 
   const tasks = tasksData?.data || [];
   const cashSummary = cashData?.data || {
@@ -62,23 +61,6 @@ export function RiderDashboard() {
       }
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to start delivery run");
-    }
-  };
-
-  const handleDemoRiderLogin = async () => {
-    try {
-      const res = await loginMutation({
-        emailOrPhone: "rider@dhruto.com",
-        password: "dhruto123",
-      }).unwrap();
-
-      if (res.success) {
-        toast.success("Logged in as Demo Rider (Rafiqul Rider)");
-        refetchTasks();
-        refetchCash();
-      }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Demo login failed");
     }
   };
 
@@ -151,29 +133,30 @@ export function RiderDashboard() {
         </div>
       </div>
 
-      {/* Demo Switcher Alert if Forbidden or Empty */}
+      {/* Rider Authentication Alert */}
       {error && (
-        <Card className="border-warning bg-warning-soft  p-4">
+        <Card className="border-warning bg-warning-soft p-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
             <div className="flex items-start gap-2.5">
               <UserCheck className="h-5 w-5 text-warning shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-warning ">
+                <p className="font-semibold text-warning">
                   Rider Authentication Required
                 </p>
-                <p className="text-xs text-warning  mt-0.5">
-                  You are currently logged in with a non-rider account. Switch to the demo rider profile to test deliveries.
+                <p className="text-xs text-warning mt-0.5">
+                  You are currently logged in with a non-rider account. Please log in with an authorized Rider account to manage deliveries.
                 </p>
               </div>
             </div>
-            <Button
-              size="sm"
-              onClick={handleDemoRiderLogin}
-              disabled={isLoggingIn}
-              className="bg-warning hover:bg-warning text-primary-foreground text-xs whitespace-nowrap self-end sm:self-center"
-            >
-              {isLoggingIn ? "Switching..." : "Login as Demo Rider"}
-            </Button>
+            <Link href="/login">
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-warning text-warning hover:bg-warning-soft text-xs whitespace-nowrap self-end sm:self-center"
+              >
+                Sign In as Rider
+              </Button>
+            </Link>
           </div>
         </Card>
       )}

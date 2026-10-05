@@ -10,6 +10,7 @@ import {
   Button,
   Input,
   Badge,
+  DataTable,
 } from "@dhruto/ui";
 import {
   Scan,
@@ -297,40 +298,56 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
               No scans logged during this session.
             </div>
           ) : (
-            <table className="w-full text-xs text-left">
-              <thead className="bg-muted/40 text-muted-foreground uppercase border-b">
-                <tr>
-                  <th className="px-4 py-2 font-semibold">Barcode</th>
-                  <th className="px-4 py-2 font-semibold">Scan Action</th>
-                  <th className="px-4 py-2 font-semibold">Status</th>
-                  <th className="px-4 py-2 font-semibold">Message</th>
-                  <th className="px-4 py-2 font-semibold text-right">Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {scanHistory.map((scan, idx) => (
-                  <tr key={idx} className="hover:bg-muted/30">
-                    <td className="px-4 py-2.5 font-mono font-medium text-foreground">
-                      {scan.barcode}
-                    </td>
-                    <td className="px-4 py-2.5 font-semibold text-primary">
-                      {scan.scanType}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-muted font-bold">
-                        {scan.currentStatus}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {scan.message}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-muted-foreground">
-                      {new Date(scan.timestamp).toLocaleTimeString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={[
+                {
+                  accessorKey: "barcode",
+                  header: "Barcode",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="font-mono font-medium text-foreground">
+                      {row.original.barcode}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "scanType",
+                  header: "Scan Action",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="font-semibold text-primary">
+                      {row.original.scanType}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "currentStatus",
+                  header: "Status",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-muted font-bold">
+                      {row.original.currentStatus}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "message",
+                  header: "Message",
+                  cell: ({ row }: { row: any }) => (
+                    <span className="text-muted-foreground text-xs">
+                      {row.original.message}
+                    </span>
+                  ),
+                },
+                {
+                  accessorKey: "timestamp",
+                  header: () => <span className="text-right block">Time</span>,
+                  cell: ({ row }: { row: any }) => (
+                    <div className="text-right font-mono text-muted-foreground text-xs">
+                      {new Date(row.original.timestamp).toLocaleTimeString()}
+                    </div>
+                  ),
+                },
+              ]}
+              data={scanHistory}
+            />
           )}
         </CardContent>
       </Card>

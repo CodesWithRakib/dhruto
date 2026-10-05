@@ -1,9 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { type WalletTransactionItem, WalletTransactionType } from "@dhruto/contracts";
-import { ArrowDownLeft, ArrowUpRight, Filter, ReceiptText, ExternalLink } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ReceiptText, ExternalLink } from "lucide-react";
 import { Link } from "../../../lib/navigation";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  DataTable,
+  type ColumnDef,
+} from "@dhruto/ui";
 
 interface TransactionsTableProps {
   transactions: WalletTransactionItem[];
@@ -13,10 +21,10 @@ interface TransactionsTableProps {
 export function TransactionsTable({ transactions, isLoading }: TransactionsTableProps) {
   const [filterType, setFilterType] = useState<string>("ALL");
 
-  const filtered = transactions.filter((tx) => {
-    if (filterType === "ALL") return true;
-    return tx.type === filterType;
-  });
+  const filtered = useMemo(() => {
+    if (filterType === "ALL") return transactions;
+    return transactions.filter((tx) => tx.type === filterType);
+  }, [transactions, filterType]);
 
   const getBadgeStyle = (type: WalletTransactionType) => {
     switch (type) {
@@ -63,128 +71,127 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
     }
   };
 
-  return (
-    <div className="rounded-3xl bg-surface-muted backdrop-blur-xl border border-border overflow-hidden ">
-      {/* Table Header & Filters */}
-      <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h4 className="text-lg font-bold text-primary-foreground flex items-center gap-2">
-            <ReceiptText className="w-5 h-5 text-success" />
-            Wallet Statement & Audit Ledger
-          </h4>
-          <p className="text-xs text-muted-foreground mt-1">
-            Complete immutable log of all Cash on Delivery collections, delivery charges, and disbursements.
-          </p>
-        </div>
-
-        {/* Filter Chips */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted border border-border text-xs text-muted-foreground">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-            <span>Filter:</span>
-          </div>
-
-          {[
-            { id: "ALL", label: "All Records" },
-            { id: WalletTransactionType.COD_CREDIT, label: "COD Credits" },
-            { id: WalletTransactionType.DELIVERY_FEE, label: "Delivery Charges" },
-            { id: WalletTransactionType.PAYOUT_DEBIT, label: "Withdrawals" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilterType(tab.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                filterType === tab.id
-                  ? "bg-success-soft text-success border border-success "
-                  : "bg-surface-muted text-muted-foreground border border-border hover:border-border hover:text-foreground"
-              }`}
+  const columns: ColumnDef<WalletTransactionItem>[] = useMemo(
+    () => [
+      {
+        accessorKey: "createdAt",
+        header: "Date & Time",
+        cell: ({ row }) => {
+          const dateObj = new Date(row.original.createdAt);
+          return (
+            <div className="text-caption text-muted-foreground">
+              <span className="font-medium text-foreground">{dateObj.toLocaleDateString()}</span>
+              <br />
+              <span>{dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => {
+          const badge = getBadgeStyle(row.original.type);
+          const Icon = badge.icon;
+          return (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${badge.bg}`}
             >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-foreground">
-          <thead className="bg-surface-muted text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-            <tr>
-              <th className="px-6 py-4 font-semibold">Date & Time</th>
-              <th className="px-6 py-4 font-semibold">Type</th>
-              <th className="px-6 py-4 font-semibold">Description & Reference</th>
-              <th className="px-6 py-4 font-semibold text-right">Amount</th>
-              <th className="px-6 py-4 font-semibold text-right">Balance After</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {isLoading ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-xs">
-                  Loading ledger transactions...
-                </td>
-              </tr>
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <ReceiptText className="w-10 h-10 text-muted-foreground mb-2" />
-                    <p className="font-semibold text-foreground">No transactions recorded yet</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Completed parcel deliveries and payout withdrawals will appear in this ledger.
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              filtered.map((tx) => {
-                const badge = getBadgeStyle(tx.type);
-                const Icon = badge.icon;
-                const dateObj = new Date(tx.createdAt);
-
-                return (
-                  <tr key={tx.id} className="hover:bg-surface-muted transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
-                      <div>{dateObj.toLocaleDateString()}</div>
-                      <div className="text-[11px] text-muted-foreground">{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border ${badge.bg}`}>
-                        <Icon className="w-3.5 h-3.5" />
-                        {badge.label}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="text-xs text-foreground font-medium">{tx.description}</div>
-                      {tx.referenceId && (
-                        <div className="mt-1">
-                          <Link
-                            href={`/tracking?q=${tx.referenceId}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-mono text-success hover:text-success underline"
-                          >
-                            <span>Ref: {tx.referenceId}</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </Link>
-                        </div>
-                      )}
-                    </td>
-
-                    <td className={`px-6 py-4 whitespace-nowrap text-right text-sm ${badge.amountColor}`}>
-                      {badge.prefix}৳{Number(tx.amount).toLocaleString()}
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-mono font-semibold text-foreground">
-                      ৳{Number(tx.balanceAfter).toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })
+              <Icon className="w-3.5 h-3.5" />
+              {badge.label}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "description",
+        header: "Description & Reference",
+        cell: ({ row }) => (
+          <div>
+            <p className="text-body-sm text-foreground font-medium">{row.original.description}</p>
+            {row.original.referenceId && (
+              <div className="mt-0.5">
+                <Link
+                  href={`/tracking?q=${row.original.referenceId}`}
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-primary hover:underline"
+                >
+                  <span>Ref: {row.original.referenceId}</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+              </div>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: () => <span className="text-right block">Amount</span>,
+        cell: ({ row }) => {
+          const badge = getBadgeStyle(row.original.type);
+          return (
+            <div className={`text-right tabular-nums text-body-sm ${badge.amountColor}`}>
+              {badge.prefix}৳{Number(row.original.amount).toLocaleString()}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "balanceAfter",
+        header: () => <span className="text-right block">Balance After</span>,
+        cell: ({ row }) => (
+          <div className="text-right font-mono font-semibold tabular-nums text-xs text-foreground">
+            ৳{Number(row.original.balanceAfter).toLocaleString()}
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
+
+  return (
+    <div className="w-full space-y-4">
+      <Card className="border-border shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
+          <div>
+            <CardTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+              <ReceiptText className="w-5 h-5 text-primary" />
+              Wallet Statement & Audit Ledger
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground mt-1">
+              Complete immutable log of all Cash on Delivery collections, delivery charges, and disbursements.
+            </CardDescription>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <DataTable
+        columns={columns}
+        data={filtered}
+        isLoading={isLoading}
+        emptyMessage="No transactions recorded yet. Completed parcel deliveries and payout withdrawals will appear in this ledger."
+        filterSlot={
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {[
+              { id: "ALL", label: "All Records" },
+              { id: WalletTransactionType.COD_CREDIT, label: "COD Credits" },
+              { id: WalletTransactionType.DELIVERY_FEE, label: "Delivery Charges" },
+              { id: WalletTransactionType.PAYOUT_DEBIT, label: "Withdrawals" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilterType(tab.id)}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  filterType === tab.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-surface-muted text-muted-foreground border border-border hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
     </div>
   );
 }

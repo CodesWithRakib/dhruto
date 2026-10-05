@@ -20,7 +20,7 @@ import {
   Radio,
   FileCode,
 } from "lucide-react";
-import { Button, Badge, Card } from "@dhruto/ui";
+import { Button, Badge, Card, DataTable } from "@dhruto/ui";
 import {
   useListWebhookSubscriptionsQuery,
   useCreateWebhookSubscriptionMutation,
@@ -463,95 +463,116 @@ export default function WebhooksDeveloperPage() {
         ) : (
           <div className="border rounded-xl bg-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/40 border-b text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-3 px-4">Event</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Response Code</th>
-                    <th className="py-3 px-4">Attempts</th>
-                    <th className="py-3 px-4">Timestamp</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60 font-sans">
-                  {filteredDeliveries.map((item) => {
-                    const isDelivered = item.status === WebhookDeliveryStatus.DELIVERED;
-                    const isDeadLetter = item.status === WebhookDeliveryStatus.DEAD_LETTER;
-
-                    return (
-                      <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-medium text-foreground">
-                          {item.event}
-                        </td>
-                        <td className="py-3.5 px-4">
+              <DataTable
+                columns={[
+                  {
+                    accessorKey: "event",
+                    header: "Event",
+                    cell: ({ row }: { row: any }) => (
+                      <span className="font-mono font-medium text-foreground">
+                        {row.original.event}
+                      </span>
+                    ),
+                  },
+                  {
+                    accessorKey: "status",
+                    header: "Status",
+                    cell: ({ row }: { row: any }) => {
+                      const isDelivered = row.original.status === WebhookDeliveryStatus.DELIVERED;
+                      const isDeadLetter = row.original.status === WebhookDeliveryStatus.DEAD_LETTER;
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            isDelivered
+                              ? "bg-success-soft text-success border-success"
+                              : isDeadLetter
+                              ? "bg-warning-soft text-warning border-warning"
+                              : "bg-danger-soft text-danger border-danger"
+                          }`}
+                        >
+                          {isDelivered && <CheckCircle2 className="h-3 w-3" />}
+                          {isDeadLetter && <AlertTriangle className="h-3 w-3" />}
+                          {row.original.status}
+                        </span>
+                      );
+                    }
+                  },
+                  {
+                    accessorKey: "statusCode",
+                    header: "Response Code",
+                    cell: ({ row }: { row: any }) => (
+                      <span className="font-mono">
+                        {row.original.statusCode ? (
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                              isDelivered
-                                ? "bg-success-soft text-success border-success"
-                                : isDeadLetter
-                                ? "bg-warning-soft text-warning border-warning"
-                                : "bg-danger-soft text-danger border-danger"
-                            }`}
+                            className={
+                              row.original.statusCode >= 200 && row.original.statusCode < 300
+                                ? "text-success font-semibold"
+                                : "text-danger font-semibold"
+                            }
                           >
-                            {isDelivered && <CheckCircle2 className="h-3 w-3" />}
-                            {isDeadLetter && <AlertTriangle className="h-3 w-3" />}
-                            {item.status}
+                            HTTP {row.original.statusCode}
                           </span>
-                        </td>
-                        <td className="py-3.5 px-4 font-mono">
-                          {item.statusCode ? (
-                            <span
-                              className={
-                                item.statusCode >= 200 && item.statusCode < 300
-                                  ? "text-success font-semibold"
-                                  : "text-danger font-semibold"
-                              }
-                            >
-                              HTTP {item.statusCode}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">Error / Timeout</span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className="font-mono text-muted-foreground">
-                            {item.attemptCount} / 3
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-muted-foreground">
-                          {new Date(item.createdAt).toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        ) : (
+                          <span className="text-muted-foreground">Error / Timeout</span>
+                        )}
+                      </span>
+                    ),
+                  },
+                  {
+                    accessorKey: "attemptCount",
+                    header: "Attempts",
+                    cell: ({ row }: { row: any }) => (
+                      <span className="font-mono text-muted-foreground">
+                        {row.original.attemptCount} / 3
+                      </span>
+                    ),
+                  },
+                  {
+                    accessorKey: "createdAt",
+                    header: "Timestamp",
+                    cell: ({ row }: { row: any }) => (
+                      <span className="text-muted-foreground">
+                        {new Date(row.original.createdAt).toLocaleString()}
+                      </span>
+                    ),
+                  },
+                  {
+                    id: "actions",
+                    header: () => <span className="text-right block">Actions</span>,
+                    cell: ({ row }: { row: any }) => {
+                      const item = row.original;
+                      const isDelivered = item.status === WebhookDeliveryStatus.DELIVERED;
+                      return (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setInspectDelivery(item)}
+                            className="h-7 text-xs px-2 flex items-center gap-1"
+                          >
+                            <Code2 className="h-3 w-3 text-primary" />
+                            Payload
+                          </Button>
+                          {!isDelivered && (
                             <Button
                               size="sm"
-                              variant="ghost"
-                              onClick={() => setInspectDelivery(item)}
-                              className="h-7 text-xs px-2 flex items-center gap-1"
+                              variant="outline"
+                              disabled={isRetrying}
+                              onClick={() => handleRetry(item.id)}
+                              className="h-7 text-xs px-2 flex items-center gap-1 text-warning hover:text-warning"
                             >
-                              <Code2 className="h-3 w-3 text-primary" />
-                              Payload
+                              <RefreshCw className="h-3 w-3" />
+                              Replay
                             </Button>
-                            {!isDelivered && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={isRetrying}
-                                onClick={() => handleRetry(item.id)}
-                                className="h-7 text-xs px-2 flex items-center gap-1 text-warning hover:text-warning"
-                              >
-                                <RefreshCw className="h-3 w-3" />
-                                Replay
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                ]}
+                data={filteredDeliveries}
+                isLoading={isLoadingDeliveries}
+              />
             </div>
           </div>
         )}
