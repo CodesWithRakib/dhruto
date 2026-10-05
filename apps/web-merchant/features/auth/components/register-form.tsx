@@ -17,6 +17,7 @@ import { UserPlus, AlertCircle, ArrowRight } from "lucide-react";
 import { useRegisterMutation } from "../api/auth.api";
 import { useAppDispatch } from "../../../store/hooks";
 import { setCredentials } from "../../../store/auth.slice";
+import { getApiErrorMessage } from "../../../lib/api-error";
 import { toast } from "sonner";
 
 export function RegisterForm() {
@@ -63,22 +64,23 @@ export function RegisterForm() {
           }),
         );
         toast.success(`Merchant account created! Welcome, ${res.data.user.name}.`);
-        router.push("/");
+        // `/` is now the public site; new merchants land on their dashboard.
+        router.push("/dashboard");
       }
-    } catch (err: any) {
-      const message =
-        err?.data?.message ||
-        err?.message ||
-        "Registration failed. Please verify your information.";
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        "Registration failed. Please verify your information.",
+      );
       setErrorMessage(message);
       toast.error("Registration failed", { description: message });
     }
   };
 
   return (
-    <Card className="max-w-xl mx-auto shadow-md border-primary/20">
+    <Card className="mx-auto w-full max-w-xl border-border">
       <CardHeader className="space-y-1">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2">
+        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
           <UserPlus className="h-5 w-5" />
         </div>
         <CardTitle className="text-2xl font-bold">{t("registerTitle")}</CardTitle>
@@ -88,7 +90,7 @@ export function RegisterForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {errorMessage && (
-            <div className="p-3 text-sm rounded-lg bg-destructive/10 text-destructive flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg bg-danger-soft p-3 text-body text-danger-soft-foreground">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -96,7 +98,7 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none">
+              <label className="text-label leading-none">
                 {t("fullName")} *
               </label>
               <Input
@@ -110,7 +112,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none">
+              <label className="text-label leading-none">
                 {t("email")} *
               </label>
               <Input
@@ -126,7 +128,7 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none">
+              <label className="text-label leading-none">
                 {t("phone")} *
               </label>
               <Input
@@ -140,7 +142,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none">
+              <label className="text-label leading-none">
                 {t("password")} *
               </label>
               <Input
@@ -155,7 +157,7 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none">
+            <label className="text-label leading-none">
               {t("businessName")} *
             </label>
             <Input
@@ -169,7 +171,7 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none">
+            <label className="text-label leading-none">
               {t("pickupAddress")} *
             </label>
             <Input
@@ -193,7 +195,7 @@ export function RegisterForm() {
             <ArrowRight className="h-4 w-4" />
           </Button>
 
-          <div className="text-center text-xs text-muted-foreground">
+          <div className="text-center text-caption text-muted-foreground">
             {t("alreadyAccount")}{" "}
             <Link
               href="/login"

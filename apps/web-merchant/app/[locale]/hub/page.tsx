@@ -2,6 +2,7 @@ import React from "react";
 import { HubOperationsView } from "../../../features/hubs/components/hub-operations-view";
 
 export const metadata = {
+  robots: { index: false, follow: false },
   title: "Hub Operations Terminal | Dhruto Express",
   description: "Terminal sorting, bag consolidation, vehicle manifests, and hub inventory operations.",
 };

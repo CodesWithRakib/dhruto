@@ -5,15 +5,13 @@ import { useRouter } from "@/lib/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardContent,
+  CardHeader,
+  Badge,
   Button,
   Input,
-  Badge,
 } from "@dhruto/ui";
-import { Search, Package, MapPin, Phone, Building2, Clock, AlertCircle } from "lucide-react";
+import { Search, Package, MapPin, Phone, Building2, Clock, AlertCircle, Check } from "lucide-react";
 import { useGetPublicTrackingQuery } from "../../parcels/api/parcels.api";
 
 interface PublicTrackingViewProps {
@@ -32,163 +30,162 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
     skip: !activeCode,
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
     const clean = inputCode.trim();
     if (clean) {
       setActiveCode(clean);
-      router.push(`/track/${clean}`);
+      router.push(`/track/${encodeURIComponent(clean)}`);
     }
   };
 
   const tracking = data?.data;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Search Header */}
-      <div className="text-center space-y-2">
-        <div className="p-3 bg-primary/10 rounded-2xl w-fit mx-auto text-primary mb-2">
-          <Package className="h-8 w-8" />
-        </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-          {t("searchTitle")}
-        </h1>
-        <p className="text-muted-foreground text-sm max-w-md mx-auto">
+    <div className="dhruto-container max-w-3xl py-10 sm:py-14">
+      {/* Search header */}
+      <div className="space-y-3 text-center">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+          <Package className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <h1 className="text-h1 text-foreground text-balance">{t("searchTitle")}</h1>
+        <p className="mx-auto max-w-md text-body text-muted-foreground text-pretty">
           {t("searchSubtitle")}
         </p>
 
-        {/* Input Bar */}
-        <form onSubmit={handleSearch} className="pt-4 max-w-lg mx-auto flex gap-2">
+        {/* Stacks on small screens so the input never gets squeezed. */}
+        <form
+          onSubmit={handleSearch}
+          role="search"
+          className="mx-auto flex w-full max-w-lg flex-col gap-2 pt-3 sm:flex-row"
+        >
           <div className="relative flex-1">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               type="text"
-              placeholder={t("inputPlaceholder")}
               value={inputCode}
-              onChange={(e) => setInputCode(e.target.value)}
-              className="pl-9 font-mono uppercase text-sm"
+              onChange={(event) => setInputCode(event.target.value)}
+              placeholder={t("inputPlaceholder")}
+              aria-label={t("searchTitle")}
+              className="pl-9 font-mono uppercase"
               required
             />
           </div>
-          <Button type="submit" disabled={isLoading} className="flex items-center gap-1.5">
-            <Search className="h-4 w-4" />
+          <Button type="submit" loading={isLoading}>
+            <Search className="h-4 w-4" aria-hidden="true" />
             {t("trackBtn")}
           </Button>
         </form>
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="py-12 text-center space-y-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground text-sm">Locating shipment...</p>
-        </div>
-      )}
+      {/* Loading */}
+      {isLoading ? (
+        <p
+          role="status"
+          aria-live="polite"
+          className="py-12 text-center text-body text-muted-foreground"
+        >
+          {t("loading")}
+        </p>
+      ) : null}
 
-      {/* Error / Not Found */}
-      {!isLoading && activeCode && (error || !tracking) && (
-        <Card className="border-destructive/20 text-center p-8">
-          <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-2" />
-          <CardTitle className="text-lg">{t("notFound")}</CardTitle>
-          <CardDescription className="mt-1">{t("notFoundDesc")}</CardDescription>
+      {/* Not found / error */}
+      {!isLoading && activeCode && (error || !tracking) ? (
+        <Card className="mt-8 p-8 text-center">
+          <AlertCircle className="mx-auto mb-2 h-9 w-9 text-danger" aria-hidden="true" />
+          <h2 className="text-h3 text-foreground">{t("notFound")}</h2>
+          <p className="mt-1 text-body text-muted-foreground">{t("notFoundDesc")}</p>
         </Card>
-      )}
+      ) : null}
 
-      {/* Results View */}
-      {!isLoading && tracking && (
-        <div className="space-y-6">
-          <Card className="shadow-md border-primary/20">
-            <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                <div>
-                  <span className="text-xs uppercase font-semibold text-muted-foreground">
-                    Shipment Tracking ID
-                  </span>
-                  <p className="text-xl font-mono font-extrabold text-foreground">
-                    {tracking.trackingCode}
-                  </p>
-                </div>
-                <Badge variant="default" className="w-fit text-sm px-3 py-1 font-semibold">
-                  {tracking.status}
-                </Badge>
-              </div>
-            </CardHeader>
+      {/* Result */}
+      {!isLoading && tracking ? (
+        <Card className="mt-8">
+          <CardHeader className="flex-row items-start justify-between gap-3 space-y-0 border-b border-border">
+            <div>
+              <p className="dhruto-eyebrow">{t("trackingId")}</p>
+              <p className="font-mono text-h3 text-foreground tabular-nums">
+                {tracking.trackingCode}
+              </p>
+            </div>
+            <Badge variant="primary-soft" className="shrink-0 text-body-sm">
+              {tracking.status}
+            </Badge>
+          </CardHeader>
 
-            <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm border-b">
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground uppercase font-semibold">
-                  {t("destination")}
-                </span>
-                <p className="font-medium text-foreground flex items-center gap-1">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  {tracking.recipientThana ? `${tracking.recipientThana}, ` : ""}
-                  {tracking.recipientDistrict}
-                </p>
-              </div>
+          <CardContent className="grid gap-5 pt-5 sm:grid-cols-3">
+            <div className="space-y-1">
+              <p className="dhruto-eyebrow">{t("destination")}</p>
+              <p className="flex items-center gap-1.5 text-body font-medium text-foreground">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                {tracking.recipientThana ? `${tracking.recipientThana}, ` : ""}
+                {tracking.recipientDistrict}
+              </p>
+            </div>
 
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground uppercase font-semibold">
-                  Customer Contact
-                </span>
-                <p className="font-mono text-muted-foreground flex items-center gap-1">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  {tracking.recipientPhoneMasked}
-                </p>
-              </div>
+            <div className="space-y-1">
+              <p className="dhruto-eyebrow">{t("contact")}</p>
+              <p className="flex items-center gap-1.5 font-mono text-body text-muted-foreground">
+                <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {tracking.recipientPhoneMasked}
+              </p>
+            </div>
 
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground uppercase font-semibold">
-                  Current Location
-                </span>
-                <p className="font-medium text-foreground flex items-center gap-1">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  {tracking.currentHubName || "Dhaka Central Sorting Hub"}
-                </p>
-              </div>
-            </CardContent>
+            <div className="space-y-1">
+              <p className="dhruto-eyebrow">{t("location")}</p>
+              <p className="flex items-center gap-1.5 text-body font-medium text-foreground">
+                <Building2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                {tracking.currentHubName || t("locationPending")}
+              </p>
+            </div>
+          </CardContent>
 
-            {/* Timeline Stepper */}
-            <CardContent className="pt-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-primary" />
-                {t("timeline")}
-              </h3>
+          <CardContent className="pt-0">
+            <h2 className="dhruto-eyebrow mb-4 flex items-center gap-1.5">
+              <Clock className="h-4 w-4" aria-hidden="true" />
+              {t("timeline")}
+            </h2>
 
-              <ol className="relative border-l border-primary/30 ml-4 space-y-6">
-                {tracking.timeline.map((event, idx) => {
-                  const label = locale === "bn" ? event.labelBn : event.labelEn;
-                  const isLatest = idx === tracking.timeline.length - 1;
+            <ol className="relative ml-3 space-y-6 border-l border-border">
+              {tracking.timeline.map((event, index) => {
+                const label = locale === "bn" ? event.labelBn : event.labelEn;
+                const isLatest = index === tracking.timeline.length - 1;
 
-                  return (
-                    <li key={idx} className="ml-6">
-                      <span
-                        className={`absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-background text-xs ${
-                          isLatest
-                            ? "bg-primary text-primary-foreground font-bold shadow"
-                            : "bg-muted text-muted-foreground"
-                        }`}
+                return (
+                  <li key={`${event.timestamp}-${index}`} className="ml-6">
+                    <span
+                      className={
+                        "absolute -left-[11px] flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-card " +
+                        (isLatest
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-surface-muted text-muted-foreground")
+                      }
+                      aria-hidden="true"
+                    >
+                      {isLatest ? null : <Check className="h-3 w-3" />}
+                    </span>
+                    <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between">
+                      <span className="text-body font-semibold text-foreground">{label}</span>
+                      <time
+                        dateTime={event.timestamp}
+                        className="font-mono text-caption text-muted-foreground tabular-nums"
                       >
-                        {isLatest ? "●" : "✓"}
-                      </span>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span className="font-semibold text-sm text-foreground">
-                          {label}
-                        </span>
-                        <span className="text-xs text-muted-foreground font-mono">
-                          {new Date(event.timestamp).toLocaleString()}
-                        </span>
-                      </div>
-                      {event.note && (
-                        <p className="text-xs text-muted-foreground mt-0.5">{event.note}</p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+                        {new Date(event.timestamp).toLocaleString(locale)}
+                      </time>
+                    </div>
+                    {event.note ? (
+                      <p className="mt-0.5 text-body-sm text-muted-foreground">{event.note}</p>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ol>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

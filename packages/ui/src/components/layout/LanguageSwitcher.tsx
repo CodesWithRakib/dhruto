@@ -2,13 +2,13 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Globe } from 'lucide-react';
+import { cn } from '../../lib/utils.js';
 
-interface LanguageSwitcherProps {
+export interface LanguageSwitcherProps {
   currentLocale: string;
-  variant?: 'default' | 'ghost' | 'outline';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
-  showLabel?: boolean;
+  /** Optional label resolver, e.g. next-intl `t('label')`. */
+  label?: string;
 }
 
 function persistLocalePreference(newLocale: string) {
@@ -18,30 +18,35 @@ function persistLocalePreference(newLocale: string) {
     try {
       localStorage.setItem('dhruto_locale', newLocale);
     } catch {
-      // Ignore
+      // Ignore storage failures (private mode).
     }
   }
 }
 
+const LOCALES = ['en', 'bn'] as const;
+
+/**
+ * Bilingual EN ⇄ BN switch. Bangla is LTR, so no direction handling is needed;
+ * the switch only swaps the locale segment of the current URL.
+ */
 export function LanguageSwitcher({
   currentLocale,
-  className = '',
-  showLabel = true,
+  className,
+  label,
 }: LanguageSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
 
   const handleLocaleChange = (newLocale: string) => {
-    if (newLocale === currentLocale) return;
+    if (newLocale === currentLocale || !LOCALES.includes(newLocale as 'en' | 'bn')) return;
 
     persistLocalePreference(newLocale);
 
     let targetPath = pathname;
     const segments = pathname.split('/');
-    const locales = ['en', 'bn'];
-    
-    if (segments.length > 1 && locales.includes(segments[1] || '')) {
+
+    if (segments.length > 1 && LOCALES.includes(segments[1] as 'en' | 'bn')) {
       segments[1] = newLocale;
       targetPath = segments.join('/');
     } else {
@@ -49,22 +54,38 @@ export function LanguageSwitcher({
     }
 
     const queryString = searchParams?.toString();
-    const finalUrl = queryString ? `${targetPath}?${queryString}` : targetPath;
-
-    router.push(finalUrl);
+    router.push(queryString ? `${targetPath}?${queryString}` : targetPath);
   };
 
   return (
-    <div className={`relative inline-block ${className}`}>
-      <button 
-        className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
-        onClick={() => handleLocaleChange(currentLocale === 'en' ? 'bn' : 'en')}
-      >
-        <Globe className="h-4 w-4 opacity-80 shrink-0" />
-        {showLabel && (
-          <span className="text-xs uppercase font-semibold">{currentLocale === 'en' ? 'bn' : 'en'}</span>
-        )}
-      </button>
+    <div
+      role="group"
+      aria-label={label ?? 'Change language'}
+      className={cn(
+        'inline-flex items-center gap-0.5 rounded-md border border-border bg-surface p-0.5',
+        className,
+      )}
+    >
+      <Globe className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+      {LOCALES.map((locale) => {
+        const active = locale === currentLocale;
+        return (
+          <button
+            key={locale}
+            type="button"
+            onClick={() => handleLocaleChange(locale)}
+            aria-pressed={active}
+            className={cn(
+              'rounded px-2 py-1 text-caption font-semibold uppercase transition-colors',
+              active
+                ? 'bg-primary-soft text-primary-soft-foreground'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {locale}
+          </button>
+        );
+      })}
     </div>
   );
 }

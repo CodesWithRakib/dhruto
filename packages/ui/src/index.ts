@@ -7,5 +7,5 @@ export * from "./components/badge.js";
 export * from "./components/select.js";
 export * from "./components/form.js";
 export * from "./components/sonner.js";
-export * from "./theme/index.js";
+export * from "./components/layout/Logo.js";
 export * from "./components/layout/LanguageSwitcher.js";

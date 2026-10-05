@@ -17,6 +17,7 @@ import { LogIn, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
 import { useLoginMutation } from "../api/auth.api";
 import { useAppDispatch } from "../../../store/hooks";
 import { setCredentials } from "../../../store/auth.slice";
+import { getApiErrorMessage } from "../../../lib/api-error";
 import { toast } from "sonner";
 
 export function LoginForm() {
@@ -60,22 +61,23 @@ export function LoginForm() {
           }),
         );
         toast.success(`Welcome back, ${res.data.user.name}!`);
-        router.push("/");
+        // `/` is now the public site; merchants land on their dashboard.
+        router.push("/dashboard");
       }
-    } catch (err: any) {
-      const message =
-        err?.data?.message ||
-        err?.message ||
-        "Invalid email/phone or password. Please verify your credentials.";
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        "Invalid email/phone or password. Please verify your credentials.",
+      );
       setErrorMessage(message);
       toast.error("Sign in failed", { description: message });
     }
   };
 
   return (
-    <Card className="max-w-md mx-auto shadow-md border-primary/20">
+    <Card className="mx-auto w-full max-w-md border-border">
       <CardHeader className="space-y-1">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2">
+        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
           <LogIn className="h-5 w-5" />
         </div>
         <CardTitle className="text-2xl font-bold">{t("loginTitle")}</CardTitle>
@@ -85,14 +87,14 @@ export function LoginForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {errorMessage && (
-            <div className="p-3 text-sm rounded-lg bg-destructive/10 text-destructive flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg bg-danger-soft p-3 text-body text-danger-soft-foreground">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none">
+            <label className="text-label leading-none">
               {t("emailOrPhone")}
             </label>
             <Input
@@ -106,7 +108,7 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none">
+            <label className="text-label leading-none">
               {t("password")}
             </label>
             <Input
@@ -124,9 +126,9 @@ export function LoginForm() {
             variant="outline"
             size="sm"
             onClick={handleDemoFill}
-            className="w-full text-xs flex items-center justify-center gap-1.5 border-dashed"
+            className="flex w-full items-center justify-center gap-1.5 border-dashed text-body-sm"
           >
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
             {t("demoFill")}
           </Button>
         </CardContent>
@@ -141,7 +143,7 @@ export function LoginForm() {
             <ArrowRight className="h-4 w-4" />
           </Button>
 
-          <div className="text-center text-xs text-muted-foreground">
+          <div className="text-center text-caption text-muted-foreground">
             {t("noAccount")}{" "}
             <Link
               href="/register"

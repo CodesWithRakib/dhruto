@@ -1,24 +1,25 @@
 import React from "react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/components/page-header";
 import { BookingForm } from "../../../../features/parcels/components/booking-form";
 
 export const metadata: Metadata = {
-  title: "New Parcel Booking — Dhruto Merchant",
+  robots: { index: false, follow: false },
+  title: "New Parcel Booking",
   description: "Create and confirm a single parcel delivery booking.",
 };
 
-export default function NewBookingPage() {
-  return (
-    <div className="py-4 space-y-6">
-      <div className="text-center max-w-xl mx-auto space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Book a Parcel
-        </h1>
-        <p className="text-sm text-slate-500">
-          Fill in the recipient and package details below. Delivery fees are automatically estimated.
-        </p>
-      </div>
+export default async function NewBookingPage() {
+  const t = await getTranslations("BookingForm");
 
+  return (
+    <div className="space-y-6 py-4">
+      <PageHeader
+        title={t("pageTitle")}
+        description={t("pageSubtitle")}
+        className="mx-auto max-w-xl text-center"
+      />
       <BookingForm />
     </div>
   );

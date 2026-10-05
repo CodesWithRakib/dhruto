@@ -23,6 +23,7 @@ import {
   useTestSmsNotificationMutation,
 } from "../features/notifications/api/notifications.api";
 import { NotificationChannel, NotificationType } from "@dhruto/contracts";
+import { getApiErrorMessage } from "../lib/api-error";
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
@@ -99,17 +100,17 @@ export function NotificationBell() {
         setShowSmsModal(false);
         setSmsFeedback(null);
       }, 2000);
-    } catch (err: any) {
-      setSmsFeedback(`Failed: ${err?.data?.message || "Could not dispatch SMS"}`);
+    } catch (err) {
+      setSmsFeedback(`Failed: ${getApiErrorMessage(err, "Could not dispatch SMS")}`);
     }
   };
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
       case NotificationChannel.SMS:
-        return <Smartphone className="h-3.5 w-3.5 text-blue-500" />;
+        return <Smartphone className="h-3.5 w-3.5 text-info" aria-hidden="true" />;
       case NotificationChannel.EMAIL:
-        return <Mail className="h-3.5 w-3.5 text-purple-500" />;
+        return <Mail className="h-3.5 w-3.5 text-info" aria-hidden="true" />;
       default:
         return <Bell className="h-3.5 w-3.5 text-primary" />;
     }
@@ -119,10 +120,10 @@ export function NotificationBell() {
     switch (type) {
       case NotificationType.CASH_COLLECTED:
       case NotificationType.PAYOUT_UPDATE:
-        return <Wallet className="h-4 w-4 text-emerald-500" />;
+        return <Wallet className="h-4 w-4 text-success" aria-hidden="true" />;
       case NotificationType.DELIVERY_OTP:
       case NotificationType.PARCEL_STATUS_UPDATE:
-        return <Truck className="h-4 w-4 text-blue-500" />;
+        return <Truck className="h-4 w-4 text-info" aria-hidden="true" />;
       default:
         return <Info className="h-4 w-4 text-muted-foreground" />;
     }
@@ -137,9 +138,9 @@ export function NotificationBell() {
         id="notification-bell-btn"
         className="relative p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40"
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-5 w-5" aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm animate-pulse">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-danger px-1 text-caption font-bold text-danger-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -147,7 +148,7 @@ export function NotificationBell() {
 
       {/* Notifications Dropdown Popover */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border bg-card text-card-foreground shadow-2xl z-50 overflow-hidden animate-in fade-in-0 zoom-in-95">
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-card text-card-foreground sm:w-96">
           {/* Header */}
           <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-2">
@@ -174,7 +175,7 @@ export function NotificationBell() {
                 className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border rounded px-1.5 py-0.5 hover:bg-muted"
                 title="Send test SMS"
               >
-                <Smartphone className="h-3 w-3 text-blue-500" />
+                <Smartphone className="h-3 w-3 text-info" aria-hidden="true" />
                 Test SMS
               </button>
             </div>
@@ -206,7 +207,7 @@ export function NotificationBell() {
                       isUnread ? "bg-primary/5" : ""
                     }`}
                   >
-                    <div className="mt-0.5 p-1.5 rounded-lg bg-card border shadow-xs h-fit">
+                    <div className="mt-0.5 h-fit rounded-lg border border-border bg-card p-1.5">
                       {getTypeIcon(item.type)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -248,8 +249,8 @@ export function NotificationBell() {
 
       {/* Test SMS Modal */}
       {showSmsModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card text-card-foreground border shadow-2xl rounded-2xl max-w-md w-full p-5 relative animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4">
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-5 text-card-foreground">
             <button
               onClick={() => setShowSmsModal(false)}
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
@@ -258,7 +259,7 @@ export function NotificationBell() {
             </button>
 
             <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+              <div className="rounded-lg bg-info-soft p-2 text-info-soft-foreground">
                 <Smartphone className="h-5 w-5" />
               </div>
               <div>
@@ -307,8 +308,8 @@ export function NotificationBell() {
                 <div
                   className={`text-xs p-2.5 rounded-lg border ${
                     smsFeedback.startsWith("SMS sent")
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                      : "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400"
+                      ? "border-border bg-success-soft text-success-soft-foreground"
+                      : "border-border bg-danger-soft text-danger-soft-foreground"
                   }`}
                 >
                   {smsFeedback}

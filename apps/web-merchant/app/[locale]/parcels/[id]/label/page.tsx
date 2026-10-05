@@ -2,6 +2,7 @@ import React from "react";
 import { ShippingLabelView } from "../../../../../features/parcels/components/shipping-label-view";
 
 export const metadata = {
+  robots: { index: false, follow: false },
   title: "Shipping Label — Dhruto",
   description: "Print standard 4x6 thermal shipping label with barcode.",
 };

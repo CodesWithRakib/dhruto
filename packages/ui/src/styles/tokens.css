@@ -1,0 +1,124 @@
+/**
+ * Dhruto — Centralized Design Tokens
+ * ------------------------------------------------------------------
+ * THIS FILE IS THE SINGLE SOURCE OF TRUTH FOR COLOR AND TYPOGRAPHY.
+ *
+ * Rules:
+ *  - Application components must NEVER hard-code colors.
+ *  - Tokens are stored as raw HSL triples (no `hsl()` wrapper) so that
+ *    Tailwind can compose opacity: `hsl(var(--primary) / 0.5)`.
+ *  - Semantic names only (background, surface, success, danger, ...).
+ *  - Changing `--primary` here updates the entire product.
+ *
+ * Palette mirrors the Dhruto design reference:
+ *    Primary #16A34A · Background #F8FAFC · Surface #FFFFFF
+ *    Text #0F172A · Secondary text #64748B · Border #E2E8F0
+ *    Success #16A34A · Warning #F59E0B · Error #EF4444
+ */
+
+:root {
+  /* ------------------------------------------------------------------
+   * 1. Base surfaces
+   * ------------------------------------------------------------------ */
+  --background: 210 40% 98%; /* #F8FAFC */
+  --foreground: 222 47% 11%; /* #0F172A */
+
+  --surface: 0 0% 100%; /* #FFFFFF — cards, panels, sheets */
+  --surface-muted: 210 40% 96%; /* #F1F5F9 — subtle section wash */
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  /* ------------------------------------------------------------------
+   * 2. Text hierarchy
+   * ------------------------------------------------------------------ */
+  --text-primary: 222 47% 11%; /* #0F172A */
+  --text-secondary: 215 16% 47%; /* #64748B */
+  --text-muted: 215 20% 65%; /* #94A3B8 */
+  --text-inverse: 0 0% 100%;
+
+  /* ------------------------------------------------------------------
+   * 3. Brand / primary
+   * ------------------------------------------------------------------ */
+  --primary: 142 72% 36%; /* #16A34A */
+  --primary-hover: 142 72% 30%; /* #15803D */
+  --primary-foreground: 0 0% 100%;
+  --primary-soft: 141 84% 93%; /* #DCFCE7 */
+  --primary-soft-foreground: 142 72% 26%;
+
+  /* ------------------------------------------------------------------
+   * 4. Neutral / secondary
+   * ------------------------------------------------------------------ */
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+
+  /* ------------------------------------------------------------------
+   * 5. Semantic states
+   * ------------------------------------------------------------------ */
+  --success: 142 72% 36%;
+  --success-foreground: 0 0% 100%;
+  --success-soft: 141 84% 93%;
+  --success-soft-foreground: 142 72% 26%;
+
+  --warning: 38 92% 50%; /* #F59E0B */
+  --warning-foreground: 0 0% 100%;
+  --warning-soft: 48 96% 89%; /* #FEF3C7 */
+  --warning-soft-foreground: 26 83% 24%;
+
+  --danger: 0 84% 60%; /* #EF4444 */
+  --danger-foreground: 0 0% 100%;
+  --danger-soft: 0 93% 94%; /* #FEE2E2 */
+  --danger-soft-foreground: 0 74% 42%;
+
+  --info: 217 91% 60%; /* #3B82F6 */
+  --info-foreground: 0 0% 100%;
+  --info-soft: 214 95% 93%; /* #DBEAFE */
+  --info-soft-foreground: 224 76% 40%;
+
+  /* Backwards-compatible alias (shadcn convention). */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* ------------------------------------------------------------------
+   * 6. Lines & focus
+   * ------------------------------------------------------------------ */
+  --border: 214 32% 91%; /* #E2E8F0 */
+  --input: 214 32% 91%;
+  --ring: 142 72% 36%;
+  --overlay: 222 47% 11%;
+
+  /* ------------------------------------------------------------------
+   * 7. Radius — one rhythm for the whole system
+   * ------------------------------------------------------------------ */
+  --radius-sm: 0.25rem; /* 4px  · badges, tags */
+  --radius-md: 0.375rem; /* 6px  · buttons, inputs */
+  --radius-lg: 0.5rem; /* 8px  · cards, panels */
+  --radius-xl: 0.75rem; /* 12px · sheets, hero surfaces */
+  --radius: var(--radius-lg);
+
+  /* ------------------------------------------------------------------
+   * 8. Typography
+   * ------------------------------------------------------------------
+   * The font families themselves are injected by the app via next/font
+   * (Inter for Latin, Noto Sans Bengali for Bangla). Fallbacks keep
+   * rendering sane before the webfont loads.
+   */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-bangla: var(--font-bangla), var(--font-inter), "Noto Sans Bengali",
+    "SolaimanLipi", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas,
+    monospace;
+
+  /* Bangla needs a roomier line-height than Latin. */
+  --leading-bangla: 1.75;
+}
