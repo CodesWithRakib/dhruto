@@ -83,6 +83,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           icon: FileText,
         },
         {
+          href: MERCHANT_ROUTES.tracking,
+          labelKey: "tracking",
+          icon: Search,
+        },
+        {
           href: MERCHANT_ROUTES.webhooks,
           labelKey: "settings",
           icon: Settings,
@@ -114,7 +119,13 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
     },
     {
       labelKey: "groupNetwork",
-      items: [TRACKING_ITEM],
+      items: [
+        {
+          href: ADMIN_ROUTES.tracking,
+          labelKey: "tracking",
+          icon: Search,
+        },
+      ],
     },
   ],
   HUB_MANAGER: [

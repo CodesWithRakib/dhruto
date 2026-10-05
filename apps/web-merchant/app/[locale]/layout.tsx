@@ -1,6 +1,11 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_Bengali } from "next/font/google";
+import {
+  Inter,
+  Noto_Sans_Bengali,
+  Hind_Siliguri,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -11,18 +16,32 @@ import { NetworkStatus } from "@/components/pwa/network-status";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 
-/** Latin face — variable font, used for all English copy. */
+/** Latin font stack matching Gramer Bazar. */
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-inter",
   display: "swap",
 });
 
-/** Bangla face — explicit weights keep glyph rendering crisp in Bangla. */
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+/** Bangla font stack matching Gramer Bazar: Hind Siliguri + Noto Sans Bengali. */
+const hindSiliguri = Hind_Siliguri({
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-hind-siliguri",
+  display: "swap",
+});
+
 const notoSansBengali = Noto_Sans_Bengali({
   subsets: ["bengali", "latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-bangla",
+  variable: "--font-noto-bengali",
   display: "swap",
 });
 
@@ -92,7 +111,8 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir="ltr"
-      className={`${inter.variable} ${notoSansBengali.variable}`}
+      suppressHydrationWarning
+      className={`${inter.variable} ${plusJakartaSans.variable} ${hindSiliguri.variable} ${notoSansBengali.variable}`}
     >
       <body className={`min-h-screen bg-background ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}>
         <NextIntlClientProvider messages={messages}>

@@ -21,23 +21,44 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
-  /* Bangla-first rendering: roomier leading, slightly larger optical size. */
-  :lang(bn) {
-    font-family: var(--font-bangla);
-    line-height: var(--leading-bangla);
-    word-break: break-word;
+  /* English mode explicitly prioritizes Plus Jakarta Sans */
+  html[lang='en'],
+  html[lang='en'] body {
+    font-family: var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   }
+
+  /* Bengali mode explicitly prioritizes Hind Siliguri & Noto Sans Bengali with optical line-height */
+  html[lang='bn'],
+  html[lang='bn'] body {
+    font-family: var(--font-hind-siliguri), var(--font-noto-bengali), var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.625;
+  }
+
+  /* Bangla script shaping & rendering matching Gramer Bazar */
+  :lang(bn),
+  [lang='bn'],
+  .font-bangla,
+  :is([lang='bn'] *) {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    font-synthesis: none;
+    letter-spacing: 0 !important; /* Never apply letter-spacing to Bengali - breaks conjuncts */
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
   :lang(bn) h1,
   :lang(bn) h2,
   :lang(bn) h3,
   :lang(bn) h4 {
-    line-height: 1.5;
+    line-height: 1.45;
   }
 
   /* One consistent, always-visible focus treatment across the product. */
@@ -107,4 +128,23 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Prevent Radix scroll-lock from removing horizontal clipping and causing jumping */
+html body[data-scroll-locked] {
+  overflow-x: clip !important;
+  max-width: 100vw !important;
+}
+
+/* When body is scroll-locked by any Radix modal/dialog/sheet/dropdown,
+   lock sticky header to fixed coordinates so it never shifts or jumps off screen. */
+body[data-scroll-locked] header,
+body[data-scroll-locked] header[class*="sticky"] {
+  position: sticky !important;
+  top: 0 !important;
+}
+
+/* Sticky headers must allow dropdowns and mega menus to escape */
+header[class*="sticky"] {
+  overflow: visible !important;
 }

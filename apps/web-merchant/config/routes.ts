@@ -42,6 +42,8 @@ export const MERCHANT_ROUTES = {
   finance: "/merchant/finance",
   intelligence: "/merchant/intelligence",
   analytics: "/merchant/analytics",
+  tracking: "/merchant/track",
+  trackShipment: (code: string) => `/merchant/track/${code}`,
   webhooks: "/merchant/developer/webhooks",
 } as const;
 
@@ -54,6 +56,8 @@ export const ADMIN_ROUTES = {
   hub: "/admin/hub",
   rider: "/admin/rider",
   analytics: "/admin/analytics",
+  tracking: "/admin/track",
+  trackShipment: (code: string) => `/admin/track/${code}`,
 } as const;
 
 export const HUB_ROUTES = {
