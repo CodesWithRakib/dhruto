@@ -7,7 +7,9 @@ import { notFound } from "next/navigation";
 import { routing } from "../../src/i18n/routing";
 import "../globals.css";
 import { Providers } from "./providers";
-import { AppShell } from "../../components/layout/app-shell";
+import { NetworkStatus } from "@/components/pwa/network-status";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 /** Latin face — variable font, used for all English copy. */
 const inter = Inter({
@@ -33,6 +35,13 @@ export const metadata: Metadata = {
   description:
     "Dhruto is Bangladesh's logistics operating system: nationwide parcel delivery, cash-on-delivery collection, merchant automation and real-time tracking.",
   applicationName: "Dhruto",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Dhruto",
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: true },
   keywords: [
     "Dhruto",
     "courier service Bangladesh",
@@ -55,10 +64,17 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#16A34A",
 };
 
-export default async function RootLayout({
+/**
+ * Locale root. Owns `<html>`/`<body>`, fonts, i18n and the Redux store.
+ *
+ * Chrome (public header/footer, auth shell, dashboard shell) is provided by
+ * the per-surface group layouts, so this file stays free of pathname logic.
+ */
+export default async function LocaleLayout({
   children,
   params,
 }: {
@@ -81,7 +97,10 @@ export default async function RootLayout({
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <AppShell>{children}</AppShell>
+            <NetworkStatus />
+            {children}
+            <InstallPrompt />
+            <ServiceWorkerRegister />
           </Providers>
         </NextIntlClientProvider>
       </body>

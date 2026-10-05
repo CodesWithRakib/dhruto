@@ -70,13 +70,13 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ORIGIN_HUB_RECEIVED":
-        return <Badge variant="outline" className="border-emerald-400 text-emerald-600 bg-emerald-50">At Hub (Sorted)</Badge>;
+        return <Badge variant="outline" className="border-success text-success bg-success-soft">At Hub (Sorted)</Badge>;
       case "BAGGED":
-        return <Badge variant="outline" className="border-blue-400 text-blue-600 bg-blue-50">In Transit Bag</Badge>;
+        return <Badge variant="outline" className="border-info text-info bg-info-soft">In Transit Bag</Badge>;
       case "IN_TRANSIT":
-        return <Badge variant="outline" className="border-amber-400 text-amber-600 bg-amber-50">Line-Haul Transit</Badge>;
+        return <Badge variant="outline" className="border-warning text-warning bg-warning-soft">Line-Haul Transit</Badge>;
       case "DESTINATION_HUB_RECEIVED":
-        return <Badge variant="outline" className="border-purple-400 text-purple-600 bg-purple-50">Arrived at Dest Hub</Badge>;
+        return <Badge variant="outline" className="border-primary text-primary bg-primary-soft">Arrived at Dest Hub</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -86,7 +86,7 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
     <div className="space-y-6">
       {/* Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-emerald-500 shadow-sm">
+        <Card className="border-l-4 border-l-emerald-500 ">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -97,13 +97,13 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
               </h3>
               <p className="text-[11px] text-muted-foreground mt-0.5">Ready for sorting & bagging</p>
             </div>
-            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 rounded-lg">
+            <div className="p-2.5 bg-success-soft  text-success rounded-lg">
               <CheckCircle2 className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="border-l-4 border-l-blue-500 ">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -114,13 +114,13 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
               </h3>
               <p className="text-[11px] text-muted-foreground mt-0.5">Inside security transit bags</p>
             </div>
-            <div className="p-2.5 bg-blue-100 dark:bg-blue-950 text-blue-600 rounded-lg">
+            <div className="p-2.5 bg-info-soft  text-info rounded-lg">
               <Layers className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-amber-500 shadow-sm">
+        <Card className="border-l-4 border-l-amber-500 ">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -131,13 +131,13 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
               </h3>
               <p className="text-[11px] text-muted-foreground mt-0.5">Accepting parcel packing</p>
             </div>
-            <div className="p-2.5 bg-amber-100 dark:bg-amber-950 text-amber-600 rounded-lg">
+            <div className="p-2.5 bg-warning-soft  text-warning rounded-lg">
               <Package className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500 shadow-sm">
+        <Card className="border-l-4 border-l-purple-500 ">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -148,7 +148,7 @@ export function HubInventoryView({ currentHubId }: HubInventoryViewProps) {
               </h3>
               <p className="text-[11px] text-muted-foreground mt-0.5">Total processed items</p>
             </div>
-            <div className="p-2.5 bg-purple-100 dark:bg-purple-950 text-purple-600 rounded-lg">
+            <div className="p-2.5 bg-primary-soft  text-primary rounded-lg">
               <Truck className="h-5 w-5" />
             </div>
           </CardContent>

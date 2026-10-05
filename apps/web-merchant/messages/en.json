@@ -12,7 +12,18 @@
     "recentOrders": "Recent Shipments",
     "viewAll": "View All Shipments",
     "bookNew": "Book New Parcel",
-    "trackParcel": "Track Shipment"
+    "trackParcel": "Track Shipment",
+    "recentOrdersSubtitle": "Live pipeline of your most recent bookings.",
+    "loadingRecent": "Loading recent shipments…",
+    "emptyRecent": "No shipments recorded yet. Create your first parcel booking to begin shipping.",
+    "colTracking": "Tracking ID",
+    "colRecipient": "Recipient",
+    "colDestination": "Destination",
+    "colCod": "COD Amount",
+    "colStatus": "Status",
+    "colAction": "Action",
+    "label": "Label",
+    "view": "View"
   },
   "LocaleSwitcher": {
     "label": "Change language"
@@ -89,7 +100,16 @@
     "empty": "No parcels found. Create a booking to get started.",
     "create": "Create Booking",
     "all": "All Statuses",
-    "searchPlaceholder": "Search by Tracking ID, Recipient Name or Phone..."
+    "searchPlaceholder": "Search by Tracking ID, Recipient Name or Phone...",
+    "fee": "Fee:",
+    "view": "View",
+    "printLabel": "Print label",
+    "actions": "Actions",
+    "filterCreated": "Created",
+    "filterInTransit": "In transit",
+    "filterOutForDelivery": "Out for delivery",
+    "filterDelivered": "Delivered",
+    "filterReturned": "Returned"
   },
   "ParcelDetails": {
     "title": "Shipment Details",
@@ -233,7 +253,15 @@
     "hub": "Hub Operations",
     "rider": "Rider Terminal",
     "intelligence": "AI Intelligence",
-    "webhooks": "Webhooks"
+    "webhooks": "Webhooks",
+    "more": "More",
+    "openApp": "Open dashboard",
+    "roleAdmin": "Admin",
+    "roleMerchant": "Merchant",
+    "roleHubManager": "Hub Manager",
+    "roleRider": "Rider",
+    "roleCustomer": "Customer",
+    "groupNetwork": "Network"
   },
   "Footer": {
     "tagline": "Bangladesh's logistics operating system — nationwide delivery, cash-on-delivery collection and merchant automation.",
@@ -269,10 +297,22 @@
     },
     "capabilities": {
       "items": [
-        { "title": "Nationwide coverage", "description": "delivery across all 64 districts" },
-        { "title": "Cash on delivery", "description": "collected, reconciled and settled to your wallet" },
-        { "title": "Live tracking", "description": "milestone updates from pickup to doorstep" },
-        { "title": "Hub network", "description": "sorting and line-haul between origin and destination" }
+        {
+          "title": "Nationwide coverage",
+          "description": "delivery across all 64 districts"
+        },
+        {
+          "title": "Cash on delivery",
+          "description": "collected, reconciled and settled to your wallet"
+        },
+        {
+          "title": "Live tracking",
+          "description": "milestone updates from pickup to doorstep"
+        },
+        {
+          "title": "Hub network",
+          "description": "sorting and line-haul between origin and destination"
+        }
       ]
     },
     "services": {
@@ -280,12 +320,30 @@
       "title": "Delivery services built for Bangladeshi commerce",
       "description": "From a single parcel to daily bulk dispatch, Dhruto covers the full delivery lifecycle.",
       "items": [
-        { "title": "Same-day delivery", "description": "Time-critical parcels delivered within the city on the same day." },
-        { "title": "Nationwide delivery", "description": "Door-to-door delivery to every district through our hub network." },
-        { "title": "Cash on delivery", "description": "COD collected by riders and reconciled into your merchant wallet." },
-        { "title": "Parcel tracking", "description": "A public tracking link with a clear, bilingual status timeline." },
-        { "title": "Merchant automation", "description": "Bulk booking, smart address parsing and API integration." },
-        { "title": "Returns & RTO", "description": "Structured return-to-origin handling when a delivery cannot be completed." }
+        {
+          "title": "Same-day delivery",
+          "description": "Time-critical parcels delivered within the city on the same day."
+        },
+        {
+          "title": "Nationwide delivery",
+          "description": "Door-to-door delivery to every district through our hub network."
+        },
+        {
+          "title": "Cash on delivery",
+          "description": "COD collected by riders and reconciled into your merchant wallet."
+        },
+        {
+          "title": "Parcel tracking",
+          "description": "A public tracking link with a clear, bilingual status timeline."
+        },
+        {
+          "title": "Merchant automation",
+          "description": "Bulk booking, smart address parsing and API integration."
+        },
+        {
+          "title": "Returns & RTO",
+          "description": "Structured return-to-origin handling when a delivery cannot be completed."
+        }
       ]
     },
     "how": {
@@ -293,11 +351,26 @@
       "title": "From booking to settlement",
       "description": "One connected flow — the same parcel record follows every step.",
       "items": [
-        { "title": "Merchant books", "description": "Create a booking in the portal or through the API." },
-        { "title": "Pickup", "description": "A rider collects the parcel from your pickup address." },
-        { "title": "Hub sorting", "description": "Parcels are scanned, bagged and dispatched." },
-        { "title": "Delivery", "description": "Last-mile delivery with OTP verification and COD." },
-        { "title": "Settlement", "description": "COD is reconciled and settled to your wallet." }
+        {
+          "title": "Merchant books",
+          "description": "Create a booking in the portal or through the API."
+        },
+        {
+          "title": "Pickup",
+          "description": "A rider collects the parcel from your pickup address."
+        },
+        {
+          "title": "Hub sorting",
+          "description": "Parcels are scanned, bagged and dispatched."
+        },
+        {
+          "title": "Delivery",
+          "description": "Last-mile delivery with OTP verification and COD."
+        },
+        {
+          "title": "Settlement",
+          "description": "COD is reconciled and settled to your wallet."
+        }
       ]
     },
     "benefits": {
@@ -305,10 +378,22 @@
       "title": "Built to make shipping predictable",
       "description": "Everything a growing e-commerce business needs to ship at scale.",
       "items": [
-        { "title": "One dashboard", "description": "Bookings, parcels, finance and payouts in one place." },
-        { "title": "Transparent COD", "description": "Every taka of COD is traced from rider to wallet." },
-        { "title": "Reliable coverage", "description": "Urban and rural delivery through sorting hubs." },
-        { "title": "Integrations", "description": "Webhooks and APIs to connect Dhruto to your store." }
+        {
+          "title": "One dashboard",
+          "description": "Bookings, parcels, finance and payouts in one place."
+        },
+        {
+          "title": "Transparent COD",
+          "description": "Every taka of COD is traced from rider to wallet."
+        },
+        {
+          "title": "Reliable coverage",
+          "description": "Urban and rural delivery through sorting hubs."
+        },
+        {
+          "title": "Integrations",
+          "description": "Webhooks and APIs to connect Dhruto to your store."
+        }
       ]
     },
     "trackCta": {
@@ -320,11 +405,26 @@
       "title": "Frequently asked questions",
       "description": "Quick answers about booking, delivery and settlement.",
       "items": [
-        { "question": "How do I book a parcel?", "answer": "Create a merchant account and book directly from the dashboard, or connect your store to the Dhruto API for automatic bookings." },
-        { "question": "How long does delivery take?", "answer": "Timelines depend on the origin, destination and service. Same-day delivery is available within the city, while nationwide delivery typically takes a few working days." },
-        { "question": "How does cash on delivery work?", "answer": "The rider collects the COD amount at the doorstep. It is then reconciled at the hub and settled into your merchant wallet." },
-        { "question": "Can I track a parcel without an account?", "answer": "Yes. Anyone with a tracking ID can use the public tracking page to view the parcel's status timeline." },
-        { "question": "What happens if delivery fails?", "answer": "The parcel follows the return-to-origin flow and is returned to the merchant instead of being abandoned." }
+        {
+          "question": "How do I book a parcel?",
+          "answer": "Create a merchant account and book directly from the dashboard, or connect your store to the Dhruto API for automatic bookings."
+        },
+        {
+          "question": "How long does delivery take?",
+          "answer": "Timelines depend on the origin, destination and service. Same-day delivery is available within the city, while nationwide delivery typically takes a few working days."
+        },
+        {
+          "question": "How does cash on delivery work?",
+          "answer": "The rider collects the COD amount at the doorstep. It is then reconciled at the hub and settled into your merchant wallet."
+        },
+        {
+          "question": "Can I track a parcel without an account?",
+          "answer": "Yes. Anyone with a tracking ID can use the public tracking page to view the parcel's status timeline."
+        },
+        {
+          "question": "What happens if delivery fails?",
+          "answer": "The parcel follows the return-to-origin flow and is returned to the merchant instead of being abandoned."
+        }
       ]
     },
     "finalCta": {
@@ -339,14 +439,38 @@
     "title": "Delivery services",
     "description": "Pick the service that fits each shipment — all on one platform.",
     "items": [
-      { "title": "Same-day delivery", "description": "Time-critical parcels delivered within the city on the same day." },
-      { "title": "Nationwide delivery", "description": "Door-to-door delivery to every district through our hub network." },
-      { "title": "Cash on delivery", "description": "COD collected by riders and reconciled into your merchant wallet." },
-      { "title": "Parcel tracking", "description": "A public tracking link with a clear, bilingual status timeline." },
-      { "title": "Merchant automation", "description": "Bulk booking, smart address parsing and API integration." },
-      { "title": "Returns & RTO", "description": "Structured return-to-origin handling when a delivery cannot be completed." },
-      { "title": "Hub operations", "description": "Scanning, bagging and line-haul manifests across the hub network." },
-      { "title": "Developer API", "description": "Webhooks and signed endpoints to build delivery into your own systems." }
+      {
+        "title": "Same-day delivery",
+        "description": "Time-critical parcels delivered within the city on the same day."
+      },
+      {
+        "title": "Nationwide delivery",
+        "description": "Door-to-door delivery to every district through our hub network."
+      },
+      {
+        "title": "Cash on delivery",
+        "description": "COD collected by riders and reconciled into your merchant wallet."
+      },
+      {
+        "title": "Parcel tracking",
+        "description": "A public tracking link with a clear, bilingual status timeline."
+      },
+      {
+        "title": "Merchant automation",
+        "description": "Bulk booking, smart address parsing and API integration."
+      },
+      {
+        "title": "Returns & RTO",
+        "description": "Structured return-to-origin handling when a delivery cannot be completed."
+      },
+      {
+        "title": "Hub operations",
+        "description": "Scanning, bagging and line-haul manifests across the hub network."
+      },
+      {
+        "title": "Developer API",
+        "description": "Webhooks and signed endpoints to build delivery into your own systems."
+      }
     ]
   },
   "Pricing": {
@@ -354,10 +478,22 @@
     "title": "Simple, transparent pricing",
     "description": "Delivery charges are based on weight and delivery zone, with volume rates for regular merchants. No hidden fees.",
     "items": [
-      { "title": "Weight-based charge", "description": "The base delivery fee scales with the parcel's billable weight." },
-      { "title": "Zone-based charge", "description": "Rates depend on the destination district and delivery zone." },
-      { "title": "Cash on delivery", "description": "A COD handling fee applies per collected order and is shown before you confirm." },
-      { "title": "Volume merchant rates", "description": "Regular volume unlocks negotiated per-parcel rates and settlement cycles." }
+      {
+        "title": "Weight-based charge",
+        "description": "The base delivery fee scales with the parcel's billable weight."
+      },
+      {
+        "title": "Zone-based charge",
+        "description": "Rates depend on the destination district and delivery zone."
+      },
+      {
+        "title": "Cash on delivery",
+        "description": "A COD handling fee applies per collected order and is shown before you confirm."
+      },
+      {
+        "title": "Volume merchant rates",
+        "description": "Regular volume unlocks negotiated per-parcel rates and settlement cycles."
+      }
     ],
     "quoteNote": "Final rates depend on your pickup location, parcel profile and monthly volume.",
     "quoteCta": "Request a quote"
@@ -370,19 +506,42 @@
     "paragraph2": "We built Dhruto as a logistics operating system — one connected record for every parcel, from merchant booking through hub sorting and last-mile delivery to COD settlement. Every handover is scanned, every state change is auditable, and every taka of COD is traceable.",
     "paragraph3": "The platform is bilingual by design, mobile-first for riders and operators, and API-ready for merchants who want to integrate delivery directly into their own systems.",
     "values": [
-      { "title": "Reliability", "description": "Predictable pickup, sorting and delivery you can plan around." },
-      { "title": "Transparency", "description": "Clear status, clear fees and auditable COD settlement." },
-      { "title": "Merchant-first", "description": "Tools that reduce manual work for growing businesses." },
-      { "title": "Accessibility", "description": "Bilingual and mobile-first for every operator in the chain." }
+      {
+        "title": "Reliability",
+        "description": "Predictable pickup, sorting and delivery you can plan around."
+      },
+      {
+        "title": "Transparency",
+        "description": "Clear status, clear fees and auditable COD settlement."
+      },
+      {
+        "title": "Merchant-first",
+        "description": "Tools that reduce manual work for growing businesses."
+      },
+      {
+        "title": "Accessibility",
+        "description": "Bilingual and mobile-first for every operator in the chain."
+      }
     ]
   },
   "Contact": {
     "eyebrow": "Contact",
     "title": "Talk to the Dhruto team",
     "description": "Questions about onboarding, rates or an existing shipment? Reach out and we'll respond.",
-    "email": { "title": "Email", "detail": "For merchant onboarding, support and partnership queries." },
-    "hours": { "title": "Support hours", "value": "Sun–Thu, 9:00–18:00 (BST)", "detail": "We respond to merchant support requests within one business day." },
-    "office": { "title": "Coverage", "value": "Nationwide, Bangladesh", "detail": "Operations across all 64 districts through our hub network." },
+    "email": {
+      "title": "Email",
+      "detail": "For merchant onboarding, support and partnership queries."
+    },
+    "hours": {
+      "title": "Support hours",
+      "value": "Sun–Thu, 9:00–18:00 (BST)",
+      "detail": "We respond to merchant support requests within one business day."
+    },
+    "office": {
+      "title": "Coverage",
+      "value": "Nationwide, Bangladesh",
+      "detail": "Operations across all 64 districts through our hub network."
+    },
     "note": "Merchant account holders can also reach support directly from the portal."
   },
   "Faq": {
@@ -390,14 +549,38 @@
     "title": "Frequently asked questions",
     "description": "Everything you need to know about shipping with Dhruto.",
     "items": [
-      { "question": "How do I book a parcel?", "answer": "Create a merchant account and book directly from the dashboard, or connect your store to the Dhruto API for automatic bookings." },
-      { "question": "How long does delivery take?", "answer": "Timelines depend on the origin, destination and service. Same-day delivery is available within the city, while nationwide delivery typically takes a few working days." },
-      { "question": "How does cash on delivery work?", "answer": "The rider collects the COD amount at the doorstep. It is then reconciled at the hub and settled into your merchant wallet." },
-      { "question": "Can I track a parcel without an account?", "answer": "Yes. Anyone with a tracking ID can use the public tracking page to view the parcel's status timeline." },
-      { "question": "What happens if delivery fails?", "answer": "The parcel follows the return-to-origin flow and is returned to the merchant instead of being abandoned." },
-      { "question": "How are delivery charges calculated?", "answer": "Charges are based on the parcel's billable weight and the destination zone, plus any cash-on-delivery handling fee." },
-      { "question": "Can I integrate my own store?", "answer": "Yes. Dhruto exposes an API with signed webhooks so your systems can create bookings and receive status updates automatically." },
-      { "question": "Is Dhruto available in Bangla?", "answer": "Yes. The merchant portal, rider terminal and public pages are all available in both English and Bangla." }
+      {
+        "question": "How do I book a parcel?",
+        "answer": "Create a merchant account and book directly from the dashboard, or connect your store to the Dhruto API for automatic bookings."
+      },
+      {
+        "question": "How long does delivery take?",
+        "answer": "Timelines depend on the origin, destination and service. Same-day delivery is available within the city, while nationwide delivery typically takes a few working days."
+      },
+      {
+        "question": "How does cash on delivery work?",
+        "answer": "The rider collects the COD amount at the doorstep. It is then reconciled at the hub and settled into your merchant wallet."
+      },
+      {
+        "question": "Can I track a parcel without an account?",
+        "answer": "Yes. Anyone with a tracking ID can use the public tracking page to view the parcel's status timeline."
+      },
+      {
+        "question": "What happens if delivery fails?",
+        "answer": "The parcel follows the return-to-origin flow and is returned to the merchant instead of being abandoned."
+      },
+      {
+        "question": "How are delivery charges calculated?",
+        "answer": "Charges are based on the parcel's billable weight and the destination zone, plus any cash-on-delivery handling fee."
+      },
+      {
+        "question": "Can I integrate my own store?",
+        "answer": "Yes. Dhruto exposes an API with signed webhooks so your systems can create bookings and receive status updates automatically."
+      },
+      {
+        "question": "Is Dhruto available in Bangla?",
+        "answer": "Yes. The merchant portal, rider terminal and public pages are all available in both English and Bangla."
+      }
     ]
   },
   "Privacy": {
@@ -405,12 +588,30 @@
     "title": "Privacy Policy",
     "updated": "This summary explains, in plain language, how Dhruto handles data.",
     "sections": [
-      { "title": "Information we collect", "body": "We collect the account details you provide, the shipment and recipient details needed to deliver a parcel, and operational data such as scans, status changes and delivery attempts." },
-      { "title": "How we use information", "body": "Data is used to book, route, deliver and track shipments, to reconcile cash-on-delivery, and to provide support. We do not sell personal data." },
-      { "title": "Recipient data", "body": "Recipient names, phone numbers and addresses are used to complete delivery. Public tracking deliberately masks sensitive recipient details." },
-      { "title": "Sharing", "body": "Information is shared only with parties required to complete a shipment — such as hubs, riders and payment channels — and where required by law." },
-      { "title": "Security", "body": "Access to the platform is protected by authentication and role-based permissions, and financial actions are auditable." },
-      { "title": "Your choices", "body": "Merchants can update their account details and manage access from the portal. For data requests, contact us using the details on the contact page." }
+      {
+        "title": "Information we collect",
+        "body": "We collect the account details you provide, the shipment and recipient details needed to deliver a parcel, and operational data such as scans, status changes and delivery attempts."
+      },
+      {
+        "title": "How we use information",
+        "body": "Data is used to book, route, deliver and track shipments, to reconcile cash-on-delivery, and to provide support. We do not sell personal data."
+      },
+      {
+        "title": "Recipient data",
+        "body": "Recipient names, phone numbers and addresses are used to complete delivery. Public tracking deliberately masks sensitive recipient details."
+      },
+      {
+        "title": "Sharing",
+        "body": "Information is shared only with parties required to complete a shipment — such as hubs, riders and payment channels — and where required by law."
+      },
+      {
+        "title": "Security",
+        "body": "Access to the platform is protected by authentication and role-based permissions, and financial actions are auditable."
+      },
+      {
+        "title": "Your choices",
+        "body": "Merchants can update their account details and manage access from the portal. For data requests, contact us using the details on the contact page."
+      }
     ]
   },
   "Terms": {
@@ -418,13 +619,92 @@
     "title": "Terms of Service",
     "updated": "These terms govern the use of Dhruto delivery services and the merchant portal.",
     "sections": [
-      { "title": "The service", "body": "Dhruto provides parcel booking, pickup, hub sorting, last-mile delivery, cash-on-delivery collection and settlement through its platform." },
-      { "title": "Merchant responsibilities", "body": "Merchants are responsible for accurate shipment and recipient details, for packaging, and for complying with all applicable laws and prohibited-item rules." },
-      { "title": "Delivery and cash on delivery", "body": "Delivery timelines are estimates. COD collected by riders is reconciled at the hub and settled according to the platform's settlement cycle." },
-      { "title": "Fees and settlement", "body": "Applicable delivery and COD fees are shown before a booking is confirmed. Settlement amounts reflect delivered and reconciled shipments." },
-      { "title": "Prohibited items", "body": "Illegal, hazardous and restricted goods may not be shipped through the platform." },
-      { "title": "Changes", "body": "We may update these terms as the platform evolves. Material changes will be communicated through the portal." },
-      { "title": "Contact", "body": "Questions about these terms can be sent using the details on the contact page." }
+      {
+        "title": "The service",
+        "body": "Dhruto provides parcel booking, pickup, hub sorting, last-mile delivery, cash-on-delivery collection and settlement through its platform."
+      },
+      {
+        "title": "Merchant responsibilities",
+        "body": "Merchants are responsible for accurate shipment and recipient details, for packaging, and for complying with all applicable laws and prohibited-item rules."
+      },
+      {
+        "title": "Delivery and cash on delivery",
+        "body": "Delivery timelines are estimates. COD collected by riders is reconciled at the hub and settled according to the platform's settlement cycle."
+      },
+      {
+        "title": "Fees and settlement",
+        "body": "Applicable delivery and COD fees are shown before a booking is confirmed. Settlement amounts reflect delivered and reconciled shipments."
+      },
+      {
+        "title": "Prohibited items",
+        "body": "Illegal, hazardous and restricted goods may not be shipped through the platform."
+      },
+      {
+        "title": "Changes",
+        "body": "We may update these terms as the platform evolves. Material changes will be communicated through the portal."
+      },
+      {
+        "title": "Contact",
+        "body": "Questions about these terms can be sent using the details on the contact page."
+      }
     ]
+  },
+  "ParcelStatus": {
+    "created": "Created",
+    "pickupRequested": "Pickup requested",
+    "pickupAssigned": "Pickup assigned",
+    "pickedUp": "Picked up",
+    "originHubReceived": "At origin hub",
+    "bagged": "Bagged",
+    "inTransit": "In transit",
+    "destinationHubReceived": "At destination hub",
+    "assignedToRider": "Assigned to rider",
+    "outForDelivery": "Out for delivery",
+    "deliveryAttempted": "Delivery attempted",
+    "rescheduled": "Rescheduled",
+    "delivered": "Delivered",
+    "cashPending": "Cash pending",
+    "cashVerified": "Cash verified",
+    "rtoInitiated": "RTO initiated",
+    "returnInTransit": "Return in transit",
+    "returnedToMerchant": "Returned to merchant",
+    "cancelled": "Cancelled",
+    "lost": "Lost",
+    "damaged": "Damaged",
+    "unknown": "Unknown"
+  },
+  "Admin": {
+    "title": "Operations console",
+    "subtitle": "Supervise parcels, finance, hubs and riders across the Dhruto network.",
+    "parcels": {
+      "title": "Parcels",
+      "description": "Search and inspect shipments across the network."
+    },
+    "finance": {
+      "title": "Finance",
+      "description": "Settlements, payouts and cash reconciliation."
+    },
+    "hub": {
+      "title": "Hub operations",
+      "description": "Sorting, bagging, manifests and hub inventory."
+    },
+    "rider": {
+      "title": "Rider operations",
+      "description": "Last-mile task queues and cash collection."
+    }
+  },
+  "Pwa": {
+    "offline": "You are offline",
+    "reconnecting": "Reconnecting…",
+    "installTitle": "Install the Dhruto app",
+    "installDescription": "Add Dhruto to your home screen for faster access and an app-like experience.",
+    "install": "Install",
+    "later": "Not now",
+    "dismiss": "Dismiss"
+  },
+  "Offline": {
+    "title": "You are offline",
+    "description": "Dhruto needs a connection to load live parcel, scan and cash data. Reconnect and try again.",
+    "goHome": "Back to home"
   }
 }

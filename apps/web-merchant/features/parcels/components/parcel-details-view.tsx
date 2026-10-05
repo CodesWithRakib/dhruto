@@ -27,6 +27,7 @@ import {
   Building2,
 } from "lucide-react";
 import { useGetParcelByIdQuery } from "../api/parcels.api";
+import { useRouteBase } from "@/config/route-base";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -50,6 +51,7 @@ function getCurrentStepIndex(currentStatus: string): number {
 
 export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const t = useTranslations("ParcelDetails");
+  const routes = useRouteBase();
   const { data, isLoading, error } = useGetParcelByIdQuery(parcelId);
 
   if (isLoading) {
@@ -69,7 +71,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         <CardDescription className="mt-1">
           Unable to find shipment with ID "{parcelId}".
         </CardDescription>
-        <Link href="/parcels" className="mt-4 inline-block">
+        <Link href={routes.parcels} className="mt-4 inline-block">
           <Button variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t("back")}
@@ -87,8 +89,8 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <Link href="/parcels">
-          <Button variant="ghost" size="sm" className="flex items-center gap-1.5 -ml-2">
+        <Link href={routes.parcels}>
+          <Button variant="ghost" size="sm" className="-ml-2 flex items-center gap-1.5">
             <ArrowLeft className="h-4 w-4" />
             {t("back")}
           </Button>
@@ -100,7 +102,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
               {t("publicTracking")}
             </Button>
           </Link>
-          <Link href={`/parcels/${parcel.id}/label`}>
+          <Link href={routes.parcelLabel(parcel.id)}>
             <Button size="sm" className="flex items-center gap-1.5">
               <Printer className="h-4 w-4" />
               {t("printLabel")}
@@ -110,7 +112,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
       </div>
 
       {/* Main Info Card */}
-      <Card className="shadow-md border-primary/20">
+      <Card>
         <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
             <div>
@@ -148,7 +150,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-colors ${
                       isPassed
-                        ? "bg-primary text-primary-foreground shadow"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground border-2 border-background"
                     } ${isCurrent ? "ring-4 ring-primary/20" : ""}`}
                   >
@@ -260,7 +262,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
       </Card>
 
       {/* History Timeline */}
-      <Card className="shadow-sm">
+      <Card>
         <CardHeader className="pb-3 border-b">
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />

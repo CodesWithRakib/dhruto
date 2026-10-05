@@ -66,8 +66,8 @@ export function RiderCashModal({ onClose, onSuccess }: RiderCashModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-primary/30">
+    <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-md  border-primary/30">
         <CardHeader className="border-b pb-4 flex flex-row items-start justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -89,32 +89,32 @@ export function RiderCashModal({ onClose, onSuccess }: RiderCashModalProps) {
         <CardContent className="pt-5 space-y-4">
           {/* Summary Breakdown Cards */}
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10">
-              <Clock className="h-4 w-4 text-amber-600 mx-auto mb-1" />
+            <div className="p-3 rounded-lg border border-warning bg-warning-soft">
+              <Clock className="h-4 w-4 text-warning mx-auto mb-1" />
               <div className="text-[10px] text-muted-foreground uppercase font-semibold">
                 In Hand
               </div>
-              <div className="text-base font-bold font-mono text-amber-600 mt-0.5">
+              <div className="text-base font-bold font-mono text-warning mt-0.5">
                 ৳{summary.pendingHandIn.toLocaleString()}
               </div>
             </div>
 
-            <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-500/10">
-              <ArrowRight className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+            <div className="p-3 rounded-lg border border-info bg-info-soft">
+              <ArrowRight className="h-4 w-4 text-info mx-auto mb-1" />
               <div className="text-[10px] text-muted-foreground uppercase font-semibold">
                 Submitted
               </div>
-              <div className="text-base font-bold font-mono text-blue-600 mt-0.5">
+              <div className="text-base font-bold font-mono text-info mt-0.5">
                 ৳{summary.awaitingVerification.toLocaleString()}
               </div>
             </div>
 
-            <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10">
-              <ShieldCheck className="h-4 w-4 text-emerald-600 mx-auto mb-1" />
+            <div className="p-3 rounded-lg border border-success bg-success-soft">
+              <ShieldCheck className="h-4 w-4 text-success mx-auto mb-1" />
               <div className="text-[10px] text-muted-foreground uppercase font-semibold">
                 Verified
               </div>
-              <div className="text-base font-bold font-mono text-emerald-600 mt-0.5">
+              <div className="text-base font-bold font-mono text-success mt-0.5">
                 ৳{summary.verifiedByHub.toLocaleString()}
               </div>
             </div>

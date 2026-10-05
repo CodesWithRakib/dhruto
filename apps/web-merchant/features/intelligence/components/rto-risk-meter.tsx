@@ -106,24 +106,24 @@ export function RtoRiskMeter({
       case "LOW":
         return {
           label: "Low Risk (Safe)",
-          color: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800",
-          icon: <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
-          progressColor: "bg-emerald-500",
+          color: "text-success bg-success-soft border-success   ",
+          icon: <ShieldCheck className="h-5 w-5 text-success " />,
+          progressColor: "bg-success",
         };
       case "MEDIUM":
         return {
           label: "Moderate Risk (Verify)",
-          color: "text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800",
-          icon: <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400" />,
-          progressColor: "bg-amber-500",
+          color: "text-warning bg-warning-soft border-warning   ",
+          icon: <Shield className="h-5 w-5 text-warning " />,
+          progressColor: "bg-warning",
         };
       case "HIGH":
       default:
         return {
           label: "High Risk (Action Needed)",
-          color: "text-rose-600 bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800",
-          icon: <ShieldAlert className="h-5 w-5 text-rose-600 dark:text-rose-400" />,
-          progressColor: "bg-rose-500",
+          color: "text-danger bg-danger-soft border-danger   ",
+          icon: <ShieldAlert className="h-5 w-5 text-danger " />,
+          progressColor: "bg-danger",
         };
     }
   };
@@ -132,19 +132,19 @@ export function RtoRiskMeter({
     switch (impact) {
       case "POSITIVE":
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-success-soft text-success  ">
             Positive
           </span>
         );
       case "WARNING":
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-warning-soft text-warning  ">
             Warning
           </span>
         );
       case "CRITICAL":
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-danger-soft text-danger  ">
             Critical
           </span>
         );
@@ -158,7 +158,7 @@ export function RtoRiskMeter({
   };
 
   return (
-    <Card className="shadow-sm border-primary/20">
+    <Card className=" border-primary/20">
       <CardHeader className="bg-primary/5 border-b border-primary/10">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
@@ -318,21 +318,21 @@ export function RtoRiskMeter({
 
             {/* Action Badges */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-3 bg-muted/10 border-b text-xs">
-              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.safeToDispatch ? "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300" : "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300"}`}>
+              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.safeToDispatch ? "bg-success-soft text-success border-success  " : "bg-danger-soft text-danger border-danger  "}`}>
                 {riskResult.safeToDispatch ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertTriangle className="h-4 w-4 shrink-0" />}
                 <span className="font-semibold">
                   {riskResult.safeToDispatch ? "Safe to Dispatch" : "Hold for Review"}
                 </span>
               </div>
 
-              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresPhoneVerification ? "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300" : "bg-muted text-muted-foreground"}`}>
+              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresPhoneVerification ? "bg-warning-soft text-warning border-warning  " : "bg-muted text-muted-foreground"}`}>
                 <PhoneCall className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
                   {riskResult.requiresPhoneVerification ? "Call Verification Needed" : "No Phone Check Needed"}
                 </span>
               </div>
 
-              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresAdvancePayment ? "bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950 dark:text-purple-300" : "bg-muted text-muted-foreground"}`}>
+              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresAdvancePayment ? "bg-primary-soft text-primary border-primary  " : "bg-muted text-muted-foreground"}`}>
                 <CreditCard className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
                   {riskResult.requiresAdvancePayment ? "Advance Fee Suggested" : "Full COD Permitted"}
@@ -353,15 +353,15 @@ export function RtoRiskMeter({
                 </div>
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Delivered</span>
-                  <span className="text-base font-bold font-mono text-emerald-600">{riskResult.deliveryHistory.deliveredOrders}</span>
+                  <span className="text-base font-bold font-mono text-success">{riskResult.deliveryHistory.deliveredOrders}</span>
                 </div>
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Returns / RTO</span>
-                  <span className="text-base font-bold font-mono text-rose-600">{riskResult.deliveryHistory.returnedOrders}</span>
+                  <span className="text-base font-bold font-mono text-danger">{riskResult.deliveryHistory.returnedOrders}</span>
                 </div>
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Completion</span>
-                  <span className="text-base font-bold font-mono text-blue-600">{riskResult.deliveryHistory.completionRate}%</span>
+                  <span className="text-base font-bold font-mono text-info">{riskResult.deliveryHistory.completionRate}%</span>
                 </div>
               </div>
             </div>

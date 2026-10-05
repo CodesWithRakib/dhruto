@@ -107,7 +107,7 @@ export function RiderDashboard() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Top Banner & Quick Actions */}
-      <div className="bg-card border rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-card border rounded-2xl p-5 sm:p-6  flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
             <Bike className="h-7 w-7" />
@@ -115,7 +115,7 @@ export function RiderDashboard() {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Rider Delivery Terminal</h1>
-              <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50 text-[10px]">
+              <Badge variant="outline" className="border-success text-success bg-success-soft text-[10px]">
                 On Duty
               </Badge>
             </div>
@@ -130,9 +130,9 @@ export function RiderDashboard() {
             variant="outline"
             size="sm"
             onClick={() => setIsCashModalOpen(true)}
-            className="h-9 px-3 gap-1.5 border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 text-xs font-semibold"
+            className="h-9 px-3 gap-1.5 border-warning text-warning  hover:bg-warning-soft text-xs font-semibold"
           >
-            <Wallet className="h-4 w-4 text-amber-600" />
+            <Wallet className="h-4 w-4 text-warning" />
             Cash: ৳{cashSummary.pendingHandIn.toLocaleString()}
           </Button>
 
@@ -153,15 +153,15 @@ export function RiderDashboard() {
 
       {/* Demo Switcher Alert if Forbidden or Empty */}
       {error && (
-        <Card className="border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-4">
+        <Card className="border-warning bg-warning-soft  p-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
             <div className="flex items-start gap-2.5">
-              <UserCheck className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <UserCheck className="h-5 w-5 text-warning shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-amber-900 dark:text-amber-200">
+                <p className="font-semibold text-warning ">
                   Rider Authentication Required
                 </p>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                <p className="text-xs text-warning  mt-0.5">
                   You are currently logged in with a non-rider account. Switch to the demo rider profile to test deliveries.
                 </p>
               </div>
@@ -170,7 +170,7 @@ export function RiderDashboard() {
               size="sm"
               onClick={handleDemoRiderLogin}
               disabled={isLoggingIn}
-              className="bg-amber-600 hover:bg-amber-700 text-white text-xs whitespace-nowrap self-end sm:self-center"
+              className="bg-warning hover:bg-warning text-primary-foreground text-xs whitespace-nowrap self-end sm:self-center"
             >
               {isLoggingIn ? "Switching..." : "Login as Demo Rider"}
             </Button>
@@ -180,43 +180,43 @@ export function RiderDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-3.5 flex items-center justify-between">
             <div>
               <p className="text-[11px] font-medium text-muted-foreground uppercase">Out For Delivery</p>
-              <h3 className="text-xl font-bold mt-0.5 text-amber-600">{outCount}</h3>
+              <h3 className="text-xl font-bold mt-0.5 text-warning">{outCount}</h3>
             </div>
-            <div className="p-2 bg-amber-100 dark:bg-amber-950 text-amber-600 rounded-lg">
+            <div className="p-2 bg-warning-soft  text-warning rounded-lg">
               <Truck className="h-4 w-4" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-3.5 flex items-center justify-between">
             <div>
               <p className="text-[11px] font-medium text-muted-foreground uppercase">Pending Run</p>
-              <h3 className="text-xl font-bold mt-0.5 text-blue-600">{assignedCount}</h3>
+              <h3 className="text-xl font-bold mt-0.5 text-info">{assignedCount}</h3>
             </div>
-            <div className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-600 rounded-lg">
+            <div className="p-2 bg-info-soft  text-info rounded-lg">
               <Clock className="h-4 w-4" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-3.5 flex items-center justify-between">
             <div>
               <p className="text-[11px] font-medium text-muted-foreground uppercase">Completed</p>
-              <h3 className="text-xl font-bold mt-0.5 text-emerald-600">{completedCount}</h3>
+              <h3 className="text-xl font-bold mt-0.5 text-success">{completedCount}</h3>
             </div>
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 rounded-lg">
+            <div className="p-2 bg-success-soft  text-success rounded-lg">
               <CheckCircle2 className="h-4 w-4" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-3.5 flex items-center justify-between">
             <div>
               <p className="text-[11px] font-medium text-muted-foreground uppercase">Cash Collected</p>

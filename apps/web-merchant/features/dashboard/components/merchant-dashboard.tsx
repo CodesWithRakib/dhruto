@@ -10,7 +10,6 @@ import {
   CardDescription,
   CardContent,
   Button,
-  Badge,
 } from "@dhruto/ui";
 import {
   PackagePlus,
@@ -25,6 +24,9 @@ import {
 } from "lucide-react";
 import { useGetMerchantDashboardQuery } from "../../merchants/api/merchants.api";
 import { useAppSelector } from "../../../store/hooks";
+import { MERCHANT_ROUTES } from "@/config/routes";
+import { KpiCard } from "@/components/data-display/kpi-card";
+import { StatusBadge } from "@/components/data-display/status-badge";
 
 export function MerchantDashboard() {
   const t = useTranslations("Index");
@@ -44,226 +46,185 @@ export function MerchantDashboard() {
   const recentParcels = data?.data?.recentParcels || [];
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b">
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex flex-col justify-between gap-4 border-b border-border pb-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-h1 text-foreground">
             {user ? `${user.name} — ${t("dashboardTitle")}` : t("dashboardTitle")}
           </h1>
-          <p className="text-muted-foreground mt-1">{t("dashboardSubtitle")}</p>
+          <p className="mt-1 text-muted-foreground">{t("dashboardSubtitle")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/track">
+          <Link href={MERCHANT_ROUTES.parcels}>
             <Button variant="outline" className="flex items-center gap-2">
-              <PackageSearch className="h-4 w-4" />
+              <PackageSearch className="h-4 w-4" aria-hidden="true" />
               {t("trackParcel")}
             </Button>
           </Link>
-          <Link href="/bookings/new">
+          <Link href={MERCHANT_ROUTES.createBooking}>
             <Button className="flex items-center gap-2">
-              <PackagePlus className="h-4 w-4" />
+              <PackagePlus className="h-4 w-4" aria-hidden="true" />
               {t("bookNew")}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {/* Total Shipments */}
-        <Card className="border-primary/20 bg-card">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardDescription className="text-xs uppercase font-semibold">
-                {t("kpiTotal")}
-              </CardDescription>
-              <div className="p-1.5 bg-primary/10 text-primary rounded-lg">
-                <Truck className="h-4 w-4" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold">
-              {isLoading ? "..." : stats.totalOrders}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        {/* Pending Pickup */}
-        <Card className="border-amber-500/20 bg-card">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardDescription className="text-xs uppercase font-semibold">
-                {t("kpiPending")}
-              </CardDescription>
-              <div className="p-1.5 bg-amber-500/10 text-amber-600 rounded-lg">
-                <Clock className="h-4 w-4" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-amber-600">
-              {isLoading ? "..." : stats.pendingOrders}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        {/* In Transit */}
-        <Card className="border-blue-500/20 bg-card">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardDescription className="text-xs uppercase font-semibold">
-                {t("kpiInTransit")}
-              </CardDescription>
-              <div className="p-1.5 bg-blue-500/10 text-blue-600 rounded-lg">
-                <TrendingUp className="h-4 w-4" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-blue-600">
-              {isLoading ? "..." : stats.inTransitOrders}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        {/* Delivered */}
-        <Card className="border-emerald-500/20 bg-card">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardDescription className="text-xs uppercase font-semibold">
-                {t("kpiDelivered")}
-              </CardDescription>
-              <div className="p-1.5 bg-emerald-500/10 text-emerald-600 rounded-lg">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-emerald-600">
-              {isLoading ? "..." : stats.deliveredOrders}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-
-        {/* Collected COD */}
-        <Card className="border-indigo-500/20 bg-card col-span-2 md:col-span-1">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardDescription className="text-xs uppercase font-semibold">
-                {t("kpiCod")}
-              </CardDescription>
-              <div className="p-1.5 bg-indigo-500/10 text-indigo-600 rounded-lg">
-                <Receipt className="h-4 w-4" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-foreground">
-              ৳{isLoading ? "..." : stats.collectedCodAmount.toLocaleString()}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+      {/* KPI cards — horizontally scrollable on the smallest screens. */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
+        <KpiCard
+          label={t("kpiTotal")}
+          value={isLoading ? "…" : stats.totalOrders}
+          icon={Truck}
+          tone="primary"
+        />
+        <KpiCard
+          label={t("kpiPending")}
+          value={isLoading ? "…" : stats.pendingOrders}
+          icon={Clock}
+          tone="warning"
+        />
+        <KpiCard
+          label={t("kpiInTransit")}
+          value={isLoading ? "…" : stats.inTransitOrders}
+          icon={TrendingUp}
+          tone="info"
+        />
+        <KpiCard
+          label={t("kpiDelivered")}
+          value={isLoading ? "…" : stats.deliveredOrders}
+          icon={CheckCircle2}
+          tone="success"
+        />
+        <KpiCard
+          label={t("kpiCod")}
+          value={isLoading ? "…" : `৳${stats.collectedCodAmount.toLocaleString()}`}
+          icon={Receipt}
+          tone="neutral"
+          className="col-span-2 md:col-span-1"
+        />
       </div>
 
-      {/* Recent Shipments Section */}
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
+      {/* Recent shipments */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-4">
           <div>
-            <CardTitle className="text-lg font-bold">{t("recentOrders")}</CardTitle>
-            <CardDescription>Live pipeline of your most recent bookings.</CardDescription>
+            <CardTitle className="text-h3 text-foreground">{t("recentOrders")}</CardTitle>
+            <CardDescription>{t("recentOrdersSubtitle")}</CardDescription>
           </div>
-          <Link href="/parcels">
-            <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs">
+          <Link href={MERCHANT_ROUTES.parcels}>
+            <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-caption">
               {t("viewAll")}
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </Link>
         </CardHeader>
 
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground text-sm">
-              Loading recent shipments...
-            </div>
+            <p className="p-8 text-center text-body-sm text-muted-foreground">
+              {t("loadingRecent")}
+            </p>
           ) : recentParcels.length === 0 ? (
-            <div className="p-12 text-center space-y-3">
-              <div className="p-3 bg-muted w-fit rounded-full mx-auto text-muted-foreground">
-                <RotateCcw className="h-6 w-6" />
+            <div className="space-y-3 p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-muted-foreground">
+                <RotateCcw className="h-5 w-5" aria-hidden="true" />
               </div>
-              <p className="text-muted-foreground font-medium text-sm">
-                No shipments recorded yet. Create your first parcel booking to begin shipping.
+              <p className="font-medium text-body-sm text-muted-foreground">
+                {t("emptyRecent")}
               </p>
-              <Link href="/bookings/new">
-                <Button size="sm" className="mt-2">
-                  <PackagePlus className="h-4 w-4 mr-2" />
+              <Link href={MERCHANT_ROUTES.createBooking}>
+                <Button size="sm" className="mt-1">
+                  <PackagePlus className="mr-2 h-4 w-4" aria-hidden="true" />
                   {t("bookNew")}
                 </Button>
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-muted-foreground uppercase bg-muted/40 border-b">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">Tracking ID</th>
-                    <th className="px-4 py-3 font-semibold">Recipient</th>
-                    <th className="px-4 py-3 font-semibold">Destination</th>
-                    <th className="px-4 py-3 font-semibold">COD Amount</th>
-                    <th className="px-4 py-3 font-semibold">Status</th>
-                    <th className="px-4 py-3 font-semibold text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {recentParcels.map((parcel) => (
-                    <tr key={parcel.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 font-mono font-medium text-foreground">
-                        <Link
-                          href={`/parcels/${parcel.id}`}
-                          className="hover:underline text-primary"
-                        >
-                          {parcel.trackingCode}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">
-                          {parcel.recipientName}
-                        </div>
-                        <div className="text-xs text-muted-foreground font-mono">
-                          {parcel.recipientPhone}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {parcel.district}
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-foreground">
-                        ৳{parcel.codAmount}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge
-                          variant={
-                            parcel.status === "DELIVERED"
-                              ? "success"
-                              : parcel.status === "CREATED"
-                                ? "outline"
-                                : "default"
-                          }
-                          className="text-xs"
-                        >
-                          {parcel.status}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link href={`/parcels/${parcel.id}/label`}>
-                            <Button variant="ghost" size="sm" className="h-8 text-xs">
-                              Label
-                            </Button>
-                          </Link>
-                          <Link href={`/parcels/${parcel.id}`}>
-                            <Button variant="outline" size="sm" className="h-8 text-xs">
-                              View
-                            </Button>
-                          </Link>
-                        </div>
-                      </td>
+            <>
+              {/* Desktop table */}
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full text-left text-table">
+                  <thead className="border-b border-border bg-surface-muted text-caption uppercase text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold">{t("colTracking")}</th>
+                      <th className="px-4 py-3 font-semibold">{t("colRecipient")}</th>
+                      <th className="px-4 py-3 font-semibold">{t("colDestination")}</th>
+                      <th className="px-4 py-3 font-semibold">{t("colCod")}</th>
+                      <th className="px-4 py-3 font-semibold">{t("colStatus")}</th>
+                      <th className="px-4 py-3 text-right font-semibold">{t("colAction")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {recentParcels.map((parcel) => (
+                      <tr key={parcel.id} className="transition-colors hover:bg-surface-muted">
+                        <td className="px-4 py-3 font-mono font-medium">
+                          <Link
+                            href={MERCHANT_ROUTES.parcel(parcel.id)}
+                            className="text-primary hover:underline"
+                          >
+                            {parcel.trackingCode}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-foreground">{parcel.recipientName}</p>
+                          <p className="font-mono text-caption text-muted-foreground">
+                            {parcel.recipientPhone}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{parcel.district}</td>
+                        <td className="px-4 py-3 font-semibold tabular-nums text-foreground">
+                          ৳{parcel.codAmount}
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge status={parcel.status} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link href={MERCHANT_ROUTES.parcelLabel(parcel.id)}>
+                              <Button variant="ghost" size="sm" className="h-8 text-caption">
+                                {t("label")}
+                              </Button>
+                            </Link>
+                            <Link href={MERCHANT_ROUTES.parcel(parcel.id)}>
+                              <Button variant="outline" size="sm" className="h-8 text-caption">
+                                {t("view")}
+                              </Button>
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile cards */}
+              <ul className="divide-y divide-border md:hidden">
+                {recentParcels.map((parcel) => (
+                  <li key={parcel.id} className="space-y-2 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link
+                        href={MERCHANT_ROUTES.parcel(parcel.id)}
+                        className="font-mono text-body font-medium text-primary hover:underline"
+                      >
+                        {parcel.trackingCode}
+                      </Link>
+                      <StatusBadge status={parcel.status} />
+                    </div>
+                    <p className="text-body-sm text-foreground">{parcel.recipientName}</p>
+                    <div className="flex items-center justify-between text-caption text-muted-foreground">
+                      <span>{parcel.district}</span>
+                      <span className="font-semibold tabular-nums text-foreground">
+                        ৳{parcel.codAmount}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </CardContent>
       </Card>

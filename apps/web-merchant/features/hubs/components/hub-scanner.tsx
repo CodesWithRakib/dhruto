@@ -118,7 +118,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
   return (
     <div className="space-y-6">
       {/* Scanner Mode Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-card border shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-card border ">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
@@ -172,7 +172,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
         >
           {soundEnabled ? (
             <>
-              <Volume2 className="h-4 w-4 text-emerald-600" />
+              <Volume2 className="h-4 w-4 text-success" />
               <span>Audio Beep On</span>
             </>
           ) : (
@@ -216,7 +216,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
       )}
 
       {/* Barcode Scanner Input Card */}
-      <Card className="shadow-md border-primary/20">
+      <Card className=" border-primary/20">
         <CardHeader className="pb-3 border-b bg-muted/20">
           <div className="flex items-center justify-between">
             <div>
@@ -261,8 +261,8 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
 
           {/* Last Result Alert Banner */}
           {lastResult && (
-            <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100 flex items-start gap-3 transition-all animate-in fade-in">
-              <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-success-soft  border border-success  text-success  flex items-start gap-3 transition-all animate-in fade-in">
+              <CheckCircle2 className="h-6 w-6 text-success  flex-shrink-0 mt-0.5" />
               <div className="space-y-1 flex-1">
                 <div className="flex items-center justify-between">
                   <p className="font-bold text-sm font-mono">{lastResult.barcode}</p>
@@ -270,11 +270,11 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
                     {lastResult.currentStatus}
                   </Badge>
                 </div>
-                <p className="text-xs text-emerald-800 dark:text-emerald-200">
+                <p className="text-xs text-success ">
                   {lastResult.message}
                 </p>
                 {lastResult.routingInfo?.destinationHubName && (
-                  <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                  <p className="text-[11px] font-medium text-success ">
                     Destination: {lastResult.routingInfo.destinationHubName}
                   </p>
                 )}
@@ -285,7 +285,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
       </Card>
 
       {/* Live Recent Scans Log */}
-      <Card className="shadow-sm">
+      <Card className="">
         <CardHeader className="pb-3 border-b">
           <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
             Recent Scans Stream

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Merchant Booking Flow Smoke Test", () => {
   test("should render booking page and form elements properly", async ({ page }) => {
-    await page.goto("/bookings/new");
+    await page.goto("/merchant/bookings/new");
 
     // Verify page title
     await expect(page.locator("h1")).toContainText("Book a Parcel");

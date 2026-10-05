@@ -18,6 +18,7 @@ import { useLoginMutation } from "../api/auth.api";
 import { useAppDispatch } from "../../../store/hooks";
 import { setCredentials } from "../../../store/auth.slice";
 import { getApiErrorMessage } from "../../../lib/api-error";
+import { homeForRole } from "@/config/roles";
 import { toast } from "sonner";
 
 export function LoginForm() {
@@ -61,8 +62,8 @@ export function LoginForm() {
           }),
         );
         toast.success(`Welcome back, ${res.data.user.name}!`);
-        // `/` is now the public site; merchants land on their dashboard.
-        router.push("/dashboard");
+        // Route each role to its own application surface.
+        router.replace(homeForRole(res.data.user.role).href);
       }
     } catch (err) {
       const message = getApiErrorMessage(

@@ -71,7 +71,7 @@ export function HubOperationsView() {
   return (
     <div className="space-y-6">
       {/* Top Banner & Hub Selector */}
-      <div className="bg-card border rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="bg-card border rounded-2xl p-6  flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="flex items-start sm:items-center gap-4">
           <div className="p-3.5 bg-primary/10 text-primary rounded-xl shrink-0">
             <Warehouse className="h-8 w-8" />
@@ -79,7 +79,7 @@ export function HubOperationsView() {
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-2xl font-bold tracking-tight">Hub Operations Center</h1>
-              <Badge variant="outline" className="border-emerald-400 text-emerald-600 bg-emerald-50 text-xs">
+              <Badge variant="outline" className="border-success text-success bg-success-soft text-xs">
                 Live Terminal
               </Badge>
             </div>
@@ -97,7 +97,7 @@ export function HubOperationsView() {
             <select
               value={currentHub?.id || ""}
               onChange={(e) => setSelectedHubId(e.target.value)}
-              className="w-full sm:w-72 font-semibold text-sm border-2 border-primary/20 bg-background rounded-xl px-4 py-2.5 shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
+              className="w-full sm:w-72 font-semibold text-sm border-2 border-primary/20 bg-background rounded-xl px-4 py-2.5  focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
             >
               {hubs.map((hub) => (
                 <option key={hub.id} value={hub.id}>

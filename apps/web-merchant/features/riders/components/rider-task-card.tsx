@@ -45,16 +45,16 @@ export function RiderTaskCard({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ASSIGNED_TO_RIDER":
-        return <Badge variant="outline" className="border-blue-400 text-blue-600 bg-blue-50 text-[11px]">Ready for Pickup</Badge>;
+        return <Badge variant="outline" className="border-info text-info bg-info-soft text-[11px]">Ready for Pickup</Badge>;
       case "OUT_FOR_DELIVERY":
-        return <Badge variant="outline" className="border-amber-400 text-amber-600 bg-amber-50 text-[11px] animate-pulse">Out for Delivery</Badge>;
+        return <Badge variant="outline" className="border-warning text-warning bg-warning-soft text-[11px] animate-pulse">Out for Delivery</Badge>;
       case "DELIVERED":
       case "CASH_PENDING":
-        return <Badge variant="outline" className="border-emerald-400 text-emerald-600 bg-emerald-50 text-[11px]">Delivered</Badge>;
+        return <Badge variant="outline" className="border-success text-success bg-success-soft text-[11px]">Delivered</Badge>;
       case "DELIVERY_ATTEMPTED":
-        return <Badge variant="outline" className="border-rose-400 text-rose-600 bg-rose-50 text-[11px]">Attempt Failed</Badge>;
+        return <Badge variant="outline" className="border-danger text-danger bg-danger-soft text-[11px]">Attempt Failed</Badge>;
       case "RESCHEDULED":
-        return <Badge variant="outline" className="border-purple-400 text-purple-600 bg-purple-50 text-[11px]">Rescheduled</Badge>;
+        return <Badge variant="outline" className="border-primary text-primary bg-primary-soft text-[11px]">Rescheduled</Badge>;
       default:
         return <Badge variant="secondary" className="text-[11px]">{status}</Badge>;
     }
@@ -65,7 +65,7 @@ export function RiderTaskCard({
   )}`;
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow border-muted">
+    <Card className=" hover: transition-shadow border-muted">
       <CardContent className="p-4 space-y-3">
         {/* Top: Tracking code + Status */}
         <div className="flex justify-between items-center gap-2">
@@ -88,11 +88,11 @@ export function RiderTaskCard({
           <div className="flex justify-between items-start">
             <h4 className="font-bold text-sm text-foreground">{task.recipientName}</h4>
             {task.codAmount > 0 ? (
-              <Badge className="bg-amber-600 text-white font-mono font-bold text-xs">
+              <Badge className="bg-warning text-primary-foreground font-mono font-bold text-xs">
                 COD: ৳{task.codAmount.toLocaleString()}
               </Badge>
             ) : (
-              <Badge variant="outline" className="border-emerald-500 text-emerald-600 text-[10px]">
+              <Badge variant="outline" className="border-success text-success text-[10px]">
                 Prepaid
               </Badge>
             )}
@@ -117,7 +117,7 @@ export function RiderTaskCard({
               href={`tel:${task.recipientPhone}`}
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border text-xs font-medium bg-muted/30 hover:bg-muted transition-colors text-foreground"
             >
-              <Phone className="h-3 w-3 text-emerald-600" />
+              <Phone className="h-3 w-3 text-success" />
               Call
             </a>
 
@@ -127,7 +127,7 @@ export function RiderTaskCard({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border text-xs font-medium bg-muted/30 hover:bg-muted transition-colors text-foreground"
             >
-              <Navigation className="h-3 w-3 text-blue-600" />
+              <Navigation className="h-3 w-3 text-info" />
               Maps
             </a>
 
@@ -150,7 +150,7 @@ export function RiderTaskCard({
                 size="sm"
                 onClick={() => onStartDelivery(task.id)}
                 disabled={isStarting}
-                className="h-8 text-xs gap-1.5 bg-blue-600 hover:bg-blue-700 text-white"
+                className="h-8 text-xs gap-1.5 bg-info hover:bg-info text-primary-foreground"
               >
                 <Play className="h-3.5 w-3.5" />
                 Start Delivery
@@ -163,7 +163,7 @@ export function RiderTaskCard({
                   size="sm"
                   variant="outline"
                   onClick={() => onFail(task)}
-                  className="h-8 text-xs border-amber-400 text-amber-600 hover:bg-amber-50 gap-1"
+                  className="h-8 text-xs border-warning text-warning hover:bg-warning-soft gap-1"
                 >
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Issue
@@ -172,7 +172,7 @@ export function RiderTaskCard({
                 <Button
                   size="sm"
                   onClick={() => onComplete(task)}
-                  className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                  className="h-8 text-xs bg-success hover:bg-success text-primary-foreground gap-1.5"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Deliver
@@ -181,7 +181,7 @@ export function RiderTaskCard({
             )}
 
             {(task.status === "DELIVERED" || task.status === "CASH_PENDING") && (
-              <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+              <span className="text-xs text-success font-semibold flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Delivered
               </span>

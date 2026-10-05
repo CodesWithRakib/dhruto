@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button, Card, CardTitle, CardDescription } from "@dhruto/ui";
 import { Printer, ArrowLeft, AlertCircle, Truck } from "lucide-react";
 import { useGetShippingLabelQuery } from "../api/parcels.api";
+import { useRouteBase } from "@/config/route-base";
 
 interface ShippingLabelViewProps {
   parcelId: string;
@@ -13,6 +14,7 @@ interface ShippingLabelViewProps {
 
 export function ShippingLabelView({ parcelId }: ShippingLabelViewProps) {
   const t = useTranslations("ShippingLabel");
+  const routes = useRouteBase();
   const { data, isLoading, error } = useGetShippingLabelQuery(parcelId);
 
   if (isLoading) {
@@ -30,7 +32,7 @@ export function ShippingLabelView({ parcelId }: ShippingLabelViewProps) {
         <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-2" />
         <CardTitle className="text-lg">Label Generation Failed</CardTitle>
         <CardDescription>Could not retrieve label for shipment "{parcelId}".</CardDescription>
-        <Link href="/parcels" className="mt-4 inline-block">
+        <Link href={routes.parcels} className="mt-4 inline-block">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             {t("back")}
@@ -46,20 +48,21 @@ export function ShippingLabelView({ parcelId }: ShippingLabelViewProps) {
     <div className="max-w-xl mx-auto space-y-6">
       {/* Screen Control Bar */}
       <div className="flex items-center justify-between print:hidden">
-        <Link href={`/parcels/${parcelId}`}>
+        <Link href={routes.parcel(parcelId)}>
           <Button variant="ghost" size="sm" className="flex items-center gap-1.5">
             <ArrowLeft className="h-4 w-4" />
             {t("back")}
           </Button>
         </Link>
-        <Button onClick={() => window.print()} className="flex items-center gap-2 shadow-sm">
+        <Button onClick={() => window.print()} className="flex items-center gap-2">
           <Printer className="h-4 w-4" />
           {t("print")}
         </Button>
       </div>
 
       {/* 4x6 Physical Thermal Label Container */}
-      <div className="bg-white text-black p-6 border-2 border-black rounded-lg shadow-lg max-w-[420px] mx-auto print:max-w-full print:shadow-none print:border-none print:p-0 font-sans">
+      {/* Physical 4x6 thermal label: black-on-white is intentional (print artifact). */}
+      <div className="mx-auto max-w-[420px] rounded-lg border-2 border-black bg-white p-6 font-sans text-black print:max-w-full print:border-none print:p-0">
         {/* Label Header */}
         <div className="flex items-center justify-between border-b-2 border-black pb-3">
           <div className="flex items-center gap-1.5">

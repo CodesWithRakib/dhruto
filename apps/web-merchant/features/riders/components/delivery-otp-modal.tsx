@@ -64,11 +64,11 @@ export function DeliveryOtpModal({ task, onClose, onSuccess }: DeliveryOtpModalP
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-emerald-500/30">
+    <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-md  border-success">
         <CardHeader className="border-b pb-4 flex flex-row items-start justify-between">
           <div>
-            <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
+            <CardTitle className="text-lg flex items-center gap-2 text-success">
               <CheckCircle2 className="h-5 w-5" />
               Complete Delivery
             </CardTitle>
@@ -106,7 +106,7 @@ export function DeliveryOtpModal({ task, onClose, onSuccess }: DeliveryOtpModalP
             <div>
               <label className="text-sm font-semibold flex items-center justify-between mb-1.5">
                 <span className="flex items-center gap-1.5">
-                  <KeyRound className="h-4 w-4 text-emerald-600" />
+                  <KeyRound className="h-4 w-4 text-success" />
                   Customer Delivery OTP
                 </span>
                 {task.deliveryOtp && (
@@ -130,13 +130,13 @@ export function DeliveryOtpModal({ task, onClose, onSuccess }: DeliveryOtpModalP
 
             {/* COD Cash Collection */}
             {task.codAmount > 0 ? (
-              <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10">
-                <label className="text-xs font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-1.5 mb-1.5">
+              <div className="p-3.5 rounded-xl border border-warning bg-warning-soft">
+                <label className="text-xs font-semibold text-warning  flex items-center gap-1.5 mb-1.5">
                   <DollarSign className="h-4 w-4" />
                   COD Cash to Collect
                 </label>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold font-mono text-amber-600">৳</span>
+                  <span className="text-xl font-bold font-mono text-warning">৳</span>
                   <Input
                     type="number"
                     value={collectedAmount}
@@ -151,7 +151,7 @@ export function DeliveryOtpModal({ task, onClose, onSuccess }: DeliveryOtpModalP
                 </p>
               </div>
             ) : (
-              <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-medium flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-success-soft text-success text-xs font-medium flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" />
                 Prepaid Parcel — No Cash Collection Required
               </div>
@@ -179,7 +179,7 @@ export function DeliveryOtpModal({ task, onClose, onSuccess }: DeliveryOtpModalP
                 type="submit"
                 size="sm"
                 disabled={isLoading}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                className="bg-success hover:bg-success text-primary-foreground gap-1.5"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 {isLoading ? "Verifying..." : "Confirm & Deliver"}

@@ -22,65 +22,65 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
     switch (type) {
       case WalletTransactionType.COD_CREDIT:
         return {
-          bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+          bg: "bg-success-soft text-success border-success",
           icon: ArrowDownLeft,
           prefix: "+",
-          amountColor: "text-emerald-400 font-bold",
+          amountColor: "text-success font-bold",
           label: "COD Received",
         };
       case WalletTransactionType.DELIVERY_FEE:
         return {
-          bg: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+          bg: "bg-danger-soft text-danger border-danger",
           icon: ArrowUpRight,
           prefix: "-",
-          amountColor: "text-rose-400 font-medium",
+          amountColor: "text-danger font-medium",
           label: "Delivery Charge",
         };
       case WalletTransactionType.PAYOUT_DEBIT:
         return {
-          bg: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+          bg: "bg-warning-soft text-warning border-warning",
           icon: ArrowUpRight,
           prefix: "-",
-          amountColor: "text-amber-400 font-semibold",
+          amountColor: "text-warning font-semibold",
           label: "Payout Withdrawal",
         };
       case WalletTransactionType.ADJUSTMENT_CREDIT:
         return {
-          bg: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+          bg: "bg-info-soft text-info border-info",
           icon: ArrowDownLeft,
           prefix: "+",
-          amountColor: "text-blue-400 font-semibold",
+          amountColor: "text-info font-semibold",
           label: "Adjustment Refund",
         };
       default:
         return {
-          bg: "bg-slate-800 text-slate-300 border-slate-700",
+          bg: "bg-surface-muted text-foreground border-border",
           icon: ReceiptText,
           prefix: "",
-          amountColor: "text-slate-300",
+          amountColor: "text-foreground",
           label: type,
         };
     }
   };
 
   return (
-    <div className="rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 overflow-hidden shadow-2xl">
+    <div className="rounded-3xl bg-surface-muted backdrop-blur-xl border border-border overflow-hidden ">
       {/* Table Header & Filters */}
-      <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h4 className="text-lg font-bold text-white flex items-center gap-2">
-            <ReceiptText className="w-5 h-5 text-emerald-400" />
+          <h4 className="text-lg font-bold text-primary-foreground flex items-center gap-2">
+            <ReceiptText className="w-5 h-5 text-success" />
             Wallet Statement & Audit Ledger
           </h4>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Complete immutable log of all Cash on Delivery collections, delivery charges, and disbursements.
           </p>
         </div>
 
         {/* Filter Chips */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted border border-border text-xs text-muted-foreground">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <span>Filter:</span>
           </div>
 
@@ -95,8 +95,8 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
               onClick={() => setFilterType(tab.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 filterType === tab.id
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
-                  : "bg-slate-950/40 text-slate-400 border border-slate-800/80 hover:border-slate-700 hover:text-slate-200"
+                  ? "bg-success-soft text-success border border-success "
+                  : "bg-surface-muted text-muted-foreground border border-border hover:border-border hover:text-foreground"
               }`}
             >
               {tab.label}
@@ -107,8 +107,8 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
 
       {/* Content Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-slate-300">
-          <thead className="bg-slate-950/70 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+        <table className="w-full text-left text-sm text-foreground">
+          <thead className="bg-surface-muted text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
             <tr>
               <th className="px-6 py-4 font-semibold">Date & Time</th>
               <th className="px-6 py-4 font-semibold">Type</th>
@@ -117,20 +117,20 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
               <th className="px-6 py-4 font-semibold text-right">Balance After</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60">
+          <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-xs">
+                <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-xs">
                   Loading ledger transactions...
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center justify-center text-slate-400">
-                    <ReceiptText className="w-10 h-10 text-slate-600 mb-2" />
-                    <p className="font-semibold text-slate-300">No transactions recorded yet</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <ReceiptText className="w-10 h-10 text-muted-foreground mb-2" />
+                    <p className="font-semibold text-foreground">No transactions recorded yet</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Completed parcel deliveries and payout withdrawals will appear in this ledger.
                     </p>
                   </div>
@@ -143,10 +143,10 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                 const dateObj = new Date(tx.createdAt);
 
                 return (
-                  <tr key={tx.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
+                  <tr key={tx.id} className="hover:bg-surface-muted transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
                       <div>{dateObj.toLocaleDateString()}</div>
-                      <div className="text-[11px] text-slate-500">{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                      <div className="text-[11px] text-muted-foreground">{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -157,12 +157,12 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                     </td>
 
                     <td className="px-6 py-4">
-                      <div className="text-xs text-slate-200 font-medium">{tx.description}</div>
+                      <div className="text-xs text-foreground font-medium">{tx.description}</div>
                       {tx.referenceId && (
                         <div className="mt-1">
                           <Link
                             href={`/tracking?q=${tx.referenceId}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400/90 hover:text-emerald-300 underline"
+                            className="inline-flex items-center gap-1 text-[11px] font-mono text-success hover:text-success underline"
                           >
                             <span>Ref: {tx.referenceId}</span>
                             <ExternalLink className="w-3 h-3" />
@@ -175,7 +175,7 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                       {badge.prefix}৳{Number(tx.amount).toLocaleString()}
                     </td>
 
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-mono font-semibold text-slate-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-mono font-semibold text-foreground">
                       ৳{Number(tx.balanceAfter).toLocaleString()}
                     </td>
                   </tr>

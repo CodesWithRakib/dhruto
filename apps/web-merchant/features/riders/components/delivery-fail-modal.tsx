@@ -59,11 +59,11 @@ export function DeliveryFailModal({ task, onClose, onSuccess }: DeliveryFailModa
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-amber-500/30">
+    <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-md  border-warning">
         <CardHeader className="border-b pb-4 flex flex-row items-start justify-between">
           <div>
-            <CardTitle className="text-lg flex items-center gap-2 text-amber-600">
+            <CardTitle className="text-lg flex items-center gap-2 text-warning">
               <AlertTriangle className="h-5 w-5" />
               Report Delivery Issue / Reschedule
             </CardTitle>

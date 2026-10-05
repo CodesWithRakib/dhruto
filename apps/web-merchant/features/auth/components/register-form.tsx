@@ -18,6 +18,7 @@ import { useRegisterMutation } from "../api/auth.api";
 import { useAppDispatch } from "../../../store/hooks";
 import { setCredentials } from "../../../store/auth.slice";
 import { getApiErrorMessage } from "../../../lib/api-error";
+import { homeForRole } from "@/config/roles";
 import { toast } from "sonner";
 
 export function RegisterForm() {
@@ -64,8 +65,8 @@ export function RegisterForm() {
           }),
         );
         toast.success(`Merchant account created! Welcome, ${res.data.user.name}.`);
-        // `/` is now the public site; new merchants land on their dashboard.
-        router.push("/dashboard");
+        // New merchants land on their own dashboard.
+        router.replace(homeForRole(res.data.user.role).href);
       }
     } catch (err) {
       const message = getApiErrorMessage(

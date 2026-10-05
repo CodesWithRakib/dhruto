@@ -115,17 +115,17 @@ export function SmartAddressParser({
   const getZoneLabel = (zone: string) => {
     switch (zone) {
       case "INSIDE_DHAKA":
-        return { label: "Inside Dhaka (Same Day / Next Day)", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+        return { label: "Inside Dhaka (Same Day / Next Day)", color: "text-success bg-success-soft border-success" };
       case "DHAKA_SUBURB":
-        return { label: "Dhaka Suburb (Gazipur / Narayanganj)", color: "text-amber-700 bg-amber-50 border-amber-200" };
+        return { label: "Dhaka Suburb (Gazipur / Narayanganj)", color: "text-warning bg-warning-soft border-warning" };
       case "OUTSIDE_DHAKA":
       default:
-        return { label: "Outside Dhaka (National Inter-District)", color: "text-blue-700 bg-blue-50 border-blue-200" };
+        return { label: "Outside Dhaka (National Inter-District)", color: "text-info bg-info-soft border-info" };
     }
   };
 
   return (
-    <Card className="shadow-sm border-primary/20">
+    <Card className=" border-primary/20">
       <CardHeader className="bg-primary/5 border-b border-primary/10">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
@@ -285,7 +285,7 @@ export function SmartAddressParser({
 
               {/* Suggested Corrections */}
               {result.suggestedCorrections && result.suggestedCorrections.length > 0 && (
-                <div className="p-3 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs space-y-1">
+                <div className="p-3 rounded-md bg-warning-soft border border-warning text-warning  text-xs space-y-1">
                   <div className="flex items-center gap-1.5 font-semibold">
                     <AlertTriangle className="h-3.5 w-3.5" />
                     <span>Typo Auto-Corrections & Recommendations:</span>
@@ -307,7 +307,7 @@ export function SmartAddressParser({
                 onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy Parsed"}
               </Button>
 

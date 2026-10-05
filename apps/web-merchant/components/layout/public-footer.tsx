@@ -4,6 +4,7 @@ import * as React from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher, Logo } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
+import { MERCHANT_ROUTES } from "@/config/routes";
 
 interface FooterLink {
   href: string;
@@ -46,7 +47,7 @@ const FOOTER_SECTIONS: { labelKey: string; links: FooterLink[] }[] = [
     links: [
       { href: "/login", labelKey: "signIn" },
       { href: "/register", labelKey: "register" },
-      { href: "/dashboard", labelKey: "dashboard" },
+      { href: MERCHANT_ROUTES.dashboard, labelKey: "dashboard" },
     ],
   },
 ];

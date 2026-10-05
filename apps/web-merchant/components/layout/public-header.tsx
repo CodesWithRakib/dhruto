@@ -5,8 +5,8 @@ import { Menu, X, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, LanguageSwitcher, Logo } from "@dhruto/ui";
 import { Link, usePathname } from "@/lib/navigation";
-import { isActiveRoute } from "@/lib/nav-config";
-import { homeForRole } from "@/lib/roles";
+import { isActiveRoute } from "@/config/routes";
+import { homeForRole } from "@/config/roles";
 import { useAppSelector } from "@/store/hooks";
 import { cn } from "@/lib/cn";
 
@@ -45,7 +45,7 @@ export function PublicHeader() {
 
   const home = homeForRole(user?.role);
   const ctaHref = isAuthenticated ? home.href : "/login";
-  const ctaLabel = isAuthenticated ? home.labelKey : "signIn";
+  const ctaLabel = isAuthenticated ? "openApp" : "signIn";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">

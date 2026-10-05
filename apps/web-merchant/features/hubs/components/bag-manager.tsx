@@ -182,7 +182,7 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
       )}
 
       {/* Bags Table */}
-      <Card className="shadow-md border-primary/20">
+      <Card className=" border-primary/20">
         <CardContent className="p-0 overflow-x-auto">
           {isLoading ? (
             <div className="p-8 text-center text-xs text-muted-foreground">
@@ -293,7 +293,7 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                             size="sm"
                             onClick={() => handleReceive(bag.id)}
                             disabled={isReceiving}
-                            className="h-7 text-[10px] flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="h-7 text-[10px] flex items-center gap-1 bg-success hover:bg-success text-primary-foreground"
                           >
                             <CheckCircle2 className="h-3 w-3" />
                             Receive & Unpack

@@ -1,0 +1,191 @@
+import {
+  Bike,
+  LayoutDashboard,
+  Package,
+  PlusCircle,
+  Search,
+  Sparkles,
+  Warehouse,
+  Wallet,
+  Webhook,
+  type LucideIcon,
+} from "lucide-react";
+import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
+import type { AppRole } from "./roles";
+
+/**
+ * Dhruto — Centralized navigation configuration.
+ * ------------------------------------------------------------------
+ * Navigation is declared per role, not filtered from one global list with
+ * scattered `role === "..."` checks. A role's route group, its sidebar, its
+ * mobile drawer and its bottom bar all read from here.
+ */
+export interface NavItem {
+  /** Locale-relative href — the i18n `Link` prefixes the active locale. */
+  href: string;
+  /** Key relative to the `Nav` namespace. */
+  labelKey: string;
+  icon: LucideIcon;
+}
+
+export interface NavGroup {
+  /** Optional group heading key, relative to the `Nav` namespace. */
+  labelKey?: string;
+  items: NavItem[];
+}
+
+const TRACKING_ITEM: NavItem = {
+  href: PUBLIC_ROUTES.tracking,
+  labelKey: "tracking",
+  icon: Search,
+};
+
+/** Secondary navigation for each role (desktop sidebar + mobile drawer). */
+export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
+  MERCHANT: [
+    {
+      labelKey: "groupOverview",
+      items: [
+        {
+          href: MERCHANT_ROUTES.dashboard,
+          labelKey: "overview",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      labelKey: "groupShipments",
+      items: [
+        {
+          href: MERCHANT_ROUTES.createBooking,
+          labelKey: "createBooking",
+          icon: PlusCircle,
+        },
+        { href: MERCHANT_ROUTES.parcels, labelKey: "parcels", icon: Package },
+        TRACKING_ITEM,
+      ],
+    },
+    {
+      labelKey: "groupFinance",
+      items: [
+        { href: MERCHANT_ROUTES.finance, labelKey: "finance", icon: Wallet },
+      ],
+    },
+    {
+      labelKey: "groupOperations",
+      items: [
+        {
+          href: MERCHANT_ROUTES.intelligence,
+          labelKey: "intelligence",
+          icon: Sparkles,
+        },
+      ],
+    },
+    {
+      labelKey: "groupDeveloper",
+      items: [
+        { href: MERCHANT_ROUTES.webhooks, labelKey: "webhooks", icon: Webhook },
+      ],
+    },
+  ],
+  ADMIN: [
+    {
+      labelKey: "groupOverview",
+      items: [
+        { href: ADMIN_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
+      ],
+    },
+    {
+      labelKey: "groupOperations",
+      items: [
+        { href: ADMIN_ROUTES.parcels, labelKey: "parcels", icon: Package },
+        { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
+        { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
+      ],
+    },
+    {
+      labelKey: "groupFinance",
+      items: [
+        { href: ADMIN_ROUTES.finance, labelKey: "finance", icon: Wallet },
+      ],
+    },
+    {
+      labelKey: "groupNetwork",
+      items: [TRACKING_ITEM],
+    },
+  ],
+  HUB_MANAGER: [
+    {
+      labelKey: "groupOperations",
+      items: [
+        { href: HUB_ROUTES.dashboard, labelKey: "hub", icon: Warehouse },
+      ],
+    },
+    {
+      labelKey: "groupNetwork",
+      items: [TRACKING_ITEM],
+    },
+  ],
+  RIDER: [
+    {
+      labelKey: "groupOverview",
+      items: [
+        { href: RIDER_ROUTES.dashboard, labelKey: "rider", icon: Bike },
+      ],
+    },
+    {
+      labelKey: "groupNetwork",
+      items: [TRACKING_ITEM],
+    },
+  ],
+  CUSTOMER: [
+    {
+      labelKey: "groupNetwork",
+      items: [TRACKING_ITEM],
+    },
+  ],
+};
+
+/**
+ * Primary mobile bottom-bar items per role. Empty means the role relies on the
+ * hamburger drawer instead of a persistent bar (surfaces with a single route).
+ */
+const BOTTOM_HREFS: Record<AppRole, string[]> = {
+  MERCHANT: [
+    MERCHANT_ROUTES.dashboard,
+    MERCHANT_ROUTES.parcels,
+    MERCHANT_ROUTES.createBooking,
+    MERCHANT_ROUTES.finance,
+  ],
+  ADMIN: [
+    ADMIN_ROUTES.dashboard,
+    ADMIN_ROUTES.parcels,
+    ADMIN_ROUTES.finance,
+    ADMIN_ROUTES.hub,
+  ],
+  HUB_MANAGER: [HUB_ROUTES.dashboard, PUBLIC_ROUTES.tracking],
+  RIDER: [RIDER_ROUTES.dashboard, PUBLIC_ROUTES.tracking],
+  CUSTOMER: [],
+};
+
+function allItems(role: AppRole): NavItem[] {
+  return NAV_BY_ROLE[role].flatMap((group) => group.items);
+}
+
+/** Sidebar / drawer navigation for a role. */
+export function navForRole(role: AppRole): NavGroup[] {
+  return NAV_BY_ROLE[role] ?? NAV_BY_ROLE.MERCHANT;
+}
+
+/** Bottom-bar items for a role, resolved from the role's flattened config. */
+export function bottomNavForRole(role: AppRole): NavItem[] {
+  const items = allItems(role);
+  return BOTTOM_HREFS[role]
+    .map((href) => items.find((item) => item.href === href))
+    .filter((item): item is NavItem => Boolean(item));
+}
+
+/** True when a role has routes beyond the bottom bar (drives the "More" tab). */
+export function hasMoreForRole(role: AppRole): boolean {
+  return allItems(role).length > bottomNavForRole(role).length;
+}

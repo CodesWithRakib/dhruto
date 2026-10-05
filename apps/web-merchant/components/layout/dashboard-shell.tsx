@@ -2,21 +2,30 @@
 
 import * as React from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, MoreHorizontal, X } from "lucide-react";
 import { Button, LanguageSwitcher, Logo } from "@dhruto/ui";
 import { Link, usePathname, useRouter } from "@/lib/navigation";
 import {
   bottomNavForRole,
-  isActiveRoute,
+  hasMoreForRole,
   navForRole,
-  BOTTOM_NAV_ROLES,
   type NavItem,
-} from "@/lib/nav-config";
-import { asAppRole } from "@/lib/roles";
+} from "@/config/navigation";
+import {
+  asAppRole,
+  canAccessSection,
+  homeForRole,
+  roleConfigFor,
+  type AppSection,
+} from "@/config/roles";
+import { isActiveRoute } from "@/config/routes";
 import { cn } from "@/lib/cn";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/auth.slice";
 import { NotificationBell } from "@/components/notification-bell";
+
+/** Dashboard sections that render inside this shell. */
+type DashboardSection = Extract<AppSection, "merchant" | "admin" | "hub" | "rider">;
 
 function NavLinks({
   items,
@@ -59,24 +68,58 @@ function NavLinks({
   );
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  section,
+}: {
+  children: React.ReactNode;
+  section: DashboardSection;
+}) {
   const t = useTranslations("Nav");
   const locale = useLocale();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const pathname = usePathname();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  // Guards must not run during SSR (the store is not hydrated yet).
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   const role = asAppRole(user?.role);
+  const roleConfig = roleConfigFor(role);
   const groups = navForRole(role);
   const bottomItems = bottomNavForRole(role);
-  const showBottomNav = BOTTOM_NAV_ROLES.includes(role);
+  const showMore = hasMoreForRole(role);
+  const showBottomNav = bottomItems.length > 0;
 
+  // Close the drawer whenever the route changes.
   React.useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
+
+  // Client-side guard: unauthenticated -> login; wrong section -> role home.
+  React.useEffect(() => {
+    if (!mounted) return;
+    if (!isAuthenticated) {
+      router.replace("/login");
+      return;
+    }
+    if (!canAccessSection(role, section)) {
+      router.replace(homeForRole(role).href);
+    }
+  }, [mounted, isAuthenticated, role, section, router]);
+
+  // Escape closes the mobile drawer.
+  React.useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -88,16 +131,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
         <div className="flex h-16 items-center border-b border-border px-5">
-          <Link href="/" aria-label="Dhruto">
+          <Link href="/" aria-label="Dhruto" className="rounded-md">
             <Logo size="sm" />
           </Link>
         </div>
-        <nav aria-label={t("dashboardLabel")} className="flex-1 overflow-y-auto p-3">
+        <nav aria-label={t("primaryLabel")} className="flex-1 overflow-y-auto p-3">
           {groups.map((group) => (
             <div key={group.labelKey ?? group.items[0]?.href} className="mb-4">
               {group.labelKey ? (
-                <p className="px-3 pb-1.5 text-caption font-semibold uppercasetracking-wider text-muted-foreground">
-                    {t(group.labelKey)}
+                <p className="px-3 pb-1.5 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t(group.labelKey)}
                 </p>
               ) : null}
               <NavLinks items={group.items} />
@@ -108,7 +151,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-surface px-4 sm:px-6">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
@@ -121,6 +164,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <Link href="/" aria-label="Dhruto" className="lg:hidden">
               <Logo size="sm" markOnly />
             </Link>
+            <span className="hidden truncate text-h4 text-foreground lg:block">
+              {t(roleConfig.labelKey)}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -154,9 +200,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </main>
 
         {/* Mobile bottom navigation — role specific, safe-area aware. */}
-        {showBottomNav && bottomItems.length > 0 ? (
+        {showBottomNav ? (
           <nav
-            aria-label={t("dashboardLabel")}
+            aria-label={t("primaryLabel")}
             className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe lg:hidden"
           >
             <ul className="mx-auto flex max-w-md items-stretch justify-around px-1">
@@ -179,6 +225,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </li>
                 );
               })}
+              {showMore ? (
+                <li className="flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setDrawerOpen(true)}
+                    aria-haspopup="dialog"
+                    className="flex min-h-[56px] w-full flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-caption font-medium text-muted-foreground"
+                  >
+                    <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+                    <span className="truncate">{t("more")}</span>
+                  </button>
+                </li>
+              ) : null}
             </ul>
           </nav>
         ) : null}
@@ -195,7 +254,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={t("dashboardLabel")}
+            aria-label={t("primaryLabel")}
             className="absolute inset-y-0 left-0 w-[min(20rem,85vw)] overflow-y-auto border-r border-border bg-surface"
           >
             <div className="flex h-16 items-center justify-between border-b border-border px-4">
@@ -209,11 +268,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <nav aria-label={t("dashboardLabel")} className="p-3 pb-safe">
+            <nav aria-label={t("primaryLabel")} className="p-3 pb-safe">
               {groups.map((group) => (
                 <div key={group.labelKey ?? group.items[0]?.href} className="mb-4">
                   {group.labelKey ? (
-                    <p className="px-3 pb-1.5 text-caption font-semibold uppercase tracking-wider text-muted">
+                    <p className="px-3 pb-1.5 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                       {t(group.labelKey)}
                     </p>
                   ) : null}
@@ -224,6 +283,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   />
                 </div>
               ))}
+              <div className="mt-2 border-t border-border pt-2">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex h-12 w-full items-center gap-2.5 rounded-md px-3 text-body font-medium text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                >
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                  {t("signOut")}
+                </button>
+              </div>
             </nav>
           </div>
         </div>

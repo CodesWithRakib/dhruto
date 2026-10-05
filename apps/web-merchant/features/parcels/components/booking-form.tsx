@@ -110,7 +110,7 @@ export function BookingForm() {
   if (createdParcel) {
     const normalized = (createdParcel as any).normalizedAddress;
     return (
-      <Card className="max-w-2xl mx-auto border-primary/20 shadow-md">
+      <Card className="max-w-2xl mx-auto border-primary/20 ">
         <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
           <div className="flex items-center space-x-3">
             <CheckCircle2 className="h-8 w-8 text-primary flex-shrink-0" />
@@ -186,7 +186,7 @@ export function BookingForm() {
               <div className="col-span-full border-t pt-3 mt-1 bg-primary/5 rounded-lg p-3 space-y-1.5 border border-primary/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                    <Sparkles className="h-3.5 w-3.5 text-warning" />
                     <span>Cognitive Intelligence Normalized</span>
                   </div>
                   <Badge variant="outline" className="text-[10px] bg-background">
@@ -198,7 +198,7 @@ export function BookingForm() {
                   {normalized.riskTier && (
                     <span>
                       RTO Risk:{" "}
-                      <strong className={normalized.riskTier === "LOW" ? "text-emerald-600" : normalized.riskTier === "MEDIUM" ? "text-amber-600" : "text-rose-600"}>
+                      <strong className={normalized.riskTier === "LOW" ? "text-success" : normalized.riskTier === "MEDIUM" ? "text-warning" : "text-danger"}>
                         {normalized.riskTier} ({normalized.rtoProbability ?? 0}%)
                       </strong>
                     </span>
@@ -234,7 +234,7 @@ export function BookingForm() {
   }
 
   return (
-    <Card className="max-w-2xl mx-auto shadow-sm">
+    <Card className="max-w-2xl mx-auto ">
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
@@ -255,7 +255,7 @@ export function BookingForm() {
             onClick={() => setShowSmartFill(!showSmartFill)}
             className="flex items-center gap-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5"
           >
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            <Sparkles className="h-3.5 w-3.5 text-warning" />
             {showSmartFill ? "Hide Smart Auto-Fill" : "✨ Smart Address Auto-Fill"}
           </Button>
         </div>
@@ -267,7 +267,7 @@ export function BookingForm() {
           <div className="mb-6 p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <Sparkles className="h-3.5 w-3.5 text-warning" />
                 AI Address Extractor & Normalizer
               </span>
               <span className="text-[11px] text-muted-foreground font-medium">
@@ -303,7 +303,7 @@ export function BookingForm() {
             {parsedMeta && (
               <div className="flex items-center justify-between text-xs pt-1 border-t border-primary/10">
                 <div className="flex items-center gap-2 text-foreground font-medium">
-                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  <Check className="h-3.5 w-3.5 text-success" />
                   <span>
                     Detected: <strong>{parsedMeta.thana}</strong>, <strong>{parsedMeta.district}</strong>
                     {parsedMeta.postalCode && ` (${parsedMeta.postalCode})`}
@@ -387,7 +387,7 @@ export function BookingForm() {
 
             {/* Live Risk Badge if evaluated */}
             {riskProfile && (
-              <div className={`p-3 rounded-lg border flex items-center justify-between text-xs ${riskProfile.riskTier === "LOW" ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" : riskProfile.riskTier === "MEDIUM" ? "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300" : "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"}`}>
+              <div className={`p-3 rounded-lg border flex items-center justify-between text-xs ${riskProfile.riskTier === "LOW" ? "bg-success-soft border-success text-success  " : riskProfile.riskTier === "MEDIUM" ? "bg-warning-soft border-warning text-warning  " : "bg-danger-soft border-danger text-danger  "}`}>
                 <div className="flex items-center gap-2">
                   {riskProfile.riskTier === "LOW" ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
                   <span>

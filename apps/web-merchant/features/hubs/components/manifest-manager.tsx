@@ -127,11 +127,11 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "CREATED":
-        return <Badge variant="outline" className="border-amber-400 text-amber-600 bg-amber-50">Ready to Depart</Badge>;
+        return <Badge variant="outline" className="border-warning text-warning bg-warning-soft">Ready to Depart</Badge>;
       case "DISPATCHED":
-        return <Badge variant="outline" className="border-blue-400 text-blue-600 bg-blue-50">In Transit</Badge>;
+        return <Badge variant="outline" className="border-info text-info bg-info-soft">In Transit</Badge>;
       case "RECEIVED":
-        return <Badge variant="outline" className="border-emerald-400 text-emerald-600 bg-emerald-50">Arrived</Badge>;
+        return <Badge variant="outline" className="border-success text-success bg-success-soft">Arrived</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -140,7 +140,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
   return (
     <div className="space-y-6">
       {/* Header & Action */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-xl border shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-xl border ">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Truck className="h-6 w-6 text-primary" />
@@ -166,7 +166,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
 
       {/* Manifest Creation Form Card */}
       {isCreating && (
-        <Card className="border-primary/30 shadow-md">
+        <Card className="border-primary/30 ">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
@@ -251,7 +251,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
 
                 {availableBags.length === 0 ? (
                   <div className="p-4 rounded-lg bg-muted/40 border text-center text-sm text-muted-foreground">
-                    <AlertCircle className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+                    <AlertCircle className="h-5 w-5 mx-auto mb-1 text-warning" />
                     No sealed bags found at this hub. Seal open transit bags in the Bag Consolidation Station first.
                   </div>
                 ) : (
@@ -264,7 +264,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
                           onClick={() => toggleBagSelection(bag.id)}
                           className={`cursor-pointer p-3 rounded-lg border text-sm transition-all flex items-start gap-2.5 ${
                             isSelected
-                              ? "border-primary bg-primary/10 shadow-sm"
+                              ? "border-primary bg-primary/10 "
                               : "border-border bg-card hover:bg-accent/40"
                           }`}
                         >
@@ -383,7 +383,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
                               size="sm"
                               onClick={() => handleDispatch(man.id)}
                               disabled={isDispatching}
-                              className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white"
+                              className="h-8 gap-1.5 bg-info hover:bg-info text-primary-foreground"
                             >
                               <Send className="h-3.5 w-3.5" />
                               Dispatch Run
@@ -411,8 +411,8 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
 
       {/* Manifest Detail Modal */}
       {viewingManifest && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg shadow-2xl border-primary/20">
+        <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-lg  border-primary/20">
             <CardHeader className="border-b pb-4">
               <div className="flex justify-between items-start">
                 <div>

@@ -68,54 +68,54 @@ export function ReconciliationDesk() {
     <div className="space-y-6">
       {/* Live System Financial Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 backdrop-blur-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="rounded-2xl bg-surface-muted border border-border p-5 backdrop-blur-xl">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Verified COD Collections</span>
-            <Coins className="w-4 h-4 text-emerald-400" />
+            <Coins className="w-4 h-4 text-success" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-white">
+          <div className="mt-2 text-2xl font-bold text-primary-foreground">
             ৳{(summary?.totalVerifiedCod || 0).toLocaleString()}
           </div>
-          <p className="mt-1 text-[11px] text-emerald-400 flex items-center gap-1">
+          <p className="mt-1 text-[11px] text-success flex items-center gap-1">
             <Check className="w-3 h-3" /> Fully settled to merchant wallets
           </p>
         </div>
 
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 backdrop-blur-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="rounded-2xl bg-surface-muted border border-border p-5 backdrop-blur-xl">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Pending Hub Clearance</span>
-            <Receipt className="w-4 h-4 text-amber-400" />
+            <Receipt className="w-4 h-4 text-warning" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-white">
+          <div className="mt-2 text-2xl font-bold text-primary-foreground">
             ৳{(summary?.totalPendingCod || 0).toLocaleString()}
           </div>
-          <p className="mt-1 text-[11px] text-amber-400">
+          <p className="mt-1 text-[11px] text-warning">
             {summary?.pendingReconciliationsCount || 0} parcels awaiting physical hand-in
           </p>
         </div>
 
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 backdrop-blur-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="rounded-2xl bg-surface-muted border border-border p-5 backdrop-blur-xl">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Total Disbursed Payouts</span>
-            <Building2 className="w-4 h-4 text-indigo-400" />
+            <Building2 className="w-4 h-4 text-primary" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-white">
+          <div className="mt-2 text-2xl font-bold text-primary-foreground">
             ৳{(summary?.totalDisbursedPayouts || 0).toLocaleString()}
           </div>
-          <p className="mt-1 text-[11px] text-indigo-400">
+          <p className="mt-1 text-[11px] text-primary">
             Processed via bKash, Nagad & Bank
           </p>
         </div>
 
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 backdrop-blur-xl">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="rounded-2xl bg-surface-muted border border-border p-5 backdrop-blur-xl">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Platform Merchant Balances</span>
-            <ShieldCheck className="w-4 h-4 text-teal-400" />
+            <ShieldCheck className="w-4 h-4 text-success" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-white">
+          <div className="mt-2 text-2xl font-bold text-primary-foreground">
             ৳{(summary?.totalMerchantBalance || 0).toLocaleString()}
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">
+          <p className="mt-1 text-[11px] text-muted-foreground">
             Across {summary?.totalWallets || 0} active wallets
           </p>
         </div>
@@ -125,8 +125,8 @@ export function ReconciliationDesk() {
         <div
           className={`p-4 rounded-2xl text-xs flex items-center gap-2 border ${
             feedback.type === "success"
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-              : "bg-rose-500/10 border-rose-500/30 text-rose-400"
+              ? "bg-success-soft border-success text-success"
+              : "bg-danger-soft border-danger text-danger"
           }`}
         >
           {feedback.type === "success" ? (
@@ -139,14 +139,14 @@ export function ReconciliationDesk() {
       )}
 
       {/* Main Pending Cash Reconciliation Table */}
-      <div className="rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+      <div className="rounded-3xl bg-surface-muted backdrop-blur-xl border border-border overflow-hidden ">
+        <div className="p-6 border-b border-border flex items-center justify-between">
           <div>
-            <h4 className="text-lg font-bold text-white flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <h4 className="text-lg font-bold text-primary-foreground flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-success" />
               Hub Manager Cash Hand-In Desk
             </h4>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Verify physical cash collected by delivery riders. Approving will automatically record the double-entry credit and delivery fee deduction to the merchant wallet.
             </p>
           </div>
@@ -159,7 +159,7 @@ export function ReconciliationDesk() {
               refetchSummary();
             }}
             disabled={isFetching}
-            className="border-slate-800 text-slate-300 hover:bg-slate-800/80 text-xs rounded-xl flex items-center gap-1.5"
+            className="border-border text-foreground hover:bg-surface-muted text-xs rounded-xl flex items-center gap-1.5"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
             <span>Refresh Desk</span>
@@ -167,32 +167,32 @@ export function ReconciliationDesk() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/70 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-surface-muted text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
               <tr>
                 <th className="px-6 py-4 font-semibold">Tracking Code</th>
                 <th className="px-6 py-4 font-semibold">Recipient & Merchant</th>
                 <th className="px-6 py-4 font-semibold">Rider & Hub</th>
                 <th className="px-6 py-4 font-semibold text-right">COD Collected</th>
                 <th className="px-6 py-4 font-semibold text-right">Delivery Fee</th>
-                <th className="px-6 py-4 font-semibold text-right text-emerald-400">Net Merchant Credit</th>
+                <th className="px-6 py-4 font-semibold text-right text-success">Net Merchant Credit</th>
                 <th className="px-6 py-4 font-semibold text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500 text-xs">
+                  <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground text-xs">
                     Loading pending cash reconciliations...
                   </td>
                 </tr>
               ) : pendingItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-16 text-center">
-                    <div className="flex flex-col items-center justify-center text-slate-400">
-                      <CheckCircle2 className="w-10 h-10 text-emerald-500/60 mb-2" />
-                      <p className="font-semibold text-slate-200">All rider cash hand-ins are verified!</p>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                      <CheckCircle2 className="w-10 h-10 text-success mb-2" />
+                      <p className="font-semibold text-foreground">All rider cash hand-ins are verified!</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         No pending COD deposits require Hub Manager confirmation at this moment.
                       </p>
                     </div>
@@ -200,54 +200,54 @@ export function ReconciliationDesk() {
                 </tr>
               ) : (
                 pendingItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-xs text-emerald-400">
+                  <tr key={item.id} className="hover:bg-surface-muted transition-colors">
+                    <td className="px-6 py-4 font-mono font-bold text-xs text-success">
                       {item.trackingCode}
                     </td>
 
                     <td className="px-6 py-4">
-                      <div className="text-xs font-semibold text-slate-200">{item.recipientName}</div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                        <Building2 className="w-3 h-3 text-slate-500" />
+                      <div className="text-xs font-semibold text-foreground">{item.recipientName}</div>
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Building2 className="w-3 h-3 text-muted-foreground" />
                         <span>{item.merchantName}</span>
                       </div>
                     </td>
 
                     <td className="px-6 py-4">
-                      <div className="text-xs font-medium text-slate-200 flex items-center gap-1">
-                        <Bike className="w-3.5 h-3.5 text-amber-400" />
+                      <div className="text-xs font-medium text-foreground flex items-center gap-1">
+                        <Bike className="w-3.5 h-3.5 text-warning" />
                         <span>{item.riderName}</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">{item.hubName}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">{item.hubName}</div>
                     </td>
 
-                    <td className="px-6 py-4 text-right font-bold text-slate-200">
+                    <td className="px-6 py-4 text-right font-bold text-foreground">
                       ৳{item.amount.toLocaleString()}
                     </td>
 
-                    <td className="px-6 py-4 text-right text-xs text-rose-400">
+                    <td className="px-6 py-4 text-right text-xs text-danger">
                       -৳{item.deliveryFee.toLocaleString()}
                     </td>
 
-                    <td className="px-6 py-4 text-right font-bold text-emerald-400">
+                    <td className="px-6 py-4 text-right font-bold text-success">
                       ৳{item.netPayable.toLocaleString()}
                     </td>
 
                     <td className="px-6 py-4 text-center">
                       {activeLedgerId === item.id ? (
-                        <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-slate-950/80 border border-emerald-500/40">
+                        <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-surface-muted border border-success">
                           <Input
                             type="number"
                             value={actualAmount}
                             onChange={(e) => setActualAmount(e.target.value)}
-                            className="w-24 h-8 bg-slate-900 border-slate-700 text-xs text-white rounded-lg px-2"
+                            className="w-24 h-8 bg-surface-muted border-border text-xs text-primary-foreground rounded-lg px-2"
                             placeholder="Actual ৳"
                           />
                           <Button
                             size="sm"
                             disabled={isVerifying}
                             onClick={() => handleConfirmVerification(item.id)}
-                            className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 rounded-lg"
+                            className="h-8 bg-success hover:bg-success text-primary-foreground text-xs px-2.5 rounded-lg"
                           >
                             {isVerifying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Confirm"}
                           </Button>
@@ -255,7 +255,7 @@ export function ReconciliationDesk() {
                             size="sm"
                             variant="ghost"
                             onClick={() => setActiveLedgerId(null)}
-                            className="h-8 text-xs text-slate-400 hover:text-white px-2"
+                            className="h-8 text-xs text-muted-foreground hover:text-primary-foreground px-2"
                           >
                             Cancel
                           </Button>
@@ -265,7 +265,7 @@ export function ReconciliationDesk() {
                           id={`verify-cash-${item.id}`}
                           size="sm"
                           onClick={() => handleOpenVerify(item)}
-                          className="bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shadow-md shadow-emerald-950/30 flex items-center gap-1.5"
+                          className="bg-success-soft hover:bg-success text-primary-foreground text-xs px-3 py-1.5 rounded-xl font-semibold  shadow-emerald-950/30 flex items-center gap-1.5"
                         >
                           <ShieldCheck className="w-3.5 h-3.5" />
                           <span>Verify & Settle</span>
