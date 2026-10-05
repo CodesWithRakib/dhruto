@@ -295,6 +295,7 @@
     "shipments": "Shipments",
     "financials": "Financials",
     "reports": "Reports",
+    "analytics": "Analytics",
     "settings": "Settings"
   },
   "Footer": {
@@ -757,5 +758,19 @@
     "title": "You are offline",
     "description": "Dhruto needs a connection to load live parcel, scan and cash data. Reconnect and try again.",
     "goHome": "Back to home"
+  },
+  "Analytics": {
+    "title": "Executive Analytics & Operations Radar",
+    "subtitle": "Real-time fulfillment KPIs, daily delivery trends, RTO root cause diagnostics, and cash collection auditing.",
+    "kpiSuccessRate": "Delivery Success Rate",
+    "kpiRtoRate": "RTO Return Rate",
+    "kpiCollectedCod": "Collected Cash on Delivery",
+    "kpiAvgVelocity": "Average Delivery Velocity",
+    "trendsTitle": "Delivery Velocity & Volume Trends",
+    "districtsTitle": "Top Regional Delivery Destinations",
+    "rtoTitle": "RTO Analytics & Root Cause Decomposition",
+    "codFlowTitle": "COD Cashflow & Settlement Velocity",
+    "hubThroughputTitle": "Hub Sorting & Throughput Velocity",
+    "riderPerformanceTitle": "Last-Mile Rider Fleet Efficiency"
   }
 }

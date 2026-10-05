@@ -6,3 +6,4 @@ export * from "./finance/index.js";
 export * from "./notifications/index.js";
 export * from "./webhooks/index.js";
 export * from "./intelligence/index.js";
+export * from "./analytics/index.js";

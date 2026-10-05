@@ -41,6 +41,7 @@ export const MERCHANT_ROUTES = {
   parcelLabel: (id: string) => `/merchant/parcels/${id}/label`,
   finance: "/merchant/finance",
   intelligence: "/merchant/intelligence",
+  analytics: "/merchant/analytics",
   webhooks: "/merchant/developer/webhooks",
 } as const;
 
@@ -52,6 +53,7 @@ export const ADMIN_ROUTES = {
   finance: "/admin/finance",
   hub: "/admin/hub",
   rider: "/admin/rider",
+  analytics: "/admin/analytics",
 } as const;
 
 export const HUB_ROUTES = {

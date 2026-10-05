@@ -9,6 +9,7 @@ import {
   UploadCloud,
   Warehouse,
   Wallet,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -72,6 +73,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           icon: Wallet,
         },
         {
+          href: MERCHANT_ROUTES.analytics,
+          labelKey: "analytics",
+          icon: BarChart3,
+        },
+        {
           href: MERCHANT_ROUTES.intelligence,
           labelKey: "reports",
           icon: FileText,
@@ -103,6 +109,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
       labelKey: "groupFinance",
       items: [
         { href: ADMIN_ROUTES.finance, labelKey: "finance", icon: Wallet },
+        { href: ADMIN_ROUTES.analytics, labelKey: "analytics", icon: BarChart3 },
       ],
     },
     {
