@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
+import { CacheService } from '../common/cache/cache.service.js';
 import {
   Parcel,
   Rider,
@@ -41,6 +42,8 @@ export class AnalyticsService {
     private readonly bagRepo: Repository<Bag>,
     @InjectRepository(Manifest)
     private readonly manifestRepo: Repository<Manifest>,
+    @Optional()
+    private readonly cacheService?: CacheService,
   ) {}
 
   private resolveDateRange(query: AnalyticsQueryDto): { start: Date; end: Date; periodStr: string } {
@@ -60,6 +63,18 @@ export class AnalyticsService {
   }
 
   async getMerchantSummary(
+    merchantId: string,
+    query: AnalyticsQueryDto,
+  ): Promise<MerchantAnalyticsSummary> {
+    const period = query.period || (query as any).timeframe || '30d';
+    const cacheKey = `analytics:merchant:${merchantId}:${period}:${query.startDate || ''}:${query.endDate || ''}`;
+    if (this.cacheService) {
+      return this.cacheService.wrap(cacheKey, () => this.computeMerchantSummary(merchantId, query), 60);
+    }
+    return this.computeMerchantSummary(merchantId, query);
+  }
+
+  private async computeMerchantSummary(
     merchantId: string,
     query: AnalyticsQueryDto,
   ): Promise<MerchantAnalyticsSummary> {

@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from './Base.entity';
 import { Parcel } from './Parcel.entity';
 import { Rider } from './Rider.entity';
@@ -12,6 +12,9 @@ export enum CashHandInStatus {
 }
 
 @Entity('cash_ledgers')
+@Index(['riderId', 'handInStatus'])
+@Index(['hubId', 'handInStatus'])
+@Index(['collectedAt'])
 export class CashLedger extends BaseEntity {
   @Column({ name: 'parcel_id', type: 'uuid', unique: true })
   parcelId: string;

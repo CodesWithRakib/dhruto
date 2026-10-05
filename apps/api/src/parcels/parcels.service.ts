@@ -28,6 +28,7 @@ import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { WebhooksService } from "../webhooks/webhooks.service.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
+import { CacheService } from "../common/cache/cache.service.js";
 
 const STATUS_DESCRIPTIONS: Record<string, { en: string; bn: string }> = {
   [ParcelStatus.CREATED]: { en: "Booking Created", bn: "বুকিং সম্পন্ন হয়েছে" },
@@ -78,6 +79,8 @@ export class ParcelsService {
     private readonly webhooksService?: WebhooksService,
     @Optional()
     private readonly intelligenceService?: IntelligenceService,
+    @Optional()
+    private readonly cacheService?: CacheService,
   ) {}
 
   /**
@@ -445,6 +448,7 @@ export class ParcelsService {
       metadata: { riderId: rider.id },
     });
     await this.parcelStatusHistoryRepo.save(history);
+    await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
 
     this.logger.log(`Parcel ${parcel.trackingCode} assigned to rider ${rider.id}`);
 

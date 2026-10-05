@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from './Base.entity';
 import { Merchant } from './Merchant.entity';
 import { Rider } from './Rider.entity';
@@ -8,6 +8,12 @@ import { ParcelStatus } from '@dhruto/contracts';
 export { ParcelStatus };
 
 @Entity('parcels')
+@Index(['merchantId', 'status'])
+@Index(['currentHubId', 'status'])
+@Index(['currentRiderId', 'status'])
+@Index(['recipientPhone'])
+@Index(['status'])
+@Index(['createdAt'])
 export class Parcel extends BaseEntity {
   @Column({ name: 'tracking_code', type: 'varchar', length: 50, unique: true })
   trackingCode: string;

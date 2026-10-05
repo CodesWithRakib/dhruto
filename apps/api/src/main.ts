@@ -21,8 +21,10 @@ async function bootstrap() {
     }),
   );
 
-  // Global Prefix
-  app.setGlobalPrefix(apiPrefix.replace(/^\//, ""));
+  // Global Prefix (excluding root health probes for container orchestrators)
+  app.setGlobalPrefix(apiPrefix.replace(/^\//, ""), {
+    exclude: ["health", "health/(.*)"],
+  });
 
   // CORS Configuration
   app.enableCors({

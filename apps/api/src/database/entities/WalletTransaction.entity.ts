@@ -1,9 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from './Base.entity';
 import { Wallet } from './Wallet.entity';
 import { WalletTransactionType } from '@dhruto/contracts';
 
 @Entity('wallet_transactions')
+@Index(['walletId', 'createdAt'])
+@Index(['referenceType', 'referenceId'])
 export class WalletTransaction extends BaseEntity {
   @Column({ name: 'wallet_id', type: 'uuid' })
   walletId: string;

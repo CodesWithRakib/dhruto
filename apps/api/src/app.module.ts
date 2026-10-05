@@ -24,8 +24,10 @@ import { IntelligenceModule } from "./intelligence/intelligence.module.js";
 import { AnalyticsModule } from "./analytics/analytics.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 
+import { CacheModule } from "./common/cache/cache.module.js";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor.js";
+import { TelemetryInterceptor } from "./common/interceptors/telemetry.interceptor.js";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
 
 @Module({
@@ -37,6 +39,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     }),
     DatabaseModule,
     QueuesModule,
+    CacheModule,
     HealthModule,
     AuthModule,
     IdempotencyModule,
@@ -63,6 +66,10 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TelemetryInterceptor,
     },
   ],
 })

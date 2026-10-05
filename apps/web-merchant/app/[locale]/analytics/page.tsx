@@ -19,11 +19,13 @@ import { DistrictDistributionCard } from "../../../features/analytics/components
 import { RtoDeepDiveCard } from "../../../features/analytics/components/rto-deep-dive-card";
 import { CodFlowCard } from "../../../features/analytics/components/cod-flow-card";
 import { HubRiderPerformanceCard } from "../../../features/analytics/components/hub-rider-performance-card";
+import { SystemObservabilityCard } from "../../../features/observability/components/system-observability-card";
+import { Activity } from "lucide-react";
 import { type AnalyticsPeriod } from "@dhruto/contracts";
 
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState<AnalyticsPeriod>("30d");
-  const [activeTab, setActiveTab] = useState<"merchant" | "rto" | "operations">("merchant");
+  const [activeTab, setActiveTab] = useState<"merchant" | "rto" | "operations" | "scale">("merchant");
 
   const {
     data: merchantResp,
@@ -117,6 +119,15 @@ export default function AnalyticsPage() {
           <Warehouse className="h-4 w-4" />
           Hub Throughput & Fleet
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("scale")}
+          className={`pb-3 border-b-2 flex items-center gap-2 transition-colors ${activeTab === "scale" ? "border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          <Activity className="h-4 w-4" />
+          System Scale & Observability
+        </button>
       </div>
 
       {/* Tab 1: Merchant Performance & Trends */}
@@ -204,6 +215,11 @@ export default function AnalyticsPage() {
             </div>
           ) : null}
         </div>
+      )}
+
+      {/* Tab 4: System Scale & Observability */}
+      {activeTab === "scale" && (
+        <SystemObservabilityCard />
       )}
     </div>
   );

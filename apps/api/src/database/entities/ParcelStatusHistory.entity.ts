@@ -1,8 +1,10 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from './Base.entity';
 import { Parcel, ParcelStatus } from './Parcel.entity';
 
 @Entity('parcel_status_histories')
+@Index(['parcelId', 'createdAt'])
+@Index(['toStatus'])
 export class ParcelStatusHistory extends BaseEntity {
   @Column({ name: 'parcel_id', type: 'uuid' })
   parcelId: string;
