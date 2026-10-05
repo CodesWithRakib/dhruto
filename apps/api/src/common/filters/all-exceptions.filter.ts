@@ -43,12 +43,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message: "Validation failed",
         errorCode: "VALIDATION_ERROR",
         path,
+        requestId,
+        timestamp,
         errors: validationErrors,
-        meta: {
-          requestId,
-          timestamp,
-          path,
-        },
       });
       return;
     }
@@ -69,12 +66,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message: "Validation failed",
         errorCode: "VALIDATION_ERROR",
         path,
+        requestId,
+        timestamp,
         errors: validationErrors,
-        meta: {
-          requestId,
-          timestamp,
-          path,
-        },
       });
       return;
     }
@@ -105,11 +99,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message,
         errorCode,
         path,
-        meta: {
-          requestId,
-          timestamp,
-          path,
-        },
+        requestId,
+        timestamp,
       });
       return;
     }
@@ -123,11 +114,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message: "An internal server error occurred",
       errorCode: "INTERNAL_SERVER_ERROR",
       path,
-      meta: {
-        requestId,
-        timestamp,
-        path,
-      },
+      requestId,
+      timestamp,
     });
   }
 }

@@ -17,11 +17,12 @@ export const paginationMetaSchema = z.object({
 
 export type PaginationMeta = z.infer<typeof paginationMetaSchema>;
 
-export const apiResponseMetaSchema = z.object({
-  requestId: z.string(),
-  timestamp: z.string(),
+// Meta is primarily reserved for pagination info (cursor or offset)
+// requestId, timestamp, path are also optionally permitted during compilation before interceptor elevates them
+export const apiResponseMetaSchema = paginationMetaSchema.extend({
+  requestId: z.string().optional(),
+  timestamp: z.string().optional(),
   path: z.string().optional(),
-  pagination: paginationMetaSchema.optional(),
 });
 
 export type ApiResponseMeta = z.infer<typeof apiResponseMetaSchema>;
@@ -33,7 +34,9 @@ export const apiSuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) 
     message: z.string(),
     data: dataSchema,
     path: z.string().optional(),
-    meta: apiResponseMetaSchema,
+    requestId: z.string().optional(),
+    timestamp: z.string().optional(),
+    meta: apiResponseMetaSchema.optional(),
   });
 
 export const apiValidationErrorItemSchema = z.object({
@@ -50,8 +53,10 @@ export const apiErrorResponseSchema = z.object({
   message: z.string(),
   errorCode: z.string(),
   path: z.string().optional(),
+  requestId: z.string().optional(),
+  timestamp: z.string().optional(),
   errors: z.array(apiValidationErrorItemSchema).optional(),
-  meta: apiResponseMetaSchema,
+  meta: apiResponseMetaSchema.optional(),
 });
 
 export type ApiErrorResponse = z.infer<typeof apiErrorResponseSchema>;
@@ -63,6 +68,8 @@ export interface ApiResponse<T> {
   data?: T;
   errorCode?: string;
   path?: string;
+  requestId?: string;
+  timestamp?: string;
   errors?: ApiValidationErrorItem[];
-  meta: ApiResponseMeta;
+  meta?: ApiResponseMeta;
 }

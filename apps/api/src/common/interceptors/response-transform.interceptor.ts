@@ -27,11 +27,8 @@ export class ResponseTransformInterceptor implements NestInterceptor {
             message: "Success",
             data,
             path,
-            meta: {
-              requestId,
-              timestamp,
-              path,
-            },
+            requestId,
+            timestamp,
           };
         }
 
@@ -39,30 +36,28 @@ export class ResponseTransformInterceptor implements NestInterceptor {
         if ("success" in data) {
           const resObj = { ...data } as Record<string, any>;
 
-          // Ensure path is present at root
-          if (!resObj.path) {
-            resObj.path = path;
-          }
+          // Move path, requestId, timestamp directly to root
+          resObj.path = resObj.path || path;
+          resObj.requestId = resObj.requestId || resObj.meta?.requestId || requestId;
+          resObj.timestamp = resObj.timestamp || resObj.meta?.timestamp || timestamp;
 
-          // Ensure meta is present and includes path & requestId
-          if (!resObj.meta) {
-            resObj.meta = {
-              requestId,
-              timestamp,
-              path,
-            };
+          // Pagination handling in meta
+          const pagination =
+            resObj.meta?.pagination ||
+            resObj.pagination ||
+            (resObj.meta && (resObj.meta.page !== undefined || resObj.meta.total !== undefined || resObj.meta.nextCursor !== undefined)
+              ? resObj.meta
+              : undefined);
+
+          delete resObj.pagination;
+
+          if (pagination) {
+            // Clean any requestId/timestamp/path from pagination meta if present
+            const { requestId: _r, timestamp: _t, path: _p, ...cleanPagination } = pagination;
+            resObj.meta = cleanPagination;
           } else {
-            resObj.meta = {
-              requestId: resObj.meta.requestId || requestId,
-              timestamp: resObj.meta.timestamp || timestamp,
-              path: resObj.meta.path || path,
-              ...resObj.meta,
-            };
-          }
-
-          // If pagination is provided at root, lift it into meta.pagination
-          if (resObj.pagination && !resObj.meta.pagination) {
-            resObj.meta.pagination = resObj.pagination;
+            // No pagination metadata, remove or leave meta empty/undefined
+            delete resObj.meta;
           }
 
           return resObj;
@@ -75,11 +70,8 @@ export class ResponseTransformInterceptor implements NestInterceptor {
           message: "Success",
           data,
           path,
-          meta: {
-            requestId,
-            timestamp,
-            path,
-          },
+          requestId,
+          timestamp,
         };
       }),
     );

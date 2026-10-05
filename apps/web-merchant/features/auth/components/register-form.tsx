@@ -57,16 +57,20 @@ export function RegisterForm() {
       }).unwrap();
 
       if (res.success && res.data) {
+        const payloadData = res.data as any;
+        const accessToken = payloadData.tokens?.accessToken || payloadData.accessToken;
+        const refreshToken = payloadData.tokens?.refreshToken || payloadData.refreshToken;
+
         dispatch(
           setCredentials({
-            user: res.data.user,
-            accessToken: res.data.accessToken,
-            refreshToken: res.data.refreshToken,
+            user: payloadData.user,
+            accessToken,
+            refreshToken,
           }),
         );
-        toast.success(`Merchant account created! Welcome, ${res.data.user.name}.`);
+        toast.success(`Merchant account created! Welcome, ${payloadData.user.name}.`);
         // New merchants land on their own dashboard.
-        router.replace(homeForRole(res.data.user.role).href);
+        router.replace(homeForRole(payloadData.user.role).href);
       }
     } catch (err) {
       const message = getApiErrorMessage(

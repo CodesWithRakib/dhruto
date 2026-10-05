@@ -16,6 +16,13 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
+const cleanStorageToken = (val: string | null): string | null => {
+  if (!val || val === "undefined" || val === "null" || val.trim() === "") {
+    return null;
+  }
+  return val.replace(/^["']|["']$/g, "").trim();
+};
+
 const getInitialState = (): AuthState => {
   if (typeof window === "undefined") {
     return {
@@ -27,16 +34,26 @@ const getInitialState = (): AuthState => {
   }
 
   try {
-    const token = localStorage.getItem("dhruto_access_token");
-    const refreshToken = localStorage.getItem("dhruto_refresh_token");
+    const rawToken = localStorage.getItem("dhruto_access_token");
+    const rawRefreshToken = localStorage.getItem("dhruto_refresh_token");
+    const token = cleanStorageToken(rawToken);
+    const refreshToken = cleanStorageToken(rawRefreshToken);
+
     const userStr = localStorage.getItem("dhruto_user");
-    const user = userStr ? JSON.parse(userStr) : null;
+    let user: UserProfile | null = null;
+    if (userStr && userStr !== "undefined" && userStr !== "null") {
+      try {
+        user = JSON.parse(userStr);
+      } catch {
+        user = null;
+      }
+    }
 
     return {
       user,
       accessToken: token,
       refreshToken,
-      isAuthenticated: Boolean(token),
+      isAuthenticated: Boolean(token && user),
     };
   } catch {
     return {
@@ -60,15 +77,32 @@ export const authSlice = createSlice({
         refreshToken: string;
       }>,
     ) => {
+      const validToken = cleanStorageToken(action.payload.accessToken);
+      const validRefreshToken = cleanStorageToken(action.payload.refreshToken);
+
       state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
-      state.isAuthenticated = true;
+      state.accessToken = validToken;
+      state.refreshToken = validRefreshToken;
+      state.isAuthenticated = Boolean(validToken);
 
       if (typeof window !== "undefined") {
-        localStorage.setItem("dhruto_access_token", action.payload.accessToken);
-        localStorage.setItem("dhruto_refresh_token", action.payload.refreshToken);
-        localStorage.setItem("dhruto_user", JSON.stringify(action.payload.user));
+        if (validToken) {
+          localStorage.setItem("dhruto_access_token", validToken);
+        } else {
+          localStorage.removeItem("dhruto_access_token");
+        }
+
+        if (validRefreshToken) {
+          localStorage.setItem("dhruto_refresh_token", validRefreshToken);
+        } else {
+          localStorage.removeItem("dhruto_refresh_token");
+        }
+
+        if (action.payload.user) {
+          localStorage.setItem("dhruto_user", JSON.stringify(action.payload.user));
+        } else {
+          localStorage.removeItem("dhruto_user");
+        }
       }
     },
     logout: (state) => {

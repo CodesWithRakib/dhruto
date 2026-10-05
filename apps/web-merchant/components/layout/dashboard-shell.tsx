@@ -143,6 +143,18 @@ export function DashboardShell({
     router.push("/login");
   };
 
+  // Prevent flash of protected dashboard content before hydration or redirect
+  if (!mounted || !isAuthenticated || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-muted-foreground">Loading workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}

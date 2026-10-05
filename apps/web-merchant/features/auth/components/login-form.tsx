@@ -51,16 +51,20 @@ export function LoginForm() {
       }).unwrap();
 
       if (res.success && res.data) {
+        const payloadData = res.data as any;
+        const accessToken = payloadData.tokens?.accessToken || payloadData.accessToken;
+        const refreshToken = payloadData.tokens?.refreshToken || payloadData.refreshToken;
+
         dispatch(
           setCredentials({
-            user: res.data.user,
-            accessToken: res.data.accessToken,
-            refreshToken: res.data.refreshToken,
+            user: payloadData.user,
+            accessToken,
+            refreshToken,
           }),
         );
-        toast.success(`Welcome back, ${res.data.user.name}!`);
+        toast.success(`Welcome back, ${payloadData.user.name}!`);
         // Route each role to its own application surface.
-        router.replace(homeForRole(res.data.user.role).href);
+        router.replace(homeForRole(payloadData.user.role).href);
       }
     } catch (err) {
       const message = getApiErrorMessage(

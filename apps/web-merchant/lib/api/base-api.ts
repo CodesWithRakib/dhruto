@@ -16,13 +16,15 @@ export const baseApi = createApi({
 
       // Retrieve auth token from state or localStorage
       const state = getState() as any;
-      const token =
-        state?.auth?.accessToken ||
-        (typeof window !== "undefined"
-          ? localStorage.getItem("dhruto_access_token")
-          : null);
+      let token: string | null = state?.auth?.accessToken || null;
+      if (!token && typeof window !== "undefined") {
+        const stored = localStorage.getItem("dhruto_access_token");
+        if (stored && stored !== "undefined" && stored !== "null") {
+          token = stored.replace(/^["']|["']$/g, "").trim();
+        }
+      }
 
-      if (token) {
+      if (token && token !== "undefined" && token !== "null") {
         headers.set("Authorization", `Bearer ${token}`);
       }
 
