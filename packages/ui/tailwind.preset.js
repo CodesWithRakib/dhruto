@@ -53,6 +53,12 @@ module.exports = {
           "soft-foreground": "hsl(var(--primary-soft-foreground))",
         },
 
+        brand: {
+          DEFAULT: "hsl(var(--brand-green))",
+          hover: "hsl(var(--brand-green-hover))",
+          soft: "hsl(var(--primary-soft))",
+        },
+
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",

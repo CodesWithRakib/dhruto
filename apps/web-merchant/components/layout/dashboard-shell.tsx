@@ -172,10 +172,18 @@ export function DashboardShell({
           <div className="flex items-center gap-2">
             <LanguageSwitcher currentLocale={locale} label={t("language")} />
             <NotificationBell />
-            <div className="hidden items-center gap-2 sm:flex">
-              <span className="max-w-[140px] truncate text-body-sm font-medium text-foreground">
-                {user?.name ?? t("guest")}
-              </span>
+            <div className="hidden items-center gap-2.5 sm:flex border-l border-border pl-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] font-bold text-white text-xs shadow-sm">
+                {(user?.name || "M").charAt(0).toUpperCase()}
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="max-w-[150px] truncate text-xs font-bold text-foreground leading-tight">
+                  {user?.name ?? "Merchant Name"}
+                </span>
+                <span className="max-w-[150px] truncate text-[11px] text-muted-foreground leading-tight">
+                  {user?.email ?? "merchant@dhruto.com"}
+                </span>
+              </div>
             </div>
             <Button
               variant="ghost"

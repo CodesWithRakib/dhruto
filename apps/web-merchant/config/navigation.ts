@@ -1,13 +1,14 @@
 import {
   Bike,
+  FileText,
   LayoutDashboard,
   Package,
   PlusCircle,
   Search,
-  Sparkles,
+  Settings,
+  UploadCloud,
   Warehouse,
   Wallet,
-  Webhook,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -44,47 +45,42 @@ const TRACKING_ITEM: NavItem = {
 export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
   MERCHANT: [
     {
-      labelKey: "groupOverview",
       items: [
         {
           href: MERCHANT_ROUTES.dashboard,
           labelKey: "overview",
           icon: LayoutDashboard,
         },
-      ],
-    },
-    {
-      labelKey: "groupShipments",
-      items: [
         {
           href: MERCHANT_ROUTES.createBooking,
           labelKey: "createBooking",
           icon: PlusCircle,
         },
-        { href: MERCHANT_ROUTES.parcels, labelKey: "parcels", icon: Package },
-        TRACKING_ITEM,
-      ],
-    },
-    {
-      labelKey: "groupFinance",
-      items: [
-        { href: MERCHANT_ROUTES.finance, labelKey: "finance", icon: Wallet },
-      ],
-    },
-    {
-      labelKey: "groupOperations",
-      items: [
+        {
+          href: `${MERCHANT_ROUTES.createBooking}?mode=bulk`,
+          labelKey: "bulkUpload",
+          icon: UploadCloud,
+        },
+        {
+          href: MERCHANT_ROUTES.parcels,
+          labelKey: "shipments",
+          icon: Package,
+        },
+        {
+          href: MERCHANT_ROUTES.finance,
+          labelKey: "financials",
+          icon: Wallet,
+        },
         {
           href: MERCHANT_ROUTES.intelligence,
-          labelKey: "intelligence",
-          icon: Sparkles,
+          labelKey: "reports",
+          icon: FileText,
         },
-      ],
-    },
-    {
-      labelKey: "groupDeveloper",
-      items: [
-        { href: MERCHANT_ROUTES.webhooks, labelKey: "webhooks", icon: Webhook },
+        {
+          href: MERCHANT_ROUTES.webhooks,
+          labelKey: "settings",
+          icon: Settings,
+        },
       ],
     },
   ],

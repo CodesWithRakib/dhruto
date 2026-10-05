@@ -26,8 +26,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowRight,
-  RotateCcw,
-  Truck,
   Sparkles,
   ShieldCheck,
   ShieldAlert,
@@ -108,158 +106,140 @@ export function BookingForm() {
   };
 
   if (createdParcel) {
-    const normalized = (createdParcel as any).normalizedAddress;
     return (
-      <Card className="max-w-2xl mx-auto border-primary/20 ">
-        <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
-          <div className="flex items-center space-x-3">
-            <CheckCircle2 className="h-8 w-8 text-primary flex-shrink-0" />
-            <div>
-              <CardTitle className="text-xl text-foreground">
-                {t("successTitle")}
-              </CardTitle>
-              <CardDescription className="text-muted-foreground">
-                {t("successDescription")}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+      <Card className="max-w-xl mx-auto border-border shadow-lg p-6 sm:p-8 text-center">
+        {/* Big circular green checkmark with ripple */}
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 ring-8 ring-emerald-50">
+          <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+        </div>
 
-        <CardContent className="space-y-6 pt-6">
-          <div className="bg-muted/50 border border-border rounded-lg p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+        <h2 className="text-2xl font-bold text-foreground">
+          বুকিং সফল হয়েছে!
+        </h2>
+        <p className="mt-1 text-body-sm text-muted-foreground">
+          আপনার পার্সেলটি সফলভাবে বুক হয়েছে।
+        </p>
+
+        {/* Receipt Container */}
+        <div className="mt-6 rounded-xl border border-border bg-surface-muted/50 p-4 sm:p-5 text-left space-y-3">
+          <div className="flex items-center justify-between pb-3 border-b border-border">
             <div>
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {t("trackingCode")}
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                ট্র্যাকিং নম্বর
               </span>
-              <p className="text-xl font-mono font-bold text-foreground">
+              <p className="font-mono text-lg font-bold text-foreground tracking-wide">
                 {createdParcel.trackingCode}
               </p>
             </div>
-            <Badge variant="success" className="w-fit">
-              {t("status", { status: createdParcel.status })}
-            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(createdParcel.trackingCode);
+                toast.success("ট্র্যাকিং কোড কপি করা হয়েছে!");
+              }}
+              className="h-8 gap-1.5 text-xs font-medium"
+            >
+              কপি করুন
+            </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="space-y-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                {t("recipient")}
-              </span>
-              <p className="font-medium text-foreground">{createdParcel.recipientName}</p>
-              <p className="font-mono text-muted-foreground">{createdParcel.recipientPhone}</p>
+          <div className="grid grid-cols-2 gap-3 text-xs pt-1">
+            <div>
+              <span className="text-muted-foreground block font-medium">রিসিভিয়েন্ট</span>
+              <span className="font-semibold text-foreground text-body-sm">{createdParcel.recipientName}</span>
             </div>
-
-            <div className="space-y-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                {t("destination")}
-              </span>
-              <p className="font-medium text-foreground">
-                {createdParcel.thana}, {createdParcel.district}
-              </p>
-              <p className="text-muted-foreground text-xs">{createdParcel.deliveryAddress}</p>
+            <div>
+              <span className="text-muted-foreground block font-medium">মোবাইল</span>
+              <span className="font-mono font-medium text-foreground text-body-sm">{createdParcel.recipientPhone}</span>
             </div>
-
-            <div className="space-y-1 border-t pt-3">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                {t("weight")}
-              </span>
-              <p className="font-medium text-foreground">{createdParcel.weight} kg</p>
+            <div>
+              <span className="text-muted-foreground block font-medium">গন্তব্য</span>
+              <span className="font-medium text-foreground">{createdParcel.district}, {createdParcel.thana}</span>
             </div>
-
-            <div className="space-y-1 border-t pt-3">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                {t("codAmount")}
-              </span>
-              <p className="font-medium text-foreground">৳{createdParcel.codAmount}</p>
+            <div>
+              <span className="text-muted-foreground block font-medium">COD পরিমাণ</span>
+              <span className="font-bold text-foreground">৳ {createdParcel.codAmount.toLocaleString()}</span>
             </div>
-
-            <div className="space-y-1 border-t pt-3 col-span-full">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">
-                {t("deliveryCharge")}
-              </span>
-              <p className="text-lg font-bold text-foreground">
-                ৳{createdParcel.deliveryFee}
-              </p>
+            <div className="col-span-2 pt-2 border-t border-border flex justify-between items-center text-body-sm">
+              <span className="font-medium text-muted-foreground">ডেলিভারি চার্জ</span>
+              <span className="font-bold text-foreground">৳ {createdParcel.deliveryFee}</span>
             </div>
-
-            {normalized && (
-              <div className="col-span-full border-t pt-3 mt-1 bg-primary/5 rounded-lg p-3 space-y-1.5 border border-primary/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                    <Sparkles className="h-3.5 w-3.5 text-warning" />
-                    <span>Cognitive Intelligence Normalized</span>
-                  </div>
-                  <Badge variant="outline" className="text-[10px] bg-background">
-                    {normalized.confidenceScore}% Confidence ({normalized.confidenceTier})
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Zone: <strong className="text-foreground">{normalized.zone}</strong></span>
-                  {normalized.riskTier && (
-                    <span>
-                      RTO Risk:{" "}
-                      <strong className={normalized.riskTier === "LOW" ? "text-success" : normalized.riskTier === "MEDIUM" ? "text-warning" : "text-danger"}>
-                        {normalized.riskTier} ({normalized.rtoProbability ?? 0}%)
-                      </strong>
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
-        </CardContent>
+        </div>
 
-        <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 p-4">
-          <Button variant="outline" onClick={resetForm} className="flex items-center gap-2">
-            <RotateCcw className="h-4 w-4" />
-            {t("bookAnother")}
+        <div className="mt-6 space-y-3">
+          <Link href="/merchant/parcels">
+            <Button size="lg" className="w-full font-semibold h-11">
+              অর্ডার লিস্ট দেখুন
+            </Button>
+          </Link>
+          <Button variant="outline" size="lg" onClick={resetForm} className="w-full h-11">
+            আরেকটি বুকিং করুন
           </Button>
-          <div className="flex items-center gap-2">
-            <Link href={`/parcels/${createdParcel.id}`}>
-              <Button variant="outline" className="flex items-center gap-1.5">
-                <ArrowRight className="h-4 w-4" />
-                {t("viewDetails")}
-              </Button>
-            </Link>
-            <Link href={`/parcels/${createdParcel.id}/label`}>
-              <Button variant="default" className="flex items-center gap-2">
-                <Truck className="h-4 w-4" />
-                {t("printLabel")}
-              </Button>
-            </Link>
-          </div>
-        </CardFooter>
+        </div>
       </Card>
     );
   }
 
   return (
-    <Card className="max-w-2xl mx-auto ">
-      <CardHeader>
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <Package className="h-5 w-5" />
-            </div>
-            <div>
-              <CardTitle>{t("title")}</CardTitle>
-              <CardDescription>
-                {t("description")}
-              </CardDescription>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSmartFill(!showSmartFill)}
-            className="flex items-center gap-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-warning" />
-            {showSmartFill ? "Hide Smart Auto-Fill" : "✨ Smart Address Auto-Fill"}
-          </Button>
+    <div className="max-w-2xl mx-auto space-y-4">
+      {/* 3-Step Progress Indicator matching design.png */}
+      <div className="flex items-center justify-between px-6 py-3 rounded-xl border border-border bg-surface shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-sm">
+            ১
+          </span>
+          <span className="text-body-sm font-bold text-foreground">
+            বেসিক তথ্য
+          </span>
         </div>
-      </CardHeader>
+        <div className="h-[2px] flex-1 mx-3 bg-primary/20" />
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-muted text-muted-foreground text-xs font-bold">
+            ২
+          </span>
+          <span className="text-body-sm font-medium text-muted-foreground">
+            পার্সেল ডিটেইলস
+          </span>
+        </div>
+        <div className="h-[2px] flex-1 mx-3 bg-border" />
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface-muted text-muted-foreground text-xs font-bold">
+            ৩
+          </span>
+          <span className="text-body-sm font-medium text-muted-foreground">
+            রিভিউ
+          </span>
+        </div>
+      </div>
+
+      <Card className="shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center space-x-2">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <Package className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle>{t("title")}</CardTitle>
+                <CardDescription>
+                  {t("description")}
+                </CardDescription>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSmartFill(!showSmartFill)}
+              className="flex items-center gap-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-warning" />
+              {showSmartFill ? "Hide Smart Auto-Fill" : "✨ Smart Address Auto-Fill"}
+            </Button>
+          </div>
+        </CardHeader>
 
       <CardContent>
         {/* Smart Auto-Fill Drawer/Accordion */}
@@ -540,6 +520,7 @@ export function BookingForm() {
           )}
         </Button>
       </CardFooter>
-    </Card>
+      </Card>
+    </div>
   );
 }

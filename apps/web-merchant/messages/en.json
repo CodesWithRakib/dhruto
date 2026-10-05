@@ -2,18 +2,18 @@
   "Index": {
     "title": "Welcome to Dhruto",
     "description": "Enterprise Logistics Management System for Bangladesh",
-    "dashboardTitle": "Merchant Command Center",
-    "dashboardSubtitle": "Live parcel movements, COD collections, and express fulfillment tracking.",
+    "dashboardTitle": "Welcome back, Merchant!",
+    "dashboardSubtitle": "Here's what's happening with your shipments today.",
     "kpiTotal": "Total Shipments",
     "kpiPending": "Pending Pickup",
     "kpiInTransit": "In Transit",
     "kpiDelivered": "Delivered",
     "kpiCod": "Collected COD",
     "recentOrders": "Recent Shipments",
-    "viewAll": "View All Shipments",
-    "bookNew": "Book New Parcel",
+    "viewAll": "View All",
+    "bookNew": "Book Shipment",
     "trackParcel": "Track Shipment",
-    "recentOrdersSubtitle": "Live pipeline of your most recent bookings.",
+    "recentOrdersSubtitle": "Live status of your shipments today.",
     "loadingRecent": "Loading recent shipments…",
     "emptyRecent": "No shipments recorded yet. Create your first parcel booking to begin shipping.",
     "colTracking": "Tracking ID",
@@ -23,7 +23,32 @@
     "colStatus": "Status",
     "colAction": "Action",
     "label": "Label",
-    "view": "View"
+    "view": "View",
+    "totalBookings": "Total Bookings",
+    "delivered": "Delivered",
+    "inTransit": "In Transit",
+    "pending": "Pending",
+    "fromYesterday": "from yesterday",
+    "from7Days": "vs last 7 days",
+    "codSettlement": "COD Settlement",
+    "availableBalance": "Available Balance",
+    "pendingBalance": "Pending Balance",
+    "withdraw": "Withdraw",
+    "viewDetails": "View Details",
+    "deliveryPerformance": "Delivery Performance",
+    "onTimeDelivery": "On-time Delivery",
+    "last30Days": "(Last 30 days)",
+    "quickActions": "Quick Actions",
+    "createSingle": "Create Single Booking",
+    "createSingleDesc": "Add one shipment manually",
+    "bulkUpload": "Bulk Upload",
+    "bulkUploadDesc": "Upload CSV or Excel file",
+    "printLabels": "Print Labels",
+    "printLabelsDesc": "Generate shipping labels",
+    "viewReports": "View Reports",
+    "viewReportsDesc": "Download detailed reports",
+    "bannerTitle": "Fast. Secure. Reliable. Ship smarter with Dhruto",
+    "startBooking": "Start Booking"
   },
   "LocaleSwitcher": {
     "label": "Change language"
@@ -230,10 +255,10 @@
     "home": "Home",
     "tracking": "Tracking",
     "services": "Services",
-    "pricing": "Pricing",
+    "pricing": "Calculator",
     "about": "About",
-    "contact": "Contact",
-    "signIn": "Sign in",
+    "contact": "Support",
+    "signIn": "Login",
     "signOut": "Sign out",
     "language": "Change language",
     "primaryLabel": "Primary",
@@ -246,54 +271,68 @@
     "groupFinance": "Finance",
     "groupOperations": "Operations",
     "groupDeveloper": "Developer",
-    "overview": "Overview",
+    "overview": "Dashboard",
     "createBooking": "Create Booking",
-    "parcels": "Parcels",
-    "finance": "Finance & Wallet",
+    "parcels": "Shipments",
+    "finance": "Financials",
     "hub": "Hub Operations",
     "rider": "Rider Terminal",
     "intelligence": "AI Intelligence",
     "webhooks": "Webhooks",
     "more": "More",
-    "openApp": "Open dashboard",
+    "openApp": "Dashboard",
     "roleAdmin": "Admin",
     "roleMerchant": "Merchant",
     "roleHubManager": "Hub Manager",
     "roleRider": "Rider",
     "roleCustomer": "Customer",
-    "groupNetwork": "Network"
+    "groupNetwork": "Network",
+    "calculator": "Calculator",
+    "support": "Support",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "bulkUpload": "Bulk Upload",
+    "shipments": "Shipments",
+    "financials": "Financials",
+    "reports": "Reports",
+    "settings": "Settings"
   },
   "Footer": {
-    "tagline": "Bangladesh's logistics operating system — nationwide delivery, cash-on-delivery collection and merchant automation.",
+    "tagline": "Next-Gen Logistics & Courier OS",
     "company": "Company",
     "services": "Services",
     "support": "Support",
     "legal": "Legal",
     "merchant": "Merchant",
-    "about": "About Dhruto",
+    "about": "About",
     "contact": "Contact",
-    "pricing": "Pricing",
-    "tracking": "Track a parcel",
+    "pricing": "Calculator",
+    "tracking": "Tracking",
     "serviceRates": "Services & rates",
-    "faq": "Help & FAQ",
+    "faq": "FAQ",
     "contactSupport": "Contact support",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
+    "privacy": "Return Policy",
+    "terms": "Terms & Conditions",
     "signIn": "Sign in",
     "register": "Create merchant account",
     "dashboard": "Merchant dashboard",
-    "copyright": "© {year} Dhruto. All rights reserved.",
-    "operatedIn": "Operated in Bangladesh"
+    "copyright": "© 2025 Dhruto. All rights reserved. | Made with ❤️ in Bangladesh",
+    "operatedIn": "Operated in Bangladesh",
+    "quickLinks": "Quick Links",
+    "connect": "Connect with Us",
+    "career": "Careers",
+    "returnPolicy": "Return Policy"
   },
   "Home": {
     "hero": {
-      "eyebrow": "Logistics infrastructure for Bangladesh",
-      "title": "Bangladesh's smarter delivery infrastructure.",
-      "subtitle": "Dhruto helps merchants move parcels across all 64 districts — reliable pickup, hub sorting, last-mile delivery, cash-on-delivery collection and transparent settlement.",
-      "ctaPrimary": "Create a shipment",
-      "ctaSecondary": "Explore services",
-      "trackTitle": "Track a parcel",
-      "trackSubtitle": "Enter a Dhruto tracking ID to see its live journey."
+      "eyebrow": "Fastest Logistics Solution for Bangladesh",
+      "title": "Your Cargo, Our Commitment",
+      "tagline": "Fast • Safe • Reliable",
+      "subtitle": "Dhruto is the modern logistics and courier operating system for Bangladesh's e-commerce and retail supply chain. Fast deliveries, dependable service, and smart tech by your side.",
+      "ctaPrimary": "Book Now",
+      "ctaSecondary": "How It Works?",
+      "trackTitle": "Track Your Shipment",
+      "trackSubtitle": "Enter your tracking code to view live parcel updates."
     },
     "capabilities": {
       "items": [
@@ -316,33 +355,25 @@
       ]
     },
     "services": {
-      "eyebrow": "What we do",
-      "title": "Delivery services built for Bangladeshi commerce",
-      "description": "From a single parcel to daily bulk dispatch, Dhruto covers the full delivery lifecycle.",
+      "eyebrow": "Our Services",
+      "title": "Our Services",
+      "description": "Complete end-to-end logistics solutions for your growing business",
       "items": [
         {
-          "title": "Same-day delivery",
-          "description": "Time-critical parcels delivered within the city on the same day."
+          "title": "Pickup & Delivery",
+          "description": "Express door-to-door pickup from your warehouse to customer doorstep"
         },
         {
-          "title": "Nationwide delivery",
-          "description": "Door-to-door delivery to every district through our hub network."
+          "title": "COD Collection",
+          "description": "Fast cash collection with guaranteed automated wallet settlements"
         },
         {
-          "title": "Cash on delivery",
-          "description": "COD collected by riders and reconciled into your merchant wallet."
+          "title": "Smart Address Recognition",
+          "description": "Intelligent bilingual parsing for exact district, thana & geocoding"
         },
         {
-          "title": "Parcel tracking",
-          "description": "A public tracking link with a clear, bilingual status timeline."
-        },
-        {
-          "title": "Merchant automation",
-          "description": "Bulk booking, smart address parsing and API integration."
-        },
-        {
-          "title": "Returns & RTO",
-          "description": "Structured return-to-origin handling when a delivery cannot be completed."
+          "title": "Real-time Tracking",
+          "description": "Live GPS tracking and milestone timeline for merchants and buyers"
         }
       ]
     },
@@ -432,6 +463,26 @@
       "description": "Create a merchant account and start booking parcels today.",
       "primary": "Create merchant account",
       "secondary": "Talk to us"
+    },
+    "stats": {
+      "coverage": "64",
+      "coverageLabel": "District Coverage",
+      "thanas": "495+",
+      "thanasLabel": "Thana Coverage",
+      "daily": "10K+",
+      "dailyLabel": "Daily Deliveries",
+      "rate": "99.5%",
+      "rateLabel": "Success Delivery Rate"
+    },
+    "merchantBanner": {
+      "title": "Grow Your Business, We Are With You",
+      "description": "If you run an e-commerce or retail business, partner with Dhruto today and streamline your delivery operations.",
+      "cta": "Register as a Merchant"
+    },
+    "trackingBanner": {
+      "title": "Track Your Shipment",
+      "placeholder": "Enter tracking number (e.g. TRK123456789)",
+      "cta": "Track Shipment"
     }
   },
   "Services": {

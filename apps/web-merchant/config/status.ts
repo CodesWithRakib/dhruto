@@ -66,7 +66,7 @@ export const PARCEL_STATUS_CONFIG: Record<ParcelStatus, StatusConfig> = {
   },
   [ParcelStatus.OUT_FOR_DELIVERY]: {
     labelKey: "outForDelivery",
-    tone: "info",
+    tone: "warning",
     icon: Truck,
   },
   [ParcelStatus.DELIVERY_ATTEMPTED]: {

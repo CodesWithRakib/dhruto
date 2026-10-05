@@ -41,19 +41,23 @@
   --text-inverse: 0 0% 100%;
 
   /* ------------------------------------------------------------------
-   * 3. Brand / primary
+   * 3. Brand / primary — Centralized Palette (#0F5132, #0A3F26, #1E7A57)
    * ------------------------------------------------------------------ */
-  --primary: 142 72% 36%; /* #16A34A */
-  --primary-hover: 142 72% 30%; /* #15803D */
+  --primary: 152 69% 19%; /* #0F5132 — Deep Forest Green */
+  --primary-hover: 152 73% 14%; /* #0A3F26 — Forest Green Dark */
   --primary-foreground: 0 0% 100%;
-  --primary-soft: 141 84% 93%; /* #DCFCE7 */
-  --primary-soft-foreground: 142 72% 26%;
+  --primary-soft: 141 84% 93%; /* #DCFCE7 — Soft Light Green */
+  --primary-soft-foreground: 152 69% 19%;
+
+  /* Accent / mobile primary green (#10A34A) */
+  --brand-green: 142 72% 36%; /* #10A34A */
+  --brand-green-hover: 142 72% 30%; /* #15803D */
 
   /* ------------------------------------------------------------------
    * 4. Neutral / secondary
    * ------------------------------------------------------------------ */
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 157 61% 30%; /* #1E7A57 */
+  --secondary-foreground: 0 0% 100%;
 
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
@@ -64,10 +68,10 @@
   /* ------------------------------------------------------------------
    * 5. Semantic states
    * ------------------------------------------------------------------ */
-  --success: 142 72% 36%;
+  --success: 176 79% 30%; /* #108981 */
   --success-foreground: 0 0% 100%;
   --success-soft: 141 84% 93%;
-  --success-soft-foreground: 142 72% 26%;
+  --success-soft-foreground: 152 69% 19%;
 
   --warning: 38 92% 50%; /* #F59E0B */
   --warning-foreground: 0 0% 100%;

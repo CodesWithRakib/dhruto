@@ -12,11 +12,10 @@ import { cn } from "@/lib/cn";
 
 const PUBLIC_LINKS = [
   { href: "/", labelKey: "home" },
-  { href: "/track", labelKey: "tracking" },
   { href: "/services", labelKey: "services" },
-  { href: "/pricing", labelKey: "pricing" },
-  { href: "/about", labelKey: "about" },
-  { href: "/contact", labelKey: "contact" },
+  { href: "/pricing", labelKey: "calculator" },
+  { href: "/track", labelKey: "tracking" },
+  { href: "/contact", labelKey: "support" },
 ] as const;
 
 export function PublicHeader() {
@@ -45,7 +44,6 @@ export function PublicHeader() {
 
   const home = homeForRole(user?.role);
   const ctaHref = isAuthenticated ? home.href : "/login";
-  const ctaLabel = isAuthenticated ? "openApp" : "signIn";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
@@ -66,7 +64,7 @@ export function PublicHeader() {
                     className={cn(
                       "inline-flex h-9 items-center rounded-md px-3 text-body font-medium transition-colors",
                       active
-                        ? "text-primary"
+                        ? "text-primary font-semibold"
                         : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
                     )}
                   >
@@ -78,15 +76,31 @@ export function PublicHeader() {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <LanguageSwitcher currentLocale={locale} label={t("language")} />
 
-          <Link href={ctaHref} className="hidden sm:inline-flex">
-            <Button size="sm" className="h-9">
-              {isAuthenticated ? t(ctaLabel) : t("signIn")}
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <Link href={home.href} className="hidden sm:inline-flex">
+              <Button size="sm" className="h-9 px-4 font-medium">
+                {t("openApp")}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </Link>
+          ) : (
+            <div className="hidden sm:flex sm:items-center sm:gap-2">
+              <Link
+                href="/login"
+                className="inline-flex h-9 items-center rounded-md px-3 text-body font-medium text-foreground hover:bg-surface-muted transition-colors"
+              >
+                {t("signIn")}
+              </Link>
+              <Link href="/register">
+                <Button size="sm" className="h-9 px-4 rounded-full font-medium shadow-sm">
+                  {t("register")}
+                </Button>
+              </Link>
+            </div>
+          )}
 
           <button
             type="button"
@@ -132,7 +146,7 @@ export function PublicHeader() {
             <div className="pt-3 sm:hidden">
               <Link href={ctaHref} className="block">
                 <Button className="w-full">
-                  {isAuthenticated ? t(ctaLabel) : t("signIn")}
+                  {isAuthenticated ? t("openApp") : t("signIn")}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </Link>
