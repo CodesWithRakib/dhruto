@@ -27,6 +27,27 @@ export const PRE_PICKUP_RIDER_ASSIGNMENT_FROM: readonly ParcelStatus[] = [
   ParcelStatus.PICKUP_REQUESTED,
 ];
 
+/**
+ * Phase 2 hub inbound exception.
+ *
+ * The documented matrix only admits `PICKED_UP -> ORIGIN_HUB_RECEIVED`, which
+ * assumes the rider pickup leg has already been recorded. Rider pickup is a
+ * Phase 3 concern, so the origin hub must be able to receive a parcel that was
+ * physically collected but is still digitally `CREATED`/`PICKUP_REQUESTED`/
+ * `PICKUP_ASSIGNED`. Without this the hub pipeline cannot start from a
+ * merchant-created booking.
+ *
+ * Narrow by design: it only ever targets `ORIGIN_HUB_RECEIVED` and never
+ * permits a jump out of a terminal state (e.g. `DELIVERED -> ORIGIN_HUB_RECEIVED`).
+ * Remove it once the rider pickup flow lands in Phase 3.
+ */
+export const ORIGIN_HUB_INBOUND_FROM: readonly ParcelStatus[] = [
+  ParcelStatus.CREATED,
+  ParcelStatus.PICKUP_REQUESTED,
+  ParcelStatus.PICKUP_ASSIGNED,
+  ParcelStatus.PICKED_UP,
+];
+
 export const ALLOWED_PARCEL_TRANSITIONS: Readonly<
   Record<ParcelStatus, readonly ParcelStatus[]>
 > = {
@@ -80,6 +101,12 @@ export class ParcelLifecycleService {
     if (
       to === ParcelStatus.ASSIGNED_TO_RIDER &&
       PRE_PICKUP_RIDER_ASSIGNMENT_FROM.includes(from)
+    ) {
+      return true;
+    }
+    if (
+      to === ParcelStatus.ORIGIN_HUB_RECEIVED &&
+      ORIGIN_HUB_INBOUND_FROM.includes(from)
     ) {
       return true;
     }

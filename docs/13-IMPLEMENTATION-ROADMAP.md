@@ -113,28 +113,38 @@ Known gaps carried into Phase 2:
 
 ---
 
-## Phase 2 — Hub Operations
+## Phase 2 — Hub Operations (implemented)
 
 ### Backend
 
-- hubs
-- scans
-- bags
-- manifests
-- state transitions
-- hub permissions
+- hubs (`GET /hubs`, `/hubs/destinations`, `/hubs/:id`, dashboard, inventory)
+- scans (`POST /hubs/:id/scans` with idempotency keys, append-only `parcel_scans`)
+- parcel lookup (`GET /hubs/:id/parcels/:trackingCode`, operational fields only)
+- bags (`POST /hubs/:id/bags`, `GET /bags`, `/bags/:id`, add-parcel, seal)
+- manifests (`POST /hubs/:id/manifests`, `GET /hubs/:id/manifests`,
+  `/manifests/:id`, dispatch, reconciled receive)
+- exceptions (`GET /exceptions`, resolve with note)
+- state transitions via the centralized `ParcelLifecycleService`
+- hub permissions (`HubUserAssignment` + `HubPermission`, never trusted from client)
+- per-operator rate limits on scan/bag/dispatch/receive mutations
 
 ### Frontend
 
-- scanner
-- parcel operations
-- bag management
-- manifest
-- dispatch/receive
+- hub dashboard with live metrics (`/hub/dashboard`)
+- continuous scanner with idempotency, audio + text feedback (`/hub/scanner`)
+- parcel lookup + inventory (`/hub/parcels`)
+- bag management, details, sealed-membership freeze (`/hub/bags`, `/hub/bags/[id]`)
+- manifest creation, confirmed dispatch, reconciled receive (`/hub/manifests`,
+  `/hub/manifests/[id]`)
+- exception review and resolve (`/hub/exceptions`)
+- full English + Bangla catalog (166 Hub keys, parity unit-tested)
 
 ### Exit Criteria
 
-A parcel can travel through origin and destination hub workflows.
+A parcel can travel through origin and destination hub workflows. Verified by
+`apps/api/test/hubs.e2e-spec.ts` (9 tests incl. concurrency) and Playwright hub
+journeys (`hub-inbound`, `hub-bagging`, `hub-dispatch-receive`, `hub-mobile`,
+`hub-bn-spot`) run in Brave against the real backend and database.
 
 ---
 

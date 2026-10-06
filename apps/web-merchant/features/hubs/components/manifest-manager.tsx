@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Card,
   CardHeader,
@@ -10,63 +11,59 @@ import {
   Button,
   Input,
   Badge,
-  DataTable,
 } from "@dhruto/ui";
-import {
-  Truck,
-  Plus,
-  Send,
-  AlertCircle,
-  FileText,
-  User,
-  Phone,
-  Car,
-  Layers,
-  ArrowRight,
-} from "lucide-react";
+import { Truck, Plus, Send, AlertCircle, FileText, ArrowRight } from "lucide-react";
+import { BagStatus, ManifestStatus } from "@dhruto/contracts";
 import {
   useGetManifestsQuery,
   useCreateManifestMutation,
   useDispatchManifestMutation,
   useGetBagsQuery,
-  type BagListItem,
-  type HubItem,
-  type ManifestListItem,
+  useGetDestinationHubsQuery,
 } from "../api/hubs.api";
-import type { DataTableRow } from "@/lib/data-table";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { Link } from "@/lib/navigation";
+import { HUB_ROUTES } from "@/config/routes";
+import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
 
 interface ManifestManagerProps {
   currentHubId: string;
-  allHubs: HubItem[];
 }
 
-export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps) {
-  const [isCreating, setIsCreating] = useState(false);
-  const [destHubId, setDestHubId] = useState(
-    allHubs.find((h) => h.id !== currentHubId)?.id || allHubs[0]?.id || "",
-  );
-  const [vehicleNumber, setVehicleNumber] = useState("");
-  const [driverName, setDriverName] = useState("");
-  const [driverPhone, setDriverPhone] = useState("");
-  const [selectedBagIds, setSelectedBagIds] = useState<string[]>([]);
-  const [viewingManifest, setViewingManifest] = useState<ManifestListItem | null>(null);
+/** Manifest list + creation. Dispatch and receive live on the details page. */
+export function ManifestManager({ currentHubId }: ManifestManagerProps) {
+  const t = useTranslations("Hub");
+  const [isCreating, setIsCreating] = React.useState(false);
+  const [destHubId, setDestHubId] = React.useState("");
+  const [vehicleNumber, setVehicleNumber] = React.useState("");
+  const [driverName, setDriverName] = React.useState("");
+  const [driverPhone, setDriverPhone] = React.useState("");
+  const [selectedBagIds, setSelectedBagIds] = React.useState<string[]>([]);
 
   const { data: manifestsData, isLoading: isLoadingManifests, refetch: refetchManifests } =
-    useGetManifestsQuery({ hubId: currentHubId });
-  const { data: bagsData, refetch: refetchBags } = useGetBagsQuery({ hubId: currentHubId });
+    useGetManifestsQuery(currentHubId);
+  const { data: bagsData, refetch: refetchBags } = useGetBagsQuery({ hubId: currentHubId, status: BagStatus.SEALED });
+  const { data: destinationsData } = useGetDestinationHubsQuery();
 
   const [createManifestMutation, { isLoading: isCreatingManifest }] = useCreateManifestMutation();
   const [dispatchManifestMutation, { isLoading: isDispatching }] = useDispatchManifestMutation();
 
-  const manifests = manifestsData?.data || [];
-  const bags = bagsData?.data || [];
+  const manifests = manifestsData?.data ?? [];
+  const sealedBags = (bagsData?.data ?? []).filter((bag) => bag.destinationHubCode !== "");
+  const destinations = (destinationsData?.data ?? []).filter((hub) => hub.id !== currentHubId);
 
-  // Filter bags that are SEALED and destined for the currently selected destination hub
-  const availableBags = bags.filter((b: BagListItem) => {
-    return b.status === "SEALED";
-  });
+  React.useEffect(() => {
+    if (!destHubId && destinations.length > 0) {
+      setDestHubId(destinations[0]?.id ?? "");
+    }
+  }, [destinations, destHubId]);
+
+  const availableBags = sealedBags.filter((bag) =>
+    destinations.find((hub) => hub.id === destHubId)
+      ? bag.destinationHubCode === destinations.find((hub) => hub.id === destHubId)?.code
+      : true,
+  );
 
   const toggleBagSelection = (bagId: string) => {
     setSelectedBagIds((prev) =>
@@ -74,24 +71,24 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
     );
   };
 
-  const handleCreateManifest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateManifest = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!destHubId) {
-      toast.error("Please select a destination hub");
+      toast.error(t("bags.destinationRequired"));
       return;
     }
     if (!vehicleNumber.trim()) {
-      toast.error("Please enter a vehicle registration number");
+      toast.error(t("manifests.vehicleRequired"));
       return;
     }
     if (selectedBagIds.length === 0) {
-      toast.error("Please select at least one sealed transit bag");
+      toast.error(t("manifests.selectAtLeastOne"));
       return;
     }
 
     try {
       const res = await createManifestMutation({
-        originHubId: currentHubId,
+        hubId: currentHubId,
         manifest: {
           destinationHubId: destHubId,
           vehicleNumber: vehicleNumber.trim().toUpperCase(),
@@ -102,7 +99,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
       }).unwrap();
 
       if (res.success) {
-        toast.success(`Manifest created: ${res.data?.manifestCode ?? ""}`);
+        toast.success(res.data?.manifestCode ?? "");
         setIsCreating(false);
         setVehicleNumber("");
         setDriverName("");
@@ -112,7 +109,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
         refetchBags();
       }
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Failed to create manifest"));
+      toast.error(getApiErrorMessage(err, t("manifests.create")));
     }
   };
 
@@ -125,169 +122,137 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
         refetchBags();
       }
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Failed to dispatch manifest"));
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "CREATED":
-        return <Badge variant="outline" className="border-warning text-warning bg-warning-soft">Ready to Depart</Badge>;
-      case "DISPATCHED":
-        return <Badge variant="outline" className="border-info text-info bg-info-soft">In Transit</Badge>;
-      case "RECEIVED":
-        return <Badge variant="outline" className="border-success text-success bg-success-soft">Arrived</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+      toast.error(getApiErrorMessage(err, t("manifests.dispatch")));
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header & Action */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-xl border ">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Truck className="h-6 w-6 text-primary" />
-            Vehicle Line-Haul Manifests
+          <h2 className="flex items-center gap-2 text-xl font-bold">
+            <Truck className="h-6 w-6 text-primary" aria-hidden="true" />
+            {t("manifests.title")}
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Group sealed security bags, assign transport vehicles, and track inter-hub highway transit
-          </p>
+          <p className="text-xs text-muted-foreground">{t("manifests.subtitle")}</p>
         </div>
-        <Button
-          onClick={() => setIsCreating(!isCreating)}
-          className="flex items-center gap-2"
-        >
-          {isCreating ? (
-            "Cancel"
-          ) : (
+        <Button onClick={() => setIsCreating((value) => !value)} className="flex items-center gap-2">
+          {isCreating ? t("cancel") : (
             <>
-              <Plus className="h-4 w-4" /> Create Vehicle Manifest
+              <Plus className="h-4 w-4" aria-hidden="true" /> {t("manifests.create")}
             </>
           )}
         </Button>
       </div>
 
-      {/* Manifest Creation Form Card */}
-      {isCreating && (
-        <Card className="border-primary/30 ">
+      {isCreating ? (
+        <Card className="border-primary/30">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              New Line-Haul Transport Manifest
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+              {t("manifests.create")}
             </CardTitle>
-            <CardDescription>
-              Enclose sealed security bags into a vehicle run. Once dispatched, all enclosed bags and parcels move to IN_TRANSIT.
-            </CardDescription>
+            <CardDescription>{t("manifests.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreateManifest} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium mb-1 block">
-                    Destination Hub <span className="text-destructive">*</span>
+                  <label htmlFor="manifest-destination" className="mb-1 block text-sm font-medium">
+                    {t("manifests.destination")} <span className="text-danger">*</span>
                   </label>
                   <select
+                    id="manifest-destination"
                     value={destHubId}
-                    onChange={(e) => setDestHubId(e.target.value)}
-                    className="w-full border rounded-md p-2 bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
+                    onChange={(event) => {
+                      setDestHubId(event.target.value);
+                      setSelectedBagIds([]);
+                    }}
+                    className="w-full rounded-md border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary"
                     required
                   >
-                    {allHubs
-                      .filter((h) => h.id !== currentHubId)
-                      .map((h) => (
-                        <option key={h.id} value={h.id}>
-                          {h.name} ({h.code})
-                        </option>
-                      ))}
+                    {destinations.map((hub) => (
+                      <option key={hub.id} value={hub.id}>
+                        {hub.name} ({hub.code})
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-1 flex items-center gap-1.5">
-                    <Car className="h-4 w-4 text-muted-foreground" />
-                    Vehicle Registration Number <span className="text-destructive">*</span>
+                  <label htmlFor="manifest-vehicle" className="mb-1 block text-sm font-medium">
+                    {t("manifests.vehicle")} <span className="text-danger">*</span>
                   </label>
                   <Input
-                    placeholder="e.g. DM-TA-11-2049"
+                    id="manifest-vehicle"
+                    placeholder={t("manifests.vehiclePlaceholder")}
                     value={vehicleNumber}
-                    onChange={(e) => setVehicleNumber(e.target.value)}
+                    onChange={(event) => setVehicleNumber(event.target.value)}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-1 flex items-center gap-1.5">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    Driver Name (Optional)
+                  <label htmlFor="manifest-driver" className="mb-1 block text-sm font-medium">
+                    {t("manifests.driverName")}
                   </label>
                   <Input
-                    placeholder="e.g. Rafiqul Islam"
+                    id="manifest-driver"
                     value={driverName}
-                    onChange={(e) => setDriverName(e.target.value)}
+                    onChange={(event) => setDriverName(event.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-1 flex items-center gap-1.5">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    Driver Contact Phone (Optional)
+                  <label htmlFor="manifest-driver-phone" className="mb-1 block text-sm font-medium">
+                    {t("manifests.driverPhone")}
                   </label>
                   <Input
-                    placeholder="e.g. +8801712345678"
+                    id="manifest-driver-phone"
                     value={driverPhone}
-                    onChange={(e) => setDriverPhone(e.target.value)}
+                    onChange={(event) => setDriverPhone(event.target.value)}
                   />
                 </div>
               </div>
 
-              {/* Sealed Bags Multi-Selection */}
-              <div className="pt-2 border-t">
-                <label className="text-sm font-semibold mb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Layers className="h-4 w-4 text-primary" />
-                    Select Sealed Bags to Load ({selectedBagIds.length} selected)
-                  </span>
-                  <span className="text-xs font-normal text-muted-foreground">
-                    Only SEALED bags are eligible for manifest loading
-                  </span>
-                </label>
+              <div className="border-t pt-2">
+                <p className="mb-2 text-sm font-semibold">
+                  {t("manifests.selectBags", { count: selectedBagIds.length })}
+                </p>
+                <p className="mb-2 text-xs text-muted-foreground">{t("manifests.selectBagsHint")}</p>
 
                 {availableBags.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-muted/40 border text-center text-sm text-muted-foreground">
-                    <AlertCircle className="h-5 w-5 mx-auto mb-1 text-warning" />
-                    No sealed bags found at this hub. Seal open transit bags in the Bag Consolidation Station first.
+                  <div className="rounded-lg border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+                    <AlertCircle className="mx-auto mb-1 h-5 w-5 text-warning" aria-hidden="true" />
+                    {t("manifests.noSealedBags")}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-2 border rounded-lg bg-muted/20">
+                  <div className="grid max-h-56 grid-cols-1 gap-3 overflow-y-auto rounded-lg border bg-muted/20 p-2 sm:grid-cols-2 md:grid-cols-3">
                     {availableBags.map((bag) => {
                       const isSelected = selectedBagIds.includes(bag.id);
                       return (
                         <div
                           key={bag.id}
                           onClick={() => toggleBagSelection(bag.id)}
-                          className={`cursor-pointer p-3 rounded-lg border text-sm transition-all flex items-start gap-2.5 ${
-                            isSelected
-                              ? "border-primary bg-primary/10 "
-                              : "border-border bg-card hover:bg-accent/40"
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              toggleBagSelection(bag.id);
+                            }
+                          }}
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          tabIndex={0}
+                          className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 text-sm transition-all ${
+                            isSelected ? "border-primary bg-primary/10" : "border-border bg-surface"
                           }`}
                         >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {}}
-                            className="mt-0.5 rounded border-muted-foreground"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-xs font-mono truncate">{bag.bagCode}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              To: <span className="font-medium text-foreground">{bag.destinationHub}</span>
+                          <input type="checkbox" checked={isSelected} onChange={() => {}} tabIndex={-1} aria-hidden="true" className="mt-0.5 rounded" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-mono text-xs font-semibold">{bag.bagCode}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {t("bags.parcelCount", { count: bag.parcelCount })}
                             </p>
-                            <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground">
-                              <span>{bag.parcelCount} parcels</span>
-                              {bag.sealTag && <span>• Seal #{bag.sealTag}</span>}
-                            </div>
                           </div>
                         </div>
                       );
@@ -297,202 +262,119 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreating(false)}
-                >
-                  Cancel
+                <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
+                  {t("cancel")}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isCreatingManifest || selectedBagIds.length === 0}
-                  className="flex items-center gap-2"
-                >
-                  {isCreatingManifest ? "Generating..." : "Generate & Enclose Manifest"}
+                <Button type="submit" disabled={isCreatingManifest || selectedBagIds.length === 0}>
+                  {isCreatingManifest ? t("manifests.creating") : t("manifests.create")}
                 </Button>
               </div>
             </form>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
-      {/* Manifests Table */}
-      <div className="w-full space-y-4">
-        <Card className="border-border shadow-sm">
-          <CardHeader className="border-b border-border">
-            <CardTitle className="text-lg">Dispatched & Active Manifests</CardTitle>
-            <CardDescription>
-              Inter-hub vehicle line-haul dispatches originating or arriving at this terminal
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <DataTable
-          columns={[
-            {
-              accessorKey: "manifestCode",
-              header: "Manifest Code",
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <span className="font-mono font-medium text-xs">
-                  {row.original.manifestCode}
-                </span>
-              ),
-            },
-            {
-              id: "route",
-              header: "Route",
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="font-medium">{row.original.originHub}</span>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                  <span className="font-medium text-primary">{row.original.destinationHub}</span>
-                </div>
-              ),
-            },
-            {
-              id: "vehicle",
-              header: "Vehicle & Driver",
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <div className="text-xs">
-                  <div className="font-semibold">{row.original.vehicleNumber}</div>
-                  {row.original.driverName && (
-                    <div className="text-muted-foreground text-[11px]">
-                      {row.original.driverName} {row.original.driverPhone && `(${row.original.driverPhone})`}
+      <Card>
+        <CardContent className="p-0">
+          {isLoadingManifests ? (
+            <p role="status" className="p-8 text-center text-xs text-muted-foreground">
+              {t("loading")}
+            </p>
+          ) : manifests.length === 0 ? (
+            <div className="p-6">
+              <EmptyState icon={Truck} title={t("manifests.empty")} description={t("manifests.emptyDescription")} />
+            </div>
+          ) : (
+            <>
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                      <th className="px-4 py-3 font-semibold">Manifest</th>
+                      <th className="px-4 py-3 font-semibold">Route</th>
+                      <th className="px-4 py-3 font-semibold">{t("manifests.vehicle")}</th>
+                      <th className="px-4 py-3 text-center font-semibold">{t("bags.title")}</th>
+                      <th className="px-4 py-3 text-center font-semibold">{t("status")}</th>
+                      <th className="px-4 py-3 text-right font-semibold">{t("actions")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {manifests.map((manifest) => (
+                      <tr key={manifest.id}>
+                        <td className="px-4 py-3">
+                          <Link href={HUB_ROUTES.manifest(manifest.id)} className="font-mono text-xs font-semibold text-primary hover:underline">
+                            {manifest.manifestCode}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 text-xs">
+                          <span className="font-medium">{manifest.originHubName}</span>
+                          <ArrowRight className="mx-1 inline h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                          <span className="font-medium text-primary">{manifest.destinationHubName}</span>
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs">{manifest.vehicleNumber}</td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge variant="secondary" className="font-mono">
+                            {manifest.bagCount}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge variant={manifest.status === ManifestStatus.CREATED ? "secondary" : manifest.status === ManifestStatus.DISPATCHED || manifest.status === ManifestStatus.IN_TRANSIT ? "default" : "success"} className="text-[10px]">
+                            {manifest.status}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-2">
+                            {manifest.status === ManifestStatus.CREATED ? (
+                              <Button size="sm" onClick={() => handleDispatch(manifest.id)} disabled={isDispatching} className="h-8 gap-1.5">
+                                <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                                {t("manifests.dispatch")}
+                              </Button>
+                            ) : null}
+                            <Link href={HUB_ROUTES.manifest(manifest.id)}>
+                              <Button size="sm" variant="outline" className="h-8 gap-1">
+                                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                                {t("bags.details")}
+                              </Button>
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <ul className="divide-y divide-border md:hidden">
+                {manifests.map((manifest) => (
+                  <li key={manifest.id} className="space-y-2 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link href={HUB_ROUTES.manifest(manifest.id)} className="font-mono text-xs font-bold text-primary">
+                        {manifest.manifestCode}
+                      </Link>
+                      <Badge variant="secondary" className="text-[10px]">{manifest.status}</Badge>
                     </div>
-                  )}
-                </div>
-              ),
-            },
-            {
-              accessorKey: "bagCount",
-              header: () => <span className="text-center block">Bags</span>,
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <div className="text-center">
-                  <Badge variant="secondary" className="font-mono">
-                    {row.original.bagCount} bags
-                  </Badge>
-                </div>
-              ),
-            },
-            {
-              accessorKey: "status",
-              header: () => <span className="text-center block">Status</span>,
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <div className="text-center">
-                  {getStatusBadge(row.original.status)}
-                </div>
-              ),
-            },
-            {
-              accessorKey: "createdAt",
-              header: "Created",
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {new Date(row.original.createdAt).toLocaleDateString()}
-                </span>
-              ),
-            },
-            {
-              id: "actions",
-              header: () => <span className="text-right block">Actions</span>,
-              cell: ({ row }: DataTableRow<ManifestListItem>) => (
-                <div className="flex items-center justify-end gap-2">
-                  {row.original.status === "CREATED" && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleDispatch(row.original.id)}
-                      disabled={isDispatching}
-                      className="h-8 gap-1.5 bg-info hover:bg-info text-primary-foreground shadow-sm"
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      Dispatch Run
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setViewingManifest(row.original)}
-                    className="h-8 gap-1"
-                  >
-                    <FileText className="h-3.5 w-3.5" />
-                    Details
-                  </Button>
-                </div>
-              ),
-            },
-          ]}
-          data={manifests}
-          isLoading={isLoadingManifests}
-          emptyMessage="No vehicle manifests recorded yet. Create a manifest to initiate line-haul transit."
-        />
-      </div>
-
-      {/* Manifest Detail Modal */}
-      {viewingManifest && (
-        <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-lg  border-primary/20">
-            <CardHeader className="border-b pb-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-primary" />
-                    Manifest Summary Sheet
-                  </CardTitle>
-                  <CardDescription className="font-mono text-xs mt-1">
-                    {viewingManifest.manifestCode}
-                  </CardDescription>
-                </div>
-                {getStatusBadge(viewingManifest.status)}
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-4">
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-lg bg-muted/40">
-                  <span className="text-muted-foreground block text-[11px]">Origin Hub</span>
-                  <span className="font-semibold text-sm">{viewingManifest.originHub}</span>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/40">
-                  <span className="text-muted-foreground block text-[11px]">Destination Hub</span>
-                  <span className="font-semibold text-sm">{viewingManifest.destinationHub}</span>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/40">
-                  <span className="text-muted-foreground block text-[11px]">Transport Vehicle</span>
-                  <span className="font-semibold text-sm">{viewingManifest.vehicleNumber}</span>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/40">
-                  <span className="text-muted-foreground block text-[11px]">Driver</span>
-                  <span className="font-semibold text-sm">
-                    {viewingManifest.driverName || "Unassigned"}{" "}
-                    {viewingManifest.driverPhone && `(${viewingManifest.driverPhone})`}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg border bg-card text-xs flex justify-between items-center">
-                <span className="text-muted-foreground">Total Enclosed Transit Bags</span>
-                <span className="font-bold text-sm text-primary font-mono">{viewingManifest.bagCount} Bags</span>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t">
-                <Button variant="outline" onClick={() => setViewingManifest(null)}>
-                  Close
-                </Button>
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    window.print();
-                  }}
-                  className="gap-1.5"
-                >
-                  <FileText className="h-4 w-4" />
-                  Print Manifest Sheet
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+                    <p className="text-xs text-muted-foreground">
+                      {manifest.originHubName} → {manifest.destinationHubName} · {manifest.bagCount} {t("bags.title")}
+                    </p>
+                    <div className="flex gap-2">
+                      {manifest.status === ManifestStatus.CREATED ? (
+                        <Button size="sm" onClick={() => handleDispatch(manifest.id)} disabled={isDispatching} className="h-9 flex-1">
+                          <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                          {t("manifests.dispatch")}
+                        </Button>
+                      ) : null}
+                      <Link href={HUB_ROUTES.manifest(manifest.id)} className="flex-1">
+                        <Button size="sm" variant="outline" className="h-9 w-full">
+                          {t("bags.details")}
+                        </Button>
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

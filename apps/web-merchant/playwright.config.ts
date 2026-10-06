@@ -17,7 +17,7 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 15_000 },
   use: {
-    baseURL: externalBaseUrl || "http://localhost:3000",
+    baseURL: externalBaseUrl || "http://localhost:5000",
     trace: "on-first-retry",
   },
   projects: [
@@ -37,7 +37,7 @@ export default defineConfig({
     ? undefined
     : {
         command: "pnpm dev",
-        url: "http://localhost:3000",
+        url: "http://localhost:5000",
         reuseExistingServer: !process.env.CI,
         timeout: 120 * 1000,
       },

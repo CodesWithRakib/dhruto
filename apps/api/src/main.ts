@@ -12,7 +12,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
   const apiPrefix = process.env.API_PREFIX || "/api/v1";
-  const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:3000";
+  const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5000";
 
   // Security Headers
   app.use(

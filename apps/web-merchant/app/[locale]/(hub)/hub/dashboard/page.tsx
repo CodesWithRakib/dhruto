@@ -1,16 +1,12 @@
 import React from "react";
-import { HubOperationsView } from "@/features/hubs/components/hub-operations-view";
+import { HubDashboardView } from "@/features/hubs/components/hub-dashboard-view";
 
 export const metadata = {
   robots: { index: false, follow: false },
-  title: "Hub Operations Terminal | Dhruto Express",
-  description: "Terminal sorting, bag consolidation, vehicle manifests, and hub inventory operations.",
+  title: "Hub Dashboard | Dhruto",
+  description: "Live hub operations position: inbound, bags, manifests and exceptions.",
 };
 
-export default function HubPage() {
-  return (
-    <div className="max-w-7xl mx-auto space-y-6 py-6 px-4">
-      <HubOperationsView />
-    </div>
-  );
+export default function HubDashboardPage() {
+  return <HubDashboardView />;
 }

@@ -3,13 +3,16 @@ import {
   FileText,
   LayoutDashboard,
   Package,
+  PackageSearch,
   PlusCircle,
+  ScanLine,
   Search,
   Settings,
   UploadCloud,
   Warehouse,
   Wallet,
   BarChart3,
+  Truck,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -132,7 +135,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
     {
       labelKey: "groupOperations",
       items: [
-        { href: HUB_ROUTES.dashboard, labelKey: "hub", icon: Warehouse },
+        { href: HUB_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
+        { href: HUB_ROUTES.scanner, labelKey: "scanner", icon: ScanLine },
+        { href: HUB_ROUTES.parcels, labelKey: "parcels", icon: PackageSearch },
+        { href: HUB_ROUTES.bags, labelKey: "bags", icon: Package },
+        { href: HUB_ROUTES.manifests, labelKey: "manifests", icon: Truck },
       ],
     },
     {
@@ -177,7 +184,12 @@ const BOTTOM_HREFS: Record<AppRole, string[]> = {
     ADMIN_ROUTES.finance,
     ADMIN_ROUTES.hub,
   ],
-  HUB_MANAGER: [HUB_ROUTES.dashboard, PUBLIC_ROUTES.tracking],
+  HUB_MANAGER: [
+    HUB_ROUTES.dashboard,
+    HUB_ROUTES.scanner,
+    HUB_ROUTES.bags,
+    HUB_ROUTES.manifests,
+  ],
   RIDER: [RIDER_ROUTES.dashboard, PUBLIC_ROUTES.tracking],
   CUSTOMER: [],
 };

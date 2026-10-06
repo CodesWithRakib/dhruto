@@ -62,6 +62,13 @@ export const ADMIN_ROUTES = {
 
 export const HUB_ROUTES = {
   dashboard: "/hub/dashboard",
+  scanner: "/hub/scanner",
+  parcels: "/hub/parcels",
+  bags: "/hub/bags",
+  bag: (id: string) => `/hub/bags/${id}`,
+  manifests: "/hub/manifests",
+  manifest: (id: string) => `/hub/manifests/${id}`,
+  exceptions: "/hub/exceptions",
 } as const;
 
 export const RIDER_ROUTES = {

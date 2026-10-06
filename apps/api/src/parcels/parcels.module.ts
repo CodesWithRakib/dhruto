@@ -37,6 +37,8 @@ import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
     TrackingCodeService,
     RateLimitGuard,
   ],
-  exports: [ParcelsService],
+  // ParcelLifecycleService is exported so the hub module routes its status
+  // changes through the same centralized state machine (docs/08-STATE-MACHINE.md).
+  exports: [ParcelsService, ParcelLifecycleService],
 })
 export class ParcelsModule {}

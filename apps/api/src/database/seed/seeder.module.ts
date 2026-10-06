@@ -13,6 +13,7 @@ import {
   WalletTransaction,
   PayoutRequest,
   Notification,
+  HubUserAssignment,
 } from '../entities/index.js';
 import { SeederService } from './seeder.service.js';
 
@@ -30,6 +31,7 @@ import { SeederService } from './seeder.service.js';
       WalletTransaction,
       PayoutRequest,
       Notification,
+      HubUserAssignment,
     ]),
   ],
   providers: [SeederService],

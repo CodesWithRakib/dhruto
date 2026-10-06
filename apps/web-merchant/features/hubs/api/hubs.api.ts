@@ -1,162 +1,264 @@
 import { baseApi } from "../../../lib/api/base-api";
 import {
+  type AddParcelToBagDto,
+  type ApiResponse,
+  type BagDetails,
+  type BagListItem,
+  type BagStatus,
   type CreateBagDto,
-  type SealBagDto,
   type CreateManifestDto,
+  type ExceptionStatus,
   type HubScanDto,
   type HubScanResult,
-  type ApiResponse,
+  type HubScanType,
+  type HubDashboard,
+  type HubInventory,
+  type HubSummary,
+  type ManifestDetails,
+  type ManifestListItem,
+  type OperationalExceptionItem,
+  type ParcelScanItem,
+  type ReceiveManifestDto,
+  type ResolveExceptionDto,
+  type ScanOutcome,
+  type SealBagDto,
 } from "@dhruto/contracts";
 
-export interface HubItem {
-  id: string;
-  code: string;
-  name: string;
-  address: string;
-  status: string;
-}
-
-export interface HubInventoryData {
-  hub: HubItem;
-  counts: {
-    inboundCount: number;
-    receivedCount: number;
-    baggedCount: number;
-    outForDeliveryCount: number;
-    openBagsCount: number;
-  };
-  openBags: Array<{
-    id: string;
-    bagCode: string;
-    destinationHub: string;
-    status: string;
-  }>;
-  parcels: Array<{
-    id: string;
-    trackingCode: string;
-    recipientName: string;
-    recipientPhone: string;
-    district: string;
-    codAmount: number;
-    status: string;
-    updatedAt: string;
-  }>;
-}
-
 /**
- * A transit bag as returned by the hub list endpoint.
- * Phase 2 domain — typed here so the web client never falls back to `any`.
+ * Hub operations API — Phase 2.
+ * ------------------------------------------------------------------
+ * Every endpoint mirrors the real backend route in
+ * `apps/api/src/hubs/hubs.controller.ts`. The origin hub for a scoped
+ * operation always comes from the path; the backend resolves authorization
+ * from the authenticated user, never from client state.
+ *
+ * Cache discipline: server state lives in RTK Query under the `Hub` tag.
+ * Mutations that move parcels (scan, bag, dispatch, receive) also invalidate
+ * `Parcel` so merchant surfaces stay consistent without refetching the world.
  */
-export interface BagListItem {
-  id: string;
-  bagCode: string;
-  originHub: string | null;
-  destinationHub: string | null;
-  status: string;
-  sealTag: string | null;
-  parcelCount: number;
-  sealedAt: string | null;
-  dispatchedAt: string | null;
-  receivedAt: string | null;
-  createdAt: string;
+
+const HUB_TAG = "Hub" as const;
+const PARCEL_TAG = "Parcel" as const;
+
+export interface ScanListParams {
+  scanType?: HubScanType;
+  outcome?: ScanOutcome;
+  limit?: number;
 }
 
-/** A line-haul manifest as returned by the manifest list endpoint. */
-export interface ManifestListItem {
+function toScanQuery(params: ScanListParams): string {
+  const query = new URLSearchParams();
+  if (params.scanType) query.set("scanType", params.scanType);
+  if (params.outcome) query.set("outcome", params.outcome);
+  if (params.limit !== undefined) query.set("limit", String(params.limit));
+  const qs = query.toString();
+  return qs ? `?${qs}` : "";
+}
+
+/** Operational parcel lookup result — no merchant pricing or contact data. */
+export interface HubParcelLookup {
   id: string;
-  manifestCode: string;
-  originHub: string | null;
-  destinationHub: string | null;
-  vehicleNumber: string;
-  driverName: string | null;
-  driverPhone: string | null;
-  bagCount: number;
+  trackingCode: string;
+  recipientName: string;
+  district: string | null;
+  thana: string | null;
+  weightKg: number;
   status: string;
-  dispatchedAt: string | null;
-  receivedAt: string | null;
-  createdAt: string;
+  currentHubId: string | null;
 }
 
 export const hubsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getHubs: builder.query<ApiResponse<HubItem[]>, void>({
+    /* ------------------------------ Hubs ------------------------------ */
+    getHubs: builder.query<ApiResponse<HubSummary[]>, void>({
       query: () => "/hubs",
-      providesTags: ["Merchant"],
+      providesTags: [{ type: HUB_TAG, id: "HUB_LIST" }],
     }),
-    getHubById: builder.query<ApiResponse<HubItem>, string>({
+    getHubById: builder.query<ApiResponse<HubSummary>, string>({
       query: (id) => `/hubs/${id}`,
+      providesTags: (_result, _error, id) => [{ type: HUB_TAG, id }],
     }),
-    getHubInventory: builder.query<ApiResponse<HubInventoryData>, string>({
+    getDestinationHubs: builder.query<ApiResponse<HubSummary[]>, void>({
+      query: () => "/hubs/destinations",
+      providesTags: [{ type: HUB_TAG, id: "DESTINATIONS" }],
+    }),
+    getHubDashboard: builder.query<ApiResponse<HubDashboard>, string>({
+      query: (hubId) => `/hubs/${hubId}/dashboard`,
+      providesTags: (_result, _error, hubId) => [{ type: HUB_TAG, id: `DASHBOARD_${hubId}` }],
+    }),
+    getHubInventory: builder.query<ApiResponse<HubInventory>, string>({
       query: (hubId) => `/hubs/${hubId}/inventory`,
-      providesTags: ["Parcel"],
+      providesTags: (_result, _error, hubId) => [{ type: HUB_TAG, id: `INVENTORY_${hubId}` }],
     }),
-    scanBarcode: builder.mutation<ApiResponse<HubScanResult>, { hubId: string; scan: HubScanDto }>({
+
+    /* ------------------------------ Scans ------------------------------ */
+    scanBarcode: builder.mutation<
+      ApiResponse<HubScanResult>,
+      { hubId: string; scan: HubScanDto }
+    >({
       query: ({ hubId, scan }) => ({
         url: `/hubs/${hubId}/scans`,
         method: "POST",
         body: scan,
       }),
-      invalidatesTags: ["Parcel"],
+      invalidatesTags: (_result, _error, { hubId }) => [
+        { type: HUB_TAG, id: `DASHBOARD_${hubId}` },
+        { type: HUB_TAG, id: `INVENTORY_${hubId}` },
+        { type: HUB_TAG, id: `SCANS_${hubId}` },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
     }),
-    getBags: builder.query<ApiResponse<BagListItem[]>, { hubId?: string }>({
-      query: (params) => {
-        const qs = params?.hubId ? `?hubId=${params.hubId}` : "";
-        return `/bags${qs}`;
-      },
-      providesTags: ["Parcel"],
+    getScans: builder.query<
+      ApiResponse<ParcelScanItem[]>,
+      { hubId: string; params?: ScanListParams }
+    >({
+      query: ({ hubId, params }) => `/hubs/${hubId}/scans${toScanQuery(params ?? {})}`,
+      providesTags: (_result, _error, { hubId }) => [{ type: HUB_TAG, id: `SCANS_${hubId}` }],
     }),
-    createBag: builder.mutation<ApiResponse<BagListItem>, { originHubId: string; bag: CreateBagDto }>({
-      query: ({ originHubId, bag }) => ({
-        url: `/bags?originHubId=${originHubId}`,
+    lookupParcel: builder.query<
+      ApiResponse<HubParcelLookup>,
+      { hubId: string; trackingCode: string }
+    >({
+      query: ({ hubId, trackingCode }) =>
+        `/hubs/${hubId}/parcels/${encodeURIComponent(trackingCode.trim().toUpperCase())}`,
+    }),
+
+    /* ------------------------------ Bags ------------------------------ */
+    createBag: builder.mutation<
+      ApiResponse<BagDetails>,
+      { hubId: string; bag: CreateBagDto }
+    >({
+      query: ({ hubId, bag }) => ({
+        url: `/hubs/${hubId}/bags`,
         method: "POST",
         body: bag,
       }),
-      invalidatesTags: ["Parcel"],
+      invalidatesTags: (_result, _error, { hubId }) => [
+        { type: HUB_TAG, id: "BAG_LIST" },
+        { type: HUB_TAG, id: `DASHBOARD_${hubId}` },
+      ],
     }),
-    sealBag: builder.mutation<ApiResponse<BagListItem>, { bagId: string; seal: SealBagDto }>({
+    getBags: builder.query<
+      ApiResponse<BagListItem[]>,
+      { hubId?: string; status?: BagStatus }
+    >({
+      query: (params) => {
+        const query = new URLSearchParams();
+        if (params?.hubId) query.set("hubId", params.hubId);
+        if (params?.status) query.set("status", params.status);
+        const qs = query.toString();
+        return `/bags${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: [{ type: HUB_TAG, id: "BAG_LIST" }],
+    }),
+    getBagById: builder.query<ApiResponse<BagDetails>, string>({
+      query: (id) => `/bags/${id}`,
+      providesTags: (_result, _error, id) => [{ type: HUB_TAG, id: `BAG_${id}` }],
+    }),
+    addParcelToBag: builder.mutation<
+      ApiResponse<BagDetails>,
+      { bagId: string; parcel: AddParcelToBagDto }
+    >({
+      query: ({ bagId, parcel }) => ({
+        url: `/bags/${bagId}/parcels`,
+        method: "POST",
+        body: parcel,
+      }),
+      invalidatesTags: (_result, _error, { bagId }) => [
+        { type: HUB_TAG, id: "BAG_LIST" },
+        { type: HUB_TAG, id: `BAG_${bagId}` },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
+    }),
+    sealBag: builder.mutation<ApiResponse<BagDetails>, { bagId: string; seal: SealBagDto }>({
       query: ({ bagId, seal }) => ({
         url: `/bags/${bagId}/seal`,
         method: "POST",
         body: seal,
       }),
-      invalidatesTags: ["Parcel"],
+      invalidatesTags: (_result, _error, { bagId }) => [
+        { type: HUB_TAG, id: "BAG_LIST" },
+        { type: HUB_TAG, id: `BAG_${bagId}` },
+      ],
     }),
-    dispatchBag: builder.mutation<ApiResponse<BagListItem>, string>({
-      query: (bagId) => ({
-        url: `/bags/${bagId}/dispatch`,
-        method: "POST",
-      }),
-      invalidatesTags: ["Parcel"],
-    }),
-    receiveBag: builder.mutation<ApiResponse<BagListItem>, { bagId: string; destinationHubId: string }>({
-      query: ({ bagId, destinationHubId }) => ({
-        url: `/bags/${bagId}/receive`,
-        method: "POST",
-        body: { destinationHubId },
-      }),
-      invalidatesTags: ["Parcel"],
-    }),
-    getManifests: builder.query<ApiResponse<ManifestListItem[]>, { hubId?: string }>({
-      query: (params) => {
-        const qs = params?.hubId ? `?hubId=${params.hubId}` : "";
-        return `/manifests${qs}`;
-      },
-      providesTags: ["Parcel"],
-    }),
-    createManifest: builder.mutation<ApiResponse<ManifestListItem>, { originHubId: string; manifest: CreateManifestDto }>({
-      query: ({ originHubId, manifest }) => ({
-        url: `/manifests?originHubId=${originHubId}`,
+
+    /* ---------------------------- Manifests ---------------------------- */
+    createManifest: builder.mutation<
+      ApiResponse<ManifestDetails>,
+      { hubId: string; manifest: CreateManifestDto }
+    >({
+      query: ({ hubId, manifest }) => ({
+        url: `/hubs/${hubId}/manifests`,
         method: "POST",
         body: manifest,
       }),
-      invalidatesTags: ["Parcel"],
+      invalidatesTags: (_result, _error, { hubId }) => [
+        { type: HUB_TAG, id: `MANIFEST_LIST_${hubId}` },
+        { type: HUB_TAG, id: "BAG_LIST" },
+        { type: HUB_TAG, id: `DASHBOARD_${hubId}` },
+      ],
     }),
-    dispatchManifest: builder.mutation<ApiResponse<ManifestListItem>, string>({
+    getManifests: builder.query<ApiResponse<ManifestListItem[]>, string>({
+      query: (hubId) => `/hubs/${hubId}/manifests`,
+      providesTags: (_result, _error, hubId) => [
+        { type: HUB_TAG, id: `MANIFEST_LIST_${hubId}` },
+      ],
+    }),
+    getManifestById: builder.query<ApiResponse<ManifestDetails>, string>({
+      query: (id) => `/manifests/${id}`,
+      providesTags: (_result, _error, id) => [{ type: HUB_TAG, id: `MANIFEST_${id}` }],
+    }),
+    dispatchManifest: builder.mutation<ApiResponse<ManifestDetails>, string>({
       query: (manifestId) => ({
         url: `/manifests/${manifestId}/dispatch`,
         method: "POST",
       }),
-      invalidatesTags: ["Parcel"],
+      invalidatesTags: (_result, _error, manifestId) => [
+        { type: HUB_TAG, id: `MANIFEST_${manifestId}` },
+        { type: HUB_TAG, id: "BAG_LIST" },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
+    }),
+    receiveManifest: builder.mutation<
+      ApiResponse<ManifestDetails>,
+      { manifestId: string; receipt: ReceiveManifestDto }
+    >({
+      query: ({ manifestId, receipt }) => ({
+        url: `/manifests/${manifestId}/receive`,
+        method: "POST",
+        body: receipt,
+      }),
+      invalidatesTags: (_result, _error, { manifestId }) => [
+        { type: HUB_TAG, id: `MANIFEST_${manifestId}` },
+        { type: HUB_TAG, id: "BAG_LIST" },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
+    }),
+
+    /* ---------------------------- Exceptions ---------------------------- */
+    getExceptions: builder.query<
+      ApiResponse<OperationalExceptionItem[]>,
+      { hubId?: string; status?: ExceptionStatus }
+    >({
+      query: (params) => {
+        const query = new URLSearchParams();
+        if (params?.hubId) query.set("hubId", params.hubId);
+        if (params?.status) query.set("status", params.status);
+        const qs = query.toString();
+        return `/exceptions${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: [{ type: HUB_TAG, id: "EXCEPTION_LIST" }],
+    }),
+    resolveException: builder.mutation<
+      ApiResponse<OperationalExceptionItem>,
+      { exceptionId: string; resolution: ResolveExceptionDto }
+    >({
+      query: ({ exceptionId, resolution }) => ({
+        url: `/exceptions/${exceptionId}/resolve`,
+        method: "POST",
+        body: resolution,
+      }),
+      invalidatesTags: [{ type: HUB_TAG, id: "EXCEPTION_LIST" }],
     }),
   }),
 });
@@ -164,14 +266,22 @@ export const hubsApi = baseApi.injectEndpoints({
 export const {
   useGetHubsQuery,
   useGetHubByIdQuery,
+  useGetDestinationHubsQuery,
+  useGetHubDashboardQuery,
   useGetHubInventoryQuery,
   useScanBarcodeMutation,
-  useGetBagsQuery,
+  useGetScansQuery,
+  useLazyLookupParcelQuery,
   useCreateBagMutation,
+  useGetBagsQuery,
+  useGetBagByIdQuery,
+  useAddParcelToBagMutation,
   useSealBagMutation,
-  useDispatchBagMutation,
-  useReceiveBagMutation,
-  useGetManifestsQuery,
   useCreateManifestMutation,
+  useGetManifestsQuery,
+  useGetManifestByIdQuery,
   useDispatchManifestMutation,
+  useReceiveManifestMutation,
+  useGetExceptionsQuery,
+  useResolveExceptionMutation,
 } = hubsApi;

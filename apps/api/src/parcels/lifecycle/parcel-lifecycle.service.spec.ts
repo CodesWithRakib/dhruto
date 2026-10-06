@@ -3,6 +3,8 @@ import { BadRequestException } from "@nestjs/common";
 import { ParcelStatus } from "@dhruto/contracts";
 import {
   ALLOWED_PARCEL_TRANSITIONS,
+  ORIGIN_HUB_INBOUND_FROM,
+  PRE_PICKUP_RIDER_ASSIGNMENT_FROM,
   ParcelLifecycleService,
 } from "./parcel-lifecycle.service.js";
 
@@ -142,6 +144,67 @@ describe("ParcelLifecycleService", () => {
       ]) {
         expect(lifecycle.canTransition(status, ParcelStatus.ASSIGNED_TO_RIDER)).toBe(false);
       }
+    });
+  });
+
+  describe("Phase 2 hub inbound exception", () => {
+    it("permits ORIGIN_HUB_RECEIVED only from the pre-pickup pipeline states", () => {
+      expect(ORIGIN_HUB_INBOUND_FROM).toEqual([
+        ParcelStatus.CREATED,
+        ParcelStatus.PICKUP_REQUESTED,
+        ParcelStatus.PICKUP_ASSIGNED,
+        ParcelStatus.PICKED_UP,
+      ]);
+      for (const from of ORIGIN_HUB_INBOUND_FROM) {
+        expect(lifecycle.canTransition(from, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(
+          true,
+        );
+      }
+    });
+
+    it("never permits a jump into ORIGIN_HUB_RECEIVED from a post-inbound state", () => {
+      for (const status of [
+        ParcelStatus.ORIGIN_HUB_RECEIVED,
+        ParcelStatus.BAGGED,
+        ParcelStatus.IN_TRANSIT,
+        ParcelStatus.DESTINATION_HUB_RECEIVED,
+        ParcelStatus.DELIVERED,
+      ]) {
+        expect(lifecycle.canTransition(status, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(
+          false,
+        );
+      }
+    });
+
+    it("never permits a jump into ORIGIN_HUB_RECEIVED from a terminal state", () => {
+      for (const terminal of [
+        ParcelStatus.CANCELLED,
+        ParcelStatus.RETURNED_TO_MERCHANT,
+        ParcelStatus.CASH_VERIFIED,
+        ParcelStatus.LOST,
+        ParcelStatus.DAMAGED,
+      ]) {
+        expect(lifecycle.canTransition(terminal, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(
+          false,
+        );
+      }
+    });
+
+    it("keeps both named exceptions narrow and disjoint", () => {
+      for (const status of ORIGIN_HUB_INBOUND_FROM) {
+        expect(PRE_PICKUP_RIDER_ASSIGNMENT_FROM).not.toContain(
+          ParcelStatus.ORIGIN_HUB_RECEIVED,
+        );
+        expect(
+          lifecycle.canTransition(status, ParcelStatus.ORIGIN_HUB_RECEIVED),
+        ).toBe(true);
+      }
+    });
+
+    it("rejects the undocumented PICKED_UP -> ASSIGNED_TO_RIDER jump", () => {
+      expect(
+        lifecycle.canTransition(ParcelStatus.PICKED_UP, ParcelStatus.ASSIGNED_TO_RIDER),
+      ).toBe(false);
     });
   });
 

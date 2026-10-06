@@ -15,9 +15,10 @@ import {
   WalletTransaction,
   PayoutRequest,
   Notification,
+  HubUserAssignment,
 } from '../entities/index.js';
 
-import { SEED_HUBS } from './seed-hubs.data.js';
+import { SEED_HUB_ASSIGNMENTS, SEED_HUBS } from './seed-hubs.data.js';
 import { SEED_USERS } from './seed-users.data.js';
 import { SEED_MERCHANTS } from './seed-merchants.data.js';
 import { SEED_RIDERS } from './seed-riders.data.js';
@@ -58,6 +59,8 @@ export class SeederService {
     private readonly payoutRequestRepo: Repository<PayoutRequest>,
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
+    @InjectRepository(HubUserAssignment)
+    private readonly hubAssignmentRepo: Repository<HubUserAssignment>,
   ) {}
 
   async seed() {
@@ -76,6 +79,9 @@ export class SeederService {
         hub.name = hubData.name;
         hub.address = hubData.address;
         hub.status = hubData.status;
+        hub.type = hubData.type;
+        hub.district = hubData.district;
+        hub.thana = hubData.thana;
       }
       await this.hubRepo.save(hub);
       hubMap.set(hub.code, hub);
@@ -188,6 +194,33 @@ export class SeederService {
     }
     stats.riders = riderMap.size;
     this.logger.log(`✓ Seeded ${stats.riders} delivery fleet riders`);
+
+    // 5b. Seed hub user assignments (hub authorization).
+    let assignmentCount = 0;
+    for (const assignmentData of SEED_HUB_ASSIGNMENTS) {
+      const user = userMap.get(assignmentData.userEmail);
+      const hub = hubMap.get(assignmentData.hubCode);
+      if (!user || !hub) continue;
+
+      let assignment = await this.hubAssignmentRepo.findOne({
+        where: { userId: user.id, hubId: hub.id },
+      });
+      if (!assignment) {
+        assignment = this.hubAssignmentRepo.create({
+          userId: user.id,
+          hubId: hub.id,
+          permissions: assignmentData.permissions,
+          isActive: true,
+        });
+      } else {
+        assignment.permissions = assignmentData.permissions;
+        assignment.isActive = true;
+      }
+      await this.hubAssignmentRepo.save(assignment);
+      assignmentCount++;
+    }
+    stats.hubAssignments = assignmentCount;
+    this.logger.log(`✓ Seeded ${stats.hubAssignments} hub user assignments`);
 
     // 6. Seed Parcels & Status Histories
     let parcelCount = 0;

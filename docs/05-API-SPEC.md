@@ -125,13 +125,33 @@ This endpoint must return only public-safe data.
 ### Hub
 
 ```text
-POST /hubs/:hubId/scans
-POST /bags
+GET  /hubs
+GET  /hubs/destinations
+GET  /hubs/:id
+GET  /hubs/:id/dashboard
+GET  /hubs/:id/inventory
+POST /hubs/:id/scans
+GET  /hubs/:id/scans
+GET  /hubs/:id/parcels/:trackingCode
+POST /hubs/:id/bags
+GET  /bags?hubId=&status=
+GET  /bags/:id
 POST /bags/:id/parcels
 POST /bags/:id/seal
-POST /bags/:id/dispatch
-POST /bags/:id/receive
+POST /hubs/:id/manifests
+GET  /hubs/:id/manifests
+GET  /manifests/:id
+POST /manifests/:id/dispatch
+POST /manifests/:id/receive
+GET  /exceptions?hubId=&status=
+POST /exceptions/:id/resolve
 ```
+
+Bags never dispatch or receive on their own: movement happens on the manifest
+(`dispatch` moves every enclosed bag and parcel to `IN_TRANSIT`; `receive`
+reconciles scanned bag codes and rejects unexpected bags instead of absorbing
+them). Scans accept an `idempotencyKey` so scanner key-repeat and network
+retries cannot double-apply an operation.
 
 ### Rider
 

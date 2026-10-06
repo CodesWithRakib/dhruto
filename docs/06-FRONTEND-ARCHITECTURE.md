@@ -249,6 +249,9 @@ appear in the URL. Locale is always the first segment (`en` | `bn`).
 | `/admin/parcels`, `/admin/parcels/[id]`, `/admin/parcels/[id]/label`                   | `(admin)`         | admin                 |
 | `/admin/track`, `/admin/track/[code]`                                                  | `(admin)`         | admin                 |
 | `/hub/dashboard`                                                                       | `(hub)`           | hub manager           |
+| `/hub/scanner`, `/hub/parcels`                                                         | `(hub)`           | hub manager           |
+| `/hub/bags`, `/hub/bags/[id]`                                                          | `(hub)`           | hub manager           |
+| `/hub/manifests`, `/hub/manifests/[id]`, `/hub/exceptions`                              | `(hub)`           | hub manager           |
 | `/rider/dashboard`                                                                     | `(rider)`         | rider                 |
 
 The catch-all `[[...rest]]` page renders the styled not-found state for unknown

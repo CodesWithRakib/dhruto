@@ -8,6 +8,7 @@ export const SEEDED_ACCOUNTS = {
   merchant2: "merchant2@dhruto.com",
   admin: "admin@dhruto.com",
   hubManager: "hubmanager@dhruto.com",
+  hubManagerCtg: "hubmanager_ctg@dhruto.com",
   rider: "rider@dhruto.com",
 } as const;
 

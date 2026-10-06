@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { HubOperationsView } from "@/features/hubs/components/hub-operations-view";
+import { HubDashboardView } from "@/features/hubs/components/hub-dashboard-view";
 
 export const metadata: Metadata = {
   title: "Hub Operations — Admin",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminHubPage() {
-  return <HubOperationsView />;
+  return <HubDashboardView />;
 }
