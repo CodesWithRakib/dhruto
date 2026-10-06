@@ -25,7 +25,7 @@ export interface SeedPayoutRequestData {
   merchantEmail: string;
   amount: number;
   payoutMethod: PayoutMethod;
-  accountDetails: Record<string, any>;
+  accountDetails: Record<string, unknown>;
   status: PayoutStatus;
   hoursAgo: number;
 }

@@ -28,6 +28,7 @@ import { type RiderTaskItem } from "@dhruto/contracts";
 import { RiderTaskCard } from "./rider-task-card";
 import { DeliveryOtpModal } from "./delivery-otp-modal";
 import { DeliveryFailModal } from "./delivery-fail-modal";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { RiderCashModal } from "./rider-cash-modal";
 import { toast } from "sonner";
 
@@ -59,8 +60,8 @@ export function RiderDashboard() {
         toast.success(res.message || "Parcel is now OUT_FOR_DELIVERY!");
         refetchTasks();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to start delivery run");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to start delivery run"));
     }
   };
 

@@ -31,7 +31,7 @@ export class PayoutRequest extends BaseEntity {
   payoutMethod: PayoutMethod;
 
   @Column({ name: 'account_details', type: 'jsonb' })
-  accountDetails: Record<string, any>;
+  accountDetails: Record<string, unknown>;
 
   @Column({
     type: 'enum',

@@ -29,8 +29,12 @@ import {
   useCreateManifestMutation,
   useDispatchManifestMutation,
   useGetBagsQuery,
+  type BagListItem,
   type HubItem,
+  type ManifestListItem,
 } from "../api/hubs.api";
+import type { DataTableRow } from "@/lib/data-table";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 
 interface ManifestManagerProps {
@@ -47,7 +51,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
   const [driverName, setDriverName] = useState("");
   const [driverPhone, setDriverPhone] = useState("");
   const [selectedBagIds, setSelectedBagIds] = useState<string[]>([]);
-  const [viewingManifest, setViewingManifest] = useState<any | null>(null);
+  const [viewingManifest, setViewingManifest] = useState<ManifestListItem | null>(null);
 
   const { data: manifestsData, isLoading: isLoadingManifests, refetch: refetchManifests } =
     useGetManifestsQuery({ hubId: currentHubId });
@@ -60,7 +64,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
   const bags = bagsData?.data || [];
 
   // Filter bags that are SEALED and destined for the currently selected destination hub
-  const availableBags = bags.filter((b: any) => {
+  const availableBags = bags.filter((b: BagListItem) => {
     return b.status === "SEALED";
   });
 
@@ -98,7 +102,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
       }).unwrap();
 
       if (res.success) {
-        toast.success(`Manifest created: ${res.data.manifestCode}`);
+        toast.success(`Manifest created: ${res.data?.manifestCode ?? ""}`);
         setIsCreating(false);
         setVehicleNumber("");
         setDriverName("");
@@ -107,8 +111,8 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
         refetchManifests();
         refetchBags();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to create manifest");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to create manifest"));
     }
   };
 
@@ -120,8 +124,8 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
         refetchManifests();
         refetchBags();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to dispatch manifest");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to dispatch manifest"));
     }
   };
 
@@ -257,7 +261,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-2 border rounded-lg bg-muted/20">
-                    {availableBags.map((bag: any) => {
+                    {availableBags.map((bag) => {
                       const isSelected = selectedBagIds.includes(bag.id);
                       return (
                         <div
@@ -329,7 +333,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               accessorKey: "manifestCode",
               header: "Manifest Code",
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <span className="font-mono font-medium text-xs">
                   {row.original.manifestCode}
                 </span>
@@ -338,7 +342,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               id: "route",
               header: "Route",
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <div className="flex items-center gap-1.5 text-xs">
                   <span className="font-medium">{row.original.originHub}</span>
                   <ArrowRight className="h-3 w-3 text-muted-foreground" />
@@ -349,7 +353,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               id: "vehicle",
               header: "Vehicle & Driver",
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <div className="text-xs">
                   <div className="font-semibold">{row.original.vehicleNumber}</div>
                   {row.original.driverName && (
@@ -363,7 +367,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               accessorKey: "bagCount",
               header: () => <span className="text-center block">Bags</span>,
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <div className="text-center">
                   <Badge variant="secondary" className="font-mono">
                     {row.original.bagCount} bags
@@ -374,7 +378,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               accessorKey: "status",
               header: () => <span className="text-center block">Status</span>,
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <div className="text-center">
                   {getStatusBadge(row.original.status)}
                 </div>
@@ -383,7 +387,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               accessorKey: "createdAt",
               header: "Created",
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {new Date(row.original.createdAt).toLocaleDateString()}
                 </span>
@@ -392,7 +396,7 @@ export function ManifestManager({ currentHubId, allHubs }: ManifestManagerProps)
             {
               id: "actions",
               header: () => <span className="text-right block">Actions</span>,
-              cell: ({ row }: { row: any }) => (
+              cell: ({ row }: DataTableRow<ManifestListItem>) => (
                 <div className="flex items-center justify-end gap-2">
                   {row.original.status === "CREATED" && (
                     <Button

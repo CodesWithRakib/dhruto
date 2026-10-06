@@ -12,6 +12,7 @@ import { AnalyticsQueryDto } from './dto/analytics.dto.js';
 import { CustomJwtService } from '../auth/jwt/custom-jwt.service.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { type AuthenticatedUser } from '../auth/jwt/jwt.interface.js';
+import { type RequestWithId } from '../common/middleware/request-id.middleware.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Merchant } from '../database/entities/Merchant.entity.js';
@@ -37,7 +38,7 @@ export class AnalyticsController {
 
   private async resolveMerchantId(
     user: AuthenticatedUser | null,
-    req: any,
+    req: RequestWithId,
     queryMerchantId?: string,
   ): Promise<string> {
     if (queryMerchantId) return queryMerchantId;
@@ -77,7 +78,7 @@ export class AnalyticsController {
   async getMerchantSummary(
     @Query() query: AnalyticsQueryDto,
     @CurrentUser() user: AuthenticatedUser | null,
-    @Req() req: any,
+    @Req() req: RequestWithId,
   ): Promise<ApiResponse<MerchantAnalyticsSummary>> {
     const merchantId = await this.resolveMerchantId(user, req, query.merchantId);
     const data = await this.analyticsService.getMerchantSummary(merchantId, query);
@@ -102,7 +103,7 @@ export class AnalyticsController {
   })
   async getOperationalOverview(
     @Query() query: AnalyticsQueryDto,
-    @Req() req: any,
+    @Req() req: RequestWithId,
   ): Promise<ApiResponse<OperationalAnalyticsSummary>> {
     const data = await this.analyticsService.getOperationalSummary(query);
 
@@ -126,7 +127,7 @@ export class AnalyticsController {
   })
   async getHubThroughput(
     @Query() query: AnalyticsQueryDto,
-    @Req() req: any,
+    @Req() req: RequestWithId,
   ): Promise<ApiResponse<HubThroughputMetric[]>> {
     const data = await this.analyticsService.getHubThroughputAnalytics(query);
 
@@ -150,7 +151,7 @@ export class AnalyticsController {
   })
   async getRiderPerformance(
     @Query() query: AnalyticsQueryDto,
-    @Req() req: any,
+    @Req() req: RequestWithId,
   ): Promise<ApiResponse<TopRiderMetric[]>> {
     const data = await this.analyticsService.getRiderPerformanceAnalytics(query);
 
@@ -174,7 +175,7 @@ export class AnalyticsController {
   })
   async getRtoAnalytics(
     @Query() query: AnalyticsQueryDto,
-    @Req() req: any,
+    @Req() req: RequestWithId,
   ): Promise<ApiResponse<RtoAnalytics>> {
     const data = await this.analyticsService.getRtoAnalytics(query);
 
@@ -198,7 +199,7 @@ export class AnalyticsController {
   })
   async getCodAnalytics(
     @Query() query: AnalyticsQueryDto,
-    @Req() req: any,
+    @Req() req: RequestWithId,
   ): Promise<ApiResponse<CodFlowAnalytics>> {
     const data = await this.analyticsService.getCodAnalytics(query);
 

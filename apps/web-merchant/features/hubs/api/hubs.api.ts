@@ -43,6 +43,40 @@ export interface HubInventoryData {
   }>;
 }
 
+/**
+ * A transit bag as returned by the hub list endpoint.
+ * Phase 2 domain — typed here so the web client never falls back to `any`.
+ */
+export interface BagListItem {
+  id: string;
+  bagCode: string;
+  originHub: string | null;
+  destinationHub: string | null;
+  status: string;
+  sealTag: string | null;
+  parcelCount: number;
+  sealedAt: string | null;
+  dispatchedAt: string | null;
+  receivedAt: string | null;
+  createdAt: string;
+}
+
+/** A line-haul manifest as returned by the manifest list endpoint. */
+export interface ManifestListItem {
+  id: string;
+  manifestCode: string;
+  originHub: string | null;
+  destinationHub: string | null;
+  vehicleNumber: string;
+  driverName: string | null;
+  driverPhone: string | null;
+  bagCount: number;
+  status: string;
+  dispatchedAt: string | null;
+  receivedAt: string | null;
+  createdAt: string;
+}
+
 export const hubsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getHubs: builder.query<ApiResponse<HubItem[]>, void>({
@@ -64,14 +98,14 @@ export const hubsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Parcel"],
     }),
-    getBags: builder.query<ApiResponse<any[]>, { hubId?: string }>({
+    getBags: builder.query<ApiResponse<BagListItem[]>, { hubId?: string }>({
       query: (params) => {
         const qs = params?.hubId ? `?hubId=${params.hubId}` : "";
         return `/bags${qs}`;
       },
       providesTags: ["Parcel"],
     }),
-    createBag: builder.mutation<ApiResponse<any>, { originHubId: string; bag: CreateBagDto }>({
+    createBag: builder.mutation<ApiResponse<BagListItem>, { originHubId: string; bag: CreateBagDto }>({
       query: ({ originHubId, bag }) => ({
         url: `/bags?originHubId=${originHubId}`,
         method: "POST",
@@ -79,7 +113,7 @@ export const hubsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Parcel"],
     }),
-    sealBag: builder.mutation<ApiResponse<any>, { bagId: string; seal: SealBagDto }>({
+    sealBag: builder.mutation<ApiResponse<BagListItem>, { bagId: string; seal: SealBagDto }>({
       query: ({ bagId, seal }) => ({
         url: `/bags/${bagId}/seal`,
         method: "POST",
@@ -87,14 +121,14 @@ export const hubsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Parcel"],
     }),
-    dispatchBag: builder.mutation<ApiResponse<any>, string>({
+    dispatchBag: builder.mutation<ApiResponse<BagListItem>, string>({
       query: (bagId) => ({
         url: `/bags/${bagId}/dispatch`,
         method: "POST",
       }),
       invalidatesTags: ["Parcel"],
     }),
-    receiveBag: builder.mutation<ApiResponse<any>, { bagId: string; destinationHubId: string }>({
+    receiveBag: builder.mutation<ApiResponse<BagListItem>, { bagId: string; destinationHubId: string }>({
       query: ({ bagId, destinationHubId }) => ({
         url: `/bags/${bagId}/receive`,
         method: "POST",
@@ -102,14 +136,14 @@ export const hubsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Parcel"],
     }),
-    getManifests: builder.query<ApiResponse<any[]>, { hubId?: string }>({
+    getManifests: builder.query<ApiResponse<ManifestListItem[]>, { hubId?: string }>({
       query: (params) => {
         const qs = params?.hubId ? `?hubId=${params.hubId}` : "";
         return `/manifests${qs}`;
       },
       providesTags: ["Parcel"],
     }),
-    createManifest: builder.mutation<ApiResponse<any>, { originHubId: string; manifest: CreateManifestDto }>({
+    createManifest: builder.mutation<ApiResponse<ManifestListItem>, { originHubId: string; manifest: CreateManifestDto }>({
       query: ({ originHubId, manifest }) => ({
         url: `/manifests?originHubId=${originHubId}`,
         method: "POST",
@@ -117,7 +151,7 @@ export const hubsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Parcel"],
     }),
-    dispatchManifest: builder.mutation<ApiResponse<any>, string>({
+    dispatchManifest: builder.mutation<ApiResponse<ManifestListItem>, string>({
       query: (manifestId) => ({
         url: `/manifests/${manifestId}/dispatch`,
         method: "POST",

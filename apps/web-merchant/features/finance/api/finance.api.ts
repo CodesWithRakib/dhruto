@@ -10,6 +10,21 @@ import {
   type ApiResponse,
 } from "@dhruto/contracts";
 
+/** Result of a hub cash verification hand-in (Phase 4 settlement domain). */
+export interface CashVerificationResult {
+  cashLedger: {
+    id: string;
+    riderId: string;
+    hubId: string;
+    amount: number;
+    status: string;
+    verifiedAt: string | null;
+  };
+  netSettled: number;
+  newWalletBalance: number;
+  message: string;
+}
+
 export interface ReconciliationSummaryData {
   totalWallets: number;
   totalMerchantBalance: number;
@@ -52,7 +67,7 @@ export const financeApi = baseApi.injectEndpoints({
     }),
 
     verifyCashHandIn: builder.mutation<
-      ApiResponse<{ cashLedger: any; netSettled: number; newWalletBalance: number; message: string }>,
+      ApiResponse<CashVerificationResult>,
       VerifyCashLedgerDto
     >({
       query: (payload) => ({

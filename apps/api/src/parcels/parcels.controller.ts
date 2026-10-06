@@ -1,103 +1,112 @@
 import {
-  Controller,
-  Post,
+  BadRequestException,
   Body,
-  HttpStatus,
-  Req,
+  Controller,
+  Get,
   Headers,
   HttpCode,
-  Get,
+  HttpStatus,
   Param,
+  Post,
   Query,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
 import {
-  ApiTags,
-  ApiOperation,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiUnprocessableEntityResponse,
   ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiHeader,
-  ApiQuery,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiTooManyRequestsResponse,
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
+import { ApiErrorCode, ParcelStatus } from "@dhruto/contracts";
 import { ParcelsService } from "./parcels.service.js";
 import { CreateParcelDto } from "./dto/create-parcel.dto.js";
 import { ParcelResponseDto } from "./dto/parcel-response.dto.js";
-import { type RequestWithId } from "../common/middleware/request-id.middleware.js";
+import { ParcelListQueryDto } from "./dto/parcel-list-query.dto.js";
 import {
-  type ApiResponse,
-  type ParcelCreatedResponse,
-  type ParcelDetailsResponse,
-  type ShippingLabelResponse,
-  ParcelStatus,
-} from "@dhruto/contracts";
+  ParcelDetailsResponseDto,
+  ParcelHistoryResponseDto,
+} from "./dto/parcel-details-response.dto.js";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
+import { RolesGuard } from "../auth/guards/roles.guard.js";
+import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { UserRole } from "../database/entities/User.entity.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
-import { CustomJwtService } from "../auth/jwt/custom-jwt.service.js";
+import { type RequestWithId } from "../common/middleware/request-id.middleware.js";
+import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
+import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 
 @ApiTags("Parcels")
+@ApiBearerAuth("JWT-auth")
+@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@Roles(UserRole.MERCHANT, UserRole.ADMIN)
 @Controller("parcels")
 export class ParcelsController {
-  constructor(
-    private readonly parcelsService: ParcelsService,
-    private readonly jwtService: CustomJwtService,
-  ) {}
+  constructor(private readonly parcelsService: ParcelsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @RateLimit({ limit: 30, windowSeconds: 60, scope: "parcel-create" })
   @ApiOperation({
-    summary: "Create a new parcel booking",
+    summary: "Create a parcel booking",
     description:
-      "Validates parcel booking payload against shared @dhruto/contracts schema, calculates dynamic pricing, supports Idempotency-Key, and creates a parcel in CREATED state.",
+      "Creates a parcel for the authenticated merchant. The delivery fee is calculated server-side. " +
+      "The `Idempotency-Key` header is required: repeating the same key with the same payload replays the original " +
+      "result, while reusing it with a different payload returns 409.",
   })
   @ApiHeader({
     name: "Idempotency-Key",
-    required: false,
-    description: "Unique idempotency key to prevent duplicate booking submissions",
+    required: true,
+    description: "Unique key (16-128 chars) identifying this booking attempt",
   })
   @ApiCreatedResponse({
     description: "Parcel booking created successfully",
     type: ParcelResponseDto,
   })
-  @ApiUnprocessableEntityResponse({
-    description: "Validation failed due to invalid fields",
-  })
   @ApiBadRequestResponse({
-    description: "Bad request payload format",
+    description: "Missing Idempotency-Key or malformed payload",
   })
+  @ApiUnauthorizedResponse({ description: "Missing or invalid access token" })
+  @ApiForbiddenResponse({ description: "Caller has no merchant profile" })
+  @ApiConflictResponse({
+    description: "Idempotency-Key reused with a different payload, or still in progress",
+  })
+  @ApiUnprocessableEntityResponse({ description: "Validation failed" })
+  @ApiTooManyRequestsResponse({ description: "Rate limit exceeded" })
   async createParcel(
-    @Body() createParcelDto: CreateParcelDto,
+    @Body() dto: CreateParcelDto,
     @Headers("idempotency-key") idempotencyKey: string | undefined,
-    @CurrentUser() user: AuthenticatedUser | null,
+    @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
-  ): Promise<ApiResponse<ParcelCreatedResponse>> {
-    let userId = user?.id;
-    if (!userId) {
-      const authHeader = (req as any)?.headers?.authorization;
-      if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
-        try {
-          const token = authHeader.substring(7);
-          const payload = this.jwtService.verifyAccessToken(token);
-          if (payload?.sub) {
-            userId = payload.sub;
-          }
-        } catch {
-          // Ignore invalid token and use default fallback
-        }
-      }
+  ) {
+    if (!idempotencyKey || !idempotencyKey.trim()) {
+      throw new BadRequestException({
+        message:
+          "Idempotency-Key header is required for parcel creation requests",
+        error: ApiErrorCode.IDEMPOTENCY_KEY_REQUIRED,
+      });
     }
 
-    const parcel = await this.parcelsService.createParcel(
-      createParcelDto,
+    const data = await this.parcelsService.createParcel(dto, {
+      user,
       idempotencyKey,
-      userId,
-    );
+    });
 
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
       message: "Parcel booking created successfully",
-      data: parcel,
+      data,
       meta: {
         requestId: req.requestId || "unknown",
         timestamp: new Date().toISOString(),
@@ -107,30 +116,63 @@ export class ParcelsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 120, windowSeconds: 60, scope: "parcel-list" })
   @ApiOperation({
-    summary: "List parcel bookings",
-    description: "Returns a filtered list of parcel bookings.",
+    summary: "List the merchant's parcels",
+    description:
+      "Paginated, searchable and filterable parcel list. Results are always scoped to the authenticated merchant.",
   })
-  @ApiQuery({ name: "status", required: false, enum: ParcelStatus })
-  @ApiQuery({ name: "search", required: false, type: String })
-  @ApiQuery({ name: "limit", required: false, type: Number })
-  async findAll(
-    @Query("status") status: ParcelStatus | undefined,
-    @Query("search") search: string | undefined,
-    @Query("limit") limit: number | undefined,
+  @ApiOkResponse({ description: "Paginated parcel list", type: ParcelResponseDto, isArray: true })
+  @ApiUnauthorizedResponse({ description: "Missing or invalid access token" })
+  @ApiTooManyRequestsResponse({ description: "Rate limit exceeded" })
+  async listParcels(
+    @Query() query: ParcelListQueryDto,
+    @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
   ) {
-    const parcels = await this.parcelsService.findAll({
-      status,
-      search,
-      limit: limit ? Number(limit) : undefined,
-    });
+    const scope = await this.parcelsService.resolveScope(user);
+    const { items, pagination } = await this.parcelsService.listParcels(
+      query,
+      scope,
+    );
 
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Parcels retrieved successfully",
-      data: parcels,
+      data: items,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+        pagination,
+      },
+    };
+  }
+
+  @Get(":id")
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 180, windowSeconds: 60, scope: "parcel-details" })
+  @ApiOperation({
+    summary: "Get parcel details by id or tracking code",
+    description:
+      "Returns the parcel, its destination, pricing and immutable status history. A parcel owned by another merchant is reported as 404.",
+  })
+  @ApiOkResponse({ description: "Parcel details", type: ParcelDetailsResponseDto })
+  @ApiNotFoundResponse({ description: "Parcel not found or not owned by caller" })
+  @ApiUnauthorizedResponse({ description: "Missing or invalid access token" })
+  async getParcelById(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const data = await this.parcelsService.getParcelById(id, scope);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Parcel details retrieved successfully",
+      data,
       meta: {
         requestId: req.requestId || "unknown",
         timestamp: new Date().toISOString(),
@@ -138,24 +180,32 @@ export class ParcelsController {
     };
   }
 
-  @Get(":id")
+  @Get(":id/history")
   @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 180, windowSeconds: 60, scope: "parcel-history" })
   @ApiOperation({
-    summary: "Get parcel details",
-    description: "Retrieves complete parcel details including full status history and assigned rider.",
+    summary: "Get parcel status history",
+    description: "Returns the append-only lifecycle history for a parcel.",
   })
-  @ApiOkResponse({ description: "Parcel details retrieved successfully" })
-  async getParcelById(
+  @ApiOkResponse({
+    description: "Parcel history",
+    type: ParcelHistoryResponseDto,
+    isArray: true,
+  })
+  @ApiNotFoundResponse({ description: "Parcel not found or not owned by caller" })
+  async getParcelHistory(
     @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
-  ): Promise<ApiResponse<ParcelDetailsResponse>> {
-    const parcel = await this.parcelsService.getParcelById(id);
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const data = await this.parcelsService.getParcelHistory(id, scope);
 
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: "Parcel details retrieved successfully",
-      data: parcel,
+      message: "Parcel history retrieved successfully",
+      data,
       meta: {
         requestId: req.requestId || "unknown",
         timestamp: new Date().toISOString(),
@@ -165,22 +215,28 @@ export class ParcelsController {
 
   @Get(":id/label")
   @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-label" })
   @ApiOperation({
-    summary: "Get parcel shipping label",
-    description: "Retrieves 4x6 shipping label metadata and vector SVG barcode for thermal printing.",
+    summary: "Get the 4x6 shipping label",
+    description:
+      "Returns label data plus a Code128 barcode (SVG) encoding the tracking code. Scoped to the owning merchant.",
   })
-  @ApiOkResponse({ description: "Shipping label retrieved successfully" })
+  @ApiOkResponse({ description: "Shipping label payload" })
+  @ApiNotFoundResponse({ description: "Parcel not found or not owned by caller" })
+  @ApiForbiddenResponse({ description: "Caller cannot access this label" })
   async getShippingLabel(
     @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
-  ): Promise<ApiResponse<ShippingLabelResponse>> {
-    const label = await this.parcelsService.getShippingLabel(id);
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const data = await this.parcelsService.getShippingLabel(id, scope);
 
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Shipping label retrieved successfully",
-      data: label,
+      data,
       meta: {
         requestId: req.requestId || "unknown",
         timestamp: new Date().toISOString(),
@@ -189,17 +245,25 @@ export class ParcelsController {
   }
 
   @Post(":id/assign-rider")
+  @Roles(UserRole.ADMIN, UserRole.HUB_MANAGER)
   @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-assign" })
   @ApiOperation({
-    summary: "Assign parcel to a rider",
-    description: "Transitions parcel to ASSIGNED_TO_RIDER and registers assignment.",
+    summary: "Assign a parcel to a rider (hub/admin only)",
+    description:
+      "Phase 3 operational command. Status transitions are validated by the centralized state machine.",
   })
+  @ApiOkResponse({ description: "Parcel assigned" })
+  @ApiForbiddenResponse({ description: "Caller is not an admin or hub manager" })
+  @ApiNotFoundResponse({ description: "Parcel or rider not found" })
   async assignRider(
     @Param("id") id: string,
     @Body("riderId") riderId: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
   ) {
-    const result = await this.parcelsService.assignRider(id, riderId);
+    const result = await this.parcelsService.assignRider(id, riderId, user);
+
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -212,3 +276,6 @@ export class ParcelsController {
     };
   }
 }
+
+/** Re-exported so generated OpenAPI enums stay in sync with the contract. */
+export { ParcelStatus };

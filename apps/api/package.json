@@ -11,6 +11,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "node dist/database/seed/seed-cli.js",
+    "migration:run": "node dist/database/migrate-cli.js run",
+    "migration:revert": "node dist/database/migrate-cli.js revert",
+    "migration:show": "node dist/database/migrate-cli.js show",
+    "db:setup": "pnpm build && pnpm migration:run && pnpm seed",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {

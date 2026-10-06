@@ -4,10 +4,17 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { ZodValidationPipe } from "nestjs-zod";
+import {
+  SEEDED_ACCOUNTS,
+  bearer,
+  idempotencyKey,
+  loginToken,
+} from "./utils/auth.js";
 
 describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
   let app: INestApplication;
   let merchantToken: string;
+  let hubManagerToken: string;
   let riderToken: string;
   let riderId: string;
   let parcelId: string;
@@ -56,6 +63,8 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
       .expect(200);
     riderId = meRes.body.data.rider?.id;
     expect(riderId).toBeDefined();
+
+    hubManagerToken = await loginToken(app, SEEDED_ACCOUNTS.hubManager);
   });
 
   afterAll(async () => {
@@ -80,6 +89,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
     const parcelRes = await request(app.getHttpServer())
       .post("/api/v1/parcels")
       .set("Authorization", `Bearer ${merchantToken}`)
+      .set("Idempotency-Key", idempotencyKey("finance-parcel"))
       .send({
         recipientName: "Finance Test Customer",
         recipientPhone: "01711223344",
@@ -97,6 +107,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
     // 2b. Assign parcel to rider
     await request(app.getHttpServer())
       .post(`/api/v1/parcels/${parcelId}/assign-rider`)
+      .set(bearer(hubManagerToken))
       .send({ riderId })
       .expect(200);
 
@@ -140,7 +151,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
 
-    const match = res.body.data.find((item: any) => item.id === cashLedgerId);
+    const match = res.body.data.find((item: { id: string }) => item.id === cashLedgerId);
     expect(match).toBeDefined();
     expect(match.amount).toBe(3000);
     expect(match.netPayable).toBeGreaterThan(0);
@@ -181,7 +192,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
     expect(txRes.body.success).toBe(true);
     expect(txRes.body.data.length).toBeGreaterThanOrEqual(2);
 
-    const types = txRes.body.data.map((t: any) => t.type);
+    const types = txRes.body.data.map((t: { type: string }) => t.type);
     expect(types).toContain("COD_CREDIT");
     expect(types).toContain("DELIVERY_FEE");
   });

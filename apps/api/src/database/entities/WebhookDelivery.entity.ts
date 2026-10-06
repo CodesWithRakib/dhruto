@@ -23,7 +23,7 @@ export class WebhookDelivery extends BaseEntity {
   event: string;
 
   @Column({ type: 'jsonb' })
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 
   @Column({ type: 'varchar', length: 255 })
   signature: string;

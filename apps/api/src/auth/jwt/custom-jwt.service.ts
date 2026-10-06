@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { JwtPayload } from "./jwt.interface.js";
 import { AuthConfig } from "../../config/auth.config.js";
+import { UserRole } from "../../database/entities/User.entity.js";
 
 @Injectable()
 export class CustomJwtService {
@@ -173,7 +174,7 @@ export class CustomJwtService {
     id: string;
     email: string;
     phone: string;
-    role: any;
+    role: UserRole;
     merchantId?: string | null;
     riderId?: string | null;
     hubId?: string | null;

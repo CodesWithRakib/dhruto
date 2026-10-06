@@ -220,3 +220,45 @@ Critical E2E:
 - COD verification
 - merchant payout
 - public tracking
+
+## 17. Implemented Routes (Phase 1)
+
+The filesystem mirrors the centralized map in
+`apps/web-merchant/config/routes.ts` through Next.js route groups, which do not
+appear in the URL. Locale is always the first segment (`en` | `bn`).
+
+| Route                                                                                  | Group             | Access                |
+| -------------------------------------------------------------------------------------- | ----------------- | --------------------- |
+| `/`                                                                                    | `(public)`        | public                |
+| `/track`                                                                               | `(public)`        | public                |
+| `/track/[code]`                                                                        | `(public)`        | public                |
+| `/services`, `/pricing`, `/about`, `/contact`, `/faq`, `/privacy`, `/terms`            | `(public)`        | public                |
+| `/login`, `/register`                                                                  | `(auth)`          | public form           |
+| `/merchant/dashboard`                                                                  | `(merchant)`      | merchant              |
+| `/merchant/bookings/new`                                                               | `(merchant)`      | merchant              |
+| `/merchant/parcels`                                                                    | `(merchant)`      | merchant              |
+| `/merchant/parcels/[id]`                                                               | `(merchant)`      | merchant (owner only) |
+| `/merchant/parcels/[id]/label`                                                         | `(merchant)`      | merchant (owner only) |
+| `/merchant/finance`                                                                    | `(merchant)`      | merchant              |
+| `/merchant/analytics`                                                                  | `(merchant)`      | merchant              |
+| `/merchant/intelligence`                                                               | `(merchant)`      | merchant              |
+| `/merchant/track`, `/merchant/track/[code]`                                            | `(merchant)`      | merchant              |
+| `/merchant/developer/webhooks`                                                         | `(merchant)`      | merchant              |
+| `/analytics`                                                                           | none (standalone) | public                |
+| `/admin/dashboard`, `/admin/analytics`, `/admin/finance`, `/admin/hub`, `/admin/rider` | `(admin)`         | admin                 |
+| `/admin/parcels`, `/admin/parcels/[id]`, `/admin/parcels/[id]/label`                   | `(admin)`         | admin                 |
+| `/admin/track`, `/admin/track/[code]`                                                  | `(admin)`         | admin                 |
+| `/hub/dashboard`                                                                       | `(hub)`           | hub manager           |
+| `/rider/dashboard`                                                                     | `(rider)`         | rider                 |
+
+The catch-all `[[...rest]]` page renders the styled not-found state for unknown
+routes, and `/offline` is the PWA offline fallback.
+
+Legacy unprefixed URLs are kept working with permanent (`308`) redirects handled
+by `proxy.ts`, e.g. `/dashboard` -> `/merchant/dashboard`, `/parcels` ->
+`/merchant/parcels`, `/bookings/new` -> `/merchant/bookings/new`, `/finance` ->
+`/merchant/finance`, `/hub` -> `/hub/dashboard`, `/rider` -> `/rider/dashboard`.
+
+Routes carry no merchant identity in the URL: the API resolves the owning
+merchant from the bearer token, and a request for a parcel owned by another
+merchant is rendered as not found.

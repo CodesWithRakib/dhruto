@@ -28,26 +28,39 @@ DAMAGED
 
 ## 2. Transition Rules
 
-| From | Allowed To |
-|---|---|
-| CREATED | PICKUP_REQUESTED, CANCELLED |
-| PICKUP_REQUESTED | PICKUP_ASSIGNED, CANCELLED |
-| PICKUP_ASSIGNED | PICKED_UP, CANCELLED |
-| PICKED_UP | ORIGIN_HUB_RECEIVED |
-| ORIGIN_HUB_RECEIVED | BAGGED |
-| BAGGED | IN_TRANSIT |
-| IN_TRANSIT | DESTINATION_HUB_RECEIVED, LOST, DAMAGED |
-| DESTINATION_HUB_RECEIVED | ASSIGNED_TO_RIDER |
-| ASSIGNED_TO_RIDER | OUT_FOR_DELIVERY |
-| OUT_FOR_DELIVERY | DELIVERED, DELIVERY_ATTEMPTED |
-| DELIVERY_ATTEMPTED | RESCHEDULED, OUT_FOR_DELIVERY, RTO_INITIATED |
-| RESCHEDULED | OUT_FOR_DELIVERY |
-| DELIVERED | CASH_PENDING |
-| CASH_PENDING | CASH_VERIFIED |
-| RTO_INITIATED | RETURN_IN_TRANSIT |
-| RETURN_IN_TRANSIT | RETURNED_TO_MERCHANT |
+| From                     | Allowed To                                   |
+| ------------------------ | -------------------------------------------- |
+| CREATED                  | PICKUP_REQUESTED, CANCELLED                  |
+| PICKUP_REQUESTED         | PICKUP_ASSIGNED, CANCELLED                   |
+| PICKUP_ASSIGNED          | PICKED_UP, CANCELLED                         |
+| PICKED_UP                | ORIGIN_HUB_RECEIVED                          |
+| ORIGIN_HUB_RECEIVED      | BAGGED                                       |
+| BAGGED                   | IN_TRANSIT                                   |
+| IN_TRANSIT               | DESTINATION_HUB_RECEIVED, LOST, DAMAGED      |
+| DESTINATION_HUB_RECEIVED | ASSIGNED_TO_RIDER                            |
+| ASSIGNED_TO_RIDER        | OUT_FOR_DELIVERY                             |
+| OUT_FOR_DELIVERY         | DELIVERED, DELIVERY_ATTEMPTED                |
+| DELIVERY_ATTEMPTED       | RESCHEDULED, OUT_FOR_DELIVERY, RTO_INITIATED |
+| RESCHEDULED              | OUT_FOR_DELIVERY                             |
+| DELIVERED                | CASH_PENDING                                 |
+| CASH_PENDING             | CASH_VERIFIED                                |
+| RTO_INITIATED            | RETURN_IN_TRANSIT                            |
+| RETURN_IN_TRANSIT        | RETURNED_TO_MERCHANT                         |
 
 The exact production matrix may add operational exception transitions, but every exception must be explicit.
+
+### Implemented exception transitions
+
+Named and covered by unit tests — see
+`apps/api/src/parcels/lifecycle/parcel-lifecycle.service.ts`
+(`PARCEL_TRANSITIONS` / `canTransition`) and its spec:
+
+| Constant                           | From                          | To                  | Why                                                                                                                                                                                         |
+| ---------------------------------- | ----------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PRE_PICKUP_RIDER_ASSIGNMENT_FROM` | `CREATED`, `PICKUP_REQUESTED` | `ASSIGNED_TO_RIDER` | Lets a rider be assigned to a parcel before it physically reaches a hub (pre-pickup dispatch), instead of forcing the full `PICKUP_ASSIGNED` -> `PICKED_UP` -> `ORIGIN_HUB_RECEIVED` chain. |
+
+`ORDER_CREATED` from the product specification is implemented as `CREATED`
+(`INITIAL_PARCEL_STATUS`); there is no separate `ORDER_CREATED` state.
 
 ## 3. Transition Requirements
 

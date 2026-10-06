@@ -9,6 +9,10 @@ export { ParcelStatus };
 
 @Entity('parcels')
 @Index(['merchantId', 'status'])
+// Serves the paginated merchant list: WHERE merchant_id = ? ORDER BY created_at DESC.
+@Index(['merchantId', 'createdAt'])
+// Serves destination filtering on the merchant parcel list.
+@Index(['merchantId', 'district'])
 @Index(['currentHubId', 'status'])
 @Index(['currentRiderId', 'status'])
 @Index(['recipientPhone'])
@@ -42,14 +46,30 @@ export class Parcel extends BaseEntity {
   @Column({ name: 'recipient_name', type: 'varchar', length: 255 })
   recipientName: string;
 
+  @Column({ name: 'parcel_description', type: 'varchar', length: 500, nullable: true })
+  parcelDescription: string | null;
+
   @Column({ name: 'recipient_phone', type: 'varchar', length: 20 })
   recipientPhone: string;
 
   @Column({ name: 'raw_address', type: 'text' })
   rawAddress: string;
 
+  /** Destination district (first-class so it can be filtered and indexed). */
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  district: string | null;
+
+  /** Destination thana / upazila. */
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  thana: string | null;
+
+  /**
+   * Reserved for Phase 6 address intelligence (parse confidence, normalized
+   * components, risk metadata). Never used as the source of truth for district
+   * or thana, which are first-class columns above.
+   */
   @Column({ name: 'normalized_address', type: 'jsonb', nullable: true })
-  normalizedAddress: Record<string, unknown>;
+  normalizedAddress: Record<string, unknown> | null;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   weight: number;

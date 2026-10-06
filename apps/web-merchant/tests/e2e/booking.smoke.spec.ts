@@ -1,24 +1,27 @@
 import { test, expect } from "@playwright/test";
+import { loginAsMerchant } from "./helpers/merchant";
 
 test.describe("Merchant Booking Flow Smoke Test", () => {
-  test("should render booking page and form elements properly", async ({ page }) => {
-    await page.goto("/merchant/bookings/new");
+  test("renders the booking page with every required field", async ({ page }) => {
+    await loginAsMerchant(page);
+    await page.goto("/en/merchant/bookings/new");
 
-    // Verify page title
-    await expect(page.locator("h1")).toContainText("Book a Parcel");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Book a Parcel");
 
-    // Verify essential form inputs are visible
-    await expect(page.locator('input[placeholder="e.g. Tanvir Ahmed"]')).toBeVisible();
-    await expect(page.locator('input[placeholder="01712345678"]')).toBeVisible();
-    await expect(page.locator('input[placeholder="e.g. Dhaka"]')).toBeVisible();
-    await expect(page.locator('input[placeholder="e.g. Dhanmondi"]')).toBeVisible();
-    await expect(
-      page.locator('input[placeholder="House, road, sector, or landmark details"]'),
-    ).toBeVisible();
+    await expect(page.getByLabel("Recipient full name")).toBeVisible();
+    await expect(page.getByLabel("Recipient mobile number")).toBeVisible();
+    await expect(page.getByLabel("District", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Thana / Upazila")).toBeVisible();
+    await expect(page.getByLabel("Detailed delivery address")).toBeVisible();
+    await expect(page.getByLabel("Weight (kg)")).toBeVisible();
+    await expect(page.getByLabel("Cash on delivery (BDT)")).toBeVisible();
 
-    // Verify submit button is rendered
-    const submitBtn = page.locator('button:has-text("Confirm Booking")');
-    await expect(submitBtn).toBeVisible();
-    await expect(submitBtn).toBeEnabled();
+    // Pricing panel exists but offers no quote until destination/weight are set.
+    await expect(page.getByText(/total delivery charge/i)).toHaveCount(0);
+    await expect(page.getByText(/enter the destination and weight/i)).toBeVisible();
+
+    const submit = page.getByRole("button", { name: /confirm booking/i });
+    await expect(submit).toBeVisible();
+    await expect(submit).toBeEnabled();
   });
 });

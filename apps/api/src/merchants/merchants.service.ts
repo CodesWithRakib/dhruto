@@ -137,11 +137,27 @@ export class MerchantsService {
   async getDashboardStats(userId: string) {
     const merchant = await this.getOrCreateMerchantForUser(userId);
 
-    const [parcels, totalOrders] = await this.parcelRepo.findAndCount({
-      where: { merchantId: merchant.id },
-      order: { createdAt: "DESC" },
-    });
+    /**
+     * Aggregated in SQL rather than by loading every parcel into memory: a
+     * merchant with tens of thousands of parcels still resolves in one round
+     * trip (docs/05-API-SPEC.md §dashboard).
+     */
+    const rows = await this.parcelRepo
+      .createQueryBuilder("parcel")
+      .select("parcel.status", "status")
+      .addSelect("COUNT(*)", "count")
+      .addSelect("COALESCE(SUM(parcel.cod_amount), 0)", "codAmount")
+      .addSelect("COALESCE(SUM(parcel.delivery_fee), 0)", "deliveryFee")
+      .where("parcel.merchant_id = :merchantId", { merchantId: merchant.id })
+      .groupBy("parcel.status")
+      .getRawMany<{
+        status: ParcelStatus;
+        count: string;
+        codAmount: string;
+        deliveryFee: string;
+      }>();
 
+    let totalOrders = 0;
     let pendingOrders = 0;
     let inTransitOrders = 0;
     let deliveredOrders = 0;
@@ -150,36 +166,44 @@ export class MerchantsService {
     let collectedCodAmount = 0;
     let totalDeliveryFees = 0;
 
-    for (const p of parcels) {
-      const cod = Number(p.codAmount) || 0;
-      const fee = Number(p.deliveryFee) || 0;
+    for (const row of rows) {
+      const count = Number(row.count) || 0;
+      const cod = Number(row.codAmount) || 0;
+      const fee = Number(row.deliveryFee) || 0;
 
-      totalCodAmount += cod;
+      totalOrders += count;      totalCodAmount += cod;
       totalDeliveryFees += fee;
 
-      if (PENDING_STATUSES.includes(p.status)) {
-        pendingOrders++;
-      } else if (IN_TRANSIT_STATUSES.includes(p.status)) {
-        inTransitOrders++;
-      } else if (DELIVERED_STATUSES.includes(p.status)) {
-        deliveredOrders++;
+      if (PENDING_STATUSES.includes(row.status)) {
+        pendingOrders += count;
+      } else if (IN_TRANSIT_STATUSES.includes(row.status)) {
+        inTransitOrders += count;
+      } else if (DELIVERED_STATUSES.includes(row.status)) {
+        deliveredOrders += count;
         collectedCodAmount += cod;
-      } else if (RETURNED_STATUSES.includes(p.status)) {
-        returnedOrders++;
+      } else if (RETURNED_STATUSES.includes(row.status)) {
+        returnedOrders += count;
       }
     }
 
-    const recentParcels = parcels.slice(0, 5).map(p => ({
-      id: p.id,
-      trackingCode: p.trackingCode,
-      recipientName: p.recipientName,
-      recipientPhone: p.recipientPhone,
-      deliveryAddress: p.rawAddress,
-      district: (p.normalizedAddress as any)?.district || "Dhaka",
-      codAmount: Number(p.codAmount),
-      deliveryFee: Number(p.deliveryFee),
-      status: p.status,
-      createdAt: p.createdAt.toISOString(),
+    const recent = await this.parcelRepo.find({
+      where: { merchantId: merchant.id },
+      order: { createdAt: "DESC" },
+      take: 5,
+    });
+
+    const recentParcels = recent.map((parcel) => ({
+      id: parcel.id,
+      trackingCode: parcel.trackingCode,
+      recipientName: parcel.recipientName,
+      recipientPhone: parcel.recipientPhone,
+      deliveryAddress: parcel.rawAddress,
+      district: parcel.district ?? "",
+      thana: parcel.thana ?? "",
+      codAmount: Number(parcel.codAmount),
+      deliveryFee: Number(parcel.deliveryFee),
+      status: parcel.status,
+      createdAt: parcel.createdAt.toISOString(),
     }));
 
     return {

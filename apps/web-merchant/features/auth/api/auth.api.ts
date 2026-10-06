@@ -15,17 +15,24 @@ export interface RegisterPayload {
   pickupAddress?: string;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  role: string;
+  merchantId?: string;
+}
+
 export interface AuthResponseData {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    phone: string;
-    role: string;
-    merchantId?: string;
-  };
+  user: AuthUser;
   accessToken: string;
   refreshToken: string;
+  /**
+   * The auth service nests token pairs under `tokens` on some responses.
+   * Both shapes are declared so clients never need an unsafe cast.
+   */
+  tokens?: { accessToken?: string; refreshToken?: string };
 }
 
 export const authApi = baseApi.injectEndpoints({
@@ -54,7 +61,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth", "Merchant", "Parcel"],
     }),
-    getMe: builder.query<{ data: any; success: boolean }, void>({
+    getMe: builder.query<{ data: AuthUser; success: boolean }, void>({
       query: () => "/auth/me",
       providesTags: ["Auth"],
     }),

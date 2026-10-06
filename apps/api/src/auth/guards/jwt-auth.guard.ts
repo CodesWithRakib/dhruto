@@ -8,6 +8,7 @@ import { Reflector } from "@nestjs/core";
 import { CustomJwtService } from "../jwt/custom-jwt.service.js";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator.js";
 import { AuthenticatedUser } from "../jwt/jwt.interface.js";
+import { getErrorMessage } from "../../common/utils/error.util.js";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -65,8 +66,10 @@ export class JwtAuthGuard implements CanActivate {
 
       request.user = user;
       return true;
-    } catch (err: any) {
-      throw new UnauthorizedException(err.message || "Invalid or expired authorization token");
+    } catch (err) {
+      throw new UnauthorizedException(
+        getErrorMessage(err, "Invalid or expired authorization token"),
+      );
     }
   }
 }

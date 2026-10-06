@@ -1,5 +1,16 @@
 import { baseApi } from "../../../lib/api/base-api";
 
+export interface MerchantProfile {
+  id: string;
+  userId: string;
+  businessName: string;
+  contactPhone: string;
+  pickupAddress: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DashboardStats {
   totalOrders: number;
   pendingOrders: number;
@@ -27,6 +38,7 @@ export interface MerchantDashboardData {
     recipientPhone: string;
     deliveryAddress: string;
     district: string;
+    thana: string;
     codAmount: number;
     deliveryFee: number;
     status: string;
@@ -36,12 +48,12 @@ export interface MerchantDashboardData {
 
 export const merchantsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMerchantProfile: builder.query<{ data: any; success: boolean }, void>({
+    getMerchantProfile: builder.query<{ data: MerchantProfile; success: boolean }, void>({
       query: () => "/merchants/me",
       providesTags: ["Merchant"],
     }),
     updateMerchantProfile: builder.mutation<
-      { data: any; success: boolean; message: string },
+      { data: MerchantProfile; success: boolean; message: string },
       { businessName?: string; contactPhone?: string; pickupAddress?: string }
     >({
       query: (body) => ({

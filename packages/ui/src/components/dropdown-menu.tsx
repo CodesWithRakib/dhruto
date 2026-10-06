@@ -5,8 +5,10 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 import { cn } from '../lib/utils.js';
 
-interface DropdownMenuProps
-  extends React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root> {}
+/** Root props are used as-is; declared as a type alias (no empty interface). */
+type DropdownMenuProps = React.ComponentPropsWithoutRef<
+  typeof DropdownMenuPrimitive.Root
+>;
 
 const DropdownMenu = ({ modal = false, ...props }: DropdownMenuProps) => (
   <DropdownMenuPrimitive.Root modal={modal} {...props} />

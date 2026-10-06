@@ -132,7 +132,7 @@ export class HubsService {
         trackingCode: p.trackingCode,
         recipientName: p.recipientName,
         recipientPhone: p.recipientPhone,
-        district: (p.normalizedAddress as any)?.district,
+        district: p.district ?? undefined,
         codAmount: Number(p.codAmount),
         status: p.status,
         updatedAt: p.updatedAt.toISOString(),
@@ -196,7 +196,7 @@ export class HubsService {
           message: `Parcel received at ${hub.name}`,
           routingInfo: {
             currentHubName: hub.name,
-            destinationHubName: (parcel.normalizedAddress as any)?.district,
+            destinationHubName: parcel.district ?? undefined,
           },
           timestamp: new Date().toISOString(),
         };
@@ -296,9 +296,9 @@ export class HubsService {
           itemType: "PARCEL",
           previousStatus,
           currentStatus: parcel.status,
-          message: `Parcel sorted. Destination: ${(parcel.normalizedAddress as any)?.district || "Dhaka"}`,
+          message: `Parcel sorted. Destination: ${parcel.district ?? "Dhaka"}`,
           routingInfo: {
-            destinationHubName: (parcel.normalizedAddress as any)?.district || "Dhaka",
+            destinationHubName: parcel.district ?? "Dhaka",
           },
           timestamp: new Date().toISOString(),
         };
@@ -759,21 +759,22 @@ export class HubsService {
     parcelId: string,
     fromStatus: string | null,
     toStatus: ParcelStatus,
-    changedBy: string,
-    changedByRole: string,
-    reason: string,
+    actorId: string,
+    actorRole: string,
+    description: string,
     hubId?: string,
   ) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(changedBy);
-    const validChangedBy = isUuid ? changedBy : "00000000-0000-0000-0000-000000000000";
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actorId);
+    const validActorId = isUuid ? actorId : "00000000-0000-0000-0000-000000000000";
 
     const history = this.statusHistoryRepo.create({
       parcelId,
-      fromStatus: fromStatus as any,
+      fromStatus: fromStatus as ParcelStatus | null,
       toStatus,
-      changedBy: validChangedBy,
-      changedByRole,
-      reason,
+      eventType: "STATUS_CHANGED",
+      actorId: validActorId,
+      actorRole,
+      description,
       metadata: { hubId },
     });
     await this.statusHistoryRepo.save(history);

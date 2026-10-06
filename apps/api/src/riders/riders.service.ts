@@ -7,7 +7,7 @@ import {
   Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, In } from "typeorm";
+import { Repository, In, type FindOptionsWhere } from "typeorm";
 import {
   Parcel,
   ParcelStatus,
@@ -69,7 +69,7 @@ export class RidersService {
    * Get all tasks (deliveries/pickups) assigned to the rider.
    */
   async getAssignedTasks(riderId: string, filterStatus?: ParcelStatus) {
-    const whereCondition: any = { currentRiderId: riderId };
+    const whereCondition: FindOptionsWhere<Parcel> = { currentRiderId: riderId };
 
     if (filterStatus) {
       whereCondition.status = filterStatus;
@@ -96,8 +96,8 @@ export class RidersService {
       recipientName: parcel.recipientName,
       recipientPhone: parcel.recipientPhone,
       deliveryAddress: parcel.rawAddress,
-      district: (parcel.normalizedAddress as any)?.district,
-      thana: (parcel.normalizedAddress as any)?.thana,
+      district: parcel.district ?? undefined,
+      thana: parcel.thana ?? undefined,
       weight: Number(parcel.weight),
       codAmount: Number(parcel.codAmount),
       deliveryFee: Number(parcel.deliveryFee),
@@ -152,9 +152,10 @@ export class RidersService {
       parcelId: parcel.id,
       fromStatus,
       toStatus,
-      changedBy: userId,
-      changedByRole: "RIDER",
-      reason: "Rider departed for delivery",
+      eventType: "STATUS_CHANGED",
+      actorId: userId,
+      actorRole: "RIDER",
+      description: "Rider departed for delivery",
       metadata: { riderId },
     });
     await this.statusHistoryRepo.save(history);
@@ -278,9 +279,10 @@ export class RidersService {
       parcelId: parcel.id,
       fromStatus,
       toStatus,
-      changedBy: userId,
-      changedByRole: "RIDER",
-      reason: dto.remarks || "Delivered to recipient",
+      eventType: "STATUS_CHANGED",
+      actorId: userId,
+      actorRole: "RIDER",
+      description: dto.remarks || "Delivered to recipient",
       metadata: {
         riderId,
         codCollected: collectedAmount,
@@ -390,9 +392,10 @@ export class RidersService {
       parcelId: parcel.id,
       fromStatus,
       toStatus,
-      changedBy: userId,
-      changedByRole: "RIDER",
-      reason: `Delivery failed: ${dto.reason}. ${dto.notes || ""}`,
+      eventType: "STATUS_CHANGED",
+      actorId: userId,
+      actorRole: "RIDER",
+      description: `Delivery failed: ${dto.reason}. ${dto.notes || ""}`,
       metadata: {
         riderId,
         reason: dto.reason,

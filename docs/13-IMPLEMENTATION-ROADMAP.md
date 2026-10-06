@@ -62,6 +62,55 @@
 
 Merchant can create and track a parcel end-to-end.
 
+### Status — implemented
+
+Delivered as a vertical slice: DB -> NestJS -> API -> RBAC -> frontend.
+
+| Area        | Delivered                                                                                                                                       |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Database    | `parcels`, `parcel_status_histories` (append-only), `idempotency_records` (unique `(key, scope)`); migrations run via `migration:run`           |
+| API         | `POST/GET /parcels`, `GET /parcels/:id`, `GET /parcels/:id/history`, `GET /parcels/:id/label`, `GET /tracking/:code`, `POST /pricing/calculate` |
+| RBAC        | Merchant ownership enforced server-side; client-supplied `merchantId` is never trusted; cross-tenant reads return 404                           |
+| Idempotency | `Idempotency-Key` mandatory on create; DB-unique guard; replay / conflict / in-progress                                                         |
+| Pricing     | Decimal-safe integer paisa, `PRICING_RULES_VERSION = 2026.1`; the client never computes a fee                                                   |
+| History     | Append-only status history written in the same transaction as the parcel                                                                        |
+| Labels      | Code128 SVG from the API rendered on a 4in x 6in thermal label with print CSS                                                                   |
+| Tracking    | Public endpoint returns safe fields only (no merchant or financial data)                                                                        |
+| Frontend    | Dashboard, booking form with live quote, paginated/searchable list, details with timeline, label print, public tracking                         |
+| i18n        | EN + BN catalogs with matching key sets                                                                                                         |
+| Mobile      | Bottom nav, card list, filter sheet; no horizontal page scroll                                                                                  |
+
+Verified commands (run from the repository root unless noted):
+
+```text
+pnpm typecheck   # 6/6 tasks
+pnpm lint        # 6/6 tasks
+pnpm build       # 4/4 tasks
+pnpm test        # 5/5 tasks (API 148 tests, web 16 tests)
+pnpm test:e2e    # 3/3 tasks (Playwright 28 tests: chromium + mobile-chrome)
+cd apps/api && npm run migration:run   && npm run migration:show   # no pending
+cd apps/api && npm run seed                                    # idempotent
+```
+
+Spec reconciliations (documented, not silent divergences):
+
+- `ORDER_CREATED` in the spec is implemented as `CREATED`
+  (`INITIAL_PARCEL_STATUS`); see [State Machine](./08-STATE-MACHINE.md).
+- `SUPER_ADMIN` is covered by the existing `UserRole.ADMIN`, which bypasses
+  role checks.
+- `canTransition` follows `08-STATE-MACHINE.md` §2, with one named and tested
+  exception: `PRE_PICKUP_RIDER_ASSIGNMENT_FROM = [CREATED, PICKUP_REQUESTED]`
+  -> `ASSIGNED_TO_RIDER`.
+- `GET /parcels` flattens the page envelope onto `meta`; see
+  [API Specification](./05-API-SPEC.md) §5.
+
+Known gaps carried into Phase 2:
+
+- Bulk parcel ingestion (`POST /parcels/bulk/validate`, `bulk/import`) is
+  stubbed in the UI as a future feature and not implemented on the API.
+- Redis is optional at runtime; the API falls back to an in-memory TTL/LRU
+  cache for rate limiting and tracking lookups.
+
 ---
 
 ## Phase 2 — Hub Operations

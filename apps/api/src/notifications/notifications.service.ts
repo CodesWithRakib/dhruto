@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, type FindOptionsWhere } from "typeorm";
 import {
   Notification,
   NotificationChannel,
@@ -11,6 +11,7 @@ import {
   type CreateNotificationDto,
   type NotificationItem,
 } from "@dhruto/contracts";
+import { getErrorMessage } from "../common/utils/error.util.js";
 import { SmsService } from "./services/sms.service.js";
 import { EmailService } from "./services/email.service.js";
 
@@ -48,16 +49,16 @@ export class NotificationsService {
       notification.recipientTarget = normalized;
       try {
         await this.smsService.sendSms(normalized, dto.message);
-      } catch (err: any) {
+      } catch (err) {
         notification.status = NotificationStatus.FAILED;
-        notification.failureReason = err?.message || "SMS delivery failed";
+        notification.failureReason = getErrorMessage(err, "SMS delivery failed");
       }
     } else if (dto.channel === NotificationChannel.EMAIL && dto.recipientTarget) {
       try {
         await this.emailService.sendEmail(dto.recipientTarget, dto.title, dto.message);
-      } catch (err: any) {
+      } catch (err) {
         notification.status = NotificationStatus.FAILED;
-        notification.failureReason = err?.message || "Email delivery failed";
+        notification.failureReason = getErrorMessage(err, "Email delivery failed");
       }
     }
 
@@ -120,7 +121,7 @@ export class NotificationsService {
    * Marks a specific notification as read.
    */
   async markAsRead(notificationId: string, merchantId?: string): Promise<Notification> {
-    const where: any = { id: notificationId };
+    const where: FindOptionsWhere<Notification> = { id: notificationId };
     if (merchantId) {
       where.merchantId = merchantId;
     }

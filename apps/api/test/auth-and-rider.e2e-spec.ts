@@ -4,10 +4,18 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { ZodValidationPipe } from "nestjs-zod";
+import {
+  SEEDED_ACCOUNTS,
+  bearer,
+  idempotencyKey,
+  loginToken,
+} from "./utils/auth.js";
 
 describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
   let app: INestApplication;
   let riderToken: string;
+  let merchantToken: string;
+  let hubManagerToken: string;
   let riderRefreshToken: string;
   let riderId: string;
   let testParcelId: string;
@@ -26,6 +34,9 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
     app.setGlobalPrefix("api/v1");
     app.useGlobalPipes(new ZodValidationPipe());
     await app.init();
+
+    merchantToken = await loginToken(app, SEEDED_ACCOUNTS.merchant);
+    hubManagerToken = await loginToken(app, SEEDED_ACCOUNTS.hubManager);
   });
 
   afterAll(async () => {
@@ -110,6 +121,8 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
       // 1. Create parcel
       const createRes = await request(app.getHttpServer())
         .post("/api/v1/parcels")
+        .set(bearer(merchantToken))
+        .set("Idempotency-Key", idempotencyKey("auth-rider-parcel"))
         .send({
           recipientName: "Customer Sifat",
           recipientPhone: "01812345678",
@@ -127,6 +140,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
       // 2. Assign to rider
       const assignRes = await request(app.getHttpServer())
         .post(`/api/v1/parcels/${testParcelId}/assign-rider`)
+        .set(bearer(hubManagerToken))
         .send({ riderId })
         .expect(200);
 
@@ -142,7 +156,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
 
       expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.data)).toBe(true);
-      const task = res.body.data.find((p: any) => p.id === testParcelId);
+      const task = res.body.data.find((p: { id: string }) => p.id === testParcelId);
       expect(task).toBeDefined();
       expect(task.recipientName).toBe("Customer Sifat");
       expect(task.codAmount).toBe(2500);

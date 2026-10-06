@@ -3,3 +3,50 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Shipping label print output.
+ * ------------------------------------------------------------------
+ * Thermal printers are fed 4in x 6in stock with no browser margins, so the
+ * printable page is declared explicitly and everything outside `.dhruto-label`
+ * is hidden. The label itself is black-on-white by design (it is the print
+ * artifact, not a themed surface).
+ */
+@page {
+  size: 4in 6in;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  /* Hide the whole application, then reveal only the label subtree. */
+  body * {
+    visibility: hidden;
+  }
+
+  .dhruto-label,
+  .dhruto-label * {
+    visibility: visible;
+  }
+
+  .dhruto-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4in;
+    height: 6in;
+    margin: 0;
+    border: none;
+    padding: 0.12in;
+  }
+
+  .dhruto-print-hidden {
+    display: none !important;
+  }
+}

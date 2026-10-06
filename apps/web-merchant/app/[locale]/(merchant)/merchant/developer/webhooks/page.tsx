@@ -29,7 +29,13 @@ import {
   useListWebhookDeliveriesQuery,
   useRetryWebhookDeliveryMutation,
 } from "@/features/webhooks/api/webhooks.api";
-import { WebhookEvent, WebhookDeliveryStatus } from "@dhruto/contracts";
+import {
+  WebhookEvent,
+  WebhookDeliveryStatus,
+  type WebhookDeliveryItem,
+} from "@dhruto/contracts";
+import type { DataTableRow } from "@/lib/data-table";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const AVAILABLE_EVENTS = [
   {
@@ -68,7 +74,7 @@ export default function WebhooksDeveloperPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [revealedSecrets, setRevealedSecrets] = useState<Record<string, boolean>>({});
   const [copiedSecretId, setCopiedSecretId] = useState<string | null>(null);
-  const [inspectDelivery, setInspectDelivery] = useState<any | null>(null);
+  const [inspectDelivery, setInspectDelivery] = useState<WebhookDeliveryItem | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
 
   // Create form state
@@ -145,8 +151,8 @@ export default function WebhooksDeveloperPage() {
       setCustomSecret("");
       setShowCreateModal(false);
       refetchSubs();
-    } catch (err: any) {
-      setFormError(err?.data?.message || "Failed to register webhook subscription.");
+    } catch (err) {
+      setFormError(getApiErrorMessage(err, "Failed to register webhook subscription."));
     }
   };
 
@@ -468,7 +474,7 @@ export default function WebhooksDeveloperPage() {
                   {
                     accessorKey: "event",
                     header: "Event",
-                    cell: ({ row }: { row: any }) => (
+                    cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => (
                       <span className="font-mono font-medium text-foreground">
                         {row.original.event}
                       </span>
@@ -477,7 +483,7 @@ export default function WebhooksDeveloperPage() {
                   {
                     accessorKey: "status",
                     header: "Status",
-                    cell: ({ row }: { row: any }) => {
+                    cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => {
                       const isDelivered = row.original.status === WebhookDeliveryStatus.DELIVERED;
                       const isDeadLetter = row.original.status === WebhookDeliveryStatus.DEAD_LETTER;
                       return (
@@ -500,7 +506,7 @@ export default function WebhooksDeveloperPage() {
                   {
                     accessorKey: "statusCode",
                     header: "Response Code",
-                    cell: ({ row }: { row: any }) => (
+                    cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => (
                       <span className="font-mono">
                         {row.original.statusCode ? (
                           <span
@@ -521,7 +527,7 @@ export default function WebhooksDeveloperPage() {
                   {
                     accessorKey: "attemptCount",
                     header: "Attempts",
-                    cell: ({ row }: { row: any }) => (
+                    cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => (
                       <span className="font-mono text-muted-foreground">
                         {row.original.attemptCount} / 3
                       </span>
@@ -530,7 +536,7 @@ export default function WebhooksDeveloperPage() {
                   {
                     accessorKey: "createdAt",
                     header: "Timestamp",
-                    cell: ({ row }: { row: any }) => (
+                    cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => (
                       <span className="text-muted-foreground">
                         {new Date(row.original.createdAt).toLocaleString()}
                       </span>
@@ -539,7 +545,7 @@ export default function WebhooksDeveloperPage() {
                   {
                     id: "actions",
                     header: () => <span className="text-right block">Actions</span>,
-                    cell: ({ row }: { row: any }) => {
+                    cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => {
                       const item = row.original;
                       const isDelivered = item.status === WebhookDeliveryStatus.DELIVERED;
                       return (

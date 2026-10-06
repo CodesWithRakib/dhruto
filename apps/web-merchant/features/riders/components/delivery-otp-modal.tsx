@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useCompleteDeliveryMutation } from "../api/riders.api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 import { type RiderTaskItem } from "@dhruto/contracts";
 
@@ -58,8 +59,8 @@ export function DeliveryOtpModal({ task, onClose, onSuccess }: DeliveryOtpModalP
         onSuccess();
         onClose();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to complete delivery");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to complete delivery"));
     }
   };
 

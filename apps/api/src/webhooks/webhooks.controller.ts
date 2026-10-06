@@ -47,7 +47,7 @@ export class WebhooksController {
       if (profile) return profile.id;
     }
 
-    const authHeader = (req as any)?.headers?.authorization;
+    const authHeader = req?.headers?.authorization;
     if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
       try {
         const token = authHeader.substring(7);

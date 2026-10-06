@@ -214,6 +214,8 @@ export class SeederService {
           recipientName: pData.recipientName,
           recipientPhone: pData.recipientPhone,
           rawAddress: pData.rawAddress,
+          district: pData.district,
+          thana: pData.thana,
           normalizedAddress: {
             district: pData.district,
             thana: pData.thana,
@@ -233,6 +235,8 @@ export class SeederService {
         parcel.recipientName = pData.recipientName;
         parcel.recipientPhone = pData.recipientPhone;
         parcel.rawAddress = pData.rawAddress;
+        parcel.district = pData.district;
+        parcel.thana = pData.thana;
         parcel.weight = pData.weight;
         parcel.codAmount = pData.codAmount;
         parcel.deliveryFee = pData.deliveryFee;
@@ -321,11 +325,12 @@ export class SeederService {
         for (const step of historySteps) {
           const h = this.statusHistoryRepo.create({
             parcelId: parcel.id,
-            fromStatus: step.fromStatus as any,
-            toStatus: step.toStatus as any,
-            changedBy: merchant.userId,
-            changedByRole: step.role,
-            reason: step.reason,
+            fromStatus: step.fromStatus,
+            toStatus: step.toStatus,
+            eventType: step.fromStatus === null ? 'PARCEL_CREATED' : 'STATUS_CHANGED',
+            actorId: merchant.userId,
+            actorRole: step.role,
+            description: step.reason,
             metadata: {},
           });
           h.createdAt = new Date(now - step.hoursAgo * 3600 * 1000);

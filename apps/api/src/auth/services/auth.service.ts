@@ -22,6 +22,7 @@ import {
 import { CustomJwtService } from "../jwt/custom-jwt.service.js";
 import { PasswordService } from "./password.service.js";
 import { RegisterDto, LoginDto } from "../dto/auth.dto.js";
+import { getErrorMessage } from "../../common/utils/error.util.js";
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -46,8 +47,8 @@ export class AuthService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.seedDemoData();
-    } catch (err: any) {
-      this.logger.warn(`Demo data seed warning: ${err.message}`);
+    } catch (err) {
+      this.logger.warn(`Demo data seed warning: ${getErrorMessage(err, "unknown error")}`);
     }
   }
 

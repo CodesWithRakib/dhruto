@@ -4,15 +4,21 @@ import { type INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { ParcelStatus, BagStatus, HubScanType } from "@dhruto/contracts";
+import {
+  SEEDED_ACCOUNTS,
+  bearer,
+  idempotencyKey,
+  loginToken,
+} from "./utils/auth.js";
 
 describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () => {
   let app: INestApplication;
+  let merchantToken: string;
   let originHubId: string;
   let destinationHubId: string;
   let testParcelId: string;
   let testTrackingCode: string;
   let testBagId: string;
-  let testBagCode: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,6 +28,8 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
     await app.init();
+
+    merchantToken = await loginToken(app, SEEDED_ACCOUNTS.merchant);
   });
 
   afterAll(async () => {
@@ -36,10 +44,10 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
     expect(res.body.success).toBe(true);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
 
-    const dhkHub = res.body.data.find((h: any) => h.code === "HUB-DHK-01");
+    const dhkHub = res.body.data.find((h: { code: string }) => h.code === "HUB-DHK-01");
     originHubId = dhkHub ? dhkHub.id : res.body.data[0].id;
 
-    const ctgHub = res.body.data.find((h: any) => h.code === "HUB-CTG-01");
+    const ctgHub = res.body.data.find((h: { code: string }) => h.code === "HUB-CTG-01");
     destinationHubId = ctgHub ? ctgHub.id : originHubId;
   });
 
@@ -56,6 +64,8 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
 
     const res = await request(app.getHttpServer())
       .post("/api/v1/parcels")
+      .set(bearer(merchantToken))
+      .set("Idempotency-Key", idempotencyKey("hubs-parcel"))
       .send(booking)
       .expect(201);
 
@@ -82,6 +92,7 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
     // Verify parcel status in DB
     const check = await request(app.getHttpServer())
       .get(`/api/v1/parcels/${testParcelId}`)
+      .set(bearer(merchantToken))
       .expect(200);
     expect(check.body.data.status).toBe(ParcelStatus.ORIGIN_HUB_RECEIVED);
   });
@@ -99,7 +110,6 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
 
     expect(res.body.success).toBe(true);
     testBagId = res.body.data.id;
-    testBagCode = res.body.data.bagCode;
     expect(res.body.data.status).toBe(BagStatus.OPEN);
   });
 
@@ -114,6 +124,7 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
     // Verify parcel status transitioned to BAGGED
     const check = await request(app.getHttpServer())
       .get(`/api/v1/parcels/${testParcelId}`)
+      .set(bearer(merchantToken))
       .expect(200);
     expect(check.body.data.status).toBe(ParcelStatus.BAGGED);
   });
@@ -140,6 +151,7 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
     // Verify parcel status transitioned to IN_TRANSIT
     const check = await request(app.getHttpServer())
       .get(`/api/v1/parcels/${testParcelId}`)
+      .set(bearer(merchantToken))
       .expect(200);
     expect(check.body.data.status).toBe(ParcelStatus.IN_TRANSIT);
   });
@@ -156,8 +168,9 @@ describe("Hub Operations & Cross-Hub Transit Lifecycle (E2E / Integration)", () 
     // Verify parcel status transitioned to DESTINATION_HUB_RECEIVED
     const check = await request(app.getHttpServer())
       .get(`/api/v1/parcels/${testParcelId}`)
+      .set(bearer(merchantToken))
       .expect(200);
     expect(check.body.data.status).toBe(ParcelStatus.DESTINATION_HUB_RECEIVED);
-    expect(check.body.data.statusHistory.length).toBeGreaterThanOrEqual(4);
+    expect(check.body.data.history.length).toBeGreaterThanOrEqual(4);
   });
 });

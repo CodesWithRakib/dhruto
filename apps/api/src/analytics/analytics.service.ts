@@ -66,7 +66,8 @@ export class AnalyticsService {
     merchantId: string,
     query: AnalyticsQueryDto,
   ): Promise<MerchantAnalyticsSummary> {
-    const period = query.period || (query as any).timeframe || '30d';
+    const period =
+      query.period || (query as { timeframe?: string }).timeframe || '30d';
     const cacheKey = `analytics:merchant:${merchantId}:${period}:${query.startDate || ''}:${query.endDate || ''}`;
     if (this.cacheService) {
       return this.cacheService.wrap(cacheKey, () => this.computeMerchantSummary(merchantId, query), 60);
@@ -117,8 +118,8 @@ export class AnalyticsService {
       totalBookedCod += Number(p.codAmount || 0);
       deliveryCharges += Number(p.deliveryFee || 0);
 
-      // Extract district from normalizedAddress or raw address
-      const dist = (p.normalizedAddress as any)?.district || 'Dhaka';
+      // Destination district is a first-class parcel column (Phase 1).
+      const dist = p.district ?? 'Dhaka';
       const currentDist = districtMap.get(dist) || { count: 0, delivered: 0 };
       currentDist.count += 1;
 

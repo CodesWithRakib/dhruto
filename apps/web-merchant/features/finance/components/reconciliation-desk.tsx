@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import {
   useGetPendingReconciliationsQuery,
   useVerifyCashHandInMutation,
@@ -29,6 +29,7 @@ import {
   CardDescription,
 } from "@dhruto/ui";
 import type { PendingReconciliationItem } from "@dhruto/contracts";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function ReconciliationDesk() {
   const { data: summaryRes, refetch: refetchSummary } = useGetReconciliationSummaryQuery();
@@ -50,7 +51,8 @@ export function ReconciliationDesk() {
     setFeedback(null);
   };
 
-  const handleConfirmVerification = async (ledgerId: string) => {
+  const handleConfirmVerification = useCallback(
+    async (ledgerId: string) => {
     setFeedback(null);
     try {
       const res = await verifyCashHandIn({
@@ -66,13 +68,15 @@ export function ReconciliationDesk() {
       setActiveLedgerId(null);
       refetchPending();
       refetchSummary();
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         type: "error",
-        text: err?.data?.message || err?.message || "Failed to verify cash ledger",
+        text: getApiErrorMessage(err, "Failed to verify cash ledger"),
       });
     }
-  };
+    },
+    [actualAmount, refetchPending, refetchSummary, verifyCashHandIn, verifyNotes],
+  );
 
   const columns: ColumnDef<PendingReconciliationItem>[] = useMemo(
     () => [
@@ -187,7 +191,7 @@ export function ReconciliationDesk() {
         },
       },
     ],
-    [activeLedgerId, actualAmount, isVerifying],
+    [activeLedgerId, actualAmount, handleConfirmVerification, isVerifying],
   );
 
   return (

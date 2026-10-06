@@ -1,152 +1,165 @@
 "use client";
 
 import React from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { AlertCircle, ArrowLeft, Printer, Truck } from "lucide-react";
+import { Button } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
-import { useTranslations } from "next-intl";
-import { Button, Card, CardTitle, CardDescription } from "@dhruto/ui";
-import { Printer, ArrowLeft, AlertCircle, Truck } from "lucide-react";
-import { useGetShippingLabelQuery } from "../api/parcels.api";
 import { useRouteBase } from "@/config/route-base";
+import { ErrorState, LoadingState } from "@/components/feedback/states";
+import { useGetShippingLabelQuery } from "../api/parcels.api";
 
 interface ShippingLabelViewProps {
   parcelId: string;
 }
 
+/**
+ * Printable 4in x 6in shipping label.
+ *
+ * The label is deliberately black-on-white with hard borders: it is rendered
+ * for a thermal printer, not as a themed UI surface. Page size and the print
+ * isolation rules live in `app/globals.css` (`.dhruto-label`).
+ */
 export function ShippingLabelView({ parcelId }: ShippingLabelViewProps) {
   const t = useTranslations("ShippingLabel");
+  const locale = useLocale();
   const routes = useRouteBase();
-  const { data, isLoading, error } = useGetShippingLabelQuery(parcelId);
+  const { data, isLoading, isError } = useGetShippingLabelQuery(parcelId);
 
   if (isLoading) {
     return (
-      <div className="max-w-xl mx-auto py-16 text-center space-y-3">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground">Generating shipping label...</p>
+      <div className="mx-auto max-w-xl rounded-md border border-border bg-surface">
+        <LoadingState title={t("generating")} />
       </div>
     );
   }
 
-  if (error || !data?.data) {
+  if (isError || !data?.data) {
     return (
-      <Card className="max-w-md mx-auto my-8 border-destructive/20 text-center p-8">
-        <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-2" />
-        <CardTitle className="text-lg">Label Generation Failed</CardTitle>
-        <CardDescription>Could not retrieve label for shipment "{parcelId}".</CardDescription>
-        <Link href={routes.parcels} className="mt-4 inline-block">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-1.5" />
-            {t("back")}
-          </Button>
-        </Link>
-      </Card>
+      <div className="mx-auto max-w-xl rounded-md border border-border bg-surface">
+        <ErrorState
+          title={t("failedTitle")}
+          description={t("failedDescription")}
+          action={
+            <Link href={routes.parcels}>
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                {t("back")}
+              </Button>
+            </Link>
+          }
+        />
+      </div>
     );
   }
 
   const label = data.data;
 
   return (
-    <div className="max-w-xl mx-auto space-y-6">
-      {/* Screen Control Bar */}
-      <div className="flex items-center justify-between print:hidden">
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="dhruto-print-hidden flex items-center justify-between gap-3">
         <Link href={routes.parcel(parcelId)}>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1.5">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="gap-1.5">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t("back")}
           </Button>
         </Link>
-        <Button onClick={() => window.print()} className="flex items-center gap-2">
-          <Printer className="h-4 w-4" />
+        <Button onClick={() => window.print()} className="gap-2">
+          <Printer className="h-4 w-4" aria-hidden="true" />
           {t("print")}
         </Button>
       </div>
 
-      {/* 4x6 Physical Thermal Label Container */}
-      {/* Physical 4x6 thermal label: black-on-white is intentional (print artifact). */}
-      <div className="mx-auto max-w-[420px] rounded-lg border-2 border-black bg-white p-6 font-sans text-black print:max-w-full print:border-none print:p-0">
-        {/* Label Header */}
-        <div className="flex items-center justify-between border-b-2 border-black pb-3">
+      <p className="dhruto-print-hidden flex items-start gap-2 text-caption text-muted-foreground">
+        <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        {t("printHint")}
+      </p>
+
+      {/* 4in x 6in thermal label — black-on-white is intentional. */}
+      <div className="dhruto-label mx-auto w-[4in] overflow-hidden border-2 border-black bg-white font-sans text-black">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b-2 border-black px-3 py-2">
           <div className="flex items-center gap-1.5">
-            <div className="p-1 bg-black text-white rounded">
-              <Truck className="h-5 w-5" />
-            </div>
-            <span className="text-2xl font-black tracking-tighter">DHRUTO</span>
-            <span className="text-[10px] font-bold border border-black px-1 rounded ml-1">
+            <span className="flex items-center bg-black p-0.5 text-white">
+              <Truck className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span className="text-xl font-black tracking-tighter">DHRUTO</span>
+            <span className="ml-1 border border-black px-1 text-[9px] font-bold">
               EXPRESS
             </span>
           </div>
           <div className="text-right">
-            <span className="text-[10px] uppercase font-bold block text-neutral-600">
-              {t("hub")}
-            </span>
-            <span className="text-sm font-black">{label.routingHub}</span>
+            <span className="block text-[9px] font-bold uppercase">{t("hub")}</span>
+            <span className="text-xs font-black">{label.routingHub}</span>
           </div>
         </div>
 
-        {/* Barcode & Tracking Section */}
-        <div className="py-4 border-b-2 border-black text-center space-y-1">
+        {/* Barcode */}
+        <div className="border-b-2 border-black px-3 py-3">
           <div
-            className="w-full flex justify-center [&>svg]:max-h-16 [&>svg]:w-full"
+            className="flex h-20 w-full items-center justify-center overflow-hidden [&>svg]:h-full [&>svg]:w-full"
+            // Barcode SVG is generated by the Dhruto API from the validated
+            // tracking code; it is not user-supplied markup.
             dangerouslySetInnerHTML={{ __html: label.barcodeSvg }}
           />
+          <p className="mt-1 text-center font-mono text-sm font-black tracking-widest">
+            {label.trackingCode}
+          </p>
         </div>
 
-        {/* Grid Info: Recipient & COD */}
-        <div className="grid grid-cols-3 border-b-2 border-black divide-x-2 divide-black">
-          {/* Recipient Details (2 cols) */}
-          <div className="col-span-2 p-3 space-y-1">
-            <span className="text-[10px] font-extrabold uppercase text-neutral-600 block">
+        {/* Recipient + COD */}
+        <div className="grid grid-cols-3 divide-x-2 divide-black border-b-2 border-black">
+          <div className="col-span-2 space-y-1 p-3">
+            <span className="block text-[9px] font-extrabold uppercase">
               {t("to")}
             </span>
-            <p className="text-sm font-black uppercase leading-tight">{label.recipientName}</p>
-            <p className="text-sm font-bold font-mono tracking-tight">{label.recipientPhone}</p>
-            <p className="text-xs leading-tight text-neutral-800 mt-1">
-              {label.deliveryAddress}
+            <p className="text-sm font-black uppercase leading-tight">
+              {label.recipientName}
             </p>
-            <p className="text-xs font-black uppercase mt-1">
+            <p className="font-mono text-sm font-bold tracking-tight">
+              {label.recipientPhone}
+            </p>
+            <p className="mt-1 text-[11px] leading-tight">{label.deliveryAddress}</p>
+            <p className="mt-1 text-[11px] font-black uppercase">
               {label.thana}, {label.district}
             </p>
           </div>
 
-          {/* COD Box (1 col) */}
-          <div className="p-3 bg-neutral-100 flex flex-col justify-center items-center text-center">
-            <span className="text-[9px] font-black uppercase text-neutral-700">
-              {t("codAmount")}
+          <div className="flex flex-col items-center justify-center bg-neutral-100 p-3 text-center">
+            <span className="text-[9px] font-black uppercase">{t("codAmount")}</span>
+            <span className="mt-1 text-base font-black leading-none">
+              ৳{label.codAmount.toLocaleString(locale)}
             </span>
-            <span className="text-lg font-black mt-1 leading-none">
-              ৳{label.codAmount.toLocaleString()}
-            </span>
-            <span className="text-[9px] font-bold text-neutral-500 mt-1">
-              {label.codAmount > 0 ? "COLLECT CASH" : "PREPAID"}
+            <span className="mt-1 text-[9px] font-bold">
+              {label.codAmount > 0 ? t("collectCash") : t("prepaid")}
             </span>
           </div>
         </div>
 
-        {/* Sender & Spec Details */}
-        <div className="p-3 border-b-2 border-black space-y-1">
-          <span className="text-[10px] font-extrabold uppercase text-neutral-600 block">
-            {t("from")}
-          </span>
-          <div className="flex justify-between items-start text-xs">
-            <div>
+        {/* Sender + zone */}
+        <div className="space-y-1 border-b-2 border-black p-3">
+          <span className="block text-[9px] font-extrabold uppercase">{t("from")}</span>
+          <div className="flex items-start justify-between gap-2 text-[11px]">
+            <div className="min-w-0">
               <p className="font-bold">{label.merchantName}</p>
-              <p className="font-mono text-[11px] text-neutral-700">{label.merchantPhone}</p>
-              <p className="text-[11px] text-neutral-600 truncate max-w-[260px]">
-                {label.pickupAddress}
-              </p>
+              <p className="font-mono">{label.merchantPhone}</p>
+              <p className="truncate">{label.pickupAddress}</p>
             </div>
-            <div className="text-right pl-2">
-              <span className="text-[9px] uppercase font-bold text-neutral-500 block">
-                {t("zone")}
-              </span>
-              <span className="text-xs font-black uppercase">{label.zone}</span>
+            <div className="shrink-0 text-right">
+              <span className="block text-[9px] font-bold uppercase">{t("zone")}</span>
+              <span className="text-[11px] font-black uppercase">{label.zone}</span>
             </div>
           </div>
         </div>
 
-        {/* Footer Specs */}
-        <div className="pt-2 flex justify-between items-center text-[10px] font-bold text-neutral-600">
-          <span>WEIGHT: {label.weightKg} KG</span>
-          <span>DATE: {new Date(label.createdDate).toLocaleDateString()}</span>
+        {/* Footer */}
+        <div className="flex items-center justify-between px-3 py-2 text-[9px] font-bold">
+          <span>
+            {t("weight")}: {label.weightKg} KG
+          </span>
+          <span>
+            {t("date")}: {new Date(label.createdDate).toLocaleDateString(locale)}
+          </span>
           <span>DHRUTO LOGISTICS BD</span>
         </div>
       </div>

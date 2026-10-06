@@ -1,0 +1,20 @@
+/**
+ * Stable machine-readable error codes for the Dhruto API error contract.
+ * The backend sets `errorCode` to one of these values; clients may branch on it.
+ */
+export const ApiErrorCode = {
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  MERCHANT_NOT_FOUND: "MERCHANT_NOT_FOUND",
+  PARCEL_NOT_FOUND: "PARCEL_NOT_FOUND",
+  TRACKING_NOT_FOUND: "TRACKING_NOT_FOUND",
+  INVALID_STATUS_TRANSITION: "INVALID_STATUS_TRANSITION",
+  IDEMPOTENCY_KEY_REQUIRED: "IDEMPOTENCY_KEY_REQUIRED",
+  IDEMPOTENCY_CONFLICT: "IDEMPOTENCY_CONFLICT",
+  IDEMPOTENCY_IN_PROGRESS: "IDEMPOTENCY_IN_PROGRESS",
+  RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+  INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
+} as const;
+
+export type ApiErrorCodeValue = (typeof ApiErrorCode)[keyof typeof ApiErrorCode];

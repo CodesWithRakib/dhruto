@@ -23,6 +23,7 @@ import {
   useHandInCashMutation,
 } from "../api/riders.api";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 interface RiderCashModalProps {
   onClose: () => void;
@@ -60,8 +61,8 @@ export function RiderCashModal({ onClose, onSuccess }: RiderCashModalProps) {
         onSuccess();
         onClose();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to submit cash hand-in");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to submit cash hand-in"));
     }
   };
 

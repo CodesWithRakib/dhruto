@@ -44,7 +44,7 @@ export interface NotificationItem {
   message: string;
   recipientTarget?: string;
   status: NotificationStatus;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   sentAt?: string;
   readAt?: string;
   createdAt: string;

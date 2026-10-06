@@ -57,7 +57,7 @@ export interface WebhookDeliveryItem {
   subscriptionId: string;
   merchantId: string;
   event: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   signature: string;
   statusCode?: number | null;
   responseBody?: string | null;

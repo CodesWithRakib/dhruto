@@ -1,302 +1,400 @@
 "use client";
 
 import React from "react";
-import { Link } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Button,
-  Badge,
-} from "@dhruto/ui";
-import {
+  AlertCircle,
   ArrowLeft,
+  Building2,
+  Clock,
+  MapPin,
+  Package,
   Printer,
   Search,
+  ShieldCheck,
   Truck,
-  MapPin,
-  Phone,
   User,
-  DollarSign,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Building2,
+  Wallet,
 } from "lucide-react";
-import { useGetParcelByIdQuery } from "../api/parcels.api";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@dhruto/ui";
+import { ParcelStatus } from "@dhruto/contracts";
+import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
+import { StatusBadge } from "@/components/data-display/status-badge";
+import { PARCEL_STATUS_CONFIG } from "@/config/status";
+import { ErrorState, LoadingState } from "@/components/feedback/states";
+import { useGetParcelByIdQuery } from "../api/parcels.api";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
 }
 
-const MILESTONES = [
-  { step: 1, label: "Booking", statuses: ["CREATED", "PICKUP_REQUESTED", "PICKUP_ASSIGNED"] },
-  { step: 2, label: "Picked Up", statuses: ["PICKED_UP", "ORIGIN_HUB_RECEIVED"] },
-  { step: 3, label: "Sorting & Transit", statuses: ["BAGGED", "IN_TRANSIT", "DESTINATION_HUB_RECEIVED"] },
-  { step: 4, label: "Out for Delivery", statuses: ["ASSIGNED_TO_RIDER", "OUT_FOR_DELIVERY", "DELIVERY_ATTEMPTED", "RESCHEDULED"] },
-  { step: 5, label: "Delivered", statuses: ["DELIVERED", "CASH_PENDING", "CASH_VERIFIED"] },
+/** Lifecycle milestones shown as a progress track, keyed to `ParcelStatus` labels. */
+const MILESTONES: { statuses: ParcelStatus[]; labelKey: string }[] = [
+  { statuses: [ParcelStatus.CREATED, ParcelStatus.PICKUP_REQUESTED], labelKey: "created" },
+  {
+    statuses: [
+      ParcelStatus.PICKUP_ASSIGNED,
+      ParcelStatus.PICKED_UP,
+      ParcelStatus.ORIGIN_HUB_RECEIVED,
+      ParcelStatus.BAGGED,
+    ],
+    labelKey: "pickedUp",
+  },
+  {
+    statuses: [ParcelStatus.IN_TRANSIT, ParcelStatus.DESTINATION_HUB_RECEIVED],
+    labelKey: "inTransit",
+  },
+  {
+    statuses: [
+      ParcelStatus.ASSIGNED_TO_RIDER,
+      ParcelStatus.OUT_FOR_DELIVERY,
+      ParcelStatus.DELIVERY_ATTEMPTED,
+      ParcelStatus.RESCHEDULED,
+    ],
+    labelKey: "outForDelivery",
+  },
+  {
+    statuses: [
+      ParcelStatus.DELIVERED,
+      ParcelStatus.CASH_PENDING,
+      ParcelStatus.CASH_VERIFIED,
+    ],
+    labelKey: "delivered",
+  },
 ];
 
-function getCurrentStepIndex(currentStatus: string): number {
-  if (["DELIVERED", "CASH_PENDING", "CASH_VERIFIED"].includes(currentStatus)) return 5;
-  if (["ASSIGNED_TO_RIDER", "OUT_FOR_DELIVERY", "DELIVERY_ATTEMPTED", "RESCHEDULED"].includes(currentStatus)) return 4;
-  if (["BAGGED", "IN_TRANSIT", "DESTINATION_HUB_RECEIVED"].includes(currentStatus)) return 3;
-  if (["PICKED_UP", "ORIGIN_HUB_RECEIVED"].includes(currentStatus)) return 2;
-  return 1;
+const RETURN_MILESTONES: { statuses: ParcelStatus[]; labelKey: string }[] = [
+  { statuses: [ParcelStatus.RTO_INITIATED, ParcelStatus.RETURN_IN_TRANSIT], labelKey: "rtoInitiated" },
+  { statuses: [ParcelStatus.RETURNED_TO_MERCHANT], labelKey: "returnedToMerchant" },
+];
+
+function isReturnFlow(status: ParcelStatus): boolean {
+  return [ParcelStatus.RTO_INITIATED, ParcelStatus.RETURN_IN_TRANSIT, ParcelStatus.RETURNED_TO_MERCHANT].includes(status);
+}
+
+function formatBdt(value: number): string {
+  return `৳${value.toLocaleString()}`;
 }
 
 export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const t = useTranslations("ParcelDetails");
+  const tStatus = useTranslations("ParcelStatus");
   const routes = useRouteBase();
-  const { data, isLoading, error } = useGetParcelByIdQuery(parcelId);
+
+  const { data, isLoading, isError, refetch } = useGetParcelByIdQuery(parcelId);
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto py-12 text-center space-y-3">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground">Loading shipment details...</p>
+      <div className="rounded-md border border-border bg-surface">
+        <LoadingState title={t("loading")} />
       </div>
     );
   }
 
-  if (error || !data?.data) {
+  if (isError || !data?.data) {
     return (
-      <Card className="max-w-xl mx-auto my-8 border-destructive/20 text-center p-8">
-        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-        <CardTitle className="text-xl">Shipment Not Found</CardTitle>
-        <CardDescription className="mt-1">
-          Unable to find shipment with ID "{parcelId}".
-        </CardDescription>
-        <Link href={routes.parcels} className="mt-4 inline-block">
-          <Button variant="outline">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t("back")}
-          </Button>
-        </Link>
-      </Card>
+      <div className="rounded-md border border-border bg-surface">
+        <ErrorState
+          title={t("notFoundTitle")}
+          description={t("notFoundDescription")}
+          action={
+            <Link href={routes.parcels}>
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                {t("back")}
+              </Button>
+            </Link>
+          }
+        />
+      </div>
     );
   }
 
   const parcel = data.data;
-  const currentStep = getCurrentStepIndex(parcel.status);
   const netReceivable = Math.max(0, parcel.codAmount - parcel.deliveryFee);
+  const milestones = isReturnFlow(parcel.status) ? RETURN_MILESTONES : MILESTONES;
+  const currentStep = Math.max(
+    1,
+    milestones.findIndex((milestone) => milestone.statuses.includes(parcel.status)) + 1,
+  );
+  const progress =
+    milestones.length > 1 ? ((currentStep - 1) / (milestones.length - 1)) * 100 : 0;
+  const intelligence = parcel.addressIntelligence;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <Link href={routes.parcels}>
-          <Button variant="ghost" size="sm" className="-ml-2 flex items-center gap-1.5">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="-ml-2 gap-1.5">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t("back")}
           </Button>
         </Link>
         <div className="flex items-center gap-2">
-          <Link href={`/track/${parcel.trackingCode}`}>
-            <Button variant="outline" size="sm" className="flex items-center gap-1.5">
-              <Search className="h-4 w-4" />
-              {t("publicTracking")}
-            </Button>
-          </Link>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void refetch()}>
+            <Search className="h-4 w-4" aria-hidden="true" />
+            {t("refresh")}
+          </Button>
           <Link href={routes.parcelLabel(parcel.id)}>
-            <Button size="sm" className="flex items-center gap-1.5">
-              <Printer className="h-4 w-4" />
+            <Button size="sm" className="gap-1.5">
+              <Printer className="h-4 w-4" aria-hidden="true" />
               {t("printLabel")}
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Main Info Card */}
       <Card>
-        <CardHeader className="bg-primary/5 border-b border-primary/10 rounded-t-xl">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-            <div>
-              <span className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">
-                {t("trackingCode")}
-              </span>
-              <h1 className="text-2xl font-mono font-extrabold text-foreground">
-                {parcel.trackingCode}
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="default" className="text-sm px-3 py-1 font-semibold">
-                {parcel.status}
-              </Badge>
-            </div>
+        <CardHeader className="flex flex-col gap-3 border-b border-border sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <span className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("trackingCode")}
+            </span>
+            <p className="font-mono text-h3 font-bold text-foreground">{parcel.trackingCode}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={parcel.status} withIcon />
+            <span className="text-caption text-muted-foreground">
+              {t("createdOn", { date: new Date(parcel.createdAt).toLocaleString() })}
+            </span>
           </div>
         </CardHeader>
 
-        {/* Milestone Stepper */}
-        <CardContent className="pt-6 pb-6 border-b bg-card">
-          <div className="relative flex justify-between items-center max-w-2xl mx-auto">
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted -z-0">
-              <div
-                className="h-1 bg-primary transition-all duration-500"
-                style={{ width: `${((currentStep - 1) / (MILESTONES.length - 1)) * 100}%` }}
-              ></div>
-            </div>
-
-            {MILESTONES.map((m) => {
-              const isPassed = currentStep >= m.step;
-              const isCurrent = currentStep === m.step;
-
+        {/* Progress track */}
+        <CardContent className="border-b border-border py-6">
+          <ol className="relative mx-auto flex max-w-2xl justify-between">
+            <div
+              className="absolute left-0 top-3.5 h-0.5 w-full bg-surface-muted"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute left-0 top-3.5 h-0.5 bg-primary transition-all"
+              style={{ width: `${progress}%` }}
+              aria-hidden="true"
+            />
+            {milestones.map((milestone, index) => {
+              const step = index + 1;
+              const isPassed = currentStep >= step;
               return (
-                <div key={m.step} className="relative z-10 flex flex-col items-center">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-colors ${
-                      isPassed
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground border-2 border-background"
-                    } ${isCurrent ? "ring-4 ring-primary/20" : ""}`}
-                  >
-                    {isPassed ? <CheckCircle2 className="h-5 w-5" /> : m.step}
-                  </div>
+                <li key={milestone.labelKey} className="relative z-10 flex flex-col items-center">
                   <span
-                    className={`text-xs mt-2 text-center max-w-[80px] font-medium leading-tight ${
-                      isPassed ? "text-foreground" : "text-muted-foreground"
-                    }`}
+                    aria-hidden="true"
+                    className={
+                      isPassed
+                        ? "flex h-7 w-7 items-center justify-center rounded-full bg-primary text-caption font-bold text-primary-foreground"
+                        : "flex h-7 w-7 items-center justify-center rounded-full bg-surface-muted text-caption font-bold text-muted-foreground"
+                    }
                   >
-                    {m.label}
+                    {step}
                   </span>
-                </div>
+                  <span
+                    className={
+                      isPassed
+                        ? "mt-2 max-w-[80px] text-center text-caption font-medium text-foreground"
+                        : "mt-2 max-w-[80px] text-center text-caption text-muted-foreground"
+                    }
+                  >
+                    {tStatus(milestone.labelKey)}
+                  </span>
+                </li>
               );
             })}
-          </div>
+          </ol>
         </CardContent>
 
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-          {/* Recipient Details */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" />
+        <CardContent className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-2">
+          {/* Recipient */}
+          <section className="space-y-3">
+            <h3 className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground">
+              <User className="h-4 w-4 text-primary" aria-hidden="true" />
               {t("recipientInfo")}
             </h3>
-            <div className="p-4 rounded-lg bg-muted/40 border space-y-2 text-sm">
+            <div className="space-y-3 rounded-md border border-border bg-surface-muted p-4 text-body-sm">
               <div>
-                <span className="text-xs text-muted-foreground">{t("recipientName")}</span>
+                <span className="text-caption text-muted-foreground">{t("recipientName")}</span>
                 <p className="font-semibold text-foreground">{parcel.recipientName}</p>
               </div>
               <div>
-                <span className="text-xs text-muted-foreground">{t("recipientPhone")}</span>
-                <p className="font-mono font-medium text-foreground flex items-center gap-1.5 mt-0.5">
-                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                  {parcel.recipientPhone}
-                </p>
+                <span className="text-caption text-muted-foreground">{t("recipientPhone")}</span>
+                <p className="font-mono font-medium text-foreground">{parcel.recipientPhone}</p>
               </div>
               <div>
-                <span className="text-xs text-muted-foreground">{t("address")}</span>
-                <p className="font-medium text-foreground flex items-start gap-1.5 mt-0.5">
-                  <MapPin className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                <span className="text-caption text-muted-foreground">{t("address")}</span>
+                <p className="flex items-start gap-1.5 font-medium text-foreground">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                   <span>
                     {parcel.deliveryAddress}, {parcel.thana}, {parcel.district}
                   </span>
                 </p>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Financial Summary */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-primary" />
+          {/* Pricing */}
+          <section className="space-y-3">
+            <h3 className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground">
+              <Wallet className="h-4 w-4 text-primary" aria-hidden="true" />
               {t("financialSummary")}
             </h3>
-            <div className="p-4 rounded-lg bg-muted/40 border space-y-3 text-sm">
-              <div className="flex justify-between items-center">
+            <div className="space-y-3 rounded-md border border-border bg-surface-muted p-4 text-body-sm">
+              <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t("codCollection")}</span>
-                <span className="text-base font-bold text-foreground">
-                  ৳{parcel.codAmount.toLocaleString()}
+                <span className="font-bold tabular-nums text-foreground">
+                  {formatBdt(parcel.codAmount)}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs text-muted-foreground border-b pb-2">
+              <div className="flex items-center justify-between border-b border-border pb-2 text-caption text-muted-foreground">
                 <span>{t("deliveryFee")}</span>
-                <span>- ৳{parcel.deliveryFee.toLocaleString()}</span>
+                <span className="tabular-nums">− {formatBdt(parcel.deliveryFee)}</span>
               </div>
-              <div className="flex justify-between items-center pt-1 font-semibold">
-                <span className="text-foreground">{t("netReceivable")}</span>
-                <span className="text-lg font-extrabold text-primary">
-                  ৳{netReceivable.toLocaleString()}
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-foreground">{t("netReceivable")}</span>
+                <span className="text-h4 font-bold tabular-nums text-primary">
+                  {formatBdt(netReceivable)}
                 </span>
               </div>
-              <div className="text-xs text-muted-foreground pt-1">
-                Weight: <span className="font-semibold text-foreground">{parcel.weight} kg</span>
+              <div className="flex items-center justify-between text-caption text-muted-foreground">
+                <span>{t("weight")}</span>
+                <span className="font-semibold text-foreground">{parcel.weight} kg</span>
+              </div>
+              <div className="flex items-center justify-between text-caption text-muted-foreground">
+                <span>{t("codStatus")}</span>
+                <Badge variant={parcel.codAmount > 0 ? "warning" : "success"}>
+                  {parcel.codAmount > 0 ? t("collectCash") : t("prepaid")}
+                </Badge>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Operational Logistics */}
-          <div className="space-y-4 md:col-span-2">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <Truck className="h-4 w-4 text-primary" />
+          {/* Parcel + operations */}
+          <section className="space-y-3 md:col-span-2">
+            <h3 className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground">
+              <Truck className="h-4 w-4 text-primary" aria-hidden="true" />
               {t("operations")}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted/40 border flex items-center gap-3">
-                <Building2 className="h-8 w-8 text-primary/70 flex-shrink-0" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
+                <Building2 className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
                 <div>
-                  <span className="text-xs text-muted-foreground">{t("currentHub")}</span>
+                  <span className="text-caption text-muted-foreground">{t("currentHub")}</span>
                   <p className="font-medium text-foreground">
-                    {parcel.currentHubName || "Dhaka Central Sorting Hub (DHK-01)"}
+                    {parcel.currentHubName ?? t("awaitingHub")}
                   </p>
                 </div>
               </div>
-              <div className="p-4 rounded-lg bg-muted/40 border flex items-center gap-3">
-                <Truck className="h-8 w-8 text-primary/70 flex-shrink-0" />
+              <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
+                <Truck className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
                 <div>
-                  <span className="text-xs text-muted-foreground">{t("assignedRider")}</span>
+                  <span className="text-caption text-muted-foreground">{t("assignedRider")}</span>
                   <p className="font-medium text-foreground">
-                    {parcel.currentRiderName
-                      ? `${parcel.currentRiderName} (${parcel.currentRiderPhone || ""})`
-                      : t("notAssigned")}
+                    {parcel.currentRiderName ?? t("notAssigned")}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
+                <Package className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
+                <div>
+                  <span className="text-caption text-muted-foreground">{t("parcelDescription")}</span>
+                  <p className="font-medium text-foreground">
+                    {parcel.parcelDescription || t("noDescription")}
                   </p>
                 </div>
               </div>
             </div>
-          </div>
+
+            <div className="rounded-md border border-border bg-surface-muted p-4 text-body-sm">
+              <p className="text-caption text-muted-foreground">{t("merchant")}</p>
+              <p className="font-semibold text-foreground">{parcel.merchantName}</p>
+              <p className="mt-1 text-caption text-muted-foreground">{t("pickupAddress")}</p>
+              <p className="text-foreground">{parcel.pickupAddress}</p>
+            </div>
+
+            {intelligence.confidenceScore !== null || intelligence.riskTier !== null ? (
+              <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface-muted p-4 text-caption">
+                <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                  {t("addressIntelligence")}
+                </span>
+                {intelligence.confidenceScore !== null ? (
+                  <Badge variant="secondary">
+                    {t("confidence", { score: intelligence.confidenceScore })}
+                  </Badge>
+                ) : null}
+                {intelligence.riskTier ? (
+                  <Badge variant={intelligence.riskTier === "HIGH" ? "destructive" : "outline"}>
+                    {t("riskTier", { tier: intelligence.riskTier })}
+                  </Badge>
+                ) : null}
+                {intelligence.zone ? (
+                  <span className="text-muted-foreground">{intelligence.zone}</span>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
         </CardContent>
       </Card>
 
-      {/* History Timeline */}
+      {/* History */}
       <Card>
-        <CardHeader className="pb-3 border-b">
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" />
+        <CardHeader className="border-b border-border pb-3">
+          <CardTitle className="flex items-center gap-2 text-body font-bold">
+            <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
             {t("statusHistory")}
           </CardTitle>
+          <CardDescription>{t("statusHistoryHint")}</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          {parcel.statusHistory.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No milestone history recorded yet.</p>
+          {parcel.history.length === 0 ? (
+            <p className="flex items-center gap-2 text-body-sm text-muted-foreground">
+              <AlertCircle className="h-4 w-4" aria-hidden="true" />
+              {t("noHistory")}
+            </p>
           ) : (
-            <ol className="relative border-l border-primary/30 ml-4 space-y-6">
-              {parcel.statusHistory.map((hist, idx) => (
-                <li key={hist.id || idx} className="ml-6">
-                  <span className="absolute -left-3 flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full ring-4 ring-background text-xs">
-                    ✓
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-foreground">
-                      {hist.toStatus}
-                    </span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {new Date(hist.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  {hist.reason && (
-                    <p className="text-xs text-muted-foreground mt-1 bg-muted/50 p-2 rounded w-fit">
-                      {hist.reason}
+            <ol className="relative ml-3 space-y-6 border-l border-border pl-6">
+              {[...parcel.history]
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+                )
+                .map((entry) => (
+                  <li key={entry.id} className="relative">
+                    <span
+                      aria-hidden="true"
+                      className="absolute -left-[31px] top-1 h-2.5 w-2.5 rounded-full bg-primary"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusBadge status={entry.toStatus} />
+                      {entry.fromStatus ? (
+                        <span className="text-caption text-muted-foreground">
+                          {t("fromStatus", {
+                            status: tStatus(PARCEL_STATUS_CONFIG[entry.fromStatus].labelKey),
+                          })}
+                        </span>
+                      ) : null}
+                      <time
+                        dateTime={entry.createdAt}
+                        className="font-mono text-caption text-muted-foreground"
+                      >
+                        {new Date(entry.createdAt).toLocaleString()}
+                      </time>
+                    </div>
+                    {entry.description ? (
+                      <p className="mt-1 text-body-sm text-muted-foreground">{entry.description}</p>
+                    ) : null}
+                    <p className="mt-1 text-caption text-muted-foreground">
+                      {t("recordedBy", { role: entry.actorRole })}
                     </p>
-                  )}
-                  <span className="text-[11px] text-muted-foreground mt-1 block">
-                    Recorded by role: <span className="font-medium">{hist.changedByRole}</span>
-                  </span>
-                </li>
-              ))}
+                  </li>
+                ))}
             </ol>
           )}
         </CardContent>

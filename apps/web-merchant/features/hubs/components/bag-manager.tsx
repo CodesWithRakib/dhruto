@@ -22,8 +22,11 @@ import {
   useSealBagMutation,
   useDispatchBagMutation,
   useReceiveBagMutation,
+  type BagListItem,
   type HubItem,
 } from "../api/hubs.api";
+import type { DataTableRow } from "@/lib/data-table";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 
 interface BagManagerProps {
@@ -61,12 +64,12 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
       }).unwrap();
 
       if (res.success) {
-        toast.success(`Transit bag created: ${res.data.bagCode}`);
+        toast.success(`Transit bag created: ${res.data?.bagCode ?? ""}`);
         setIsCreating(false);
         refetch();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to create bag");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to create bag"));
     }
   };
 
@@ -84,8 +87,8 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
         setSealTagInput("");
         refetch();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to seal bag");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to seal bag"));
     }
   };
 
@@ -96,8 +99,8 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
         toast.success(res.message);
         refetch();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to dispatch bag");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to dispatch bag"));
     }
   };
 
@@ -111,8 +114,8 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
         toast.success(res.message);
         refetch();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to receive bag");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to receive bag"));
     }
   };
 
@@ -202,7 +205,7 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                 {
                   accessorKey: "bagCode",
                   header: "Bag Code",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<BagListItem>) => (
                     <span className="font-mono font-bold text-foreground">
                       {row.original.bagCode}
                     </span>
@@ -211,21 +214,21 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                 {
                   accessorKey: "originHub",
                   header: "Origin Hub",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<BagListItem>) => (
                     <span className="text-muted-foreground">{row.original.originHub}</span>
                   ),
                 },
                 {
                   accessorKey: "destinationHub",
                   header: "Destination Hub",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<BagListItem>) => (
                     <span className="font-medium text-foreground">{row.original.destinationHub}</span>
                   ),
                 },
                 {
                   accessorKey: "parcelCount",
                   header: "Parcels",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<BagListItem>) => (
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
                       {row.original.parcelCount}
                     </span>
@@ -234,7 +237,7 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                 {
                   accessorKey: "sealTag",
                   header: "Seal Tag",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<BagListItem>) => (
                     <span className="font-mono text-muted-foreground">
                       {row.original.sealTag || "—"}
                     </span>
@@ -243,7 +246,7 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                 {
                   accessorKey: "status",
                   header: "Status",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<BagListItem>) => (
                     <Badge
                       variant={
                         row.original.status === "RECEIVED"
@@ -261,7 +264,7 @@ export function BagManager({ currentHubId, allHubs }: BagManagerProps) {
                 {
                   id: "actions",
                   header: () => <span className="text-right block">Actions</span>,
-                  cell: ({ row }: { row: any }) => {
+                  cell: ({ row }: DataTableRow<BagListItem>) => {
                     const bag = row.original;
                     return (
                       <div className="flex items-center justify-end gap-1.5">

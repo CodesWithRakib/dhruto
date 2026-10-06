@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { HubScanType, type HubScanResult } from "@dhruto/contracts";
 import { useScanBarcodeMutation } from "../api/hubs.api";
+import type { DataTableRow } from "@/lib/data-table";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 
 interface HubScannerProps {
@@ -57,7 +59,11 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
   const playBeep = (type: "success" | "error") => {
     if (!soundEnabled || typeof window === "undefined") return;
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // `webkitAudioContext` is the Safari fallback and is absent from the DOM lib types.
+      const audioWindow = window as Window & { webkitAudioContext?: typeof AudioContext };
+      const AudioCtor = window.AudioContext || audioWindow.webkitAudioContext;
+      if (!AudioCtor) return;
+      const audioCtx = new AudioCtor();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
@@ -107,10 +113,9 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
         toast.success(scanData.message);
         onScanSuccess?.();
       }
-    } catch (err: any) {
+    } catch (err) {
       playBeep("error");
-      const msg = err?.data?.message || err?.message || "Scan failed. Please verify barcode.";
-      toast.error(msg);
+      toast.error(getApiErrorMessage(err, "Scan failed. Please verify barcode."));
     } finally {
       inputRef.current?.focus();
     }
@@ -303,7 +308,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
                 {
                   accessorKey: "barcode",
                   header: "Barcode",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<HubScanResult>) => (
                     <span className="font-mono font-medium text-foreground">
                       {row.original.barcode}
                     </span>
@@ -312,7 +317,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
                 {
                   accessorKey: "scanType",
                   header: "Scan Action",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<HubScanResult>) => (
                     <span className="font-semibold text-primary">
                       {row.original.scanType}
                     </span>
@@ -321,7 +326,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
                 {
                   accessorKey: "currentStatus",
                   header: "Status",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<HubScanResult>) => (
                     <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-muted font-bold">
                       {row.original.currentStatus}
                     </span>
@@ -330,7 +335,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
                 {
                   accessorKey: "message",
                   header: "Message",
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<HubScanResult>) => (
                     <span className="text-muted-foreground text-xs">
                       {row.original.message}
                     </span>
@@ -339,7 +344,7 @@ export function HubScanner({ hubId, hubName, openBags, onScanSuccess }: HubScann
                 {
                   accessorKey: "timestamp",
                   header: () => <span className="text-right block">Time</span>,
-                  cell: ({ row }: { row: any }) => (
+                  cell: ({ row }: DataTableRow<HubScanResult>) => (
                     <div className="text-right font-mono text-muted-foreground text-xs">
                       {new Date(row.original.timestamp).toLocaleTimeString()}
                     </div>

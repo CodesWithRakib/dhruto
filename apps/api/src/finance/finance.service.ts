@@ -34,6 +34,30 @@ import {
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { WebhooksService } from "../webhooks/webhooks.service.js";
 
+/** Account details as returned by the API contract. */
+type PayoutAccountDetails = PayoutRequestItem["accountDetails"];
+
+/**
+ * Narrows the persisted JSONB account details into the response contract.
+ *
+ * The column is `jsonb`, so its runtime shape is only as trustworthy as what
+ * was written. Each field is read defensively instead of casting the blob.
+ */
+function toPayoutAccountDetails(raw: Record<string, unknown>): PayoutAccountDetails {
+  const readString = (key: string): string | undefined => {
+    const value = raw[key];
+    return typeof value === "string" ? value : undefined;
+  };
+
+  return {
+    accountNumber: readString("accountNumber") ?? "",
+    accountType: readString("accountType"),
+    bankName: readString("bankName"),
+    branchName: readString("branchName"),
+    accountHolderName: readString("accountHolderName"),
+  };
+}
+
 @Injectable()
 export class FinanceService {
   private readonly logger = new Logger(FinanceService.name);
@@ -230,7 +254,7 @@ export class FinanceService {
       id: p.id,
       amount: Number(p.amount),
       payoutMethod: p.payoutMethod,
-      accountDetails: p.accountDetails as any,
+      accountDetails: toPayoutAccountDetails(p.accountDetails),
       status: p.status,
       transactionReference: p.transactionReference || undefined,
       rejectionReason: p.rejectionReason || undefined,
@@ -395,9 +419,10 @@ export class FinanceService {
         parcelId: parcel.id,
         fromStatus,
         toStatus: ParcelStatus.CASH_VERIFIED,
-        changedBy: userId,
-        changedByRole: "HUB_MANAGER",
-        reason: `Cash verified (৳${verifiedCodAmount}). Settled ৳${netSettled} to merchant wallet.`,
+        eventType: "CASH_VERIFIED",
+        actorId: userId,
+        actorRole: "HUB_MANAGER",
+        description: `Cash verified (৳${verifiedCodAmount}). Settled ৳${netSettled} to merchant wallet.`,
         metadata: {
           cashLedgerId: ledger.id,
           verifiedAmount: verifiedCodAmount,

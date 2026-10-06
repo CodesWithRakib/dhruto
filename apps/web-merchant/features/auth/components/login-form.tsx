@@ -51,9 +51,9 @@ export function LoginForm() {
       }).unwrap();
 
       if (res.success && res.data) {
-        const payloadData = res.data as any;
-        const accessToken = payloadData.tokens?.accessToken || payloadData.accessToken;
-        const refreshToken = payloadData.tokens?.refreshToken || payloadData.refreshToken;
+        const payloadData = res.data;
+        const accessToken = payloadData.tokens?.accessToken ?? payloadData.accessToken;
+        const refreshToken = payloadData.tokens?.refreshToken ?? payloadData.refreshToken;
 
         dispatch(
           setCredentials({
@@ -83,29 +83,10 @@ export function LoginForm() {
           <Logo size="default" />
         </div>
         <div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            Merchant Portal
-          </CardTitle>
-          <CardDescription className="text-body-sm text-muted-foreground mt-1">
-            আপনার ব্যবসার সাথে আমরা আছি
+          <CardTitle className="text-h2">{t("loginTitle")}</CardTitle>
+          <CardDescription className="mt-1 text-body-sm text-muted-foreground">
+            {t("loginSubtitle")}
           </CardDescription>
-        </div>
-
-        {/* Friendly merchant illustration banner */}
-        <div className="mx-auto mt-2 flex h-24 w-full max-w-xs items-center justify-center rounded-xl bg-gradient-to-b from-emerald-50 to-emerald-100/40 p-2">
-          <svg viewBox="0 0 200 90" className="h-full w-auto">
-            {/* Store awning */}
-            <path d="M40 25 Q100 10 160 25 L155 35 L45 35 Z" fill="#DCFCE7" stroke="#16A34A" strokeWidth="1.5" />
-            <path d="M45 35 Q55 42 65 35 Q75 42 85 35 Q95 42 105 35 Q115 42 125 35 Q135 42 145 35 Q155 42 155 35" fill="none" stroke="#16A34A" strokeWidth="1.5" />
-            {/* Counter */}
-            <rect x="50" y="65" width="100" height="20" rx="3" fill="#0F5132" />
-            {/* Parcel on counter */}
-            <rect x="60" y="55" width="22" height="15" rx="2" fill="#F59E0B" />
-            <line x1="60" y1="62" x2="82" y2="62" stroke="#B45309" strokeWidth="1" />
-            {/* Person behind counter */}
-            <circle cx="115" cy="40" r="11" fill="#1E293B" />
-            <path d="M102 65 C102 52 110 51 115 51 C120 51 128 52 128 65 Z" fill="#15803D" />
-          </svg>
         </div>
       </CardHeader>
 
@@ -119,11 +100,13 @@ export function LoginForm() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-body-sm font-semibold text-foreground">
-              ইমেইল / মোবাইল
+            <label htmlFor="login-email" className="text-body-sm font-semibold text-foreground">
+              {t("emailOrPhone")}
             </label>
             <Input
+              id="login-email"
               type="text"
+              autoComplete="username"
               placeholder="merchant@shop.com"
               value={emailOrPhone}
               onChange={(e) => setEmailOrPhone(e.target.value)}
@@ -134,12 +117,14 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-body-sm font-semibold text-foreground">
-              পাসওয়ার্ড
+            <label htmlFor="login-password" className="text-body-sm font-semibold text-foreground">
+              {t("password")}
             </label>
             <div className="relative">
               <Input
+                id="login-password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

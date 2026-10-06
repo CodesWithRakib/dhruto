@@ -104,7 +104,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
 
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
-    const sub = res.body.data.find((s: any) => s.id === subscriptionId);
+    const sub = res.body.data.find((s: { id: string }) => s.id === subscriptionId);
     expect(sub).toBeDefined();
     expect(sub.secret).toBeDefined();
   });
@@ -131,7 +131,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
 
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
-    const foundDelivery = res.body.data.find((d: any) => d.id === deliveryId);
+    const foundDelivery = res.body.data.find((d: { id: string }) => d.id === deliveryId);
     expect(foundDelivery).toBeDefined();
     expect(foundDelivery.signature).toBeDefined();
   });
@@ -141,6 +141,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
     const bookingRes = await request(app.getHttpServer())
       .post("/api/v1/parcels")
       .set("Authorization", `Bearer ${merchantToken}`)
+      .set("Idempotency-Key", `webhook-parcel-${Date.now()}`)
       .send({
         recipientName: "Webhook Recipient",
         recipientPhone: "01899998888",
@@ -161,7 +162,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
       .expect(200);
 
     const parcelCreatedDelivery = deliveriesRes.body.data.find(
-      (d: any) => d.event === WebhookEvent.PARCEL_CREATED,
+      (d: { event: string }) => d.event === WebhookEvent.PARCEL_CREATED,
     );
     expect(parcelCreatedDelivery).toBeDefined();
     expect(parcelCreatedDelivery.signature).toMatch(/^t=\d+,v1=[0-9a-f]{64}$/);
@@ -173,7 +174,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
       .expect(200);
 
     const createdNotif = notifsRes.body.data.find(
-      (n: any) => n.channel === NotificationChannel.IN_APP,
+      (n: { channel: string }) => n.channel === NotificationChannel.IN_APP,
     );
     expect(createdNotif).toBeDefined();
   });

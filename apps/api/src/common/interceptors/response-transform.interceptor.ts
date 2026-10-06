@@ -8,18 +8,32 @@ import { type Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { type RequestWithId } from "../middleware/request-id.middleware.js";
 
+/**
+ * Operational probes (`/health`, `/system`) must return a flat payload — the
+ * Kubernetes/container runtime inspects `status` at the top level and must not
+ * have to unwrap an application envelope.
+ */
+const PROBE_PATH_PATTERN = /^\/(?:api\/v\d+\/)?(?:health|system)(?:\/|$|\?)/;
+
+const PAGINATION_KEYS = ["page", "limit", "total", "nextCursor", "hasMore"];
+
 @Injectable()
 export class ResponseTransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const ctx = context.switchToHttp();
-    const request = ctx.getRequest<RequestWithId>();
+    const request = context
+      .switchToHttp()
+      .getRequest<RequestWithId & { user?: unknown }>();
     const path = request?.originalUrl || request?.url || "unknown";
     const requestId = request?.requestId || "unknown";
     const timestamp = new Date().toISOString();
 
     return next.handle().pipe(
-      map((data) => {
-        // If data is null or undefined, or not an object, wrap it
+      map((data: unknown) => {
+        if (PROBE_PATH_PATTERN.test(path)) {
+          return data;
+        }
+
+        // Primitives and null are wrapped directly.
         if (!data || typeof data !== "object") {
           return {
             success: true,
@@ -32,38 +46,32 @@ export class ResponseTransformInterceptor implements NestInterceptor {
           };
         }
 
-        // If data is already an envelope with success property
-        if ("success" in data) {
-          const resObj = { ...data } as Record<string, any>;
+        const envelope = data as Record<string, unknown>;
 
-          // Move path, requestId, timestamp directly to root
-          resObj.path = resObj.path || path;
-          resObj.requestId = resObj.requestId || resObj.meta?.requestId || requestId;
-          resObj.timestamp = resObj.timestamp || resObj.meta?.timestamp || timestamp;
+        // Already an explicit envelope (controllers return these when they need
+        // pagination metadata or a custom message).
+        if ("success" in envelope) {
+          const result: Record<string, unknown> = { ...envelope };
+          result.path = result.path || path;
+          result.requestId =
+            result.requestId ||
+            readMetaString(envelope, "requestId") ||
+            requestId;
+          result.timestamp =
+            result.timestamp ||
+            readMetaString(envelope, "timestamp") ||
+            timestamp;
 
-          // Pagination handling in meta
-          const pagination =
-            resObj.meta?.pagination ||
-            resObj.pagination ||
-            (resObj.meta && (resObj.meta.page !== undefined || resObj.meta.total !== undefined || resObj.meta.nextCursor !== undefined)
-              ? resObj.meta
-              : undefined);
-
-          delete resObj.pagination;
-
+          const pagination = extractPagination(envelope);
           if (pagination) {
-            // Clean any requestId/timestamp/path from pagination meta if present
-            const { requestId: _r, timestamp: _t, path: _p, ...cleanPagination } = pagination;
-            resObj.meta = cleanPagination;
+            result.meta = pagination;
           } else {
-            // No pagination metadata, remove or leave meta empty/undefined
-            delete resObj.meta;
+            delete result.meta;
           }
 
-          return resObj;
+          return result;
         }
 
-        // Standard unwrapped payload
         return {
           success: true,
           statusCode: 200,
@@ -76,4 +84,52 @@ export class ResponseTransformInterceptor implements NestInterceptor {
       }),
     );
   }
+}
+
+function readMetaString(
+  envelope: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const meta = envelope.meta;
+  if (meta && typeof meta === "object") {
+    const value = (meta as Record<string, unknown>)[key];
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Returns the pagination metadata for a list response, or `undefined`.
+ * Prefers an explicit `meta.pagination`; otherwise treats `meta` as pagination
+ * when it carries one of the documented pagination keys.
+ */
+function extractPagination(
+  envelope: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const meta = envelope.meta;
+  if (!meta || typeof meta !== "object") {
+    return undefined;
+  }
+
+  const metaRecord = meta as Record<string, unknown>;
+  const nested = metaRecord.pagination;
+  const source =
+    nested && typeof nested === "object"
+      ? (nested as Record<string, unknown>)
+      : PAGINATION_KEYS.some((key) => metaRecord[key] !== undefined)
+        ? metaRecord
+        : undefined;
+
+  if (!source) {
+    return undefined;
+  }
+
+  const { requestId, timestamp, path, pagination, ...rest } = source;
+  void requestId;
+  void timestamp;
+  void path;
+  void pagination;
+  return rest;
 }

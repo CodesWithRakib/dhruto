@@ -1,38 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
-import { Link } from "@/lib/navigation";
+import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/lib/navigation";
 import {
+  Badge,
+  Button,
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardContent,
-  Button,
   DataTable,
   type ColumnDef,
 } from "@dhruto/ui";
 import {
-  PackagePlus,
-  Truck,
+  ArrowRight,
   CheckCircle2,
   Clock,
-  ArrowRight,
-  TrendingUp,
-  UploadCloud,
-  Printer,
   FileText,
-  Calendar,
-  X,
-  ChevronDown,
-  ArrowUpRight,
-  ArrowDownRight,
+  PackagePlus,
+  Printer,
+  Truck,
+  UploadCloud,
 } from "lucide-react";
+import type { ParcelStatus } from "@dhruto/contracts";
 import { useGetMerchantDashboardQuery } from "../../merchants/api/merchants.api";
-import { useAppSelector } from "../../../store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { MERCHANT_ROUTES } from "@/config/routes";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { ParcelStatus } from "@dhruto/contracts";
+import { ErrorState, RetryButton } from "@/components/feedback/states";
 
 interface ShipmentRow {
   id: string;
@@ -43,13 +40,99 @@ interface ShipmentRow {
   codAmount: number;
 }
 
+/** One honest summary card: value, label and a factual caption (no invented deltas). */
+function MetricCard({
+  label,
+  value,
+  caption,
+  icon: Icon,
+  tone,
+  isLoading,
+}: {
+  label: string;
+  value: number;
+  caption: string;
+  icon: React.ElementType;
+  tone: "primary" | "success" | "info" | "warning";
+  isLoading: boolean;
+}) {
+  const toneClass = {
+    primary: "bg-primary-soft text-primary",
+    success: "bg-success-soft text-success-soft-foreground",
+    info: "bg-info-soft text-info-soft-foreground",
+    warning: "bg-warning-soft text-warning-soft-foreground",
+  }[tone];
+
+  return (
+    <Card className="p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+        <span className={`flex h-8 w-8 items-center justify-center rounded-md ${toneClass}`}>
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+      </div>
+      <p className="mt-2 text-h2 font-bold tabular-nums text-foreground">
+        {isLoading ? "—" : value.toLocaleString()}
+      </p>
+      <p className="mt-1 text-caption text-muted-foreground">{caption}</p>
+    </Card>
+  );
+}
+
+/** A quick action tile. `disabled` marks later-phase functionality. */
+function QuickAction({
+  href,
+  icon: Icon,
+  title,
+  description,
+  badge,
+  disabled,
+}: {
+  href: string;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  badge?: string;
+  disabled?: boolean;
+}) {
+  const content = (
+    <Card className="flex h-full flex-col p-5">
+      <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-soft text-primary">
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <h3 className="mt-3 text-body-sm font-semibold text-foreground">{title}</h3>
+      <p className="mt-1 text-caption text-muted-foreground">{description}</p>
+      {badge ? (
+        <Badge variant="secondary" className="mt-3 w-fit">
+          {badge}
+        </Badge>
+      ) : null}
+    </Card>
+  );
+
+  if (disabled) {
+    return (
+      <div aria-disabled="true" className="cursor-not-allowed opacity-60">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className="group">
+      {content}
+    </Link>
+  );
+}
+
 export function MerchantDashboard() {
   const t = useTranslations("Index");
   const { user } = useAppSelector((state) => state.auth);
-  const { data, isLoading } = useGetMerchantDashboardQuery();
-  const [showPromo, setShowPromo] = useState(true);
+  const { data, isLoading, isError, refetch } = useGetMerchantDashboardQuery();
 
-  const stats = data?.data?.stats || {
+  const stats = data?.data?.stats ?? {
     totalOrders: 0,
     pendingOrders: 0,
     inTransitOrders: 0,
@@ -59,205 +142,171 @@ export function MerchantDashboard() {
     collectedCodAmount: 0,
   };
 
-  const rawParcels = data?.data?.recentParcels || [];
-  const displayParcels: ShipmentRow[] = (rawParcels as ShipmentRow[]) ?? [];
+  const recentParcels: ShipmentRow[] = useMemo(
+    () =>
+      (data?.data?.recentParcels ?? []).map((parcel) => ({
+        id: parcel.id,
+        trackingCode: parcel.trackingCode,
+        recipientName: parcel.recipientName,
+        district: parcel.district,
+        status: parcel.status,
+        codAmount: parcel.codAmount,
+      })),
+    [data],
+  );
 
-  const columns: ColumnDef<ShipmentRow>[] = [
-    {
-      accessorKey: "trackingCode",
-      header: t("colTracking"),
-      cell: ({ row }) => (
-        <Link
-          href={MERCHANT_ROUTES.parcel(row.original.id)}
-          className="font-mono font-medium text-xs text-foreground hover:text-primary transition-colors"
-        >
-          {row.original.trackingCode}
-        </Link>
-      ),
-    },
-    {
-      accessorKey: "recipientName",
-      header: t("colRecipient"),
-      cell: ({ row }) => (
-        <span className="font-medium text-body-sm text-foreground">
-          {row.original.recipientName}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "district",
-      header: t("colDestination"),
-      cell: ({ row }) => (
-        <span className="text-body-sm text-muted-foreground">
-          {row.original.district}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: t("colStatus"),
-      cell: ({ row }) => <StatusBadge status={row.original.status as any} />,
-    },
-    {
-      accessorKey: "codAmount",
-      header: t("colCod"),
-      cell: ({ row }) => (
-        <span className="font-medium tabular-nums text-foreground">
-          ৳ {row.original.codAmount.toLocaleString()}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <span className="text-right block">{t("colAction")}</span>,
-      cell: ({ row }) => (
-        <div className="text-right">
+  const pendingCod = Math.max(0, stats.totalCodAmount - stats.collectedCodAmount);
+
+  const columns: ColumnDef<ShipmentRow>[] = useMemo(
+    () => [
+      {
+        accessorKey: "trackingCode",
+        header: t("colTracking"),
+        cell: ({ row }) => (
           <Link
             href={MERCHANT_ROUTES.parcel(row.original.id)}
-            className="text-xs font-semibold text-primary hover:underline"
+            className="font-mono text-caption font-medium text-primary hover:underline"
           >
-            {t("view")}
+            {row.original.trackingCode}
           </Link>
-        </div>
-      ),
-    },
-  ];
+        ),
+      },
+      {
+        accessorKey: "recipientName",
+        header: t("colRecipient"),
+        cell: ({ row }) => (
+          <span className="text-body-sm font-medium text-foreground">
+            {row.original.recipientName}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "district",
+        header: t("colDestination"),
+        cell: ({ row }) => (
+          <span className="text-body-sm text-muted-foreground">
+            {row.original.district || "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: t("colStatus"),
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        accessorKey: "codAmount",
+        header: t("colCod"),
+        cell: ({ row }) => (
+          <span className="tabular-nums text-foreground">
+            ৳ {row.original.codAmount.toLocaleString()}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: () => <span className="block text-right">{t("colAction")}</span>,
+        cell: ({ row }) => (
+          <div className="text-right">
+            <Link
+              href={MERCHANT_ROUTES.parcel(row.original.id)}
+              className="text-caption font-semibold text-primary hover:underline"
+            >
+              {t("view")}
+            </Link>
+          </div>
+        ),
+      },
+    ],
+    [t],
+  );
 
-  const todayFormatted = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date());
+  if (isError) {
+    return (
+      <div className="rounded-md border border-border bg-surface">
+        <ErrorState
+          title={t("loadErrorTitle")}
+          description={t("loadErrorDescription")}
+          action={<RetryButton label={t("retry")} onRetry={() => void refetch()} />}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* 1. Header with greeting and date range filter */}
       <div className="flex flex-col justify-between gap-4 border-b border-border pb-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            {user ? `Welcome back, ${user.name}!` : t("dashboardTitle")}
+          <h1 className="text-h2 font-bold tracking-tight text-foreground">
+            {user ? t("greeting", { name: user.name }) : t("dashboardTitle")}
           </h1>
-          <p className="mt-1 text-body text-muted-foreground">
-            {t("dashboardSubtitle")}
-          </p>
+          <p className="mt-1 text-body text-muted-foreground">{t("dashboardSubtitle")}</p>
         </div>
-
-        <div className="flex items-center gap-3">
-          {/* Date Selector Dropdown Pill */}
-          <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 shadow-sm text-body-sm text-foreground">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <div className="text-left">
-              <span className="block text-[10px] uppercase font-bold text-muted-foreground leading-none">
-                Today
-              </span>
-              <span className="font-medium text-xs leading-tight">
-                {todayFormatted}
-              </span>
-            </div>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
-          </div>
-        </div>
+        <Link href={MERCHANT_ROUTES.createBooking}>
+          <Button className="gap-2">
+            <PackagePlus className="h-4 w-4" aria-hidden="true" />
+            {t("bookNew")}
+          </Button>
+        </Link>
       </div>
 
-      {/* 2. Top 4 Metric Cards (Matching design-1.png) */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {/* Card 1: Total Bookings */}
-        <Card className="p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-caption font-semibold uppercase tracking-wider">
-              {t("totalBookings")}
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary">
-              <Truck className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">
-            {isLoading ? "…" : stats.totalOrders}
-          </p>
-          <div className="mt-2 flex items-center gap-1 text-caption text-emerald-600 font-medium">
-            <ArrowUpRight className="h-3.5 w-3.5" />
-            <span>12% {t("fromYesterday")}</span>
-          </div>
-        </Card>
-
-        {/* Card 2: Delivered */}
-        <Card className="p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-caption font-semibold uppercase tracking-wider">
-              {t("delivered")}
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-              <CheckCircle2 className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">
-            {isLoading ? "…" : stats.deliveredOrders}
-          </p>
-          <div className="mt-2 flex items-center gap-1 text-caption text-emerald-600 font-medium">
-            <ArrowUpRight className="h-3.5 w-3.5" />
-            <span>15% {t("fromYesterday")}</span>
-          </div>
-        </Card>
-
-        {/* Card 3: In Transit */}
-        <Card className="p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-caption font-semibold uppercase tracking-wider">
-              {t("inTransit")}
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-              <TrendingUp className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">
-            {isLoading ? "…" : stats.inTransitOrders}
-          </p>
-          <div className="mt-2 flex items-center gap-1 text-caption text-blue-600 font-medium">
-            <ArrowUpRight className="h-3.5 w-3.5" />
-            <span>8% {t("fromYesterday")}</span>
-          </div>
-        </Card>
-
-        {/* Card 4: Pending */}
-        <Card className="p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-caption font-semibold uppercase tracking-wider">
-              {t("pending")}
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-              <Clock className="h-4 w-4" />
-            </span>
-          </div>
-          <p className="mt-2 text-2xl sm:text-3xl font-bold text-foreground">
-            {isLoading ? "…" : stats.pendingOrders}
-          </p>
-          <div className="mt-2 flex items-center gap-1 text-caption text-muted-foreground font-medium">
-            <ArrowDownRight className="h-3.5 w-3.5 text-amber-500" />
-            <span>2% {t("fromYesterday")}</span>
-          </div>
-        </Card>
+        <MetricCard
+          label={t("totalBookings")}
+          value={stats.totalOrders}
+          caption={t("totalBookingsHint")}
+          icon={Truck}
+          tone="primary"
+          isLoading={isLoading}
+        />
+        <MetricCard
+          label={t("delivered")}
+          value={stats.deliveredOrders}
+          caption={t("deliveredHint")}
+          icon={CheckCircle2}
+          tone="success"
+          isLoading={isLoading}
+        />
+        <MetricCard
+          label={t("inTransit")}
+          value={stats.inTransitOrders}
+          caption={t("inTransitHint")}
+          icon={Truck}
+          tone="info"
+          isLoading={isLoading}
+        />
+        <MetricCard
+          label={t("pending")}
+          value={stats.pendingOrders}
+          caption={t("pendingHint")}
+          icon={Clock}
+          tone="warning"
+          isLoading={isLoading}
+        />
       </div>
 
-      {/* 3. Middle Section: Two Columns (Recent Shipments 2/3 + Settlement & Performance 1/3) */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left (2 Columns on large screens): Recent Shipments */}
-        <div className="lg:col-span-2">
-          <Card className="shadow-sm">
+        {/* min-w-0: a grid item defaults to min-width:auto, so the wide shipment
+            table would otherwise stretch the track past the viewport instead of
+            scrolling inside the table's own overflow container. */}
+        <div className="min-w-0 lg:col-span-2">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between border-b border-border px-5 py-4">
-              <CardTitle className="text-lg font-bold text-foreground">
-                {t("recentOrders")}
-              </CardTitle>
+              <div>
+                <CardTitle className="text-h4">{t("recentOrders")}</CardTitle>
+                <CardDescription className="mt-1">{t("recentOrdersSubtitle")}</CardDescription>
+              </div>
               <Link href={MERCHANT_ROUTES.parcels}>
-                <Button variant="ghost" size="sm" className="text-body-sm text-primary hover:text-primary-hover">
+                <Button variant="ghost" size="sm" className="gap-1 text-primary">
                   {t("viewAll")}
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
               </Link>
             </CardHeader>
-
             <CardContent className="p-0">
               <DataTable
                 columns={columns}
-                data={displayParcels}
+                data={recentParcels}
                 isLoading={isLoading}
                 emptyMessage={t("emptyRecent")}
               />
@@ -265,196 +314,83 @@ export function MerchantDashboard() {
           </Card>
         </div>
 
-        {/* Right (1 Column): COD Settlement + Delivery Performance */}
         <div className="space-y-6">
-          {/* COD Settlement Card */}
-          <Card className="p-5 shadow-sm">
-            <h3 className="text-base font-bold text-foreground">
-              {t("codSettlement")}
-            </h3>
+          <Card className="p-5">
+            <h2 className="text-h4 font-bold text-foreground">{t("codSettlement")}</h2>
+            <p className="mt-1 text-caption text-muted-foreground">{t("codSettlementHint")}</p>
 
-            <div className="mt-4 flex items-center justify-between">
+            <dl className="mt-4 space-y-3">
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t("availableBalance")}
-                </span>
-                <p className="text-2xl font-bold tracking-tight text-foreground mt-0.5">
+                <dt className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("codCollected")}
+                </dt>
+                <dd className="mt-0.5 text-h3 font-bold tabular-nums text-foreground">
                   ৳ {stats.collectedCodAmount.toLocaleString()}
-                </p>
+                </dd>
               </div>
-              <Link href={MERCHANT_ROUTES.finance}>
-                <Button size="sm" className="rounded-md px-4 font-semibold shadow-sm">
-                  {t("withdraw")}
-                </Button>
-              </Link>
-            </div>
-
-            <div className="mt-4 border-t border-border pt-4 flex items-center justify-between text-body-sm">
-              <div>
-                <span className="text-caption text-muted-foreground block">
-                  {t("pendingBalance")}
-                </span>
-                <span className="font-semibold text-foreground">
-                  ৳ {(stats.totalCodAmount - stats.collectedCodAmount).toLocaleString()}
-                </span>
+              <div className="border-t border-border pt-3">
+                <dt className="text-caption text-muted-foreground">{t("codPending")}</dt>
+                <dd className="font-semibold tabular-nums text-foreground">
+                  ৳ {pendingCod.toLocaleString()}
+                </dd>
               </div>
-              <Link
-                href={MERCHANT_ROUTES.finance}
-                className="text-caption font-semibold text-primary hover:underline"
-              >
-                {t("viewDetails")}
-              </Link>
-            </div>
-          </Card>
+            </dl>
 
-          {/* Delivery Performance Card with Circular Gauge */}
-          <Card className="p-5 shadow-sm">
-            <h3 className="text-base font-bold text-foreground">
-              {t("deliveryPerformance")}
-            </h3>
-
-            <div className="mt-4 flex items-center gap-5">
-              {/* Circular Gauge Ring */}
-              <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="32"
-                    stroke="#E2E8F0"
-                    strokeWidth="7"
-                    fill="none"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="32"
-                    stroke="#10A34A"
-                    strokeWidth="7"
-                    strokeDasharray={201}
-                    strokeDashoffset={201 * (1 - 0.92)}
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                </svg>
-                <span className="absolute text-base font-bold text-foreground">
-                  92%
-                </span>
-              </div>
-
-              <div>
-                <p className="text-body font-semibold text-foreground">
-                  {t("onTimeDelivery")}
-                </p>
-                <p className="text-caption text-muted-foreground">
-                  {t("last30Days")}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* 4. Quick Actions Row (4 Cards matching design-1.png) */}
-      <div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {/* Action 1: Create Single Booking */}
-          <Link href={MERCHANT_ROUTES.createBooking} className="group">
-            <Card className="p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md h-full">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <PackagePlus className="h-5 w-5" />
-              </span>
-              <h4 className="mt-3 text-body font-semibold text-foreground">
-                {t("createSingle")}
-              </h4>
-              <p className="mt-1 text-caption text-muted-foreground">
-                {t("createSingleDesc")}
-              </p>
-            </Card>
-          </Link>
-
-          {/* Action 2: Bulk Upload */}
-          <Link href={MERCHANT_ROUTES.createBooking} className="group">
-            <Card className="p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md h-full">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <UploadCloud className="h-5 w-5" />
-              </span>
-              <h4 className="mt-3 text-body font-semibold text-foreground">
-                {t("bulkUpload")}
-              </h4>
-              <p className="mt-1 text-caption text-muted-foreground">
-                {t("bulkUploadDesc")}
-              </p>
-            </Card>
-          </Link>
-
-          {/* Action 3: Print Labels */}
-          <Link href={MERCHANT_ROUTES.parcels} className="group">
-            <Card className="p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md h-full">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <Printer className="h-5 w-5" />
-              </span>
-              <h4 className="mt-3 text-body font-semibold text-foreground">
-                {t("printLabels")}
-              </h4>
-              <p className="mt-1 text-caption text-muted-foreground">
-                {t("printLabelsDesc")}
-              </p>
-            </Card>
-          </Link>
-
-          {/* Action 4: View Reports */}
-          <Link href={MERCHANT_ROUTES.finance} className="group">
-            <Card className="p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md h-full">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <FileText className="h-5 w-5" />
-              </span>
-              <h4 className="mt-3 text-body font-semibold text-foreground">
-                {t("viewReports")}
-              </h4>
-              <p className="mt-1 text-caption text-muted-foreground">
-                {t("viewReportsDesc")}
-              </p>
-            </Card>
-          </Link>
-        </div>
-      </div>
-
-      {/* 5. Bottom Callout Banner matching design-1.png */}
-      {showPromo && (
-        <div className="relative overflow-hidden rounded-xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50/80 via-white to-emerald-50/40 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
-              <Truck className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-base font-bold text-foreground">
-                {t("bannerTitle")}
-              </p>
-              <p className="text-body-sm text-muted-foreground">
-                Experience express delivery with 24h COD settlements across 64 districts.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link href={MERCHANT_ROUTES.createBooking}>
-              <Button size="sm" className="h-10 px-5 font-semibold shadow-sm">
-                {t("startBooking")}
-                <ArrowRight className="h-4 w-4 ml-1.5" />
-              </Button>
-            </Link>
-            <button
-              type="button"
-              onClick={() => setShowPromo(false)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-muted hover:text-foreground"
-              aria-label="Dismiss banner"
+            <Link
+              href={MERCHANT_ROUTES.finance}
+              className="mt-4 inline-block text-caption font-semibold text-primary hover:underline"
             >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+              {t("codStatement")}
+            </Link>
+          </Card>
+
+          <Card className="p-5">
+            <h2 className="text-h4 font-bold text-foreground">{t("returnsTitle")}</h2>
+            <p className="mt-1 text-caption text-muted-foreground">{t("returnsHint")}</p>
+            <p className="mt-3 text-h3 font-bold tabular-nums text-foreground">
+              {stats.returnedOrders.toLocaleString()}
+            </p>
+            <Link
+              href={MERCHANT_ROUTES.parcels}
+              className="mt-4 inline-block text-caption font-semibold text-primary hover:underline"
+            >
+              {t("viewAll")}
+            </Link>
+          </Card>
         </div>
-      )}
+      </div>
+
+      <section className="space-y-3">
+        <h2 className="text-h4 font-bold text-foreground">{t("quickActions")}</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <QuickAction
+            href={MERCHANT_ROUTES.createBooking}
+            icon={PackagePlus}
+            title={t("createSingle")}
+            description={t("createSingleDesc")}
+          />
+          <QuickAction
+            href={MERCHANT_ROUTES.createBooking}
+            icon={UploadCloud}
+            title={t("bulkUpload")}
+            description={t("bulkUploadDesc")}
+            badge={t("futureFeature")}
+            disabled
+          />
+          <QuickAction
+            href={MERCHANT_ROUTES.parcels}
+            icon={Printer}
+            title={t("printLabels")}
+            description={t("printLabelsDesc")}
+          />
+          <QuickAction
+            href={MERCHANT_ROUTES.analytics}
+            icon={FileText}
+            title={t("viewReports")}
+            description={t("viewReportsDesc")}
+          />
+        </div>
+      </section>
     </div>
   );
 }

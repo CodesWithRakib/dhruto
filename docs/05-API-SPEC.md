@@ -30,10 +30,10 @@ Success:
   "statusCode": 200,
   "message": "Success",
   "data": {},
-  "meta": {
-    "requestId": "uuid",
-    "timestamp": "ISO-8601"
-  }
+  "path": "/api/v1/parcels",
+  "requestId": "uuid",
+  "timestamp": "ISO-8601",
+  "meta": {}
 }
 ```
 
@@ -46,12 +46,17 @@ Error:
   "message": "Validation failed",
   "errorCode": "VALIDATION_ERROR",
   "errors": [],
-  "meta": {
-    "requestId": "uuid",
-    "timestamp": "ISO-8601"
-  }
+  "path": "/api/v1/parcels",
+  "requestId": "uuid",
+  "timestamp": "ISO-8601"
 }
 ```
+
+`path`, `requestId` and `timestamp` are elevated to the top level of the
+envelope by `ResponseTransformInterceptor`; they are not nested under `meta`.
+`meta` is reserved for pagination and is omitted entirely when the handler does
+not return any. Operational probes (`/health`, `/system`) intentionally bypass
+the envelope and return a flat payload.
 
 ## 3. Modules
 
@@ -161,7 +166,7 @@ limit
 
 For administrative reporting where stable page navigation is required, offset pagination may be used.
 
-Response:
+Response (cursor shape):
 
 ```json
 {
@@ -170,6 +175,32 @@ Response:
     "nextCursor": "opaque",
     "hasNextPage": true
   }
+}
+```
+
+### Implemented offset pagination (Phase 1, `GET /parcels`)
+
+`GET /parcels` accepts `page`, `limit`, `sort`, `order`, `status`, `search`,
+`district`, `thana`, `from` and `to`. The pagination envelope is **flattened
+directly onto `meta`** — there is no nested `meta.pagination`:
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Success",
+  "data": [{ "id": "uuid", "trackingCode": "DHR-YYYYMMDD-XXXXXX" }],
+  "meta": {
+    "page": 1,
+    "limit": 5,
+    "total": 148,
+    "totalPages": 30,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  },
+  "path": "/api/v1/parcels?page=1&limit=5",
+  "requestId": "uuid",
+  "timestamp": "ISO-8601"
 }
 ```
 
@@ -197,6 +228,27 @@ Required for:
 - cash verification
 
 The backend must return the original result when the same valid idempotency key is replayed.
+
+### Implemented behavior (Phase 1, `POST /parcels`)
+
+`Idempotency-Key` is **required** on `POST /parcels`; a request without it is
+rejected with `VALIDATION_ERROR`. A DB unique constraint on
+`(key, scope)` is the concurrency guard — not an application-level check.
+`IdempotencyService.resolve()` returns one of:
+
+- `replay` — the same key and an equivalent payload were already processed, so
+  the original stored result is returned unchanged (safe retry, no duplicate
+  parcel).
+- `conflict` — the key was reused with a _different_ payload; rejected with
+  `IDEMPOTENCY_CONFLICT` (`409`).
+- `in_progress` — a request with the same key is still executing; rejected with
+  `IDEMPOTENCY_IN_PROGRESS` (`409`) so the caller retries rather than creating a
+  second parcel.
+
+A concurrent duplicate is polled briefly (10 attempts x 200 ms) before being
+classified, so a double submission normally resolves to a `replay` and returns
+the same parcel instead of an error. Side effects such as the append-only
+status history row are written only by the winning transaction.
 
 ## 8. Error Codes
 

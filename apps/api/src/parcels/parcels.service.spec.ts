@@ -1,166 +1,178 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { ParcelsService } from "./parcels.service.js";
+import { NotFoundException } from "@nestjs/common";
 import { ParcelStatus } from "@dhruto/contracts";
+import { ParcelsService } from "./parcels.service.js";
+import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
+import { TrackingCodeService } from "./services/tracking-code.service.js";
 import { PricingService } from "../pricing/pricing.service.js";
+import { UserRole } from "../database/entities/User.entity.js";
+import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
 
-describe("ParcelsService", () => {
-  let service: ParcelsService;
-  let pricingService: PricingService;
+const MERCHANT_A = "11111111-1111-1111-1111-111111111111";
+const MERCHANT_B = "22222222-2222-2222-2222-222222222222";
 
-  const mockParcelRepo: any = {
-    create: (data: any) => ({
-      ...data,
-      id: "test-id",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }),
-    save: (data: any) => Promise.resolve(data),
-    find: () => Promise.resolve([]),
-    findOne: (opts: any) => {
-      if (opts?.where?.trackingCode === "DHR-20261004-TEST01") {
-        return Promise.resolve({
-          id: "test-id",
-          trackingCode: "DHR-20261004-TEST01",
-          recipientName: "Test Recipient",
-          recipientPhone: "01712345678",
-          rawAddress: "123 Test Street",
-          normalizedAddress: { district: "Dhaka", thana: "Dhanmondi" },
-          weight: 1.5,
-          codAmount: 1000,
-          deliveryFee: 80,
-          status: ParcelStatus.CREATED,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          merchant: { businessName: "Test Merchant", contactPhone: "01700000000", pickupAddress: "Warehouse" },
-        });
+/** A parcel that belongs to Merchant B. */
+const PARCEL_OF_B = {
+  id: "33333333-3333-3333-3333-333333333333",
+  trackingCode: "DHR-20260101-ABC234",
+  merchantId: MERCHANT_B,
+  recipientName: "Rafiqul Islam",
+  recipientPhone: "01712345678",
+  parcelDescription: null,
+  rawAddress: "House 12, Road 5, Dhanmondi, Dhaka",
+  district: "Dhaka",
+  thana: "Dhanmondi",
+  normalizedAddress: { zone: "INSIDE_DHAKA" },
+  weight: 1.5,
+  codAmount: 1500,
+  deliveryFee: 60,
+  status: ParcelStatus.CREATED,
+  currentHubId: null,
+  currentHub: null,
+  currentRider: null,
+  merchant: {
+    id: MERCHANT_B,
+    businessName: "Merchant B Traders",
+    contactPhone: "01700000012",
+    pickupAddress: "Warehouse B",
+  },
+  createdAt: new Date("2026-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+};
+
+function buildService(parcel: unknown, history: unknown[] = []) {
+  const parcelRepo = {
+    findOne: () => Promise.resolve(parcel),
+    exists: () => Promise.resolve(false),
+  };
+  const historyRepo = {
+    find: () => Promise.resolve(history),
+  };
+  const merchantRepo = {
+    findOne: (options: { where: { id?: string; userId?: string } }) => {
+      if (options.where.id === MERCHANT_A || options.where.userId === "user-a") {
+        return Promise.resolve({ id: MERCHANT_A, userId: "user-a" });
       }
       return Promise.resolve(null);
     },
   };
 
-  const mockHistoryRepo: any = {
-    create: (data: any) => data,
-    save: (data: any) => Promise.resolve(data),
-    find: () =>
-      Promise.resolve([
-        {
-          id: "hist-1",
-          parcelId: "test-id",
-          fromStatus: null,
-          toStatus: ParcelStatus.CREATED,
-          changedByRole: "MERCHANT",
-          reason: "Booking created",
-          createdAt: new Date(),
-        },
-      ]),
-  };
+  return new ParcelsService(
+    parcelRepo as never,
+    historyRepo as never,
+    merchantRepo as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    new PricingService(),
+    { find: () => Promise.resolve(null) } as never,
+    new ParcelLifecycleService(),
+    new TrackingCodeService(),
+  );
+}
 
-  const mockMerchantRepo: any = {
-    findOne: () =>
-      Promise.resolve({
-        id: "merchant-id",
-        userId: "user-id",
-        businessName: "Test Merchant",
-      }),
-    create: (data: any) => data,
-    save: (data: any) => Promise.resolve(data),
-  };
+const merchantA: AuthenticatedUser = {
+  id: "user-a",
+  email: "a@example.com",
+  phone: "01700000011",
+  role: UserRole.MERCHANT,
+  merchantId: MERCHANT_A,
+};
 
-  const mockAssignmentRepo: any = {
-    create: (data: any) => data,
-    save: (data: any) => Promise.resolve(data),
-  };
+const admin: AuthenticatedUser = {
+  id: "admin-user",
+  email: "admin@dhruto.com",
+  phone: "01700000001",
+  role: UserRole.ADMIN,
+  merchantId: null,
+};
 
-  const mockRiderRepo: any = {
-    findOne: () => Promise.resolve({ id: "rider-id", userId: "rider-user-id" }),
-  };
-
-  const mockHubRepo: any = {
-    findOne: () => Promise.resolve({ id: "hub-1", name: "Dhaka Central Sorting Hub" }),
-  };
-
-  const mockIdempotencyService: any = {
-    checkKey: () => Promise.resolve({ isDuplicate: false }),
-    saveKey: () => Promise.resolve(),
-  };
+describe("ParcelsService — tenant isolation", () => {
+  let service: ParcelsService;
 
   beforeEach(() => {
-    pricingService = new PricingService();
-    service = new ParcelsService(
-      mockParcelRepo,
-      mockHistoryRepo,
-      mockMerchantRepo,
-      mockAssignmentRepo,
-      mockRiderRepo,
-      mockHubRepo,
-      pricingService,
-      mockIdempotencyService,
+    service = buildService(PARCEL_OF_B);
+  });
+
+  it("resolves an unscoped scope for platform admins", async () => {
+    const scope = await service.resolveScope(admin);
+    expect(scope.isAdmin).toBe(true);
+    expect(scope.merchantId).toBeUndefined();
+  });
+
+  it("resolves the merchant scope from the authenticated token", async () => {
+    const scope = await service.resolveScope(merchantA);
+    expect(scope.isAdmin).toBe(false);
+    expect(scope.merchantId).toBe(MERCHANT_A);
+  });
+
+  it("hides another merchant's parcel rather than confirming it exists", async () => {
+    const scope = await service.resolveScope(merchantA);
+    await expect(
+      service.getParcelById(PARCEL_OF_B.id, scope),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("lets the platform admin read any parcel", async () => {
+    const scope = await service.resolveScope(admin);
+    const details = await service.getParcelById(PARCEL_OF_B.id, scope);
+    expect(details.id).toBe(PARCEL_OF_B.id);
+    expect(details.merchantId).toBe(MERCHANT_B);
+  });
+
+  it("hides another merchant's shipping label", async () => {
+    const scope = await service.resolveScope(merchantA);
+    await expect(
+      service.getShippingLabel(PARCEL_OF_B.id, scope),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("hides another merchant's history", async () => {
+    const scope = await service.resolveScope(merchantA);
+    await expect(
+      service.getParcelHistory(PARCEL_OF_B.id, scope),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe("ParcelsService — public tracking payload", () => {
+  it("masks the recipient phone and never exposes merchant or financial data", async () => {
+    const service = buildService(PARCEL_OF_B, [
+      {
+        id: "44444444-4444-4444-4444-444444444444",
+        parcelId: PARCEL_OF_B.id,
+        fromStatus: null,
+        toStatus: ParcelStatus.CREATED,
+        eventType: "PARCEL_CREATED",
+        actorRole: "MERCHANT",
+        description: "Initial booking created",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const tracking = await service.getTracking("dhr-20260101-abc234");
+    const serialized = JSON.stringify(tracking);
+
+    expect(tracking.trackingCode).toBe(PARCEL_OF_B.trackingCode);
+    expect(tracking.recipientPhoneMasked).toBe("017****5678");
+    expect(tracking.timeline).toHaveLength(1);
+    expect(tracking.timeline[0]?.labelEn).toBe("Booking Created");
+    expect(tracking.timeline[0]?.labelBn).toBe("বুকিং সম্পন্ন হয়েছে");
+
+    // Forbidden leakage checks (docs/10-SECURITY.md §6).
+    expect(serialized).not.toContain(MERCHANT_B);
+    expect(serialized).not.toContain("Merchant B Traders");
+    expect(serialized).not.toContain("1500");
+    expect(serialized).not.toContain("deliveryFee");
+    expect(serialized).not.toContain("01712345678");
+  });
+});
+
+describe("ParcelsService — tracking code generation", () => {
+  it("generates a canonical, unambiguous tracking code", () => {
+    const code = new TrackingCodeService().generate(
+      new Date("2026-01-01T00:00:00.000Z"),
     );
-  });
-
-  describe("createParcel", () => {
-    it("should create parcel with CREATED status, dynamic pricing, and canonical tracking code", async () => {
-      const booking = {
-        recipientName: "Hasan Mahmud",
-        recipientPhone: "01812345678",
-        district: "Dhaka",
-        thana: "Dhanmondi",
-        deliveryAddress: "GEC Circle, Nasirabad, Chittagong",
-        codAmount: 0,
-        weight: 1.0,
-      };
-
-      const result = await service.createParcel(booking);
-
-      expect(result.id).toBeDefined();
-      expect(result.trackingCode).toMatch(/^DHR-\d{8}-[A-F0-9]{6}$/);
-      expect(result.recipientName).toBe("Hasan Mahmud");
-      expect(result.recipientPhone).toBe("01812345678");
-      expect(result.status).toBe(ParcelStatus.CREATED);
-      expect(result.deliveryFee).toBe(60); // Inside Dhaka 1kg base fee
-      expect(result.codAmount).toBe(0);
-      expect(result.createdAt).toBeDefined();
-    });
-
-    it("should calculate outside Dhaka fees properly", async () => {
-      const booking = {
-        recipientName: "Fatima Begum",
-        recipientPhone: "01712345678",
-        district: "Chittagong",
-        thana: "Panchlaish",
-        deliveryAddress: "Nasirabad, Chittagong",
-        codAmount: 2000,
-        weight: 2.0, // base 130 + 1 extra kg (25) + 1% COD (20) = 175
-      };
-
-      const result = await service.createParcel(booking);
-      expect(result.deliveryFee).toBe(175);
-    });
-  });
-
-  describe("getTracking", () => {
-    it("should return public-safe tracking with masked phone and timeline", async () => {
-      const result = await service.getTracking("DHR-20261004-TEST01");
-
-      expect(result.trackingCode).toBe("DHR-20261004-TEST01");
-      expect(result.recipientPhoneMasked).toBe("017****5678");
-      expect(result.status).toBe(ParcelStatus.CREATED);
-      expect(result.timeline).toHaveLength(1);
-      expect(result.timeline[0]?.labelEn).toBe("Booking Created");
-      expect(result.timeline[0]?.labelBn).toBe("বুকিং সম্পন্ন হয়েছে");
-    });
-  });
-
-  describe("getShippingLabel", () => {
-    it("should return shipping label data with SVG barcode", async () => {
-      const label = await service.getShippingLabel("DHR-20261004-TEST01");
-
-      expect(label.trackingCode).toBe("DHR-20261004-TEST01");
-      expect(label.barcodeSvg).toContain("<svg");
-      expect(label.barcodeSvg).toContain("DHR-20261004-TEST01");
-      expect(label.recipientName).toBe("Test Recipient");
-      expect(label.merchantName).toBe("Test Merchant");
-      expect(label.routingHub).toBe("Dhaka Central Sorting Hub");
-    });
+    expect(code).toMatch(/^DHR-20260101-[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{6}$/);
   });
 });

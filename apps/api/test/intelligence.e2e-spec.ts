@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { ZodValidationPipe } from "nestjs-zod";
 import { DeliveryZone } from "@dhruto/contracts";
+import { idempotencyKey } from "./utils/auth.js";
 
 describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6 E2E)", () => {
   let app: INestApplication;
@@ -141,7 +142,7 @@ describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6
     expect(res.body.success).toBe(true);
     const data = res.body.data;
     expect(data.riskScore).toBeGreaterThan(40);
-    const codFactor = data.riskFactors.find((f: any) => f.code === "HIGH_COD_VALUE");
+    const codFactor = data.riskFactors.find((f: { code: string }) => f.code === "HIGH_COD_VALUE");
     expect(codFactor).toBeDefined();
     expect(data.requiresPhoneVerification).toBe(true);
   });
@@ -159,7 +160,9 @@ describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6
 
     expect(res.body.success).toBe(true);
     const data = res.body.data;
-    const phoneFactor = data.riskFactors.find((f: any) => f.code === "INVALID_PHONE_FORMAT");
+    const phoneFactor = data.riskFactors.find(
+      (f: { code: string; impact?: string }) => f.code === "INVALID_PHONE_FORMAT",
+    );
     expect(phoneFactor).toBeDefined();
     expect(phoneFactor.impact).toBe("CRITICAL");
   });
@@ -186,6 +189,7 @@ describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6
     const res = await request(app.getHttpServer())
       .post("/api/v1/parcels")
       .set("Authorization", `Bearer ${merchantToken}`)
+      .set("Idempotency-Key", idempotencyKey("intelligence-parcel"))
       .send({
         recipientName: "Smart Delivery Test",
         recipientPhone: "01788776655",
@@ -206,11 +210,11 @@ describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6
       .set("Authorization", `Bearer ${merchantToken}`)
       .expect(200);
 
-    const norm = details.body.data.normalizedAddress;
-    expect(norm).toBeDefined();
-    expect(norm.district).toBe("Dhaka");
-    expect(norm.thana).toBe("Banani");
-    expect(typeof norm.confidenceScore).toBe("number");
-    expect(norm.riskTier).toBeDefined();
+    const intelligence = details.body.data.addressIntelligence;
+    expect(intelligence).toBeDefined();
+    expect(intelligence.district).toBe("Dhaka");
+    expect(intelligence.thana).toBe("Banani");
+    expect(typeof intelligence.confidenceScore).toBe("number");
+    expect(intelligence.riskTier).toBeDefined();
   });
 });

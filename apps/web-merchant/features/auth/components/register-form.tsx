@@ -57,9 +57,9 @@ export function RegisterForm() {
       }).unwrap();
 
       if (res.success && res.data) {
-        const payloadData = res.data as any;
-        const accessToken = payloadData.tokens?.accessToken || payloadData.accessToken;
-        const refreshToken = payloadData.tokens?.refreshToken || payloadData.refreshToken;
+        const payloadData = res.data;
+        const accessToken = payloadData.tokens?.accessToken ?? payloadData.accessToken;
+        const refreshToken = payloadData.tokens?.refreshToken ?? payloadData.refreshToken;
 
         dispatch(
           setCredentials({

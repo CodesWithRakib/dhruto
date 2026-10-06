@@ -5,6 +5,7 @@ import { PayoutMethod } from "@dhruto/contracts";
 import { useRequestPayoutMutation } from "../api/finance.api";
 import { X, CheckCircle, AlertCircle, Building2, Smartphone, ArrowRight, Loader2 } from "lucide-react";
 import { Button, Input, Label } from "@dhruto/ui";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 interface PayoutRequestModalProps {
   isOpen: boolean;
@@ -78,9 +79,8 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
         setAmount("");
         setAccountNumber("");
       }, 1500);
-    } catch (err: any) {
-      const msg = err?.data?.message || err?.message || "Failed to submit payout request";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
+    } catch (err) {
+      setErrorMsg(getApiErrorMessage(err, "Failed to submit payout request"));
     }
   };
 

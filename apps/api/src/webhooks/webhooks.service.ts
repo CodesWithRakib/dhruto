@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { randomBytes, createHmac } from "crypto";
+import { getErrorMessage } from "../common/utils/error.util.js";
 import {
   WebhookSubscription,
   WebhookDelivery,
@@ -40,7 +41,7 @@ export class WebhooksService {
   /**
    * Computes HMAC-SHA256 signature for payload verification.
    */
-  generateSignature(payload: any, secret: string, timestamp: number): string {
+  generateSignature(payload: unknown, secret: string, timestamp: number): string {
     const serialized = JSON.stringify(payload);
     const signaturePayload = `${timestamp}.${serialized}`;
     const hash = createHmac("sha256", secret).update(signaturePayload).digest("hex");
@@ -116,7 +117,7 @@ export class WebhooksService {
   async dispatchEvent(
     event: WebhookEvent | string,
     merchantId: string,
-    payload: Record<string, any>,
+    payload: Record<string, unknown>,
   ): Promise<WebhookDelivery[]> {
     const subscriptions = await this.subscriptionRepo.find({
       where: { merchantId, status: "ACTIVE" },
@@ -197,9 +198,13 @@ export class WebhooksService {
       } else {
         await this.handleDeliveryFailure(delivery, sub, `HTTP ${response.status}: ${delivery.responseBody}`);
       }
-    } catch (err: any) {
+    } catch (err) {
       clearTimeout(timeoutId);
-      await this.handleDeliveryFailure(delivery, sub, err?.message || "Connection refused / timeout");
+      await this.handleDeliveryFailure(
+        delivery,
+        sub,
+        getErrorMessage(err, "Connection refused / timeout"),
+      );
     }
 
     await this.deliveryRepo.save(delivery);

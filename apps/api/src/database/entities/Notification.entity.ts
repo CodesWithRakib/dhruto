@@ -59,7 +59,7 @@ export class Notification extends BaseEntity {
   status: NotificationStatus;
 
   @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
 
   @Column({ name: 'sent_at', type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   sentAt: Date;

@@ -76,37 +76,67 @@ Use database constraints in addition to application validation.
 
 ### parcels
 
+Implemented columns (`apps/api/src/database/entities/Parcel.entity.ts`):
+
 - id
 - tracking_code UNIQUE
 - merchant_id
+- current_rider_id (nullable)
+- current_hub_id (nullable)
 - recipient_name
 - recipient_phone
+- parcel_description (nullable)
 - raw_address
-- normalized_address
-- district_id
-- thana_id
-- area_id
-- hub_id
+- district (nullable)
+- thana (nullable)
+- normalized_address JSONB (nullable; Phase 6 address intelligence only)
 - weight
 - cod_amount
 - delivery_fee
+- delivery_otp (nullable)
 - status
 - created_at
 - updated_at
 
+Indexes: `(merchant_id, status)`, `(merchant_id, created_at)`, `(merchant_id, district)`,
+`(current_hub_id, status)`, `(current_rider_id, status)`, `(recipient_phone)`, `(status)`, `(created_at)`.
+
 ### parcel_status_histories
+
+Append-only audit trail. Rows are never updated or deleted; the parcel's `status`
+column is the current state, this table records how it got there.
 
 - id
 - parcel_id
-- from_status
+- from_status (nullable)
 - to_status
-- changed_by
-- changed_by_role
-- hub_id
-- rider_id
-- reason
-- metadata JSONB
+- event_type (e.g. `PARCEL_CREATED`, `STATUS_CHANGED`)
+- actor_id (nullable)
+- actor_role
+- description (nullable)
+- metadata JSONB (nullable)
 - created_at
+
+Indexes: `(parcel_id, created_at)`, `(to_status)`.
+
+### idempotency_records
+
+Backs critical commands (`POST /parcels`). The unique `(key, scope)` index is the
+concurrency guard: a claim row is inserted inside the same transaction that
+performs the command, then completed with the serialized response before commit.
+
+- id
+- key
+- scope (default `DEFAULT`)
+- user_id (nullable)
+- request_hash (SHA-256 of the canonical payload; detects key reuse)
+- status_code (nullable while in flight)
+- response JSONB (nullable; replayed on duplicate requests)
+- completed_at (nullable)
+- expires_at (nullable)
+- created_at
+
+Unique index: `(key, scope)`.
 
 ### parcel_assignments
 

@@ -1,7 +1,43 @@
 import { z } from "zod";
 
+/**
+ * Canonical Bangladesh mobile number pattern.
+ * Format: 01XXXXXXXXX (11 digits, operator prefix 13-19).
+ */
 export const BANGLADESH_PHONE_REGEX = /^01[3-9]\d{8}$/;
 
+/**
+ * Normalizes a Bangladesh mobile number to the canonical `01XXXXXXXXX` form.
+ *
+ * Accepted inputs: `01XXXXXXXXX`, `+8801XXXXXXXXX`, `8801XXXXXXXXX`, `1XXXXXXXXX`,
+ * with optional spaces, dashes or parentheses.
+ */
+export function normalizeBangladeshPhone(input: string): string {
+  const digits = String(input ?? "").replace(/\D/g, "");
+
+  let local = digits;
+  if (local.startsWith("880")) {
+    local = local.slice(3);
+  } else if (local.startsWith("88")) {
+    local = local.slice(2);
+  }
+
+  if (!local.startsWith("0") && local.length === 10) {
+    local = `0${local}`;
+  }
+
+  return local;
+}
+
+/**
+ * Dhruto parcel lifecycle statuses.
+ *
+ * NOTE (spec reconciliation): the Phase 1 brief names the initial state
+ * `ORDER_CREATED`; the implemented Phase 0 lifecycle (docs/08-STATE-MACHINE.md)
+ * uses `CREATED` for the same state. `CREATED` is retained as the single
+ * canonical initial status so the state machine, seeds, finance and hub flows
+ * stay internally consistent. See docs/08-STATE-MACHINE.md §1.
+ */
 export enum ParcelStatus {
   CREATED = "CREATED",
   PICKUP_REQUESTED = "PICKUP_REQUESTED",
@@ -26,6 +62,12 @@ export enum ParcelStatus {
   DAMAGED = "DAMAGED",
 }
 
+/** The status a parcel is created in. */
+export const INITIAL_PARCEL_STATUS = ParcelStatus.CREATED;
+
+/** Canonical tracking code format: DHR-YYYYMMDD-XXXXXX. */
+export const TRACKING_CODE_REGEX = /^DHR-\d{8}-[0-9A-Z]{6}$/;
+
 export const parcelBookingSchema = z.object({
   recipientName: z
     .string({ required_error: "Recipient name is required" })
@@ -34,8 +76,11 @@ export const parcelBookingSchema = z.object({
     .max(100, "Recipient name cannot exceed 100 characters"),
   recipientPhone: z
     .string({ required_error: "Recipient phone is required" })
-    .trim()
-    .regex(BANGLADESH_PHONE_REGEX, "Invalid Bangladesh mobile number (format: 01XXXXXXXXX, 11 digits)"),
+    .transform((value) => normalizeBangladeshPhone(value))
+    .refine(
+      (value) => BANGLADESH_PHONE_REGEX.test(value),
+      "Invalid Bangladesh mobile number (format: 01XXXXXXXXX, 11 digits)",
+    ),
   district: z
     .string({ required_error: "District is required" })
     .trim()
@@ -51,6 +96,11 @@ export const parcelBookingSchema = z.object({
     .trim()
     .min(5, "Delivery address must be at least 5 characters")
     .max(300, "Delivery address cannot exceed 300 characters"),
+  parcelDescription: z
+    .string()
+    .trim()
+    .max(500, "Parcel description cannot exceed 500 characters")
+    .optional(),
   codAmount: z.coerce
     .number({ invalid_type_error: "COD amount must be a number" })
     .min(0, "COD amount cannot be negative")
@@ -63,7 +113,8 @@ export const parcelBookingSchema = z.object({
 
 export type ParcelBooking = z.infer<typeof parcelBookingSchema>;
 
-export const parcelCreatedResponseSchema = z.object({
+/** Summary projection of a parcel. Never exposes internal audit columns. */
+export const parcelSummarySchema = z.object({
   id: z.string().uuid(),
   trackingCode: z.string(),
   recipientName: z.string(),
@@ -71,15 +122,24 @@ export const parcelCreatedResponseSchema = z.object({
   district: z.string(),
   thana: z.string(),
   deliveryAddress: z.string(),
+  parcelDescription: z.string().nullable(),
   codAmount: z.number(),
   weight: z.number(),
   deliveryFee: z.number(),
   status: z.nativeEnum(ParcelStatus),
-  normalizedAddress: z.record(z.any()).optional(),
   createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
+export type ParcelSummary = z.infer<typeof parcelSummarySchema>;
+
+/** Response returned by parcel creation. */
+export const parcelCreatedResponseSchema = parcelSummarySchema;
 export type ParcelCreatedResponse = z.infer<typeof parcelCreatedResponseSchema>;
+
+/** A row in the paginated merchant parcel list. */
+export const parcelListItemSchema = parcelSummarySchema;
+export type ParcelListItem = z.infer<typeof parcelListItemSchema>;
 
 export enum DeliveryZone {
   INSIDE_DHAKA = "INSIDE_DHAKA",
@@ -88,24 +148,76 @@ export enum DeliveryZone {
 }
 
 export const pricingCalculationSchema = z.object({
-  district: z.string().trim().min(1, "District is required"),
-  thana: z.string().trim().optional(),
-  weight: z.coerce.number().positive("Weight must be greater than 0"),
-  codAmount: z.coerce.number().min(0).default(0),
+  district: z.string().trim().min(1, "District is required").max(50),
+  thana: z.string().trim().max(50).optional(),
+  weight: z.coerce
+    .number()
+    .positive("Weight must be greater than 0")
+    .max(50, "Weight exceeds maximum allowable limit of 50 kg"),
+  codAmount: z.coerce.number().min(0).max(500000).default(0),
 });
 
 export type PricingCalculation = z.infer<typeof pricingCalculationSchema>;
 
+/**
+ * Pricing breakdown. All monetary values are BDT amounts with 2 decimal places.
+ * `additionalCharge` and `discount` are explicit extension points for later
+ * phases (remote area fee, promotions); they are 0 in Phase 1.
+ */
 export const pricingResultSchema = z.object({
   zone: z.nativeEnum(DeliveryZone),
   baseFee: z.number(),
   weightFee: z.number(),
+  additionalCharge: z.number(),
+  discount: z.number(),
   codFee: z.number(),
   totalFee: z.number(),
   estimatedDays: z.string(),
 });
 
 export type PricingResult = z.infer<typeof pricingResultSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Merchant parcel list: query + pagination                            */
+/* ------------------------------------------------------------------ */
+
+export const PARCEL_LIST_SORT_FIELDS = [
+  "createdAt",
+  "updatedAt",
+  "codAmount",
+  "deliveryFee",
+] as const;
+
+export const parcelListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  sort: z.enum(PARCEL_LIST_SORT_FIELDS).default("createdAt"),
+  order: z.enum(["ASC", "DESC"]).default("DESC"),
+  status: z.nativeEnum(ParcelStatus).optional(),
+  search: z.string().trim().min(1).max(100).optional(),
+  district: z.string().trim().min(1).max(50).optional(),
+  thana: z.string().trim().min(1).max(50).optional(),
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+});
+
+export type ParcelListQuery = z.infer<typeof parcelListQuerySchema>;
+
+/* ------------------------------------------------------------------ */
+/* History / timeline                                                  */
+/* ------------------------------------------------------------------ */
+
+export const parcelHistoryEntrySchema = z.object({
+  id: z.string().uuid(),
+  fromStatus: z.nativeEnum(ParcelStatus).nullable(),
+  toStatus: z.nativeEnum(ParcelStatus),
+  eventType: z.string(),
+  description: z.string().nullable(),
+  actorRole: z.string(),
+  createdAt: z.string(),
+});
+
+export type ParcelHistoryEntry = z.infer<typeof parcelHistoryEntrySchema>;
 
 export const timelineEventSchema = z.object({
   status: z.nativeEnum(ParcelStatus),
@@ -117,6 +229,10 @@ export const timelineEventSchema = z.object({
 
 export type TimelineEvent = z.infer<typeof timelineEventSchema>;
 
+/**
+ * Public tracking payload. Deliberately excludes merchant identity, financial
+ * values, internal IDs and audit metadata (docs/10-SECURITY.md §6).
+ */
 export const publicTrackingResponseSchema = z.object({
   trackingCode: z.string(),
   status: z.nativeEnum(ParcelStatus),
@@ -131,25 +247,34 @@ export const publicTrackingResponseSchema = z.object({
 
 export type PublicTrackingResponse = z.infer<typeof publicTrackingResponseSchema>;
 
-export const statusHistoryEntrySchema = z.object({
-  id: z.string().uuid(),
-  fromStatus: z.string().nullable(),
-  toStatus: z.nativeEnum(ParcelStatus),
-  changedByRole: z.string(),
-  reason: z.string().nullable(),
-  createdAt: z.string(),
+/**
+ * Address/risk intelligence attached to a parcel (Phase 6). Expressed as an
+ * explicit contract so the raw `normalized_address` column never leaks while
+ * still allowing Phase 6 to enrich the same fields.
+ */
+export const parcelAddressIntelligenceSchema = z.object({
+  district: z.string(),
+  thana: z.string(),
+  zone: z.string().nullable(),
+  confidenceScore: z.number().nullable(),
+  confidenceTier: z.string().nullable(),
+  riskScore: z.number().nullable(),
+  riskTier: z.string().nullable(),
+  rtoProbability: z.number().nullable(),
 });
 
-export type StatusHistoryEntry = z.infer<typeof statusHistoryEntrySchema>;
+export type ParcelAddressIntelligence = z.infer<
+  typeof parcelAddressIntelligenceSchema
+>;
 
-export const parcelDetailsResponseSchema = parcelCreatedResponseSchema.extend({
+export const parcelDetailsResponseSchema = parcelSummarySchema.extend({
   merchantId: z.string().uuid(),
-  merchantName: z.string().optional(),
-  pickupAddress: z.string().optional(),
-  currentRiderName: z.string().nullable().optional(),
-  currentRiderPhone: z.string().nullable().optional(),
-  currentHubName: z.string().nullable().optional(),
-  statusHistory: z.array(statusHistoryEntrySchema).default([]),
+  merchantName: z.string(),
+  pickupAddress: z.string(),
+  currentRiderName: z.string().nullable(),
+  currentHubName: z.string().nullable(),
+  addressIntelligence: parcelAddressIntelligenceSchema,
+  history: z.array(parcelHistoryEntrySchema),
 });
 
 export type ParcelDetailsResponse = z.infer<typeof parcelDetailsResponseSchema>;

@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useFailDeliveryMutation } from "../api/riders.api";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { toast } from "sonner";
 import { DeliveryFailureReason, type RiderTaskItem } from "@dhruto/contracts";
 
@@ -53,8 +54,8 @@ export function DeliveryFailModal({ task, onClose, onSuccess }: DeliveryFailModa
         onSuccess();
         onClose();
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to record issue");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Failed to record issue"));
     }
   };
 

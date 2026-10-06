@@ -1,40 +1,59 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useParcelsList } from "../hooks/use-parcels-list";
 import {
+  Badge,
+  Button,
   Card,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  Button,
   DataTable,
+  Input,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
   type ColumnDef,
 } from "@dhruto/ui";
-import { PackageSearch, Plus, MapPin, Phone, Hash, Printer, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Filter, Hash, Plus, Printer, Search } from "lucide-react";
+import type { ParcelListItem } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import type { ParcelCreatedResponse } from "@dhruto/contracts";
-
-const STATUS_FILTERS = [
-  { value: "", labelKey: "all" },
-  { value: "CREATED", labelKey: "filterCreated" },
-  { value: "IN_TRANSIT", labelKey: "filterInTransit" },
-  { value: "OUT_FOR_DELIVERY", labelKey: "filterOutForDelivery" },
-  { value: "DELIVERED", labelKey: "filterDelivered" },
-  { value: "RETURNED_TO_MERCHANT", labelKey: "filterReturned" },
-] as const;
+import { EmptyState, ErrorState, LoadingState, RetryButton } from "@/components/feedback/states";
+import { useParcelsList } from "../hooks/use-parcels-list";
+import { ParcelFilterControls } from "./parcel-filters";
+import { ParcelCard } from "./parcel-card";
 
 export function ParcelList() {
   const t = useTranslations("ParcelList");
   const routes = useRouteBase();
-  const { parcels, isLoading, isError, refetch, status, setStatus, search, setSearch } = useParcelsList();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const {
+    parcels,
+    pagination,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+    page,
+    limit,
+    setLimit,
+    setPage,
+    filters,
+    updateFilter,
+    resetFilters,
+    activeFilterCount,
+  } = useParcelsList();
 
   const createHref = routes.createBooking;
+  const totalItems = pagination?.total ?? parcels.length;
+  const totalPages = pagination?.totalPages ?? 1;
 
-  const columns: ColumnDef<ParcelCreatedResponse>[] = useMemo(
+  const columns: ColumnDef<ParcelListItem>[] = useMemo(
     () => [
       {
         accessorKey: "trackingCode",
@@ -55,8 +74,7 @@ export function ParcelList() {
         cell: ({ row }) => (
           <div>
             <p className="font-medium text-foreground">{row.original.recipientName}</p>
-            <p className="mt-0.5 flex items-center gap-1 font-mono text-caption text-muted-foreground">
-              <Phone className="h-3 w-3" aria-hidden="true" />
+            <p className="mt-0.5 font-mono text-caption text-muted-foreground">
               {row.original.recipientPhone}
             </p>
           </div>
@@ -70,11 +88,11 @@ export function ParcelList() {
             <p className="font-medium text-foreground">
               {row.original.thana}, {row.original.district}
             </p>
-            <p className="mt-0.5 flex items-start gap-1 text-caption text-muted-foreground">
-              <MapPin className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-              <span className="max-w-[220px] truncate" title={row.original.deliveryAddress}>
-                {row.original.deliveryAddress}
-              </span>
+            <p
+              className="mt-0.5 max-w-[220px] truncate text-caption text-muted-foreground"
+              title={row.original.deliveryAddress}
+            >
+              {row.original.deliveryAddress}
             </p>
           </div>
         ),
@@ -88,7 +106,7 @@ export function ParcelList() {
               ৳{row.original.codAmount.toLocaleString()}
             </p>
             <p className="mt-0.5 text-caption text-muted-foreground">
-              {t("fee")} ৳{row.original.deliveryFee}
+              {t("fee")} ৳{row.original.deliveryFee.toLocaleString()}
             </p>
           </div>
         ),
@@ -102,19 +120,21 @@ export function ParcelList() {
         accessorKey: "createdAt",
         header: t("date"),
         cell: ({ row }) => {
-          const d = new Date(row.original.createdAt);
+          const created = new Date(row.original.createdAt);
           return (
             <div className="text-caption text-muted-foreground">
-              <span>{d.toLocaleDateString()}</span>
+              <span>{created.toLocaleDateString()}</span>
               <br />
-              <span>{d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+              <span>
+                {created.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
             </div>
           );
         },
       },
       {
         id: "actions",
-        header: () => <span className="text-right block">{t("actions")}</span>,
+        header: () => <span className="block text-right">{t("actions")}</span>,
         cell: ({ row }) => (
           <div className="flex items-center justify-end gap-1.5">
             <Link
@@ -122,12 +142,12 @@ export function ParcelList() {
               aria-label={t("printLabel")}
               title={t("printLabel")}
             >
-              <Button variant="ghost" size="icon-sm">
+              <Button variant="ghost" size="icon-sm" aria-label={t("printLabel")}>
                 <Printer className="h-3.5 w-3.5" aria-hidden="true" />
               </Button>
             </Link>
             <Link href={routes.parcel(row.original.id)}>
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Button variant="outline" size="sm" className="gap-1">
                 <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                 {t("view")}
               </Button>
@@ -139,22 +159,19 @@ export function ParcelList() {
     [t, routes],
   );
 
+  const hasNoResults = !isLoading && !isError && parcels.length === 0;
+
   return (
     <div className="w-full space-y-4">
-      <Card className="w-full border-border shadow-sm">
+      <Card>
         <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-border sm:flex-row sm:items-center">
           <div>
-            <CardTitle className="flex items-center gap-2 text-h3 text-foreground">
-              <PackageSearch className="h-5 w-5 text-primary" aria-hidden="true" />
-              {t("title")}
-            </CardTitle>
-            <CardDescription className="mt-1 text-muted-foreground">
-              {t("description")}
-            </CardDescription>
+            <CardTitle className="text-h3">{t("title")}</CardTitle>
+            <CardDescription className="mt-1">{t("description")}</CardDescription>
           </div>
           {createHref ? (
             <Link href={createHref}>
-              <Button className="flex items-center gap-2">
+              <Button className="gap-2">
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 {t("create")}
               </Button>
@@ -163,39 +180,172 @@ export function ParcelList() {
         </CardHeader>
       </Card>
 
-      <DataTable
-        columns={columns}
-        data={parcels}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={refetch}
-        search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder={t("searchPlaceholder")}
-        filterSlot={
-          <div className="flex items-center gap-2">
-            <label
-              htmlFor="parcel-status-filter"
-              className="text-caption font-medium text-muted-foreground whitespace-nowrap"
-            >
-              {t("status")}:
-            </label>
-            <select
-              id="parcel-status-filter"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 text-body-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {STATUS_FILTERS.map((option) => (
-                <option key={option.value || "all"} value={option.value}>
-                  {t(option.labelKey)}
-                </option>
-              ))}
-            </select>
+      {/* Search + mobile filter trigger */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            value={filters.search}
+            onChange={(event) => updateFilter("search", event.target.value)}
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
+            className="pl-9"
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setFiltersOpen(true)}
+          className="gap-2 lg:hidden"
+          aria-expanded={filtersOpen}
+        >
+          <Filter className="h-4 w-4" aria-hidden="true" />
+          {t("filters")}
+          {activeFilterCount > 0 ? (
+            <Badge variant="secondary" className="ml-1">
+              {activeFilterCount}
+            </Badge>
+          ) : null}
+        </Button>
+      </div>
+
+      {/* Desktop filters */}
+      <div className="hidden rounded-md border border-border bg-surface p-4 lg:block">
+        <ParcelFilterControls
+          idPrefix="desktop"
+          filters={filters}
+          updateFilter={updateFilter}
+          resetFilters={resetFilters}
+          activeFilterCount={activeFilterCount}
+        />
+      </div>
+
+      {/* Mobile filter sheet */}
+      <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t("filters")}</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4">
+            <ParcelFilterControls
+              idPrefix="mobile"
+              stacked
+              filters={filters}
+              updateFilter={updateFilter}
+              resetFilters={resetFilters}
+              activeFilterCount={activeFilterCount}
+            />
           </div>
-        }
-        emptyMessage={t("empty")}
-      />
+          <div className="mt-4 flex justify-end">
+            <Button type="button" onClick={() => setFiltersOpen(false)}>
+              {t("applyFilters")}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* States */}
+      {isError ? (
+        <div className="rounded-md border border-border bg-surface">
+          <ErrorState
+            title={t("loadErrorTitle")}
+            description={t("loadErrorDescription")}
+            action={<RetryButton label={t("retry")} onRetry={() => void refetch()} />}
+          />
+        </div>
+      ) : isLoading ? (
+        <div className="rounded-md border border-border bg-surface">
+          <LoadingState title={t("loading")} />
+        </div>
+      ) : hasNoResults ? (
+        <div className="rounded-md border border-border bg-surface">
+          <EmptyState
+            title={activeFilterCount > 0 ? t("noResultsTitle") : t("emptyTitle")}
+            description={
+              activeFilterCount > 0 ? t("noResultsDescription") : t("emptyDescription")
+            }
+            action={
+              activeFilterCount > 0 ? (
+                <Button variant="outline" size="sm" onClick={resetFilters}>
+                  {t("clearFilters")}
+                </Button>
+              ) : createHref ? (
+                <Link href={createHref}>
+                  <Button size="sm" className="gap-1.5">
+                    <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("create")}
+                  </Button>
+                </Link>
+              ) : undefined
+            }
+          />
+        </div>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="hidden lg:block">
+            <DataTable
+              columns={columns}
+              data={parcels}
+              isLoading={isFetching && parcels.length === 0}
+              totalItems={totalItems}
+              pageCount={totalPages}
+              currentPage={page}
+              itemsPerPage={limit}
+              onPageChange={setPage}
+              onLimitChange={(nextLimit) => {
+                setLimit(nextLimit);
+                setPage(1);
+              }}
+              emptyMessage={t("emptyTitle")}
+            />
+          </div>
+
+          {/* Mobile cards */}
+          <div className="lg:hidden">
+            <ul className="space-y-3">
+              {parcels.map((parcel) => (
+                <ParcelCard key={parcel.id} parcel={parcel} />
+              ))}
+            </ul>
+          </div>
+
+          {/* Mobile pager */}
+          <nav
+            aria-label={t("paginationLabel")}
+            className="flex items-center justify-between gap-3 lg:hidden"
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage(Math.max(1, page - 1))}
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              {t("previous")}
+            </Button>
+            <span className="text-caption text-muted-foreground">
+              {t("pageOf", { page, totalPages })}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              disabled={page >= totalPages || isFetching}
+              onClick={() => setPage(page + 1)}
+            >
+              {t("next")}
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </nav>
+        </>
+      )}
     </div>
   );
 }
