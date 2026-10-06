@@ -42,6 +42,21 @@ export class AuthService implements OnModuleInit {
   ) {}
 
   /**
+   * Central rider-code issuance with conflict retry (unique index guard).
+   */
+  private async generateUniqueRiderCode(): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const code = Rider.generateCode();
+      const existing = await this.riderRepo.findOne({
+        where: { riderCode: code },
+        select: ["id"],
+      });
+      if (!existing) return code;
+    }
+    return `RDR-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
+  }
+
+  /**
    * Seed default demo users for development and testing.
    */
   async onModuleInit() {
@@ -131,6 +146,7 @@ export class AuthService implements OnModuleInit {
         userId: riderUser.id,
         hubId: hub.id,
         status: RiderStatus.ACTIVE,
+        riderCode: await this.generateUniqueRiderCode(),
       });
       await this.riderRepo.save(rider);
     }
@@ -230,6 +246,7 @@ export class AuthService implements OnModuleInit {
         userId: user.id,
         hubId: targetHub.id,
         status: RiderStatus.ACTIVE,
+        riderCode: await this.generateUniqueRiderCode(),
       });
       await this.riderRepo.save(rider);
       riderId = rider.id;

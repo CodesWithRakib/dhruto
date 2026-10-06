@@ -73,6 +73,10 @@ export const HUB_ROUTES = {
 
 export const RIDER_ROUTES = {
   dashboard: "/rider/dashboard",
+  tasks: "/rider/tasks",
+  task: (id: string) => `/rider/tasks/${id}`,
+  history: "/rider/history",
+  profile: "/rider/profile",
 } as const;
 
 export const ROUTES = {

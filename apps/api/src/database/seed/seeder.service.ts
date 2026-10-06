@@ -184,10 +184,12 @@ export class SeederService {
           userId: user.id,
           hubId: hub.id,
           status: rData.status,
+          riderCode: rData.riderCode,
         });
       } else {
         rider.hubId = hub.id;
         rider.status = rData.status;
+        if (!rider.riderCode) rider.riderCode = rData.riderCode;
       }
       await this.riderRepo.save(rider);
       riderMap.set(rData.userEmail, rider);
@@ -258,7 +260,6 @@ export class SeederService {
           weight: pData.weight,
           codAmount: pData.codAmount,
           deliveryFee: pData.deliveryFee,
-          deliveryOtp: pData.deliveryOtp || null,
           status: pData.status,
         });
       } else {

@@ -119,9 +119,11 @@ describe("Rider Delivery & Cash Reconciliation (E2E / Integration)", () => {
 
     expect(res.body.success).toBe(true);
     expect(res.body.data.status).toBe("OUT_FOR_DELIVERY");
-    expect(res.body.data.deliveryOtp).toBeDefined();
-    expect(res.body.data.deliveryOtp).toHaveLength(6);
-    deliveryOtp = res.body.data.deliveryOtp;
+    // Test automation receives the OTP from the start response (NODE_ENV=test).
+    // Production responses never include it; the rider learns it from the customer.
+    expect(res.body.data.otp).toBeDefined();
+    expect(res.body.data.otp).toHaveLength(6);
+    deliveryOtp = res.body.data.otp;
   });
 
   it("5. Verify customer delivery OTP via POST /api/v1/riders/me/deliveries/:id/verify-otp", async () => {

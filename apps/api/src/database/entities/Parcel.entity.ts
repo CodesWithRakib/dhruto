@@ -80,8 +80,30 @@ export class Parcel extends BaseEntity {
   @Column({ name: 'delivery_fee', type: 'decimal', precision: 12, scale: 2, default: 0 })
   deliveryFee: number;
 
-  @Column({ name: 'delivery_otp', type: 'varchar', length: 10, nullable: true })
-  deliveryOtp: string | null;
+  /**
+   * Bcrypt hash of the active delivery OTP. The plaintext OTP exists only in
+   * memory at generation time (sent to the customer via SMS) and is never
+   * persisted, logged, or returned to the rider UI.
+   */
+  @Column({ name: 'delivery_otp_hash', type: 'varchar', length: 255, nullable: true })
+  deliveryOtpHash: string | null;
+
+  @Column({ name: 'otp_expires_at', type: 'timestamptz', nullable: true })
+  otpExpiresAt: Date | null;
+
+  /** Wrong guesses against the active OTP (locks at OTP_MAX_ATTEMPTS). */
+  @Column({ name: 'otp_attempts', type: 'int', default: 0 })
+  otpAttempts: number;
+
+  @Column({ name: 'otp_verified_at', type: 'timestamptz', nullable: true })
+  otpVerifiedAt: Date | null;
+
+  /** OTP generations for the current delivery leg (resend cap). */
+  @Column({ name: 'otp_request_count', type: 'int', default: 0 })
+  otpRequestCount: number;
+
+  @Column({ name: 'last_otp_requested_at', type: 'timestamptz', nullable: true })
+  lastOtpRequestedAt: Date | null;
 
   @Column({ type: 'enum', enum: ParcelStatus, default: ParcelStatus.CREATED })
   status: ParcelStatus;

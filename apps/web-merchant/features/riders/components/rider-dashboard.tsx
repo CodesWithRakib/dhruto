@@ -1,336 +1,221 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  Button,
-  Badge,
-} from "@dhruto/ui";
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import { Card, CardContent, Button, Badge } from "@dhruto/ui";
 import {
   Bike,
   Package,
+  PackageCheck,
   CheckCircle2,
-  Clock,
+  AlertTriangle,
   Wallet,
   RefreshCw,
-  Search,
-  Truck,
-  UserCheck,
+  Play,
 } from "lucide-react";
 import {
+  useGetRiderDashboardQuery,
   useGetRiderTasksQuery,
-  useStartDeliveryMutation,
-  useGetCashSummaryQuery,
+  useSetDutyMutation,
 } from "../api/riders.api";
 import { Link } from "@/lib/navigation";
-import { type RiderTaskItem } from "@dhruto/contracts";
-import { RiderTaskCard } from "./rider-task-card";
-import { DeliveryOtpModal } from "./delivery-otp-modal";
-import { DeliveryFailModal } from "./delivery-fail-modal";
+import { RIDER_ROUTES } from "@/config/routes";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { RiderCashModal } from "./rider-cash-modal";
+import { RiderDutyStatus } from "@dhruto/contracts";
 import { toast } from "sonner";
 
+/**
+ * Rider dashboard: live task counts, COD still to collect and the next
+ * delivery CTA. Every number comes from `GET /riders/me/dashboard`.
+ */
 export function RiderDashboard() {
-  const [activeTab, setActiveTab] = useState<string>("ALL");
-  const [search, setSearch] = useState("");
-  const [selectedTaskForOtp, setSelectedTaskForOtp] = useState<RiderTaskItem | null>(null);
-  const [selectedTaskForFail, setSelectedTaskForFail] = useState<RiderTaskItem | null>(null);
-  const [isCashModalOpen, setIsCashModalOpen] = useState(false);
+  const t = useTranslations("Rider");
+  const {
+    data: dashboardData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetRiderDashboardQuery();
+  const { data: tasksData, refetch: refetchTasks } = useGetRiderTasksQuery();
+  const [setDuty, { isLoading: isTogglingDuty }] = useSetDutyMutation();
 
-  const { data: tasksData, isLoading, refetch: refetchTasks, error } = useGetRiderTasksQuery();
-  const { data: cashData, refetch: refetchCash } = useGetCashSummaryQuery();
+  const dashboard = dashboardData?.data;
+  const tasks = tasksData?.data ?? [];
+  const nextTask =
+    tasks.find((task) => task.status === "OUT_FOR_DELIVERY") ??
+    tasks.find((task) => task.status === "ASSIGNED_TO_RIDER");
 
-  const [startDeliveryMutation, { isLoading: isStarting }] = useStartDeliveryMutation();
-
-  const tasks = tasksData?.data || [];
-  const cashSummary = cashData?.data || {
-    totalCollected: 0,
-    pendingHandIn: 0,
-    awaitingVerification: 0,
-    verifiedByHub: 0,
-    totalParcelsCount: 0,
-  };
-
-  const handleStartDelivery = async (parcelId: string) => {
+  const handleDutyToggle = async () => {
+    if (!dashboard) return;
+    const next =
+      dashboard.duty === RiderDutyStatus.ON_DUTY ? RiderDutyStatus.OFF_DUTY : RiderDutyStatus.ON_DUTY;
     try {
-      const res = await startDeliveryMutation(parcelId).unwrap();
+      const res = await setDuty({ duty: next }).unwrap();
       if (res.success) {
-        toast.success(res.message || "Parcel is now OUT_FOR_DELIVERY!");
-        refetchTasks();
+        toast.success(res.message);
+        refetch();
       }
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Failed to start delivery run"));
+      toast.error(getApiErrorMessage(err, t("dutyBlocked")));
     }
   };
 
-  const filteredTasks = tasks.filter((t) => {
-    const matchesSearch =
-      search === "" ||
-      t.trackingCode.toLowerCase().includes(search.toLowerCase()) ||
-      t.recipientName.toLowerCase().includes(search.toLowerCase()) ||
-      t.recipientPhone.includes(search);
+  const handleRefresh = React.useCallback(() => {
+    refetch();
+    refetchTasks();
+  }, [refetch, refetchTasks]);
 
-    const matchesTab =
-      activeTab === "ALL" ||
-      (activeTab === "OUT" && t.status === "OUT_FOR_DELIVERY") ||
-      (activeTab === "ASSIGNED" && t.status === "ASSIGNED_TO_RIDER") ||
-      (activeTab === "COMPLETED" && (t.status === "DELIVERED" || t.status === "CASH_PENDING"));
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center" role="status" aria-live="polite">
+        <RefreshCw className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <p className="font-medium text-muted-foreground">{t("loading")}</p>
+      </div>
+    );
+  }
 
-    return matchesSearch && matchesTab;
-  });
+  if (isError || !dashboard) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-6">
+        <EmptyState
+          icon={AlertTriangle}
+          tone="error"
+          title={t("loading")}
+          action={
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              {t("retry")}
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
-  const outCount = tasks.filter((t) => t.status === "OUT_FOR_DELIVERY").length;
-  const assignedCount = tasks.filter((t) => t.status === "ASSIGNED_TO_RIDER").length;
-  const completedCount = tasks.filter(
-    (t) => t.status === "DELIVERED" || t.status === "CASH_PENDING",
-  ).length;
+  const onDuty = dashboard.duty === RiderDutyStatus.ON_DUTY;
+  const metricCards = [
+    { label: t("dashboard.assigned"), value: dashboard.counts.assigned, icon: Package, tone: "bg-info-soft text-info" },
+    { label: t("dashboard.inProgress"), value: dashboard.counts.inProgress, icon: Play, tone: "bg-warning-soft text-warning" },
+    { label: t("dashboard.deliveredToday"), value: dashboard.counts.deliveredToday, icon: PackageCheck, tone: "bg-success-soft text-success" },
+    { label: t("dashboard.failedToday"), value: dashboard.counts.failedToday, icon: AlertTriangle, tone: "bg-danger-soft text-danger" },
+  ];
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Top Banner & Quick Actions */}
-      <div className="bg-card border rounded-2xl p-5 sm:p-6  flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-            <Bike className="h-7 w-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Rider Delivery Terminal</h1>
-              <Badge variant="outline" className="border-success text-success bg-success-soft text-[10px]">
-                On Duty
-              </Badge>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              Last-mile dispatch, OTP verification, and cash collection ledger
-            </p>
-          </div>
-        </div>
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
+      <PageHeader
+        title={t("dashboard.title")}
+        description={t("dashboard.subtitle", {
+          name: "",
+          code: dashboard.riderCode,
+          hub: dashboard.hubName,
+        })}
+        actions={
+          <>
+            <Badge variant={onDuty ? "success" : "secondary"} className="h-9 px-3 text-xs">
+              {onDuty ? t("onDuty") : t("offDuty")}
+            </Badge>
+            <Button variant="outline" size="sm" onClick={handleDutyToggle} disabled={isTogglingDuty} className="h-9 text-xs">
+              {onDuty ? t("goOffDuty") : t("goOnDuty")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleRefresh} className="h-9 text-xs" aria-label={t("refresh")}>
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+            </Button>
+          </>
+        }
+      />
 
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsCashModalOpen(true)}
-            className="h-9 px-3 gap-1.5 border-warning text-warning  hover:bg-warning-soft text-xs font-semibold"
-          >
-            <Wallet className="h-4 w-4 text-warning" />
-            Cash: ৳{cashSummary.pendingHandIn.toLocaleString()}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              refetchTasks();
-              refetchCash();
-            }}
-            className="h-9 w-9 p-0"
-            title="Refresh Tasks"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-        </div>
+      {/* Live metrics */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {metricCards.map((card) => (
+          <Card key={card.label}>
+            <CardContent className="flex items-center justify-between gap-2 p-4">
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {card.label}
+                </p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{card.value}</p>
+              </div>
+              <span className={`rounded-lg p-2.5 ${card.tone}`}>
+                <card.icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Rider Authentication Alert */}
-      {error && (
-        <Card className="border-warning bg-warning-soft p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
-            <div className="flex items-start gap-2.5">
-              <UserCheck className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+      {/* COD + next delivery */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Card>
+          <CardContent className="flex items-center justify-between gap-2 p-4">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {t("dashboard.codToCollect")}
+              </p>
+              <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-foreground">
+                ৳{dashboard.codToCollect.toLocaleString()}
+              </p>
+            </div>
+            <span className="rounded-lg bg-warning-soft p-2.5 text-warning">
+              <Wallet className="h-5 w-5" aria-hidden="true" />
+            </span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center justify-between gap-2 p-4">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {t("dashboard.parcelsInHand")}
+              </p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
+                {dashboard.parcelsInHand}
+              </p>
+            </div>
+            <span className="rounded-lg bg-primary-soft p-2.5 text-primary">
+              <Bike className="h-5 w-5" aria-hidden="true" />
+            </span>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Next delivery CTA */}
+      {nextTask ? (
+        <Card className="border-primary/30">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                <Package className="h-5 w-5" aria-hidden="true" />
+              </span>
               <div>
-                <p className="font-semibold text-warning">
-                  Rider Authentication Required
-                </p>
-                <p className="text-xs text-warning mt-0.5">
-                  You are currently logged in with a non-rider account. Please log in with an authorized Rider account to manage deliveries.
+                <p className="font-mono text-sm font-bold text-foreground">{nextTask.trackingCode}</p>
+                <p className="text-xs text-muted-foreground">
+                  {nextTask.recipientName} · {nextTask.status}
+                  {nextTask.codAmount > 0 ? ` · ৳${nextTask.codAmount.toLocaleString()}` : ""}
                 </p>
               </div>
             </div>
-            <Link href="/login">
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-warning text-warning hover:bg-warning-soft text-xs whitespace-nowrap self-end sm:self-center"
-              >
-                Sign In as Rider
+            <Link href={RIDER_ROUTES.task(nextTask.id)}>
+              <Button className="w-full gap-1.5 sm:w-auto">
+                <Play className="h-4 w-4" aria-hidden="true" />
+                {nextTask.status === "OUT_FOR_DELIVERY"
+                  ? t("details.attemptDelivery")
+                  : t("dashboard.startNext")}
               </Button>
             </Link>
-          </div>
-        </Card>
-      )}
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="">
-          <CardContent className="p-3.5 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase">Out For Delivery</p>
-              <h3 className="text-xl font-bold mt-0.5 text-warning">{outCount}</h3>
-            </div>
-            <div className="p-2 bg-warning-soft  text-warning rounded-lg">
-              <Truck className="h-4 w-4" />
-            </div>
           </CardContent>
         </Card>
-
-        <Card className="">
-          <CardContent className="p-3.5 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase">Pending Run</p>
-              <h3 className="text-xl font-bold mt-0.5 text-info">{assignedCount}</h3>
-            </div>
-            <div className="p-2 bg-info-soft  text-info rounded-lg">
-              <Clock className="h-4 w-4" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="">
-          <CardContent className="p-3.5 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase">Completed</p>
-              <h3 className="text-xl font-bold mt-0.5 text-success">{completedCount}</h3>
-            </div>
-            <div className="p-2 bg-success-soft  text-success rounded-lg">
-              <CheckCircle2 className="h-4 w-4" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="">
-          <CardContent className="p-3.5 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase">Cash Collected</p>
-              <h3 className="text-xl font-bold font-mono mt-0.5 text-foreground">
-                ৳{cashSummary.pendingHandIn.toLocaleString()}
-              </h3>
-            </div>
-            <div className="p-2 bg-primary/10 text-primary rounded-lg">
-              <Wallet className="h-4 w-4" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs & Search */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-          <div className="flex border-b overflow-x-auto no-scrollbar gap-1">
-            <button
-              onClick={() => setActiveTab("ALL")}
-              className={`px-3.5 py-2 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
-                activeTab === "ALL"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              All ({tasks.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("OUT")}
-              className={`px-3.5 py-2 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
-                activeTab === "OUT"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Out for Delivery ({outCount})
-            </button>
-            <button
-              onClick={() => setActiveTab("ASSIGNED")}
-              className={`px-3.5 py-2 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
-                activeTab === "ASSIGNED"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Assigned ({assignedCount})
-            </button>
-            <button
-              onClick={() => setActiveTab("COMPLETED")}
-              className={`px-3.5 py-2 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
-                activeTab === "COMPLETED"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Completed ({completedCount})
-            </button>
-          </div>
-
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search recipient, code..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border bg-background focus:ring-1 focus:ring-primary outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Task Cards Grid */}
-        {isLoading ? (
-          <div className="py-16 text-center text-muted-foreground text-sm">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto text-primary mb-2" />
-            Loading assigned rider tasks...
-          </div>
-        ) : filteredTasks.length === 0 ? (
-          <Card className="text-center py-12 p-6 border-dashed">
-            <Package className="h-10 w-10 mx-auto mb-2 text-muted-foreground/40" />
-            <h3 className="font-semibold text-sm">No Delivery Tasks Found</h3>
-            <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-              Parcels assigned to your rider profile by hub managers will appear here for delivery.
-            </p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {filteredTasks.map((task) => (
-              <RiderTaskCard
-                key={task.id}
-                task={task}
-                onStartDelivery={handleStartDelivery}
-                onComplete={(t) => setSelectedTaskForOtp(t)}
-                onFail={(t) => setSelectedTaskForFail(t)}
-                isStarting={isStarting}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Modals */}
-      {selectedTaskForOtp && (
-        <DeliveryOtpModal
-          task={selectedTaskForOtp}
-          onClose={() => setSelectedTaskForOtp(null)}
-          onSuccess={() => {
-            refetchTasks();
-            refetchCash();
-          }}
-        />
-      )}
-
-      {selectedTaskForFail && (
-        <DeliveryFailModal
-          task={selectedTaskForFail}
-          onClose={() => setSelectedTaskForFail(null)}
-          onSuccess={() => {
-            refetchTasks();
-          }}
-        />
-      )}
-
-      {isCashModalOpen && (
-        <RiderCashModal
-          onClose={() => setIsCashModalOpen(false)}
-          onSuccess={() => {
-            refetchCash();
-          }}
+      ) : (
+        <EmptyState
+          icon={CheckCircle2}
+          title={t("dashboard.noTasks")}
+          description={t("dashboard.noTasksDescription")}
+          action={
+            <Link href={RIDER_ROUTES.tasks}>
+              <Button variant="outline" size="sm">
+                {t("dashboard.viewTasks")}
+              </Button>
+            </Link>
+          }
         />
       )}
     </div>

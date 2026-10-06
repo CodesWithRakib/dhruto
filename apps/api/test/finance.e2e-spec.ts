@@ -117,7 +117,8 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
       .set("Authorization", `Bearer ${riderToken}`)
       .expect(200);
 
-    deliveryOtp = startRes.body.data.deliveryOtp;
+    // Test automation receives the OTP from the start response (NODE_ENV=test).
+    deliveryOtp = startRes.body.data.otp;
     expect(deliveryOtp).toBeDefined();
 
     // 2d. Rider completes delivery with COD collection

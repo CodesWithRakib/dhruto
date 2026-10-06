@@ -45,6 +45,7 @@ export default function manifest(): MetadataRoute.Manifest {
     shortcuts: [
       { name: "Track a parcel", short_name: "Track", url: "/track" },
       { name: "Merchant dashboard", short_name: "Dashboard", url: "/merchant/dashboard" },
+      { name: "Rider tasks", short_name: "Rider", url: "/rider/dashboard" },
     ],
   };
 }

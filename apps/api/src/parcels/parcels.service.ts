@@ -36,6 +36,7 @@ import {
   ParcelAssignment,
   ParcelStatusHistory,
   Rider,
+  OPERABLE_RIDER_STATUSES,
   UserRole,
 } from "../database/entities/index.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
@@ -705,6 +706,14 @@ export class ParcelsService {
   /**
    * Assigns a delivery rider. Authorized for platform admins and hub managers
    * only, and gated by the centralized state machine.
+   *
+   * Rules:
+   * - the rider must be operable (ACTIVE or ON_DUTY) and belong to the parcel's
+   *   current hub — hub managers cannot assign across hubs;
+   * - a fresh assignment requires DESTINATION_HUB_RECEIVED;
+   * - reassignment is allowed before the delivery starts (ASSIGNED_TO_RIDER,
+   *   DELIVERY_ATTEMPTED, RESCHEDULED) and closes the previous assignment row;
+   * - once OUT_FOR_DELIVERY (or terminal) the task is locked to its rider.
    */
   async assignRider(
     parcelId: string,
@@ -715,6 +724,7 @@ export class ParcelsService {
     trackingCode: string;
     riderId: string;
     status: ParcelStatus;
+    reassigned: boolean;
     message: string;
   }> {
     if (
@@ -731,7 +741,13 @@ export class ParcelsService {
     if (!rider) {
       throw new NotFoundException({
         message: "Rider not found",
-        error: ApiErrorCode.VALIDATION_ERROR,
+        error: ApiErrorCode.RIDER_NOT_FOUND,
+      });
+    }
+    if (!OPERABLE_RIDER_STATUSES.includes(rider.status)) {
+      throw new ForbiddenException({
+        message: `Rider is ${rider.status} and cannot receive new assignments`,
+        error: ApiErrorCode.RIDER_INACTIVE,
       });
     }
 
@@ -747,8 +763,51 @@ export class ParcelsService {
         });
       }
 
+      if (!parcel.currentHubId) {
+        // Pre-hub pickup leg (PRE_PICKUP_RIDER_ASSIGNMENT_FROM): the rider
+        // collects from the merchant, so the parcel adopts the rider's hub.
+        parcel.currentHubId = rider.hubId;
+      } else if (parcel.currentHubId !== rider.hubId) {
+        throw new ForbiddenException({
+          message: "Rider does not operate from the parcel's current hub",
+          error: ApiErrorCode.RIDER_WRONG_HUB,
+        });
+      }
+
       const fromStatus = parcel.status;
-      this.lifecycle.assertTransition(fromStatus, ParcelStatus.ASSIGNED_TO_RIDER);
+      const reassignable: readonly ParcelStatus[] = [
+        ParcelStatus.ASSIGNED_TO_RIDER,
+        ParcelStatus.DELIVERY_ATTEMPTED,
+        ParcelStatus.RESCHEDULED,
+      ];
+      const reassigned = reassignable.includes(fromStatus);
+      const previousRiderId = parcel.currentRiderId;
+
+      if (reassigned && previousRiderId === rider.id) {
+        throw new ConflictException({
+          message: "Parcel is already assigned to this rider",
+          error: ApiErrorCode.RIDER_ALREADY_ASSIGNED,
+        });
+      }
+
+      if (!reassigned) {
+        // Fresh assignment follows the delivery matrix (destination-hub
+        // receipt or the documented pre-pickup shortcut).
+        this.lifecycle.assertTransition(fromStatus, ParcelStatus.ASSIGNED_TO_RIDER);
+      }
+      // Reassignment is an operational ownership change back to (or within)
+      // ASSIGNED_TO_RIDER — e.g. DELIVERY_ATTEMPTED -> ASSIGNED_TO_RIDER for a
+      // retry by another rider. It is not a forward lifecycle transition, so
+      // the matrix does not govern it; the RIDER_REASSIGNED audit row below is
+      // the control, and the parcel can never leave its hub leg this way.
+
+      if (reassigned && previousRiderId) {
+        await manager.update(
+          ParcelAssignment,
+          { parcelId: parcel.id, riderId: previousRiderId, unassignedAt: null },
+          { unassignedAt: new Date() },
+        );
+      }
 
       parcel.currentRiderId = rider.id;
       parcel.status = ParcelStatus.ASSIGNED_TO_RIDER;
@@ -766,18 +825,20 @@ export class ParcelsService {
         parcelId: parcel.id,
         fromStatus,
         toStatus: ParcelStatus.ASSIGNED_TO_RIDER,
-        eventType: "STATUS_CHANGED",
+        eventType: reassigned ? "RIDER_REASSIGNED" : "STATUS_CHANGED",
         actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
         actorRole: DELIVERY_ACTOR_ROLE,
-        description: `Assigned to rider ${rider.id}`,
-        metadata: { riderId: rider.id },
+        description: reassigned
+          ? `Reassigned from rider ${previousRiderId} to rider ${rider.id}`
+          : `Assigned to rider ${rider.id}`,
+        metadata: { riderId: rider.id, previousRiderId: previousRiderId ?? null },
       });
       await manager.save(history);
 
       await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
 
       this.logger.log(
-        `PARCEL_RIDER_ASSIGNED parcel=${parcel.id} rider=${rider.id} actor=${actor.id}`,
+        `PARCEL_RIDER_ASSIGNED parcel=${parcel.id} rider=${rider.id} actor=${actor.id} reassigned=${reassigned}`,
       );
 
       return {
@@ -785,7 +846,10 @@ export class ParcelsService {
         trackingCode: parcel.trackingCode,
         riderId: rider.id,
         status: parcel.status,
-        message: "Parcel assigned to rider successfully",
+        reassigned,
+        message: reassigned
+          ? "Parcel reassigned to rider successfully"
+          : "Parcel assigned to rider successfully",
       };
     });
   }

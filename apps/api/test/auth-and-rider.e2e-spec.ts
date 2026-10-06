@@ -170,10 +170,11 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
 
       expect(res.body.success).toBe(true);
       expect(res.body.data.status).toBe("OUT_FOR_DELIVERY");
-      expect(res.body.data.deliveryOtp).toBeDefined();
-      expect(res.body.data.deliveryOtp.length).toBe(6);
+      // Test automation receives the OTP from the start response (NODE_ENV=test).
+      expect(res.body.data.otp).toBeDefined();
+      expect(res.body.data.otp.length).toBe(6);
 
-      generatedOtp = res.body.data.deliveryOtp;
+      generatedOtp = res.body.data.otp;
     });
 
     it("Step 4: POST /api/v1/riders/me/deliveries/:id/verify-otp - verifies customer OTP", async () => {

@@ -3,10 +3,19 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, Button, Input, Badge } from "@dhruto/ui";
-import { Search, Package, AlertTriangle } from "lucide-react";
+import { Search, Package, AlertTriangle, UserCheck } from "lucide-react";
 import { useLazyLookupParcelQuery, useGetHubInventoryQuery } from "../api/hubs.api";
+import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/empty-state";
+
+/** Parcel states that may be handed to a rider from this hub. */
+const ASSIGNABLE_STATUSES = [
+  "DESTINATION_HUB_RECEIVED",
+  "ASSIGNED_TO_RIDER",
+  "DELIVERY_ATTEMPTED",
+  "RESCHEDULED",
+];
 
 interface ParcelLookupViewProps {
   currentHubId: string;
@@ -21,6 +30,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
   const t = useTranslations("Hub");
   const [trackingCode, setTrackingCode] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [assignOpen, setAssignOpen] = React.useState(false);
 
   const [triggerLookup, { data: lookupData, isFetching: isLookingUp }] = useLazyLookupParcelQuery();
   const { data: inventoryData, isLoading: inventoryLoading } = useGetHubInventoryQuery(currentHubId);
@@ -74,7 +84,8 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
           ) : null}
 
           {parcel ? (
-            <div role="status" className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-surface-muted p-4 sm:grid-cols-3">
+            <div role="status" className="space-y-3 rounded-xl border border-border bg-surface-muted p-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("lookup.searchLabel")}</p>
                 <p className="font-mono text-sm font-bold">{parcel.trackingCode}</p>
@@ -96,6 +107,28 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                 <p className="font-mono text-sm tabular-nums">{parcel.weightKg} kg</p>
               </div>
             </div>
+            {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAssignOpen(true)}
+                className="h-11 w-full gap-1.5 sm:w-auto"
+              >
+                <UserCheck className="h-4 w-4" aria-hidden="true" />
+                {t("assignRider")}
+              </Button>
+            ) : null}
+            </div>
+          ) : null}
+          {parcel ? (
+            <AssignRiderDialog
+              open={assignOpen}
+              onOpenChange={setAssignOpen}
+              parcelId={parcel.id}
+              trackingCode={parcel.trackingCode}
+              hubId={currentHubId}
+              onAssigned={() => setTrackingCode("")}
+            />
           ) : null}
         </CardContent>
       </Card>

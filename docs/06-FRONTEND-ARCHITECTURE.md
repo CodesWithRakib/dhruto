@@ -253,6 +253,7 @@ appear in the URL. Locale is always the first segment (`en` | `bn`).
 | `/hub/bags`, `/hub/bags/[id]`                                                          | `(hub)`           | hub manager           |
 | `/hub/manifests`, `/hub/manifests/[id]`, `/hub/exceptions`                              | `(hub)`           | hub manager           |
 | `/rider/dashboard`                                                                     | `(rider)`         | rider                 |
+| `/rider/tasks`, `/rider/tasks/[id]`, `/rider/history`, `/rider/profile`          | `(rider)`         | rider                 |
 
 The catch-all `[[...rest]]` page renders the styled not-found state for unknown
 routes, and `/offline` is the PWA offline fallback.

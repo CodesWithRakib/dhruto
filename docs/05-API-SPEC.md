@@ -156,12 +156,26 @@ retries cannot double-apply an operation.
 ### Rider
 
 ```text
-GET  /riders/me/tasks
+GET  /riders/me/dashboard
+GET  /riders/me/tasks?status=
+GET  /riders/me/tasks/:parcelId
+GET  /riders/me/history?page=&limit=&status=
+GET  /riders/me/profile
+POST /riders/me/duty
+POST /riders/me/parcels/:parcelId/start-delivery
+POST /riders/me/deliveries/:parcelId/otp
 POST /riders/me/deliveries/:parcelId/verify-otp
-POST /riders/me/deliveries/:parcelId/complete
+POST /riders/me/deliveries/:parcelId/complete            (Idempotency-Key optional)
 POST /riders/me/deliveries/:parcelId/fail
 POST /riders/me/cash/hand-in
+GET  /riders/me/cash/summary
+GET  /riders?hubId=                                      (admin/hub manager, hub-scoped)
+GET  /riders/:id                                         (admin/hub manager, hub-scoped)
 ```
+
+Delivery completion requires a verified customer OTP and an exact COD match;
+repeats replay the recorded delivery instead of duplicating attempts, cash or
+history. The OTP secret is never returned outside non-production automation.
 
 ### Finance
 

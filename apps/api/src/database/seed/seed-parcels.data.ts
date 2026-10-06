@@ -14,7 +14,6 @@ export interface SeedParcelData {
   codAmount: number;
   deliveryFee: number;
   status: ParcelStatus;
-  deliveryOtp?: string;
   createdAtOffsetHours: number; // For realistic chronological spacing
 }
 
@@ -34,7 +33,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 1850,
     deliveryFee: 70,
     status: ParcelStatus.DELIVERED,
-    deliveryOtp: '4829',
     createdAtOffsetHours: 48,
   },
   {
@@ -51,7 +49,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 2450,
     deliveryFee: 60,
     status: ParcelStatus.DELIVERED,
-    deliveryOtp: '1934',
     createdAtOffsetHours: 42,
   },
   {
@@ -68,7 +65,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 3200,
     deliveryFee: 85,
     status: ParcelStatus.DELIVERED,
-    deliveryOtp: '8271',
     createdAtOffsetHours: 36,
   },
   {
@@ -85,7 +81,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 1450,
     deliveryFee: 70,
     status: ParcelStatus.DELIVERED,
-    deliveryOtp: '5620',
     createdAtOffsetHours: 30,
   },
   {
@@ -102,7 +97,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 5600,
     deliveryFee: 130,
     status: ParcelStatus.DELIVERED,
-    deliveryOtp: '9184',
     createdAtOffsetHours: 28,
   },
   {
@@ -119,7 +113,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 950,
     deliveryFee: 60,
     status: ParcelStatus.DELIVERED,
-    deliveryOtp: '3318',
     createdAtOffsetHours: 24,
   },
 
@@ -138,7 +131,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 2100,
     deliveryFee: 70,
     status: ParcelStatus.OUT_FOR_DELIVERY,
-    deliveryOtp: '7412',
     createdAtOffsetHours: 12,
   },
   {
@@ -155,7 +147,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 1750,
     deliveryFee: 70,
     status: ParcelStatus.OUT_FOR_DELIVERY,
-    deliveryOtp: '6523',
     createdAtOffsetHours: 10,
   },
   {
@@ -172,7 +163,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 3800,
     deliveryFee: 85,
     status: ParcelStatus.OUT_FOR_DELIVERY,
-    deliveryOtp: '4198',
     createdAtOffsetHours: 8,
   },
   {
@@ -189,7 +179,6 @@ export const SEED_PARCELS: SeedParcelData[] = [
     codAmount: 2900,
     deliveryFee: 130,
     status: ParcelStatus.OUT_FOR_DELIVERY,
-    deliveryOtp: '8910',
     createdAtOffsetHours: 7,
   },
 

@@ -148,30 +148,41 @@ journeys (`hub-inbound`, `hub-bagging`, `hub-dispatch-receive`, `hub-mobile`,
 
 ---
 
-## Phase 3 — Rider Delivery
+## Phase 3 — Rider Delivery (implemented)
 
 ### Backend
 
-- rider
-- assignments
-- delivery attempts
-- OTP
-- COD ledger
-- proof of delivery
+- rider codes (`RDR-######`, unique, centrally generated)
+- hub-scoped assignment with eligibility, hub-match and controlled reassignment
+- delivery tasks via parcel ownership + `ParcelAssignment` audit trail
+- append-only `delivery_attempts` log (also the proof-of-delivery record)
+- hashed OTPs (bcrypt, 15 min TTL, 5-attempt lockout, 60 s resend cooldown,
+  max 5 per leg; secret never persisted, logged, or returned in production)
+- exact COD matching, operational cash liability only (no wallet settlement)
+- idempotent completion (`Idempotency-Key` + recorded-delivery replay)
+- rider duty gating, terminal dashboard/history/profile endpoints
+- hub/admin fleet list + detail with task counts and assignment history
+- per-operator rate limits on start/OTP/complete/fail/hand-in
 
 ### Frontend/PWA
 
-- rider dashboard
-- tasks
-- parcel details
-- OTP
-- COD
-- proof
-- failed delivery
+- rider dashboard with live metrics (`/rider/dashboard`)
+- task list with search + filters (`/rider/tasks`)
+- handoff screen: start, server-verified OTP + resend, exact COD, idempotent
+  complete, validated fail/reschedule, attempt trail (`/rider/tasks/[id]`)
+- delivery history (`/rider/history`), profile + duty + cash hand-in
+  (`/rider/profile`)
+- hub parcel-lookup assignment + admin fleet operations
+- full English + Bangla catalog (122 Rider keys, parity unit-tested)
+- existing PWA (manifest + rider shortcut, service worker, offline page);
+  completion always requires server confirmation, nothing sensitive cached
 
 ### Exit Criteria
 
-Rider can complete a real delivery workflow.
+Rider can complete a real delivery workflow. Verified by
+`apps/api/test/delivery.e2e-spec.ts` (19 tests incl. OTP/COD/concurrency/
+security) and Playwright rider journeys (`rider-login`, `rider-delivery`,
+`rider-mobile`, `rider-bn-spot`) run in Brave against the real backend.
 
 ---
 

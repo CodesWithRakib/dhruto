@@ -175,7 +175,9 @@ export class NotificationsService {
       title: "Delivery OTP Code",
       message: `Dhruto Express: Your parcel ${trackingCode} is out for delivery. Share OTP ${otp} with your delivery rider to confirm receipt.`,
       recipientTarget: recipientPhone,
-      metadata: { parcelId, trackingCode, otp },
+      // The OTP travels in the SMS body only. It is never persisted in
+      // metadata, logs, or API responses (PWA/customer-data safety).
+      metadata: { parcelId, trackingCode },
     });
 
     // 2. In-app notification to merchant

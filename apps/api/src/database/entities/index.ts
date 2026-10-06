@@ -15,6 +15,7 @@ export * from './ParcelScan.entity.js';
 export * from './Manifest.entity.js';
 export * from './ManifestItem.entity.js';
 export * from './OperationalException.entity.js';
+export * from './DeliveryAttempt.entity.js';
 export * from './Wallet.entity.js';
 export * from './WalletTransaction.entity.js';
 export * from './PayoutRequest.entity.js';

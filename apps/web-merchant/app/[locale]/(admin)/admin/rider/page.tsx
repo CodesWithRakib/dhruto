@@ -1,12 +1,17 @@
 import React from "react";
 import type { Metadata } from "next";
-import { RiderDashboard } from "@/features/riders/components/rider-dashboard";
+import { FleetRidersView } from "@/features/riders/components/fleet-views";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Rider Operations — Admin",
-  description: "Last-mile task queues, OTP verification and cash collection.",
+  description: "Fleet visibility, live task counts and assignment audit.",
 };
 
 export default function AdminRiderPage() {
-  return <RiderDashboard />;
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <FleetRidersView />
+    </div>
+  );
 }

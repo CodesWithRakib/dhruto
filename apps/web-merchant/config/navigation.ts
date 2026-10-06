@@ -1,6 +1,8 @@
 import {
   Bike,
+  ClipboardList,
   FileText,
+  History,
   LayoutDashboard,
   Package,
   PackageSearch,
@@ -9,6 +11,7 @@ import {
   Search,
   Settings,
   UploadCloud,
+  User,
   Warehouse,
   Wallet,
   BarChart3,
@@ -151,7 +154,10 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
     {
       labelKey: "groupOverview",
       items: [
-        { href: RIDER_ROUTES.dashboard, labelKey: "rider", icon: Bike },
+        { href: RIDER_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
+        { href: RIDER_ROUTES.tasks, labelKey: "tasks", icon: ClipboardList },
+        { href: RIDER_ROUTES.history, labelKey: "history", icon: History },
+        { href: RIDER_ROUTES.profile, labelKey: "profile", icon: User },
       ],
     },
     {
@@ -190,7 +196,12 @@ const BOTTOM_HREFS: Record<AppRole, string[]> = {
     HUB_ROUTES.bags,
     HUB_ROUTES.manifests,
   ],
-  RIDER: [RIDER_ROUTES.dashboard, PUBLIC_ROUTES.tracking],
+  RIDER: [
+    RIDER_ROUTES.dashboard,
+    RIDER_ROUTES.tasks,
+    RIDER_ROUTES.history,
+    RIDER_ROUTES.profile,
+  ],
   CUSTOMER: [],
 };
 

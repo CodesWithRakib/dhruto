@@ -70,9 +70,21 @@ To move to `DELIVERED`:
 
 - parcel assigned to current rider
 - delivery attempt is valid
-- OTP requirement satisfied if configured
-- COD amount recorded if COD exists
-- proof requirements satisfied if configured
+- customer OTP verified (bcrypt hash, 15 minute TTL, 5-attempt lockout) — always
+  required since Phase 3; the secret is never stored, logged, or returned to
+  the rider UI
+- COD amount recorded and exactly matching the parcel COD if COD exists
+- proof recorded as the `DELIVERED` row of the append-only `delivery_attempts`
+  log (OTP proof reference, optional photo URL, remarks)
+
+### Reassignment (Phase 3 operational override)
+
+Moving a parcel between riders before delivery starts (`ASSIGNED_TO_RIDER`,
+`DELIVERY_ATTEMPTED`, `RESCHEDULED`) keeps or restores `ASSIGNED_TO_RIDER` and
+is audited as a `RIDER_REASSIGNED` history event with the previous rider id —
+it is an ownership change, not a forward lifecycle transition, so the matrix
+above does not govern it. Once `OUT_FOR_DELIVERY` (or terminal) the task is
+locked to its rider.
 
 ### Cash Verification
 
