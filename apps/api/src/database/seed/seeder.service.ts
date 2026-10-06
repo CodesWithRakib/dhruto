@@ -16,6 +16,8 @@ import {
   PayoutRequest,
   Notification,
   HubUserAssignment,
+  FinancialTransaction,
+  FinancialEntry,
 } from '../entities/index.js';
 
 import { SEED_HUB_ASSIGNMENTS, SEED_HUBS } from './seed-hubs.data.js';
@@ -30,7 +32,13 @@ import {
   SEED_PAYOUT_REQUESTS,
 } from './seed-finance.data.js';
 import { SEED_NOTIFICATIONS } from './seed-notifications.data.js';
-import { ParcelStatus } from '@dhruto/contracts';
+import {
+  ParcelStatus,
+  FinancialTransactionType,
+  FinancialTransactionStatus,
+  FinancialAccount,
+  EntryDirection,
+} from '@dhruto/contracts';
 
 @Injectable()
 export class SeederService {
@@ -53,6 +61,10 @@ export class SeederService {
     private readonly cashLedgerRepo: Repository<CashLedger>,
     @InjectRepository(Wallet)
     private readonly walletRepo: Repository<Wallet>,
+    @InjectRepository(FinancialTransaction)
+    private readonly financialTxRepo: Repository<FinancialTransaction>,
+    @InjectRepository(FinancialEntry)
+    private readonly financialEntryRepo: Repository<FinancialEntry>,
     @InjectRepository(WalletTransaction)
     private readonly walletTxRepo: Repository<WalletTransaction>,
     @InjectRepository(PayoutRequest)
@@ -159,12 +171,11 @@ export class SeederService {
           currency: wData.currency,
           status: wData.status,
         });
-      } else {
-        wallet.balance = wData.balance;
-        wallet.pendingBalance = wData.pendingBalance;
-        wallet.withdrawnTotal = wData.withdrawnTotal;
+        await this.walletRepo.save(wallet);
       }
-      await this.walletRepo.save(wallet);
+      // Existing wallets keep their runtime money: seed fixtures never
+      // overwrite live balances (Phase 4 ledger invariant).
+      await this.ensureSeedOpeningBalance(merchant.id, Number(wallet.balance));
       walletMap.set(wData.merchantEmail, wallet);
       walletCount++;
     }
@@ -473,5 +484,61 @@ export class SeederService {
       success: true,
       stats,
     };
+  }
+
+  /**
+   * Posts a ledger adoption opening balance for a seed wallet that has no
+   * journal history yet, so seeded demo balances reconcile like runtime
+   * balances. Idempotent per merchant.
+   */
+  private async ensureSeedOpeningBalance(merchantId: string, balance: number): Promise<void> {
+    const existing = await this.financialTxRepo.findOne({
+      where: { referenceType: 'OPENING_BALANCE', referenceId: merchantId },
+    });
+    if (existing) return;
+
+    const derived: Array<{ derived: string }> = await this.financialEntryRepo.query(
+      `SELECT COALESCE(SUM(CASE WHEN direction = 'CREDIT' THEN amount_minor ELSE -amount_minor END), 0) AS derived
+       FROM financial_entries WHERE merchant_id = $1 AND account = 'MERCHANT_AVAILABLE'`,
+      [merchantId],
+    );
+    const gap = Math.round(balance * 100) - Number(derived[0]?.derived ?? 0);
+    if (gap === 0) return;
+
+    const code = `FIN-OP${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
+    const transaction = await this.financialTxRepo.save(
+      this.financialTxRepo.create({
+        transactionCode: code,
+        type: FinancialTransactionType.ADJUSTMENT,
+        status: FinancialTransactionStatus.POSTED,
+        referenceType: 'OPENING_BALANCE',
+        referenceId: merchantId,
+        description: 'Seed opening balance adoption',
+        createdBy: null,
+      }),
+    );
+    const legs =
+      gap > 0
+        ? [
+            { account: FinancialAccount.ADJUSTMENT, direction: EntryDirection.DEBIT, amountMinor: gap, merchantId: null },
+            { account: FinancialAccount.MERCHANT_AVAILABLE, direction: EntryDirection.CREDIT, amountMinor: gap, merchantId },
+          ]
+        : [
+            { account: FinancialAccount.MERCHANT_AVAILABLE, direction: EntryDirection.DEBIT, amountMinor: -gap, merchantId },
+            { account: FinancialAccount.ADJUSTMENT, direction: EntryDirection.CREDIT, amountMinor: -gap, merchantId: null },
+          ];
+    await this.financialEntryRepo.save(
+      legs.map((leg) =>
+        this.financialEntryRepo.create({
+          transactionId: transaction.id,
+          account: leg.account,
+          direction: leg.direction,
+          amountMinor: leg.amountMinor,
+          currency: 'BDT',
+          merchantId: leg.merchantId,
+          memo: 'Seed opening balance adoption',
+        }),
+      ),
+    );
   }
 }

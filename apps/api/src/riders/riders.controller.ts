@@ -346,18 +346,43 @@ export class RidersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Hand in collected cash to hub manager",
-    description: "Submits all pending collected COD cash for hub manager verification.",
+    description:
+      "Creates a persisted hand-in batch with a server-computed total and posts the custody transfer through the journal. Accepts an Idempotency-Key: repeats replay the recorded batch.",
   })
-  @ApiResponse({ status: 200, description: "Cash handed in." })
+  @ApiHeader({ name: "Idempotency-Key", required: false, description: "Makes duplicate submissions safe" })
+  @ApiResponse({ status: 200, description: "Cash handed in as a batch." })
   async handInCash(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CashHandInDto,
     @Req() req?: RequestWithId,
+    @Headers("idempotency-key") idempotencyKey?: string,
   ) {
     const riderId = await this.resolveRiderId(user);
-    const result = await this.ridersService.handInCash(riderId, user.id, dto);
+    const result = await this.ridersService.handInCash(
+      riderId,
+      user.id,
+      dto,
+      idempotencyKey?.trim() || undefined,
+    );
 
     return envelope(HttpStatus.OK, result.message, result, req);
+  }
+
+  @Get("me/cash/handins")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Rider hand-in batches",
+    description: "Batch custody records with server-computed totals and derived status.",
+  })
+  @ApiResponse({ status: 200, description: "Hand-in batches." })
+  async getCashHandIns(
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req?: RequestWithId,
+  ) {
+    const riderId = await this.resolveRiderId(user);
+    const batches = await this.ridersService.getCashHandIns(riderId);
+
+    return envelope(HttpStatus.OK, "Hand-in batches retrieved successfully", batches, req);
   }
 
   @Get("me/cash/summary")

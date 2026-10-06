@@ -177,14 +177,41 @@ Delivery completion requires a verified customer OTP and an exact COD match;
 repeats replay the recorded delivery instead of duplicating attempts, cash or
 history. The OTP secret is never returned outside non-production automation.
 
-### Finance
+### Finance (all guarded; amounts server-computed, minor-unit integers)
 
 ```text
-GET  /wallets/me
-GET  /wallets/me/transactions
-POST /payouts
-GET  /payouts
-POST /admin/cash/:ledgerId/verify
+GET  /finance/wallet/me
+GET  /finance/wallet/transactions?page=&limit=&type=
+POST /finance/payouts/request                 (Idempotency-Key)
+GET  /finance/payouts/me
+GET  /finance/payouts/:id
+POST /finance/payouts/:id/cancel
+GET  /finance/settlements/me?page=&limit=
+GET  /finance/settlements/:id
+GET  /finance/reconciliation/pending          (hub-scoped)
+POST /finance/reconciliation/verify
+GET  /finance/cash-handins?status=            (hub-scoped)
+GET  /finance/discrepancies?status=           (hub-scoped)
+GET  /finance/reconciliation/summary          (hub/admin)
+GET  /riders/me/cash/handins
+POST /riders/me/cash/hand-in                  (Idempotency-Key)
+GET  /admin/finance/overview
+GET  /admin/finance/payouts?merchantId=&status=
+POST /admin/finance/payouts/:id/approve
+POST /admin/finance/payouts/:id/process       (COMPLETED|FAILED|REJECTED)
+GET  /admin/finance/settlements?merchantId=&status=
+POST /admin/finance/settlements/batches
+GET  /admin/finance/settlements/batches
+POST /admin/finance/settlements/batches/:id/complete
+POST /admin/finance/discrepancies/:id/resolve
+POST /admin/finance/adjustments               (Idempotency-Key)
+POST /admin/finance/transactions/:id/reverse
+GET  /admin/finance/transactions?type=&status=
+GET  /admin/finance/transactions/:id
+GET  /admin/finance/reports/cod?format=json|csv
+GET  /admin/finance/reports/payouts?format=json|csv
+GET  /admin/finance/reports/fees
+GET  /admin/finance/reconciliation/check?merchantId=
 ```
 
 ## 5. Pagination

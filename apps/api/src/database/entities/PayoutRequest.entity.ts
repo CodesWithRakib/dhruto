@@ -6,6 +6,13 @@ import { PayoutMethod, PayoutStatus } from '@dhruto/contracts';
 
 @Entity('payout_requests')
 export class PayoutRequest extends BaseEntity {
+  @Column({ name: 'payout_code', type: 'varchar', length: 20, unique: true, nullable: true })
+  payoutCode: string | null;
+
+  /** Idempotency scope key: duplicate submissions replay instead of double-spend. */
+  @Column({ name: 'idempotency_key', type: 'varchar', length: 128, nullable: true })
+  idempotencyKey: string | null;
+
   @Column({ name: 'merchant_id', type: 'uuid' })
   merchantId: string;
 
@@ -51,6 +58,15 @@ export class PayoutRequest extends BaseEntity {
 
   @Column({ name: 'rejection_reason', type: 'text', nullable: true })
   rejectionReason: string | null;
+
+  @Column({ name: 'failure_reason', type: 'text', nullable: true })
+  failureReason: string | null;
+
+  @Column({ name: 'approved_by', type: 'uuid', nullable: true })
+  approvedBy: string | null;
+
+  @Column({ name: 'approved_at', type: 'timestamptz', nullable: true })
+  approvedAt: Date | null;
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;

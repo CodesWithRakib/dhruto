@@ -1,87 +1,80 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import * as React from "react";
+import { useTranslations } from "next-intl";
 import { type WalletTransactionItem, WalletTransactionType } from "@dhruto/contracts";
-import { ArrowDownLeft, ArrowUpRight, ReceiptText, ExternalLink } from "lucide-react";
-import { Link } from "../../../lib/navigation";
+import { ArrowDownLeft, ArrowUpRight, ReceiptText, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "@/lib/navigation";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   DataTable,
+  Button,
   type ColumnDef,
 } from "@dhruto/ui";
 
 interface TransactionsTableProps {
   transactions: WalletTransactionItem[];
   isLoading: boolean;
+  page: number;
+  onPageChange: (page: number) => void;
+  hasMore: boolean;
 }
 
-export function TransactionsTable({ transactions, isLoading }: TransactionsTableProps) {
-  const [filterType, setFilterType] = useState<string>("ALL");
+function TypeBadge({ type }: { type: WalletTransactionType }) {
+  switch (type) {
+    case WalletTransactionType.COD_CREDIT:
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-success bg-success-soft px-2.5 py-1 text-xs font-semibold text-success">
+          <ArrowDownLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          {type}
+        </span>
+      );
+    case WalletTransactionType.DELIVERY_FEE:
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-danger bg-danger-soft px-2.5 py-1 text-xs font-semibold text-danger">
+          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+          {type}
+        </span>
+      );
+    case WalletTransactionType.PAYOUT_DEBIT:
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-warning bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning">
+          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+          {type}
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-muted px-2.5 py-1 text-xs font-semibold text-foreground">
+          <ReceiptText className="h-3.5 w-3.5" aria-hidden="true" />
+          {type}
+        </span>
+      );
+  }
+}
 
-  const filtered = useMemo(() => {
+export function TransactionsTable({ transactions, isLoading, page, onPageChange, hasMore }: TransactionsTableProps) {
+  const t = useTranslations("Finance");
+  const [filterType, setFilterType] = React.useState<string>("ALL");
+
+  const filtered = React.useMemo(() => {
     if (filterType === "ALL") return transactions;
     return transactions.filter((tx) => tx.type === filterType);
   }, [transactions, filterType]);
 
-  const getBadgeStyle = (type: WalletTransactionType) => {
-    switch (type) {
-      case WalletTransactionType.COD_CREDIT:
-        return {
-          bg: "bg-success-soft text-success border-success",
-          icon: ArrowDownLeft,
-          prefix: "+",
-          amountColor: "text-success font-bold",
-          label: "COD Received",
-        };
-      case WalletTransactionType.DELIVERY_FEE:
-        return {
-          bg: "bg-danger-soft text-danger border-danger",
-          icon: ArrowUpRight,
-          prefix: "-",
-          amountColor: "text-danger font-medium",
-          label: "Delivery Charge",
-        };
-      case WalletTransactionType.PAYOUT_DEBIT:
-        return {
-          bg: "bg-warning-soft text-warning border-warning",
-          icon: ArrowUpRight,
-          prefix: "-",
-          amountColor: "text-warning font-semibold",
-          label: "Payout Withdrawal",
-        };
-      case WalletTransactionType.ADJUSTMENT_CREDIT:
-        return {
-          bg: "bg-info-soft text-info border-info",
-          icon: ArrowDownLeft,
-          prefix: "+",
-          amountColor: "text-info font-semibold",
-          label: "Adjustment Refund",
-        };
-      default:
-        return {
-          bg: "bg-surface-muted text-foreground border-border",
-          icon: ReceiptText,
-          prefix: "",
-          amountColor: "text-foreground",
-          label: type,
-        };
-    }
-  };
-
-  const columns: ColumnDef<WalletTransactionItem>[] = useMemo(
+  const columns: ColumnDef<WalletTransactionItem>[] = React.useMemo(
     () => [
       {
         accessorKey: "createdAt",
-        header: "Date & Time",
+        header: t("date"),
         cell: ({ row }) => {
           const dateObj = new Date(row.original.createdAt);
           return (
-            <div className="text-caption text-muted-foreground">
-              <span className="font-medium text-foreground">{dateObj.toLocaleDateString()}</span>
-              <br />
+            <div className="whitespace-nowrap text-caption text-muted-foreground">
+              <span className="font-medium text-foreground">{dateObj.toLocaleDateString()}</span>{" "}
               <span>{dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             </div>
           );
@@ -89,76 +82,69 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
       },
       {
         accessorKey: "type",
-        header: "Type",
-        cell: ({ row }) => {
-          const badge = getBadgeStyle(row.original.type);
-          const Icon = badge.icon;
-          return (
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${badge.bg}`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {badge.label}
-            </span>
-          );
-        },
+        header: t("status"),
+        cell: ({ row }) => <TypeBadge type={row.original.type} />,
       },
       {
         accessorKey: "description",
-        header: "Description & Reference",
+        header: t("description"),
         cell: ({ row }) => (
           <div>
-            <p className="text-body-sm text-foreground font-medium">{row.original.description}</p>
-            {row.original.referenceId && (
+            <p className="text-body-sm font-medium text-foreground">{row.original.description}</p>
+            {row.original.referenceId && row.original.referenceType === "PARCEL" && (
               <div className="mt-0.5">
                 <Link
-                  href={`/tracking?q=${row.original.referenceId}`}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-primary hover:underline"
+                  href={`/track/${row.original.referenceId}`}
+                  className="inline-flex items-center gap-1 font-mono text-[11px] text-primary hover:underline"
                 >
-                  <span>Ref: {row.original.referenceId}</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <span>
+                    {t("reference")}: {row.original.referenceId}
+                  </span>
+                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
                 </Link>
               </div>
+            )}
+            {row.original.referenceId && row.original.referenceType !== "PARCEL" && (
+              <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                {t("reference")}: {row.original.referenceId}
+              </p>
             )}
           </div>
         ),
       },
       {
         accessorKey: "amount",
-        header: () => <span className="text-right block">Amount</span>,
-        cell: ({ row }) => {
-          const badge = getBadgeStyle(row.original.type);
-          return (
-            <div className={`text-right tabular-nums text-body-sm ${badge.amountColor}`}>
-              {badge.prefix}৳{Number(row.original.amount).toLocaleString()}
-            </div>
-          );
-        },
+        header: () => <span className="block text-right">{t("statement.net")}</span>,
+        cell: ({ row }) => (
+          <div className="text-right text-body-sm font-semibold tabular-nums text-foreground">
+            ৳{Number(row.original.amount).toLocaleString()}
+          </div>
+        ),
       },
       {
         accessorKey: "balanceAfter",
-        header: () => <span className="text-right block">Balance After</span>,
+        header: () => <span className="block text-right">{t("statement.balanceAfter")}</span>,
         cell: ({ row }) => (
-          <div className="text-right font-mono font-semibold tabular-nums text-xs text-foreground">
+          <div className="text-right font-mono text-xs font-semibold tabular-nums text-foreground">
             ৳{Number(row.original.balanceAfter).toLocaleString()}
           </div>
         ),
       },
     ],
-    [],
+    [t],
   );
 
   return (
     <div className="w-full space-y-4">
       <Card className="border-border shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
+        <CardHeader className="flex flex-col justify-between gap-4 border-b border-border sm:flex-row sm:items-center">
           <div>
-            <CardTitle className="text-lg font-bold text-foreground flex items-center gap-2">
-              <ReceiptText className="w-5 h-5 text-primary" />
-              Wallet Statement & Audit Ledger
+            <CardTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
+              <ReceiptText className="h-5 w-5 text-primary" aria-hidden="true" />
+              {t("statement.title")}
             </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground mt-1">
-              Complete immutable log of all Cash on Delivery collections, delivery charges, and disbursements.
+            <CardDescription className="mt-1 text-xs text-muted-foreground">
+              {t("subtitle")}
             </CardDescription>
           </div>
         </CardHeader>
@@ -168,22 +154,22 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
         columns={columns}
         data={filtered}
         isLoading={isLoading}
-        emptyMessage="No transactions recorded yet. Completed parcel deliveries and payout withdrawals will appear in this ledger."
+        emptyMessage={t("statement.empty")}
         filterSlot={
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex flex-wrap items-center gap-1.5">
             {[
-              { id: "ALL", label: "All Records" },
-              { id: WalletTransactionType.COD_CREDIT, label: "COD Credits" },
-              { id: WalletTransactionType.DELIVERY_FEE, label: "Delivery Charges" },
-              { id: WalletTransactionType.PAYOUT_DEBIT, label: "Withdrawals" },
+              { id: "ALL", label: t("statement.title") },
+              { id: WalletTransactionType.COD_CREDIT, label: WalletTransactionType.COD_CREDIT },
+              { id: WalletTransactionType.DELIVERY_FEE, label: WalletTransactionType.DELIVERY_FEE },
+              { id: WalletTransactionType.PAYOUT_DEBIT, label: WalletTransactionType.PAYOUT_DEBIT },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setFilterType(tab.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
                   filterType === tab.id
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-surface-muted text-muted-foreground border border-border hover:text-foreground"
+                    : "border border-border bg-surface-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {tab.label}
@@ -192,6 +178,27 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
           </div>
         }
       />
+      <div className="flex items-center justify-between">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page <= 1 || isLoading}
+          onClick={() => onPageChange(Math.max(1, page - 1))}
+          className="h-9 gap-1 text-xs"
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          {page}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!hasMore || isLoading}
+          onClick={() => onPageChange(page + 1)}
+          className="h-9 gap-1 text-xs"
+        >
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
     </div>
   );
 }

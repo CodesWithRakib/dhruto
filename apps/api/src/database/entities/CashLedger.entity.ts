@@ -40,6 +40,13 @@ export class CashLedger extends BaseEntity {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount: number;
 
+  /**
+   * Hub-counted amount at verification. `amount` (collected at source) is
+   * never overwritten, so expected-vs-actual variance stays auditable.
+   */
+  @Column({ name: 'verified_amount', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  verifiedAmount: number | null;
+
   @Column({ name: 'collected_at', type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   collectedAt: Date;
 

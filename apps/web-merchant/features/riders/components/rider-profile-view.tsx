@@ -9,8 +9,10 @@ import {
   useGetRiderProfileQuery,
   useSetDutyMutation,
   useGetCashSummaryQuery,
+  useGetCashHandInsQuery,
   useHandInCashMutation,
 } from "../api/riders.api";
+import { newIdempotencyKey } from "../../finance/api/finance.api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
@@ -23,6 +25,8 @@ export function RiderProfileView() {
   const { data: profileData, isLoading: profileLoading, refetch: refetchProfile } =
     useGetRiderProfileQuery();
   const { data: cashData, refetch: refetchCash } = useGetCashSummaryQuery();
+  const { data: handInsData } = useGetCashHandInsQuery();
+  const handIns = handInsData?.data ?? [];
   const [setDuty, { isLoading: isToggling }] = useSetDutyMutation();
   const [handInCash, { isLoading: isHandingIn }] = useHandInCashMutation();
 
@@ -47,7 +51,10 @@ export function RiderProfileView() {
   const handleHandIn = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const res = await handInCash({ notes: handInNotes.trim() || undefined }).unwrap();
+      const res = await handInCash({
+        dto: { notes: handInNotes.trim() || undefined },
+        idempotencyKey: newIdempotencyKey(),
+      }).unwrap();
       if (res.success) {
         toast.success(res.message);
         setHandInNotes("");
@@ -179,6 +186,24 @@ export function RiderProfileView() {
               {t("profile.handInEmpty")}
             </p>
           )}
+          {handIns.length > 0 ? (
+            <ul className="space-y-1.5 border-t pt-3">
+              {handIns.slice(0, 5).map((batch) => (
+                <li
+                  key={batch.id}
+                  className="flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 text-xs"
+                >
+                  <span className="font-mono font-semibold">{batch.handinCode}</span>
+                  <span className="font-mono tabular-nums text-muted-foreground">
+                    ৳{(batch.expectedMinor / 100).toLocaleString()}
+                  </span>
+                  <Badge variant={batch.status === "VERIFIED" ? "success" : "secondary"} className="ml-auto text-[10px]">
+                    {batch.status}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </CardContent>
       </Card>
     </div>

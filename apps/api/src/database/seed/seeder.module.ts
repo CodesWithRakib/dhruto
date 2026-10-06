@@ -14,6 +14,8 @@ import {
   PayoutRequest,
   Notification,
   HubUserAssignment,
+  FinancialTransaction,
+  FinancialEntry,
 } from '../entities/index.js';
 import { SeederService } from './seeder.service.js';
 
@@ -32,6 +34,8 @@ import { SeederService } from './seeder.service.js';
       PayoutRequest,
       Notification,
       HubUserAssignment,
+      FinancialTransaction,
+      FinancialEntry,
     ]),
   ],
   providers: [SeederService],

@@ -186,29 +186,44 @@ security) and Playwright rider journeys (`rider-login`, `rider-delivery`,
 
 ---
 
-## Phase 4 — Finance
+## Phase 4 — Finance (implemented)
 
 ### Backend
 
-- wallet
-- wallet transactions
-- cash reconciliation
-- settlements
-- payout requests
-- concurrency locking
-- financial audit
+- double-entry journal (`financial_transactions` + `financial_entries`,
+  minor-unit integers, balance-enforced, immutable, idempotent)
+- money library (poisha integers, centralized BDT constant)
+- parcel settlements + settlement batches (fee snapshots, journal links)
+- rider hand-in batches (server-computed totals) + hub verification
+- cash discrepancies (SHORT/OVER preserved, reasoned resolution)
+- payout state machine (approve/process/fail/reject/cancel) with reservation
+  postings, idempotency keys and masked destinations
+- manual adjustments + mirror-entry reversals
+- authorization overhaul (guards on every finance route, no fallback
+  merchant, hub scoping, admin console)
+- reports (COD/payout/fee, filters, CSV) + automated reconciliation check
+- ledger adoption opening balances (migration + seeder)
 
 ### Frontend
 
-- merchant wallet
-- transactions
-- payout
-- admin reconciliation
-- financial reports
+- merchant wallet, paginated statement, settlements, payout request with
+  review step and idempotency, payout history with cancel
+- hub cash desk (`/hub/cash`): pending, batches, discrepancies, verified
+  verify-with-confirmation flow
+- rider hand-in batch history on the profile
+- admin finance console: overview, payouts, settlements + batches, journal +
+  reversals, adjustments, discrepancies, reports, reconciliation check
+- full English + Bangla (130 Finance keys, parity-tested)
 
 ### Exit Criteria
 
 COD can be reconciled and merchant settlement is correct and auditable.
+Verified by `finance.e2e-spec.ts` (9) + `finance-ledger.e2e-spec.ts` (13:
+auth, invariants, discrepancy, payout machine, idempotency, concurrency,
+adjustments, reversals, reconciliation check, reports) and Playwright
+finance journeys (`finance-merchant`, `finance-hub`, `finance-admin`,
+`finance-mobile`, `finance-bn-spot`) run in Brave against the real backend.
+See `docs/phases/phase-4-finance.md`.
 
 ---
 

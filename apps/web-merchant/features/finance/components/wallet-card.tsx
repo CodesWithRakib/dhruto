@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
+import { useTranslations } from "next-intl";
 import { type MerchantWalletData } from "@dhruto/contracts";
 import { Wallet, Clock, ArrowUpRight, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@dhruto/ui";
@@ -12,113 +13,94 @@ interface WalletCardProps {
 }
 
 export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardProps) {
+  const t = useTranslations("Finance");
   const balance = Number(wallet?.balance || 0);
   const pending = Number(wallet?.pendingBalance || 0);
   const withdrawn = Number(wallet?.withdrawnTotal || 0);
   const currency = wallet?.currency || "BDT";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Primary Available Balance Hero Card */}
-      <div className="lg:col-span-1 relative overflow-hidden rounded-3xl bg-surface-muted bg-success-soft bg-success-soft bg-surface-muted p-7 text-primary-foreground  shadow-emerald-950/20 border border-success flex flex-col justify-between">
-        <div className="absolute top-0 right-0 -mr-10 -mt-10 w-44 h-44 rounded-full bg-success-soft blur-3xl pointer-events-none" />
-        
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="flex flex-col justify-between rounded-2xl border border-success bg-success-soft p-6">
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-success-soft border border-success text-xs font-semibold text-success backdrop-blur-md">
-              <Zap className="w-3.5 h-3.5 text-success animate-pulse" />
-              <span>Instant Payout Ready</span>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 rounded-full border border-success bg-surface px-3 py-1 text-xs font-semibold text-success">
+              <Zap className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+              <span>{t("availableBalance")}</span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-              <Wallet className="w-5 h-5 text-success" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-success bg-surface">
+              <Wallet className="h-5 w-5 text-success" aria-hidden="true" />
             </div>
           </div>
 
-          <p className="text-success text-sm font-medium">Available Wallet Balance</p>
+          <p className="text-sm font-medium text-success">{t("availableBalance")}</p>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-              ৳{isLoading ? "..." : balance.toLocaleString()}
+            <span className="text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+              ৳{isLoading ? "…" : balance.toLocaleString()}
             </span>
-            <span className="text-xs uppercase tracking-wider font-semibold text-success">
+            <span className="text-xs font-semibold uppercase tracking-wider text-success">
               {currency}
             </span>
           </div>
 
-          <p className="mt-2 text-xs text-success flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-success" />
-            Safe, automated double-entry ledger settlement
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-success">
+            <ShieldCheck className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+            {t("subtitle")}
           </p>
         </div>
 
-        <div className="mt-6 pt-5 border-t border-success flex items-center gap-3">
+        <div className="mt-6 border-t border-success pt-5">
           <Button
             id="open-payout-modal-btn"
             onClick={onRequestPayout}
             disabled={isLoading || balance < 100}
-            className="w-full bg-white text-success hover:bg-success-soft font-bold py-3 rounded-2xl  transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 py-3 font-bold"
           >
-            <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-            Request Payout Withdrawal
+            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            {t("requestPayout")}
           </Button>
         </div>
       </div>
 
-      {/* Secondary Stats Grid */}
-      <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Pending Settlement Card */}
-        <div className="relative rounded-3xl bg-surface-muted backdrop-blur-xl border border-border p-7 flex flex-col justify-between hover:border-warning transition-all duration-300 group">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-2">
+        <div className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-6">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-warning-soft text-warning border border-warning">
-              Pending Clearance
+            <span className="rounded-full border border-warning bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning">
+              {t("pendingSettlement")}
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-warning-soft border border-warning flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Clock className="w-5 h-5 text-warning" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-warning bg-warning-soft">
+              <Clock className="h-5 w-5 text-warning" aria-hidden="true" />
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-muted-foreground text-sm font-medium">Pending Delivery Collections</p>
+            <p className="text-sm font-medium text-muted-foreground">{t("pendingSettlement")}</p>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-3xl sm:text-4xl font-bold text-foreground">
-                ৳{isLoading ? "..." : pending.toLocaleString()}
+              <span className="text-3xl font-bold tabular-nums text-foreground sm:text-4xl">
+                ৳{isLoading ? "…" : pending.toLocaleString()}
               </span>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-              Cash on Delivery (COD) collected by riders, currently in transit to sorting hubs for physical verification.
-            </p>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-border text-xs text-warning font-medium">
-            Auto-settled net of delivery charges upon hub manager hand-in verification.
           </div>
         </div>
 
-        {/* Lifetime Withdrawn Card */}
-        <div className="relative rounded-3xl bg-surface-muted backdrop-blur-xl border border-border p-7 flex flex-col justify-between hover:border-primary transition-all duration-300 group">
+        <div className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-6">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary-soft text-primary border border-primary">
-              Lifetime Disbursed
+            <span className="rounded-full border border-primary bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
+              {t("lifetimeWithdrawn")}
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-primary-soft border border-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ArrowUpRight className="w-5 h-5 text-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary bg-primary-soft">
+              <ArrowUpRight className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-muted-foreground text-sm font-medium">Total Lifetime Withdrawals</p>
+            <p className="text-sm font-medium text-muted-foreground">{t("lifetimeWithdrawn")}</p>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-3xl sm:text-4xl font-bold text-foreground">
-                ৳{isLoading ? "..." : withdrawn.toLocaleString()}
+              <span className="text-3xl font-bold tabular-nums text-foreground sm:text-4xl">
+                ৳{isLoading ? "…" : withdrawn.toLocaleString()}
               </span>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-              Total historical earnings transferred via bKash, Nagad, Rocket, or direct bank disbursements.
-            </p>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-border text-xs text-muted-foreground font-medium flex items-center justify-between">
-            <span>Minimum Payout: ৳100</span>
-            <span className="text-success">Zero Processing Fee</span>
+            <p className="mt-2 text-xs font-medium text-muted-foreground">{t("payout.minimum")}</p>
           </div>
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
   Hourglass,
   RefreshCw,
   Warehouse,
+  Wallet,
 } from "lucide-react";
 import { Button, Card, CardContent, Badge } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
@@ -102,6 +103,7 @@ export function HubDashboardView() {
     { href: HUB_ROUTES.parcels, title: t("dashboard.lookupParcel"), description: t("dashboard.lookupParcelDescription"), icon: Inbox },
     { href: HUB_ROUTES.bags, title: t("dashboard.createBag"), description: t("dashboard.createBagDescription"), icon: Package },
     { href: HUB_ROUTES.manifests, title: t("dashboard.createManifest"), description: t("dashboard.createManifestDescription"), icon: Truck },
+    { href: HUB_ROUTES.cash, title: t("dashboard.cashDesk"), description: t("dashboard.cashDeskDescription"), icon: Wallet },
   ];
 
   return (

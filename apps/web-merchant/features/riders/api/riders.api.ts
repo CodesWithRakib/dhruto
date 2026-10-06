@@ -160,16 +160,24 @@ export const ridersApi = baseApi.injectEndpoints({
       query: () => "/riders/me/cash/summary",
       providesTags: [{ type: RIDER_TAG, id: "CASH" }],
     }),
-    handInCash: builder.mutation<ApiResponse<unknown>, CashHandInDto>({
-      query: (dto) => ({
+    handInCash: builder.mutation<
+      ApiResponse<{ handinId: string | null; handinCode: string | null }>,
+      { dto: CashHandInDto; idempotencyKey: string }
+    >({
+      query: ({ dto, idempotencyKey }) => ({
         url: "/riders/me/cash/hand-in",
         method: "POST",
         body: dto,
+        headers: { "Idempotency-Key": idempotencyKey },
       }),
       invalidatesTags: [
         { type: RIDER_TAG, id: "CASH" },
         { type: RIDER_TAG, id: "DASHBOARD" },
       ],
+    }),
+    getCashHandIns: builder.query<ApiResponse<import("@dhruto/contracts").CashHandInBatchItem[]>, void>({
+      query: () => "/riders/me/cash/handins",
+      providesTags: [{ type: RIDER_TAG, id: "CASH" }],
     }),
 
     /* --------------------- Hub/admin fleet operations --------------------- */
@@ -215,6 +223,7 @@ export const {
   useFailDeliveryMutation,
   useGetCashSummaryQuery,
   useHandInCashMutation,
+  useGetCashHandInsQuery,
   useGetFleetRidersQuery,
   useGetFleetRiderQuery,
   useAssignParcelToRiderMutation,

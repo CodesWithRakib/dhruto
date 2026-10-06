@@ -69,6 +69,7 @@ export const HUB_ROUTES = {
   manifests: "/hub/manifests",
   manifest: (id: string) => `/hub/manifests/${id}`,
   exceptions: "/hub/exceptions",
+  cash: "/hub/cash",
 } as const;
 
 export const RIDER_ROUTES = {

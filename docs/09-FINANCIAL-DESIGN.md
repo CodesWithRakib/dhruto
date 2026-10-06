@@ -174,3 +174,52 @@ Mandatory:
 - rollback after failed side effect
 - retry after provider timeout
 - idempotent replay
+
+## 13. Phase 4 Implementation (ledger, settlement, payout)
+
+### Money
+
+All ledger computation uses integer minor units (poisha) via
+`apps/api/src/common/money/money.ts` (`toMinor`/`toMajor`, HALF_UP at the
+boundary). Journal columns are `BIGINT`; wallet/statement NUMERIC columns are
+written from minor units with exact 2-decimal rendering. No float chains in
+money-moving code.
+
+### Chart of accounts / postings
+
+| Event | Debit | Credit |
+|---|---|---|
+| COD collected (rider) | `RIDER_CASH_IN_HAND` gross | `COD_RECEIVABLE` gross |
+| Rider hand-in batch | `HUB_CASH` expected | `RIDER_CASH_IN_HAND` expected |
+| Hub verify + settle | `COD_RECEIVABLE` actual | `MERCHANT_AVAILABLE` net + `FEE_REVENUE` fee |
+| Count SHORT S | `ADJUSTMENT` S | `HUB_CASH` S |
+| Count OVER O | `HUB_CASH` O | `ADJUSTMENT` O |
+| Payout request | `MERCHANT_AVAILABLE` | `MERCHANT_PAYOUT_IN_TRANSIT` |
+| Payout completed | `MERCHANT_PAYOUT_IN_TRANSIT` | `PLATFORM_CASH` |
+| Payout rejected/failed/cancelled | `MERCHANT_PAYOUT_IN_TRANSIT` | `MERCHANT_AVAILABLE` |
+| Adjustment credit/debit | `ADJUSTMENT` / `MERCHANT_AVAILABLE` | `MERCHANT_AVAILABLE` / `ADJUSTMENT` |
+| Reversal | mirror of the original | mirror of the original |
+
+Every posting is validated (positive integer minor units, single currency,
+ΣDEBIT == ΣCREDIT) by `LedgerService.post`, which also handles idempotent
+claim/complete per scope. Postings are immutable; corrections are new
+`ADJUSTMENT`/`REVERSAL` transactions linked via `reversalOfId`.
+
+### Business rules
+
+- Hub verification releases funds to merchant AVAILABLE immediately; the
+  parcel `Settlement` row (gross/fee/net snapshot + journal reference) is the
+  traceability record and settlement batches are reporting groupings.
+- Collected amounts are never overwritten: verification stores the counted
+  amount in `verified_amount` and opens a `cash_discrepancies` row on
+  variance (SHORT/OVER, OPEN until resolved with reason + optional recovery
+  posting).
+- Payouts: `REQUESTED → APPROVED → PROCESSING → COMPLETED`, with
+  `REJECTED`/`FAILED`/`CANCELLED` releasing reservations through reversal
+  postings. Completion requires approval first; terminal states reject
+  further transitions.
+- Wallet balances are materialized caches updated in the same transaction as
+  their postings. Ledger adoption uses `OPENING_BALANCE` true-up postings
+  (migration + seeder), never silent edits.
+- OTP/notification secrets never enter financial metadata or logs; payout
+  account numbers are masked (`01******789`) in every response.

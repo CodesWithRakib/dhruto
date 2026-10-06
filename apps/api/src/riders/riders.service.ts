@@ -33,10 +33,16 @@ import {
   HubUserAssignment,
   Hub,
   User,
+  CashHandIn,
+  CashHandInItem,
 } from "../database/entities/index.js";
+import { CashHandInStatus as BatchHandInStatus } from "@dhruto/contracts";
 import {
   ApiErrorCode,
   DeliveryAttemptOutcome,
+  FinancialTransactionType,
+  EntryDirection,
+  FinancialAccount,
   OTP_MAX_ATTEMPTS,
   OTP_MAX_REQUESTS,
   OTP_REQUEST_COOLDOWN_SECONDS,
@@ -65,6 +71,7 @@ import {
 import { NotificationsService } from "../notifications/notifications.service.js";
 import { WebhooksService } from "../webhooks/webhooks.service.js";
 import { WebhookEvent } from "@dhruto/contracts";
+import { LedgerService } from "../finance/ledger/ledger.service.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
 import { UserRole } from "../database/entities/index.js";
 
@@ -116,10 +123,15 @@ export class RidersService {
     private readonly hubRepo: Repository<Hub>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(CashHandIn)
+    private readonly handInRepo: Repository<CashHandIn>,
+    @InjectRepository(CashHandInItem)
+    private readonly handInItemRepo: Repository<CashHandInItem>,
     private readonly dataSource: DataSource,
     private readonly lifecycle: ParcelLifecycleService,
     private readonly passwordService: PasswordService,
     private readonly idempotency: IdempotencyService,
+    private readonly ledger: LedgerService,
     @Optional()
     private readonly notificationsService?: NotificationsService,
     @Optional()
@@ -880,6 +892,29 @@ export class RidersService {
             }),
           );
           cashLedgerId = cashLedger.id;
+
+          // Rider custody liability through the journal: the rider now owes
+          // the platform the collected cash until hand-in.
+          await this.ledger.post(manager, {
+            type: FinancialTransactionType.COD_COLLECTED,
+            referenceType: "CASH_LEDGER",
+            referenceId: cashLedger.id,
+            description: `COD collected for parcel ${parcel.trackingCode}`,
+            entries: [
+              {
+                account: FinancialAccount.RIDER_CASH_IN_HAND,
+                direction: EntryDirection.DEBIT,
+                amountMinor: toMinor(collectedAmount),
+              },
+              {
+                account: FinancialAccount.COD_RECEIVABLE,
+                direction: EntryDirection.CREDIT,
+                amountMinor: toMinor(collectedAmount),
+              },
+            ],
+            createdBy: userId,
+          });
+
           this.logger.log(
             `COD Collected: ৳${collectedAmount} for Parcel ${parcel.trackingCode}. Recorded in CashLedger.`,
           );
@@ -1023,45 +1058,209 @@ export class RidersService {
 
   /**
    * Rider hands in collected cash to hub manager.
+   *
+   * Creates a persisted hand-in batch (server-computed expected total —
+   * riders never declare amounts) and posts the custody transfer
+   * RIDER_CASH_IN_HAND -> HUB_CASH through the journal. Idempotent per key:
+   * repeats replay the recorded batch instead of moving cash twice.
    */
-  async handInCash(riderId: string, userId: string, _dto: CashHandInDto) {
-    await this.assertOperableRider(riderId);
-    const pendingLedgers = await this.cashLedgerRepo.find({
-      where: {
-        riderId,
-        handInStatus: CashHandInStatus.PENDING,
-      },
+  async handInCash(
+    riderId: string,
+    userId: string,
+    dto: CashHandInDto,
+    idempotencyKey?: string,
+  ): Promise<{
+    handinId: string | null;
+    handinCode: string | null;
+    handedInCount: number;
+    totalAmount: number;
+    ledgerIds: string[];
+    transactionId: string | null;
+    message: string;
+  }> {
+    const rider = await this.assertOperableRider(riderId);
+    const scope = `rider-handin:${riderId}`;
+
+    if (idempotencyKey) {
+      const requestHash = IdempotencyService.fingerprint({ riderId });
+      const resolution = await this.idempotency.resolve(idempotencyKey, scope, requestHash);
+      if (resolution.kind === "replay") {
+        this.idempotency.logReplay(scope, idempotencyKey);
+        return (resolution.response as unknown as Awaited<ReturnType<RidersService["handInCash"]>>);
+      }
+      if (resolution.kind === "conflict") {
+        this.idempotency.logConflict(scope, idempotencyKey);
+        throw new ConflictException({
+          message: "Idempotency key was already used with a different payload",
+          error: IdempotencyService.CONFLICT_CODE,
+        });
+      }
+    }
+
+    const result = await this.dataSource.transaction(async (manager) => {
+      if (idempotencyKey) {
+        try {
+          await this.idempotency.claim(manager, {
+            key: idempotencyKey,
+            scope,
+            userId,
+            requestHash: IdempotencyService.fingerprint({ riderId }),
+          });
+        } catch (error) {
+          if (error instanceof IdempotencyClaimConflict) {
+            throw new ConflictException({
+              message: "Cash hand-in is already in progress for this key",
+              error: IdempotencyService.IN_PROGRESS_CODE,
+            });
+          }
+          throw error;
+        }
+      }
+
+      const pendingLedgers = await manager.getRepository(CashLedger).find({
+        where: { riderId, handInStatus: CashHandInStatus.PENDING },
+        lock: { mode: "pessimistic_write" },
+      });
+
+      if (pendingLedgers.length === 0) {
+        return {
+          handinId: null as string | null,
+          handinCode: null as string | null,
+          handedInCount: 0,
+          totalAmount: 0,
+          ledgerIds: [] as string[],
+          transactionId: null as string | null,
+          message: "No pending cash to hand in",
+        };
+      }
+
+      const totalMinor = pendingLedgers.reduce(
+        (sum, item) => sum + toMinor(item.amount),
+        0,
+      );
+
+      const batch = await manager.getRepository(CashHandIn).save(
+        manager.getRepository(CashHandIn).create({
+          handinCode: await this.nextHandInCode(manager),
+          riderId,
+          hubId: rider.hubId ?? null,
+          status: BatchHandInStatus.SUBMITTED,
+          expectedMinor: totalMinor,
+          verifiedMinor: 0,
+          currency: "BDT",
+          notes: dto.notes?.trim() || null,
+        }),
+      );
+
+      await manager.getRepository(CashHandInItem).save(
+        pendingLedgers.map((ledger) =>
+          manager.getRepository(CashHandInItem).create({
+            handInId: batch.id,
+            cashLedgerId: ledger.id,
+            amountMinor: toMinor(ledger.amount),
+          }),
+        ),
+      );
+
+      for (const ledger of pendingLedgers) {
+        ledger.handInStatus = CashHandInStatus.HANDED_IN;
+        await manager.getRepository(CashLedger).save(ledger);
+      }
+
+      const posting = await this.ledger.post(manager, {
+        type: FinancialTransactionType.CASH_HANDED_IN,
+        referenceType: "CASH_HANDIN",
+        referenceId: batch.id,
+        description: `Rider cash hand-in ${batch.handinCode} (${pendingLedgers.length} collections)`,
+        entries: [
+          { account: FinancialAccount.HUB_CASH, direction: EntryDirection.DEBIT, amountMinor: totalMinor },
+          { account: FinancialAccount.RIDER_CASH_IN_HAND, direction: EntryDirection.CREDIT, amountMinor: totalMinor },
+        ],
+        createdBy: userId,
+      });
+
+      this.logger.log(
+        `Rider ${riderId} handed in batch ${batch.handinCode} across ${pendingLedgers.length} parcels.`,
+      );
+
+      return {
+        handinId: batch.id,
+        handinCode: batch.handinCode,
+        handedInCount: pendingLedgers.length,
+        totalAmount: totalMinor / 100,
+        ledgerIds: pendingLedgers.map((l) => l.id),
+        transactionId: posting.id,
+        message: `Successfully handed in batch ${batch.handinCode}. Awaiting Hub verification.`,
+      };
     });
 
-    if (pendingLedgers.length === 0) {
+    if (idempotencyKey) {
+      await this.dataSource.transaction(async (manager) => {
+        await this.idempotency.complete(manager, {
+          key: idempotencyKey,
+          scope,
+          statusCode: HttpStatus.OK,
+          response: result as unknown as Record<string, unknown>,
+          userId,
+        });
+      });
+    }
+
+    return result;
+  }
+
+  /** Hand-in batches submitted by the rider, newest first. */
+  async getCashHandIns(riderId: string) {
+    await this.assertOperableRider(riderId);
+    const batches = await this.handInRepo.find({
+      where: { riderId },
+      order: { submittedAt: "DESC" },
+      take: 100,
+    });
+    const hubIds = [...new Set(batches.map((b) => b.hubId).filter((id): id is string => id !== null))];
+    const hubs = hubIds.length
+      ? await this.hubRepo.find({ where: { id: In(hubIds) }, select: ["id", "code", "name"] })
+      : [];
+    const hubById = new Map(hubs.map((h) => [h.id, h]));
+    const counts = new Map<string, number>();
+    if (batches.length > 0) {
+      const rows = await this.handInItemRepo
+        .createQueryBuilder("item")
+        .select("item.handInId", "handInId")
+        .addSelect("COUNT(item.id)", "count")
+        .where("item.handInId IN (:...ids)", { ids: batches.map((b) => b.id) })
+        .groupBy("item.handInId")
+        .getRawMany<{ handInId: string; count: string }>();
+      for (const row of rows) counts.set(row.handInId, Number(row.count));
+    }
+
+    return batches.map((batch) => {
+      const hub = batch.hubId ? hubById.get(batch.hubId) : undefined;
       return {
-        handedInCount: 0,
-        totalAmount: 0,
-        message: "No pending cash to hand in",
+        id: batch.id,
+        handinCode: batch.handinCode,
+        riderId: batch.riderId,
+        riderName: null,
+        hubId: batch.hubId,
+        hubCode: hub?.code ?? null,
+        hubName: hub?.name ?? null,
+        status: batch.status,
+        expectedMinor: Number(batch.expectedMinor),
+        verifiedMinor: Number(batch.verifiedMinor),
+        itemCount: counts.get(batch.id) ?? 0,
+        submittedAt: batch.submittedAt.toISOString(),
+        verifiedAt: batch.verifiedAt?.toISOString() ?? null,
       };
+    });
+  }
+
+  private async nextHandInCode(manager: EntityManager): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const code = `CASH-${Math.floor(100000 + Math.random() * 900000)}`;
+      const existing = await manager.findOne(CashHandIn, { where: { handinCode: code } });
+      if (!existing) return code;
     }
-
-    const totalAmount = pendingLedgers.reduce(
-      (sum, item) => sum + Number(item.amount),
-      0,
-    );
-
-    // Update all pending ledgers to HANDED_IN
-    for (const ledger of pendingLedgers) {
-      ledger.handInStatus = CashHandInStatus.HANDED_IN;
-      await this.cashLedgerRepo.save(ledger);
-    }
-
-    this.logger.log(
-      `Rider ${riderId} (User ${userId}) handed in ৳${totalAmount} across ${pendingLedgers.length} parcels.`,
-    );
-
-    return {
-      handedInCount: pendingLedgers.length,
-      totalAmount,
-      ledgerIds: pendingLedgers.map((l) => l.id),
-      message: `Successfully handed in ৳${totalAmount}. Awaiting Hub verification.`,
-    };
+    return `CASH-${Date.now().toString().slice(-6)}`;
   }
 
   /**

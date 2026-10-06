@@ -252,6 +252,7 @@ appear in the URL. Locale is always the first segment (`en` | `bn`).
 | `/hub/scanner`, `/hub/parcels`                                                         | `(hub)`           | hub manager           |
 | `/hub/bags`, `/hub/bags/[id]`                                                          | `(hub)`           | hub manager           |
 | `/hub/manifests`, `/hub/manifests/[id]`, `/hub/exceptions`                              | `(hub)`           | hub manager           |
+| `/hub/cash`                                                                                | `(hub)`           | hub manager           |
 | `/rider/dashboard`                                                                     | `(rider)`         | rider                 |
 | `/rider/tasks`, `/rider/tasks/[id]`, `/rider/history`, `/rider/profile`          | `(rider)`         | rider                 |
 

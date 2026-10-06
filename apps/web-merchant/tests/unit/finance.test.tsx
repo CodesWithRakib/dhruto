@@ -53,15 +53,15 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
     expect(screen.getByText("৳14,500")).toBeDefined();
     expect(screen.getByText("৳3,200")).toBeDefined();
     expect(screen.getByText("৳50,000")).toBeDefined();
-    expect(screen.getByText(/Available Wallet Balance/i)).toBeDefined();
+    expect(screen.getAllByText(/Available Balance/i).length).toBeGreaterThanOrEqual(1);
 
-    const btn = screen.getByRole("button", { name: /Request Payout Withdrawal/i });
+    const btn = screen.getByRole("button", { name: /Withdraw Funds/i });
     expect(btn).toBeDefined();
     fireEvent.click(btn);
     expect(handlePayout).toHaveBeenCalledTimes(1);
   });
 
-  it("2. TransactionsTable renders double-entry ledger items and types", () => {
+  it("2. TransactionsTable renders statement rows with paginated props", () => {
     const mockTxs = [
       {
         id: "tx-1",
@@ -86,19 +86,25 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
         <Providers>
-          <TransactionsTable transactions={mockTxs} isLoading={false} />
+          <TransactionsTable
+            transactions={mockTxs}
+            isLoading={false}
+            page={1}
+            onPageChange={() => undefined}
+            hasMore={false}
+          />
         </Providers>
       </NextIntlClientProvider>,
     );
 
-    expect(screen.getByText("COD Received")).toBeDefined();
-    expect(screen.getByText("Delivery Charge")).toBeDefined();
-    expect(screen.getByText("+৳3,000")).toBeDefined();
-    expect(screen.getByText("-৳120")).toBeDefined();
-    expect(screen.getAllByText(/Ref: DHR-20261004-TEST01/).length).toBe(2);
+    expect(screen.getAllByText("COD_CREDIT").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("DELIVERY_FEE").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("৳3,000")).toBeDefined();
+    expect(screen.getByText("৳120")).toBeDefined();
+    expect(screen.getAllByText(/DHR-20261004-TEST01/).length).toBeGreaterThanOrEqual(2);
   });
 
-  it("3. PayoutRequestModal handles payment method selection and balance validation", () => {
+  it("3. PayoutRequestModal handles payment method selection and review step", () => {
     const handleClose = vi.fn();
 
     render(
@@ -123,7 +129,7 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
     const amountInput = screen.getByPlaceholderText("0.00");
     fireEvent.change(amountInput, { target: { value: "10000" } });
 
-    const submitBtn = screen.getByRole("button", { name: /Withdraw/i });
-    expect(submitBtn).toBeDefined();
+    const reviewBtn = screen.getByRole("button", { name: /Review payout request/i });
+    expect(reviewBtn).toBeDefined();
   });
 });

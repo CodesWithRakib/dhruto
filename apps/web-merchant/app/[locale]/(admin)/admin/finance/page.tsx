@@ -1,12 +1,13 @@
 import React from "react";
 import type { Metadata } from "next";
-import { FinanceDashboard } from "@/features/finance/components/finance-dashboard";
+import { AdminFinanceDashboard } from "@/features/finance/components/admin-finance-dashboard";
 
 export const metadata: Metadata = {
-  title: "Finance — Admin",
-  description: "Settlements, payouts and cash reconciliation across the network.",
+  robots: { index: false, follow: false },
+  title: "Finance Operations — Admin",
+  description: "Ledger, settlements, payouts, adjustments and reconciliation.",
 };
 
 export default function AdminFinancePage() {
-  return <FinanceDashboard />;
+  return <AdminFinanceDashboard />;
 }

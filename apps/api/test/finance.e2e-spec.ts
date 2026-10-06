@@ -21,6 +21,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
   let deliveryOtp: string;
   let cashLedgerId: string;
   let payoutRequestId: string;
+  let adminToken: string;
   let initialBalance = 0;
 
   beforeAll(async () => {
@@ -65,6 +66,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
     expect(riderId).toBeDefined();
 
     hubManagerToken = await loginToken(app, SEEDED_ACCOUNTS.hubManager);
+    adminToken = await loginToken(app, SEEDED_ACCOUNTS.admin);
   });
 
   afterAll(async () => {
@@ -147,6 +149,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
   it("3. Hub Manager lists pending reconciliations via GET /api/v1/finance/reconciliation/pending", async () => {
     const res = await request(app.getHttpServer())
       .get("/api/v1/finance/reconciliation/pending")
+      .set(bearer(hubManagerToken))
       .expect(200);
 
     expect(res.body.success).toBe(true);
@@ -161,6 +164,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
   it("4. Hub Manager verifies cash hand-in and triggers auto-settlement to merchant wallet", async () => {
     const res = await request(app.getHttpServer())
       .post("/api/v1/finance/reconciliation/verify")
+      .set(bearer(hubManagerToken))
       .send({
         cashLedgerId,
         actualAmount: 3000,
@@ -244,9 +248,16 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
       .expect(400);
   });
 
-  it("8. Admin approves payout request via POST /api/v1/finance/payouts/:id/process", async () => {
+  it("8. Admin approves then completes payout via /api/v1/admin/finance/payouts/:id/*", async () => {
+    await request(app.getHttpServer())
+      .post(`/api/v1/admin/finance/payouts/${payoutRequestId}/approve`)
+      .set(bearer(adminToken))
+      .send({})
+      .expect(200);
+
     const res = await request(app.getHttpServer())
-      .post(`/api/v1/finance/payouts/${payoutRequestId}/process`)
+      .post(`/api/v1/admin/finance/payouts/${payoutRequestId}/process`)
+      .set(bearer(adminToken))
       .send({
         status: "COMPLETED",
         transactionReference: "BKP7788990011",
@@ -261,6 +272,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
   it("9. Financial reconciliation summary provides platform-wide balance overview", async () => {
     const res = await request(app.getHttpServer())
       .get("/api/v1/finance/reconciliation/summary")
+      .set(bearer(hubManagerToken))
       .expect(200);
 
     expect(res.body.success).toBe(true);

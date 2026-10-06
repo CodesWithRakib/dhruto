@@ -143,6 +143,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: HUB_ROUTES.parcels, labelKey: "parcels", icon: PackageSearch },
         { href: HUB_ROUTES.bags, labelKey: "bags", icon: Package },
         { href: HUB_ROUTES.manifests, labelKey: "manifests", icon: Truck },
+        { href: HUB_ROUTES.cash, labelKey: "cash", icon: Wallet },
       ],
     },
     {

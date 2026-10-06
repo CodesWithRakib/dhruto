@@ -16,6 +16,16 @@ export * from './Manifest.entity.js';
 export * from './ManifestItem.entity.js';
 export * from './OperationalException.entity.js';
 export * from './DeliveryAttempt.entity.js';
+export * from './FinancialTransaction.entity.js';
+export * from './FinancialEntry.entity.js';
+export * from './Settlement.entity.js';
+export * from './SettlementBatch.entity.js';
+// NOTE: CashHandIn.entity.ts is intentionally NOT star-exported — it shares
+// the `CashHandInStatus` name with CashLedger.entity.ts (different enum).
+// Import batch classes explicitly by file, and the status from contracts.
+export { CashHandIn } from './CashHandIn.entity.js';
+export { CashHandInItem } from './CashHandInItem.entity.js';
+export * from './CashDiscrepancy.entity.js';
 export * from './Wallet.entity.js';
 export * from './WalletTransaction.entity.js';
 export * from './PayoutRequest.entity.js';
