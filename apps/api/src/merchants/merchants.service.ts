@@ -171,7 +171,8 @@ export class MerchantsService {
       const cod = Number(row.codAmount) || 0;
       const fee = Number(row.deliveryFee) || 0;
 
-      totalOrders += count;      totalCodAmount += cod;
+      totalOrders += count;
+      totalCodAmount += cod;
       totalDeliveryFees += fee;
 
       if (PENDING_STATUSES.includes(row.status)) {

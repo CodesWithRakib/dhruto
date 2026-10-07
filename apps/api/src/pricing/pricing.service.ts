@@ -1,9 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import {
-  DeliveryZone,
-  type PricingCalculation,
-  type PricingResult,
-} from "@dhruto/contracts";
+import { DeliveryZone, type PricingCalculation, type PricingResult } from "@dhruto/contracts";
 import {
   DHAKA_SUBURB_DISTRICTS,
   DHAKA_SUBURB_THANAS,
@@ -71,10 +67,7 @@ export class PricingService {
     const zone = this.resolveZone(calc.district, calc.thana);
     const rate = ZONE_RATES[zone];
 
-    const weightCentis = Math.max(
-      1,
-      Math.round(Number(calc.weight) * 100),
-    );
+    const weightCentis = Math.max(1, Math.round(Number(calc.weight) * 100));
     const codPaisa = Math.max(0, PricingService.toPaisa(calc.codAmount));
 
     // Additional kilograms are charged for each *started* kilogram.
@@ -91,11 +84,7 @@ export class PricingService {
     const discountPaisa = 0;
 
     const totalPaisa =
-      rate.baseFeePaisa +
-      weightFeePaisa +
-      additionalChargePaisa +
-      codFeePaisa -
-      discountPaisa;
+      rate.baseFeePaisa + weightFeePaisa + additionalChargePaisa + codFeePaisa - discountPaisa;
 
     this.logger.debug(
       `Pricing v${PRICING_RULES_VERSION}: zone=${zone} weightCentis=${weightCentis} ` +

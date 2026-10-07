@@ -2,23 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Input,
-} from "@dhruto/ui";
-import {
-  AlertCircle,
-  Building2,
-  Check,
-  MapPin,
-  Package,
-  Phone,
-  Search,
-} from "lucide-react";
+import { Badge, Button, Card, CardContent, CardHeader, Input } from "@dhruto/ui";
+import { AlertCircle, Building2, Check, MapPin, Package, Phone, Search } from "lucide-react";
 import { useGetPublicTrackingQuery } from "@/features/parcels/api/parcels.api";
 import { useRouter } from "@/lib/navigation";
 import { StatusBadge } from "@/components/data-display/status-badge";
@@ -69,9 +54,7 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary-soft text-primary">
           <Package className="h-7 w-7" aria-hidden="true" />
         </span>
-        <h1 className="text-balance text-h2 font-bold text-foreground">
-          {t("searchTitle")}
-        </h1>
+        <h1 className="text-balance text-h2 font-bold text-foreground">{t("searchTitle")}</h1>
         <p className="mx-auto max-w-md text-pretty text-body text-muted-foreground">
           {t("searchSubtitle")}
         </p>
@@ -217,9 +200,11 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
                   }),
                 })}
               </span>
-              <Badge variant="secondary">{t("statusLabel", {
-                status: tracking.status,
-              })}</Badge>
+              <Badge variant="secondary">
+                {t("statusLabel", {
+                  status: tracking.status,
+                })}
+              </Badge>
             </div>
           </Card>
         </div>

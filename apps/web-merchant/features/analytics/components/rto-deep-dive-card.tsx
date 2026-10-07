@@ -23,11 +23,15 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
             <div>
               <CardTitle className="text-lg">RTO Analytics & Root Cause Decomposition</CardTitle>
               <CardDescription>
-                Empirical investigation into return patterns, zone vulnerabilities, and cognitive risk tier correlation
+                Empirical investigation into return patterns, zone vulnerabilities, and cognitive
+                risk tier correlation
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="text-xs font-mono border-rose-500/30 text-rose-600 dark:text-rose-400">
+          <Badge
+            variant="outline"
+            className="text-xs font-mono border-rose-500/30 text-rose-600 dark:text-rose-400"
+          >
             Network RTO: {rto.overallRtoRate}%
           </Badge>
         </div>
@@ -75,14 +79,19 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
             </span>
             <div className="space-y-2 text-xs">
               {rto.byZone.map((z) => (
-                <div key={z.zone} className="p-2.5 rounded border bg-muted/20 flex items-center justify-between">
+                <div
+                  key={z.zone}
+                  className="p-2.5 rounded border bg-muted/20 flex items-center justify-between"
+                >
                   <div>
                     <span className="font-semibold text-foreground">{z.zone}</span>
                     <span className="text-[11px] text-muted-foreground block">
                       {z.parcelCount} total shipments
                     </span>
                   </div>
-                  <span className={`font-mono font-bold ${z.rtoRate < 5 ? "text-emerald-600" : z.rtoRate < 8 ? "text-amber-600" : "text-rose-600"}`}>
+                  <span
+                    className={`font-mono font-bold ${z.rtoRate < 5 ? "text-emerald-600" : z.rtoRate < 8 ? "text-amber-600" : "text-rose-600"}`}
+                  >
                     {z.rtoRate}% RTO
                   </span>
                 </div>
@@ -98,7 +107,10 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
             </span>
             <div className="space-y-2 text-xs">
               {rto.byRiskTier.map((rt) => (
-                <div key={rt.tier} className="p-2.5 rounded border bg-muted/20 flex items-center justify-between">
+                <div
+                  key={rt.tier}
+                  className="p-2.5 rounded border bg-muted/20 flex items-center justify-between"
+                >
                   <div>
                     <span className="font-bold text-foreground">{rt.tier} Risk Tier</span>
                     <span className="text-[11px] text-muted-foreground block">
@@ -106,10 +118,14 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className={`font-mono font-black ${rt.tier === "LOW" ? "text-emerald-600" : rt.tier === "MEDIUM" ? "text-amber-600" : "text-rose-600"}`}>
+                    <span
+                      className={`font-mono font-black ${rt.tier === "LOW" ? "text-emerald-600" : rt.tier === "MEDIUM" ? "text-amber-600" : "text-rose-600"}`}
+                    >
                       {rt.rtoRate}% RTO
                     </span>
-                    <span className="text-[10px] text-muted-foreground block">Actual return rate</span>
+                    <span className="text-[10px] text-muted-foreground block">
+                      Actual return rate
+                    </span>
                   </div>
                 </div>
               ))}

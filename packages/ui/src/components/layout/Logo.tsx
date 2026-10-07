@@ -20,7 +20,12 @@ const sizeMap = {
  * Dhruto brand lockup. Renders a tokenized mark + wordmark.
  * Exactly reflects the Dhruto courier identity from design mockups.
  */
-export function Logo({ size = "default", markOnly = false, inverted = false, className }: LogoProps) {
+export function Logo({
+  size = "default",
+  markOnly = false,
+  inverted = false,
+  className,
+}: LogoProps) {
   const s = sizeMap[size];
   return (
     <span className={cn("inline-flex items-center gap-2.5 select-none", className)}>

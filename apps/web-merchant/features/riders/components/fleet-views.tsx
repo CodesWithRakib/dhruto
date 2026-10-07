@@ -22,9 +22,12 @@ import {
   useAssignParcelToRiderMutation,
 } from "../api/riders.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { PageHeader } from "@/components/page-header";
 import { toast } from "sonner";
+import { useFormatters } from "@/lib/format";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { RIDER_STATUS_TONE } from "@/config/status";
 
 interface AssignRiderDialogProps {
   open: boolean;
@@ -98,7 +101,8 @@ export function AssignRiderDialog({
               <option value="">{t("fleet.selectRider")}</option>
               {riders.map((rider) => (
                 <option key={rider.id} value={rider.id}>
-                  {rider.name} ({rider.riderCode}) · {t("fleet.activeTasks", { count: rider.activeTaskCount })}
+                  {rider.name} ({rider.riderCode}) ·{" "}
+                  {t("fleet.activeTasks", { count: rider.activeTaskCount })}
                 </option>
               ))}
             </select>
@@ -155,20 +159,29 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                       <tr key={rider.id}>
                         <td className="px-4 py-3">
                           <p className="font-semibold text-foreground">{rider.name}</p>
-                          <p className="font-mono text-[11px] text-muted-foreground">{rider.riderCode}</p>
+                          <p className="font-mono text-[11px] text-muted-foreground">
+                            {rider.riderCode}
+                          </p>
                         </td>
                         <td className="px-4 py-3 text-xs">{rider.hubName}</td>
                         <td className="px-4 py-3">
-                          <Badge variant={rider.duty === "ON_DUTY" ? "success" : "secondary"} className="text-[10px]">
-                            {rider.status}
-                          </Badge>
+                          <EnumBadge
+                            namespace="RiderStatus"
+                            value={rider.status}
+                            tones={RIDER_STATUS_TONE}
+                          />
                         </td>
                         <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">
                           {t("fleet.activeTasks", { count: rider.activeTaskCount })} ·{" "}
                           {t("fleet.deliveredToday", { count: rider.deliveredTodayCount })}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setSelectedRider(rider)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs"
+                            onClick={() => setSelectedRider(rider)}
+                          >
                             {t("tasks.openDetails")}
                           </Button>
                         </td>
@@ -182,16 +195,27 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                   <li key={rider.id} className="space-y-1 p-4">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-bold text-foreground">
-                        {rider.name} <span className="font-mono text-[11px] font-normal text-muted-foreground">{rider.riderCode}</span>
+                        {rider.name}{" "}
+                        <span className="font-mono text-[11px] font-normal text-muted-foreground">
+                          {rider.riderCode}
+                        </span>
                       </p>
-                      <Badge variant={rider.duty === "ON_DUTY" ? "success" : "secondary"} className="text-[10px]">
+                      <Badge
+                        variant={rider.duty === "ON_DUTY" ? "success" : "secondary"}
+                        className="text-[10px]"
+                      >
                         {rider.status}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {rider.hubName} · {t("fleet.activeTasks", { count: rider.activeTaskCount })}
                     </p>
-                    <Button size="sm" variant="outline" className="h-9 w-full" onClick={() => setSelectedRider(rider)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 w-full"
+                      onClick={() => setSelectedRider(rider)}
+                    >
                       {t("tasks.openDetails")}
                     </Button>
                   </li>
@@ -202,7 +226,10 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
         </CardContent>
       </Card>
 
-      <Dialog open={selectedRider !== null} onOpenChange={(open) => !open && setSelectedRider(null)}>
+      <Dialog
+        open={selectedRider !== null}
+        onOpenChange={(open) => !open && setSelectedRider(null)}
+      >
         <DialogContent className="max-w-lg">
           {selectedRider ? (
             <FleetRiderDetails riderId={selectedRider.id} onChanged={() => refetch()} />
@@ -214,8 +241,15 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
 }
 
 /** Rider file: active tasks plus the assignment audit trail. */
-export function FleetRiderDetails({ riderId, onChanged }: { riderId: string; onChanged: () => void }) {
+export function FleetRiderDetails({
+  riderId,
+  onChanged,
+}: {
+  riderId: string;
+  onChanged: () => void;
+}) {
   const t = useTranslations("Rider");
+  const { date: fmtDate } = useFormatters();
   const { data, isLoading, refetch } = useGetFleetRiderQuery(riderId);
   const rider = data?.data;
 
@@ -232,7 +266,10 @@ export function FleetRiderDetails({ riderId, onChanged }: { riderId: string; onC
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <UserCheck className="h-5 w-5 text-primary" aria-hidden="true" />
-          {rider.name} <span className="font-mono text-xs font-normal text-muted-foreground">{rider.riderCode}</span>
+          {rider.name}{" "}
+          <span className="font-mono text-xs font-normal text-muted-foreground">
+            {rider.riderCode}
+          </span>
         </DialogTitle>
         <DialogDescription>
           {rider.hubName} · {rider.status}
@@ -247,9 +284,14 @@ export function FleetRiderDetails({ riderId, onChanged }: { riderId: string; onC
         ) : (
           <ul className="space-y-1.5">
             {rider.activeTasks.map((task) => (
-              <li key={task.id} className="flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 text-xs">
+              <li
+                key={task.id}
+                className="flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 text-xs"
+              >
                 <span className="font-mono font-semibold">{task.trackingCode}</span>
-                <Badge variant="secondary" className="ml-auto text-[10px]">{task.status}</Badge>
+                <Badge variant="secondary" className="ml-auto text-[10px]">
+                  {task.status}
+                </Badge>
               </li>
             ))}
           </ul>
@@ -265,10 +307,13 @@ export function FleetRiderDetails({ riderId, onChanged }: { riderId: string; onC
         ) : (
           <ul className="max-h-48 space-y-1.5 overflow-y-auto">
             {rider.assignments.map((assignment) => (
-              <li key={assignment.id} className="flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 font-mono text-[11px]">
+              <li
+                key={assignment.id}
+                className="flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 font-mono text-[11px]"
+              >
                 <span className="font-semibold">{assignment.trackingCode}</span>
                 <span className="ml-auto tabular-nums text-muted-foreground">
-                  {new Date(assignment.assignedAt).toLocaleDateString()}
+                  {fmtDate(assignment.assignedAt)}
                   {assignment.unassignedAt ? ` · ${t("fleet.reassignedNote")}` : ""}
                 </span>
               </li>
@@ -277,7 +322,14 @@ export function FleetRiderDetails({ riderId, onChanged }: { riderId: string; onC
         )}
       </div>
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={() => { refetch(); onChanged(); }}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            refetch();
+            onChanged();
+          }}
+        >
           {t("refresh")}
         </Button>
       </DialogFooter>

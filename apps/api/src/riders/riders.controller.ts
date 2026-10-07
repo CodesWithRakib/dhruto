@@ -40,12 +40,7 @@ import { type RequestWithId } from "../common/middleware/request-id.middleware.j
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
 import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 
-function envelope(
-  statusCode: number,
-  message: string,
-  data: unknown,
-  req?: RequestWithId,
-) {
+function envelope(statusCode: number, message: string, data: unknown, req?: RequestWithId) {
   return {
     success: true,
     statusCode,
@@ -86,10 +81,7 @@ export class RidersController {
   })
   @ApiResponse({ status: 200, description: "Dashboard aggregates." })
   @ApiResponse({ status: 403, description: "Rider is inactive or off duty." })
-  async getDashboard(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getDashboard(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const riderId = await this.resolveRiderId(user);
     const dashboard = await this.ridersService.getDashboard(riderId);
     return envelope(HttpStatus.OK, "Rider dashboard retrieved successfully", dashboard, req);
@@ -173,10 +165,7 @@ export class RidersController {
     description: "Rider code, hub, duty state and joined date. No sensitive data.",
   })
   @ApiResponse({ status: 200, description: "Rider profile." })
-  async getProfile(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getProfile(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const riderId = await this.resolveRiderId(user);
     const profile = await this.ridersService.getProfile(riderId, user);
     return envelope(HttpStatus.OK, "Rider profile retrieved successfully", profile, req);
@@ -211,18 +200,17 @@ export class RidersController {
       "Transitions parcel status to OUT_FOR_DELIVERY and issues a hashed customer OTP (15 minute TTL) via SMS. The secret is never returned to the rider UI.",
   })
   @ApiResponse({ status: 200, description: "Delivery started." })
-  @ApiResponse({ status: 403, description: "Parcel belongs to another rider or rider is inactive." })
+  @ApiResponse({
+    status: 403,
+    description: "Parcel belongs to another rider or rider is inactive.",
+  })
   async startDelivery(
     @CurrentUser() user: AuthenticatedUser,
     @Param("parcelId") parcelId: string,
     @Req() req: RequestWithId,
   ) {
     const riderId = await this.resolveRiderId(user);
-    const result = await this.ridersService.startDelivery(
-      riderId,
-      parcelId,
-      user.id,
-    );
+    const result = await this.ridersService.startDelivery(riderId, parcelId, user.id);
 
     return envelope(HttpStatus.OK, result.message, result, req);
   }
@@ -266,11 +254,7 @@ export class RidersController {
     @Req() req?: RequestWithId,
   ) {
     const riderId = await this.resolveRiderId(user);
-    const result = await this.ridersService.verifyOtp(
-      riderId,
-      parcelId,
-      dto.otp,
-    );
+    const result = await this.ridersService.verifyOtp(riderId, parcelId, dto.otp);
 
     if (!result.valid) {
       throw new BadRequestException(result.message || "Invalid OTP code");
@@ -293,7 +277,10 @@ export class RidersController {
     description: "Optional key making duplicate completion submissions safe",
   })
   @ApiResponse({ status: 200, description: "Delivery completed (or replayed)." })
-  @ApiResponse({ status: 409, description: "Already completed or key reused with another payload." })
+  @ApiResponse({
+    status: 409,
+    description: "Already completed or key reused with another payload.",
+  })
   @ApiResponse({ status: 422, description: "OTP missing or COD amount mismatch." })
   async completeDelivery(
     @CurrentUser() user: AuthenticatedUser,
@@ -331,12 +318,7 @@ export class RidersController {
     @Req() req?: RequestWithId,
   ) {
     const riderId = await this.resolveRiderId(user);
-    const result = await this.ridersService.failDelivery(
-      riderId,
-      parcelId,
-      dto,
-      user.id,
-    );
+    const result = await this.ridersService.failDelivery(riderId, parcelId, dto, user.id);
 
     return envelope(HttpStatus.OK, result.message, result, req);
   }
@@ -349,7 +331,11 @@ export class RidersController {
     description:
       "Creates a persisted hand-in batch with a server-computed total and posts the custody transfer through the journal. Accepts an Idempotency-Key: repeats replay the recorded batch.",
   })
-  @ApiHeader({ name: "Idempotency-Key", required: false, description: "Makes duplicate submissions safe" })
+  @ApiHeader({
+    name: "Idempotency-Key",
+    required: false,
+    description: "Makes duplicate submissions safe",
+  })
   @ApiResponse({ status: 200, description: "Cash handed in as a batch." })
   async handInCash(
     @CurrentUser() user: AuthenticatedUser,
@@ -375,10 +361,7 @@ export class RidersController {
     description: "Batch custody records with server-computed totals and derived status.",
   })
   @ApiResponse({ status: 200, description: "Hand-in batches." })
-  async getCashHandIns(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getCashHandIns(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const riderId = await this.resolveRiderId(user);
     const batches = await this.ridersService.getCashHandIns(riderId);
 
@@ -391,10 +374,7 @@ export class RidersController {
     summary: "Get rider's cash collection and reconciliation summary",
   })
   @ApiResponse({ status: 200, description: "Cash summary." })
-  async getCashSummary(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getCashSummary(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const riderId = await this.resolveRiderId(user);
     const summary = await this.ridersService.getCashSummary(riderId);
 

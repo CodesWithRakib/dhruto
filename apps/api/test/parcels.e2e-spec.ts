@@ -4,12 +4,7 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { ZodValidationPipe } from "nestjs-zod";
 import { AppModule } from "../src/app.module.js";
-import {
-  SEEDED_ACCOUNTS,
-  bearer,
-  idempotencyKey,
-  loginToken,
-} from "./utils/auth.js";
+import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 const VALID_BOOKING = {
   recipientName: "Rafiqul Islam",
@@ -93,7 +88,9 @@ describe("Parcels API — Phase 1 merchant parcel core (E2E / Integration)", () 
       expect(res.status).toBe(422);
       expect(res.body.success).toBe(false);
       expect(res.body.errorCode).toBe("VALIDATION_ERROR");
-      expect(res.body.errors.some((e: { field: string }) => e.field === "recipientPhone")).toBe(true);
+      expect(res.body.errors.some((e: { field: string }) => e.field === "recipientPhone")).toBe(
+        true,
+      );
     });
 
     it("rejects a negative COD amount with 422", async () => {

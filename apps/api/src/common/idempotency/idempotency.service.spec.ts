@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { QueryFailedError } from "typeorm";
-import {
-  IdempotencyService,
-  IdempotencyClaimConflict,
-} from "./idempotency.service.js";
+import { IdempotencyService, IdempotencyClaimConflict } from "./idempotency.service.js";
 import { IdempotencyRecord } from "../../database/entities/IdempotencyRecord.entity.js";
 
 /**
@@ -26,9 +23,7 @@ class FakeIdempotencyStore {
     for (const clause of clauses) {
       const key = clause.key as string | undefined;
       const scope = clause.scope as string | undefined;
-      const match = this.records.find(
-        (record) => record.key === key && record.scope === scope,
-      );
+      const match = this.records.find((record) => record.key === key && record.scope === scope);
       if (match) {
         return Promise.resolve(match);
       }
@@ -56,9 +51,7 @@ class FakeIdempotencyStore {
 
   insert(values: Partial<IdempotencyRecord>): Promise<unknown> {
     if (this.findIndex(values.key as string, values.scope as string) >= 0) {
-      return Promise.reject(
-        new QueryFailedError("INSERT", [], { code: "23505" } as never),
-      );
+      return Promise.reject(new QueryFailedError("INSERT", [], { code: "23505" } as never));
     }
     this.records.push({
       id: `rec-${this.records.length + 1}`,
@@ -76,25 +69,20 @@ class FakeIdempotencyStore {
   }
 
   private findIndex(key: string, scope: string): number {
-    return this.records.findIndex(
-      (record) => record.key === key && record.scope === scope,
-    );
+    return this.records.findIndex((record) => record.key === key && record.scope === scope);
   }
 }
 
 function fakeManager(store: FakeIdempotencyStore) {
   return {
-    insert: (_entity: unknown, values: Partial<IdempotencyRecord>) =>
-      store.insert(values),
-    delete: (_entity: unknown, values: { key: string; scope: string }) =>
-      store.delete(values),
+    insert: (_entity: unknown, values: Partial<IdempotencyRecord>) => store.insert(values),
+    delete: (_entity: unknown, values: { key: string; scope: string }) => store.delete(values),
   };
 }
 
 function makeService(store: FakeIdempotencyStore): IdempotencyService {
   return new IdempotencyService({
-    findOne: (options: Parameters<FakeIdempotencyStore["findOne"]>[0]) =>
-      store.findOne(options),
+    findOne: (options: Parameters<FakeIdempotencyStore["findOne"]>[0]) => store.findOne(options),
   } as never);
 }
 
@@ -203,18 +191,12 @@ describe("IdempotencyService", () => {
     it("reports a different payload for the same key as a conflict", async () => {
       store.records.push(completedRecord());
 
-      const result = await service.resolve(
-        "k1",
-        "PARCEL_CREATE",
-        "hash-DIFFERENT",
-      );
+      const result = await service.resolve("k1", "PARCEL_CREATE", "hash-DIFFERENT");
       expect(result).toEqual({ kind: "conflict", reason: "PAYLOAD_MISMATCH" });
     });
 
     it("reports an unfinished claim as in progress after polling", async () => {
-      store.records.push(
-        completedRecord({ statusCode: null, response: null, completedAt: null }),
-      );
+      store.records.push(completedRecord({ statusCode: null, response: null, completedAt: null }));
 
       const result = await service.resolve("k1", "PARCEL_CREATE", "hash-1", {
         attempts: 2,

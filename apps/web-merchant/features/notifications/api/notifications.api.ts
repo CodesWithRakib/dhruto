@@ -55,7 +55,10 @@ export const notificationsApi = baseApi.injectEndpoints({
       providesTags: ["Notification"],
     }),
 
-    updateNotificationPreferences: builder.mutation<ApiResponse<PreferencesResponse>, UpdatePreferencesDto>({
+    updateNotificationPreferences: builder.mutation<
+      ApiResponse<PreferencesResponse>,
+      UpdatePreferencesDto
+    >({
       query: (payload) => ({
         url: "/notifications/preferences",
         method: "POST",

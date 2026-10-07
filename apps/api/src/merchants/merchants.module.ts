@@ -6,10 +6,7 @@ import { MerchantsController } from "./merchants.controller.js";
 import { AuthModule } from "../auth/auth.module.js";
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Merchant, Parcel, User]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Merchant, Parcel, User]), AuthModule],
   controllers: [MerchantsController],
   providers: [MerchantsService],
   exports: [MerchantsService],

@@ -115,12 +115,21 @@ export function SmartAddressParser({
   const getZoneLabel = (zone: string) => {
     switch (zone) {
       case "INSIDE_DHAKA":
-        return { label: "Inside Dhaka (Same Day / Next Day)", color: "text-success bg-success-soft border-success" };
+        return {
+          label: "Inside Dhaka (Same Day / Next Day)",
+          color: "text-success bg-success-soft border-success",
+        };
       case "DHAKA_SUBURBS":
-        return { label: "Dhaka Suburb (Gazipur / Narayanganj)", color: "text-warning bg-warning-soft border-warning" };
+        return {
+          label: "Dhaka Suburb (Gazipur / Narayanganj)",
+          color: "text-warning bg-warning-soft border-warning",
+        };
       case "OUTSIDE_DHAKA":
       default:
-        return { label: "Outside Dhaka (National Inter-District)", color: "text-info bg-info-soft border-info" };
+        return {
+          label: "Outside Dhaka (National Inter-District)",
+          color: "text-info bg-info-soft border-info",
+        };
     }
   };
 
@@ -228,27 +237,21 @@ export function SmartAddressParser({
                   <span className="text-xs font-semibold text-muted-foreground block uppercase">
                     District
                   </span>
-                  <p className="font-bold text-foreground text-base mt-0.5">
-                    {result.district}
-                  </p>
+                  <p className="font-bold text-foreground text-base mt-0.5">{result.district}</p>
                 </div>
 
                 <div className="p-2.5 rounded-md border bg-muted/20">
                   <span className="text-xs font-semibold text-muted-foreground block uppercase">
                     Thana / Upazila
                   </span>
-                  <p className="font-bold text-foreground text-base mt-0.5">
-                    {result.thana}
-                  </p>
+                  <p className="font-bold text-foreground text-base mt-0.5">{result.thana}</p>
                 </div>
 
                 <div className="p-2.5 rounded-md border bg-muted/20">
                   <span className="text-xs font-semibold text-muted-foreground block uppercase">
                     Area / Sector
                   </span>
-                  <p className="font-semibold text-foreground mt-0.5">
-                    {result.area || "—"}
-                  </p>
+                  <p className="font-semibold text-foreground mt-0.5">{result.area || "—"}</p>
                 </div>
 
                 <div className="p-2.5 rounded-md border bg-muted/20">
@@ -267,7 +270,9 @@ export function SmartAddressParser({
                   <span className="text-xs font-semibold text-muted-foreground uppercase block">
                     Calculated Delivery Zone
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded border inline-block mt-1 font-medium ${getZoneLabel(result.zone).color}`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded border inline-block mt-1 font-medium ${getZoneLabel(result.zone).color}`}
+                  >
                     {getZoneLabel(result.zone).label}
                   </span>
                 </div>
@@ -307,7 +312,11 @@ export function SmartAddressParser({
                 onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-success" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
                 {copied ? "Copied" : "Copy Parsed"}
               </Button>
 

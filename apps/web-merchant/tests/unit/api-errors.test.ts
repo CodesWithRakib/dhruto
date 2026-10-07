@@ -4,9 +4,7 @@ import { getApiErrorKey } from "../../lib/api-errors";
 
 describe("getApiErrorKey", () => {
   it("maps stable API error codes to translated keys", () => {
-    expect(getApiErrorKey({ data: { errorCode: ApiErrorCode.UNAUTHORIZED } })).toBe(
-      "unauthorized",
-    );
+    expect(getApiErrorKey({ data: { errorCode: ApiErrorCode.UNAUTHORIZED } })).toBe("unauthorized");
     expect(getApiErrorKey({ data: { errorCode: ApiErrorCode.FORBIDDEN } })).toBe("forbidden");
     expect(getApiErrorKey({ data: { errorCode: ApiErrorCode.TRACKING_NOT_FOUND } })).toBe(
       "notFound",

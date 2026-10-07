@@ -7,7 +7,9 @@ import { BANGLADESH_PHONE_REGEX } from "@dhruto/contracts";
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(BANGLADESH_PHONE_REGEX, "Invalid 11-digit BD phone number (e.g. 017XXXXXXXX)"),
+  phone: z
+    .string()
+    .regex(BANGLADESH_PHONE_REGEX, "Invalid 11-digit BD phone number (e.g. 017XXXXXXXX)"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.nativeEnum(UserRole).default(UserRole.MERCHANT),
   businessName: z.string().optional(),

@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Req,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, HttpCode, HttpStatus, Param, Req, UseGuards } from "@nestjs/common";
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -48,10 +40,7 @@ export class TrackingController {
   })
   @ApiNotFoundResponse({ description: "Tracking code not found" })
   @ApiTooManyRequestsResponse({ description: "Rate limit exceeded" })
-  async getTracking(
-    @Param("trackingCode") trackingCode: string,
-    @Req() req: RequestWithId,
-  ) {
+  async getTracking(@Param("trackingCode") trackingCode: string, @Req() req: RequestWithId) {
     const data = await this.parcelsService.getTracking(trackingCode);
 
     return {

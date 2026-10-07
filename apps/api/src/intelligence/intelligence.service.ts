@@ -29,9 +29,7 @@ export class IntelligenceService {
    * Evaluates recipient risk and predicts RTO probability.
    */
   async evaluateRisk(dto: RecipientRiskEvaluateRequest): Promise<RecipientRiskResult> {
-    this.logger.log(
-      `Evaluating risk for recipient ${dto.recipientPhone} (COD: ৳${dto.codAmount})`,
-    );
+    this.logger.log(`Evaluating risk for recipient ${dto.recipientPhone} (COD: ৳${dto.codAmount})`);
     return this.riskScorer.evaluateRisk(dto);
   }
 

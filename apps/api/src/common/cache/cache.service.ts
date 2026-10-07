@@ -47,7 +47,9 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
             retryStrategy: () => null,
           };
 
-      const client = redisConf?.url ? new Redis(redisConf.url, redisOptions) : new Redis(redisOptions);
+      const client = redisConf?.url
+        ? new Redis(redisConf.url, redisOptions)
+        : new Redis(redisOptions);
 
       client.on("connect", () => {
         this.isRedisConnected = true;
@@ -56,7 +58,9 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
 
       client.on("error", (err) => {
         if (this.isRedisConnected) {
-          this.logger.warn(`Redis disconnected: ${err.message}. Using high-performance in-memory cache fallback.`);
+          this.logger.warn(
+            `Redis disconnected: ${err.message}. Using high-performance in-memory cache fallback.`,
+          );
         }
         this.isRedisConnected = false;
       });
@@ -71,7 +75,9 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
         this.redisClient = client;
         this.isRedisConnected = true;
       } else {
-        this.logger.log("Redis not available. Initialized resilient in-memory TTL/LRU cache layer.");
+        this.logger.log(
+          "Redis not available. Initialized resilient in-memory TTL/LRU cache layer.",
+        );
       }
     } catch {
       this.logger.log("Operating cache in high-performance in-memory mode.");
@@ -169,7 +175,13 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
         // SCAN (not KEYS): non-blocking on large keyspaces. Batch 100.
         let cursor = "0";
         do {
-          const [next, keys] = (await this.redisClient.scan(cursor, "MATCH", pattern, "COUNT", 100)) as [string, string[]];
+          const [next, keys] = (await this.redisClient.scan(
+            cursor,
+            "MATCH",
+            pattern,
+            "COUNT",
+            100,
+          )) as [string, string[]];
           cursor = next;
           if (keys.length > 0) {
             await this.redisClient.del(...keys);
@@ -185,7 +197,9 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
         }
       }
     } catch (err) {
-      this.logger.warn(`Cache delPattern error for pattern "${pattern}": ${(err as Error).message}`);
+      this.logger.warn(
+        `Cache delPattern error for pattern "${pattern}": ${(err as Error).message}`,
+      );
     }
   }
 
@@ -224,7 +238,10 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   getHealth(): CacheHealth {
     const totalOps = this.hits + this.misses;
     const hitRate = totalOps > 0 ? Math.round((this.hits / totalOps) * 100) : 100;
-    const avgLatency = this.operationsCount > 0 ? Number((this.totalLatencyMs / this.operationsCount).toFixed(2)) : 0.5;
+    const avgLatency =
+      this.operationsCount > 0
+        ? Number((this.totalLatencyMs / this.operationsCount).toFixed(2))
+        : 0.5;
 
     return {
       status: "healthy",

@@ -5,12 +5,7 @@ import request from "supertest";
 import { DataSource } from "typeorm";
 import { AppModule } from "../src/app.module.js";
 import { Parcel } from "../src/database/entities/index.js";
-import {
-  SEEDED_ACCOUNTS,
-  bearer,
-  idempotencyKey,
-  loginToken,
-} from "./utils/auth.js";
+import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 /**
  * Phase 3 rider delivery, end-to-end against the real database.
@@ -176,10 +171,7 @@ describe("Rider Delivery (Phase 3 E2E)", () => {
         .get("/api/v1/riders/me/tasks")
         .set(bearer(merchantToken))
         .expect(403);
-      await request(app.getHttpServer())
-        .get("/api/v1/riders")
-        .set(bearer(riderToken))
-        .expect(403);
+      await request(app.getHttpServer()).get("/api/v1/riders").set(bearer(riderToken)).expect(403);
     });
   });
 
@@ -244,7 +236,9 @@ describe("Rider Delivery (Phase 3 E2E)", () => {
         .set(bearer(merchantToken))
         .expect(200);
       const chain = detail.body.data.history
-        .map((h: { fromStatus: string | null; toStatus: string }) => `${h.fromStatus}->${h.toStatus}`)
+        .map(
+          (h: { fromStatus: string | null; toStatus: string }) => `${h.fromStatus}->${h.toStatus}`,
+        )
         .join(",");
       expect(chain).toContain("OUT_FOR_DELIVERY->DELIVERED");
       expect(chain).toContain("DELIVERED->CASH_PENDING");
@@ -458,9 +452,7 @@ describe("Rider Delivery (Phase 3 E2E)", () => {
         .get("/api/v1/riders/me/tasks")
         .set(bearer(rider2Token))
         .expect(200);
-      expect(
-        tasks.body.data.some((t: { id: string }) => t.id === parcel.id),
-      ).toBe(false);
+      expect(tasks.body.data.some((t: { id: string }) => t.id === parcel.id)).toBe(false);
     });
   });
 

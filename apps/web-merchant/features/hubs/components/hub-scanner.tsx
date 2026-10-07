@@ -29,6 +29,7 @@ import { getApiErrorMessage } from "@/lib/api-error";
 import { Link } from "@/lib/navigation";
 import { HUB_ROUTES } from "@/config/routes";
 import { toast } from "sonner";
+import { useFormatters } from "@/lib/format";
 
 interface HubScannerProps {
   hubId: string;
@@ -56,6 +57,7 @@ type CameraState = "idle" | "unsupported" | "denied" | "active" | "unavailable";
  */
 export function HubScanner({ hubId, hubName }: HubScannerProps) {
   const t = useTranslations("Hub");
+  const { time: fmtTime } = useFormatters();
   const [barcode, setBarcode] = React.useState("");
   const [scanType, setScanType] = React.useState<HubScanType>(HubScanType.RECEIVE_INBOUND);
   const [selectedBagId, setSelectedBagId] = React.useState<string>("");
@@ -70,7 +72,10 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
 
   const { data: bagsData } = useGetBagsQuery({ hubId, status: BagStatus.OPEN });
   const openBags = React.useMemo(() => bagsData?.data ?? [], [bagsData]);
-  const { data: hubLogData, refetch: refetchLog } = useGetScansQuery({ hubId, params: { limit: 20 } });
+  const { data: hubLogData, refetch: refetchLog } = useGetScansQuery({
+    hubId,
+    params: { limit: 20 },
+  });
   const hubLog = hubLogData?.data ?? [];
 
   React.useEffect(() => {
@@ -152,7 +157,16 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
           const applied = scanData.outcome === ScanOutcome.APPLIED;
           playBeep(applied ? "success" : "error");
           setAttempts((prev) =>
-            [{ key: idempotencyKey, result: scanData, error: null, barcode: cleanCode, at: new Date().toISOString() }, ...prev].slice(0, 10),
+            [
+              {
+                key: idempotencyKey,
+                result: scanData,
+                error: null,
+                barcode: cleanCode,
+                at: new Date().toISOString(),
+              },
+              ...prev,
+            ].slice(0, 10),
           );
           if (applied) toast.success(scanData.message);
           else toast.warning(scanData.message);
@@ -162,7 +176,16 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
         playBeep("error");
         const message = getApiErrorMessage(err, t("scanner.errorTitle"));
         setAttempts((prev) =>
-          [{ key: idempotencyKey, result: null, error: message, barcode: cleanCode, at: new Date().toISOString() }, ...prev].slice(0, 10),
+          [
+            {
+              key: idempotencyKey,
+              result: null,
+              error: message,
+              barcode: cleanCode,
+              at: new Date().toISOString(),
+            },
+            ...prev,
+          ].slice(0, 10),
         );
         toast.error(message);
       } finally {
@@ -200,7 +223,13 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
         video.srcObject = stream;
         await video.play();
       }
-      const Detector = (window as unknown as { BarcodeDetector: new (opts?: object) => { detect(v: HTMLVideoElement): Promise<Array<{ rawValue?: string }>> } }).BarcodeDetector;
+      const Detector = (
+        window as unknown as {
+          BarcodeDetector: new (opts?: object) => {
+            detect(v: HTMLVideoElement): Promise<Array<{ rawValue?: string }>>;
+          };
+        }
+      ).BarcodeDetector;
       const detector = new Detector({ formats: ["code_128", "qr_code", "ean_13", "code_39"] });
       const tick = async () => {
         if (!streamRef.current || !videoRef.current) return;
@@ -230,9 +259,17 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
   const lastAttempt = attempts[0] ?? null;
 
   const modes = [
-    { type: HubScanType.RECEIVE_INBOUND, label: t("scanner.modeReceiveInbound"), icon: PackageCheck },
+    {
+      type: HubScanType.RECEIVE_INBOUND,
+      label: t("scanner.modeReceiveInbound"),
+      icon: PackageCheck,
+    },
     { type: HubScanType.BAG_PARCEL, label: t("scanner.modeBagParcel"), icon: Scan },
-    { type: HubScanType.RECEIVE_TRANSFER, label: t("scanner.modeReceiveTransfer"), icon: ArrowRightLeft },
+    {
+      type: HubScanType.RECEIVE_TRANSFER,
+      label: t("scanner.modeReceiveTransfer"),
+      icon: ArrowRightLeft,
+    },
     { type: HubScanType.SORT, label: t("scanner.modeSort"), icon: RotateCcw },
   ];
 
@@ -296,19 +333,31 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
       </div>
 
       {cameraState === "unsupported" || cameraState === "unavailable" ? (
-        <p role="status" className="rounded-xl border border-border bg-surface-muted px-4 py-3 text-xs text-muted-foreground">
+        <p
+          role="status"
+          className="rounded-xl border border-border bg-surface-muted px-4 py-3 text-xs text-muted-foreground"
+        >
           {t("scanner.cameraUnsupported")}
         </p>
       ) : null}
       {cameraState === "denied" ? (
-        <p role="alert" className="rounded-xl border border-danger bg-danger-soft px-4 py-3 text-xs text-danger-soft-foreground">
+        <p
+          role="alert"
+          className="rounded-xl border border-danger bg-danger-soft px-4 py-3 text-xs text-danger-soft-foreground"
+        >
           {t("scanner.cameraDenied")}
         </p>
       ) : null}
       {cameraState === "active" ? (
         <Card>
           <CardContent className="space-y-2 p-4">
-            <video ref={videoRef} playsInline muted aria-label={t("scanner.cameraScan")} className="aspect-video w-full rounded-lg bg-background object-cover" />
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              aria-label={t("scanner.cameraScan")}
+              className="aspect-video w-full rounded-lg bg-background object-cover"
+            />
             <Button type="button" variant="outline" size="sm" onClick={stopCamera}>
               {t("close")}
             </Button>
@@ -366,7 +415,10 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
         <CardContent className="space-y-4 pt-6">
           <form onSubmit={handleScanSubmit} className="flex gap-2">
             <div className="relative flex-1">
-              <Scan className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Scan
+                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <Input
                 ref={inputRef}
                 id="hub-scanner-input"
@@ -382,7 +434,12 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                 autoFocus
               />
             </div>
-            <Button type="submit" size="lg" disabled={isLoading || !barcode.trim()} className="h-12 px-6 font-semibold">
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isLoading || !barcode.trim()}
+              className="h-12 px-6 font-semibold"
+            >
               {isLoading ? t("scanner.processing") : t("scanner.processScan")}
             </Button>
           </form>
@@ -400,12 +457,20 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
               {lastAttempt.result.outcome === ScanOutcome.APPLIED ? (
                 <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" aria-hidden="true" />
               ) : (
-                <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-warning" aria-hidden="true" />
+                <AlertTriangle
+                  className="mt-0.5 h-6 w-6 shrink-0 text-warning"
+                  aria-hidden="true"
+                />
               )}
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-mono text-sm font-bold">{lastAttempt.result.barcode}</p>
-                  <Badge variant={lastAttempt.result.outcome === ScanOutcome.APPLIED ? "success" : "secondary"} className="text-xs">
+                  <Badge
+                    variant={
+                      lastAttempt.result.outcome === ScanOutcome.APPLIED ? "success" : "secondary"
+                    }
+                    className="text-xs"
+                  >
                     {lastAttempt.result.outcome === ScanOutcome.APPLIED
                       ? lastAttempt.result.currentStatus
                       : t("scanner.duplicateTitle")}
@@ -419,7 +484,10 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
             </div>
           ) : null}
           {lastAttempt?.error ? (
-            <div role="alert" className="flex items-start gap-3 rounded-xl border border-danger bg-danger-soft p-4 text-danger">
+            <div
+              role="alert"
+              className="flex items-start gap-3 rounded-xl border border-danger bg-danger-soft p-4 text-danger"
+            >
               <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-danger" aria-hidden="true" />
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between gap-2">
@@ -448,15 +516,26 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
         </CardHeader>
         <CardContent className="p-0">
           {attempts.length === 0 ? (
-            <p className="p-6 text-center text-xs text-muted-foreground">{t("scanner.emptyHistory")}</p>
+            <p className="p-6 text-center text-xs text-muted-foreground">
+              {t("scanner.emptyHistory")}
+            </p>
           ) : (
             <ul className="divide-y divide-border">
               {attempts.map((attempt) => (
-                <li key={attempt.key} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs">
+                <li
+                  key={attempt.key}
+                  className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs"
+                >
                   <span className="font-mono font-semibold text-foreground">{attempt.barcode}</span>
                   {attempt.result ? (
                     <Badge
-                      variant={attempt.result.outcome === ScanOutcome.APPLIED ? "success" : attempt.result.outcome === ScanOutcome.DUPLICATE ? "secondary" : "destructive"}
+                      variant={
+                        attempt.result.outcome === ScanOutcome.APPLIED
+                          ? "success"
+                          : attempt.result.outcome === ScanOutcome.DUPLICATE
+                            ? "secondary"
+                            : "destructive"
+                      }
                       className="text-[10px]"
                     >
                       {attempt.result.scanType} · {attempt.result.outcome}
@@ -470,7 +549,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                     {attempt.result?.message ?? attempt.error}
                   </span>
                   <span className="ml-auto font-mono tabular-nums text-muted-foreground">
-                    {new Date(attempt.at).toLocaleTimeString()}
+                    {fmtTime(attempt.at)}
                   </span>
                 </li>
               ))}
@@ -496,13 +575,19 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                   </span>
                   <span className="font-semibold text-primary">{scan.scanType}</span>
                   <Badge
-                    variant={scan.outcome === ScanOutcome.APPLIED ? "success" : scan.outcome === ScanOutcome.DUPLICATE ? "secondary" : "destructive"}
+                    variant={
+                      scan.outcome === ScanOutcome.APPLIED
+                        ? "success"
+                        : scan.outcome === ScanOutcome.DUPLICATE
+                          ? "secondary"
+                          : "destructive"
+                    }
                     className="text-[10px]"
                   >
                     {scan.outcome}
                   </Badge>
                   <span className="ml-auto font-mono tabular-nums text-muted-foreground">
-                    {new Date(scan.createdAt).toLocaleTimeString()}
+                    {fmtTime(scan.createdAt)}
                   </span>
                 </li>
               ))}

@@ -61,8 +61,14 @@ describe("analytics date ranges (Asia/Dhaka, correct comparisons)", () => {
 
 describe("centralized metric math", () => {
   const metrics = new AnalyticsMetricsService(
-    {} as never, {} as never, {} as never, {} as never, {} as never,
-    {} as never, {} as never, {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
     new AnalyticsRangeService(),
   );
 

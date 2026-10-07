@@ -30,9 +30,7 @@ describe("Rider routing", () => {
   });
 
   it("gives riders dashboard, tasks, history and profile in nav and bottom bar", () => {
-    const hrefs = navForRole("RIDER").flatMap((group) =>
-      group.items.map((item) => item.href),
-    );
+    const hrefs = navForRole("RIDER").flatMap((group) => group.items.map((item) => item.href));
     for (const href of [
       RIDER_ROUTES.dashboard,
       RIDER_ROUTES.tasks,

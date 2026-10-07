@@ -8,13 +8,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import {
-  Repository,
-  DataSource,
-  EntityManager,
-  In,
-  QueryFailedError,
-} from "typeorm";
+import { Repository, DataSource, EntityManager, In, QueryFailedError } from "typeorm";
 import {
   Wallet,
   WalletTransaction,
@@ -98,9 +92,7 @@ function toPayoutAccountDetails(raw: Record<string, unknown>): PayoutAccountDeta
 
 function toPayoutItem(payout: PayoutRequest): PayoutRequestItem {
   const details =
-    payout.accountDetails && typeof payout.accountDetails === "object"
-      ? payout.accountDetails
-      : {};
+    payout.accountDetails && typeof payout.accountDetails === "object" ? payout.accountDetails : {};
   return {
     id: payout.id,
     payoutCode: payout.payoutCode ?? "",
@@ -271,113 +263,115 @@ export class FinanceService {
       }
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      const wallet = await this.lockWallet(manager, merchantId);
+    return this.dataSource
+      .transaction(async (manager) => {
+        const wallet = await this.lockWallet(manager, merchantId);
 
-      const requestedMinor = toMinor(dto.amount);
-      if (requestedMinor <= 0) {
-        throw new BadRequestException({
-          message: "Requested amount must be greater than 0",
-          error: "VALIDATION_ERROR",
-        });
-      }
-
-      const availableMinor = toMinor(wallet.balance);
-      if (availableMinor < requestedMinor) {
-        throw new BadRequestException({
-          message: `Insufficient available balance. Available: ৳${toMajor(availableMinor)}, Requested: ৳${toMajor(requestedMinor)}`,
-          error: "INSUFFICIENT_BALANCE",
-        });
-      }
-
-      const payoutCode = await this.nextPayoutCode(manager);
-
-      const payout = await manager.getRepository(PayoutRequest).save(
-        manager.getRepository(PayoutRequest).create({
-          payoutCode,
-          idempotencyKey: idempotencyKey ?? null,
-          merchantId,
-          walletId: wallet.id,
-          amount: toMajor(requestedMinor),
-          payoutMethod: dto.payoutMethod,
-          accountDetails: dto.accountDetails,
-          status: PayoutStatus.REQUESTED,
-          notes: dto.notes?.trim() || null,
-        }),
-      );
-
-      // Reserve the funds: they leave AVAILABLE but are not yet disbursed.
-      await this.ledger.post(manager, {
-        type: FinancialTransactionType.PAYOUT_RESERVATION,
-        referenceType: "PAYOUT",
-        referenceId: payout.id,
-        description: `Payout reservation ${payoutCode}`,
-        entries: [
-          {
-            account: FinancialAccount.MERCHANT_AVAILABLE,
-            direction: EntryDirection.DEBIT,
-            amountMinor: requestedMinor,
-            merchantId,
-          },
-          {
-            account: FinancialAccount.MERCHANT_PAYOUT_IN_TRANSIT,
-            direction: EntryDirection.CREDIT,
-            amountMinor: requestedMinor,
-            merchantId,
-          },
-        ],
-        createdBy: actorId,
-      });
-
-      wallet.balance = toMajor(availableMinor - requestedMinor);
-      wallet.withdrawnTotal = toMajor(toMinor(wallet.withdrawnTotal) + requestedMinor);
-      await manager.getRepository(Wallet).save(wallet);
-
-      await this.writeStatement(manager, {
-        walletId: wallet.id,
-        type: WalletTransactionType.PAYOUT_DEBIT,
-        amountMinor: requestedMinor,
-        balanceAfterMinor: availableMinor - requestedMinor,
-        referenceType: "PAYOUT",
-        referenceId: payout.id,
-        description: `Payout withdrawal request ${payoutCode} via ${dto.payoutMethod}`,
-      });
-
-      this.logger.log(
-        `Merchant ${merchantId} requested payout ${payoutCode} of ৳${toMajor(requestedMinor)} via ${dto.payoutMethod}`,
-      );
-
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.PAYOUT_REQUESTED,
-        aggregateType: "payout",
-        aggregateId: payout.id,
-        actorId,
-        payload: {
-          payoutId: payout.id,
-          payoutCode,
-          merchantId,
-          amountMinor: requestedMinor,
-          method: dto.payoutMethod,
-        },
-      });
-
-      return toPayoutItem(payout);
-    }).catch(async (error) => {
-      if (
-        idempotencyKey &&
-        error instanceof QueryFailedError &&
-        (error.driverError as { code?: string })?.code === "23505"
-      ) {
-        const existing = await this.payoutRepo.findOne({
-          where: { merchantId, idempotencyKey },
-        });
-        if (existing) {
-          this.idempotency.logReplay(scope, idempotencyKey);
-          return toPayoutItem(existing);
+        const requestedMinor = toMinor(dto.amount);
+        if (requestedMinor <= 0) {
+          throw new BadRequestException({
+            message: "Requested amount must be greater than 0",
+            error: "VALIDATION_ERROR",
+          });
         }
-      }
-      throw error;
-    });
+
+        const availableMinor = toMinor(wallet.balance);
+        if (availableMinor < requestedMinor) {
+          throw new BadRequestException({
+            message: `Insufficient available balance. Available: ৳${toMajor(availableMinor)}, Requested: ৳${toMajor(requestedMinor)}`,
+            error: "INSUFFICIENT_BALANCE",
+          });
+        }
+
+        const payoutCode = await this.nextPayoutCode(manager);
+
+        const payout = await manager.getRepository(PayoutRequest).save(
+          manager.getRepository(PayoutRequest).create({
+            payoutCode,
+            idempotencyKey: idempotencyKey ?? null,
+            merchantId,
+            walletId: wallet.id,
+            amount: toMajor(requestedMinor),
+            payoutMethod: dto.payoutMethod,
+            accountDetails: dto.accountDetails,
+            status: PayoutStatus.REQUESTED,
+            notes: dto.notes?.trim() || null,
+          }),
+        );
+
+        // Reserve the funds: they leave AVAILABLE but are not yet disbursed.
+        await this.ledger.post(manager, {
+          type: FinancialTransactionType.PAYOUT_RESERVATION,
+          referenceType: "PAYOUT",
+          referenceId: payout.id,
+          description: `Payout reservation ${payoutCode}`,
+          entries: [
+            {
+              account: FinancialAccount.MERCHANT_AVAILABLE,
+              direction: EntryDirection.DEBIT,
+              amountMinor: requestedMinor,
+              merchantId,
+            },
+            {
+              account: FinancialAccount.MERCHANT_PAYOUT_IN_TRANSIT,
+              direction: EntryDirection.CREDIT,
+              amountMinor: requestedMinor,
+              merchantId,
+            },
+          ],
+          createdBy: actorId,
+        });
+
+        wallet.balance = toMajor(availableMinor - requestedMinor);
+        wallet.withdrawnTotal = toMajor(toMinor(wallet.withdrawnTotal) + requestedMinor);
+        await manager.getRepository(Wallet).save(wallet);
+
+        await this.writeStatement(manager, {
+          walletId: wallet.id,
+          type: WalletTransactionType.PAYOUT_DEBIT,
+          amountMinor: requestedMinor,
+          balanceAfterMinor: availableMinor - requestedMinor,
+          referenceType: "PAYOUT",
+          referenceId: payout.id,
+          description: `Payout withdrawal request ${payoutCode} via ${dto.payoutMethod}`,
+        });
+
+        this.logger.log(
+          `Merchant ${merchantId} requested payout ${payoutCode} of ৳${toMajor(requestedMinor)} via ${dto.payoutMethod}`,
+        );
+
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PAYOUT_REQUESTED,
+          aggregateType: "payout",
+          aggregateId: payout.id,
+          actorId,
+          payload: {
+            payoutId: payout.id,
+            payoutCode,
+            merchantId,
+            amountMinor: requestedMinor,
+            method: dto.payoutMethod,
+          },
+        });
+
+        return toPayoutItem(payout);
+      })
+      .catch(async (error) => {
+        if (
+          idempotencyKey &&
+          error instanceof QueryFailedError &&
+          (error.driverError as { code?: string })?.code === "23505"
+        ) {
+          const existing = await this.payoutRepo.findOne({
+            where: { merchantId, idempotencyKey },
+          });
+          if (existing) {
+            this.idempotency.logReplay(scope, idempotencyKey);
+            return toPayoutItem(existing);
+          }
+        }
+        throw error;
+      });
   }
 
   /** Merchant payout history, newest first. */
@@ -617,9 +611,7 @@ export class FinanceService {
             amountMinor: toMinor(locked.amount),
             method: locked.payoutMethod,
             reason:
-              dto.status === PayoutStatus.REJECTED
-                ? locked.rejectionReason
-                : locked.failureReason,
+              dto.status === PayoutStatus.REJECTED ? locked.rejectionReason : locked.failureReason,
           },
         });
 
@@ -641,9 +633,10 @@ export class FinanceService {
    * Lists cash collections awaiting hub verification. Hub managers only see
    * their own hubs; admins see everything.
    */
-  async getPendingReconciliations(
-    actor: { id: string; role: string },
-  ): Promise<PendingReconciliationItem[]> {
+  async getPendingReconciliations(actor: {
+    id: string;
+    role: string;
+  }): Promise<PendingReconciliationItem[]> {
     const hubIds = await this.visibleHubIds(actor);
     const query = this.cashLedgerRepo
       .createQueryBuilder("ledger")
@@ -653,7 +646,11 @@ export class FinanceService {
       .leftJoinAndSelect("rider.user", "riderUser")
       .leftJoinAndSelect("ledger.hub", "hub")
       .where("ledger.handInStatus IN (:...statuses)", {
-        statuses: [CashHandInStatus.HANDED_IN, CashHandInStatus.PENDING, CashHandInStatus.DISCREPANCY],
+        statuses: [
+          CashHandInStatus.HANDED_IN,
+          CashHandInStatus.PENDING,
+          CashHandInStatus.DISCREPANCY,
+        ],
       })
       .orderBy("ledger.collectedAt", "DESC")
       .take(200);
@@ -1257,10 +1254,7 @@ export class FinanceService {
   /* Discrepancies                                                      */
   /* ================================================================== */
 
-  async listDiscrepancies(
-    actor: { id: string; role: string },
-    options: { status?: string } = {},
-  ) {
+  async listDiscrepancies(actor: { id: string; role: string }, options: { status?: string } = {}) {
     const hubIds = await this.visibleHubIds(actor);
     let ledgerIds: string[] | null = null;
     if (hubIds !== null) {
@@ -1273,9 +1267,7 @@ export class FinanceService {
     }
     const rows = await this.discrepancyRepo.find({
       where: {
-        ...(options.status
-          ? { status: options.status as DiscrepancyStatus }
-          : {}),
+        ...(options.status ? { status: options.status as DiscrepancyStatus } : {}),
         ...(ledgerIds !== null ? { cashLedgerId: In(ledgerIds) } : {}),
       },
       order: { createdAt: "DESC" },
@@ -1287,9 +1279,7 @@ export class FinanceService {
           relations: ["parcel"],
         })
       : [];
-    const trackingByLedger = new Map(
-      parcels.map((l) => [l.id, l.parcel?.trackingCode ?? null]),
-    );
+    const trackingByLedger = new Map(parcels.map((l) => [l.id, l.parcel?.trackingCode ?? null]));
     return rows.map((d) => ({
       id: d.id,
       cashLedgerId: d.cashLedgerId,
@@ -1314,11 +1304,7 @@ export class FinanceService {
    * the merchant wallet keeps every taka traceable; the discrepancy itself
    * is never edited into silence.
    */
-  async resolveDiscrepancy(
-    discrepancyId: string,
-    adminId: string,
-    dto: ResolveDiscrepancyDto,
-  ) {
+  async resolveDiscrepancy(discrepancyId: string, adminId: string, dto: ResolveDiscrepancyDto) {
     return this.dataSource.transaction(async (manager) => {
       const discrepancy = await manager.getRepository(CashDiscrepancy).findOne({
         where: { id: discrepancyId },
@@ -1731,13 +1717,16 @@ export class FinanceService {
       .orderBy("settlement.settledAt", "DESC")
       .take(limit)
       .skip((page - 1) * limit);
-    if (options.merchantId) query.andWhere("settlement.merchantId = :merchantId", { merchantId: options.merchantId });
-    if (options.from) query.andWhere("settlement.settledAt >= :from", { from: new Date(options.from) });
+    if (options.merchantId)
+      query.andWhere("settlement.merchantId = :merchantId", { merchantId: options.merchantId });
+    if (options.from)
+      query.andWhere("settlement.settledAt >= :from", { from: new Date(options.from) });
     if (options.to) query.andWhere("settlement.settledAt <= :to", { to: new Date(options.to) });
     if (options.hubId || options.riderId) {
       query.leftJoin("settlement.cashLedger", "ledger");
       if (options.hubId) query.andWhere("ledger.hubId = :hubId", { hubId: options.hubId });
-      if (options.riderId) query.andWhere("ledger.riderId = :riderId", { riderId: options.riderId });
+      if (options.riderId)
+        query.andWhere("ledger.riderId = :riderId", { riderId: options.riderId });
     }
     const [rows, total] = await query.getManyAndCount();
     return {
@@ -1810,15 +1799,14 @@ export class FinanceService {
    */
   async getReconciliationSummary() {
     const wallets = await this.walletRepo.find();
-    const totalMerchantBalanceMinor = wallets.reduce(
-      (sum, w) => sum + toMinor(w.balance),
-      0,
-    );
+    const totalMerchantBalanceMinor = wallets.reduce((sum, w) => sum + toMinor(w.balance), 0);
 
     const allLedgers = await this.cashLedgerRepo.find({ select: ["id", "amount", "handInStatus"] });
     const verifiedLedgers = allLedgers.filter((l) => l.handInStatus === CashHandInStatus.VERIFIED);
     const pendingLedgers = allLedgers.filter(
-      (l) => l.handInStatus === CashHandInStatus.PENDING || l.handInStatus === CashHandInStatus.HANDED_IN,
+      (l) =>
+        l.handInStatus === CashHandInStatus.PENDING ||
+        l.handInStatus === CashHandInStatus.HANDED_IN,
     );
 
     const totalVerifiedMinor = verifiedLedgers.reduce((sum, l) => sum + toMinor(l.amount), 0);
@@ -2229,4 +2217,3 @@ export class FinanceService {
   // asynchronously; provider outages can delay communication but never the
   // financial fact.
 }
-

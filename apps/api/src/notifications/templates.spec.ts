@@ -74,16 +74,29 @@ describe("notification templates (bilingual, strictly typed)", () => {
     const handIn = renderHandInSubmitted({ handinCode: "HI-1", itemCount: 3, totalMinor: 150000 });
     expect(handIn.en.body).toContain("HI-1");
     expect(handIn.bn.body).toContain("HI-1");
-    const verified = renderCashVerified({ trackingCode: "T", netAmount: 950, settlementCode: "STL-1" });
+    const verified = renderCashVerified({
+      trackingCode: "T",
+      netAmount: 950,
+      settlementCode: "STL-1",
+    });
     expect(verified.en.body).toContain("T");
     expect(verified.en.body).toContain("950");
-    const settlement = renderSettlementCreated({ trackingCode: "T", netAmount: 950, settlementCode: "STL-2" });
+    const settlement = renderSettlementCreated({
+      trackingCode: "T",
+      netAmount: 950,
+      settlementCode: "STL-2",
+    });
     expect(settlement.bn.body).toContain("STL-2");
   });
 
   it("renders the full payout lifecycle bilingually", () => {
     const vars = { payoutCode: "PAY-1", amount: 5000, method: "bKash" };
-    for (const fn of [renderPayoutRequested, renderPayoutApproved, renderPayoutCompleted, renderPayoutFailed]) {
+    for (const fn of [
+      renderPayoutRequested,
+      renderPayoutApproved,
+      renderPayoutCompleted,
+      renderPayoutFailed,
+    ]) {
       const out = fn(vars);
       expect(out.en.body).toContain("PAY-1");
       expect(out.bn.body).toContain("PAY-1");

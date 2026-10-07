@@ -39,7 +39,7 @@ export async function assignedParcel(
   });
 
   const me = await request.get(`${API_BASE_URL}/auth/me`, { headers: authHeaders(riderToken) });
-  const riderId = ((await me.json()).data.rider.id as string) as string;
+  const riderId = (await me.json()).data.rider.id as string as string;
 
   const assigned = await request.post(`${API_BASE_URL}/parcels/${created.id}/assign-rider`, {
     headers: { ...authHeaders(managerToken), "Content-Type": "application/json" },
@@ -56,9 +56,12 @@ export async function startDeliveryViaApi(
   riderToken: string,
   parcelId: string,
 ): Promise<string> {
-  const started = await request.post(`${API_BASE_URL}/riders/me/parcels/${parcelId}/start-delivery`, {
-    headers: authHeaders(riderToken),
-  });
+  const started = await request.post(
+    `${API_BASE_URL}/riders/me/parcels/${parcelId}/start-delivery`,
+    {
+      headers: authHeaders(riderToken),
+    },
+  );
   if (!started.ok()) throw new Error(`Start failed: ${await started.text()}`);
-  return ((await started.json()).data.otp as string) as string;
+  return (await started.json()).data.otp as string as string;
 }

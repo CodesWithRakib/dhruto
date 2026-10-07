@@ -181,7 +181,9 @@ export class AuthService implements OnModuleInit {
       await this.userRepo.save(hubManager);
     }
 
-    this.logger.log("✅ Default Admin, Merchant, Rider, and Hub Manager ready (Password: dhruto123)");
+    this.logger.log(
+      "✅ Default Admin, Merchant, Rider, and Hub Manager ready (Password: dhruto123)",
+    );
   }
 
   /**
@@ -295,10 +297,7 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException(`Account is ${user.status.toLowerCase()}`);
     }
 
-    const isMatch = await this.passwordService.compare(
-      dto.password,
-      user.passwordHash,
-    );
+    const isMatch = await this.passwordService.compare(dto.password, user.passwordHash);
     if (!isMatch) {
       throw new UnauthorizedException("Invalid email/phone or password");
     }

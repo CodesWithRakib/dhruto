@@ -116,10 +116,24 @@ export class HealthController {
     const [notifications, webhooks] = await Promise.all([
       this.notificationsQueue
         ? queueCounts(this.notificationsQueue)
-        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+        : Promise.resolve({
+            reachable: false,
+            waiting: 0,
+            active: 0,
+            completed: 0,
+            failed: 0,
+            delayed: 0,
+          }),
       this.webhooksQueue
         ? queueCounts(this.webhooksQueue)
-        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+        : Promise.resolve({
+            reachable: false,
+            waiting: 0,
+            active: 0,
+            completed: 0,
+            failed: 0,
+            delayed: 0,
+          }),
     ]);
     const queue: QueueHealth = {
       status: notifications.reachable && webhooks.reachable ? "healthy" : "degraded",
@@ -162,10 +176,24 @@ export class HealthController {
     const [notifications, webhooks] = await Promise.all([
       this.notificationsQueue
         ? queueCounts(this.notificationsQueue)
-        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+        : Promise.resolve({
+            reachable: false,
+            waiting: 0,
+            active: 0,
+            completed: 0,
+            failed: 0,
+            delayed: 0,
+          }),
       this.webhooksQueue
         ? queueCounts(this.webhooksQueue)
-        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+        : Promise.resolve({
+            reachable: false,
+            waiting: 0,
+            active: 0,
+            completed: 0,
+            failed: 0,
+            delayed: 0,
+          }),
     ]);
     const mem = process.memoryUsage();
     const lines = [

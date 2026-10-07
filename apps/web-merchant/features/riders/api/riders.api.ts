@@ -104,9 +104,7 @@ export const ridersApi = baseApi.injectEndpoints({
         method: "POST",
         body: {},
       }),
-      invalidatesTags: (_result, _error, parcelId) => [
-        { type: RIDER_TAG, id: `TASK_${parcelId}` },
-      ],
+      invalidatesTags: (_result, _error, parcelId) => [{ type: RIDER_TAG, id: `TASK_${parcelId}` }],
     }),
     verifyOtp: builder.mutation<
       ApiResponse<VerifyOtpResult>,
@@ -175,7 +173,10 @@ export const ridersApi = baseApi.injectEndpoints({
         { type: RIDER_TAG, id: "DASHBOARD" },
       ],
     }),
-    getCashHandIns: builder.query<ApiResponse<import("@dhruto/contracts").CashHandInBatchItem[]>, void>({
+    getCashHandIns: builder.query<
+      ApiResponse<import("@dhruto/contracts").CashHandInBatchItem[]>,
+      void
+    >({
       query: () => "/riders/me/cash/handins",
       providesTags: [{ type: RIDER_TAG, id: "CASH" }],
     }),

@@ -38,10 +38,10 @@ export class RateLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const options = this.reflector.getAllAndOverride<RateLimitOptions>(
-      RATE_LIMIT_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const options = this.reflector.getAllAndOverride<RateLimitOptions>(RATE_LIMIT_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!options) {
       return true;
@@ -71,8 +71,7 @@ export class RateLimitGuard implements CanActivate {
         .setHeader("Retry-After", String(retryAfter));
       throw new HttpException(
         {
-          message:
-            "Too many requests. Please slow down and try again shortly.",
+          message: "Too many requests. Please slow down and try again shortly.",
           error: ApiErrorCode.RATE_LIMIT_EXCEEDED,
         },
         HttpStatus.TOO_MANY_REQUESTS,

@@ -10,13 +10,7 @@ import {
   Req,
   ParseUUIDPipe,
 } from "@nestjs/common";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-  ApiResponse,
-} from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { IntegrationsAdminService } from "./integrations-admin.service.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { RolesGuard } from "../auth/guards/roles.guard.js";
@@ -105,7 +99,8 @@ export class IntegrationsAdminController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Replay a dead-letter entry",
-    description: "Requeues the referenced delivery idempotently; domain effects are never duplicated.",
+    description:
+      "Requeues the referenced delivery idempotently; domain effects are never duplicated.",
   })
   @ApiResponse({ status: 200, description: "Replayed." })
   @ApiResponse({ status: 404, description: "Failure not found." })
@@ -141,7 +136,12 @@ export class IntegrationsAdminController {
       this.integrations.outboxOverview(),
       this.integrations.outboxFailed(50),
     ]);
-    return envelope(HttpStatus.OK, "Outbox overview retrieved successfully", { stats, failed }, req);
+    return envelope(
+      HttpStatus.OK,
+      "Outbox overview retrieved successfully",
+      { stats, failed },
+      req,
+    );
   }
 
   @Post("outbox/:id/replay")

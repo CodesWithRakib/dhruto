@@ -184,11 +184,9 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
           .get("/api/v1/webhooks/deliveries")
           .set("Authorization", `Bearer ${merchantToken}`)
           .expect(200);
-        return (
-          deliveriesRes.body.data.items.find(
-            (d: { event: string }) => d.event === WebhookEvent.PARCEL_CREATED,
-          ) as { signature: string } | undefined
-        );
+        return deliveriesRes.body.data.items.find(
+          (d: { event: string }) => d.event === WebhookEvent.PARCEL_CREATED,
+        ) as { signature: string } | undefined;
       },
       (found) => found !== undefined,
       "parcel.created webhook delivery",
@@ -202,11 +200,9 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
           .get("/api/v1/notifications/me")
           .set("Authorization", `Bearer ${merchantToken}`)
           .expect(200);
-        return (
-          notifsRes.body.data.items.find(
-            (n: { channel: string }) => n.channel === NotificationChannel.IN_APP,
-          ) as { channel: string } | undefined
-        );
+        return notifsRes.body.data.items.find(
+          (n: { channel: string }) => n.channel === NotificationChannel.IN_APP,
+        ) as { channel: string } | undefined;
       },
       (found) => found !== undefined,
       "parcel.created in-app notification",

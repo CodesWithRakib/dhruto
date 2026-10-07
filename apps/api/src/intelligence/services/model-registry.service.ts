@@ -133,10 +133,7 @@ export class ModelRegistryService {
       this.riskRepo.count(),
       this.riskRepo.count({ where: { level: "HIGH" } }),
       this.predictionRepo.count(),
-      this.predictionRepo
-        .createQueryBuilder("p")
-        .where("p.outcome IS NOT NULL")
-        .getCount(),
+      this.predictionRepo.createQueryBuilder("p").where("p.outcome IS NOT NULL").getCount(),
       this.recommendationRepo.count({ where: { status: "OVERRIDDEN" } }),
     ]);
     return {

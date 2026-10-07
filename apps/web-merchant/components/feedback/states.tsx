@@ -1,5 +1,13 @@
 import React from "react";
-import { AlertTriangle, Inbox, Loader2, RefreshCw, SearchX, WifiOff } from "lucide-react";
+import {
+  AlertTriangle,
+  Inbox,
+  Loader2,
+  RefreshCw,
+  SearchX,
+  WifiOff,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@dhruto/ui";
 import { cn } from "@/lib/cn";
 
@@ -70,20 +78,29 @@ export function LoadingState({ title, description, className }: StateViewProps) 
   );
 }
 
+export interface EmptyStateProps extends StateViewProps {
+  /** Lucide icon component (not an element), so callers stay terse. */
+  icon?: LucideIcon;
+  /** `error` tints the icon with the danger token. */
+  tone?: "neutral" | "error";
+}
+
 export function EmptyState({
   title,
   description,
   action,
   className,
-  icon,
-}: StateViewProps & { icon?: React.ReactNode }) {
+  icon: Icon = Inbox,
+  tone = "neutral",
+}: EmptyStateProps) {
   return (
     <Frame
       className={className}
+      tone={tone === "error" ? "danger" : "neutral"}
       title={title}
       description={description}
       action={action}
-      icon={icon ?? <Inbox className="h-5 w-5" aria-hidden="true" />}
+      icon={<Icon className="h-5 w-5" aria-hidden="true" />}
     />
   );
 }

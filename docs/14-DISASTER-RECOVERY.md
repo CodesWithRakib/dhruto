@@ -2,11 +2,11 @@
 
 ## 1. Objectives & SLA Targets
 
-| Metric | Target | Definition |
-| :--- | :---: | :--- |
+| Metric                             |      Target      | Definition                                                         |
+| :--------------------------------- | :--------------: | :----------------------------------------------------------------- |
 | **Recovery Point Objective (RPO)** | **< 15 minutes** | Maximum allowable data loss measured in time preceding an incident |
-| **Recovery Time Objective (RTO)** | **< 30 minutes** | Maximum allowable downtime before core services are restored |
-| **Service Availability SLA** | **99.9%** | Multi-region resilient container and database architecture |
+| **Recovery Time Objective (RTO)**  | **< 30 minutes** | Maximum allowable downtime before core services are restored       |
+| **Service Availability SLA**       |    **99.9%**     | Multi-region resilient container and database architecture         |
 
 ---
 
@@ -46,6 +46,7 @@
 ## 3. High-Frequency Backup Strategy
 
 ### A. Snapshot Frequency
+
 1. **Continuous WAL Streaming**: PostgreSQL Write-Ahead Logs (WAL) streamed continuously to distributed object storage.
 2. **Scheduled Full Backups**: Automated full daily backups with SHA-256 checksum verification via `scripts/backup-db.mjs`.
 3. **Retention Policy**:
@@ -54,7 +55,9 @@
    - Monthly compliance archives: Retained for 1 year.
 
 ### B. Integrity Verification Drill
+
 Run regular restore drills:
+
 ```bash
 node scripts/backup-db.mjs
 node scripts/restore-db.mjs
@@ -65,6 +68,7 @@ node scripts/restore-db.mjs
 ## 4. Incident Response & Failover Runbook
 
 ### Scenario A: PostgreSQL Primary Database Unresponsive
+
 1. **Detection**:
    - `/health/readiness` fails with `checks.database: "unhealthy"`.
    - Alert triggers on Prometheus / Datadog.
@@ -76,12 +80,14 @@ node scripts/restore-db.mjs
    - Run verification query: `SELECT count(*) FROM parcels;`.
 
 ### Scenario B: Redis Cache Unavailability
+
 1. **Automatic Resilience**:
    - API automatically falls back to in-memory TTL/LRU caching with 0 downtime.
    - `GET /health/metrics` reports `cache.driver: "memory-fallback"`.
    - No financial data is corrupted (authoritative state resides strictly in PostgreSQL).
 
 ### Scenario C: Regional Datacenter Outage
+
 1. **DNS Failover**:
    - Cloudflare edge shifts traffic to secondary disaster recovery region.
    - Docker containers bootstrap with environment variables and connect to promoted replica.

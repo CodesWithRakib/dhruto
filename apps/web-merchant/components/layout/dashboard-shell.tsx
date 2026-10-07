@@ -20,11 +20,7 @@ import {
   Logo,
 } from "@dhruto/ui";
 import { Link, usePathname, useRouter } from "@/lib/navigation";
-import {
-  bottomNavForRole,
-  navForRole,
-  type NavItem,
-} from "@/config/navigation";
+import { bottomNavForRole, navForRole, type NavItem } from "@/config/navigation";
 import {
   asAppRole,
   canAccessSection,
@@ -209,7 +205,7 @@ export function DashboardShell({
                   className="flex items-center gap-2.5 rounded-lg p-1.5 text-left transition-colors hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 border-l border-border pl-3 ml-1"
                   aria-label="User account menu"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] font-bold text-white text-xs shadow-sm">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] font-bold text-white text-xs">
                     {(user?.name || "M").charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden flex-col text-left sm:flex">
@@ -220,10 +216,16 @@ export function DashboardShell({
                       {user?.email ?? "merchant@dhruto.com"}
                     </span>
                   </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground hidden sm:block" aria-hidden="true" />
+                  <ChevronDown
+                    className="h-3.5 w-3.5 text-muted-foreground hidden sm:block"
+                    aria-hidden="true"
+                  />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-xl border border-border bg-surface shadow-xl">
+              <DropdownMenuContent
+                align="end"
+                className="w-56 p-1.5 rounded-xl border border-border bg-surface"
+              >
                 <div className="px-3 py-2 border-b border-border mb-1">
                   <p className="text-xs font-bold text-foreground truncate">
                     {user?.name ?? "Merchant"}

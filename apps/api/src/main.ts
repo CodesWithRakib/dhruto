@@ -39,9 +39,7 @@ async function bootstrap() {
 
   // CORS Configuration
   app.enableCors({
-    origin: corsOrigin.includes(",")
-      ? corsOrigin.split(",").map((s) => s.trim())
-      : corsOrigin,
+    origin: corsOrigin.includes(",") ? corsOrigin.split(",").map((s) => s.trim()) : corsOrigin,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id", "Idempotency-Key"],
@@ -82,7 +80,9 @@ async function bootstrap() {
 
   await app.listen(port);
   logger.log(`========================================================`);
-  logger.log(`🚀 Dhruto API server running on: http://localhost:${port}/${apiPrefix.replace(/^\//, "")}`);
+  logger.log(
+    `🚀 Dhruto API server running on: http://localhost:${port}/${apiPrefix.replace(/^\//, "")}`,
+  );
   logger.log(`📚 Interactive Swagger docs at: http://localhost:${port}/docs`);
   logger.log(`========================================================`);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Badge,
@@ -10,25 +10,31 @@ import {
   CardHeader,
   CardTitle,
   DataTable,
-  Input,
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   type ColumnDef,
 } from "@dhruto/ui";
-import { ChevronLeft, ChevronRight, Eye, Filter, Hash, Plus, Printer, Search } from "lucide-react";
+import { Eye, Filter, Hash, Plus, Printer } from "lucide-react";
 import type { ParcelListItem } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
+import { statusConfig } from "@/config/status";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { ActiveFilters, type ActiveFilter } from "@/components/active-filters";
+import { DebouncedSearchInput } from "@/components/search-input";
+import { Pagination } from "@/components/pagination";
 import { EmptyState, ErrorState, LoadingState, RetryButton } from "@/components/feedback/states";
+import { useFormatters } from "@/lib/format";
 import { useParcelsList } from "../hooks/use-parcels-list";
 import { ParcelFilterControls } from "./parcel-filters";
 import { ParcelCard } from "./parcel-card";
 
 export function ParcelList() {
   const t = useTranslations("ParcelList");
+  const tStatus = useTranslations("ParcelStatus");
+  const { bdt, date, time } = useFormatters();
   const routes = useRouteBase();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -103,10 +109,10 @@ export function ParcelList() {
         cell: ({ row }) => (
           <div>
             <p className="font-semibold tabular-nums text-foreground">
-              ৳{row.original.codAmount.toLocaleString()}
+              {bdt(row.original.codAmount)}
             </p>
             <p className="mt-0.5 text-caption text-muted-foreground">
-              {t("fee")} ৳{row.original.deliveryFee.toLocaleString()}
+              {t("fee")} {bdt(row.original.deliveryFee)}
             </p>
           </div>
         ),
@@ -119,18 +125,13 @@ export function ParcelList() {
       {
         accessorKey: "createdAt",
         header: t("date"),
-        cell: ({ row }) => {
-          const created = new Date(row.original.createdAt);
-          return (
-            <div className="text-caption text-muted-foreground">
-              <span>{created.toLocaleDateString()}</span>
-              <br />
-              <span>
-                {created.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-              </span>
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <div className="text-caption text-muted-foreground">
+            <span>{date(row.original.createdAt)}</span>
+            <br />
+            <span>{time(row.original.createdAt)}</span>
+          </div>
+        ),
       },
       {
         id: "actions",
@@ -156,7 +157,55 @@ export function ParcelList() {
         ),
       },
     ],
-    [t, routes],
+    [bdt, date, time, t, routes],
+  );
+
+  /** Chips mirror the URL, so clearing one only removes that filter. */
+  const chips: ActiveFilter[] = useMemo(() => {
+    const active: ActiveFilter[] = [];
+    if (filters.search.trim()) {
+      active.push({ key: "search", label: t("searchPlaceholder"), display: filters.search.trim() });
+    }
+    if (filters.status) {
+      active.push({
+        key: "status",
+        label: t("status"),
+        display: tStatus(statusConfig(filters.status).labelKey),
+      });
+    }
+    if (filters.district.trim()) {
+      active.push({
+        key: "district",
+        label: t("filterDistrict"),
+        display: filters.district.trim(),
+      });
+    }
+    if (filters.thana.trim()) {
+      active.push({ key: "thana", label: t("filterThana"), display: filters.thana.trim() });
+    }
+    if (filters.from) {
+      active.push({ key: "from", label: t("filterFrom"), display: filters.from });
+    }
+    if (filters.to) {
+      active.push({ key: "to", label: t("filterTo"), display: filters.to });
+    }
+    return active;
+  }, [filters, t, tStatus]);
+
+  const handleRemoveFilter = useCallback(
+    (key: string) => {
+      // Every list filter is optional, so "" clears exactly one of them.
+      updateFilter(key as "status", "");
+    },
+    [updateFilter],
+  );
+
+  const handleLimitChange = useCallback(
+    (nextLimit: number) => {
+      setLimit(nextLimit);
+      setPage(1);
+    },
+    [setLimit, setPage],
   );
 
   const hasNoResults = !isLoading && !isError && parcels.length === 0;
@@ -182,20 +231,16 @@ export function ParcelList() {
 
       {/* Search + mobile filter trigger */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            type="search"
-            value={filters.search}
-            onChange={(event) => updateFilter("search", event.target.value)}
-            placeholder={t("searchPlaceholder")}
-            aria-label={t("searchPlaceholder")}
-            className="pl-9"
-          />
-        </div>
+        {/* The hook debounces the URL write, so the field reports every keystroke. */}
+        <DebouncedSearchInput
+          className="flex-1 sm:max-w-none"
+          debounceMs={0}
+          value={filters.search}
+          onChange={(value) => updateFilter("search", value)}
+          placeholder={t("searchPlaceholder")}
+          ariaLabel={t("searchPlaceholder")}
+          loading={isFetching}
+        />
 
         <Button
           type="button"
@@ -213,6 +258,8 @@ export function ParcelList() {
           ) : null}
         </Button>
       </div>
+
+      <ActiveFilters filters={chips} onRemove={handleRemoveFilter} onClearAll={resetFilters} />
 
       {/* Desktop filters */}
       <div className="hidden rounded-md border border-border bg-surface p-4 lg:block">
@@ -266,9 +313,7 @@ export function ParcelList() {
         <div className="rounded-md border border-border bg-surface">
           <EmptyState
             title={activeFilterCount > 0 ? t("noResultsTitle") : t("emptyTitle")}
-            description={
-              activeFilterCount > 0 ? t("noResultsDescription") : t("emptyDescription")
-            }
+            description={activeFilterCount > 0 ? t("noResultsDescription") : t("emptyDescription")}
             action={
               activeFilterCount > 0 ? (
                 <Button variant="outline" size="sm" onClick={resetFilters}>
@@ -298,10 +343,7 @@ export function ParcelList() {
               currentPage={page}
               itemsPerPage={limit}
               onPageChange={setPage}
-              onLimitChange={(nextLimit) => {
-                setLimit(nextLimit);
-                setPage(1);
-              }}
+              onLimitChange={handleLimitChange}
               emptyMessage={t("emptyTitle")}
             />
           </div>
@@ -315,35 +357,16 @@ export function ParcelList() {
             </ul>
           </div>
 
-          {/* Mobile pager */}
-          <nav
-            aria-label={t("paginationLabel")}
-            className="flex items-center justify-between gap-3 lg:hidden"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              disabled={page <= 1 || isFetching}
-              onClick={() => setPage(Math.max(1, page - 1))}
-            >
-              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-              {t("previous")}
-            </Button>
-            <span className="text-caption text-muted-foreground">
-              {t("pageOf", { page, totalPages })}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              disabled={page >= totalPages || isFetching}
-              onClick={() => setPage(page + 1)}
-            >
-              {t("next")}
-              <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </nav>
+          {/* Mobile pager: shared control, cursor-safe when the total is unknown */}
+          <Pagination
+            className="lg:hidden"
+            page={page}
+            totalPages={pagination ? totalPages : undefined}
+            hasNextPage={parcels.length >= limit}
+            onPageChange={setPage}
+            disabled={isFetching}
+            label={t("paginationLabel")}
+          />
         </>
       )}
     </div>

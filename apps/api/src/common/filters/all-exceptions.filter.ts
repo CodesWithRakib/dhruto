@@ -52,13 +52,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // 2. Direct ZodError
     if (exception instanceof ZodError) {
-      const validationErrors: ApiValidationErrorItem[] = exception.issues.map(
-        (issue) => ({
-          field: issue.path.join("."),
-          message: issue.message,
-          code: issue.code,
-        }),
-      );
+      const validationErrors: ApiValidationErrorItem[] = exception.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+        code: issue.code,
+      }));
 
       response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
         success: false,

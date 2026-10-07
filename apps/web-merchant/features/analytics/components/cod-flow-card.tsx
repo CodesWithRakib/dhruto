@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@dhruto/ui";
 import { Wallet, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 import { type CodFlowAnalytics } from "@dhruto/contracts";
+import { formatBDT } from "@/lib/format";
 
 interface CodFlowCardProps {
   codFlow: CodFlowAnalytics;
@@ -37,7 +38,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
               <Clock className="h-4 w-4 text-blue-500" />
             </div>
             <div className="text-2xl font-black font-mono text-foreground">
-              ৳{codFlow.totalBooked.toLocaleString()}
+              {formatBDT(codFlow.totalBooked)}
             </div>
             <p className="text-[11px] text-muted-foreground">Total order volume generated</p>
           </div>
@@ -49,7 +50,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
               <Clock className="h-4 w-4 text-amber-500" />
             </div>
             <div className="text-2xl font-black font-mono text-amber-600 dark:text-amber-400">
-              ৳{codFlow.inTransitWithRiders.toLocaleString()}
+              {formatBDT(codFlow.inTransitWithRiders)}
             </div>
             <p className="text-[11px] text-muted-foreground">Collected cash in transit</p>
           </div>
@@ -61,7 +62,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
               <ShieldCheck className="h-4 w-4 text-purple-500" />
             </div>
             <div className="text-2xl font-black font-mono text-purple-600 dark:text-purple-400">
-              ৳{codFlow.collectedUnsettled.toLocaleString()}
+              {formatBDT(codFlow.collectedUnsettled)}
             </div>
             <p className="text-[11px] text-muted-foreground">Verified at hub cash desk</p>
           </div>
@@ -73,9 +74,11 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
             </div>
             <div className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
-              ৳{codFlow.settledToMerchants.toLocaleString()}
+              {formatBDT(codFlow.settledToMerchants)}
             </div>
-            <p className="text-[11px] text-emerald-700 dark:text-emerald-300">Ready for instant payout withdrawal</p>
+            <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
+              Ready for instant payout withdrawal
+            </p>
           </div>
         </div>
       </CardContent>

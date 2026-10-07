@@ -32,8 +32,8 @@ export function MobileBottomNav({ onOpenMore, className }: MobileBottomNavProps)
     <nav
       aria-label={t("primaryLabel")}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe lg:hidden shadow-sm",
-        className
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe lg:hidden ",
+        className,
       )}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around px-1">
@@ -49,7 +49,7 @@ export function MobileBottomNav({ onOpenMore, className }: MobileBottomNavProps)
                   "flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-caption font-medium transition-colors",
                   active
                     ? "text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground active:text-primary"
+                    : "text-muted-foreground hover:text-foreground active:text-primary",
                 )}
               >
                 <div className="relative">

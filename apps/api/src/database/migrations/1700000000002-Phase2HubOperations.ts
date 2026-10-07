@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 2 — Hub Operations.
@@ -12,7 +12,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * migration converges both a freshly-created and an already-migrated database.
  */
 export class Phase2HubOperations1700000000002 implements MigrationInterface {
-  name = 'Phase2HubOperations1700000000002';
+  name = "Phase2HubOperations1700000000002";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // ------------------------------------------------------------------
@@ -21,12 +21,8 @@ export class Phase2HubOperations1700000000002 implements MigrationInterface {
     //    transaction, so the new values are only referenced by later migrations
     //    and by the application.
     // ------------------------------------------------------------------
-    await queryRunner.query(
-      `ALTER TYPE "hubs_status_enum" ADD VALUE IF NOT EXISTS 'MAINTENANCE'`,
-    );
-    await queryRunner.query(
-      `ALTER TYPE "bags_status_enum" ADD VALUE IF NOT EXISTS 'CANCELLED'`,
-    );
+    await queryRunner.query(`ALTER TYPE "hubs_status_enum" ADD VALUE IF NOT EXISTS 'MAINTENANCE'`);
+    await queryRunner.query(`ALTER TYPE "bags_status_enum" ADD VALUE IF NOT EXISTS 'CANCELLED'`);
     await queryRunner.query(
       `ALTER TYPE "manifests_status_enum" ADD VALUE IF NOT EXISTS 'IN_TRANSIT'`,
     );
@@ -53,9 +49,7 @@ export class Phase2HubOperations1700000000002 implements MigrationInterface {
         ADD COLUMN IF NOT EXISTS "thana" character varying(100);
     `);
 
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "IDX_hubs_status" ON "hubs" ("status")`,
-    );
+    await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_hubs_status" ON "hubs" ("status")`);
 
     // ------------------------------------------------------------------
     // 3. Bag operator/audit columns.
@@ -143,9 +137,7 @@ export class Phase2HubOperations1700000000002 implements MigrationInterface {
       END $$;
     `);
 
-    await queryRunner.query(
-      `ALTER TABLE "manifests" DROP COLUMN IF EXISTS "bag_ids"`,
-    );
+    await queryRunner.query(`ALTER TABLE "manifests" DROP COLUMN IF EXISTS "bag_ids"`);
 
     // ------------------------------------------------------------------
     // 6. bag_parcels: DB-enforced "one active bag per parcel".
@@ -335,21 +327,13 @@ export class Phase2HubOperations1700000000002 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS "hub_user_assignments"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "operational_exceptions"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "parcel_scans"`);
-    await queryRunner.query(
-      `DROP TYPE IF EXISTS "operational_exceptions_status_enum"`,
-    );
-    await queryRunner.query(
-      `DROP TYPE IF EXISTS "operational_exceptions_type_enum"`,
-    );
+    await queryRunner.query(`DROP TYPE IF EXISTS "operational_exceptions_status_enum"`);
+    await queryRunner.query(`DROP TYPE IF EXISTS "operational_exceptions_type_enum"`);
     await queryRunner.query(`DROP TYPE IF EXISTS "parcel_scans_outcome_enum"`);
     await queryRunner.query(`DROP TYPE IF EXISTS "parcel_scans_scan_type_enum"`);
 
-    await queryRunner.query(
-      `DROP INDEX IF EXISTS "UQ_bag_parcels_active_parcel"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "bag_parcels" DROP COLUMN IF EXISTS "is_active"`,
-    );
+    await queryRunner.query(`DROP INDEX IF EXISTS "UQ_bag_parcels_active_parcel"`);
+    await queryRunner.query(`ALTER TABLE "bag_parcels" DROP COLUMN IF EXISTS "is_active"`);
 
     // Restore the legacy jsonb membership column.
     await queryRunner.query(

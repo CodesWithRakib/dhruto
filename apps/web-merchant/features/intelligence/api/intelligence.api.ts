@@ -94,14 +94,16 @@ export const intelligenceApi = baseApi.injectEndpoints({
       invalidatesTags: ["Intelligence"],
     }),
 
-    confirmAddress: builder.mutation<ApiResponse<AddressConfirmationRecord>, AddressConfirmRequest>({
-      query: (payload) => ({
-        url: "/intelligence/address/confirm",
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Intelligence"],
-    }),
+    confirmAddress: builder.mutation<ApiResponse<AddressConfirmationRecord>, AddressConfirmRequest>(
+      {
+        query: (payload) => ({
+          url: "/intelligence/address/confirm",
+          method: "POST",
+          body: payload,
+        }),
+        invalidatesTags: ["Intelligence"],
+      },
+    ),
 
     searchGeography: builder.query<ApiResponse<AddressCandidate[]>, { q: string; limit?: number }>({
       query: ({ q, limit }) =>
@@ -142,7 +144,10 @@ export const intelligenceApi = baseApi.injectEndpoints({
       invalidatesTags: ["Intelligence"],
     }),
 
-    sendIntelligenceFeedback: builder.mutation<ApiResponse<{ id: string }>, IntelligenceFeedbackInput>({
+    sendIntelligenceFeedback: builder.mutation<
+      ApiResponse<{ id: string }>,
+      IntelligenceFeedbackInput
+    >({
       query: (payload) => ({
         url: "/intelligence/feedback",
         method: "POST",

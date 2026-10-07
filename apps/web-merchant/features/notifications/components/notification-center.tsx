@@ -23,6 +23,7 @@ import {
 import { NotificationChannel, NotificationType } from "@dhruto/contracts";
 import { PageHeader } from "@/components/page-header";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { useFormatters } from "@/lib/format";
 
 const PAGE_SIZE = 20;
 
@@ -72,6 +73,7 @@ function ChannelIcon({ channel }: { channel: string }) {
  */
 export function NotificationCenter() {
   const t = useTranslations("Notifications");
+  const { dateTime } = useFormatters();
   const router = useRouter();
   const [page, setPage] = React.useState(1);
   const [unreadOnly, setUnreadOnly] = React.useState(false);
@@ -224,7 +226,9 @@ export function NotificationCenter() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-0.5 flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-medium text-foreground">{item.title}</span>
+                    <span className="truncate text-sm font-medium text-foreground">
+                      {item.title}
+                    </span>
                     <span className="flex shrink-0 items-center gap-1">
                       <ChannelIcon channel={item.channel} />
                       <span className="text-[10px] text-muted-foreground">{item.channel}</span>
@@ -235,7 +239,7 @@ export function NotificationCenter() {
                   </p>
                   <div className="mt-1.5 flex items-center justify-between">
                     <span className="text-[11px] text-muted-foreground/70">
-                      {new Date(item.createdAt).toLocaleString()}
+                      {dateTime(item.createdAt)}
                     </span>
                     <span className="flex items-center gap-2">
                       {isUnread ? (
@@ -255,10 +259,7 @@ export function NotificationCenter() {
       </Card>
 
       {totalPages > 1 && (
-        <nav
-          className="flex items-center justify-center gap-2"
-          aria-label={t("paginationLabel")}
-        >
+        <nav className="flex items-center justify-center gap-2" aria-label={t("paginationLabel")}>
           <Button
             variant="outline"
             size="sm"

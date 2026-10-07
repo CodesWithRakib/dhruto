@@ -43,20 +43,11 @@ export function HeroVisual() {
               strokeLinejoin="round"
             />
             {/* Green Body Panels */}
-            <path
-              d="M100 175 C100 150 120 145 155 145 L190 170 L140 185 Z"
-              fill="#0F5132"
-            />
-            <path
-              d="M210 165 L245 110 L260 110 L250 175 Z"
-              fill="#10A34A"
-            />
+            <path d="M100 175 C100 150 120 145 155 145 L190 170 L140 185 Z" fill="#0F5132" />
+            <path d="M210 165 L245 110 L260 110 L250 175 Z" fill="#10A34A" />
 
             {/* Scooter Seat */}
-            <path
-              d="M110 142 C125 142 165 145 175 150 L120 152 Z"
-              fill="#0F172A"
-            />
+            <path d="M110 142 C125 142 165 145 175 150 L120 152 Z" fill="#0F172A" />
 
             {/* Handlebar */}
             <path
@@ -73,7 +64,13 @@ export function HeroVisual() {
             <rect x="50" y="105" width="55" height="55" rx="6" fill="#0F5132" />
             <rect x="53" y="108" width="49" height="49" rx="4" fill="#14532D" />
             {/* White / Green Dhruto courier logo on box */}
-            <path d="M68 132 H84 M79 126 L85 132 L79 138" stroke="#DCFCE7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M68 132 H84 M79 126 L85 132 L79 138"
+              stroke="#DCFCE7"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
             <circle cx="87" cy="132" r="1.5" fill="#4ADE80" />
 
             {/* Rider Legs & Torso */}
@@ -85,10 +82,7 @@ export function HeroVisual() {
               strokeLinejoin="round"
             />
             {/* Rider Torso in Green Dhruto uniform */}
-            <path
-              d="M160 145 L180 95 L210 98 L200 150 Z"
-              fill="#15803D"
-            />
+            <path d="M160 145 L180 95 L210 98 L200 150 Z" fill="#15803D" />
             {/* Rider Arm to handlebars */}
             <path
               d="M185 105 L215 115 L240 88"
@@ -104,11 +98,36 @@ export function HeroVisual() {
             <circle cx="195" cy="65" r="17" fill="#0F5132" />
             <path d="M192 60 C202 60 213 65 210 74 L190 74 Z" fill="#0F172A" />
             {/* Helmet Visor shine */}
-            <path d="M196 62 Q206 63 207 70" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
+            <path
+              d="M196 62 Q206 63 207 70"
+              stroke="#38BDF8"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
 
             {/* Motion Lines */}
-            <line x1="20" y1="180" x2="45" y2="180" stroke="#10A34A" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 4" opacity="0.6" />
-            <line x1="15" y1="195" x2="40" y2="195" stroke="#10A34A" strokeWidth="3" strokeLinecap="round" strokeDasharray="5 3" opacity="0.4" />
+            <line
+              x1="20"
+              y1="180"
+              x2="45"
+              y2="180"
+              stroke="#10A34A"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="6 4"
+              opacity="0.6"
+            />
+            <line
+              x1="15"
+              y1="195"
+              x2="40"
+              y2="195"
+              stroke="#10A34A"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="5 3"
+              opacity="0.4"
+            />
           </svg>
         </div>
 
@@ -118,12 +137,8 @@ export function HeroVisual() {
             <MapPin className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-[12px] font-bold text-foreground leading-tight">
-              Fast Delivery
-            </p>
-            <p className="text-[11px] text-muted-foreground leading-tight">
-              Across Bangladesh
-            </p>
+            <p className="text-[12px] font-bold text-foreground leading-tight">Fast Delivery</p>
+            <p className="text-[11px] text-muted-foreground leading-tight">Across Bangladesh</p>
           </div>
         </div>
 
@@ -141,9 +156,7 @@ export function HeroVisual() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
             </span>
-            <span className="text-[11px] font-semibold text-emerald-800">
-              Out for Delivery
-            </span>
+            <span className="text-[11px] font-semibold text-emerald-800">Out for Delivery</span>
           </div>
         </div>
 
@@ -153,9 +166,7 @@ export function HeroVisual() {
             <ShieldCheck className="h-4 w-4" />
           </span>
           <div className="text-left">
-            <p className="text-[12px] font-bold text-foreground leading-none">
-              Fast Delivery
-            </p>
+            <p className="text-[12px] font-bold text-foreground leading-none">Fast Delivery</p>
             <p className="text-[11px] text-muted-foreground leading-none mt-1">
               সকল ডেলিভারি নিশ্চিত
             </p>

@@ -29,9 +29,7 @@ export async function enqueueOrInline<T>(
     });
     return { mode: "queued" };
   } catch (error) {
-    logger.warn(
-      `Queue unavailable, executing inline: ${getErrorMessage(error, "queue error")}`,
-    );
+    logger.warn(`Queue unavailable, executing inline: ${getErrorMessage(error, "queue error")}`);
     await inlineFn();
     return { mode: "inline" };
   }

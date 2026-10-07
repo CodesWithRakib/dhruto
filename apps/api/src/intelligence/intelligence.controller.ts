@@ -15,7 +15,10 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from "@nestjs/swagg
 import { IntelligenceService } from "./intelligence.service.js";
 import { IntelligenceFacadeService } from "./services/intelligence-facade.service.js";
 import { RecommendationEngineService } from "./services/recommendation.service.js";
-import { IntelligenceFeedbackService, ModelRegistryService } from "./services/model-registry.service.js";
+import {
+  IntelligenceFeedbackService,
+  ModelRegistryService,
+} from "./services/model-registry.service.js";
 import { GeoDataService } from "./services/geo-data.service.js";
 import {
   AddressParseDto,
@@ -146,7 +149,11 @@ export class IntelligenceController {
   ) {
     const result = await this.facade.confirmAddress(
       dto.parseId,
-      { candidateIndex: dto.candidateIndex, manualStructure: dto.manualStructure, reason: dto.reason },
+      {
+        candidateIndex: dto.candidateIndex,
+        manualStructure: dto.manualStructure,
+        reason: dto.reason,
+      },
       user.id,
       this.confirmationSourceFor(user.role),
     );

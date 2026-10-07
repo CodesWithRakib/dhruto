@@ -1,7 +1,7 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { BaseEntity } from './Base.entity.js';
-import { Merchant } from './Merchant.entity.js';
-import { SettlementBatchStatus } from '@dhruto/contracts';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from "typeorm";
+import { BaseEntity } from "./Base.entity.js";
+import { Merchant } from "./Merchant.entity.js";
+import { SettlementBatchStatus } from "@dhruto/contracts";
 
 export { SettlementBatchStatus };
 
@@ -12,40 +12,40 @@ export { SettlementBatchStatus };
  * rule), so a batch never moves money itself — it groups settled parcels for
  * review and payout referencing. Transitions: PENDING -> COMPLETED|CANCELLED.
  */
-@Entity('settlement_batches')
-@Index(['merchantId', 'status'])
+@Entity("settlement_batches")
+@Index(["merchantId", "status"])
 export class SettlementBatch extends BaseEntity {
-  @Column({ name: 'settlement_code', type: 'varchar', length: 20, unique: true })
+  @Column({ name: "settlement_code", type: "varchar", length: 20, unique: true })
   settlementCode: string;
 
-  @Column({ name: 'merchant_id', type: 'uuid' })
+  @Column({ name: "merchant_id", type: "uuid" })
   merchantId: string;
 
   @ManyToOne(() => Merchant)
-  @JoinColumn({ name: 'merchant_id' })
+  @JoinColumn({ name: "merchant_id" })
   merchant: Merchant;
 
-  @Column({ type: 'enum', enum: SettlementBatchStatus, default: SettlementBatchStatus.PENDING })
+  @Column({ type: "enum", enum: SettlementBatchStatus, default: SettlementBatchStatus.PENDING })
   status: SettlementBatchStatus;
 
-  @Column({ name: 'gross_minor', type: 'bigint', default: 0 })
+  @Column({ name: "gross_minor", type: "bigint", default: 0 })
   grossMinor: number;
 
-  @Column({ name: 'fee_minor', type: 'bigint', default: 0 })
+  @Column({ name: "fee_minor", type: "bigint", default: 0 })
   feeMinor: number;
 
-  @Column({ name: 'net_minor', type: 'bigint', default: 0 })
+  @Column({ name: "net_minor", type: "bigint", default: 0 })
   netMinor: number;
 
-  @Column({ name: 'settlement_count', type: 'int', default: 0 })
+  @Column({ name: "settlement_count", type: "int", default: 0 })
   settlementCount: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   notes: string | null;
 
-  @Column({ name: 'created_by', type: 'uuid', nullable: true })
+  @Column({ name: "created_by", type: "uuid", nullable: true })
   createdBy: string | null;
 
-  @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })
+  @Column({ name: "completed_at", type: "timestamptz", nullable: true })
   completedAt: Date | null;
 }

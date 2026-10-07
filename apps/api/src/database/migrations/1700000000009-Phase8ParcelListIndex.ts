@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 8 - query plan evidence: filtered parcel lists
@@ -7,7 +7,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * Validated with EXPLAIN ANALYZE on the development dataset before/after.
  */
 export class Phase8ParcelListIndex1700000000009 implements MigrationInterface {
-  name = 'Phase8ParcelListIndex1700000000009';
+  name = "Phase8ParcelListIndex1700000000009";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

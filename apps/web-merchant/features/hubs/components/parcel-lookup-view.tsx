@@ -7,7 +7,7 @@ import { Search, Package, AlertTriangle, UserCheck } from "lucide-react";
 import { useLazyLookupParcelQuery, useGetHubInventoryQuery } from "../api/hubs.api";
 import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 
 /** Parcel states that may be handed to a rider from this hub. */
 const ASSIGNABLE_STATUSES = [
@@ -33,7 +33,8 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
   const [assignOpen, setAssignOpen] = React.useState(false);
 
   const [triggerLookup, { data: lookupData, isFetching: isLookingUp }] = useLazyLookupParcelQuery();
-  const { data: inventoryData, isLoading: inventoryLoading } = useGetHubInventoryQuery(currentHubId);
+  const { data: inventoryData, isLoading: inventoryLoading } =
+    useGetHubInventoryQuery(currentHubId);
 
   const parcel = lookupData?.data;
   const inventory = inventoryData?.data;
@@ -56,7 +57,10 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
         <CardContent className="space-y-4 p-4">
           <form onSubmit={handleLookup} className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Search
+                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <Input
                 type="text"
                 autoComplete="off"
@@ -68,13 +72,20 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                 className="h-12 pl-10 font-mono text-base uppercase"
               />
             </div>
-            <Button type="submit" disabled={isLookingUp || !trackingCode.trim()} className="h-12 px-6">
+            <Button
+              type="submit"
+              disabled={isLookingUp || !trackingCode.trim()}
+              className="h-12 px-6"
+            >
               {isLookingUp ? t("lookup.searching") : t("lookup.search")}
             </Button>
           </form>
 
           {error ? (
-            <div role="alert" className="flex items-start gap-2 rounded-xl border border-danger bg-danger-soft p-4 text-danger">
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-xl border border-danger bg-danger-soft p-4 text-danger"
+            >
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm font-semibold">{t("lookup.notFound")}</p>
@@ -84,40 +95,55 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
           ) : null}
 
           {parcel ? (
-            <div role="status" className="space-y-3 rounded-xl border border-border bg-surface-muted p-4">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("lookup.searchLabel")}</p>
-                <p className="font-mono text-sm font-bold">{parcel.trackingCode}</p>
+            <div
+              role="status"
+              className="space-y-3 rounded-xl border border-border bg-surface-muted p-4"
+            >
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {t("lookup.searchLabel")}
+                  </p>
+                  <p className="font-mono text-sm font-bold">{parcel.trackingCode}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {t("lookup.currentStatus")}
+                  </p>
+                  <Badge className="mt-1 text-[11px]">{parcel.status}</Badge>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {t("lookup.recipient")}
+                  </p>
+                  <p className="text-sm font-semibold">{parcel.recipientName}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {t("lookup.destination")}
+                  </p>
+                  <p className="text-sm">
+                    {[parcel.district, parcel.thana].filter(Boolean).join(", ") || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {t("lookup.weight")}
+                  </p>
+                  <p className="font-mono text-sm tabular-nums">{parcel.weightKg} kg</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("lookup.currentStatus")}</p>
-                <Badge className="mt-1 text-[11px]">{parcel.status}</Badge>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("lookup.recipient")}</p>
-                <p className="text-sm font-semibold">{parcel.recipientName}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("lookup.destination")}</p>
-                <p className="text-sm">{[parcel.district, parcel.thana].filter(Boolean).join(", ") || "—"}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("lookup.weight")}</p>
-                <p className="font-mono text-sm tabular-nums">{parcel.weightKg} kg</p>
-              </div>
-            </div>
-            {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAssignOpen(true)}
-                className="h-11 w-full gap-1.5 sm:w-auto"
-              >
-                <UserCheck className="h-4 w-4" aria-hidden="true" />
-                {t("assignRider")}
-              </Button>
-            ) : null}
+              {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAssignOpen(true)}
+                  className="h-11 w-full gap-1.5 sm:w-auto"
+                >
+                  <UserCheck className="h-4 w-4" aria-hidden="true" />
+                  {t("assignRider")}
+                </Button>
+              ) : null}
             </div>
           ) : null}
           {parcel ? (
@@ -161,11 +187,15 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   <tbody className="divide-y divide-border">
                     {inventory.parcels.map((item) => (
                       <tr key={item.id}>
-                        <td className="px-4 py-2.5 font-mono text-xs font-semibold">{item.trackingCode}</td>
+                        <td className="px-4 py-2.5 font-mono text-xs font-semibold">
+                          {item.trackingCode}
+                        </td>
                         <td className="px-4 py-2.5 text-xs">{item.recipientName}</td>
                         <td className="px-4 py-2.5 text-xs">{item.district ?? "—"}</td>
                         <td className="px-4 py-2.5 text-center">
-                          <Badge variant="secondary" className="text-[10px]">{item.status}</Badge>
+                          <Badge variant="secondary" className="text-[10px]">
+                            {item.status}
+                          </Badge>
                         </td>
                       </tr>
                     ))}
@@ -177,7 +207,9 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   <li key={item.id} className="space-y-1 p-4">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-xs font-bold">{item.trackingCode}</span>
-                      <Badge variant="secondary" className="text-[10px]">{item.status}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {item.status}
+                      </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {item.recipientName} · {item.district ?? "—"}

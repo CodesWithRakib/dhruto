@@ -33,6 +33,7 @@ import { PARCEL_STATUS_CONFIG } from "@/config/status";
 import { ErrorState, LoadingState } from "@/components/feedback/states";
 import { useGetParcelByIdQuery } from "../api/parcels.api";
 import { ParcelIntelligencePanel } from "@/features/intelligence/components/parcel-intelligence-panel";
+import { useFormatters } from "@/lib/format";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -64,22 +65,25 @@ const MILESTONES: { statuses: ParcelStatus[]; labelKey: string }[] = [
     labelKey: "outForDelivery",
   },
   {
-    statuses: [
-      ParcelStatus.DELIVERED,
-      ParcelStatus.CASH_PENDING,
-      ParcelStatus.CASH_VERIFIED,
-    ],
+    statuses: [ParcelStatus.DELIVERED, ParcelStatus.CASH_PENDING, ParcelStatus.CASH_VERIFIED],
     labelKey: "delivered",
   },
 ];
 
 const RETURN_MILESTONES: { statuses: ParcelStatus[]; labelKey: string }[] = [
-  { statuses: [ParcelStatus.RTO_INITIATED, ParcelStatus.RETURN_IN_TRANSIT], labelKey: "rtoInitiated" },
+  {
+    statuses: [ParcelStatus.RTO_INITIATED, ParcelStatus.RETURN_IN_TRANSIT],
+    labelKey: "rtoInitiated",
+  },
   { statuses: [ParcelStatus.RETURNED_TO_MERCHANT], labelKey: "returnedToMerchant" },
 ];
 
 function isReturnFlow(status: ParcelStatus): boolean {
-  return [ParcelStatus.RTO_INITIATED, ParcelStatus.RETURN_IN_TRANSIT, ParcelStatus.RETURNED_TO_MERCHANT].includes(status);
+  return [
+    ParcelStatus.RTO_INITIATED,
+    ParcelStatus.RETURN_IN_TRANSIT,
+    ParcelStatus.RETURNED_TO_MERCHANT,
+  ].includes(status);
 }
 
 function formatBdt(value: number): string {
@@ -88,6 +92,7 @@ function formatBdt(value: number): string {
 
 export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const t = useTranslations("ParcelDetails");
+  const { dateTime } = useFormatters();
   const tStatus = useTranslations("ParcelStatus");
   const routes = useRouteBase();
 
@@ -127,8 +132,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
     1,
     milestones.findIndex((milestone) => milestone.statuses.includes(parcel.status)) + 1,
   );
-  const progress =
-    milestones.length > 1 ? ((currentStep - 1) / (milestones.length - 1)) * 100 : 0;
+  const progress = milestones.length > 1 ? ((currentStep - 1) / (milestones.length - 1)) * 100 : 0;
   const intelligence = parcel.addressIntelligence;
 
   return (
@@ -165,7 +169,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={parcel.status} withIcon />
             <span className="text-caption text-muted-foreground">
-              {t("createdOn", { date: new Date(parcel.createdAt).toLocaleString() })}
+              {t("createdOn", { date: dateTime(parcel.createdAt) })}
             </span>
           </div>
         </CardHeader>
@@ -304,7 +308,9 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
               <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
                 <Package className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
                 <div>
-                  <span className="text-caption text-muted-foreground">{t("parcelDescription")}</span>
+                  <span className="text-caption text-muted-foreground">
+                    {t("parcelDescription")}
+                  </span>
                   <p className="font-medium text-foreground">
                     {parcel.parcelDescription || t("noDescription")}
                   </p>
@@ -363,10 +369,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
           ) : (
             <ol className="relative ml-3 space-y-6 border-l border-border pl-6">
               {[...parcel.history]
-                .sort(
-                  (a, b) =>
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-                )
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                 .map((entry) => (
                   <li key={entry.id} className="relative">
                     <span
@@ -386,7 +389,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
                         dateTime={entry.createdAt}
                         className="font-mono text-caption text-muted-foreground"
                       >
-                        {new Date(entry.createdAt).toLocaleString()}
+                        {dateTime(entry.createdAt)}
                       </time>
                     </div>
                     {entry.description ? (

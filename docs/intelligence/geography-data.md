@@ -16,7 +16,7 @@ sadar postal codes. Version `bd-geo-2026-10`, source string recorded per import.
   `code` (`BD-RG-PAN`, `BD-RG-PAN-DEBIGANJ`…), `name/nameBn`, `parentId`,
   denormalized `division`, `zone`, `aliases`, `postalCodes`, `datasetVersion`.
 - `address_aliases` — runtime alias additions (`alias, language, aliasType,
-  source`), unique on normalized alias; duplicates rejected.
+source`), unique on normalized alias; duplicates rejected.
 
 ## Import
 

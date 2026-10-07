@@ -8,6 +8,7 @@ import type { ParcelListItem } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { useFormatters } from "@/lib/format";
 
 interface ParcelCardProps {
   parcel: ParcelListItem;
@@ -20,6 +21,7 @@ interface ParcelCardProps {
  */
 export function ParcelCard({ parcel }: ParcelCardProps) {
   const t = useTranslations("ParcelList");
+  const { bdt } = useFormatters();
   const routes = useRouteBase();
 
   return (
@@ -56,13 +58,11 @@ export function ParcelCard({ parcel }: ParcelCardProps) {
       <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-body-sm">
         <div>
           <span className="text-caption text-muted-foreground">{t("cod")}</span>
-          <p className="font-semibold tabular-nums text-foreground">
-            ৳{parcel.codAmount.toLocaleString()}
-          </p>
+          <p className="font-semibold tabular-nums text-foreground">{bdt(parcel.codAmount)}</p>
         </div>
         <div className="text-right">
           <span className="text-caption text-muted-foreground">{t("fee")}</span>
-          <p className="tabular-nums text-foreground">৳{parcel.deliveryFee.toLocaleString()}</p>
+          <p className="tabular-nums text-foreground">{bdt(parcel.deliveryFee)}</p>
         </div>
       </div>
 

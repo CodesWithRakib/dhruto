@@ -61,22 +61,13 @@ describe("ParcelLifecycleService", () => {
 
     it("allows the return-to-merchant path", () => {
       expect(
-        lifecycle.canTransition(
-          ParcelStatus.DELIVERY_ATTEMPTED,
-          ParcelStatus.RTO_INITIATED,
-        ),
+        lifecycle.canTransition(ParcelStatus.DELIVERY_ATTEMPTED, ParcelStatus.RTO_INITIATED),
       ).toBe(true);
       expect(
-        lifecycle.canTransition(
-          ParcelStatus.RTO_INITIATED,
-          ParcelStatus.RETURN_IN_TRANSIT,
-        ),
+        lifecycle.canTransition(ParcelStatus.RTO_INITIATED, ParcelStatus.RETURN_IN_TRANSIT),
       ).toBe(true);
       expect(
-        lifecycle.canTransition(
-          ParcelStatus.RETURN_IN_TRANSIT,
-          ParcelStatus.RETURNED_TO_MERCHANT,
-        ),
+        lifecycle.canTransition(ParcelStatus.RETURN_IN_TRANSIT, ParcelStatus.RETURNED_TO_MERCHANT),
       ).toBe(true);
     });
   });
@@ -92,8 +83,12 @@ describe("ParcelLifecycleService", () => {
     });
 
     it("forbids moving backwards from CASH_VERIFIED", () => {
-      expect(lifecycle.canTransition(ParcelStatus.CASH_VERIFIED, ParcelStatus.CASH_PENDING)).toBe(false);
-      expect(lifecycle.canTransition(ParcelStatus.CASH_VERIFIED, ParcelStatus.DELIVERED)).toBe(false);
+      expect(lifecycle.canTransition(ParcelStatus.CASH_VERIFIED, ParcelStatus.CASH_PENDING)).toBe(
+        false,
+      );
+      expect(lifecycle.canTransition(ParcelStatus.CASH_VERIFIED, ParcelStatus.DELIVERED)).toBe(
+        false,
+      );
     });
 
     it("forbids any transition out of a terminal state", () => {
@@ -109,12 +104,9 @@ describe("ParcelLifecycleService", () => {
     });
 
     it("forbids assigning a rider to an already delivered parcel", () => {
-      expect(
-        lifecycle.canTransition(
-          ParcelStatus.DELIVERED,
-          ParcelStatus.ASSIGNED_TO_RIDER,
-        ),
-      ).toBe(false);
+      expect(lifecycle.canTransition(ParcelStatus.DELIVERED, ParcelStatus.ASSIGNED_TO_RIDER)).toBe(
+        false,
+      );
     });
 
     it("forbids a no-op transition", () => {
@@ -124,14 +116,11 @@ describe("ParcelLifecycleService", () => {
 
   describe("Phase 3 pre-pickup assignment shortcut", () => {
     it("permits assignment only from pre-pickup states", () => {
+      expect(lifecycle.canTransition(ParcelStatus.CREATED, ParcelStatus.ASSIGNED_TO_RIDER)).toBe(
+        true,
+      );
       expect(
-        lifecycle.canTransition(ParcelStatus.CREATED, ParcelStatus.ASSIGNED_TO_RIDER),
-      ).toBe(true);
-      expect(
-        lifecycle.canTransition(
-          ParcelStatus.PICKUP_REQUESTED,
-          ParcelStatus.ASSIGNED_TO_RIDER,
-        ),
+        lifecycle.canTransition(ParcelStatus.PICKUP_REQUESTED, ParcelStatus.ASSIGNED_TO_RIDER),
       ).toBe(true);
     });
 
@@ -156,9 +145,7 @@ describe("ParcelLifecycleService", () => {
         ParcelStatus.PICKED_UP,
       ]);
       for (const from of ORIGIN_HUB_INBOUND_FROM) {
-        expect(lifecycle.canTransition(from, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(
-          true,
-        );
+        expect(lifecycle.canTransition(from, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(true);
       }
     });
 
@@ -170,9 +157,7 @@ describe("ParcelLifecycleService", () => {
         ParcelStatus.DESTINATION_HUB_RECEIVED,
         ParcelStatus.DELIVERED,
       ]) {
-        expect(lifecycle.canTransition(status, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(
-          false,
-        );
+        expect(lifecycle.canTransition(status, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(false);
       }
     });
 
@@ -184,27 +169,21 @@ describe("ParcelLifecycleService", () => {
         ParcelStatus.LOST,
         ParcelStatus.DAMAGED,
       ]) {
-        expect(lifecycle.canTransition(terminal, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(
-          false,
-        );
+        expect(lifecycle.canTransition(terminal, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(false);
       }
     });
 
     it("keeps both named exceptions narrow and disjoint", () => {
       for (const status of ORIGIN_HUB_INBOUND_FROM) {
-        expect(PRE_PICKUP_RIDER_ASSIGNMENT_FROM).not.toContain(
-          ParcelStatus.ORIGIN_HUB_RECEIVED,
-        );
-        expect(
-          lifecycle.canTransition(status, ParcelStatus.ORIGIN_HUB_RECEIVED),
-        ).toBe(true);
+        expect(PRE_PICKUP_RIDER_ASSIGNMENT_FROM).not.toContain(ParcelStatus.ORIGIN_HUB_RECEIVED);
+        expect(lifecycle.canTransition(status, ParcelStatus.ORIGIN_HUB_RECEIVED)).toBe(true);
       }
     });
 
     it("rejects the undocumented PICKED_UP -> ASSIGNED_TO_RIDER jump", () => {
-      expect(
-        lifecycle.canTransition(ParcelStatus.PICKED_UP, ParcelStatus.ASSIGNED_TO_RIDER),
-      ).toBe(false);
+      expect(lifecycle.canTransition(ParcelStatus.PICKED_UP, ParcelStatus.ASSIGNED_TO_RIDER)).toBe(
+        false,
+      );
     });
   });
 

@@ -1,14 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { createHash } from "node:crypto";
-import {
-  EntityManager,
-  IsNull,
-  LessThan,
-  MoreThan,
-  QueryFailedError,
-  Repository,
-} from "typeorm";
+import { EntityManager, IsNull, LessThan, MoreThan, QueryFailedError, Repository } from "typeorm";
 import { ApiErrorCode } from "@dhruto/contracts";
 import { IdempotencyRecord } from "../../database/entities/IdempotencyRecord.entity.js";
 
@@ -91,10 +84,7 @@ export class IdempotencyService {
    * Atomically claims a key. Must be called inside the transaction that performs
    * the command. Throws {@link IdempotencyClaimConflict} when already claimed.
    */
-  async claim(
-    manager: EntityManager,
-    params: IdempotencyClaimParams,
-  ): Promise<void> {
+  async claim(manager: EntityManager, params: IdempotencyClaimParams): Promise<void> {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + (params.ttlHours ?? 24));
 
@@ -126,10 +116,7 @@ export class IdempotencyService {
   }
 
   /** Completes a claimed key with the command's response, inside the transaction. */
-  async complete(
-    manager: EntityManager,
-    params: IdempotencyCompleteParams,
-  ): Promise<void> {
+  async complete(manager: EntityManager, params: IdempotencyCompleteParams): Promise<void> {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + (params.ttlHours ?? 24));
 
@@ -168,11 +155,7 @@ export class IdempotencyService {
         return { kind: "in_progress" };
       }
 
-      if (
-        record.requestHash &&
-        requestHash &&
-        record.requestHash !== requestHash
-      ) {
+      if (record.requestHash && requestHash && record.requestHash !== requestHash) {
         return { kind: "conflict", reason: "PAYLOAD_MISMATCH" };
       }
 

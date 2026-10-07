@@ -94,15 +94,14 @@ export const ROUTES = {
  * guard and by `robots.ts`. Backend authorization remains authoritative —
  * this is defence in depth and UX only.
  */
-export const PROTECTED_PREFIXES: string[] = [
-  "/merchant",
-  "/admin",
-  "/hub",
-  "/rider",
-];
+export const PROTECTED_PREFIXES: string[] = ["/merchant", "/admin", "/hub", "/rider"];
 
 /** Public routes that are indexable by search engines. */
-export const INDEXABLE_ROUTES: { path: string; priority: number; changeFrequency: "weekly" | "monthly" | "yearly" }[] = [
+export const INDEXABLE_ROUTES: {
+  path: string;
+  priority: number;
+  changeFrequency: "weekly" | "monthly" | "yearly";
+}[] = [
   { path: PUBLIC_ROUTES.home, priority: 1, changeFrequency: "weekly" },
   { path: PUBLIC_ROUTES.services, priority: 0.9, changeFrequency: "monthly" },
   { path: PUBLIC_ROUTES.pricing, priority: 0.8, changeFrequency: "monthly" },
@@ -136,7 +135,5 @@ export function isActiveRoute(pathname: string, href: string): boolean {
 /** True when the pathname targets the authenticated application. */
 export function isProtectedRoute(pathname: string): boolean {
   const clean = stripLocale(pathname);
-  return PROTECTED_PREFIXES.some(
-    (prefix) => clean === prefix || clean.startsWith(`${prefix}/`),
-  );
+  return PROTECTED_PREFIXES.some((prefix) => clean === prefix || clean.startsWith(`${prefix}/`));
 }

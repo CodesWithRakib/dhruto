@@ -41,7 +41,13 @@ describe("risk engine (rule-risk-v1)", () => {
 
   it("flags heavy RTO history as HIGH with reason codes", () => {
     const out = engine.score(
-      features({ totalOrders: 5, deliveredOrders: 1, returnedOrders: 4, recentFailedDeliveries: 3, recentOrderCount: 4 }),
+      features({
+        totalOrders: 5,
+        deliveredOrders: 1,
+        returnedOrders: 4,
+        recentFailedDeliveries: 3,
+        recentOrderCount: 4,
+      }),
     );
     expect(out.level).toBe(RiskLevel.HIGH);
     expect(out.score).toBeGreaterThanOrEqual(70);
@@ -69,7 +75,13 @@ describe("risk engine (rule-risk-v1)", () => {
 
   it("clamps scores to 0..100 with meaningful confidence", () => {
     const out = engine.score(
-      features({ totalOrders: 20, deliveredOrders: 0, returnedOrders: 20, recentFailedDeliveries: 10, recentOrderCount: 12 }),
+      features({
+        totalOrders: 20,
+        deliveredOrders: 0,
+        returnedOrders: 20,
+        recentFailedDeliveries: 10,
+        recentOrderCount: 12,
+      }),
     );
     expect(out.score).toBeLessThanOrEqual(100);
     expect(out.riskConfidence).toBe("HIGH");

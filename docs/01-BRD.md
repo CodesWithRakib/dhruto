@@ -19,13 +19,13 @@ The platform connects merchants, hubs, riders, and end customers through a unifi
 
 ## 2. Stakeholders and Roles
 
-| Role | Primary Responsibilities | Interface |
-|---|---|---|
-| Super Admin | Platform configuration, pricing, finance, users, audit, analytics | `apps/web-admin` |
-| Hub Manager | Hub operations, scans, bags, manifests, rider assignment, cash reconciliation | `apps/web-admin` |
-| Delivery Rider | Pickup, delivery, OTP, COD, proof, failed attempts | Rider PWA |
-| Merchant | Orders, bulk import, labels, tracking, wallet, payouts, reports | `apps/web-merchant` |
-| End Customer | Public tracking and delivery actions where permitted | `apps/tracker` |
+| Role           | Primary Responsibilities                                                      | Interface           |
+| -------------- | ----------------------------------------------------------------------------- | ------------------- |
+| Super Admin    | Platform configuration, pricing, finance, users, audit, analytics             | `apps/web-admin`    |
+| Hub Manager    | Hub operations, scans, bags, manifests, rider assignment, cash reconciliation | `apps/web-admin`    |
+| Delivery Rider | Pickup, delivery, OTP, COD, proof, failed attempts                            | Rider PWA           |
+| Merchant       | Orders, bulk import, labels, tracking, wallet, payouts, reports               | `apps/web-merchant` |
+| End Customer   | Public tracking and delivery actions where permitted                          | `apps/tracker`      |
 
 ## 3. Product Surfaces
 

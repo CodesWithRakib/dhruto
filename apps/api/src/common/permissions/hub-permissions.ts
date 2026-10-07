@@ -1,5 +1,5 @@
-import { HubPermission } from '@dhruto/contracts';
-import { UserRole } from '../../database/entities/User.entity.js';
+import { HubPermission } from "@dhruto/contracts";
+import { UserRole } from "../../database/entities/User.entity.js";
 
 /**
  * Centralized hub permission model.
@@ -14,9 +14,7 @@ import { UserRole } from '../../database/entities/User.entity.js';
  *
  * A client-supplied `hubId` is never proof of authorization.
  */
-export const ALL_HUB_PERMISSIONS: readonly HubPermission[] = Object.values(
-  HubPermission,
-);
+export const ALL_HUB_PERMISSIONS: readonly HubPermission[] = Object.values(HubPermission);
 
 /** The role ceiling: what a role may ever do inside a hub. */
 export const ROLE_HUB_PERMISSIONS: Record<UserRole, readonly HubPermission[]> = {
@@ -29,16 +27,10 @@ export const ROLE_HUB_PERMISSIONS: Record<UserRole, readonly HubPermission[]> = 
 };
 
 /** Roles that may access hub operations at all. Used by `@Roles(...)`. */
-export const HUB_OPERATION_ROLES: readonly UserRole[] = [
-  UserRole.ADMIN,
-  UserRole.HUB_MANAGER,
-];
+export const HUB_OPERATION_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.HUB_MANAGER];
 
 /** True when `role` may ever hold `permission`, ignoring hub scope. */
-export function roleAllowsPermission(
-  role: UserRole,
-  permission: HubPermission,
-): boolean {
+export function roleAllowsPermission(role: UserRole, permission: HubPermission): boolean {
   return (ROLE_HUB_PERMISSIONS[role] ?? []).includes(permission);
 }
 

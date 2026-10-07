@@ -9,12 +9,14 @@ import {
 } from "../api/finance.api";
 import { WalletCard } from "./wallet-card";
 import { PayoutRequestModal } from "./payout-request-modal";
-import { TransactionsTable } from "./transactions-table";
+import { TransactionsTable, ALL_TRANSACTION_TYPES } from "./transactions-table";
 import { PayoutsView } from "./payouts-view";
 import { SettlementsView } from "./settlements-view";
 import { ReceiptText, History, Building, RefreshCw } from "lucide-react";
 import { Button } from "@dhruto/ui";
 import { PageHeader } from "@/components/page-header";
+import { useQueryState } from "@/hooks/use-query-state";
+import { WalletTransactionType } from "@dhruto/contracts";
 
 type MerchantTab = "statement" | "payouts" | "settlements";
 
@@ -27,6 +29,11 @@ export function FinanceDashboard() {
   const [isPayoutModalOpen, setIsPayoutModalOpen] = React.useState(false);
   const [page, setPage] = React.useState(1);
 
+  // The statement filter lives in the URL so a filtered view is shareable and
+  // survives a reload; the parent owns both the filter and the query.
+  const query = useQueryState();
+  const typeFilter = query.getString("type", ALL_TRANSACTION_TYPES) ?? ALL_TRANSACTION_TYPES;
+
   const {
     data: walletRes,
     isLoading: isWalletLoading,
@@ -37,16 +44,22 @@ export function FinanceDashboard() {
     data: txRes,
     isLoading: isTxLoading,
     refetch: refetchTx,
-  } = useGetWalletTransactionsQuery({ page, limit: PAGE_SIZE });
+  } = useGetWalletTransactionsQuery({
+    page,
+    limit: PAGE_SIZE,
+    type: typeFilter === ALL_TRANSACTION_TYPES ? undefined : (typeFilter as WalletTransactionType),
+  });
 
-  const {
-    data: payoutsRes,
-    refetch: refetchPayouts,
-  } = useGetMyPayoutsQuery();
+  const { data: payoutsRes, refetch: refetchPayouts } = useGetMyPayoutsQuery();
 
   const wallet = walletRes?.data;
   const transactions = txRes?.data || [];
   const payouts = payoutsRes?.data || [];
+
+  const handleTypeFilterChange = (next: string) => {
+    query.set({ type: next === ALL_TRANSACTION_TYPES ? null : next });
+    setPage(1);
+  };
 
   const handleRefresh = () => {
     refetchWallet();
@@ -66,7 +79,12 @@ export function FinanceDashboard() {
         title={t("title")}
         description={t("subtitle")}
         actions={
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="h-10 gap-2 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            className="h-10 gap-2 text-xs"
+          >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
             {t("refresh")}
           </Button>
@@ -79,7 +97,10 @@ export function FinanceDashboard() {
         onRequestPayout={() => setIsPayoutModalOpen(true)}
       />
 
-      <div className="flex w-fit items-center gap-1.5 rounded-lg border border-border bg-surface-muted p-1" role="tablist">
+      <div
+        className="flex w-fit items-center gap-1.5 rounded-lg border border-border bg-surface-muted p-1"
+        role="tablist"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -105,6 +126,8 @@ export function FinanceDashboard() {
           page={page}
           onPageChange={setPage}
           hasMore={transactions.length === PAGE_SIZE}
+          typeFilter={typeFilter}
+          onTypeFilterChange={handleTypeFilterChange}
         />
       )}
 

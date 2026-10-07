@@ -34,7 +34,7 @@ test.describe("Journey — Admin finance operations", () => {
         accountDetails: { accountNumber: "01700998811" },
       },
     });
-    const payoutCode = ((await created.json()).data.payoutCode as string) as string;
+    const payoutCode = (await created.json()).data.payoutCode as string as string;
     expect(payoutCode).toMatch(/PAY-\d{6}/);
 
     await loginAsAdmin(page);
@@ -46,7 +46,10 @@ test.describe("Journey — Admin finance operations", () => {
       .getByRole("button", { name: /^approve$/i })
       .click();
     await expect(page.getByText(/approve this payout/i)).toBeVisible();
-    await page.getByRole("dialog").getByRole("button", { name: /^confirm$/i }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^confirm$/i })
+      .click();
     await expect(page.getByText(/approved/i).first()).toBeVisible({ timeout: 20_000 });
 
     await page
@@ -54,7 +57,10 @@ test.describe("Journey — Admin finance operations", () => {
       .getByRole("button", { name: /^confirm$/i })
       .click();
     await page.getByLabel(/provider reference/i).fill("BKP-TEST-001");
-    await page.getByRole("dialog").getByRole("button", { name: /^confirm$/i }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^confirm$/i })
+      .click();
     await expect(page.getByText(/completed/i).first()).toBeVisible({ timeout: 20_000 });
   });
 });

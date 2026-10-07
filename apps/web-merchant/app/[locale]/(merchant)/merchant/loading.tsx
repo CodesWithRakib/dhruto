@@ -19,7 +19,7 @@ export default function Loading() {
           <Skeleton key={i} className="h-32 w-full rounded-xl" />
         ))}
       </div>
-      
+
       {/* Table Skeleton */}
       <div className="pt-8 space-y-4">
         <Skeleton className="h-10 w-[200px]" />

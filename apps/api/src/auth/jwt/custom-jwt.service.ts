@@ -15,11 +15,9 @@ export class CustomJwtService {
   constructor(private readonly configService: ConfigService) {
     const authConfig = this.configService.get<AuthConfig>("auth");
     this.accessSecret =
-      authConfig?.jwtAccessSecret ||
-      "dhruto_dev_jwt_access_secret_change_in_production_32chars";
+      authConfig?.jwtAccessSecret || "dhruto_dev_jwt_access_secret_change_in_production_32chars";
     this.refreshSecret =
-      authConfig?.jwtRefreshSecret ||
-      "dhruto_dev_jwt_refresh_secret_change_in_production_32chars";
+      authConfig?.jwtRefreshSecret || "dhruto_dev_jwt_refresh_secret_change_in_production_32chars";
     this.accessExpiresIn = authConfig?.jwtAccessExpiresIn || "15m";
     this.refreshExpiresIn = authConfig?.jwtRefreshExpiresIn || "7d";
   }
@@ -28,9 +26,7 @@ export class CustomJwtService {
    * Base64URL encoder according to RFC 7515 / RFC 7519.
    */
   private base64UrlEncode(data: string | Buffer): string {
-    const base64 = (Buffer.isBuffer(data) ? data : Buffer.from(data)).toString(
-      "base64",
-    );
+    const base64 = (Buffer.isBuffer(data) ? data : Buffer.from(data)).toString("base64");
     return base64.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
   }
 
@@ -125,9 +121,7 @@ export class CustomJwtService {
     const message = `${encodedHeader}.${encodedPayload}`;
 
     // Verify signature
-    const expectedSignature = createHmac("sha256", secret)
-      .update(message)
-      .digest();
+    const expectedSignature = createHmac("sha256", secret).update(message).digest();
     const expectedEncodedSignature = this.base64UrlEncode(expectedSignature);
 
     // Constant-time comparison to prevent timing attacks

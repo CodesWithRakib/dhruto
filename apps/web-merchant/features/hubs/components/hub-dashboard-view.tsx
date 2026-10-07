@@ -22,14 +22,12 @@ import { Button, Card, CardContent, Badge } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { HUB_ROUTES } from "@/config/routes";
 import { PageHeader } from "@/components/page-header";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { useActiveHub } from "../hooks/use-active-hub";
 import { HubSelector } from "./hub-selector";
-import {
-  useGetHubDashboardQuery,
-  useGetExceptionsQuery,
-} from "../api/hubs.api";
+import { useGetHubDashboardQuery, useGetExceptionsQuery } from "../api/hubs.api";
 import { ExceptionStatus } from "@dhruto/contracts";
+import { useFormatters } from "@/lib/format";
 
 /**
  * Hub operations dashboard.
@@ -40,7 +38,16 @@ import { ExceptionStatus } from "@dhruto/contracts";
  */
 export function HubDashboardView() {
   const t = useTranslations("Hub");
-  const { hubs, activeHub, activeHubId, setActiveHubId, isLoading: hubsLoading, isError: hubsError, refetch: refetchHubs } = useActiveHub();
+  const { time: fmtTime } = useFormatters();
+  const {
+    hubs,
+    activeHub,
+    activeHubId,
+    setActiveHubId,
+    isLoading: hubsLoading,
+    isError: hubsError,
+    refetch: refetchHubs,
+  } = useActiveHub();
 
   const {
     data: dashboardData,
@@ -86,31 +93,105 @@ export function HubDashboardView() {
 
   const metricCards = metrics
     ? [
-        { label: t("dashboard.inboundToday"), value: metrics.inboundToday, icon: ArrowDownToLine, tone: "bg-success-soft text-success" },
-        { label: t("dashboard.outboundToday"), value: metrics.outboundToday, icon: ArrowUpFromLine, tone: "bg-info-soft text-info" },
-        { label: t("dashboard.parcelsAtHub"), value: metrics.parcelsAtHub, icon: Package, tone: "bg-primary-soft text-primary" },
-        { label: t("dashboard.openBags"), value: metrics.openBags, icon: PackageOpen, tone: "bg-warning-soft text-warning" },
-        { label: t("dashboard.sealedBags"), value: metrics.sealedBags, icon: PackageCheck, tone: "bg-success-soft text-success" },
-        { label: t("dashboard.pendingManifests"), value: metrics.pendingManifests, icon: Hourglass, tone: "bg-warning-soft text-warning" },
-        { label: t("dashboard.dispatchedManifests"), value: metrics.dispatchedManifests, icon: Truck, tone: "bg-info-soft text-info" },
-        { label: t("dashboard.expectedInbound"), value: metrics.expectedInboundManifests, icon: Inbox, tone: "bg-primary-soft text-primary" },
-        { label: t("dashboard.openExceptions"), value: metrics.openExceptions, icon: AlertTriangle, tone: "bg-danger-soft text-danger" },
+        {
+          label: t("dashboard.inboundToday"),
+          value: metrics.inboundToday,
+          icon: ArrowDownToLine,
+          tone: "bg-success-soft text-success",
+        },
+        {
+          label: t("dashboard.outboundToday"),
+          value: metrics.outboundToday,
+          icon: ArrowUpFromLine,
+          tone: "bg-info-soft text-info",
+        },
+        {
+          label: t("dashboard.parcelsAtHub"),
+          value: metrics.parcelsAtHub,
+          icon: Package,
+          tone: "bg-primary-soft text-primary",
+        },
+        {
+          label: t("dashboard.openBags"),
+          value: metrics.openBags,
+          icon: PackageOpen,
+          tone: "bg-warning-soft text-warning",
+        },
+        {
+          label: t("dashboard.sealedBags"),
+          value: metrics.sealedBags,
+          icon: PackageCheck,
+          tone: "bg-success-soft text-success",
+        },
+        {
+          label: t("dashboard.pendingManifests"),
+          value: metrics.pendingManifests,
+          icon: Hourglass,
+          tone: "bg-warning-soft text-warning",
+        },
+        {
+          label: t("dashboard.dispatchedManifests"),
+          value: metrics.dispatchedManifests,
+          icon: Truck,
+          tone: "bg-info-soft text-info",
+        },
+        {
+          label: t("dashboard.expectedInbound"),
+          value: metrics.expectedInboundManifests,
+          icon: Inbox,
+          tone: "bg-primary-soft text-primary",
+        },
+        {
+          label: t("dashboard.openExceptions"),
+          value: metrics.openExceptions,
+          icon: AlertTriangle,
+          tone: "bg-danger-soft text-danger",
+        },
       ]
     : [];
 
   const quickActions = [
-    { href: HUB_ROUTES.scanner, title: t("dashboard.scanParcel"), description: t("dashboard.scanParcelDescription"), icon: ScanLine },
-    { href: HUB_ROUTES.parcels, title: t("dashboard.lookupParcel"), description: t("dashboard.lookupParcelDescription"), icon: Inbox },
-    { href: HUB_ROUTES.bags, title: t("dashboard.createBag"), description: t("dashboard.createBagDescription"), icon: Package },
-    { href: HUB_ROUTES.manifests, title: t("dashboard.createManifest"), description: t("dashboard.createManifestDescription"), icon: Truck },
-    { href: HUB_ROUTES.cash, title: t("dashboard.cashDesk"), description: t("dashboard.cashDeskDescription"), icon: Wallet },
+    {
+      href: HUB_ROUTES.scanner,
+      title: t("dashboard.scanParcel"),
+      description: t("dashboard.scanParcelDescription"),
+      icon: ScanLine,
+    },
+    {
+      href: HUB_ROUTES.parcels,
+      title: t("dashboard.lookupParcel"),
+      description: t("dashboard.lookupParcelDescription"),
+      icon: Inbox,
+    },
+    {
+      href: HUB_ROUTES.bags,
+      title: t("dashboard.createBag"),
+      description: t("dashboard.createBagDescription"),
+      icon: Package,
+    },
+    {
+      href: HUB_ROUTES.manifests,
+      title: t("dashboard.createManifest"),
+      description: t("dashboard.createManifestDescription"),
+      icon: Truck,
+    },
+    {
+      href: HUB_ROUTES.cash,
+      title: t("dashboard.cashDesk"),
+      description: t("dashboard.cashDeskDescription"),
+      icon: Wallet,
+    },
   ];
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
       <PageHeader
         title={t("dashboard.title")}
-        description={activeHub ? t("dashboard.subtitle", { hub: `${activeHub.name} (${activeHub.code})` }) : undefined}
+        description={
+          activeHub
+            ? t("dashboard.subtitle", { hub: `${activeHub.name} (${activeHub.code})` })
+            : undefined
+        }
         actions={
           <>
             <HubSelector hubs={hubs} activeHubId={activeHubId} onChange={setActiveHubId} />
@@ -150,7 +231,9 @@ export function HubDashboardView() {
               </span>
               <span>
                 <span className="block text-sm font-semibold text-foreground">{action.title}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">{action.description}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {action.description}
+                </span>
               </span>
             </Link>
           ))}
@@ -160,7 +243,11 @@ export function HubDashboardView() {
       {/* Live metrics */}
       <section aria-label={t("dashboard.title")}>
         {dashboardLoading || !metrics ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5" role="status" aria-live="polite">
+          <div
+            className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5"
+            role="status"
+            aria-live="polite"
+          >
             {Array.from({ length: 9 }).map((_, index) => (
               <Card key={index}>
                 <CardContent className="space-y-2 p-4">
@@ -179,7 +266,9 @@ export function HubDashboardView() {
                     <p className="truncate text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {card.label}
                     </p>
-                    <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{card.value}</p>
+                    <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
+                      {card.value}
+                    </p>
                   </div>
                   <span className={`rounded-lg p-2.5 ${card.tone}`}>
                     <card.icon className="h-5 w-5" aria-hidden="true" />
@@ -204,7 +293,10 @@ export function HubDashboardView() {
                   {t("dashboard.exceptionsNeedAttention")} ({openExceptions.length})
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {openExceptions.slice(0, 3).map((e) => e.type).join(" · ")}
+                  {openExceptions
+                    .slice(0, 3)
+                    .map((e) => e.type)
+                    .join(" · ")}
                 </p>
               </div>
             </div>
@@ -225,7 +317,10 @@ export function HubDashboardView() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
               {t("dashboard.recentScans")}
             </h2>
-            <Link href={HUB_ROUTES.scanner} className="text-xs font-semibold text-primary hover:underline">
+            <Link
+              href={HUB_ROUTES.scanner}
+              className="text-xs font-semibold text-primary hover:underline"
+            >
               {t("dashboard.viewAll")}
             </Link>
           </div>
@@ -241,13 +336,19 @@ export function HubDashboardView() {
                     {scan.trackingCode ?? scan.bagCode ?? "—"}
                   </span>
                   <Badge
-                    variant={scan.outcome === "APPLIED" ? "success" : scan.outcome === "DUPLICATE" ? "secondary" : "destructive"}
+                    variant={
+                      scan.outcome === "APPLIED"
+                        ? "success"
+                        : scan.outcome === "DUPLICATE"
+                          ? "secondary"
+                          : "destructive"
+                    }
                     className="text-[10px]"
                   >
                     {scan.scanType} · {scan.outcome}
                   </Badge>
                   <span className="ml-auto tabular-nums text-muted-foreground">
-                    {new Date(scan.createdAt).toLocaleTimeString()}
+                    {fmtTime(scan.createdAt)}
                   </span>
                 </li>
               ))}

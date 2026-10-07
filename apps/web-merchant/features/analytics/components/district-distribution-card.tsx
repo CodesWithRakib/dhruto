@@ -49,14 +49,17 @@ export function DistrictDistributionCard({ districts }: DistrictDistributionCard
 
       <CardContent className="pt-6 space-y-4">
         {districts.map((item, idx) => (
-          <div key={item.district} className="space-y-1.5 p-2 rounded-lg hover:bg-muted/30 transition-colors">
+          <div
+            key={item.district}
+            className="space-y-1.5 p-2 rounded-lg hover:bg-muted/30 transition-colors"
+          >
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-muted-foreground text-[11px] w-4">
-                  #{idx + 1}
-                </span>
+                <span className="font-mono text-muted-foreground text-[11px] w-4">#{idx + 1}</span>
                 <span className="font-bold text-foreground text-sm">{item.district}</span>
-                <span className="text-[11px] text-muted-foreground">({item.orderCount} orders)</span>
+                <span className="text-[11px] text-muted-foreground">
+                  ({item.orderCount} orders)
+                </span>
               </div>
 
               <div className="flex items-center gap-3">

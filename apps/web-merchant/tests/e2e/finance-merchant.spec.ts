@@ -39,9 +39,15 @@ test.describe("Journey — Merchant finance", () => {
 
     // Cancel restores the reservation (newest REQUESTED payout is listed first).
     await page.getByRole("tab", { name: /payout history/i }).click();
-    await page.getByRole("button", { name: /^cancel$/i }).first().click();
+    await page
+      .getByRole("button", { name: /^cancel$/i })
+      .first()
+      .click();
     await expect(page.getByText(/cancel this payout/i)).toBeVisible();
-    await page.getByRole("dialog").getByRole("button", { name: /^confirm$/i }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^confirm$/i })
+      .click();
     await expect(page.getByText(/cancelled/i).first()).toBeVisible({ timeout: 20_000 });
   });
 });

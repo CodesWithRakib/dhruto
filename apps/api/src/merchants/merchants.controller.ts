@@ -1,19 +1,5 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Body,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-  Req,
-} from "@nestjs/common";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiOkResponse,
-} from "@nestjs/swagger";
+import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Req } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from "@nestjs/swagger";
 import { MerchantsService } from "./merchants.service.js";
 import { UpdateMerchantDto } from "./dto/update-merchant.dto.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
@@ -39,10 +25,7 @@ export class MerchantsController {
     description: "Returns profile details for the authenticated merchant.",
   })
   @ApiOkResponse({ description: "Merchant profile retrieved successfully" })
-  async getProfile(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req: RequestWithId,
-  ) {
+  async getProfile(@CurrentUser() user: AuthenticatedUser, @Req() req: RequestWithId) {
     const profile = await this.merchantsService.getProfile(user.id);
     return {
       success: true,
@@ -90,10 +73,7 @@ export class MerchantsController {
     description: "Returns order counts, status breakdowns, financial sums, and recent bookings.",
   })
   @ApiOkResponse({ description: "Merchant dashboard metrics retrieved successfully" })
-  async getDashboard(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req: RequestWithId,
-  ) {
+  async getDashboard(@CurrentUser() user: AuthenticatedUser, @Req() req: RequestWithId) {
     const data = await this.merchantsService.getDashboardStats(user.id);
     return {
       success: true,

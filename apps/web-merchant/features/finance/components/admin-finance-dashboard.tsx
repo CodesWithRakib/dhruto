@@ -31,18 +31,28 @@ import {
   newIdempotencyKey,
 } from "../api/finance.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { PageHeader } from "@/components/page-header";
 import { toast } from "sonner";
+import { useFormatters } from "@/lib/format";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import {
+  CASH_DISCREPANCY_STATUS_TONE,
+  FINANCIAL_TXN_STATUS_TONE,
+  PAYOUT_STATUS_TONE,
+} from "@/config/status";
 
 type AdminTab = "payouts" | "journal" | "discrepancies" | "adjust" | "reports" | "check";
 
 /** Finance operations console: payouts, journal, adjustments, reports, checks. */
 export function AdminFinanceDashboard() {
   const t = useTranslations("Finance");
+  const { bdt, date: fmtDate } = useFormatters();
   const [tab, setTab] = React.useState<AdminTab>("payouts");
   const [selectedPayout, setSelectedPayout] = React.useState<PayoutRequestItem | null>(null);
-  const [decision, setDecision] = React.useState<"approve" | "complete" | "reject" | "fail" | null>(null);
+  const [decision, setDecision] = React.useState<"approve" | "complete" | "reject" | "fail" | null>(
+    null,
+  );
   const [reference, setReference] = React.useState("");
   const [reason, setReason] = React.useState("");
   const [adjustDirection, setAdjustDirection] = React.useState<"CREDIT" | "DEBIT">("CREDIT");
@@ -54,7 +64,9 @@ export function AdminFinanceDashboard() {
 
   const { data: overviewData, refetch: refetchOverview } = useGetFinanceOverviewQuery();
   const { data: payoutsData, refetch: refetchPayouts } = useGetAdminPayoutsQuery({ limit: 50 });
-  const { data: journalData, refetch: refetchJournal } = useGetJournalTransactionsQuery({ limit: 50 });
+  const { data: journalData, refetch: refetchJournal } = useGetJournalTransactionsQuery({
+    limit: 50,
+  });
   const { data: discrepanciesData, refetch: refetchDiscrepancies } = useGetDiscrepanciesQuery();
   const { data: checkData, refetch: refetchCheck } = useGetReconciliationCheckQuery();
   const { data: feeData } = useGetFeeReportQuery();
@@ -83,7 +95,10 @@ export function AdminFinanceDashboard() {
     if (!selectedPayout || !decision) return;
     try {
       if (decision === "approve") {
-        const res = await approvePayout({ id: selectedPayout.id, notes: reason || undefined }).unwrap();
+        const res = await approvePayout({
+          id: selectedPayout.id,
+          notes: reason || undefined,
+        }).unwrap();
         toast.success(res.message);
       } else {
         const status =
@@ -138,7 +153,10 @@ export function AdminFinanceDashboard() {
   const handleReverse = async () => {
     if (!reverseId) return;
     try {
-      const res = await reverseTransaction({ id: reverseId, reason: reverseReason.trim() }).unwrap();
+      const res = await reverseTransaction({
+        id: reverseId,
+        reason: reverseReason.trim(),
+      }).unwrap();
       toast.success(res.message);
       setReverseId(null);
       setReverseReason("");
@@ -153,7 +171,10 @@ export function AdminFinanceDashboard() {
       const text = value === null || value === undefined ? "" : String(value);
       return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
     };
-    const csv = [columns.join(","), ...rows.map((row) => columns.map((c) => escape(row[c])).join(","))].join("\n");
+    const csv = [
+      columns.join(","),
+      ...rows.map((row) => columns.map((c) => escape(row[c])).join(",")),
+    ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -166,9 +187,18 @@ export function AdminFinanceDashboard() {
   const metricCards = overview
     ? [
         { label: t("admin.totalCod"), value: `৳${overview.totalVerifiedCod.toLocaleString()}` },
-        { label: t("admin.pendingReconciliation"), value: `৳${overview.totalPendingCod.toLocaleString()}` },
-        { label: t("admin.merchantPayables"), value: `৳${overview.totalMerchantBalance.toLocaleString()}` },
-        { label: t("admin.disbursedPayouts"), value: `৳${overview.totalDisbursedPayouts.toLocaleString()}` },
+        {
+          label: t("admin.pendingReconciliation"),
+          value: `৳${overview.totalPendingCod.toLocaleString()}`,
+        },
+        {
+          label: t("admin.merchantPayables"),
+          value: `৳${overview.totalMerchantBalance.toLocaleString()}`,
+        },
+        {
+          label: t("admin.disbursedPayouts"),
+          value: `৳${overview.totalDisbursedPayouts.toLocaleString()}`,
+        },
         { label: t("admin.openDiscrepancies"), value: overview.openDiscrepanciesCount },
       ]
     : [];
@@ -208,7 +238,10 @@ export function AdminFinanceDashboard() {
         ))}
       </div>
 
-      <div className="flex w-fit max-w-full items-center gap-1.5 overflow-x-auto rounded-lg border border-border bg-surface-muted p-1" role="tablist">
+      <div
+        className="flex w-fit max-w-full items-center gap-1.5 overflow-x-auto rounded-lg border border-border bg-surface-muted p-1"
+        role="tablist"
+      >
         {tabs.map((entry) => (
           <button
             key={entry.key}
@@ -238,36 +271,84 @@ export function AdminFinanceDashboard() {
                 {payouts.map((payout) => (
                   <li key={payout.id} className="space-y-2 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-primary">{payout.payoutCode}</span>
-                      <Badge variant={payout.status === "COMPLETED" ? "success" : payout.status === "REQUESTED" ? "secondary" : "destructive"} className="text-[10px]">
-                        {payout.status}
+                      <span className="font-mono text-xs font-bold text-primary">
+                        {payout.payoutCode}
+                      </span>
+                      <Badge
+                        variant={
+                          payout.status === "COMPLETED"
+                            ? "success"
+                            : payout.status === "REQUESTED"
+                              ? "secondary"
+                              : "destructive"
+                        }
+                        className="text-[10px]"
+                      >
+                        {
+                          <EnumBadge
+                            namespace="PayoutStatus"
+                            value={payout.status}
+                            tones={PAYOUT_STATUS_TONE}
+                          />
+                        }
                       </Badge>
                       <span className="ml-auto font-mono text-sm font-bold tabular-nums">
-                        ৳{Number(payout.amount).toLocaleString()}
+                        {bdt(Number(payout.amount))}
                       </span>
                     </div>
                     <p className="font-mono text-[11px] text-muted-foreground">
                       {payout.payoutMethod} · {payout.accountDetails.accountNumber} ·{" "}
-                      {new Date(payout.createdAt).toLocaleDateString()}
+                      {fmtDate(payout.createdAt)}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {payout.status === "REQUESTED" ? (
-                        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setSelectedPayout(payout); setDecision("approve"); }}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-xs"
+                          onClick={() => {
+                            setSelectedPayout(payout);
+                            setDecision("approve");
+                          }}
+                        >
                           {t("payout.approve")}
                         </Button>
                       ) : null}
-                      {(payout.status === "APPROVED" || payout.status === "PROCESSING") ? (
+                      {payout.status === "APPROVED" || payout.status === "PROCESSING" ? (
                         <>
-                          <Button size="sm" className="h-8 text-xs" onClick={() => { setSelectedPayout(payout); setDecision("complete"); }}>
+                          <Button
+                            size="sm"
+                            className="h-8 text-xs"
+                            onClick={() => {
+                              setSelectedPayout(payout);
+                              setDecision("complete");
+                            }}
+                          >
                             {t("confirm")}
                           </Button>
-                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setSelectedPayout(payout); setDecision("fail"); }}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs"
+                            onClick={() => {
+                              setSelectedPayout(payout);
+                              setDecision("fail");
+                            }}
+                          >
                             {t("payout.failTitle")}
                           </Button>
                         </>
                       ) : null}
-                      {(payout.status === "REQUESTED" || payout.status === "APPROVED") ? (
-                        <Button size="sm" variant="outline" className="h-8 border-danger text-xs text-danger" onClick={() => { setSelectedPayout(payout); setDecision("reject"); }}>
+                      {payout.status === "REQUESTED" || payout.status === "APPROVED" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 border-danger text-xs text-danger"
+                          onClick={() => {
+                            setSelectedPayout(payout);
+                            setDecision("reject");
+                          }}
+                        >
                           {t("payout.reject")}
                         </Button>
                       ) : null}
@@ -290,22 +371,36 @@ export function AdminFinanceDashboard() {
             ) : (
               <ul className="divide-y divide-border">
                 {journal.map((txn) => {
-                  const debit = txn.entries.filter((e) => e.direction === "DEBIT").reduce((s, e) => s + e.amountMinor, 0);
+                  const debit = txn.entries
+                    .filter((e) => e.direction === "DEBIT")
+                    .reduce((s, e) => s + e.amountMinor, 0);
                   return (
                     <li key={txn.id} className="space-y-1 p-4">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-primary">{txn.transactionCode}</span>
-                        <Badge variant={txn.status === "POSTED" ? "success" : "secondary"} className="text-[10px]">
-                          {txn.type} · {txn.status}
+                        <span className="font-mono text-xs font-bold text-primary">
+                          {txn.transactionCode}
+                        </span>
+                        <Badge
+                          variant={txn.status === "POSTED" ? "success" : "secondary"}
+                          className="text-[10px]"
+                        >
+                          {txn.type} ·{" "}
+                          {
+                            <EnumBadge
+                              namespace="FinancialTransactionStatus"
+                              value={txn.status}
+                              tones={FINANCIAL_TXN_STATUS_TONE}
+                            />
+                          }
                         </Badge>
                         <span className="ml-auto font-mono text-xs tabular-nums">
-                          ৳{(debit / 100).toLocaleString()}
+                          {bdt(debit / 100)}
                         </span>
                       </div>
                       <div className="space-y-0.5 font-mono text-[11px] text-muted-foreground">
                         {txn.entries.map((entry, index) => (
                           <p key={index}>
-                            {entry.direction} {entry.account} ৳{(entry.amountMinor / 100).toLocaleString()}
+                            {entry.direction} {entry.account} {bdt(entry.amountMinor / 100)}
                           </p>
                         ))}
                       </div>
@@ -346,14 +441,19 @@ export function AdminFinanceDashboard() {
                   <li key={d.id} className="space-y-1 p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold">{d.type}</span>
-                      <Badge variant="destructive" className="text-[10px]">{d.status}</Badge>
+                      <EnumBadge
+                        namespace="CashDiscrepancyStatus"
+                        value={d.status}
+                        tones={CASH_DISCREPANCY_STATUS_TONE}
+                      />
                       <span className="ml-auto font-mono text-xs font-bold tabular-nums text-danger">
-                        {d.differenceMinor > 0 ? "+" : ""}৳{(d.differenceMinor / 100).toLocaleString()}
+                        {d.differenceMinor > 0 ? "+" : ""}
+                        {bdt(d.differenceMinor / 100)}
                       </span>
                     </div>
                     <p className="font-mono text-[11px] text-muted-foreground">
-                      {t("cash.expectedCash")} ৳{(d.expectedMinor / 100).toLocaleString()} ·{" "}
-                      {t("cash.verifiedCash")} ৳{(d.actualMinor / 100).toLocaleString()}
+                      {t("cash.expectedCash")} {bdt(d.expectedMinor / 100)} ·{" "}
+                      {t("cash.verifiedCash")} {bdt(d.actualMinor / 100)}
                     </p>
                   </li>
                 ))}
@@ -371,31 +471,70 @@ export function AdminFinanceDashboard() {
                 <p className="text-xs text-muted-foreground">{t("admin.adjustMessage")}</p>
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <label htmlFor="adjust-merchant" className="text-xs font-semibold text-muted-foreground">
+                <label
+                  htmlFor="adjust-merchant"
+                  className="text-xs font-semibold text-muted-foreground"
+                >
                   merchantId *
                 </label>
-                <Input id="adjust-merchant" value={adjustMerchant} onChange={(e) => setAdjustMerchant(e.target.value)} placeholder="uuid" required className="font-mono text-xs" />
+                <Input
+                  id="adjust-merchant"
+                  value={adjustMerchant}
+                  onChange={(e) => setAdjustMerchant(e.target.value)}
+                  placeholder="uuid"
+                  required
+                  className="font-mono text-xs"
+                />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="adjust-direction" className="text-xs font-semibold text-muted-foreground">
+                <label
+                  htmlFor="adjust-direction"
+                  className="text-xs font-semibold text-muted-foreground"
+                >
                   {t("admin.adjustDirection")} *
                 </label>
-                <select id="adjust-direction" value={adjustDirection} onChange={(e) => setAdjustDirection(e.target.value as "CREDIT" | "DEBIT")} className="w-full rounded-lg border border-input bg-background p-2.5 text-sm outline-none">
+                <select
+                  id="adjust-direction"
+                  value={adjustDirection}
+                  onChange={(e) => setAdjustDirection(e.target.value as "CREDIT" | "DEBIT")}
+                  className="w-full rounded-lg border border-input bg-background p-2.5 text-sm outline-none"
+                >
                   <option value="CREDIT">{t("admin.adjustCredit")}</option>
                   <option value="DEBIT">{t("admin.adjustDebit")}</option>
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="adjust-amount" className="text-xs font-semibold text-muted-foreground">
+                <label
+                  htmlFor="adjust-amount"
+                  className="text-xs font-semibold text-muted-foreground"
+                >
                   {t("amount")} *
                 </label>
-                <Input id="adjust-amount" type="number" min={0.01} step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} required className="font-mono" />
+                <Input
+                  id="adjust-amount"
+                  type="number"
+                  min={0.01}
+                  step="0.01"
+                  value={adjustAmount}
+                  onChange={(e) => setAdjustAmount(e.target.value)}
+                  required
+                  className="font-mono"
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <label htmlFor="adjust-reason" className="text-xs font-semibold text-muted-foreground">
+                <label
+                  htmlFor="adjust-reason"
+                  className="text-xs font-semibold text-muted-foreground"
+                >
                   {t("admin.adjustReason")} *
                 </label>
-                <Input id="adjust-reason" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} maxLength={500} required />
+                <Input
+                  id="adjust-reason"
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  maxLength={500}
+                  required
+                />
               </div>
               <div className="sm:col-span-2">
                 <Button type="submit" disabled={isAdjusting} className="h-11 w-full">
@@ -414,7 +553,10 @@ export function AdminFinanceDashboard() {
             <div className="rounded-lg bg-surface-muted p-3 text-xs">
               <p className="font-semibold">{t("admin.checkTransactions")}</p>
               <p className="font-mono tabular-nums">
-                {fees.reduce((s, f) => s + Number((f as Record<string, unknown>).totalMinor ?? 0), 0) / 100}
+                {fees.reduce(
+                  (s, f) => s + Number((f as Record<string, unknown>).totalMinor ?? 0),
+                  0,
+                ) / 100}
               </p>
             </div>
             <Button
@@ -424,7 +566,14 @@ export function AdminFinanceDashboard() {
               onClick={() =>
                 downloadCsv(
                   "journal.csv",
-                  ["transactionCode", "type", "status", "referenceType", "referenceId", "createdAt"],
+                  [
+                    "transactionCode",
+                    "type",
+                    "status",
+                    "referenceType",
+                    "referenceId",
+                    "createdAt",
+                  ],
                   journal.map((txn) => ({ ...txn })),
                 )
               }
@@ -442,7 +591,9 @@ export function AdminFinanceDashboard() {
             <div
               role="status"
               className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-xs font-semibold ${
-                check?.ok ? "border-success bg-success-soft text-success" : "border-danger bg-danger-soft text-danger"
+                check?.ok
+                  ? "border-success bg-success-soft text-success"
+                  : "border-danger bg-danger-soft text-danger"
               }`}
             >
               {check?.ok ? (
@@ -454,20 +605,36 @@ export function AdminFinanceDashboard() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("admin.checkMerchants")}</p>
-                <p className="font-mono text-lg font-bold tabular-nums">{check?.merchants.length ?? 0}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("admin.checkMerchants")}
+                </p>
+                <p className="font-mono text-lg font-bold tabular-nums">
+                  {check?.merchants.length ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("admin.checkRiders")}</p>
-                <p className="font-mono text-lg font-bold tabular-nums">{check?.riders.length ?? 0}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("admin.checkRiders")}
+                </p>
+                <p className="font-mono text-lg font-bold tabular-nums">
+                  {check?.riders.length ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("admin.checkSettlements")}</p>
-                <p className="font-mono text-lg font-bold tabular-nums">{check?.settlements.length ?? 0}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("admin.checkSettlements")}
+                </p>
+                <p className="font-mono text-lg font-bold tabular-nums">
+                  {check?.settlements.length ?? 0}
+                </p>
               </div>
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("admin.checkTransactions")}</p>
-                <p className="font-mono text-lg font-bold tabular-nums">{check?.transactions.length ?? 0}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("admin.checkTransactions")}
+                </p>
+                <p className="font-mono text-lg font-bold tabular-nums">
+                  {check?.transactions.length ?? 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -475,14 +642,29 @@ export function AdminFinanceDashboard() {
       ) : null}
 
       {/* Payout decision dialog with confirmation context */}
-      <Dialog open={selectedPayout !== null} onOpenChange={(open) => !open && setSelectedPayout(null)}>
+      <Dialog
+        open={selectedPayout !== null}
+        onOpenChange={(open) => !open && setSelectedPayout(null)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {decision === "approve" ? t("payout.approveTitle") : decision === "reject" ? t("payout.rejectTitle") : decision === "fail" ? t("payout.failTitle") : t("payout.processTitle")}
+              {decision === "approve"
+                ? t("payout.approveTitle")
+                : decision === "reject"
+                  ? t("payout.rejectTitle")
+                  : decision === "fail"
+                    ? t("payout.failTitle")
+                    : t("payout.processTitle")}
             </DialogTitle>
             <DialogDescription>
-              {decision === "approve" ? t("payout.approveMessage") : decision === "reject" ? t("payout.rejectMessage") : decision === "fail" ? t("payout.failMessage") : t("payout.processMessage")}
+              {decision === "approve"
+                ? t("payout.approveMessage")
+                : decision === "reject"
+                  ? t("payout.rejectMessage")
+                  : decision === "fail"
+                    ? t("payout.failMessage")
+                    : t("payout.processMessage")}
             </DialogDescription>
           </DialogHeader>
           {selectedPayout ? (
@@ -493,7 +675,7 @@ export function AdminFinanceDashboard() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">{t("payout.requestedAmount")}</dt>
-                <dd className="font-bold tabular-nums">৳{Number(selectedPayout.amount).toLocaleString()}</dd>
+                <dd className="font-bold tabular-nums">{bdt(Number(selectedPayout.amount))}</dd>
               </div>
               <div className="flex justify-between text-xs">
                 <dt className="text-muted-foreground">{t("payout.destination")}</dt>
@@ -503,18 +685,35 @@ export function AdminFinanceDashboard() {
           ) : null}
           {decision === "complete" ? (
             <div className="space-y-1.5">
-              <label htmlFor="payout-reference" className="text-xs font-semibold text-muted-foreground">
+              <label
+                htmlFor="payout-reference"
+                className="text-xs font-semibold text-muted-foreground"
+              >
                 {t("payout.providerReference")}
               </label>
-              <Input id="payout-reference" value={reference} onChange={(e) => setReference(e.target.value)} maxLength={100} />
+              <Input
+                id="payout-reference"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                maxLength={100}
+              />
             </div>
           ) : null}
           {decision === "reject" || decision === "fail" ? (
             <div className="space-y-1.5">
-              <label htmlFor="payout-reason" className="text-xs font-semibold text-muted-foreground">
+              <label
+                htmlFor="payout-reason"
+                className="text-xs font-semibold text-muted-foreground"
+              >
                 {decision === "reject" ? t("payout.rejectReason") : t("payout.failureReason")} *
               </label>
-              <Input id="payout-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} required />
+              <Input
+                id="payout-reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                maxLength={500}
+                required
+              />
             </div>
           ) : null}
           <DialogFooter>
@@ -539,13 +738,23 @@ export function AdminFinanceDashboard() {
             <label htmlFor="reverse-reason" className="text-xs font-semibold text-muted-foreground">
               {t("admin.adjustReason")} *
             </label>
-            <Input id="reverse-reason" value={reverseReason} onChange={(e) => setReverseReason(e.target.value)} maxLength={500} required />
+            <Input
+              id="reverse-reason"
+              value={reverseReason}
+              onChange={(e) => setReverseReason(e.target.value)}
+              maxLength={500}
+              required
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setReverseId(null)}>
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleReverse} disabled={isReversing || reverseReason.trim().length < 5}>
+            <Button
+              type="button"
+              onClick={handleReverse}
+              disabled={isReversing || reverseReason.trim().length < 5}
+            >
               {t("confirm")}
             </Button>
           </DialogFooter>

@@ -41,11 +41,7 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
         <Providers>
-          <WalletCard
-            wallet={mockWallet}
-            isLoading={false}
-            onRequestPayout={handlePayout}
-          />
+          <WalletCard wallet={mockWallet} isLoading={false} onRequestPayout={handlePayout} />
         </Providers>
       </NextIntlClientProvider>,
     );
@@ -62,6 +58,7 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
   });
 
   it("2. TransactionsTable renders statement rows with paginated props", () => {
+    // Presentational: the parent owns the API query and the URL-backed filter.
     const mockTxs = [
       {
         id: "tx-1",
@@ -92,13 +89,16 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
             page={1}
             onPageChange={() => undefined}
             hasMore={false}
+            typeFilter="ALL"
+            onTypeFilterChange={() => undefined}
           />
         </Providers>
       </NextIntlClientProvider>,
     );
 
-    expect(screen.getAllByText("COD_CREDIT").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("DELIVERY_FEE").length).toBeGreaterThanOrEqual(1);
+    // Status labels are translated from the centralized WalletTransactionType namespace.
+    expect(screen.getAllByText("COD credit").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Delivery fee").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("৳3,000")).toBeDefined();
     expect(screen.getByText("৳120")).toBeDefined();
     expect(screen.getAllByText(/DHR-20261004-TEST01/).length).toBeGreaterThanOrEqual(2);
@@ -110,11 +110,7 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
     render(
       <NextIntlClientProvider locale="en" messages={messages}>
         <Providers>
-          <PayoutRequestModal
-            isOpen={true}
-            onClose={handleClose}
-            availableBalance={5000}
-          />
+          <PayoutRequestModal isOpen={true} onClose={handleClose} availableBalance={5000} />
         </Providers>
       </NextIntlClientProvider>,
     );

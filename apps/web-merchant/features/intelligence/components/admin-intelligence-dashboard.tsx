@@ -12,10 +12,12 @@ import {
 } from "../api/intelligence-admin.api";
 import { PageHeader } from "@/components/page-header";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { useFormatters } from "@/lib/format";
 
 /** Admin-only intelligence operations: dataset, models, metrics, overrides. */
 export function AdminIntelligenceDashboard() {
   const t = useTranslations("AdminIntelligence");
+  const { date: fmtDate, dateTime } = useFormatters();
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
   const versions = useGetIntelligenceVersionsQuery();
@@ -44,7 +46,13 @@ export function AdminIntelligenceDashboard() {
         description={t("subtitle")}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleImport} disabled={isImporting} className="h-9 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleImport}
+              disabled={isImporting}
+              className="h-9 gap-2"
+            >
               {isImporting ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
               ) : (
@@ -70,7 +78,10 @@ export function AdminIntelligenceDashboard() {
       />
 
       {feedback && (
-        <div role="alert" className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground">
+        <div
+          role="alert"
+          className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground"
+        >
           {feedback}
         </div>
       )}
@@ -111,7 +122,7 @@ export function AdminIntelligenceDashboard() {
                   {t("geoCounts", { districts: d.districts, upazilas: d.upazilas })}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  {d.source} · {new Date(d.importedAt).toLocaleDateString()}
+                  {d.source} · {fmtDate(d.importedAt)}
                 </p>
               </Card>
             ))}
@@ -122,7 +133,11 @@ export function AdminIntelligenceDashboard() {
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {data.models.map((m) => (
-                  <Badge key={`${m.name}-${m.version}`} variant={m.status === "ACTIVE" ? "default" : "secondary"} className="font-mono text-[10px]">
+                  <Badge
+                    key={`${m.name}-${m.version}`}
+                    variant={m.status === "ACTIVE" ? "default" : "secondary"}
+                    className="font-mono text-[10px]"
+                  >
                     {m.name}@{m.version} · {m.status}
                   </Badge>
                 ))}
@@ -150,19 +165,30 @@ export function AdminIntelligenceDashboard() {
               </h3>
             </div>
             {overrideItems.length === 0 ? (
-              <p className="py-4 text-center text-xs text-muted-foreground">{t("overridesEmpty")}</p>
+              <p className="py-4 text-center text-xs text-muted-foreground">
+                {t("overridesEmpty")}
+              </p>
             ) : (
               <div className="space-y-2">
                 {overrideItems.map((o) => (
-                  <div key={o.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-2.5 text-xs">
-                    <Badge variant="outline" className="font-mono text-[10px]">{o.action}</Badge>
-                    <span className="font-mono text-[11px] text-muted-foreground">{o.parcelId.slice(0, 8)}…</span>
+                  <div
+                    key={o.id}
+                    className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-2.5 text-xs"
+                  >
+                    <Badge variant="outline" className="font-mono text-[10px]">
+                      {o.action}
+                    </Badge>
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {o.parcelId.slice(0, 8)}…
+                    </span>
                     <Badge variant="secondary">{o.overrideDecision}</Badge>
                     {o.overrideReason && (
-                      <span className="max-w-full truncate text-muted-foreground">{o.overrideReason}</span>
+                      <span className="max-w-full truncate text-muted-foreground">
+                        {o.overrideReason}
+                      </span>
                     )}
                     <span className="ml-auto text-[11px] text-muted-foreground">
-                      {o.overriddenAt ? new Date(o.overriddenAt).toLocaleString() : "—"}
+                      {o.overriddenAt ? dateTime(o.overriddenAt) : "—"}
                     </span>
                   </div>
                 ))}

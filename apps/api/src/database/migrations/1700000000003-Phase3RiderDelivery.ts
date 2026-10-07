@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 3 - Rider Delivery.
@@ -13,7 +13,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * already-migrated databases.
  */
 export class Phase3RiderDelivery1700000000003 implements MigrationInterface {
-  name = 'Phase3RiderDelivery1700000000003';
+  name = "Phase3RiderDelivery1700000000003";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // ------------------------------------------------------------------

@@ -39,23 +39,23 @@ product.**
 
 ### 2.1 Palette
 
-| Token | Value | Utility | Purpose |
-| :--- | :--- | :--- | :--- |
-| `--background` | `#F8FAFC` | `bg-background` | Page wash |
-| `--surface` | `#FFFFFF` | `bg-surface` | Cards, panels, sheets |
-| `--surface-muted` | `#F1F5F9` | `bg-surface-muted` | Subtle section separation |
-| `--foreground` / `--text-primary` | `#0F172A` | `text-foreground` | Primary text |
-| `--text-secondary` | `#64748B` | `text-muted-foreground` | Secondary text |
-| `--text-muted` | `#94A3B8` | `text-muted` | Tertiary / disabled |
-| `--primary` | `#16A34A` | `bg-primary` / `text-primary` | Brand, primary action |
-| `--primary-hover` | `#15803D` | `bg-primary-hover` | Primary hover |
-| `--primary-soft` | `#DCFCE7` | `bg-primary-soft` | Tinted surfaces, active nav |
-| `--success` | `#16A34A` | `text-success` / `bg-success` | Delivered, verified |
-| `--warning` | `#F59E0B` | `text-warning` / `bg-warning` | Pending, attention |
-| `--danger` | `#EF4444` | `text-danger` / `bg-danger` | Failed, destructive |
-| `--info` | `#3B82F6` | `text-info` / `bg-info` | Neutral information |
-| `--border` | `#E2E8F0` | `border-border` | Structural lines only |
-| `--ring` | `#16A34A` | `ring-ring` | Focus indicator |
+| Token                             | Value     | Utility                       | Purpose                     |
+| :-------------------------------- | :-------- | :---------------------------- | :-------------------------- |
+| `--background`                    | `#F8FAFC` | `bg-background`               | Page wash                   |
+| `--surface`                       | `#FFFFFF` | `bg-surface`                  | Cards, panels, sheets       |
+| `--surface-muted`                 | `#F1F5F9` | `bg-surface-muted`            | Subtle section separation   |
+| `--foreground` / `--text-primary` | `#0F172A` | `text-foreground`             | Primary text                |
+| `--text-secondary`                | `#64748B` | `text-muted-foreground`       | Secondary text              |
+| `--text-muted`                    | `#94A3B8` | `text-muted`                  | Tertiary / disabled         |
+| `--primary`                       | `#16A34A` | `bg-primary` / `text-primary` | Brand, primary action       |
+| `--primary-hover`                 | `#15803D` | `bg-primary-hover`            | Primary hover               |
+| `--primary-soft`                  | `#DCFCE7` | `bg-primary-soft`             | Tinted surfaces, active nav |
+| `--success`                       | `#16A34A` | `text-success` / `bg-success` | Delivered, verified         |
+| `--warning`                       | `#F59E0B` | `text-warning` / `bg-warning` | Pending, attention          |
+| `--danger`                        | `#EF4444` | `text-danger` / `bg-danger`   | Failed, destructive         |
+| `--info`                          | `#3B82F6` | `text-info` / `bg-info`       | Neutral information         |
+| `--border`                        | `#E2E8F0` | `border-border`               | Structural lines only       |
+| `--ring`                          | `#16A34A` | `ring-ring`                   | Focus indicator             |
 
 Each state colour has a matching **soft** pair (`bg-success-soft` +
 `text-success-soft-foreground`) for status chips. **Soft variants are the
@@ -86,10 +86,10 @@ Raw colours are acceptable **only** inside `tokens.css` and the Tailwind preset.
 
 ### 3.1 Fonts
 
-| Language | Family | Injected as |
-| :--- | :--- | :--- |
-| English | **Inter** | `--font-inter` (via `next/font/google`) |
-| Bangla | **Noto Sans Bengali** | `--font-bangla` (via `next/font/google`) |
+| Language | Family                | Injected as                              |
+| :------- | :-------------------- | :--------------------------------------- |
+| English  | **Inter**             | `--font-inter` (via `next/font/google`)  |
+| Bangla   | **Noto Sans Bengali** | `--font-bangla` (via `next/font/google`) |
 
 Both are loaded in `apps/web-merchant/app/[locale]/layout.tsx` and assigned to
 the `--font-sans` / `--font-bangla` token variables.
@@ -103,18 +103,18 @@ space than Latin at the same size.
 Utilities are defined in the Tailwind preset, so sizes are consistent
 everywhere instead of ad-hoc `text-lg` / `text-xl` choices.
 
-| Utility | Size | Use |
-| :--- | :--- | :--- |
-| `text-display` | 36px / 700 | Hero headlines |
-| `text-h1` | 28px / 700 | Page titles |
-| `text-h2` | 22px / 700 | Section titles |
-| `text-h3` | 18px / 600 | Card / modal titles |
-| `text-h4` | 16px / 600 | Sub-headings |
-| `text-body` | 14px / 1.6 | Body copy |
-| `text-body-sm` | 13px | Dense body copy |
-| `text-label` | 13px / 500 | Form labels |
-| `text-caption` | 12px | Metadata, table headers |
-| `text-table` | 13px | Tabular data |
+| Utility        | Size       | Use                     |
+| :------------- | :--------- | :---------------------- |
+| `text-display` | 36px / 700 | Hero headlines          |
+| `text-h1`      | 28px / 700 | Page titles             |
+| `text-h2`      | 22px / 700 | Section titles          |
+| `text-h3`      | 18px / 600 | Card / modal titles     |
+| `text-h4`      | 16px / 600 | Sub-headings            |
+| `text-body`    | 14px / 1.6 | Body copy               |
+| `text-body-sm` | 13px       | Dense body copy         |
+| `text-label`   | 13px / 500 | Form labels             |
+| `text-caption` | 12px       | Metadata, table headers |
+| `text-table`   | 13px       | Tabular data            |
 
 Tracking codes, money and weights use `.tabular-nums` or `font-mono` so digits
 align column-wise.
@@ -143,13 +143,13 @@ selected controls, and focus rings. **Do not put a border around every card.**
 `Button`, `Badge`, `Card`, `Input`, `Label`, `Select`, `Form*`, `Toaster`,
 `Logo`, `LanguageSwitcher` — these contain **no Dhruto business logic**.
 
-| Component | Notes |
-| :--- | :--- |
-| `Button` | Variants: `default`, `secondary`, `soft`, `outline`, `ghost`, `destructive`, `link`. Sizes: `sm`, `default` (**44px**), `lg`, `icon`, `icon-sm`. Supports `loading`. |
-| `Badge` | Solid (`success`, `warning`, `danger`, `info`) and soft (`*-soft`) variants. |
-| `Card` | Border + surface only, no shadow. |
-| `Input` | 44px tall, `error` prop sets `aria-invalid`. |
-| `Logo` | The only place the Dhruto brand lockup is defined. |
+| Component | Notes                                                                                                                                                                |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`  | Variants: `default`, `secondary`, `soft`, `outline`, `ghost`, `destructive`, `link`. Sizes: `sm`, `default` (**44px**), `lg`, `icon`, `icon-sm`. Supports `loading`. |
+| `Badge`   | Solid (`success`, `warning`, `danger`, `info`) and soft (`*-soft`) variants.                                                                                         |
+| `Card`    | Border + surface only, no shadow.                                                                                                                                    |
+| `Input`   | 44px tall, `error` prop sets `aria-invalid`.                                                                                                                         |
+| `Logo`    | The only place the Dhruto brand lockup is defined.                                                                                                                   |
 
 > **Important:** `@dhruto/ui`'s barrel re-exports client components, so it is a
 > client boundary. **Server components must not import `cn` from `@dhruto/ui`.**
@@ -181,11 +181,11 @@ timelines and the public tracker all resolve the same colours:
 
 ## 6. Layout & navigation
 
-| Shell | Routes | Chrome |
-| :--- | :--- | :--- |
-| **Public** | `/`, `/track`, `/services`, `/pricing`, `/about`, `/contact`, `/faq`, `/privacy`, `/terms` | `PublicHeader` + `PublicFooter` |
-| **Auth** | `/login`, `/register` | Distraction-free, no public nav |
-| **Dashboard** | `/dashboard`, `/parcels`, `/bookings`, `/finance`, `/hub`, `/rider`, `/intelligence`, `/developer` | `DashboardShell` |
+| Shell         | Routes                                                                                             | Chrome                          |
+| :------------ | :------------------------------------------------------------------------------------------------- | :------------------------------ |
+| **Public**    | `/`, `/track`, `/services`, `/pricing`, `/about`, `/contact`, `/faq`, `/privacy`, `/terms`         | `PublicHeader` + `PublicFooter` |
+| **Auth**      | `/login`, `/register`                                                                              | Distraction-free, no public nav |
+| **Dashboard** | `/dashboard`, `/parcels`, `/bookings`, `/finance`, `/hub`, `/rider`, `/intelligence`, `/developer` | `DashboardShell`                |
 
 `AppShell` resolves the surface from the pathname — this is the **only** place
 that decides which chrome wraps a route. Do not render a header or footer inside
@@ -199,7 +199,7 @@ exactly the roles allowed. **Never scatter `role === "…"` checks through
 components.**
 
 ```ts
-export const DASHBOARD_NAV: NavGroup[] = [ /* groups → items → roles[] */ ];
+export const DASHBOARD_NAV: NavGroup[] = [/* groups → items → roles[] */];
 ```
 
 Roles mirror the API `UserRole`: `ADMIN`, `MERCHANT`, `RIDER`, `HUB_MANAGER`,

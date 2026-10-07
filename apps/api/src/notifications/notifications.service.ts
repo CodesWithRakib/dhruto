@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger, Inject, Optional } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  Logger,
+  Inject,
+  Optional,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectQueue } from "@nestjs/bullmq";
 import type { Queue } from "bullmq";
@@ -68,7 +75,7 @@ export class NotificationsService {
       message: dto.message,
       recipientTarget:
         channel === NotificationChannel.SMS && dto.recipientTarget
-          ? this.smsProvider?.normalizePhoneNumber(dto.recipientTarget) ?? dto.recipientTarget
+          ? (this.smsProvider?.normalizePhoneNumber(dto.recipientTarget) ?? dto.recipientTarget)
           : dto.recipientTarget || null,
       status: inApp ? NotificationStatus.SENT : NotificationStatus.PENDING,
       metadata: (dto.metadata as Record<string, unknown> | undefined) ?? null,
@@ -136,7 +143,11 @@ export class NotificationsService {
       notification.sentAt = new Date();
     } else if (result.errorKind === ProviderErrorKind.PERMANENT) {
       notification.status = NotificationStatus.FAILED;
-      notification.failureReason = `${result.errorCode ?? PROVIDER_ERROR_CODES.INVALID_RECIPIENT}: ${result.errorMessage ?? ""}`.slice(0, 500);
+      notification.failureReason =
+        `${result.errorCode ?? PROVIDER_ERROR_CODES.INVALID_RECIPIENT}: ${result.errorMessage ?? ""}`.slice(
+          0,
+          500,
+        );
     } else {
       throw new Error(
         `${result.errorCode ?? PROVIDER_ERROR_CODES.PROVIDER_UNAVAILABLE}: ${result.errorMessage ?? "transient SMS failure"}`,
@@ -161,7 +172,11 @@ export class NotificationsService {
       notification.sentAt = new Date();
     } else if (result.errorKind === ProviderErrorKind.PERMANENT) {
       notification.status = NotificationStatus.FAILED;
-      notification.failureReason = `${result.errorCode ?? PROVIDER_ERROR_CODES.INVALID_RECIPIENT}: ${result.errorMessage ?? ""}`.slice(0, 500);
+      notification.failureReason =
+        `${result.errorCode ?? PROVIDER_ERROR_CODES.INVALID_RECIPIENT}: ${result.errorMessage ?? ""}`.slice(
+          0,
+          500,
+        );
     } else {
       throw new Error(
         `${result.errorCode ?? PROVIDER_ERROR_CODES.PROVIDER_UNAVAILABLE}: ${result.errorMessage ?? "transient email failure"}`,
@@ -185,9 +200,7 @@ export class NotificationsService {
       try {
         await this.transportNotification(notification.id);
       } catch (error) {
-        this.logger.warn(
-          `Direct transport failed: ${getErrorMessage(error, "unknown")}`,
-        );
+        this.logger.warn(`Direct transport failed: ${getErrorMessage(error, "unknown")}`);
       }
       const reloaded = await this.findById(notification.id);
       return reloaded ?? notification;
@@ -256,7 +269,8 @@ export class NotificationsService {
     const scope =
       typeof merchantIdOrScope === "string" ? { merchantId: merchantIdOrScope } : merchantIdOrScope;
     const conditions: FindOptionsWhere<Notification>[] = [];
-    if (scope.merchantId) conditions.push({ merchantId: scope.merchantId, status: NotificationStatus.SENT });
+    if (scope.merchantId)
+      conditions.push({ merchantId: scope.merchantId, status: NotificationStatus.SENT });
     if (scope.userId) conditions.push({ userId: scope.userId, status: NotificationStatus.SENT });
     if (conditions.length === 0) return 0;
     return this.notificationRepo.count({ where: conditions });
@@ -278,9 +292,7 @@ export class NotificationsService {
       ((!!scope?.merchantId &&
         notification.merchantId !== null &&
         notification.merchantId === scope.merchantId) ||
-        (!!scope?.userId &&
-          notification.userId !== null &&
-          notification.userId === scope.userId));
+        (!!scope?.userId && notification.userId !== null && notification.userId === scope.userId));
     if (!owned) {
       throw new NotFoundException({
         message: "Notification not found",
@@ -296,9 +308,10 @@ export class NotificationsService {
   /**
    * Marks all merchant notifications as read.
    */
-  async markAllAsRead(
-    scope: { merchantId?: string; userId?: string },
-  ): Promise<{ updatedCount: number }> {
+  async markAllAsRead(scope: {
+    merchantId?: string;
+    userId?: string;
+  }): Promise<{ updatedCount: number }> {
     const query = this.notificationRepo
       .createQueryBuilder()
       .update(Notification)
@@ -322,7 +335,7 @@ export class NotificationsService {
   async getPreferences(scope: {
     merchantId?: string;
     userId?: string;
-  }  ): Promise<{ items: NotificationPreferenceItem[]; locale: SupportedLocale }> {
+  }): Promise<{ items: NotificationPreferenceItem[]; locale: SupportedLocale }> {
     const rows = await this.preferenceRepo.find({
       where: {
         userId: scope.userId ?? IsNull(),
@@ -424,7 +437,11 @@ export class NotificationsService {
         this.notificationsQueue,
         "notification-send",
         { notificationId: notification.id },
-        { jobId: `notif-${notification.id}`, attempts: 4, backoff: { type: "exponential", delay: 10000 } },
+        {
+          jobId: `notif-${notification.id}`,
+          attempts: 4,
+          backoff: { type: "exponential", delay: 10000 },
+        },
         () => this.transportNotification(notification.id),
       ).catch((error: unknown) =>
         this.logger.warn(`OTP SMS enqueue failed: ${getErrorMessage(error, "unknown")}`),

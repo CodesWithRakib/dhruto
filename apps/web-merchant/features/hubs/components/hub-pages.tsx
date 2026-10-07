@@ -47,9 +47,7 @@ export function HubBagsPage() {
 export function HubBagDetailsPage({ bagId }: { bagId: string }) {
   const t = useTranslations("Hub");
   return (
-    <HubPageShell title={t("bags.details")}>
-      {() => <BagDetailsView bagId={bagId} />}
-    </HubPageShell>
+    <HubPageShell title={t("bags.details")}>{() => <BagDetailsView bagId={bagId} />}</HubPageShell>
   );
 }
 

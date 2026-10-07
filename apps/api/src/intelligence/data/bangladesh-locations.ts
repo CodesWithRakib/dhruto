@@ -2,7 +2,8 @@ import { DeliveryZone } from "@dhruto/contracts";
 
 /** Geography dataset version + provenance for this file. */
 export const GEO_DATASET_VERSION = "bd-geo-2026-10" as const;
-export const GEO_DATASET_SOURCE = "BBS administrative hierarchy (compiled sadar reference)" as const;
+export const GEO_DATASET_SOURCE =
+  "BBS administrative hierarchy (compiled sadar reference)" as const;
 
 export interface DistrictInfo {
   name: string;
@@ -30,26 +31,76 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-DHK",
     thanas: [
-      { name: "Dhanmondi", nameBn: "ধানমন্ডি", aliases: ["dhanmondi", "dhanmandi", "ধানমন্ডি"], postalCode: "1205" },
+      {
+        name: "Dhanmondi",
+        nameBn: "ধানমন্ডি",
+        aliases: ["dhanmondi", "dhanmandi", "ধানমন্ডি"],
+        postalCode: "1205",
+      },
       { name: "Gulshan", nameBn: "গুলশান", aliases: ["gulshan", "গুলশান"], postalCode: "1212" },
       { name: "Banani", nameBn: "বনানী", aliases: ["banani", "বনানী"], postalCode: "1213" },
-      { name: "Uttara", nameBn: "উত্তরা", aliases: ["uttara", "utora", "উত্তরা"], postalCode: "1230" },
-      { name: "Mirpur", nameBn: "মিরপুর", aliases: ["mirpur", "meerpur", "মিরপুর"], postalCode: "1216" },
-      { name: "Mohammadpur", nameBn: "মোহাম্মদপুর", aliases: ["mohammadpur", "mohammodpur", "মোহাম্মদপুর"], postalCode: "1207" },
-      { name: "Motijheel", nameBn: "মতিঝিল", aliases: ["motijheel", "motijhil", "মতিঝিল"], postalCode: "1000" },
+      {
+        name: "Uttara",
+        nameBn: "উত্তরা",
+        aliases: ["uttara", "utora", "উত্তরা"],
+        postalCode: "1230",
+      },
+      {
+        name: "Mirpur",
+        nameBn: "মিরপুর",
+        aliases: ["mirpur", "meerpur", "মিরপুর"],
+        postalCode: "1216",
+      },
+      {
+        name: "Mohammadpur",
+        nameBn: "মোহাম্মদপুর",
+        aliases: ["mohammadpur", "mohammodpur", "মোহাম্মদপুর"],
+        postalCode: "1207",
+      },
+      {
+        name: "Motijheel",
+        nameBn: "মতিঝিল",
+        aliases: ["motijheel", "motijhil", "মতিঝিল"],
+        postalCode: "1000",
+      },
       { name: "Badda", nameBn: "বাড্ডা", aliases: ["badda", "বাড্ডা"], postalCode: "1212" },
       { name: "Khilgaon", nameBn: "খিলগাঁও", aliases: ["khilgaon", "খিলগাঁও"], postalCode: "1219" },
       { name: "Rampura", nameBn: "রামপুরা", aliases: ["rampura", "রামপুরা"], postalCode: "1219" },
       { name: "Tejgaon", nameBn: "তেজগাঁও", aliases: ["tejgaon", "তেজগাঁও"], postalCode: "1208" },
-      { name: "Lalbagh", nameBn: "লালবাগ", aliases: ["lalbagh", "lalbag", "লালবাগ"], postalCode: "1211" },
+      {
+        name: "Lalbagh",
+        nameBn: "লালবাগ",
+        aliases: ["lalbagh", "lalbag", "লালবাগ"],
+        postalCode: "1211",
+      },
       { name: "Paltan", nameBn: "পল্টন", aliases: ["paltan", "পল্টন"], postalCode: "1000" },
-      { name: "Shahbagh", nameBn: "শাহবাগ", aliases: ["shahbagh", "shahbag", "শাহবাগ"], postalCode: "1000" },
-      { name: "Jatrabari", nameBn: "যাত্রাবাড়ী", aliases: ["jatrabari", "যাত্রাবাড়ী", "যাত্রাবাড়ি"], postalCode: "1204" },
+      {
+        name: "Shahbagh",
+        nameBn: "শাহবাগ",
+        aliases: ["shahbagh", "shahbag", "শাহবাগ"],
+        postalCode: "1000",
+      },
+      {
+        name: "Jatrabari",
+        nameBn: "যাত্রাবাড়ী",
+        aliases: ["jatrabari", "যাত্রাবাড়ী", "যাত্রাবাড়ি"],
+        postalCode: "1204",
+      },
       { name: "Demra", nameBn: "ডেমরা", aliases: ["demra", "ডেমরা"], postalCode: "1360" },
       { name: "Savar", nameBn: "সাভার", aliases: ["savar", "shavar", "সাভার"], postalCode: "1340" },
-      { name: "Keraniganj", nameBn: "কেরানীগঞ্জ", aliases: ["keraniganj", "কেরানীগঞ্জ"], postalCode: "1310" },
+      {
+        name: "Keraniganj",
+        nameBn: "কেরানীগঞ্জ",
+        aliases: ["keraniganj", "কেরানীগঞ্জ"],
+        postalCode: "1310",
+      },
       { name: "Dhamrai", nameBn: "ধামরাই", aliases: ["dhamrai", "ধামরাই"], postalCode: "1350" },
-      { name: "Nawabganj", nameBn: "নবাবগঞ্জ", aliases: ["nawabganj", "নবাবগঞ্জ"], postalCode: "1320" },
+      {
+        name: "Nawabganj",
+        nameBn: "নবাবগঞ্জ",
+        aliases: ["nawabganj", "নবাবগঞ্জ"],
+        postalCode: "1320",
+      },
       { name: "Dohar", nameBn: "দোহার", aliases: ["dohar", "দোহার"], postalCode: "1330" },
     ],
   },
@@ -61,11 +112,31 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-GAZ",
     thanas: [
-      { name: "Gazipur Sadar", nameBn: "গাজীপুর সদর", aliases: ["sadar", "joydebpur", "জয়দেবপুর"], postalCode: "1700" },
+      {
+        name: "Gazipur Sadar",
+        nameBn: "গাজীপুর সদর",
+        aliases: ["sadar", "joydebpur", "জয়দেবপুর"],
+        postalCode: "1700",
+      },
       { name: "Tongi", nameBn: "টঙ্গী", aliases: ["tongi", "টঙ্গী"], postalCode: "1710" },
-      { name: "Kaliakair", nameBn: "কালিয়াকৈর", aliases: ["kaliakair", "কালিয়াকৈর"], postalCode: "1750" },
-      { name: "Kapasia", nameBn: "কাপাসিয়া", aliases: ["kapasia", "কাপাসিয়া"], postalCode: "1730" },
-      { name: "Sreepur", nameBn: "শ্রীপুর", aliases: ["sreepur", "shreepur", "শ্রীপুর"], postalCode: "1740" },
+      {
+        name: "Kaliakair",
+        nameBn: "কালিয়াকৈর",
+        aliases: ["kaliakair", "কালিয়াকৈর"],
+        postalCode: "1750",
+      },
+      {
+        name: "Kapasia",
+        nameBn: "কাপাসিয়া",
+        aliases: ["kapasia", "কাপাসিয়া"],
+        postalCode: "1730",
+      },
+      {
+        name: "Sreepur",
+        nameBn: "শ্রীপুর",
+        aliases: ["sreepur", "shreepur", "শ্রীপুর"],
+        postalCode: "1740",
+      },
     ],
   },
   {
@@ -76,13 +147,38 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-NGJ",
     thanas: [
-      { name: "Narayanganj Sadar", nameBn: "নারায়ণগঞ্জ সদর", aliases: ["sadar", "শহর"], postalCode: "1400" },
-      { name: "Fatullah", nameBn: "ফতুল্লা", aliases: ["fatullah", "fatulla", "ফতুল্লা"], postalCode: "1420" },
-      { name: "Siddhirganj", nameBn: "সিদ্ধিরগঞ্জ", aliases: ["siddhirganj", "সিদ্ধিরগঞ্জ"], postalCode: "1430" },
+      {
+        name: "Narayanganj Sadar",
+        nameBn: "নারায়ণগঞ্জ সদর",
+        aliases: ["sadar", "শহর"],
+        postalCode: "1400",
+      },
+      {
+        name: "Fatullah",
+        nameBn: "ফতুল্লা",
+        aliases: ["fatullah", "fatulla", "ফতুল্লা"],
+        postalCode: "1420",
+      },
+      {
+        name: "Siddhirganj",
+        nameBn: "সিদ্ধিরগঞ্জ",
+        aliases: ["siddhirganj", "সিদ্ধিরগঞ্জ"],
+        postalCode: "1430",
+      },
       { name: "Bandar", nameBn: "বন্দর", aliases: ["bandar", "বন্দর"], postalCode: "1410" },
       { name: "Rupganj", nameBn: "রূপগঞ্জ", aliases: ["rupganj", "রূপগঞ্জ"], postalCode: "1460" },
-      { name: "Araihazar", nameBn: "আড়াইহাজার", aliases: ["araihazar", "আড়াইহাজার"], postalCode: "1450" },
-      { name: "Sonargaon", nameBn: "সোনারগাঁও", aliases: ["sonargaon", "সোনারগাঁও"], postalCode: "1440" },
+      {
+        name: "Araihazar",
+        nameBn: "আড়াইহাজার",
+        aliases: ["araihazar", "আড়াইহাজার"],
+        postalCode: "1450",
+      },
+      {
+        name: "Sonargaon",
+        nameBn: "সোনারগাঁও",
+        aliases: ["sonargaon", "সোনারগাঁও"],
+        postalCode: "1440",
+      },
     ],
   },
   {
@@ -94,15 +190,45 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-CH-CTG",
     thanas: [
       { name: "Agrabad", nameBn: "আগ্রাবাদ", aliases: ["agrabad", "আগ্রাবাদ"], postalCode: "4100" },
-      { name: "Panchlaish", nameBn: "পাঁচলাইশ", aliases: ["panchlaish", "পাঁচলাইশ"], postalCode: "4203" },
-      { name: "Kotwali", nameBn: "কোতোয়ালী", aliases: ["kotwali", "কোতোয়ালী"], postalCode: "4000" },
-      { name: "Halishahar", nameBn: "হালিশহর", aliases: ["halishahar", "হালিশহর"], postalCode: "4216" },
+      {
+        name: "Panchlaish",
+        nameBn: "পাঁচলাইশ",
+        aliases: ["panchlaish", "পাঁচলাইশ"],
+        postalCode: "4203",
+      },
+      {
+        name: "Kotwali",
+        nameBn: "কোতোয়ালী",
+        aliases: ["kotwali", "কোতোয়ালী"],
+        postalCode: "4000",
+      },
+      {
+        name: "Halishahar",
+        nameBn: "হালিশহর",
+        aliases: ["halishahar", "হালিশহর"],
+        postalCode: "4216",
+      },
       { name: "Khulshi", nameBn: "খুলশী", aliases: ["khulshi", "খুলশী"], postalCode: "4225" },
       { name: "Bakalia", nameBn: "বাকলিয়া", aliases: ["bakalia", "বাকলিয়া"], postalCode: "4218" },
-      { name: "Double Mooring", nameBn: "ডবলমুরিং", aliases: ["double mooring", "ডবলমুরিং"], postalCode: "4100" },
-      { name: "Hathazari", nameBn: "হাটহাজারী", aliases: ["hathazari", "হাটহাজারী"], postalCode: "4330" },
+      {
+        name: "Double Mooring",
+        nameBn: "ডবলমুরিং",
+        aliases: ["double mooring", "ডবলমুরিং"],
+        postalCode: "4100",
+      },
+      {
+        name: "Hathazari",
+        nameBn: "হাটহাজারী",
+        aliases: ["hathazari", "হাটহাজারী"],
+        postalCode: "4330",
+      },
       { name: "Patiya", nameBn: "পটিয়া", aliases: ["patiya", "পটিয়া"], postalCode: "4370" },
-      { name: "Sitakunda", nameBn: "সীতাকুণ্ড", aliases: ["sitakunda", "sitakund", "সীতাকুণ্ড"], postalCode: "4310" },
+      {
+        name: "Sitakunda",
+        nameBn: "সীতাকুণ্ড",
+        aliases: ["sitakunda", "sitakund", "সীতাকুণ্ড"],
+        postalCode: "4310",
+      },
     ],
   },
   {
@@ -114,11 +240,36 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-SY-SYL",
     thanas: [
       { name: "Sylhet Sadar", nameBn: "সিলেট সদর", aliases: ["sadar", "সদর"], postalCode: "3100" },
-      { name: "Zindabazar", nameBn: "জিন্দাবাজার", aliases: ["zindabazar", "জিন্দাবাজার"], postalCode: "3100" },
-      { name: "Shah Paran", nameBn: "শাহপরাণ", aliases: ["shah paran", "শাহপরাণ"], postalCode: "3104" },
-      { name: "Beanibazar", nameBn: "বিয়ানীবাজার", aliases: ["beanibazar", "বিয়ানীবাজার"], postalCode: "3170" },
-      { name: "Golapganj", nameBn: "গোলাপগঞ্জ", aliases: ["golapganj", "গোলাপগঞ্জ"], postalCode: "3160" },
-      { name: "South Surma", nameBn: "দক্ষিণ সুরমা", aliases: ["south surma", "দক্ষিণ সুরমা"], postalCode: "3111" },
+      {
+        name: "Zindabazar",
+        nameBn: "জিন্দাবাজার",
+        aliases: ["zindabazar", "জিন্দাবাজার"],
+        postalCode: "3100",
+      },
+      {
+        name: "Shah Paran",
+        nameBn: "শাহপরাণ",
+        aliases: ["shah paran", "শাহপরাণ"],
+        postalCode: "3104",
+      },
+      {
+        name: "Beanibazar",
+        nameBn: "বিয়ানীবাজার",
+        aliases: ["beanibazar", "বিয়ানীবাজার"],
+        postalCode: "3170",
+      },
+      {
+        name: "Golapganj",
+        nameBn: "গোলাপগঞ্জ",
+        aliases: ["golapganj", "গোলাপগঞ্জ"],
+        postalCode: "3160",
+      },
+      {
+        name: "South Surma",
+        nameBn: "দক্ষিণ সুরমা",
+        aliases: ["south surma", "দক্ষিণ সুরমা"],
+        postalCode: "3111",
+      },
     ],
   },
   {
@@ -129,10 +280,20 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rajshahi",
     code: "BD-RJ-RAJ",
     thanas: [
-      { name: "Boalia", nameBn: "বোয়ালিয়া", aliases: ["boalia", "বোয়ালিয়া"], postalCode: "6000" },
+      {
+        name: "Boalia",
+        nameBn: "বোয়ালিয়া",
+        aliases: ["boalia", "বোয়ালিয়া"],
+        postalCode: "6000",
+      },
       { name: "Motihar", nameBn: "মতিহার", aliases: ["motihar", "মতিহার"], postalCode: "6204" },
       { name: "Rajpara", nameBn: "রাজপাড়া", aliases: ["rajpara", "রাজপাড়া"], postalCode: "6000" },
-      { name: "Shah Makhdum", nameBn: "শাহ মখদুম", aliases: ["shah makhdum", "শাহ মখদুম"], postalCode: "6207" },
+      {
+        name: "Shah Makhdum",
+        nameBn: "শাহ মখদুম",
+        aliases: ["shah makhdum", "শাহ মখদুম"],
+        postalCode: "6207",
+      },
       { name: "Paba", nameBn: "পবা", aliases: ["paba", "পবা"], postalCode: "6210" },
     ],
   },
@@ -145,9 +306,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-KH-KHU",
     thanas: [
       { name: "Khulna Sadar", nameBn: "খুলনা সদর", aliases: ["sadar", "সদর"], postalCode: "9100" },
-      { name: "Sonadanga", nameBn: "সোনাডাঙ্গা", aliases: ["sonadanga", "সোনাডাঙ্গা"], postalCode: "9000" },
-      { name: "Khalishpur", nameBn: "খালিশপুর", aliases: ["khalishpur", "খালিশপুর"], postalCode: "9000" },
-      { name: "Daulatpur", nameBn: "দৌলতপুর", aliases: ["daulatpur", "দৌলতপুর"], postalCode: "9202" },
+      {
+        name: "Sonadanga",
+        nameBn: "সোনাডাঙ্গা",
+        aliases: ["sonadanga", "সোনাডাঙ্গা"],
+        postalCode: "9000",
+      },
+      {
+        name: "Khalishpur",
+        nameBn: "খালিশপুর",
+        aliases: ["khalishpur", "খালিশপুর"],
+        postalCode: "9000",
+      },
+      {
+        name: "Daulatpur",
+        nameBn: "দৌলতপুর",
+        aliases: ["daulatpur", "দৌলতপুর"],
+        postalCode: "9202",
+      },
       { name: "Rupsha", nameBn: "রূপসা", aliases: ["rupsha", "রূপসা"], postalCode: "9240" },
     ],
   },
@@ -159,10 +335,30 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Barishal",
     code: "BD-BA-BSL",
     thanas: [
-      { name: "Barisal Sadar", nameBn: "বরিশাল সদর", aliases: ["sadar", "কোতোয়ালী"], postalCode: "8200" },
-      { name: "Airport", nameBn: "বিমানবন্দর", aliases: ["airport", "এয়ারপোর্ট"], postalCode: "8200" },
-      { name: "Bakerganj", nameBn: "বাকেরগঞ্জ", aliases: ["bakerganj", "বাকেরগঞ্জ"], postalCode: "8280" },
-      { name: "Babuganj", nameBn: "বাবুগঞ্জ", aliases: ["babuganj", "বাবুগঞ্জ"], postalCode: "8210" },
+      {
+        name: "Barisal Sadar",
+        nameBn: "বরিশাল সদর",
+        aliases: ["sadar", "কোতোয়ালী"],
+        postalCode: "8200",
+      },
+      {
+        name: "Airport",
+        nameBn: "বিমানবন্দর",
+        aliases: ["airport", "এয়ারপোর্ট"],
+        postalCode: "8200",
+      },
+      {
+        name: "Bakerganj",
+        nameBn: "বাকেরগঞ্জ",
+        aliases: ["bakerganj", "বাকেরগঞ্জ"],
+        postalCode: "8280",
+      },
+      {
+        name: "Babuganj",
+        nameBn: "বাবুগঞ্জ",
+        aliases: ["babuganj", "বাবুগঞ্জ"],
+        postalCode: "8210",
+      },
     ],
   },
   {
@@ -174,9 +370,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-RG-RGP",
     thanas: [
       { name: "Rangpur Sadar", nameBn: "রংপুর সদর", aliases: ["sadar", "সদর"], postalCode: "5400" },
-      { name: "Kotwali", nameBn: "কোতোয়ালী", aliases: ["kotwali", "কোতোয়ালী"], postalCode: "5400" },
+      {
+        name: "Kotwali",
+        nameBn: "কোতোয়ালী",
+        aliases: ["kotwali", "কোতোয়ালী"],
+        postalCode: "5400",
+      },
       { name: "Tajhat", nameBn: "তাজহাট", aliases: ["tajhat", "তাজহাট"], postalCode: "5404" },
-      { name: "Mithapukur", nameBn: "মিঠাপুকুর", aliases: ["mithapukur", "মিঠাপুকুর"], postalCode: "5460" },
+      {
+        name: "Mithapukur",
+        nameBn: "মিঠাপুকুর",
+        aliases: ["mithapukur", "মিঠাপুকুর"],
+        postalCode: "5460",
+      },
       { name: "Pirganj", nameBn: "পীরগঞ্জ", aliases: ["pirganj", "পীরগঞ্জ"], postalCode: "5470" },
     ],
   },
@@ -189,7 +395,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-MY-MYM",
     thanas: [
       { name: "Kotwali", nameBn: "কোতোয়ালী", aliases: ["kotwali", "সদর"], postalCode: "2200" },
-      { name: "Muktagacha", nameBn: "মুক্তাগাছা", aliases: ["muktagacha", "মুক্তাগাছা"], postalCode: "2210" },
+      {
+        name: "Muktagacha",
+        nameBn: "মুক্তাগাছা",
+        aliases: ["muktagacha", "মুক্তাগাছা"],
+        postalCode: "2210",
+      },
       { name: "Trishal", nameBn: "ত্রিশাল", aliases: ["trishal", "ত্রিশাল"], postalCode: "2220" },
       { name: "Bhaluka", nameBn: "ভালুকা", aliases: ["bhaluka", "ভালুকা"], postalCode: "2240" },
     ],
@@ -202,10 +413,25 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-COM",
     thanas: [
-      { name: "Cumilla Adarsha Sadar", nameBn: "কুমিল্লা আদর্শ সদর", aliases: ["sadar", "সদর"], postalCode: "3500" },
-      { name: "Cumilla Sadar Dakshin", nameBn: "কুমিল্লা সদর দক্ষিণ", aliases: ["sadar south"], postalCode: "3500" },
+      {
+        name: "Cumilla Adarsha Sadar",
+        nameBn: "কুমিল্লা আদর্শ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3500",
+      },
+      {
+        name: "Cumilla Sadar Dakshin",
+        nameBn: "কুমিল্লা সদর দক্ষিণ",
+        aliases: ["sadar south"],
+        postalCode: "3500",
+      },
       { name: "Laksam", nameBn: "লাকসাম", aliases: ["laksam", "লাকসাম"], postalCode: "3570" },
-      { name: "Daudkandi", nameBn: "দাউদকান্দি", aliases: ["daudkandi", "দাউদকান্দি"], postalCode: "3516" },
+      {
+        name: "Daudkandi",
+        nameBn: "দাউদকান্দি",
+        aliases: ["daudkandi", "দাউদকান্দি"],
+        postalCode: "3516",
+      },
     ],
   },
   {
@@ -217,7 +443,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-RJ-BOG",
     thanas: [
       { name: "Bogura Sadar", nameBn: "বগুড়া সদর", aliases: ["sadar", "সদর"], postalCode: "5800" },
-      { name: "Shajahanpur", nameBn: "শাজাহানপুর", aliases: ["shajahanpur", "শাজাহানপুর"], postalCode: "5801" },
+      {
+        name: "Shajahanpur",
+        nameBn: "শাজাহানপুর",
+        aliases: ["shajahanpur", "শাজাহানপুর"],
+        postalCode: "5801",
+      },
       { name: "Sherpur", nameBn: "শেরপুর", aliases: ["sherpur", "শেরপুর"], postalCode: "5840" },
     ],
   },
@@ -229,10 +460,20 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-COX",
     thanas: [
-      { name: "Cox's Bazar Sadar", nameBn: "কক্সবাজার সদর", aliases: ["sadar", "সদর"], postalCode: "4700" },
+      {
+        name: "Cox's Bazar Sadar",
+        nameBn: "কক্সবাজার সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "4700",
+      },
       { name: "Teknaf", nameBn: "টেকনাফ", aliases: ["teknaf", "টেকনাফ"], postalCode: "4760" },
       { name: "Ramu", nameBn: "রামু", aliases: ["ramu", "রামু"], postalCode: "4730" },
-      { name: "Chakaria", nameBn: "চকোরিয়া", aliases: ["chakaria", "চকোরিয়া"], postalCode: "4740" },
+      {
+        name: "Chakaria",
+        nameBn: "চকোরিয়া",
+        aliases: ["chakaria", "চকোরিয়া"],
+        postalCode: "4740",
+      },
     ],
   },
   {
@@ -244,7 +485,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-KH-JES",
     thanas: [
       { name: "Kotwali", nameBn: "কোতোয়ালী", aliases: ["kotwali", "সদর"], postalCode: "7400" },
-      { name: "Jhikargachha", nameBn: "ঝিকরগাছা", aliases: ["jhikargachha", "ঝিকরগাছা"], postalCode: "7420" },
+      {
+        name: "Jhikargachha",
+        nameBn: "ঝিকরগাছা",
+        aliases: ["jhikargachha", "ঝিকরগাছা"],
+        postalCode: "7420",
+      },
       { name: "Benapole", nameBn: "বেনাপোল", aliases: ["benapole", "বেনাপোল"], postalCode: "7431" },
     ],
   },
@@ -256,7 +502,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-MUN",
     thanas: [
-      { name: "Munshiganj Sadar", nameBn: "মুন্সীগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "1500" },
+      {
+        name: "Munshiganj Sadar",
+        nameBn: "মুন্সীগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "1500",
+      },
       { name: "Srinagar", nameBn: "শ্রীনগর", aliases: ["srinagar", "শ্রীনগর"], postalCode: "1550" },
       { name: "Lohajang", nameBn: "লৌহজং", aliases: ["lohajang", "লৌহজং"], postalCode: "1530" },
       { name: "Gajaria", nameBn: "গজারিয়া", aliases: ["gajaria", "গজারিয়া"], postalCode: "1510" },
@@ -270,9 +521,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-MAN",
     thanas: [
-      { name: "Manikganj Sadar", nameBn: "মানিকগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "1800" },
+      {
+        name: "Manikganj Sadar",
+        nameBn: "মানিকগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "1800",
+      },
       { name: "Singair", nameBn: "সিংগাইর", aliases: ["singair", "সিংগাইর"], postalCode: "1820" },
-      { name: "Saturia", nameBn: "সাটুরিয়া", aliases: ["saturia", "সাটুরিয়া"], postalCode: "1810" },
+      {
+        name: "Saturia",
+        nameBn: "সাটুরিয়া",
+        aliases: ["saturia", "সাটুরিয়া"],
+        postalCode: "1810",
+      },
     ],
   },
   {
@@ -283,7 +544,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-NAR",
     thanas: [
-      { name: "Narsingdi Sadar", nameBn: "নরসিংদী সদর", aliases: ["sadar", "সদর"], postalCode: "1600" },
+      {
+        name: "Narsingdi Sadar",
+        nameBn: "নরসিংদী সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "1600",
+      },
       { name: "Palash", nameBn: "পলাশ", aliases: ["palash", "পলাশ"], postalCode: "1610" },
       { name: "Raipura", nameBn: "রায়পুরা", aliases: ["raipura", "রায়পুরা"], postalCode: "1630" },
     ],
@@ -296,9 +562,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-TAN",
     thanas: [
-      { name: "Tangail Sadar", nameBn: "টাঙ্গাইল সদর", aliases: ["sadar", "সদর"], postalCode: "1900" },
-      { name: "Mirzapur", nameBn: "মির্জাপুর", aliases: ["mirzapur", "মির্জাপুর"], postalCode: "1940" },
-      { name: "Kalihati", nameBn: "কালিহাতী", aliases: ["kalihati", "কালিহাতী"], postalCode: "1970" },
+      {
+        name: "Tangail Sadar",
+        nameBn: "টাঙ্গাইল সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "1900",
+      },
+      {
+        name: "Mirzapur",
+        nameBn: "মির্জাপুর",
+        aliases: ["mirzapur", "মির্জাপুর"],
+        postalCode: "1940",
+      },
+      {
+        name: "Kalihati",
+        nameBn: "কালিহাতী",
+        aliases: ["kalihati", "কালিহাতী"],
+        postalCode: "1970",
+      },
       { name: "Sakhipur", nameBn: "সখীপুর", aliases: ["sakhipur", "সখীপুর"], postalCode: "1950" },
     ],
   },
@@ -310,9 +591,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-KIS",
     thanas: [
-      { name: "Kishoreganj Sadar", nameBn: "কিশোরগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "2300" },
+      {
+        name: "Kishoreganj Sadar",
+        nameBn: "কিশোরগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "2300",
+      },
       { name: "Bhairab", nameBn: "ভৈরব", aliases: ["bhairab", "ভৈরব"], postalCode: "2350" },
-      { name: "Kuliarchar", nameBn: "কুলিয়ারচর", aliases: ["kuliarchar", "কুলিয়ারচর"], postalCode: "2340" },
+      {
+        name: "Kuliarchar",
+        nameBn: "কুলিয়ারচর",
+        aliases: ["kuliarchar", "কুলিয়ারচর"],
+        postalCode: "2340",
+      },
     ],
   },
   {
@@ -323,9 +614,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-FAR",
     thanas: [
-      { name: "Faridpur Sadar", nameBn: "ফরিদপুর সদর", aliases: ["kotwali", "sadar", "সদর"], postalCode: "7800" },
+      {
+        name: "Faridpur Sadar",
+        nameBn: "ফরিদপুর সদর",
+        aliases: ["kotwali", "sadar", "সদর"],
+        postalCode: "7800",
+      },
       { name: "Bhanga", nameBn: "ভাঙ্গা", aliases: ["bhanga", "ভাঙ্গা"], postalCode: "7830" },
-      { name: "Alfadanga", nameBn: "আলফাডাঙ্গা", aliases: ["alfadanga", "আলফাডাঙ্গা"], postalCode: "7870" },
+      {
+        name: "Alfadanga",
+        nameBn: "আলফাডাঙ্গা",
+        aliases: ["alfadanga", "আলফাডাঙ্গা"],
+        postalCode: "7870",
+      },
     ],
   },
   {
@@ -336,9 +637,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-GOP",
     thanas: [
-      { name: "Gopalganj Sadar", nameBn: "গোপালগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "8100" },
-      { name: "Tungipara", nameBn: "টুঙ্গিপাড়া", aliases: ["tungipara", "টুঙ্গিপাড়া"], postalCode: "8120" },
-      { name: "Kotalipara", nameBn: "কোটালীপাড়া", aliases: ["kotalipara", "কোটালীপাড়া"], postalCode: "8110" },
+      {
+        name: "Gopalganj Sadar",
+        nameBn: "গোপালগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "8100",
+      },
+      {
+        name: "Tungipara",
+        nameBn: "টুঙ্গিপাড়া",
+        aliases: ["tungipara", "টুঙ্গিপাড়া"],
+        postalCode: "8120",
+      },
+      {
+        name: "Kotalipara",
+        nameBn: "কোটালীপাড়া",
+        aliases: ["kotalipara", "কোটালীপাড়া"],
+        postalCode: "8110",
+      },
     ],
   },
   {
@@ -349,7 +665,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-MAD",
     thanas: [
-      { name: "Madaripur Sadar", nameBn: "মাদারীপুর সদর", aliases: ["sadar", "সদর"], postalCode: "7900" },
+      {
+        name: "Madaripur Sadar",
+        nameBn: "মাদারীপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "7900",
+      },
       { name: "Shibchar", nameBn: "শিবচর", aliases: ["shibchar", "শিবচর"], postalCode: "7930" },
       { name: "Kalkini", nameBn: "কালকিনি", aliases: ["kalkini", "কালকিনি"], postalCode: "7920" },
     ],
@@ -362,9 +683,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-RAJ",
     thanas: [
-      { name: "Rajbari Sadar", nameBn: "রাজবাড়ী সদর", aliases: ["sadar", "সদর"], postalCode: "7700" },
+      {
+        name: "Rajbari Sadar",
+        nameBn: "রাজবাড়ী সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "7700",
+      },
       { name: "Pangsha", nameBn: "পাংশা", aliases: ["pangsha", "পাংশা"], postalCode: "7720" },
-      { name: "Goalanda", nameBn: "গোয়ালন্দ", aliases: ["goalanda", "গোয়ালন্দ"], postalCode: "7710" },
+      {
+        name: "Goalanda",
+        nameBn: "গোয়ালন্দ",
+        aliases: ["goalanda", "গোয়ালন্দ"],
+        postalCode: "7710",
+      },
     ],
   },
   {
@@ -375,7 +706,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Dhaka",
     code: "BD-DH-SHA",
     thanas: [
-      { name: "Shariatpur Sadar", nameBn: "শরীয়তপুর সদর", aliases: ["palong", "sadar", "সদর"], postalCode: "8000" },
+      {
+        name: "Shariatpur Sadar",
+        nameBn: "শরীয়তপুর সদর",
+        aliases: ["palong", "sadar", "সদর"],
+        postalCode: "8000",
+      },
       { name: "Naria", nameBn: "নড়িয়া", aliases: ["naria", "নড়িয়া"], postalCode: "8020" },
       { name: "Zajira", nameBn: "জাজিরা", aliases: ["zajira", "জাজিরা"], postalCode: "8010" },
     ],
@@ -388,8 +724,18 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-NOA",
     thanas: [
-      { name: "Noakhali Sadar", nameBn: "নোয়াখালী সদর", aliases: ["sudharam", "sadar", "সদর"], postalCode: "3800" },
-      { name: "Begumganj", nameBn: "বেগমগঞ্জ", aliases: ["begumganj", "বেগমগঞ্জ"], postalCode: "3820" },
+      {
+        name: "Noakhali Sadar",
+        nameBn: "নোয়াখালী সদর",
+        aliases: ["sudharam", "sadar", "সদর"],
+        postalCode: "3800",
+      },
+      {
+        name: "Begumganj",
+        nameBn: "বেগমগঞ্জ",
+        aliases: ["begumganj", "বেগমগঞ্জ"],
+        postalCode: "3820",
+      },
       { name: "Senbagh", nameBn: "সেনবাগ", aliases: ["senbagh", "সেনবাগ"], postalCode: "3830" },
       { name: "Hatiya", nameBn: "হাতিয়া", aliases: ["hatiya", "হাতিয়া"], postalCode: "3890" },
     ],
@@ -403,8 +749,18 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-CH-FEN",
     thanas: [
       { name: "Feni Sadar", nameBn: "ফেনী সদর", aliases: ["sadar", "সদর"], postalCode: "3900" },
-      { name: "Daganbhuiyan", nameBn: "দাগনভূঞা", aliases: ["daganbhuiyan", "দাগনভূঞা"], postalCode: "3920" },
-      { name: "Sonagazi", nameBn: "সোনাগাজী", aliases: ["sonagazi", "সোনাগাজী"], postalCode: "3930" },
+      {
+        name: "Daganbhuiyan",
+        nameBn: "দাগনভূঞা",
+        aliases: ["daganbhuiyan", "দাগনভূঞা"],
+        postalCode: "3920",
+      },
+      {
+        name: "Sonagazi",
+        nameBn: "সোনাগাজী",
+        aliases: ["sonagazi", "সোনাগাজী"],
+        postalCode: "3930",
+      },
     ],
   },
   {
@@ -415,7 +771,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-LAK",
     thanas: [
-      { name: "Lakshmipur Sadar", nameBn: "লক্ষ্মীপুর সদর", aliases: ["sadar", "সদর"], postalCode: "3700" },
+      {
+        name: "Lakshmipur Sadar",
+        nameBn: "লক্ষ্মীপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3700",
+      },
       { name: "Raipur", nameBn: "রায়পুর", aliases: ["raipur", "রায়পুর"], postalCode: "3710" },
       { name: "Ramganj", nameBn: "রামগঞ্জ", aliases: ["ramganj", "রামগঞ্জ"], postalCode: "3720" },
     ],
@@ -428,9 +789,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-CHA",
     thanas: [
-      { name: "Chandpur Sadar", nameBn: "চাঁদপুর সদর", aliases: ["sadar", "সদর"], postalCode: "3600" },
-      { name: "Hajiganj", nameBn: "হাজীগঞ্জ", aliases: ["hajiganj", "হাজীগঞ্জ"], postalCode: "3610" },
-      { name: "Matlab Dakshin", nameBn: "মতলব দক্ষিণ", aliases: ["matlab", "মতলব"], postalCode: "3640" },
+      {
+        name: "Chandpur Sadar",
+        nameBn: "চাঁদপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3600",
+      },
+      {
+        name: "Hajiganj",
+        nameBn: "হাজীগঞ্জ",
+        aliases: ["hajiganj", "হাজীগঞ্জ"],
+        postalCode: "3610",
+      },
+      {
+        name: "Matlab Dakshin",
+        nameBn: "মতলব দক্ষিণ",
+        aliases: ["matlab", "মতলব"],
+        postalCode: "3640",
+      },
     ],
   },
   {
@@ -441,7 +817,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-BRA",
     thanas: [
-      { name: "Brahmanbaria Sadar", nameBn: "ব্রাহ্মণবাড়িয়া সদর", aliases: ["sadar", "সদর"], postalCode: "3400" },
+      {
+        name: "Brahmanbaria Sadar",
+        nameBn: "ব্রাহ্মণবাড়িয়া সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3400",
+      },
       { name: "Ashuganj", nameBn: "আশুগঞ্জ", aliases: ["ashuganj", "আশুগঞ্জ"], postalCode: "3410" },
       { name: "Nabinagar", nameBn: "নবীনগর", aliases: ["nabinagar", "নবীনগর"], postalCode: "3430" },
     ],
@@ -454,9 +835,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-KHA",
     thanas: [
-      { name: "Khagrachhari Sadar", nameBn: "খাগড়াছড়ি সদর", aliases: ["sadar", "সদর"], postalCode: "4400" },
-      { name: "Dighinala", nameBn: "দীঘিনালা", aliases: ["dighinala", "দীঘিনালা"], postalCode: "4420" },
-      { name: "Matiranga", nameBn: "মাটিরাঙ্গা", aliases: ["matiranga", "মাটিরাঙ্গা"], postalCode: "4450" },
+      {
+        name: "Khagrachhari Sadar",
+        nameBn: "খাগড়াছড়ি সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "4400",
+      },
+      {
+        name: "Dighinala",
+        nameBn: "দীঘিনালা",
+        aliases: ["dighinala", "দীঘিনালা"],
+        postalCode: "4420",
+      },
+      {
+        name: "Matiranga",
+        nameBn: "মাটিরাঙ্গা",
+        aliases: ["matiranga", "মাটিরাঙ্গা"],
+        postalCode: "4450",
+      },
     ],
   },
   {
@@ -467,9 +863,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-RAN",
     thanas: [
-      { name: "Rangamati Sadar", nameBn: "রাঙ্গামাটি সদর", aliases: ["kotwali", "sadar", "সদর"], postalCode: "4500" },
+      {
+        name: "Rangamati Sadar",
+        nameBn: "রাঙ্গামাটি সদর",
+        aliases: ["kotwali", "sadar", "সদর"],
+        postalCode: "4500",
+      },
       { name: "Kaptai", nameBn: "কাপ্তাই", aliases: ["kaptai", "কাপ্তাই"], postalCode: "4530" },
-      { name: "Baghaichhari", nameBn: "বাঘাইছড়ি", aliases: ["baghaichhari", "বাঘাইছড়ি"], postalCode: "4570" },
+      {
+        name: "Baghaichhari",
+        nameBn: "বাঘাইছড়ি",
+        aliases: ["baghaichhari", "বাঘাইছড়ি"],
+        postalCode: "4570",
+      },
     ],
   },
   {
@@ -480,7 +886,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Chattogram",
     code: "BD-CH-BAN",
     thanas: [
-      { name: "Bandarban Sadar", nameBn: "বান্দরবান সদর", aliases: ["sadar", "সদর"], postalCode: "4600" },
+      {
+        name: "Bandarban Sadar",
+        nameBn: "বান্দরবান সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "4600",
+      },
       { name: "Lama", nameBn: "লামা", aliases: ["lama", "লামা"], postalCode: "4640" },
       { name: "Alikadam", nameBn: "আলীকদম", aliases: ["alikadam", "আলীকদম"], postalCode: "4650" },
     ],
@@ -508,7 +919,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     thanas: [
       { name: "Natore Sadar", nameBn: "নাটোর সদর", aliases: ["sadar", "সদর"], postalCode: "6400" },
       { name: "Singra", nameBn: "সিংড়া", aliases: ["singra", "সিংড়া"], postalCode: "6450" },
-      { name: "Baraigram", nameBn: "বড়াইগ্রাম", aliases: ["baraigram", "বড়াইগ্রাম"], postalCode: "6430" },
+      {
+        name: "Baraigram",
+        nameBn: "বড়াইগ্রাম",
+        aliases: ["baraigram", "বড়াইগ্রাম"],
+        postalCode: "6430",
+      },
     ],
   },
   {
@@ -532,9 +948,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rajshahi",
     code: "BD-RJ-CHA",
     thanas: [
-      { name: "Chapai Nawabganj Sadar", nameBn: "চাঁপাইনবাবগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "6300" },
+      {
+        name: "Chapai Nawabganj Sadar",
+        nameBn: "চাঁপাইনবাবগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "6300",
+      },
       { name: "Shibganj", nameBn: "শিবগঞ্জ", aliases: ["shibganj", "শিবগঞ্জ"], postalCode: "6340" },
-      { name: "Gomastapur", nameBn: "গোমস্তাপুর", aliases: ["gomastapur", "গোমস্তাপুর"], postalCode: "6320" },
+      {
+        name: "Gomastapur",
+        nameBn: "গোমস্তাপুর",
+        aliases: ["gomastapur", "গোমস্তাপুর"],
+        postalCode: "6320",
+      },
     ],
   },
   {
@@ -545,9 +971,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rajshahi",
     code: "BD-RJ-SIR",
     thanas: [
-      { name: "Sirajganj Sadar", nameBn: "সিরাজগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "6700" },
-      { name: "Shahjadpur", nameBn: "শাহজাদপুর", aliases: ["shahjadpur", "শাহজাদপুর"], postalCode: "6770" },
-      { name: "Ullapara", nameBn: "উল্লাপাড়া", aliases: ["ullapara", "উল্লাপাড়া"], postalCode: "6760" },
+      {
+        name: "Sirajganj Sadar",
+        nameBn: "সিরাজগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "6700",
+      },
+      {
+        name: "Shahjadpur",
+        nameBn: "শাহজাদপুর",
+        aliases: ["shahjadpur", "শাহজাদপুর"],
+        postalCode: "6770",
+      },
+      {
+        name: "Ullapara",
+        nameBn: "উল্লাপাড়া",
+        aliases: ["ullapara", "উল্লাপাড়া"],
+        postalCode: "6760",
+      },
     ],
   },
   {
@@ -558,9 +999,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rajshahi",
     code: "BD-RJ-JOY",
     thanas: [
-      { name: "Joypurhat Sadar", nameBn: "জয়পুরহাট সদর", aliases: ["sadar", "সদর"], postalCode: "5900" },
-      { name: "Akkelpur", nameBn: "আক্কেলপুর", aliases: ["akkelpur", "আক্কেলপুর"], postalCode: "5940" },
-      { name: "Panchbibi", nameBn: "পাঁচবিবি", aliases: ["panchbibi", "পাঁচবিবি"], postalCode: "5910" },
+      {
+        name: "Joypurhat Sadar",
+        nameBn: "জয়পুরহাট সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5900",
+      },
+      {
+        name: "Akkelpur",
+        nameBn: "আক্কেলপুর",
+        aliases: ["akkelpur", "আক্কেলপুর"],
+        postalCode: "5940",
+      },
+      {
+        name: "Panchbibi",
+        nameBn: "পাঁচবিবি",
+        aliases: ["panchbibi", "পাঁচবিবি"],
+        postalCode: "5910",
+      },
     ],
   },
   {
@@ -571,7 +1027,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Khulna",
     code: "BD-KH-SAT",
     thanas: [
-      { name: "Satkhira Sadar", nameBn: "সাতক্ষীরা সদর", aliases: ["sadar", "সদর"], postalCode: "9400" },
+      {
+        name: "Satkhira Sadar",
+        nameBn: "সাতক্ষীরা সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "9400",
+      },
       { name: "Kalaroa", nameBn: "কলারোয়া", aliases: ["kalaroa", "কলারোয়া"], postalCode: "9410" },
       { name: "Tala", nameBn: "তালা", aliases: ["tala", "তালা"], postalCode: "9430" },
     ],
@@ -584,9 +1045,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Khulna",
     code: "BD-KH-BAG",
     thanas: [
-      { name: "Bagerhat Sadar", nameBn: "বাগেরহাট সদর", aliases: ["sadar", "সদর"], postalCode: "9300" },
+      {
+        name: "Bagerhat Sadar",
+        nameBn: "বাগেরহাট সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "9300",
+      },
       { name: "Mongla", nameBn: "মোংলা", aliases: ["mongla", "মোংলা"], postalCode: "9350" },
-      { name: "Morrelganj", nameBn: "মোড়েলগঞ্জ", aliases: ["morrelganj", "মোড়েলগঞ্জ"], postalCode: "9320" },
+      {
+        name: "Morrelganj",
+        nameBn: "মোড়েলগঞ্জ",
+        aliases: ["morrelganj", "মোড়েলগঞ্জ"],
+        postalCode: "9320",
+      },
     ],
   },
   {
@@ -597,9 +1068,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Khulna",
     code: "BD-KH-KUS",
     thanas: [
-      { name: "Kushtia Sadar", nameBn: "কুষ্টিয়া সদর", aliases: ["sadar", "সদর"], postalCode: "7000" },
-      { name: "Bheramara", nameBn: "ভেড়ামারা", aliases: ["bheramara", "ভেড়ামারা"], postalCode: "7040" },
-      { name: "Kumarkhali", nameBn: "কুমারখালী", aliases: ["kumarkhali", "কুমারখালী"], postalCode: "7010" },
+      {
+        name: "Kushtia Sadar",
+        nameBn: "কুষ্টিয়া সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "7000",
+      },
+      {
+        name: "Bheramara",
+        nameBn: "ভেড়ামারা",
+        aliases: ["bheramara", "ভেড়ামারা"],
+        postalCode: "7040",
+      },
+      {
+        name: "Kumarkhali",
+        nameBn: "কুমারখালী",
+        aliases: ["kumarkhali", "কুমারখালী"],
+        postalCode: "7010",
+      },
     ],
   },
   {
@@ -610,9 +1096,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Khulna",
     code: "BD-KH-JHE",
     thanas: [
-      { name: "Jhenaidah Sadar", nameBn: "ঝিনাইদহ সদর", aliases: ["sadar", "সদর"], postalCode: "7300" },
-      { name: "Shailkupa", nameBn: "শৈলকুপা", aliases: ["shailkupa", "শৈলকুপা"], postalCode: "7320" },
-      { name: "Kaliganj", nameBn: "কালীগঞ্জ", aliases: ["kaliganj", "কালীগঞ্জ"], postalCode: "7350" },
+      {
+        name: "Jhenaidah Sadar",
+        nameBn: "ঝিনাইদহ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "7300",
+      },
+      {
+        name: "Shailkupa",
+        nameBn: "শৈলকুপা",
+        aliases: ["shailkupa", "শৈলকুপা"],
+        postalCode: "7320",
+      },
+      {
+        name: "Kaliganj",
+        nameBn: "কালীগঞ্জ",
+        aliases: ["kaliganj", "কালীগঞ্জ"],
+        postalCode: "7350",
+      },
     ],
   },
   {
@@ -625,7 +1126,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     thanas: [
       { name: "Magura Sadar", nameBn: "মাগুরা সদর", aliases: ["sadar", "সদর"], postalCode: "7600" },
       { name: "Sreepur", nameBn: "শ্রীপুর", aliases: ["sreepur", "শ্রীপুর"], postalCode: "7620" },
-      { name: "Mohammadpur", nameBn: "মহম্মদপুর", aliases: ["mohammadpur", "মহম্মদপুর"], postalCode: "7630" },
+      {
+        name: "Mohammadpur",
+        nameBn: "মহম্মদপুর",
+        aliases: ["mohammadpur", "মহম্মদপুর"],
+        postalCode: "7630",
+      },
     ],
   },
   {
@@ -637,7 +1143,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-KH-NAR",
     thanas: [
       { name: "Narail Sadar", nameBn: "নড়াইল সদর", aliases: ["sadar", "সদর"], postalCode: "7500" },
-      { name: "Lohagara", nameBn: "লোহাগড়া", aliases: ["lohagara", "লোহাগড়া"], postalCode: "7510" },
+      {
+        name: "Lohagara",
+        nameBn: "লোহাগড়া",
+        aliases: ["lohagara", "লোহাগড়া"],
+        postalCode: "7510",
+      },
       { name: "Kalia", nameBn: "কালিয়া", aliases: ["kalia", "কালিয়া"], postalCode: "7520" },
     ],
   },
@@ -649,9 +1160,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Khulna",
     code: "BD-KH-MEH",
     thanas: [
-      { name: "Meherpur Sadar", nameBn: "মেহেরপুর সদর", aliases: ["sadar", "সদর"], postalCode: "7100" },
+      {
+        name: "Meherpur Sadar",
+        nameBn: "মেহেরপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "7100",
+      },
       { name: "Gangni", nameBn: "গাংনী", aliases: ["gangni", "গাংনী"], postalCode: "7110" },
-      { name: "Mujibnagar", nameBn: "মুজিবনগর", aliases: ["mujibnagar", "মুজিবনগর"], postalCode: "7120" },
+      {
+        name: "Mujibnagar",
+        nameBn: "মুজিবনগর",
+        aliases: ["mujibnagar", "মুজিবনগর"],
+        postalCode: "7120",
+      },
     ],
   },
   {
@@ -662,9 +1183,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Khulna",
     code: "BD-KH-CHU",
     thanas: [
-      { name: "Chuadanga Sadar", nameBn: "চুয়াডাঙ্গা সদর", aliases: ["sadar", "সদর"], postalCode: "7200" },
-      { name: "Alamdanga", nameBn: "আলমডাঙ্গা", aliases: ["alamdanga", "আলমডাঙ্গা"], postalCode: "7210" },
-      { name: "Damurhuda", nameBn: "দামুড়হুদা", aliases: ["damurhuda", "দামুড়হুদা"], postalCode: "7220" },
+      {
+        name: "Chuadanga Sadar",
+        nameBn: "চুয়াডাঙ্গা সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "7200",
+      },
+      {
+        name: "Alamdanga",
+        nameBn: "আলমডাঙ্গা",
+        aliases: ["alamdanga", "আলমডাঙ্গা"],
+        postalCode: "7210",
+      },
+      {
+        name: "Damurhuda",
+        nameBn: "দামুড়হুদা",
+        aliases: ["damurhuda", "দামুড়হুদা"],
+        postalCode: "7220",
+      },
     ],
   },
   {
@@ -676,9 +1212,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     code: "BD-BA-BHO",
     thanas: [
       { name: "Bhola Sadar", nameBn: "ভোলা সদর", aliases: ["sadar", "সদর"], postalCode: "8300" },
-      { name: "Char Fasson", nameBn: "চরফ্যাশন", aliases: ["char fasson", "charfasson", "চরফ্যাশন"], postalCode: "8340" },
+      {
+        name: "Char Fasson",
+        nameBn: "চরফ্যাশন",
+        aliases: ["char fasson", "charfasson", "চরফ্যাশন"],
+        postalCode: "8340",
+      },
       { name: "Lalmohan", nameBn: "লালমোহন", aliases: ["lalmohan", "লালমোহন"], postalCode: "8330" },
-      { name: "Borhanuddin", nameBn: "বোরহানউদ্দিন", aliases: ["borhanuddin", "বোরহানউদ্দিন"], postalCode: "8320" },
+      {
+        name: "Borhanuddin",
+        nameBn: "বোরহানউদ্দিন",
+        aliases: ["borhanuddin", "বোরহানউদ্দিন"],
+        postalCode: "8320",
+      },
     ],
   },
   {
@@ -689,9 +1235,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Barishal",
     code: "BD-BA-PAT",
     thanas: [
-      { name: "Patuakhali Sadar", nameBn: "পটুয়াখালী সদর", aliases: ["sadar", "সদর"], postalCode: "8600" },
-      { name: "Kalapara", nameBn: "কলাপাড়া", aliases: ["kalapara", "কলাপাড়া", "kuakata", "কুয়াকাটা"], postalCode: "8630" },
-      { name: "Galachipa", nameBn: "গলাচিপা", aliases: ["galachipa", "গলাচিপা"], postalCode: "8640" },
+      {
+        name: "Patuakhali Sadar",
+        nameBn: "পটুয়াখালী সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "8600",
+      },
+      {
+        name: "Kalapara",
+        nameBn: "কলাপাড়া",
+        aliases: ["kalapara", "কলাপাড়া", "kuakata", "কুয়াকাটা"],
+        postalCode: "8630",
+      },
+      {
+        name: "Galachipa",
+        nameBn: "গলাচিপা",
+        aliases: ["galachipa", "গলাচিপা"],
+        postalCode: "8640",
+      },
     ],
   },
   {
@@ -702,9 +1263,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Barishal",
     code: "BD-BA-PIR",
     thanas: [
-      { name: "Pirojpur Sadar", nameBn: "পিরোজপুর সদর", aliases: ["sadar", "সদর"], postalCode: "8500" },
-      { name: "Mathbaria", nameBn: "মঠবাড়িয়া", aliases: ["mathbaria", "মঠবাড়িয়া"], postalCode: "8560" },
-      { name: "Bhandaria", nameBn: "ভান্ডারিয়া", aliases: ["bhandaria", "ভান্ডারিয়া"], postalCode: "8530" },
+      {
+        name: "Pirojpur Sadar",
+        nameBn: "পিরোজপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "8500",
+      },
+      {
+        name: "Mathbaria",
+        nameBn: "মঠবাড়িয়া",
+        aliases: ["mathbaria", "মঠবাড়িয়া"],
+        postalCode: "8560",
+      },
+      {
+        name: "Bhandaria",
+        nameBn: "ভান্ডারিয়া",
+        aliases: ["bhandaria", "ভান্ডারিয়া"],
+        postalCode: "8530",
+      },
     ],
   },
   {
@@ -715,9 +1291,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Barishal",
     code: "BD-BA-BAR",
     thanas: [
-      { name: "Barguna Sadar", nameBn: "বরগুনা সদর", aliases: ["sadar", "সদর"], postalCode: "8700" },
+      {
+        name: "Barguna Sadar",
+        nameBn: "বরগুনা সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "8700",
+      },
       { name: "Amtali", nameBn: "আমতলী", aliases: ["amtali", "আমতলী"], postalCode: "8710" },
-      { name: "Patharghata", nameBn: "পাথরঘাটা", aliases: ["patharghata", "পাথরঘাটা"], postalCode: "8720" },
+      {
+        name: "Patharghata",
+        nameBn: "পাথরঘাটা",
+        aliases: ["patharghata", "পাথরঘাটা"],
+        postalCode: "8720",
+      },
     ],
   },
   {
@@ -728,7 +1314,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Barishal",
     code: "BD-BA-JHA",
     thanas: [
-      { name: "Jhalokati Sadar", nameBn: "ঝালকাঠি সদর", aliases: ["sadar", "সদর"], postalCode: "8400" },
+      {
+        name: "Jhalokati Sadar",
+        nameBn: "ঝালকাঠি সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "8400",
+      },
       { name: "Nalchity", nameBn: "নলছিটি", aliases: ["nalchity", "নলছিটি"], postalCode: "8410" },
       { name: "Rajapur", nameBn: "রাজাপুর", aliases: ["rajapur", "রাজাপুর"], postalCode: "8420" },
     ],
@@ -741,8 +1332,18 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Sylhet",
     code: "BD-SY-MOU",
     thanas: [
-      { name: "Moulvibazar Sadar", nameBn: "মৌলভীবাজার সদর", aliases: ["sadar", "সদর"], postalCode: "3200" },
-      { name: "Sreemangal", nameBn: "শ্রীমঙ্গল", aliases: ["sreemangal", "srimangal", "শ্রীমঙ্গল"], postalCode: "3210" },
+      {
+        name: "Moulvibazar Sadar",
+        nameBn: "মৌলভীবাজার সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3200",
+      },
+      {
+        name: "Sreemangal",
+        nameBn: "শ্রীমঙ্গল",
+        aliases: ["sreemangal", "srimangal", "শ্রীমঙ্গল"],
+        postalCode: "3210",
+      },
       { name: "Kulaura", nameBn: "কুলাউড়া", aliases: ["kulaura", "কুলাউড়া"], postalCode: "3230" },
     ],
   },
@@ -754,9 +1355,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Sylhet",
     code: "BD-SY-HAB",
     thanas: [
-      { name: "Habiganj Sadar", nameBn: "হবিগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "3300" },
-      { name: "Madhabpur", nameBn: "মাধবপুর", aliases: ["madhabpur", "মাধবপুর"], postalCode: "3330" },
-      { name: "Chunarughat", nameBn: "চুনারুঘাট", aliases: ["chunarughat", "চুনারুঘাট"], postalCode: "3320" },
+      {
+        name: "Habiganj Sadar",
+        nameBn: "হবিগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3300",
+      },
+      {
+        name: "Madhabpur",
+        nameBn: "মাধবপুর",
+        aliases: ["madhabpur", "মাধবপুর"],
+        postalCode: "3330",
+      },
+      {
+        name: "Chunarughat",
+        nameBn: "চুনারুঘাট",
+        aliases: ["chunarughat", "চুনারুঘাট"],
+        postalCode: "3320",
+      },
     ],
   },
   {
@@ -767,9 +1383,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Sylhet",
     code: "BD-SY-SUN",
     thanas: [
-      { name: "Sunamganj Sadar", nameBn: "সুনামগঞ্জ সদর", aliases: ["sadar", "সদর"], postalCode: "3000" },
+      {
+        name: "Sunamganj Sadar",
+        nameBn: "সুনামগঞ্জ সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "3000",
+      },
       { name: "Chhatak", nameBn: "ছাতক", aliases: ["chhatak", "ছাতক"], postalCode: "3080" },
-      { name: "Jagannathpur", nameBn: "জগন্নাথপুর", aliases: ["jagannathpur", "জগন্নাথপুর"], postalCode: "3060" },
+      {
+        name: "Jagannathpur",
+        nameBn: "জগন্নাথপুর",
+        aliases: ["jagannathpur", "জগন্নাথপুর"],
+        postalCode: "3060",
+      },
     ],
   },
   {
@@ -780,9 +1406,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-DIN",
     thanas: [
-      { name: "Dinajpur Sadar", nameBn: "দিনাজপুর সদর", aliases: ["kotwali", "sadar", "সদর"], postalCode: "5200" },
-      { name: "Birampur", nameBn: "বিরামপুর", aliases: ["birampur", "বিরামপুর"], postalCode: "5260" },
-      { name: "Phulbari", nameBn: "ফুলবাড়ী", aliases: ["phulbari", "ফুলবাড়ী"], postalCode: "5270" },
+      {
+        name: "Dinajpur Sadar",
+        nameBn: "দিনাজপুর সদর",
+        aliases: ["kotwali", "sadar", "সদর"],
+        postalCode: "5200",
+      },
+      {
+        name: "Birampur",
+        nameBn: "বিরামপুর",
+        aliases: ["birampur", "বিরামপুর"],
+        postalCode: "5260",
+      },
+      {
+        name: "Phulbari",
+        nameBn: "ফুলবাড়ী",
+        aliases: ["phulbari", "ফুলবাড়ী"],
+        postalCode: "5270",
+      },
     ],
   },
   {
@@ -793,9 +1434,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-KUR",
     thanas: [
-      { name: "Kurigram Sadar", nameBn: "কুড়িগ্রাম সদর", aliases: ["sadar", "সদর"], postalCode: "5600" },
+      {
+        name: "Kurigram Sadar",
+        nameBn: "কুড়িগ্রাম সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5600",
+      },
       { name: "Ulipur", nameBn: "উলিপুর", aliases: ["ulipur", "উলিপুর"], postalCode: "5620" },
-      { name: "Nageshwari", nameBn: "নাগেশ্বরী", aliases: ["nageshwari", "নাগেশ্বরী"], postalCode: "5660" },
+      {
+        name: "Nageshwari",
+        nameBn: "নাগেশ্বরী",
+        aliases: ["nageshwari", "নাগেশ্বরী"],
+        postalCode: "5660",
+      },
     ],
   },
   {
@@ -806,9 +1457,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-LAL",
     thanas: [
-      { name: "Lalmonirhat Sadar", nameBn: "লালমনিরহাট সদর", aliases: ["sadar", "সদর"], postalCode: "5500" },
+      {
+        name: "Lalmonirhat Sadar",
+        nameBn: "লালমনিরহাট সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5500",
+      },
       { name: "Patgram", nameBn: "পাটগ্রাম", aliases: ["patgram", "পাটগ্রাম"], postalCode: "5540" },
-      { name: "Hatibandha", nameBn: "হাতীবান্ধা", aliases: ["hatibandha", "হাতীবান্ধা"], postalCode: "5530" },
+      {
+        name: "Hatibandha",
+        nameBn: "হাতীবান্ধা",
+        aliases: ["hatibandha", "হাতীবান্ধা"],
+        postalCode: "5530",
+      },
     ],
   },
   {
@@ -819,9 +1480,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-GAI",
     thanas: [
-      { name: "Gaibandha Sadar", nameBn: "গাইবান্ধা সদর", aliases: ["sadar", "সদর"], postalCode: "5700" },
-      { name: "Gobindaganj", nameBn: "গোবিন্দগঞ্জ", aliases: ["gobindaganj", "গোবিন্দগঞ্জ"], postalCode: "5740" },
-      { name: "Sundarganj", nameBn: "সুন্দরগঞ্জ", aliases: ["sundarganj", "সুন্দরগঞ্জ"], postalCode: "5730" },
+      {
+        name: "Gaibandha Sadar",
+        nameBn: "গাইবান্ধা সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5700",
+      },
+      {
+        name: "Gobindaganj",
+        nameBn: "গোবিন্দগঞ্জ",
+        aliases: ["gobindaganj", "গোবিন্দগঞ্জ"],
+        postalCode: "5740",
+      },
+      {
+        name: "Sundarganj",
+        nameBn: "সুন্দরগঞ্জ",
+        aliases: ["sundarganj", "সুন্দরগঞ্জ"],
+        postalCode: "5730",
+      },
     ],
   },
   {
@@ -832,7 +1508,12 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-NIL",
     thanas: [
-      { name: "Nilphamari Sadar", nameBn: "নীলফামারী সদর", aliases: ["sadar", "সদর"], postalCode: "5300" },
+      {
+        name: "Nilphamari Sadar",
+        nameBn: "নীলফামারী সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5300",
+      },
       { name: "Saidpur", nameBn: "সৈয়দপুর", aliases: ["saidpur", "সৈয়দপুর"], postalCode: "5310" },
       { name: "Domar", nameBn: "ডোমার", aliases: ["domar", "ডোমার"], postalCode: "5340" },
     ],
@@ -845,9 +1526,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-THA",
     thanas: [
-      { name: "Thakurgaon Sadar", nameBn: "ঠাকুরগাঁও সদর", aliases: ["sadar", "সদর"], postalCode: "5100" },
+      {
+        name: "Thakurgaon Sadar",
+        nameBn: "ঠাকুরগাঁও সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5100",
+      },
       { name: "Pirganj", nameBn: "পীরগঞ্জ", aliases: ["pirganj", "পীরগঞ্জ"], postalCode: "5110" },
-      { name: "Ranisankail", nameBn: "রাণীশংকৈল", aliases: ["ranisankail", "রাণীশংকৈল"], postalCode: "5130" },
+      {
+        name: "Ranisankail",
+        nameBn: "রাণীশংকৈল",
+        aliases: ["ranisankail", "রাণীশংকৈল"],
+        postalCode: "5130",
+      },
     ],
   },
   {
@@ -858,10 +1549,25 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Rangpur",
     code: "BD-RG-PAN",
     thanas: [
-      { name: "Panchagarh Sadar", nameBn: "পঞ্চগড় সদর", aliases: ["sadar", "সদর"], postalCode: "5000" },
-      { name: "Debiganj", nameBn: "দেবীগঞ্জ", aliases: ["debiganj", "debijanj", "দেবীগঞ্জ"], postalCode: "5020" },
+      {
+        name: "Panchagarh Sadar",
+        nameBn: "পঞ্চগড় সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "5000",
+      },
+      {
+        name: "Debiganj",
+        nameBn: "দেবীগঞ্জ",
+        aliases: ["debiganj", "debijanj", "দেবীগঞ্জ"],
+        postalCode: "5020",
+      },
       { name: "Boda", nameBn: "বোদা", aliases: ["boda", "বোদা"], postalCode: "5010" },
-      { name: "Tetulia", nameBn: "তেঁতুলিয়া", aliases: ["tetulia", "তেঁতুলিয়া"], postalCode: "5030" },
+      {
+        name: "Tetulia",
+        nameBn: "তেঁতুলিয়া",
+        aliases: ["tetulia", "তেঁতুলিয়া"],
+        postalCode: "5030",
+      },
       { name: "Atwari", nameBn: "আটোয়ারী", aliases: ["atwari", "আটোয়ারী"], postalCode: "5040" },
     ],
   },
@@ -873,9 +1579,24 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Mymensingh",
     code: "BD-MY-JAM",
     thanas: [
-      { name: "Jamalpur Sadar", nameBn: "জামালপুর সদর", aliases: ["sadar", "সদর"], postalCode: "2000" },
-      { name: "Islampur", nameBn: "ইসলামপুর", aliases: ["islampur", "ইসলামপুর"], postalCode: "2020" },
-      { name: "Sarishabari", nameBn: "সরিষাবাড়ী", aliases: ["sarishabari", "সরিষাবাড়ী"], postalCode: "2050" },
+      {
+        name: "Jamalpur Sadar",
+        nameBn: "জামালপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "2000",
+      },
+      {
+        name: "Islampur",
+        nameBn: "ইসলামপুর",
+        aliases: ["islampur", "ইসলামপুর"],
+        postalCode: "2020",
+      },
+      {
+        name: "Sarishabari",
+        nameBn: "সরিষাবাড়ী",
+        aliases: ["sarishabari", "সরিষাবাড়ী"],
+        postalCode: "2050",
+      },
     ],
   },
   {
@@ -886,9 +1607,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Mymensingh",
     code: "BD-MY-NET",
     thanas: [
-      { name: "Netrokona Sadar", nameBn: "নেত্রকোণা সদর", aliases: ["sadar", "সদর"], postalCode: "2400" },
+      {
+        name: "Netrokona Sadar",
+        nameBn: "নেত্রকোণা সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "2400",
+      },
       { name: "Kendua", nameBn: "কেন্দুয়া", aliases: ["kendua", "কেন্দুয়া"], postalCode: "2420" },
-      { name: "Durgapur", nameBn: "দুর্গাপুর", aliases: ["durgapur", "দুর্গাপুর"], postalCode: "2420" },
+      {
+        name: "Durgapur",
+        nameBn: "দুর্গাপুর",
+        aliases: ["durgapur", "দুর্গাপুর"],
+        postalCode: "2420",
+      },
     ],
   },
   {
@@ -899,9 +1630,19 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
     division: "Mymensingh",
     code: "BD-MY-SHE",
     thanas: [
-      { name: "Sherpur Sadar", nameBn: "শেরপুর সদর", aliases: ["sadar", "সদর"], postalCode: "2100" },
+      {
+        name: "Sherpur Sadar",
+        nameBn: "শেরপুর সদর",
+        aliases: ["sadar", "সদর"],
+        postalCode: "2100",
+      },
       { name: "Nakla", nameBn: "নকলা", aliases: ["nakla", "নকলা"], postalCode: "2120" },
-      { name: "Nalitabari", nameBn: "নালিতাবাড়ী", aliases: ["nalitabari", "নালিতাবাড়ী"], postalCode: "2110" },
+      {
+        name: "Nalitabari",
+        nameBn: "নালিতাবাড়ী",
+        aliases: ["nalitabari", "নালিতাবাড়ী"],
+        postalCode: "2110",
+      },
     ],
   },
 ];

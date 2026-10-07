@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         Skip to content
       </a>
 
-      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl shadow-black/40 lg:grid-cols-2">
+      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-black/40 lg:grid-cols-2">
         {/* Brand panel */}
         <aside className="dhruto-hero-dark relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
           <div className="relative z-10 space-y-6">

@@ -1,11 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  Index,
-} from 'typeorm';
-import { HubScanType, ScanOutcome } from '@dhruto/contracts';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from "typeorm";
+import { HubScanType, ScanOutcome } from "@dhruto/contracts";
 
 /**
  * Append-only hub scan log.
@@ -18,50 +12,50 @@ import { HubScanType, ScanOutcome } from '@dhruto/contracts';
  * deleted. `idempotency_key` is unique so a resubmitted scan (scanner key
  * repeat, network retry, operator retry) cannot create a second row.
  */
-@Entity('parcel_scans')
-@Index(['parcelId', 'createdAt'])
-@Index(['hubId', 'createdAt'])
-@Index(['bagId'])
+@Entity("parcel_scans")
+@Index(["parcelId", "createdAt"])
+@Index(["hubId", "createdAt"])
+@Index(["bagId"])
 export class ParcelScan {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   /** Null when the scanned barcode could not be resolved to a parcel. */
-  @Column({ name: 'parcel_id', type: 'uuid', nullable: true })
+  @Column({ name: "parcel_id", type: "uuid", nullable: true })
   parcelId: string | null;
 
-  @Column({ name: 'bag_id', type: 'uuid', nullable: true })
+  @Column({ name: "bag_id", type: "uuid", nullable: true })
   bagId: string | null;
 
-  @Column({ name: 'hub_id', type: 'uuid' })
+  @Column({ name: "hub_id", type: "uuid" })
   hubId: string;
 
-  @Column({ name: 'scan_type', type: 'enum', enum: HubScanType })
+  @Column({ name: "scan_type", type: "enum", enum: HubScanType })
   scanType: HubScanType;
 
-  @Column({ type: 'enum', enum: ScanOutcome })
+  @Column({ type: "enum", enum: ScanOutcome })
   outcome: ScanOutcome;
 
   /** Machine-readable rejection/duplicate reason, e.g. WRONG_HUB. */
-  @Column({ name: 'reason_code', type: 'varchar', length: 64, nullable: true })
+  @Column({ name: "reason_code", type: "varchar", length: 64, nullable: true })
   reasonCode: string | null;
 
   /** Raw scanned value exactly as submitted. */
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: "varchar", length: 64 })
   barcode: string;
 
-  @Column({ name: 'operator_id', type: 'uuid', nullable: true })
+  @Column({ name: "operator_id", type: "uuid", nullable: true })
   operatorId: string | null;
 
-  @Column({ name: 'idempotency_key', type: 'varchar', length: 128, nullable: true })
+  @Column({ name: "idempotency_key", type: "varchar", length: 128, nullable: true })
   idempotencyKey: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   notes: string | null;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   metadata: Record<string, unknown> | null;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 }

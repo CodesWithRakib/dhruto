@@ -1,8 +1,4 @@
-import {
-  Module,
-  type NestModule,
-  type MiddlewareConsumer,
-} from "@nestjs/common";
+import { Module, type NestModule, type MiddlewareConsumer } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { ZodValidationPipe } from "nestjs-zod";

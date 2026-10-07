@@ -1,6 +1,6 @@
-import { Module, Global } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bullmq';
+import { Module, Global } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { BullModule } from "@nestjs/bullmq";
 import {
   Parcel,
   ParcelStatusHistory,
@@ -23,20 +23,20 @@ import {
   RecipientRiskSnapshot,
   RtoPrediction,
   HubUserAssignment,
-} from '../database/entities';
-import { User } from '../database/entities/User.entity.js';
-import { AnalyticsAlert } from '../database/entities/AnalyticsAlert.entity.js';
-import { ReportExport } from '../database/entities/ReportExport.entity.js';
-import { IntelligenceRecommendation } from '../database/entities/IntelligenceRecommendation.entity.js';
-import { AnalyticsService } from './analytics.service.js';
-import { AnalyticsMetricsService } from './analytics-metrics.service.js';
-import { AnalyticsDomainService } from './analytics-domain.service.js';
-import { AnalyticsRangeService } from './analytics-range.service.js';
-import { AnalyticsAlertService } from './analytics-alert.service.js';
-import { AnalyticsExportService } from './analytics-export.service.js';
-import { AnalyticsExportProcessor } from './analytics-export.processor.js';
-import { AnalyticsController } from './analytics.controller.js';
-import { AuthModule } from '../auth/auth.module.js';
+} from "../database/entities";
+import { User } from "../database/entities/User.entity.js";
+import { AnalyticsAlert } from "../database/entities/AnalyticsAlert.entity.js";
+import { ReportExport } from "../database/entities/ReportExport.entity.js";
+import { IntelligenceRecommendation } from "../database/entities/IntelligenceRecommendation.entity.js";
+import { AnalyticsService } from "./analytics.service.js";
+import { AnalyticsMetricsService } from "./analytics-metrics.service.js";
+import { AnalyticsDomainService } from "./analytics-domain.service.js";
+import { AnalyticsRangeService } from "./analytics-range.service.js";
+import { AnalyticsAlertService } from "./analytics-alert.service.js";
+import { AnalyticsExportService } from "./analytics-export.service.js";
+import { AnalyticsExportProcessor } from "./analytics-export.processor.js";
+import { AnalyticsController } from "./analytics.controller.js";
+import { AuthModule } from "../auth/auth.module.js";
 
 @Global()
 @Module({
@@ -68,7 +68,7 @@ import { AuthModule } from '../auth/auth.module.js';
       ReportExport,
       IntelligenceRecommendation,
     ]),
-    BullModule.registerQueue({ name: 'analytics-exports' }),
+    BullModule.registerQueue({ name: "analytics-exports" }),
     AuthModule,
   ],
   controllers: [AnalyticsController],

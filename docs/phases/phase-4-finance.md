@@ -29,7 +29,7 @@ state machine notes in `../08-STATE-MACHINE.md`.
   effects atomically.
 - **Security first**: the finance controller previously had no guards and a
   default-merchant fallback — now `JwtAuthGuard + RolesGuard +
-  RateLimitGuard` everywhere, owner-scoped merchant endpoints, hub-scoped hub
+RateLimitGuard` everywhere, owner-scoped merchant endpoints, hub-scoped hub
   endpoints, admin-only finance console. No raw entities in responses.
 - **Reconciliation check**: `GET /admin/finance/reconciliation/check`
   compares ledger-derived vs materialized wallets, rider cash positions,

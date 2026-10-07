@@ -205,9 +205,7 @@ export class RidersService {
       take: 200,
     });
 
-    const attemptCounts = await this.countAttempts(
-      parcels.map((parcel) => parcel.id),
-    );
+    const attemptCounts = await this.countAttempts(parcels.map((parcel) => parcel.id));
 
     return parcels.map((parcel) => ({
       id: parcel.id,
@@ -270,9 +268,7 @@ export class RidersService {
         notes: attempt.notes,
         rescheduledFor: attempt.rescheduledFor?.toISOString() ?? null,
         codCollected:
-          typeof attempt.metadata?.codCollected === "number"
-            ? attempt.metadata.codCollected
-            : null,
+          typeof attempt.metadata?.codCollected === "number" ? attempt.metadata.codCollected : null,
         createdAt: attempt.createdAt.toISOString(),
       })),
     };
@@ -284,33 +280,32 @@ export class RidersService {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    const [assigned, inProgress, deliveredToday, failedToday, outForDelivery] =
-      await Promise.all([
-        this.parcelRepo.count({
-          where: { currentRiderId: riderId, status: ParcelStatus.ASSIGNED_TO_RIDER },
-        }),
-        this.parcelRepo.count({
-          where: { currentRiderId: riderId, status: ParcelStatus.OUT_FOR_DELIVERY },
-        }),
-        this.parcelRepo.count({
-          where: {
-            currentRiderId: riderId,
-            status: In([...CLOSED_TASK_STATUSES]),
-            updatedAt: MoreThanOrEqual(startOfToday),
-          },
-        }),
-        this.parcelRepo.count({
-          where: {
-            currentRiderId: riderId,
-            status: In([ParcelStatus.DELIVERY_ATTEMPTED, ParcelStatus.RESCHEDULED]),
-            updatedAt: MoreThanOrEqual(startOfToday),
-          },
-        }),
-        this.parcelRepo.find({
-          where: { currentRiderId: riderId, status: ParcelStatus.OUT_FOR_DELIVERY },
-          select: ["id", "codAmount"],
-        }),
-      ]);
+    const [assigned, inProgress, deliveredToday, failedToday, outForDelivery] = await Promise.all([
+      this.parcelRepo.count({
+        where: { currentRiderId: riderId, status: ParcelStatus.ASSIGNED_TO_RIDER },
+      }),
+      this.parcelRepo.count({
+        where: { currentRiderId: riderId, status: ParcelStatus.OUT_FOR_DELIVERY },
+      }),
+      this.parcelRepo.count({
+        where: {
+          currentRiderId: riderId,
+          status: In([...CLOSED_TASK_STATUSES]),
+          updatedAt: MoreThanOrEqual(startOfToday),
+        },
+      }),
+      this.parcelRepo.count({
+        where: {
+          currentRiderId: riderId,
+          status: In([ParcelStatus.DELIVERY_ATTEMPTED, ParcelStatus.RESCHEDULED]),
+          updatedAt: MoreThanOrEqual(startOfToday),
+        },
+      }),
+      this.parcelRepo.find({
+        where: { currentRiderId: riderId, status: ParcelStatus.OUT_FOR_DELIVERY },
+        select: ["id", "codAmount"],
+      }),
+    ]);
 
     const codToCollect = outForDelivery.reduce(
       (total, parcel) => total + Number(parcel.codAmount),
@@ -493,9 +488,7 @@ export class RidersService {
         metadata: { riderId },
       });
 
-      this.logger.log(
-        `Parcel ${parcel.trackingCode} is OUT_FOR_DELIVERY by rider ${riderId}`,
-      );
+      this.logger.log(`Parcel ${parcel.trackingCode} is OUT_FOR_DELIVERY by rider ${riderId}`);
 
       // Transactional fan-out trigger: notifications + webhooks relay
       // asynchronously; the OTP SMS below stays synchronous (handoff path).
@@ -559,8 +552,7 @@ export class RidersService {
       const now = new Date();
       if (
         parcel.lastOtpRequestedAt &&
-        now.getTime() - parcel.lastOtpRequestedAt.getTime() <
-          OTP_REQUEST_COOLDOWN_SECONDS * 1000
+        now.getTime() - parcel.lastOtpRequestedAt.getTime() < OTP_REQUEST_COOLDOWN_SECONDS * 1000
       ) {
         throw new HttpException(
           {
@@ -596,9 +588,7 @@ export class RidersService {
       if (this.notificationsService) {
         await this.notificationsService
           .sendDeliveryOtpSms(parcel.recipientPhone, parcel.trackingCode, otp)
-          .catch((err) =>
-            this.logger.warn(`Failed to dispatch OTP notification: ${err.message}`),
-          );
+          .catch((err) => this.logger.warn(`Failed to dispatch OTP notification: ${err.message}`));
       }
 
       return {
@@ -688,9 +678,7 @@ export class RidersService {
     idempotencyKey?: string,
   ): Promise<CompleteDeliveryResult> {
     const scope = `rider-complete:${riderId}`;
-    const requestHash = idempotencyKey
-      ? IdempotencyService.fingerprint({ parcelId, ...dto })
-      : "";
+    const requestHash = idempotencyKey ? IdempotencyService.fingerprint({ parcelId, ...dto }) : "";
 
     if (idempotencyKey) {
       const resolution = await this.idempotency.resolve(idempotencyKey, scope, requestHash);
@@ -740,259 +728,256 @@ export class RidersService {
     }
 
     return this.dataSource.transaction(async (manager) => {
-        await this.assertOperableRider(riderId);
-        const parcel = await this.lockOwnedParcel(manager, riderId, parcelId);
+      await this.assertOperableRider(riderId);
+      const parcel = await this.lockOwnedParcel(manager, riderId, parcelId);
 
-        // Duplicate completion replays the recorded delivery, never duplicates it.
-        if ([...CLOSED_TASK_STATUSES].includes(parcel.status)) {
-          const replay = await this.replayCompletedDelivery(manager, parcel);
-          if (replay) {
-            if (idempotencyKey) {
-              await this.idempotency.complete(manager, {
-                key: idempotencyKey,
-                scope,
-                statusCode: HttpStatus.OK,
-                response: replay as unknown as Record<string, unknown>,
-                userId,
-              });
-            }
-            return replay;
-          }
-          throw new ConflictException({
-            message: `Parcel is already ${parcel.status}`,
-            error: ApiErrorCode.DELIVERY_ALREADY_COMPLETED,
-          });
-        }
-
-        if (parcel.status !== ParcelStatus.OUT_FOR_DELIVERY) {
-          throw new BadRequestException({
-            message: `Parcel must be in OUT_FOR_DELIVERY status to be completed. Current status: ${parcel.status}`,
-            error: ApiErrorCode.DELIVERY_NOT_STARTED,
-          });
-        }
-
-        if (idempotencyKey) {
-          try {
-            await this.idempotency.claim(manager, {
+      // Duplicate completion replays the recorded delivery, never duplicates it.
+      if ([...CLOSED_TASK_STATUSES].includes(parcel.status)) {
+        const replay = await this.replayCompletedDelivery(manager, parcel);
+        if (replay) {
+          if (idempotencyKey) {
+            await this.idempotency.complete(manager, {
               key: idempotencyKey,
               scope,
+              statusCode: HttpStatus.OK,
+              response: replay as unknown as Record<string, unknown>,
               userId,
-              requestHash,
             });
-          } catch (error) {
-            if (error instanceof IdempotencyClaimConflict) {
-              const resolution = await this.idempotency.resolve(
-                idempotencyKey,
-                scope,
-                requestHash,
-                { attempts: 5, delayMs: 300 },
-              );
-              if (resolution.kind === "replay") {
-                return resolution.response as unknown as CompleteDeliveryResult;
-              }
-              throw new ConflictException({
-                message: "Delivery completion is already in progress for this key",
-                error: IdempotencyService.IN_PROGRESS_CODE,
-              });
-            }
-            throw error;
           }
+          return replay;
         }
+        throw new ConflictException({
+          message: `Parcel is already ${parcel.status}`,
+          error: ApiErrorCode.DELIVERY_ALREADY_COMPLETED,
+        });
+      }
 
-        // OTP was verified (durably) before this transaction opened.
-        const verifiedAt = parcel.otpVerifiedAt;
-        if (!verifiedAt) {
-          throw new HttpException(
-            {
-              message: "Customer OTP verification is required before completion",
-              error: ApiErrorCode.OTP_REQUIRED,
-            },
-            HttpStatus.UNPROCESSABLE_ENTITY,
-          );
+      if (parcel.status !== ParcelStatus.OUT_FOR_DELIVERY) {
+        throw new BadRequestException({
+          message: `Parcel must be in OUT_FOR_DELIVERY status to be completed. Current status: ${parcel.status}`,
+          error: ApiErrorCode.DELIVERY_NOT_STARTED,
+        });
+      }
+
+      if (idempotencyKey) {
+        try {
+          await this.idempotency.claim(manager, {
+            key: idempotencyKey,
+            scope,
+            userId,
+            requestHash,
+          });
+        } catch (error) {
+          if (error instanceof IdempotencyClaimConflict) {
+            const resolution = await this.idempotency.resolve(idempotencyKey, scope, requestHash, {
+              attempts: 5,
+              delayMs: 300,
+            });
+            if (resolution.kind === "replay") {
+              return resolution.response as unknown as CompleteDeliveryResult;
+            }
+            throw new ConflictException({
+              message: "Delivery completion is already in progress for this key",
+              error: IdempotencyService.IN_PROGRESS_CODE,
+            });
+          }
+          throw error;
         }
+      }
 
-        // COD must match exactly — the frontend amount is never trusted.
-        const expectedMinor = toMinor(Number(parcel.codAmount));
-        const collectedMinor =
-          dto.codAmountCollected !== undefined
-            ? toMinor(Number(dto.codAmountCollected))
-            : expectedMinor;
-        if (collectedMinor !== expectedMinor) {
-          throw new HttpException(
-            {
-              message: `Collected amount ৳${(collectedMinor / 100).toLocaleString()} does not match COD due ৳${(expectedMinor / 100).toLocaleString()}`,
-              error: ApiErrorCode.COD_MISMATCH,
-            },
-            HttpStatus.UNPROCESSABLE_ENTITY,
-          );
-        }
-        const collectedAmount = collectedMinor / 100;
+      // OTP was verified (durably) before this transaction opened.
+      const verifiedAt = parcel.otpVerifiedAt;
+      if (!verifiedAt) {
+        throw new HttpException(
+          {
+            message: "Customer OTP verification is required before completion",
+            error: ApiErrorCode.OTP_REQUIRED,
+          },
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      }
 
-        this.lifecycle.assertTransition(parcel.status, ParcelStatus.DELIVERED);
-        parcel.status = ParcelStatus.DELIVERED;
+      // COD must match exactly — the frontend amount is never trusted.
+      const expectedMinor = toMinor(Number(parcel.codAmount));
+      const collectedMinor =
+        dto.codAmountCollected !== undefined
+          ? toMinor(Number(dto.codAmountCollected))
+          : expectedMinor;
+      if (collectedMinor !== expectedMinor) {
+        throw new HttpException(
+          {
+            message: `Collected amount ৳${(collectedMinor / 100).toLocaleString()} does not match COD due ৳${(expectedMinor / 100).toLocaleString()}`,
+            error: ApiErrorCode.COD_MISMATCH,
+          },
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      }
+      const collectedAmount = collectedMinor / 100;
 
-        const attemptNumber = (await manager.count(DeliveryAttempt, {
+      this.lifecycle.assertTransition(parcel.status, ParcelStatus.DELIVERED);
+      parcel.status = ParcelStatus.DELIVERED;
+
+      const attemptNumber =
+        (await manager.count(DeliveryAttempt, {
           where: { parcelId: parcel.id },
         })) + 1;
-        const attempt = await manager.getRepository(DeliveryAttempt).save(
-          manager.getRepository(DeliveryAttempt).create({
-            parcelId: parcel.id,
-            riderId,
-            attemptNumber,
-            outcome: DeliveryAttemptOutcome.DELIVERED,
-            failureReason: null,
-            notes: dto.remarks?.trim() || null,
-            rescheduledFor: null,
-            metadata: {
-              codCollected: collectedAmount,
-              proofPhotoUrl: dto.proofPhotoUrl ?? null,
-              otpVerifiedAt: verifiedAt.toISOString(),
-            },
-          }),
-        );
-
-        await this.appendHistory(manager, {
+      const attempt = await manager.getRepository(DeliveryAttempt).save(
+        manager.getRepository(DeliveryAttempt).create({
           parcelId: parcel.id,
-          fromStatus: ParcelStatus.OUT_FOR_DELIVERY,
-          toStatus: ParcelStatus.DELIVERED,
-          actorId: userId,
-          actorRole: "RIDER",
-          description: dto.remarks?.trim() || "Delivered to recipient",
+          riderId,
+          attemptNumber,
+          outcome: DeliveryAttemptOutcome.DELIVERED,
+          failureReason: null,
+          notes: dto.remarks?.trim() || null,
+          rescheduledFor: null,
           metadata: {
-            riderId,
-            attemptId: attempt.id,
-            attemptNumber,
             codCollected: collectedAmount,
             proofPhotoUrl: dto.proofPhotoUrl ?? null,
             otpVerifiedAt: verifiedAt.toISOString(),
           },
-        });
+        }),
+      );
 
-        // COD leg: DELIVERED -> CASH_PENDING + operational cash liability.
-        // Merchant settlement stays in Phase 4 — this only records the cash.
-        let cashLedgerId: string | null = null;
-        if (collectedMinor > 0) {
-          this.lifecycle.assertTransition(ParcelStatus.DELIVERED, ParcelStatus.CASH_PENDING);
-          parcel.status = ParcelStatus.CASH_PENDING;
-          await this.appendHistory(manager, {
-            parcelId: parcel.id,
-            fromStatus: ParcelStatus.DELIVERED,
-            toStatus: ParcelStatus.CASH_PENDING,
-            actorId: userId,
-            actorRole: "RIDER",
-            description: `COD ৳${collectedAmount.toLocaleString()} collected; awaiting hub handover`,
-            metadata: { riderId, attemptId: attempt.id },
-          });
-
-          const existing = await manager.getRepository(CashLedger).findOne({
-            where: { parcelId: parcel.id },
-          });
-          if (existing) {
-            throw new ConflictException({
-              message: "Cash collection was already recorded for this parcel",
-              error: ApiErrorCode.DELIVERY_ALREADY_COMPLETED,
-            });
-          }
-          const rider = await manager.getRepository(Rider).findOne({
-            where: { id: riderId },
-          });
-          const cashLedger = await manager.getRepository(CashLedger).save(
-            manager.getRepository(CashLedger).create({
-              parcelId: parcel.id,
-              riderId,
-              hubId: rider?.hubId ?? null,
-              amount: collectedAmount,
-              collectedAt: new Date(),
-              handInStatus: CashHandInStatus.PENDING,
-            }),
-          );
-          cashLedgerId = cashLedger.id;
-
-          // Rider custody liability through the journal: the rider now owes
-          // the platform the collected cash until hand-in.
-          await this.ledger.post(manager, {
-            type: FinancialTransactionType.COD_COLLECTED,
-            referenceType: "CASH_LEDGER",
-            referenceId: cashLedger.id,
-            description: `COD collected for parcel ${parcel.trackingCode}`,
-            entries: [
-              {
-                account: FinancialAccount.RIDER_CASH_IN_HAND,
-                direction: EntryDirection.DEBIT,
-                amountMinor: toMinor(collectedAmount),
-              },
-              {
-                account: FinancialAccount.COD_RECEIVABLE,
-                direction: EntryDirection.CREDIT,
-                amountMinor: toMinor(collectedAmount),
-              },
-            ],
-            createdBy: userId,
-          });
-
-          this.logger.log(
-            `COD Collected: ৳${collectedAmount} for Parcel ${parcel.trackingCode}. Recorded in CashLedger.`,
-          );
-        }
-
-        await manager.getRepository(Parcel).save(parcel);
-
-        const result: CompleteDeliveryResult = {
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          status: parcel.status,
+      await this.appendHistory(manager, {
+        parcelId: parcel.id,
+        fromStatus: ParcelStatus.OUT_FOR_DELIVERY,
+        toStatus: ParcelStatus.DELIVERED,
+        actorId: userId,
+        actorRole: "RIDER",
+        description: dto.remarks?.trim() || "Delivered to recipient",
+        metadata: {
+          riderId,
           attemptId: attempt.id,
           attemptNumber,
-          codAmountCollected: collectedAmount,
-          cashLedgerId,
-          proof: {
-            type: "OTP",
-            verifiedAt: verifiedAt.toISOString(),
-            photoUrl: dto.proofPhotoUrl ?? null,
-          },
-          message: "Parcel marked as delivered successfully.",
-        };
+          codCollected: collectedAmount,
+          proofPhotoUrl: dto.proofPhotoUrl ?? null,
+          otpVerifiedAt: verifiedAt.toISOString(),
+        },
+      });
 
-        await this.outbox.append(manager, {
-          eventType: DomainEventType.PARCEL_DELIVERED,
-          aggregateType: "parcel",
-          aggregateId: parcel.id,
+      // COD leg: DELIVERED -> CASH_PENDING + operational cash liability.
+      // Merchant settlement stays in Phase 4 — this only records the cash.
+      let cashLedgerId: string | null = null;
+      if (collectedMinor > 0) {
+        this.lifecycle.assertTransition(ParcelStatus.DELIVERED, ParcelStatus.CASH_PENDING);
+        parcel.status = ParcelStatus.CASH_PENDING;
+        await this.appendHistory(manager, {
+          parcelId: parcel.id,
+          fromStatus: ParcelStatus.DELIVERED,
+          toStatus: ParcelStatus.CASH_PENDING,
           actorId: userId,
-          payload: {
-            parcelId: parcel.id,
-            trackingCode: parcel.trackingCode,
-            merchantId: parcel.merchantId,
-            riderId,
-            codCollected: collectedAmount,
-            attemptId: attempt.id,
-            recipientPhone: parcel.recipientPhone,
-            recipientName: parcel.recipientName,
-          },
+          actorRole: "RIDER",
+          description: `COD ৳${collectedAmount.toLocaleString()} collected; awaiting hub handover`,
+          metadata: { riderId, attemptId: attempt.id },
         });
 
-        if (idempotencyKey) {
-          await this.idempotency.complete(manager, {
-            key: idempotencyKey,
-            scope,
-            statusCode: HttpStatus.OK,
-            response: result as unknown as Record<string, unknown>,
-            userId,
+        const existing = await manager.getRepository(CashLedger).findOne({
+          where: { parcelId: parcel.id },
+        });
+        if (existing) {
+          throw new ConflictException({
+            message: "Cash collection was already recorded for this parcel",
+            error: ApiErrorCode.DELIVERY_ALREADY_COMPLETED,
           });
         }
+        const rider = await manager.getRepository(Rider).findOne({
+          where: { id: riderId },
+        });
+        const cashLedger = await manager.getRepository(CashLedger).save(
+          manager.getRepository(CashLedger).create({
+            parcelId: parcel.id,
+            riderId,
+            hubId: rider?.hubId ?? null,
+            amount: collectedAmount,
+            collectedAt: new Date(),
+            handInStatus: CashHandInStatus.PENDING,
+          }),
+        );
+        cashLedgerId = cashLedger.id;
 
-        // Side effects after commit; failures only warn.
-        await this.dispatchDeliveryComplete(parcel, collectedAmount);
-        // Intelligence outcome labeling (async, advisory — never blocks delivery).
-        if (this.rtoPredictions) {
-          await this.rtoPredictions
-            .recordOutcome(parcel.id, parcel.status)
-            .catch((err) =>
-              this.logger.warn(`RTO outcome labeling failed: ${err.message}`),
-            );
-        }
+        // Rider custody liability through the journal: the rider now owes
+        // the platform the collected cash until hand-in.
+        await this.ledger.post(manager, {
+          type: FinancialTransactionType.COD_COLLECTED,
+          referenceType: "CASH_LEDGER",
+          referenceId: cashLedger.id,
+          description: `COD collected for parcel ${parcel.trackingCode}`,
+          entries: [
+            {
+              account: FinancialAccount.RIDER_CASH_IN_HAND,
+              direction: EntryDirection.DEBIT,
+              amountMinor: toMinor(collectedAmount),
+            },
+            {
+              account: FinancialAccount.COD_RECEIVABLE,
+              direction: EntryDirection.CREDIT,
+              amountMinor: toMinor(collectedAmount),
+            },
+          ],
+          createdBy: userId,
+        });
 
-        return result;
+        this.logger.log(
+          `COD Collected: ৳${collectedAmount} for Parcel ${parcel.trackingCode}. Recorded in CashLedger.`,
+        );
+      }
+
+      await manager.getRepository(Parcel).save(parcel);
+
+      const result: CompleteDeliveryResult = {
+        parcelId: parcel.id,
+        trackingCode: parcel.trackingCode,
+        status: parcel.status,
+        attemptId: attempt.id,
+        attemptNumber,
+        codAmountCollected: collectedAmount,
+        cashLedgerId,
+        proof: {
+          type: "OTP",
+          verifiedAt: verifiedAt.toISOString(),
+          photoUrl: dto.proofPhotoUrl ?? null,
+        },
+        message: "Parcel marked as delivered successfully.",
+      };
+
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.PARCEL_DELIVERED,
+        aggregateType: "parcel",
+        aggregateId: parcel.id,
+        actorId: userId,
+        payload: {
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: parcel.merchantId,
+          riderId,
+          codCollected: collectedAmount,
+          attemptId: attempt.id,
+          recipientPhone: parcel.recipientPhone,
+          recipientName: parcel.recipientName,
+        },
       });
+
+      if (idempotencyKey) {
+        await this.idempotency.complete(manager, {
+          key: idempotencyKey,
+          scope,
+          statusCode: HttpStatus.OK,
+          response: result as unknown as Record<string, unknown>,
+          userId,
+        });
+      }
+
+      // Side effects after commit; failures only warn.
+      await this.dispatchDeliveryComplete(parcel, collectedAmount);
+      // Intelligence outcome labeling (async, advisory — never blocks delivery).
+      if (this.rtoPredictions) {
+        await this.rtoPredictions
+          .recordOutcome(parcel.id, parcel.status)
+          .catch((err) => this.logger.warn(`RTO outcome labeling failed: ${err.message}`));
+      }
+
+      return result;
+    });
   }
 
   /* ================================================================== */
@@ -1024,9 +1009,10 @@ export class RidersService {
         rescheduledFor = this.parseRescheduleDate(dto.rescheduledDate);
       }
 
-      const attemptNumber = (await manager.count(DeliveryAttempt, {
-        where: { parcelId: parcel.id },
-      })) + 1;
+      const attemptNumber =
+        (await manager.count(DeliveryAttempt, {
+          where: { parcelId: parcel.id },
+        })) + 1;
       const attempt = await manager.getRepository(DeliveryAttempt).save(
         manager.getRepository(DeliveryAttempt).create({
           parcelId: parcel.id,
@@ -1144,7 +1130,7 @@ export class RidersService {
       const resolution = await this.idempotency.resolve(idempotencyKey, scope, requestHash);
       if (resolution.kind === "replay") {
         this.idempotency.logReplay(scope, idempotencyKey);
-        return (resolution.response as unknown as Awaited<ReturnType<RidersService["handInCash"]>>);
+        return resolution.response as unknown as Awaited<ReturnType<RidersService["handInCash"]>>;
       }
       if (resolution.kind === "conflict") {
         this.idempotency.logConflict(scope, idempotencyKey);
@@ -1192,10 +1178,7 @@ export class RidersService {
         };
       }
 
-      const totalMinor = pendingLedgers.reduce(
-        (sum, item) => sum + toMinor(item.amount),
-        0,
-      );
+      const totalMinor = pendingLedgers.reduce((sum, item) => sum + toMinor(item.amount), 0);
 
       const batch = await manager.getRepository(CashHandIn).save(
         manager.getRepository(CashHandIn).create({
@@ -1231,8 +1214,16 @@ export class RidersService {
         referenceId: batch.id,
         description: `Rider cash hand-in ${batch.handinCode} (${pendingLedgers.length} collections)`,
         entries: [
-          { account: FinancialAccount.HUB_CASH, direction: EntryDirection.DEBIT, amountMinor: totalMinor },
-          { account: FinancialAccount.RIDER_CASH_IN_HAND, direction: EntryDirection.CREDIT, amountMinor: totalMinor },
+          {
+            account: FinancialAccount.HUB_CASH,
+            direction: EntryDirection.DEBIT,
+            amountMinor: totalMinor,
+          },
+          {
+            account: FinancialAccount.RIDER_CASH_IN_HAND,
+            direction: EntryDirection.CREDIT,
+            amountMinor: totalMinor,
+          },
         ],
         createdBy: userId,
       });
@@ -1290,7 +1281,9 @@ export class RidersService {
       order: { submittedAt: "DESC" },
       take: 100,
     });
-    const hubIds = [...new Set(batches.map((b) => b.hubId).filter((id): id is string => id !== null))];
+    const hubIds = [
+      ...new Set(batches.map((b) => b.hubId).filter((id): id is string => id !== null)),
+    ];
     const hubs = hubIds.length
       ? await this.hubRepo.find({ where: { id: In(hubIds) }, select: ["id", "code", "name"] })
       : [];
@@ -1413,9 +1406,7 @@ export class RidersService {
         .getRawMany<{ riderId: string; count: string }>(),
     ]);
     const activeByRider = new Map(activeTasks.map((row) => [row.riderId, Number(row.count)]));
-    const deliveredByRider = new Map(
-      deliveredToday.map((row) => [row.riderId, Number(row.count)]),
-    );
+    const deliveredByRider = new Map(deliveredToday.map((row) => [row.riderId, Number(row.count)]));
 
     const userIds = [...new Set(riders.map((rider) => rider.userId))];
     const users = await this.dataSource.getRepository("users" as never).find({
@@ -1679,13 +1670,11 @@ export class RidersService {
       status: parcel.status,
       attemptId: attempt.id,
       attemptNumber: attempt.attemptNumber,
-      codAmountCollected:
-        typeof metadata.codCollected === "number" ? metadata.codCollected : 0,
+      codAmountCollected: typeof metadata.codCollected === "number" ? metadata.codCollected : 0,
       cashLedgerId: ledger?.id ?? null,
       proof: {
         type: "OTP",
-        verifiedAt:
-          typeof metadata.otpVerifiedAt === "string" ? metadata.otpVerifiedAt : "",
+        verifiedAt: typeof metadata.otpVerifiedAt === "string" ? metadata.otpVerifiedAt : "",
         photoUrl: typeof metadata.proofPhotoUrl === "string" ? metadata.proofPhotoUrl : null,
       },
       message: "Parcel was already delivered. Replaying the recorded delivery.",
@@ -1788,10 +1777,7 @@ export class RidersService {
     }
   }
 
-  private async dispatchDeliveryComplete(
-    parcel: Parcel,
-    collectedAmount: number,
-  ): Promise<void> {
+  private async dispatchDeliveryComplete(parcel: Parcel, collectedAmount: number): Promise<void> {
     // Single ownership: PARCEL_DELIVERED fan-out (customer SMS + merchant
     // in-app/email + webhook) is owned by the outbox relay. The direct
     // notify + dispatch path was removed to prevent duplicate notifications

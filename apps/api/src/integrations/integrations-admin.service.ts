@@ -120,13 +120,19 @@ export class IntegrationsAdminService {
           this.webhooksQueue,
           "webhook-delivery",
           { deliveryId: delivery.id },
-          { jobId: `webhook-${delivery.id}-replay-${Date.now()}`, attempts: 3, backoff: { type: "exponential", delay: 15000 } },
+          {
+            jobId: `webhook-${delivery.id}-replay-${Date.now()}`,
+            attempts: 3,
+            backoff: { type: "exponential", delay: 15000 },
+          },
           () => this.webhooks.attemptDelivery(delivery.id).then(() => undefined),
         );
       } else {
-        await this.webhooks.attemptDelivery(delivery.id).catch((error: unknown) =>
-          this.logger.warn(`Inline replay failed: ${getErrorMessage(error, "unknown")}`),
-        );
+        await this.webhooks
+          .attemptDelivery(delivery.id)
+          .catch((error: unknown) =>
+            this.logger.warn(`Inline replay failed: ${getErrorMessage(error, "unknown")}`),
+          );
       }
     } else if (
       (failure.kind === IntegrationFailureKind.SMS ||
@@ -145,13 +151,19 @@ export class IntegrationsAdminService {
           this.notificationsQueue,
           "notification-send",
           { notificationId: notification.id },
-          { jobId: `notif-${notification.id}-replay-${Date.now()}`, attempts: 4, backoff: { type: "exponential", delay: 10000 } },
+          {
+            jobId: `notif-${notification.id}-replay-${Date.now()}`,
+            attempts: 4,
+            backoff: { type: "exponential", delay: 10000 },
+          },
           () => this.notifications.transportNotification(notification.id),
         );
       } else {
-        await this.notifications.transportNotification(notification.id).catch((error: unknown) =>
-          this.logger.warn(`Inline replay failed: ${getErrorMessage(error, "unknown")}`),
-        );
+        await this.notifications
+          .transportNotification(notification.id)
+          .catch((error: unknown) =>
+            this.logger.warn(`Inline replay failed: ${getErrorMessage(error, "unknown")}`),
+          );
       }
     } else {
       throw new BadRequestException({
@@ -217,10 +229,24 @@ export class IntegrationsAdminService {
     const [notifications, webhooks] = await Promise.all([
       this.notificationsQueue
         ? queueCounts(this.notificationsQueue)
-        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+        : Promise.resolve({
+            reachable: false,
+            waiting: 0,
+            active: 0,
+            completed: 0,
+            failed: 0,
+            delayed: 0,
+          }),
       this.webhooksQueue
         ? queueCounts(this.webhooksQueue)
-        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+        : Promise.resolve({
+            reachable: false,
+            waiting: 0,
+            active: 0,
+            completed: 0,
+            failed: 0,
+            delayed: 0,
+          }),
     ]);
     return [
       { name: "notifications", ...notifications },
@@ -261,7 +287,9 @@ export class IntegrationsAdminService {
         .getCount(),
       this.failureRepo
         .createQueryBuilder("f")
-        .where("f.kind IN (:...kinds)", { kinds: [IntegrationFailureKind.SMS, IntegrationFailureKind.EMAIL] })
+        .where("f.kind IN (:...kinds)", {
+          kinds: [IntegrationFailureKind.SMS, IntegrationFailureKind.EMAIL],
+        })
         .andWhere("f.createdAt >= :since", { since: dayAgo })
         .getCount(),
     ]);

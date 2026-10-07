@@ -91,8 +91,7 @@ export class ParcelsController {
   ) {
     if (!idempotencyKey || !idempotencyKey.trim()) {
       throw new BadRequestException({
-        message:
-          "Idempotency-Key header is required for parcel creation requests",
+        message: "Idempotency-Key header is required for parcel creation requests",
         error: ApiErrorCode.IDEMPOTENCY_KEY_REQUIRED,
       });
     }
@@ -131,10 +130,7 @@ export class ParcelsController {
     @Req() req: RequestWithId,
   ) {
     const scope = await this.parcelsService.resolveScope(user);
-    const { items, pagination } = await this.parcelsService.listParcels(
-      query,
-      scope,
-    );
+    const { items, pagination } = await this.parcelsService.listParcels(query, scope);
 
     return {
       success: true,

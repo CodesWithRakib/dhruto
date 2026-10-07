@@ -41,6 +41,19 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Parcel", "Merchant", "Wallet", "Auth", "Notification", "Webhook", "Hub", "Rider", "Finance", "Integration", "Intelligence", "Analytics"],
+  tagTypes: [
+    "Parcel",
+    "Merchant",
+    "Wallet",
+    "Auth",
+    "Notification",
+    "Webhook",
+    "Hub",
+    "Rider",
+    "Finance",
+    "Integration",
+    "Intelligence",
+    "Analytics",
+  ],
   endpoints: () => ({}),
 });

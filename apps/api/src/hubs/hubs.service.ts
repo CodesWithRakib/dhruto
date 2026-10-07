@@ -5,10 +5,10 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, In, MoreThanOrEqual, Repository } from 'typeorm';
-import { randomUUID } from 'node:crypto';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { DataSource, EntityManager, In, MoreThanOrEqual, Repository } from "typeorm";
+import { randomUUID } from "node:crypto";
 import {
   ApiErrorCode,
   BagStatus,
@@ -37,7 +37,7 @@ import {
   type ReceiveManifestDto,
   type ResolveExceptionDto,
   type SealBagDto,
-} from '@dhruto/contracts';
+} from "@dhruto/contracts";
 import {
   Bag,
   BagParcel,
@@ -49,10 +49,10 @@ import {
   ParcelScan,
   ParcelStatusHistory,
   User,
-} from '../database/entities/index.js';
-import { type AuthenticatedUser } from '../auth/jwt/jwt.interface.js';
-import { ParcelLifecycleService } from '../parcels/lifecycle/parcel-lifecycle.service.js';
-import { HubAuthorizationService } from './hub-authorization.service.js';
+} from "../database/entities/index.js";
+import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
+import { ParcelLifecycleService } from "../parcels/lifecycle/parcel-lifecycle.service.js";
+import { HubAuthorizationService } from "./hub-authorization.service.js";
 
 /** Bags that still accept parcels. */
 const OPEN_BAG_STATUSES: readonly BagStatus[] = [BagStatus.OPEN];
@@ -131,7 +131,7 @@ export class HubsService {
   async listDestinationHubs(): Promise<Hub[]> {
     return this.hubRepo.find({
       where: { status: HubStatus.ACTIVE },
-      order: { name: 'ASC' },
+      order: { name: "ASC" },
     });
   }
 
@@ -139,16 +139,10 @@ export class HubsService {
    * Operational dashboard. Every number is a real aggregate query — there are
    * no placeholder or fabricated metrics (spec §10).
    */
-  async getDashboard(
-    user: AuthenticatedUser,
-    hubIdOrCode: string,
-  ): Promise<HubDashboard> {
-    const hub = await this.authz.assertHubAccess(
-      user,
-      hubIdOrCode,
-      HubPermission.VIEW,
-      { requireActive: false },
-    );
+  async getDashboard(user: AuthenticatedUser, hubIdOrCode: string): Promise<HubDashboard> {
+    const hub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.VIEW, {
+      requireActive: false,
+    });
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
@@ -235,47 +229,40 @@ export class HubsService {
    * also matched parcels with an unset hub and status CREATED, which leaked
    * every merchant's uncollected bookings.
    */
-  async getHubInventory(
-    user: AuthenticatedUser,
-    hubIdOrCode: string,
-  ): Promise<HubInventory> {
-    const hub = await this.authz.assertHubAccess(
-      user,
-      hubIdOrCode,
-      HubPermission.VIEW,
-      { requireActive: false },
-    );
+  async getHubInventory(user: AuthenticatedUser, hubIdOrCode: string): Promise<HubInventory> {
+    const hub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.VIEW, {
+      requireActive: false,
+    });
 
     const parcelsAtHub = await this.parcelRepo.find({
       where: {
         currentHubId: hub.id,
         status: In(ACTIVE_PARCEL_STATUSES),
       },
-      order: { updatedAt: 'DESC' },
+      order: { updatedAt: "DESC" },
       take: 100,
     });
 
-    const [inboundCount, receivedCount, baggedCount, openBagsCount] =
-      await Promise.all([
-        this.parcelRepo.count({
-          where: {
-            currentHubId: hub.id,
-            status: In([ParcelStatus.PICKED_UP, ParcelStatus.ORIGIN_HUB_RECEIVED]),
-          },
-        }),
-        this.parcelRepo.count({
-          where: {
-            currentHubId: hub.id,
-            status: ParcelStatus.DESTINATION_HUB_RECEIVED,
-          },
-        }),
-        this.parcelRepo.count({
-          where: { currentHubId: hub.id, status: ParcelStatus.BAGGED },
-        }),
-        this.bagRepo.count({
-          where: { originHubId: hub.id, status: BagStatus.OPEN },
-        }),
-      ]);
+    const [inboundCount, receivedCount, baggedCount, openBagsCount] = await Promise.all([
+      this.parcelRepo.count({
+        where: {
+          currentHubId: hub.id,
+          status: In([ParcelStatus.PICKED_UP, ParcelStatus.ORIGIN_HUB_RECEIVED]),
+        },
+      }),
+      this.parcelRepo.count({
+        where: {
+          currentHubId: hub.id,
+          status: ParcelStatus.DESTINATION_HUB_RECEIVED,
+        },
+      }),
+      this.parcelRepo.count({
+        where: { currentHubId: hub.id, status: ParcelStatus.BAGGED },
+      }),
+      this.bagRepo.count({
+        where: { originHubId: hub.id, status: BagStatus.OPEN },
+      }),
+    ]);
 
     return {
       hub: this.toHubSummary(hub),
@@ -313,11 +300,7 @@ export class HubsService {
     hubIdOrCode: string,
     dto: HubScanDto,
   ): Promise<HubScanResult> {
-    const hub = await this.authz.assertHubAccess(
-      user,
-      hubIdOrCode,
-      HubPermission.SCAN,
-    );
+    const hub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.SCAN);
 
     const barcode = dto.barcode.trim().toUpperCase();
 
@@ -327,38 +310,36 @@ export class HubsService {
         where: { idempotencyKey: dto.idempotencyKey },
       });
       if (existing) {
-        let currentStatus = 'UNKNOWN';
+        let currentStatus = "UNKNOWN";
         if (existing.parcelId) {
           const parcel = await this.parcelRepo.findOne({
             where: { id: existing.parcelId },
-            select: ['id', 'status'],
+            select: ["id", "status"],
           });
-          currentStatus = parcel?.status ?? 'UNKNOWN';
+          currentStatus = parcel?.status ?? "UNKNOWN";
         } else if (existing.bagId) {
           const bag = await this.bagRepo.findOne({
             where: { id: existing.bagId },
-            select: ['id', 'status'],
+            select: ["id", "status"],
           });
-          currentStatus = bag?.status ?? 'UNKNOWN';
+          currentStatus = bag?.status ?? "UNKNOWN";
         }
 
         return this.resultFromScan(existing, hub, {
           outcome:
-            existing.outcome === ScanOutcome.APPLIED
-              ? ScanOutcome.DUPLICATE
-              : existing.outcome,
-          reasonCode: existing.reasonCode ?? 'DUPLICATE_SUBMISSION',
+            existing.outcome === ScanOutcome.APPLIED ? ScanOutcome.DUPLICATE : existing.outcome,
+          reasonCode: existing.reasonCode ?? "DUPLICATE_SUBMISSION",
           currentStatus,
           previousStatus: currentStatus,
           message:
             existing.outcome === ScanOutcome.APPLIED
               ? `Duplicate submission ignored; ${existing.barcode} was already processed`
-              : `Duplicate submission replayed a rejected scan (${existing.reasonCode ?? 'REJECTED'})`,
+              : `Duplicate submission replayed a rejected scan (${existing.reasonCode ?? "REJECTED"})`,
         });
       }
     }
 
-    if (barcode.startsWith('BAG-')) {
+    if (barcode.startsWith("BAG-")) {
       return this.scanBag(user, hub, barcode, dto);
     }
 
@@ -376,9 +357,9 @@ export class HubsService {
         // Lock the parcel so two concurrent scans are serialized.
         const parcel = await manager
           .getRepository(Parcel)
-          .createQueryBuilder('parcel')
-          .setLock('pessimistic_write')
-          .where('parcel.tracking_code = :barcode', { barcode })
+          .createQueryBuilder("parcel")
+          .setLock("pessimistic_write")
+          .where("parcel.tracking_code = :barcode", { barcode })
           .getOne();
 
         if (!parcel) {
@@ -399,7 +380,7 @@ export class HubsService {
             hubId: hub.id,
             scanType: dto.scanType,
             outcome: ScanOutcome.DUPLICATE,
-            reasonCode: 'ALREADY_PROCESSED',
+            reasonCode: "ALREADY_PROCESSED",
             barcode,
             operatorId: user.id,
             idempotencyKey: dto.idempotencyKey ?? null,
@@ -417,7 +398,7 @@ export class HubsService {
 
           return this.resultFromScan(result, hub, {
             outcome: ScanOutcome.DUPLICATE,
-            reasonCode: 'ALREADY_PROCESSED',
+            reasonCode: "ALREADY_PROCESSED",
             message: `Parcel ${parcel.trackingCode} was already processed at this stage (status ${previousStatus}).`,
             previousStatus,
             currentStatus: parcel.status,
@@ -453,17 +434,11 @@ export class HubsService {
           case HubScanType.BAG_PARCEL: {
             if (!dto.bagId) {
               throw new BadRequestException({
-                message: 'bagId is required when scanning for BAG_PARCEL',
+                message: "bagId is required when scanning for BAG_PARCEL",
                 error: ApiErrorCode.VALIDATION_ERROR,
               });
             }
-            await this.addParcelToBagWithinTransaction(
-              manager,
-              dto.bagId,
-              parcel,
-              hub,
-              user,
-            );
+            await this.addParcelToBagWithinTransaction(manager, dto.bagId, parcel, hub, user);
             break;
           }
 
@@ -489,7 +464,7 @@ export class HubsService {
           case HubScanType.EXCEPTION: {
             if (!dto.notes) {
               throw new BadRequestException({
-                message: 'notes are required when raising an EXCEPTION scan',
+                message: "notes are required when raising an EXCEPTION scan",
                 error: ApiErrorCode.VALIDATION_ERROR,
               });
             }
@@ -529,7 +504,7 @@ export class HubsService {
           previousStatus,
           currentStatus: parcel.status,
           parcelId: parcel.id,
-          itemType: 'PARCEL',
+          itemType: "PARCEL",
         });
       });
     } catch (error) {
@@ -548,11 +523,11 @@ export class HubsService {
       return await this.dataSource.transaction(async (manager) => {
         const bag = await manager
           .getRepository(Bag)
-          .createQueryBuilder('bag')
-          .setLock('pessimistic_write')
-          .leftJoinAndSelect('bag.originHub', 'originHub')
-          .leftJoinAndSelect('bag.destinationHub', 'destinationHub')
-          .where('bag.bag_code = :barcode', { barcode })
+          .createQueryBuilder("bag")
+          .setLock("pessimistic_write")
+          .leftJoinAndSelect("bag.originHub", "originHub")
+          .leftJoinAndSelect("bag.destinationHub", "destinationHub")
+          .where("bag.bag_code = :barcode", { barcode })
           .getOne();
 
         if (!bag) {
@@ -601,7 +576,7 @@ export class HubsService {
             previousStatus,
             currentStatus: BagStatus.RECEIVED,
             bagId: bag.id,
-            itemType: 'BAG',
+            itemType: "BAG",
             routingInfo: {
               originHubName: bag.originHub?.name,
               destinationHubName: hub.name,
@@ -641,12 +616,12 @@ export class HubsService {
           return this.resultFromScan(scan, hub, {
             outcome: ScanOutcome.APPLIED,
             message: `Bag ${bag.bagCode} dispatched to ${
-              bag.destinationHub?.name ?? 'destination hub'
+              bag.destinationHub?.name ?? "destination hub"
             }`,
             previousStatus,
             currentStatus: BagStatus.IN_TRANSIT,
             bagId: bag.id,
-            itemType: 'BAG',
+            itemType: "BAG",
             routingInfo: {
               originHubName: hub.name,
               destinationHubName: bag.destinationHub?.name,
@@ -674,7 +649,7 @@ export class HubsService {
           previousStatus,
           currentStatus: bag.status,
           bagId: bag.id,
-          itemType: 'BAG',
+          itemType: "BAG",
         });
       });
     } catch (error) {
@@ -684,10 +659,7 @@ export class HubsService {
   }
 
   /** The parcel must not already be past this hub's leg of the journey. */
-  private async assertHubCanReceive(
-    parcel: Parcel,
-    hub: Hub,
-  ): Promise<void> {
+  private async assertHubCanReceive(parcel: Parcel, hub: Hub): Promise<void> {
     const terminalStatuses: ParcelStatus[] = [
       ParcelStatus.DELIVERED,
       ParcelStatus.CASH_PENDING,
@@ -711,12 +683,9 @@ export class HubsService {
     hubIdOrCode: string,
     options: { limit?: number; scanType?: HubScanType; outcome?: ScanOutcome } = {},
   ): Promise<ParcelScanItem[]> {
-    const hub = await this.authz.assertHubAccess(
-      user,
-      hubIdOrCode,
-      HubPermission.VIEW,
-      { requireActive: false },
-    );
+    const hub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.VIEW, {
+      requireActive: false,
+    });
 
     const scans = await this.scanRepo.find({
       where: {
@@ -724,41 +693,33 @@ export class HubsService {
         ...(options.scanType ? { scanType: options.scanType } : {}),
         ...(options.outcome ? { outcome: options.outcome } : {}),
       },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
       take: Math.min(options.limit ?? 50, 200),
     });
 
-    const codes = scans
-      .map((scan) => scan.parcelId)
-      .filter((id): id is string => id !== null);
-    const bagIds = scans
-      .map((scan) => scan.bagId)
-      .filter((id): id is string => id !== null);
+    const codes = scans.map((scan) => scan.parcelId).filter((id): id is string => id !== null);
+    const bagIds = scans.map((scan) => scan.bagId).filter((id): id is string => id !== null);
     const operatorIds = [
-      ...new Set(
-        scans
-          .map((scan) => scan.operatorId)
-          .filter((id): id is string => id !== null),
-      ),
+      ...new Set(scans.map((scan) => scan.operatorId).filter((id): id is string => id !== null)),
     ];
 
     const [parcels, bags, operators] = await Promise.all([
       codes.length
         ? this.parcelRepo.find({
             where: { id: In(codes) },
-            select: ['id', 'trackingCode'],
+            select: ["id", "trackingCode"],
           })
         : Promise.resolve([]),
       bagIds.length
         ? this.bagRepo.find({
             where: { id: In(bagIds) },
-            select: ['id', 'bagCode'],
+            select: ["id", "bagCode"],
           })
         : Promise.resolve([]),
       operatorIds.length
         ? this.parcelRepo.manager.getRepository(User).find({
             where: { id: In(operatorIds) },
-            select: ['id', 'name'],
+            select: ["id", "name"],
           })
         : Promise.resolve([]),
     ]);
@@ -769,27 +730,21 @@ export class HubsService {
 
     return scans.map((scan) => ({
       id: scan.id,
-      trackingCode: scan.parcelId ? parcelById.get(scan.parcelId) ?? null : null,
-      bagCode: scan.bagId ? bagById.get(scan.bagId) ?? null : null,
+      trackingCode: scan.parcelId ? (parcelById.get(scan.parcelId) ?? null) : null,
+      bagCode: scan.bagId ? (bagById.get(scan.bagId) ?? null) : null,
       hubCode: hub.code,
       hubName: hub.name,
       scanType: scan.scanType,
       outcome: scan.outcome,
       reasonCode: scan.reasonCode,
-      operatorName: scan.operatorId
-        ? operatorById.get(scan.operatorId) ?? null
-        : null,
+      operatorName: scan.operatorId ? (operatorById.get(scan.operatorId) ?? null) : null,
       notes: scan.notes,
       createdAt: scan.createdAt.toISOString(),
     }));
   }
 
   /** Operator parcel lookup by tracking code. Never exposes merchant pricing. */
-  async lookupParcel(
-    user: AuthenticatedUser,
-    hubIdOrCode: string,
-    trackingCode: string,
-  ) {
+  async lookupParcel(user: AuthenticatedUser, hubIdOrCode: string, trackingCode: string) {
     await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.VIEW, {
       requireActive: false,
     });
@@ -826,16 +781,12 @@ export class HubsService {
     hubIdOrCode: string,
     dto: CreateBagDto,
   ): Promise<BagDetails> {
-    const originHub = await this.authz.assertHubAccess(
-      user,
-      hubIdOrCode,
-      HubPermission.BAG_CREATE,
-    );
+    const originHub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.BAG_CREATE);
     const destinationHub = await this.authz.resolveHub(dto.destinationHubId);
 
     if (destinationHub.id === originHub.id) {
       throw new BadRequestException({
-        message: 'A bag cannot be created for its own origin hub',
+        message: "A bag cannot be created for its own origin hub",
         error: ApiErrorCode.VALIDATION_ERROR,
       });
     }
@@ -852,9 +803,7 @@ export class HubsService {
       }),
     );
 
-    this.logger.log(
-      `HUB_BAG_CREATED hub=${originHub.code} bag=${bag.bagCode} actor=${user.id}`,
-    );
+    this.logger.log(`HUB_BAG_CREATED hub=${originHub.code} bag=${bag.bagCode} actor=${user.id}`);
 
     return this.getBag(user, bag.id);
   }
@@ -869,16 +818,16 @@ export class HubsService {
     if (hubIds.length === 0) return [];
 
     const bags = await this.bagRepo
-      .createQueryBuilder('bag')
-      .leftJoinAndSelect('bag.originHub', 'originHub')
-      .leftJoinAndSelect('bag.destinationHub', 'destinationHub')
-      .leftJoinAndSelect('bag.bagParcels', 'bagParcels')
-      .leftJoinAndSelect('bagParcels.parcel', 'parcel')
-      .where('(bag.origin_hub_id IN (:...hubIds) OR bag.destination_hub_id IN (:...hubIds))', {
+      .createQueryBuilder("bag")
+      .leftJoinAndSelect("bag.originHub", "originHub")
+      .leftJoinAndSelect("bag.destinationHub", "destinationHub")
+      .leftJoinAndSelect("bag.bagParcels", "bagParcels")
+      .leftJoinAndSelect("bagParcels.parcel", "parcel")
+      .where("(bag.origin_hub_id IN (:...hubIds) OR bag.destination_hub_id IN (:...hubIds))", {
         hubIds,
       })
-      .andWhere(status ? 'bag.status = :status' : '1=1', status ? { status } : {})
-      .orderBy('bag.createdAt', 'DESC')
+      .andWhere(status ? "bag.status = :status" : "1=1", status ? { status } : {})
+      .orderBy("bag.createdAt", "DESC")
       .take(200)
       .getMany();
 
@@ -888,12 +837,7 @@ export class HubsService {
   async getBag(user: AuthenticatedUser, bagId: string): Promise<BagDetails> {
     const bag = await this.bagRepo.findOne({
       where: { id: bagId },
-      relations: [
-        'originHub',
-        'destinationHub',
-        'bagParcels',
-        'bagParcels.parcel',
-      ],
+      relations: ["originHub", "destinationHub", "bagParcels", "bagParcels.parcel"],
     });
 
     if (!bag) {
@@ -907,12 +851,10 @@ export class HubsService {
 
     const manifestItem = await this.manifestItemRepo.findOne({
       where: { bagId: bag.id },
-      relations: ['manifest'],
+      relations: ["manifest"],
     });
 
-    const activeParcels = (bag.bagParcels ?? []).filter(
-      (item) => item.isActive && item.parcel,
-    );
+    const activeParcels = (bag.bagParcels ?? []).filter((item) => item.isActive && item.parcel);
 
     const parcels: BagParcelItem[] = activeParcels.map((item) => ({
       id: item.parcel.id,
@@ -953,18 +895,14 @@ export class HubsService {
       });
     }
 
-    const hub = await this.authz.assertHubAccess(
-      user,
-      bag.originHubId,
-      HubPermission.BAG_CREATE,
-    );
+    const hub = await this.authz.assertHubAccess(user, bag.originHubId, HubPermission.BAG_CREATE);
 
     const parcelId = await this.dataSource.transaction(async (manager) => {
       const parcel = await manager
         .getRepository(Parcel)
-        .createQueryBuilder('parcel')
-        .setLock('pessimistic_write')
-        .where('parcel.tracking_code = :trackingCode', {
+        .createQueryBuilder("parcel")
+        .setLock("pessimistic_write")
+        .where("parcel.tracking_code = :trackingCode", {
           trackingCode: trackingCode.trim().toUpperCase(),
         })
         .getOne();
@@ -978,17 +916,10 @@ export class HubsService {
 
       const fresh = await manager.getRepository(Bag).findOne({
         where: { id: bag.id },
-        lock: { mode: 'pessimistic_write' },
+        lock: { mode: "pessimistic_write" },
       });
 
-      await this.addParcelToBagWithinTransaction(
-        manager,
-        bag.id,
-        parcel,
-        hub,
-        user,
-        fresh ?? bag,
-      );
+      await this.addParcelToBagWithinTransaction(manager, bag.id, parcel, hub, user, fresh ?? bag);
 
       return parcel.id;
     });
@@ -1015,7 +946,7 @@ export class HubsService {
       preselectedBag ??
       (await manager.getRepository(Bag).findOne({
         where: { id: bagId },
-        lock: { mode: 'pessimistic_write' },
+        lock: { mode: "pessimistic_write" },
       }));
 
     if (!bag) {
@@ -1089,11 +1020,7 @@ export class HubsService {
     });
   }
 
-  async sealBag(
-    user: AuthenticatedUser,
-    bagId: string,
-    dto: SealBagDto,
-  ): Promise<BagDetails> {
+  async sealBag(user: AuthenticatedUser, bagId: string, dto: SealBagDto): Promise<BagDetails> {
     const bag = await this.bagRepo.findOne({ where: { id: bagId } });
     if (!bag) {
       throw new NotFoundException({
@@ -1102,16 +1029,12 @@ export class HubsService {
       });
     }
 
-    const hub = await this.authz.assertHubAccess(
-      user,
-      bag.originHubId,
-      HubPermission.BAG_SEAL,
-    );
+    const hub = await this.authz.assertHubAccess(user, bag.originHubId, HubPermission.BAG_SEAL);
 
     const updated = await this.dataSource.transaction(async (manager) => {
       const locked = await manager.getRepository(Bag).findOne({
         where: { id: bagId },
-        lock: { mode: 'pessimistic_write' },
+        lock: { mode: "pessimistic_write" },
       });
 
       if (!locked) {
@@ -1134,7 +1057,7 @@ export class HubsService {
 
       if (parcelCount === 0) {
         throw new BadRequestException({
-          message: 'A bag must contain at least one parcel before it can be sealed',
+          message: "A bag must contain at least one parcel before it can be sealed",
           error: ApiErrorCode.VALIDATION_ERROR,
         });
       }
@@ -1147,9 +1070,7 @@ export class HubsService {
       return manager.getRepository(Bag).save(locked);
     });
 
-    this.logger.log(
-      `HUB_BAG_SEALED hub=${hub.code} bag=${updated.bagCode} actor=${user.id}`,
-    );
+    this.logger.log(`HUB_BAG_SEALED hub=${hub.code} bag=${updated.bagCode} actor=${user.id}`);
 
     return this.getBag(user, bagId);
   }
@@ -1172,7 +1093,7 @@ export class HubsService {
 
     if (destinationHub.id === originHub.id) {
       throw new BadRequestException({
-        message: 'A manifest cannot be created for its own origin hub',
+        message: "A manifest cannot be created for its own origin hub",
         error: ApiErrorCode.VALIDATION_ERROR,
       });
     }
@@ -1182,12 +1103,12 @@ export class HubsService {
     const manifestId = await this.dataSource.transaction(async (manager) => {
       const bags = await manager.getRepository(Bag).find({
         where: { id: In(bagIds) },
-        lock: { mode: 'pessimistic_write' },
+        lock: { mode: "pessimistic_write" },
       });
 
       if (bags.length !== bagIds.length) {
         throw new NotFoundException({
-          message: 'One or more selected bags no longer exist',
+          message: "One or more selected bags no longer exist",
           error: ApiErrorCode.BAG_NOT_FOUND,
         });
       }
@@ -1215,13 +1136,11 @@ export class HubsService {
 
       const alreadyManifested = await manager.getRepository(ManifestItem).find({
         where: { bagId: In(bagIds) },
-        relations: ['manifest'],
+        relations: ["manifest"],
       });
 
       const conflicting = alreadyManifested.filter(
-        (item) =>
-          item.manifest &&
-          item.manifest.status !== ManifestStatus.CANCELLED,
+        (item) => item.manifest && item.manifest.status !== ManifestStatus.CANCELLED,
       );
 
       const conflictingItem = conflicting[0];
@@ -1274,16 +1193,16 @@ export class HubsService {
     if (hubIds.length === 0) return [];
 
     const manifests = await this.manifestRepo
-      .createQueryBuilder('manifest')
-      .leftJoinAndSelect('manifest.originHub', 'originHub')
-      .leftJoinAndSelect('manifest.destinationHub', 'destinationHub')
-      .leftJoinAndSelect('manifest.items', 'items')
-      .leftJoinAndSelect('items.bag', 'bag')
+      .createQueryBuilder("manifest")
+      .leftJoinAndSelect("manifest.originHub", "originHub")
+      .leftJoinAndSelect("manifest.destinationHub", "destinationHub")
+      .leftJoinAndSelect("manifest.items", "items")
+      .leftJoinAndSelect("items.bag", "bag")
       .where(
-        '(manifest.origin_hub_id IN (:...hubIds) OR manifest.destination_hub_id IN (:...hubIds))',
+        "(manifest.origin_hub_id IN (:...hubIds) OR manifest.destination_hub_id IN (:...hubIds))",
         { hubIds },
       )
-      .orderBy('manifest.createdAt', 'DESC')
+      .orderBy("manifest.createdAt", "DESC")
       .take(200)
       .getMany();
 
@@ -1296,21 +1215,18 @@ export class HubsService {
     );
   }
 
-  async getManifest(
-    user: AuthenticatedUser,
-    manifestId: string,
-  ): Promise<ManifestDetails> {
+  async getManifest(user: AuthenticatedUser, manifestId: string): Promise<ManifestDetails> {
     const manifest = await this.manifestRepo.findOne({
       where: { id: manifestId },
       relations: [
-        'originHub',
-        'destinationHub',
-        'items',
-        'items.bag',
-        'items.bag.originHub',
-        'items.bag.destinationHub',
-        'items.bag.bagParcels',
-        'items.bag.bagParcels.parcel',
+        "originHub",
+        "destinationHub",
+        "items",
+        "items.bag",
+        "items.bag.originHub",
+        "items.bag.destinationHub",
+        "items.bag.bagParcels",
+        "items.bag.bagParcels.parcel",
       ],
     });
 
@@ -1355,13 +1271,10 @@ export class HubsService {
     };
   }
 
-  async dispatchManifest(
-    user: AuthenticatedUser,
-    manifestId: string,
-  ): Promise<ManifestDetails> {
+  async dispatchManifest(user: AuthenticatedUser, manifestId: string): Promise<ManifestDetails> {
     const manifest = await this.manifestRepo.findOne({
       where: { id: manifestId },
-      relations: ['items', 'items.bag', 'originHub'],
+      relations: ["items", "items.bag", "originHub"],
     });
 
     if (!manifest) {
@@ -1380,7 +1293,7 @@ export class HubsService {
     await this.dataSource.transaction(async (manager) => {
       const locked = await manager.getRepository(Manifest).findOne({
         where: { id: manifestId },
-        lock: { mode: 'pessimistic_write' },
+        lock: { mode: "pessimistic_write" },
       });
 
       if (!locked) {
@@ -1401,21 +1314,21 @@ export class HubsService {
       const destination = await manager.getRepository(Hub).findOne({
         where: { id: locked.destinationHubId },
       });
-      if (!destination || destination.status !== 'ACTIVE') {
+      if (!destination || destination.status !== "ACTIVE") {
         throw new BadRequestException({
-          message: 'Destination hub is not active and cannot accept a dispatch',
+          message: "Destination hub is not active and cannot accept a dispatch",
           error: ApiErrorCode.HUB_NOT_ACTIVE,
         });
       }
 
       const items = await manager.getRepository(ManifestItem).find({
         where: { manifestId: locked.id },
-        relations: ['bag'],
+        relations: ["bag"],
       });
 
       if (items.length === 0) {
         throw new BadRequestException({
-          message: 'A manifest must contain at least one sealed bag before dispatch',
+          message: "A manifest must contain at least one sealed bag before dispatch",
           error: ApiErrorCode.VALIDATION_ERROR,
         });
       }
@@ -1459,7 +1372,7 @@ export class HubsService {
   ): Promise<{ manifest: ManifestDetails; reconciliation: ManifestReconciliation }> {
     const manifest = await this.manifestRepo.findOne({
       where: { id: manifestId },
-      relations: ['items', 'items.bag'],
+      relations: ["items", "items.bag"],
     });
 
     if (!manifest) {
@@ -1479,7 +1392,7 @@ export class HubsService {
     const expectedBagCodes = new Set(
       (manifest.items ?? [])
         .map((item) => item.bag?.bagCode)
-        .filter((code): code is string => typeof code === 'string'),
+        .filter((code): code is string => typeof code === "string"),
     );
 
     const unexpected = scanned.filter((code) => !expectedBagCodes.has(code));
@@ -1489,16 +1402,12 @@ export class HubsService {
     // exceptions raised inside it would be lost — and a silently discarded
     // discrepancy is exactly what this must never do (spec §39, §41).
     const manifestItems = manifest.items ?? [];
-    const missingBagCodes = [...expectedBagCodes].filter(
-      (code) => !scanned.includes(code),
-    );
+    const missingBagCodes = [...expectedBagCodes].filter((code) => !scanned.includes(code));
     const wrongDestinationBags = manifestItems
       .map((item) => item.bag)
       .filter(
         (bag): bag is Bag =>
-          bag !== null &&
-          scanned.includes(bag.bagCode) &&
-          bag.destinationHubId !== hub.id,
+          bag !== null && scanned.includes(bag.bagCode) && bag.destinationHubId !== hub.id,
       );
 
     for (const code of unexpected) {
@@ -1537,7 +1446,7 @@ export class HubsService {
     // A mismatch is never silently absorbed into the manifest.
     if (unexpected.length > 0) {
       throw new BadRequestException({
-        message: `Bag(s) ${unexpected.join(', ')} are not part of manifest ${manifest.manifestCode}`,
+        message: `Bag(s) ${unexpected.join(", ")} are not part of manifest ${manifest.manifestCode}`,
         error: ApiErrorCode.MANIFEST_INVALID_STATE,
       });
     }
@@ -1553,7 +1462,7 @@ export class HubsService {
     if (missingBagCodes.length > 0 && !dto.allowPartial) {
       throw new ConflictException({
         message: `Manifest ${manifest.manifestCode} is incomplete: bag(s) ${missingBagCodes.join(
-          ', ',
+          ", ",
         )} were not scanned. Resolve the discrepancy or allow a partial receipt.`,
         error: ApiErrorCode.MANIFEST_INVALID_STATE,
       });
@@ -1562,7 +1471,7 @@ export class HubsService {
     await this.dataSource.transaction(async (manager) => {
       const locked = await manager.getRepository(Manifest).findOne({
         where: { id: manifestId },
-        lock: { mode: 'pessimistic_write' },
+        lock: { mode: "pessimistic_write" },
       });
 
       if (!locked) {
@@ -1581,7 +1490,7 @@ export class HubsService {
 
       const items = await manager.getRepository(ManifestItem).find({
         where: { manifestId: locked.id },
-        relations: ['bag'],
+        relations: ["bag"],
       });
 
       for (const code of scanned) {
@@ -1592,9 +1501,7 @@ export class HubsService {
       }
 
       locked.status =
-        missingBagCodes.length > 0
-          ? ManifestStatus.RECONCILED
-          : ManifestStatus.RECEIVED;
+        missingBagCodes.length > 0 ? ManifestStatus.RECONCILED : ManifestStatus.RECEIVED;
       locked.receivedAt = new Date();
       locked.receivedBy = user.id;
       await manager.getRepository(Manifest).save(locked);
@@ -1617,7 +1524,7 @@ export class HubsService {
   ): Promise<void> {
     const activeLinks = await manager.getRepository(BagParcel).find({
       where: { bagId: bag.id, isActive: true },
-      relations: ['parcel'],
+      relations: ["parcel"],
     });
 
     for (const link of activeLinks) {
@@ -1652,19 +1559,14 @@ export class HubsService {
   ): Promise<void> {
     const activeLinks = await manager.getRepository(BagParcel).find({
       where: { bagId: bag.id, isActive: true },
-      relations: ['parcel'],
+      relations: ["parcel"],
     });
 
     for (const link of activeLinks) {
       const parcel = link.parcel;
       if (!parcel) continue;
       const previousStatus = parcel.status;
-      if (
-        this.lifecycle.canTransition(
-          previousStatus,
-          ParcelStatus.DESTINATION_HUB_RECEIVED,
-        )
-      ) {
+      if (this.lifecycle.canTransition(previousStatus, ParcelStatus.DESTINATION_HUB_RECEIVED)) {
         parcel.status = ParcelStatus.DESTINATION_HUB_RECEIVED;
       }
       parcel.currentHubId = hub.id;
@@ -1707,7 +1609,7 @@ export class HubsService {
         hubId: In(hubIds),
         ...(status ? { status } : {}),
       },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
       take: 200,
     });
 
@@ -1730,12 +1632,9 @@ export class HubsService {
       });
     }
 
-    await this.authz.assertHubAccess(
-      user,
-      exception.hubId,
-      HubPermission.EXCEPTION_RESOLVE,
-      { requireActive: false },
-    );
+    await this.authz.assertHubAccess(user, exception.hubId, HubPermission.EXCEPTION_RESOLVE, {
+      requireActive: false,
+    });
 
     exception.status = ExceptionStatus.RESOLVED;
     exception.resolvedBy = user.id;
@@ -1745,7 +1644,7 @@ export class HubsService {
 
     const [item] = await this.toExceptionItems([exception]);
     if (!item) {
-      throw new InternalServerErrorException('Failed to serialize exception');
+      throw new InternalServerErrorException("Failed to serialize exception");
     }
     return item;
   }
@@ -1760,21 +1659,15 @@ export class HubsService {
     hubIdOrCode: string | undefined,
   ): Promise<string[]> {
     if (hubIdOrCode) {
-      const hub = await this.authz.assertHubAccess(
-        user,
-        hubIdOrCode,
-        HubPermission.VIEW,
-        { requireActive: false },
-      );
+      const hub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.VIEW, {
+        requireActive: false,
+      });
       return [hub.id];
     }
     return this.authz.listAuthorizedHubIds(user);
   }
 
-  private async assertBagVisible(
-    user: AuthenticatedUser,
-    bag: Bag,
-  ): Promise<void> {
+  private async assertBagVisible(user: AuthenticatedUser, bag: Bag): Promise<void> {
     const [originVisible, destinationVisible] = await Promise.all([
       this.authz.isHubVisible(user, bag.originHubId),
       this.authz.isHubVisible(user, bag.destinationHubId),
@@ -1806,7 +1699,7 @@ export class HubsService {
         parcelId: entry.parcelId,
         fromStatus: entry.fromStatus,
         toStatus: entry.toStatus,
-        eventType: 'STATUS_CHANGED',
+        eventType: "STATUS_CHANGED",
         actorId: entry.actorId,
         actorRole: entry.actorRole,
         description: entry.description,
@@ -1830,9 +1723,7 @@ export class HubsService {
       notes: string | null;
     },
   ): Promise<ParcelScan> {
-    return manager.getRepository(ParcelScan).save(
-      manager.getRepository(ParcelScan).create(scan),
-    );
+    return manager.getRepository(ParcelScan).save(manager.getRepository(ParcelScan).create(scan));
   }
 
   /**
@@ -1847,8 +1738,7 @@ export class HubsService {
     error: unknown,
   ): Promise<void> {
     const reasonCode =
-      (error as { response?: { error?: string } })?.response?.error ??
-      'SCAN_REJECTED';
+      (error as { response?: { error?: string } })?.response?.error ?? "SCAN_REJECTED";
 
     try {
       await this.scanRepo.save(
@@ -1869,7 +1759,7 @@ export class HubsService {
       // Never mask the original failure with an audit-write problem.
       this.logger.warn(
         `Failed to record rejected scan for ${barcode}: ${
-          persistError instanceof Error ? persistError.message : 'unknown'
+          persistError instanceof Error ? persistError.message : "unknown"
         }`,
       );
     }
@@ -1933,7 +1823,7 @@ export class HubsService {
     if (!userId) return null;
     const user = await this.parcelRepo.manager.getRepository(User).findOne({
       where: { id: userId },
-      select: ['id', 'name'],
+      select: ["id", "name"],
     });
     return user?.name ?? null;
   }
@@ -1945,21 +1835,13 @@ export class HubsService {
 
     const hubIds = [...new Set(exceptions.map((e) => e.hubId))];
     const parcelIds = [
-      ...new Set(
-        exceptions.map((e) => e.parcelId).filter((id): id is string => id !== null),
-      ),
+      ...new Set(exceptions.map((e) => e.parcelId).filter((id): id is string => id !== null)),
     ];
     const bagIds = [
-      ...new Set(
-        exceptions.map((e) => e.bagId).filter((id): id is string => id !== null),
-      ),
+      ...new Set(exceptions.map((e) => e.bagId).filter((id): id is string => id !== null)),
     ];
     const manifestIds = [
-      ...new Set(
-        exceptions
-          .map((e) => e.manifestId)
-          .filter((id): id is string => id !== null),
-      ),
+      ...new Set(exceptions.map((e) => e.manifestId).filter((id): id is string => id !== null)),
     ];
     const userIds = [
       ...new Set(
@@ -1974,25 +1856,25 @@ export class HubsService {
       parcelIds.length
         ? this.parcelRepo.find({
             where: { id: In(parcelIds) },
-            select: ['id', 'trackingCode'],
+            select: ["id", "trackingCode"],
           })
         : Promise.resolve([]),
       bagIds.length
         ? this.bagRepo.find({
             where: { id: In(bagIds) },
-            select: ['id', 'bagCode'],
+            select: ["id", "bagCode"],
           })
         : Promise.resolve([]),
       manifestIds.length
         ? this.manifestRepo.find({
             where: { id: In(manifestIds) },
-            select: ['id', 'manifestCode'],
+            select: ["id", "manifestCode"],
           })
         : Promise.resolve([]),
       userIds.length
         ? this.parcelRepo.manager.getRepository(User).find({
             where: { id: In(userIds) },
-            select: ['id', 'name'],
+            select: ["id", "name"],
           })
         : Promise.resolve([]),
     ]);
@@ -2010,21 +1892,15 @@ export class HubsService {
         type: exception.type,
         status: exception.status,
         description: exception.description,
-        hubCode: hub?.code ?? '',
-        hubName: hub?.name ?? '',
-        trackingCode: exception.parcelId
-          ? parcelById.get(exception.parcelId) ?? null
-          : null,
-        bagCode: exception.bagId ? bagById.get(exception.bagId) ?? null : null,
+        hubCode: hub?.code ?? "",
+        hubName: hub?.name ?? "",
+        trackingCode: exception.parcelId ? (parcelById.get(exception.parcelId) ?? null) : null,
+        bagCode: exception.bagId ? (bagById.get(exception.bagId) ?? null) : null,
         manifestCode: exception.manifestId
-          ? manifestById.get(exception.manifestId) ?? null
+          ? (manifestById.get(exception.manifestId) ?? null)
           : null,
-        raisedByName: exception.actorId
-          ? userById.get(exception.actorId) ?? null
-          : null,
-        resolvedByName: exception.resolvedBy
-          ? userById.get(exception.resolvedBy) ?? null
-          : null,
+        raisedByName: exception.actorId ? (userById.get(exception.actorId) ?? null) : null,
+        resolvedByName: exception.resolvedBy ? (userById.get(exception.resolvedBy) ?? null) : null,
         resolvedAt: exception.resolvedAt?.toISOString() ?? null,
         resolutionNote: exception.resolutionNote,
         createdAt: exception.createdAt.toISOString(),
@@ -2033,12 +1909,10 @@ export class HubsService {
   }
 
   /** Expected manifest contents versus what the destination hub has received. */
-  private async buildReconciliation(
-    manifest: Manifest,
-  ): Promise<ManifestReconciliation> {
+  private async buildReconciliation(manifest: Manifest): Promise<ManifestReconciliation> {
     const items = await this.manifestItemRepo.find({
       where: { manifestId: manifest.id },
-      relations: ['bag', 'bag.bagParcels', 'bag.bagParcels.parcel'],
+      relations: ["bag", "bag.bagParcels", "bag.bagParcels.parcel"],
     });
 
     const expectedBagCodes: string[] = [];
@@ -2065,17 +1939,12 @@ export class HubsService {
         }
       }
 
-      if (
-        bag.status === BagStatus.RECEIVED ||
-        bag.status === BagStatus.COMPLETED
-      ) {
+      if (bag.status === BagStatus.RECEIVED || bag.status === BagStatus.COMPLETED) {
         receivedBagCodes.push(bag.bagCode);
       }
     }
 
-    const missingBagCodes = expectedBagCodes.filter(
-      (code) => !receivedBagCodes.includes(code),
-    );
+    const missingBagCodes = expectedBagCodes.filter((code) => !receivedBagCodes.includes(code));
 
     return {
       expectedBagCount: expectedBagCodes.length,
@@ -2088,26 +1957,23 @@ export class HubsService {
         (code) => !receivedTrackingCodes.includes(code),
       ),
       unexpectedTrackingCodes: [],
-      isComplete:
-        missingBagCodes.length === 0 && receivedBagCodes.length > 0,
+      isComplete: missingBagCodes.length === 0 && receivedBagCodes.length > 0,
     };
   }
 
-  private async countParcelsPerManifest(
-    manifestIds: string[],
-  ): Promise<Map<string, number>> {
+  private async countParcelsPerManifest(manifestIds: string[]): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
     if (manifestIds.length === 0) return counts;
 
     const rows = await this.bagParcelRepo
-      .createQueryBuilder('bagParcel')
-      .innerJoin('bagParcel.bag', 'bag')
-      .innerJoin('manifest_items', 'item', 'item.bag_id = bag.id')
-      .where('item.manifest_id IN (:...manifestIds)', { manifestIds })
-      .andWhere('bagParcel.is_active = true')
-      .select('item.manifest_id', 'manifestId')
-      .addSelect('COUNT(bagParcel.id)', 'count')
-      .groupBy('item.manifest_id')
+      .createQueryBuilder("bagParcel")
+      .innerJoin("bagParcel.bag", "bag")
+      .innerJoin("manifest_items", "item", "item.bag_id = bag.id")
+      .where("item.manifest_id IN (:...manifestIds)", { manifestIds })
+      .andWhere("bagParcel.is_active = true")
+      .select("item.manifest_id", "manifestId")
+      .addSelect("COUNT(bagParcel.id)", "count")
+      .groupBy("item.manifest_id")
       .getRawMany<{ manifestId: string; count: string }>();
 
     for (const row of rows) {
@@ -2130,7 +1996,7 @@ export class HubsService {
       success: override.outcome === ScanOutcome.APPLIED,
       scanType: scan.scanType,
       barcode: scan.barcode,
-      itemType: override.itemType ?? (scan.bagId ? 'BAG' : 'PARCEL'),
+      itemType: override.itemType ?? (scan.bagId ? "BAG" : "PARCEL"),
       reasonCode: override.reasonCode ?? scan.reasonCode ?? undefined,
       routingInfo: {
         currentHubName: hub.name,
@@ -2140,11 +2006,7 @@ export class HubsService {
     };
   }
 
-  private appliedMessage(
-    scanType: HubScanType,
-    parcel: Parcel,
-    hub: Hub,
-  ): string {
+  private appliedMessage(scanType: HubScanType, parcel: Parcel, hub: Hub): string {
     switch (scanType) {
       case HubScanType.RECEIVE_INBOUND:
         return `Parcel ${parcel.trackingCode} received at ${hub.name}`;
@@ -2177,10 +2039,10 @@ export class HubsService {
     return {
       id: bag.id,
       bagCode: bag.bagCode,
-      originHubCode: bag.originHub?.code ?? '',
-      originHubName: bag.originHub?.name ?? '',
-      destinationHubCode: bag.destinationHub?.code ?? '',
-      destinationHubName: bag.destinationHub?.name ?? '',
+      originHubCode: bag.originHub?.code ?? "",
+      originHubName: bag.originHub?.name ?? "",
+      destinationHubCode: bag.destinationHub?.code ?? "",
+      destinationHubName: bag.destinationHub?.name ?? "",
       status: bag.status,
       sealTag: bag.sealTag,
       parcelCount: activeLinks.length,
@@ -2195,10 +2057,7 @@ export class HubsService {
     };
   }
 
-  private toManifestListItem(
-    manifest: Manifest,
-    parcelCount: number,
-  ): ManifestListItem {
+  private toManifestListItem(manifest: Manifest, parcelCount: number): ManifestListItem {
     const bags = (manifest.items ?? [])
       .map((item) => item.bag)
       .filter((bag): bag is Bag => bag !== null);
@@ -2206,10 +2065,10 @@ export class HubsService {
     return {
       id: manifest.id,
       manifestCode: manifest.manifestCode,
-      originHubCode: manifest.originHub?.code ?? '',
-      originHubName: manifest.originHub?.name ?? '',
-      destinationHubCode: manifest.destinationHub?.code ?? '',
-      destinationHubName: manifest.destinationHub?.name ?? '',
+      originHubCode: manifest.originHub?.code ?? "",
+      originHubName: manifest.originHub?.name ?? "",
+      destinationHubCode: manifest.destinationHub?.code ?? "",
+      destinationHubName: manifest.destinationHub?.name ?? "",
       status: manifest.status,
       vehicleNumber: manifest.vehicleNumber,
       driverName: manifest.driverName,
@@ -2223,13 +2082,11 @@ export class HubsService {
   }
 
   private generateBagCode(originCode: string, destinationCode: string): string {
-    return `BAG-${originCode}-${destinationCode}-${randomUUID()
-      .slice(0, 6)
-      .toUpperCase()}`;
+    return `BAG-${originCode}-${destinationCode}-${randomUUID().slice(0, 6).toUpperCase()}`;
   }
 
   private generateManifestCode(): string {
-    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     return `MAN-${dateStr}-${randomUUID().slice(0, 6).toUpperCase()}`;
   }
 }

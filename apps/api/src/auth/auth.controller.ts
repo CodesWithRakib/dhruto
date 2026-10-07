@@ -1,18 +1,5 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  HttpStatus,
-  HttpCode,
-  UseGuards,
-  Req,
-} from "@nestjs/common";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-} from "@nestjs/swagger";
+import { Controller, Post, Get, Body, HttpStatus, HttpCode, UseGuards, Req } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { AuthService } from "./services/auth.service.js";
 import { RegisterDto, LoginDto, RefreshTokenDto } from "./dto/auth.dto.js";
 import { Public } from "./decorators/public.decorator.js";
@@ -52,7 +39,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Authenticate user and issue JWT tokens",
-    description: "Validates email/phone and password, returning short-lived access token and refresh token.",
+    description:
+      "Validates email/phone and password, returning short-lived access token and refresh token.",
   })
   async login(@Body() dto: LoginDto, @Req() req: RequestWithId) {
     const result = await this.authService.login(dto);
@@ -114,10 +102,7 @@ export class AuthController {
   @ApiOperation({
     summary: "Get current authenticated user profile and roles",
   })
-  async getMe(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req: RequestWithId,
-  ) {
+  async getMe(@CurrentUser() user: AuthenticatedUser, @Req() req: RequestWithId) {
     const profile = await this.authService.getProfile(user.id);
     return {
       success: true,

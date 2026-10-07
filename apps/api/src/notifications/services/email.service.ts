@@ -10,7 +10,12 @@ export interface EmailSendResult {
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
-  async sendEmail(to: string, subject: string, bodyText: string, htmlBody?: string): Promise<EmailSendResult> {
+  async sendEmail(
+    to: string,
+    subject: string,
+    bodyText: string,
+    htmlBody?: string,
+  ): Promise<EmailSendResult> {
     const messageId = `email_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     this.logger.log(
       `[EMAIL-SERVICE] Dispatched Email to "${to}" [${subject}] (ID: ${messageId}, len: ${bodyText?.length || 0}, html: ${!!htmlBody})`,

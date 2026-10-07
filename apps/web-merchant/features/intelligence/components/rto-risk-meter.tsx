@@ -71,7 +71,7 @@ export function RtoRiskMeter({
   const handleEvaluate = async (
     customPhone?: string,
     customCod?: number,
-    customAddress?: string
+    customAddress?: string,
   ) => {
     const targetPhone = (customPhone ?? phone).trim();
     const targetCod = Number(customCod ?? cod);
@@ -276,7 +276,9 @@ export function RtoRiskMeter({
         {riskResult && (
           <div className="mt-6 border rounded-lg bg-card overflow-hidden">
             {/* Header with Risk Tier & Score */}
-            <div className={`p-4 border-b flex items-center justify-between flex-wrap gap-2 ${getTierDetails(riskResult.riskTier, riskResult.riskScore).color}`}>
+            <div
+              className={`p-4 border-b flex items-center justify-between flex-wrap gap-2 ${getTierDetails(riskResult.riskTier, riskResult.riskScore).color}`}
+            >
               <div className="flex items-center gap-2.5">
                 {getTierDetails(riskResult.riskTier, riskResult.riskScore).icon}
                 <div>
@@ -318,24 +320,38 @@ export function RtoRiskMeter({
 
             {/* Action Badges */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-3 bg-muted/10 border-b text-xs">
-              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.safeToDispatch ? "bg-success-soft text-success border-success  " : "bg-danger-soft text-danger border-danger  "}`}>
-                {riskResult.safeToDispatch ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertTriangle className="h-4 w-4 shrink-0" />}
+              <div
+                className={`p-2 rounded border flex items-center gap-2 ${riskResult.safeToDispatch ? "bg-success-soft text-success border-success  " : "bg-danger-soft text-danger border-danger  "}`}
+              >
+                {riskResult.safeToDispatch ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                )}
                 <span className="font-semibold">
                   {riskResult.safeToDispatch ? "Safe to Dispatch" : "Hold for Review"}
                 </span>
               </div>
 
-              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresPhoneVerification ? "bg-warning-soft text-warning border-warning  " : "bg-muted text-muted-foreground"}`}>
+              <div
+                className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresPhoneVerification ? "bg-warning-soft text-warning border-warning  " : "bg-muted text-muted-foreground"}`}
+              >
                 <PhoneCall className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
-                  {riskResult.requiresPhoneVerification ? "Call Verification Needed" : "No Phone Check Needed"}
+                  {riskResult.requiresPhoneVerification
+                    ? "Call Verification Needed"
+                    : "No Phone Check Needed"}
                 </span>
               </div>
 
-              <div className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresAdvancePayment ? "bg-primary-soft text-primary border-primary  " : "bg-muted text-muted-foreground"}`}>
+              <div
+                className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresAdvancePayment ? "bg-primary-soft text-primary border-primary  " : "bg-muted text-muted-foreground"}`}
+              >
                 <CreditCard className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
-                  {riskResult.requiresAdvancePayment ? "Advance Fee Suggested" : "Full COD Permitted"}
+                  {riskResult.requiresAdvancePayment
+                    ? "Advance Fee Suggested"
+                    : "Full COD Permitted"}
                 </span>
               </div>
             </div>
@@ -349,19 +365,27 @@ export function RtoRiskMeter({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Total Orders</span>
-                  <span className="text-base font-bold font-mono">{riskResult.deliveryHistory.totalOrders}</span>
+                  <span className="text-base font-bold font-mono">
+                    {riskResult.deliveryHistory.totalOrders}
+                  </span>
                 </div>
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Delivered</span>
-                  <span className="text-base font-bold font-mono text-success">{riskResult.deliveryHistory.deliveredOrders}</span>
+                  <span className="text-base font-bold font-mono text-success">
+                    {riskResult.deliveryHistory.deliveredOrders}
+                  </span>
                 </div>
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Returns / RTO</span>
-                  <span className="text-base font-bold font-mono text-danger">{riskResult.deliveryHistory.returnedOrders}</span>
+                  <span className="text-base font-bold font-mono text-danger">
+                    {riskResult.deliveryHistory.returnedOrders}
+                  </span>
                 </div>
                 <div className="p-2 border rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Completion</span>
-                  <span className="text-base font-bold font-mono text-info">{riskResult.deliveryHistory.completionRate}%</span>
+                  <span className="text-base font-bold font-mono text-info">
+                    {riskResult.deliveryHistory.completionRate}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -392,22 +416,23 @@ export function RtoRiskMeter({
             )}
 
             {/* Operational Recommendations */}
-            {riskResult.operationalRecommendations && riskResult.operationalRecommendations.length > 0 && (
-              <div className="p-4 bg-muted/30 space-y-2">
-                <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary" />
-                  Proactive Merchant Recommendations
-                </span>
-                <ul className="space-y-1 text-xs">
-                  {riskResult.operationalRecommendations.map((rec, i) => (
-                    <li key={i} className="flex items-center gap-2 text-foreground font-medium">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                      {rec}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {riskResult.operationalRecommendations &&
+              riskResult.operationalRecommendations.length > 0 && (
+                <div className="p-4 bg-muted/30 space-y-2">
+                  <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-primary" />
+                    Proactive Merchant Recommendations
+                  </span>
+                  <ul className="space-y-1 text-xs">
+                    {riskResult.operationalRecommendations.map((rec, i) => (
+                      <li key={i} className="flex items-center gap-2 text-foreground font-medium">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
           </div>
         )}
       </CardContent>

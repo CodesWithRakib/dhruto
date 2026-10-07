@@ -28,9 +28,10 @@ export function MetricCard({ label, kpi, format, invertTrend, hint }: MetricCard
       </Card>
     );
   }
-  const good = kpi.changePct === null
-    ? null
-    : (kpi.changePct >= 0 && !invertTrend) || (kpi.changePct <= 0 && invertTrend);
+  const good =
+    kpi.changePct === null
+      ? null
+      : (kpi.changePct >= 0 && !invertTrend) || (kpi.changePct <= 0 && invertTrend);
   return (
     <Card className="p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -43,7 +44,11 @@ export function MetricCard({ label, kpi, format, invertTrend, hint }: MetricCard
         ) : (
           <Minus className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
         )}
-        <span className={good === null ? "text-muted-foreground" : good ? "text-success" : "text-danger"}>
+        <span
+          className={
+            good === null ? "text-muted-foreground" : good ? "text-success" : "text-danger"
+          }
+        >
           {kpi.changePct !== null ? `${kpi.changePct > 0 ? "+" : ""}${kpi.changePct}%` : "—"}
         </span>
         <span className="text-muted-foreground">vs previous period</span>

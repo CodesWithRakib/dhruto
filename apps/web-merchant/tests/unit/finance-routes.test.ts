@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  HUB_ROUTES,
-  ADMIN_ROUTES,
-  MERCHANT_ROUTES,
-  isProtectedRoute,
-} from "../../config/routes";
+import { HUB_ROUTES, ADMIN_ROUTES, MERCHANT_ROUTES, isProtectedRoute } from "../../config/routes";
 import { bottomNavForRole, navForRole } from "../../config/navigation";
 import { canAccessSection } from "../../config/roles";
 
@@ -23,9 +18,7 @@ describe("Finance routing", () => {
     );
     expect(hubHrefs).toContain(HUB_ROUTES.cash);
 
-    const adminHrefs = navForRole("ADMIN").flatMap((group) =>
-      group.items.map((item) => item.href),
-    );
+    const adminHrefs = navForRole("ADMIN").flatMap((group) => group.items.map((item) => item.href));
     expect(adminHrefs).toContain(ADMIN_ROUTES.finance);
 
     expect(bottomNavForRole("MERCHANT").map((item) => item.href)).toContain(

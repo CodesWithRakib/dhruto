@@ -1414,6 +1414,108 @@
       }
     ]
   },
+  "Pagination": {
+    "label": "পৃষ্ঠা নেভিগেশন",
+    "previous": "আগের",
+    "next": "পরের",
+    "page": "পৃষ্ঠা {page}",
+    "pageOf": "পৃষ্ঠা {page} / {totalPages}",
+    "perPage": "প্রতি পৃষ্ঠা"
+  },
+  "ConfirmDialog": {
+    "cancel": "বাতিল",
+    "confirm": "নিশ্চিত করুন",
+    "failed": "কাজটি ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
+  },
+  "ActiveFilters": {
+    "label": "সক্রিয় ফিল্টার",
+    "remove": "{label} ফিল্টার সরান",
+    "clearAll": "সব মুছুন"
+  },
+  "States": {
+    "loadErrorTitle": "কিছু একটা ভুল হয়েছে",
+    "loadErrorDescription": "ডেটা লোড করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+    "retry": "আবার চেষ্টা করুন",
+    "noResultsTitle": "কোনো ফলাফল নেই",
+    "noResultsDescription": "আপনার বর্তমান ফিল্টারে কোনো রেকর্ড মেলেনি।",
+    "emptyTitle": "এখনো কিছু নেই",
+    "clearFilters": "ফিল্টার মুছুন"
+  },
+  "PayoutStatus": {
+    "REQUESTED": "অনুরোধ করা হয়েছে",
+    "APPROVED": "অনুমোদিত",
+    "PROCESSING": "প্রক্রিয়াধীন",
+    "COMPLETED": "সম্পন্ন",
+    "FAILED": "ব্যর্থ",
+    "REJECTED": "প্রত্যাখ্যাত",
+    "CANCELLED": "বাতিল"
+  },
+  "PayoutMethod": {
+    "BKASH": "বিকাশ",
+    "NAGAD": "নগদ",
+    "ROCKET": "রকেট",
+    "BANK_TRANSFER": "ব্যাংক ট্রান্সফার"
+  },
+  "WalletTransactionType": {
+    "COD_CREDIT": "সিওডি জমা",
+    "DELIVERY_FEE": "ডেলিভারি ফি",
+    "RETURN_FEE": "রিটার্ন ফি",
+    "PAYOUT_DEBIT": "পেআউট",
+    "ADJUSTMENT_CREDIT": "সমন্বয় (জমা)",
+    "ADJUSTMENT_DEBIT": "সমন্বয় (কর্তন)"
+  },
+  "SettlementStatus": {
+    "SETTLED": "নিষ্পত্তি হয়েছে",
+    "REVERSED": "ফেরত"
+  },
+  "BagStatus": {
+    "OPEN": "খোলা",
+    "SEALED": "সিল করা",
+    "IN_TRANSIT": "পরিবহনে",
+    "RECEIVED": "গৃহীত",
+    "COMPLETED": "সম্পন্ন",
+    "CANCELLED": "বাতিল"
+  },
+  "ManifestStatus": {
+    "CREATED": "তৈরি",
+    "DISPATCHED": "প্রেরিত",
+    "IN_TRANSIT": "পরিবহনে",
+    "RECEIVED": "গৃহীত",
+    "RECONCILED": "মিলন হয়েছে",
+    "CANCELLED": "বাতিল"
+  },
+  "ExceptionStatus": {
+    "OPEN": "খোলা",
+    "RESOLVED": "নিষ্পত্তি",
+    "DISMISSED": "খারিজ"
+  },
+  "CashHandInStatus": {
+    "SUBMITTED": "জমা দেওয়া",
+    "VERIFIED": "যাচাইকৃত",
+    "DISCREPANCY": "গরমিল",
+    "RESOLVED": "নিষ্পত্তি"
+  },
+  "CashDiscrepancyStatus": {
+    "OPEN": "খোলা",
+    "RESOLVED": "নিষ্পত্তি"
+  },
+  "FinancialTransactionStatus": {
+    "POSTED": "পোস্ট করা হয়েছে",
+    "REVERSED": "ফেরত"
+  },
+  "RiderStatus": {
+    "ACTIVE": "সক্রিয়",
+    "INACTIVE": "নিষ্ক্রিয়",
+    "PENDING": "অপেক্ষমাণ",
+    "SUSPENDED": "স্থগিত",
+    "ON_DUTY": "ডিউটিতে",
+    "OFF_DUTY": "ডিউটির বাইরে"
+  },
+  "ScanOutcome": {
+    "APPLIED": "প্রয়োগ হয়েছে",
+    "DUPLICATE": "ডুপ্লিকেট",
+    "REJECTED": "প্রত্যাখ্যাত"
+  },
   "ParcelStatus": {
     "created": "তৈরি হয়েছে",
     "pickupRequested": "পিকআপ অনুরোধ",

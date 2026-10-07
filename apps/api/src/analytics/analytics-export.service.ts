@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException, Optional } from "@nestjs/common";
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+  Optional,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
@@ -103,10 +109,18 @@ export class AnalyticsExportService {
         await this.exportsQueue.add(
           "export-generate",
           { exportId: row.id },
-          { jobId: `export-${row.id}`, attempts: 3, backoff: { type: "exponential", delay: 10000 }, removeOnComplete: 500, removeOnFail: 1000 },
+          {
+            jobId: `export-${row.id}`,
+            attempts: 3,
+            backoff: { type: "exponential", delay: 10000 },
+            removeOnComplete: 500,
+            removeOnFail: 1000,
+          },
         );
       } catch (error) {
-        this.logger.warn(`Export queue unavailable, completing inline: ${getErrorMessage(error, "unknown")}`);
+        this.logger.warn(
+          `Export queue unavailable, completing inline: ${getErrorMessage(error, "unknown")}`,
+        );
         await this.complete(row.id, headers, rows, input.format);
       }
     } else {
@@ -127,11 +141,10 @@ export class AnalyticsExportService {
         hubId: (filters.hubId as string) || undefined,
         riderId: (filters.riderId as string) || undefined,
       };
-      const { headers, rows } = await this.buildDataset(
-        row.dataset as ExportDataset,
-        scope,
-        { dataset: row.dataset as ExportDataset, format: row.format as ExportFormat },
-      );
+      const { headers, rows } = await this.buildDataset(row.dataset as ExportDataset, scope, {
+        dataset: row.dataset as ExportDataset,
+        format: row.format as ExportFormat,
+      });
       await this.complete(row.id, headers, rows, row.format as ExportFormat);
       if (this.notifications) {
         await this.notifications
@@ -155,21 +168,41 @@ export class AnalyticsExportService {
     }
   }
 
-  async download(id: string, scope: TenantScope, actorId: string): Promise<{ fileName: string; format: string; contentBase64: string }> {
+  async download(
+    id: string,
+    scope: TenantScope,
+    actorId: string,
+  ): Promise<{ fileName: string; format: string; contentBase64: string }> {
     const row = await this.exportRepo.findOne({ where: { id } });
     if (!row) {
-      throw new NotFoundException({ message: "Export not found", error: ApiErrorCode.EXPORT_NOT_FOUND });
+      throw new NotFoundException({
+        message: "Export not found",
+        error: ApiErrorCode.EXPORT_NOT_FOUND,
+      });
     }
     if (row.requestedBy !== actorId) {
-      throw new ForbiddenException({ message: "Export belongs to another user", error: ApiErrorCode.ANALYTICS_SCOPE_FORBIDDEN });
+      throw new ForbiddenException({
+        message: "Export belongs to another user",
+        error: ApiErrorCode.ANALYTICS_SCOPE_FORBIDDEN,
+      });
     }
     if (scope.merchantId && row.tenantId && row.tenantId !== scope.merchantId) {
-      throw new ForbiddenException({ message: "Export belongs to another tenant", error: ApiErrorCode.ANALYTICS_SCOPE_FORBIDDEN });
+      throw new ForbiddenException({
+        message: "Export belongs to another tenant",
+        error: ApiErrorCode.ANALYTICS_SCOPE_FORBIDDEN,
+      });
     }
     if (row.status !== "READY" || !row.content || (row.expiresAt && row.expiresAt < new Date())) {
-      throw new NotFoundException({ message: "Export expired or unavailable", error: ApiErrorCode.EXPORT_EXPIRED });
+      throw new NotFoundException({
+        message: "Export expired or unavailable",
+        error: ApiErrorCode.EXPORT_EXPIRED,
+      });
     }
-    return { fileName: row.fileName ?? `report.${row.format}`, format: row.format, contentBase64: row.content };
+    return {
+      fileName: row.fileName ?? `report.${row.format}`,
+      format: row.format,
+      contentBase64: row.content,
+    };
   }
 
   async listForUser(actorId: string): Promise<ReportExportContract[]> {
@@ -181,8 +214,16 @@ export class AnalyticsExportService {
     return rows.map((r) => this.toContract(r));
   }
 
-  private async complete(exportId: string, headers: string[], rows: Array<Array<string | number | null>>, format: ExportFormat): Promise<void> {
-    const content = format === "xlsx" ? toXlsxBase64(headers, rows) : Buffer.from(toCsv(headers, rows), "utf8").toString("base64");
+  private async complete(
+    exportId: string,
+    headers: string[],
+    rows: Array<Array<string | number | null>>,
+    format: ExportFormat,
+  ): Promise<void> {
+    const content =
+      format === "xlsx"
+        ? toXlsxBase64(headers, rows)
+        : Buffer.from(toCsv(headers, rows), "utf8").toString("base64");
     await this.exportRepo.update(
       { id: exportId },
       {
@@ -198,7 +239,13 @@ export class AnalyticsExportService {
   private async buildDataset(
     dataset: ExportDataset,
     scope: TenantScope,
-    input: { preset?: string; from?: string; to?: string; dataset?: ExportDataset; format?: ExportFormat },
+    input: {
+      preset?: string;
+      from?: string;
+      to?: string;
+      dataset?: ExportDataset;
+      format?: ExportFormat;
+    },
   ): Promise<{ headers: string[]; rows: Array<Array<string | number | null>> }> {
     const range = this.ranges.resolve({
       preset: (input.preset as never) ?? "30d",
@@ -230,15 +277,53 @@ export class AnalyticsExportService {
       case "riders": {
         const riders = await this.metrics.riderStats(range, scope.hubId);
         return {
-          headers: ["rider", "hub", "assigned", "delivered", "failed", "success_rate", "first_attempt_success", "avg_hours", "cod_collected"],
-          rows: riders.slice(0, MAX_ROWS).map((r) => [r.name, r.hubName, r.assigned, r.delivered, r.failed, r.successRate, r.firstAttemptSuccess, r.avgCompletionHours, r.codCollected]),
+          headers: [
+            "rider",
+            "hub",
+            "assigned",
+            "delivered",
+            "failed",
+            "success_rate",
+            "first_attempt_success",
+            "avg_hours",
+            "cod_collected",
+          ],
+          rows: riders
+            .slice(0, MAX_ROWS)
+            .map((r) => [
+              r.name,
+              r.hubName,
+              r.assigned,
+              r.delivered,
+              r.failed,
+              r.successRate,
+              r.firstAttemptSuccess,
+              r.avgCompletionHours,
+              r.codCollected,
+            ]),
         };
       }
       case "hubs": {
         const hubs = await this.metrics.hubStats(range, scope.hubId);
         return {
-          headers: ["hub", "code", "incoming", "dispatched", "pending", "throughput_per_day", "oldest_pending_hours"],
-          rows: hubs.map((h) => [h.hubName, h.code, h.incoming, h.dispatched, h.pending, h.throughputPerDay, h.oldestPendingHours]),
+          headers: [
+            "hub",
+            "code",
+            "incoming",
+            "dispatched",
+            "pending",
+            "throughput_per_day",
+            "oldest_pending_hours",
+          ],
+          rows: hubs.map((h) => [
+            h.hubName,
+            h.code,
+            h.incoming,
+            h.dispatched,
+            h.pending,
+            h.throughputPerDay,
+            h.oldestPendingHours,
+          ]),
         };
       }
       case "finance": {

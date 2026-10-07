@@ -229,9 +229,7 @@ export const operationalExceptionItemSchema = z.object({
   createdAt: z.string(),
 });
 
-export type OperationalExceptionItem = z.infer<
-  typeof operationalExceptionItemSchema
->;
+export type OperationalExceptionItem = z.infer<typeof operationalExceptionItemSchema>;
 
 /* ------------------------------------------------------------------ */
 /* Bags - DTOs and responses                                           */
@@ -306,10 +304,7 @@ export type BagDetails = z.infer<typeof bagDetailsSchema>;
 
 export const createManifestSchema = z.object({
   destinationHubId: z.string().uuid("Invalid destination hub ID"),
-  bagIds: z
-    .array(z.string().uuid())
-    .min(1, "Select at least one bag for manifest")
-    .max(200),
+  bagIds: z.array(z.string().uuid()).min(1, "Select at least one bag for manifest").max(200),
   vehicleNumber: z.string().trim().min(3).max(50),
   driverName: z.string().trim().max(150).optional(),
   driverPhone: z.string().trim().max(20).optional(),
@@ -354,9 +349,7 @@ export const manifestReconciliationSchema = z.object({
   isComplete: z.boolean(),
 });
 
-export type ManifestReconciliation = z.infer<
-  typeof manifestReconciliationSchema
->;
+export type ManifestReconciliation = z.infer<typeof manifestReconciliationSchema>;
 
 export const manifestDetailsSchema = manifestListItemSchema.extend({
   notes: z.string().nullable(),

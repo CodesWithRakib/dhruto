@@ -42,7 +42,8 @@ export class RecommendationEngineService implements RecommendationEngine {
         reasons: [
           {
             code: "VAGUE_DELIVERY_ADDRESS",
-            detail: "Address confidence is low or the destination is ambiguous — confirm before dispatch.",
+            detail:
+              "Address confidence is low or the destination is ambiguous — confirm before dispatch.",
           },
         ],
       });
@@ -78,9 +79,7 @@ export class RecommendationEngineService implements RecommendationEngine {
         );
         saved.push(this.toContract(row));
       } catch (error) {
-        this.logger.warn(
-          `Recommendation persist failed: ${getErrorMessage(error, "unknown")}`,
-        );
+        this.logger.warn(`Recommendation persist failed: ${getErrorMessage(error, "unknown")}`);
       }
     }
     return saved;
@@ -105,9 +104,7 @@ export class RecommendationEngineService implements RecommendationEngine {
     row.overrideReason = reason;
     row.overrideDecision = decision;
     const saved = await this.recommendationRepo.save(row);
-    this.logger.log(
-      `RECOMMENDATION_OVERRIDDEN id=${id} decision=${decision} actor=${actorId}`,
-    );
+    this.logger.log(`RECOMMENDATION_OVERRIDDEN id=${id} decision=${decision} actor=${actorId}`);
     return this.toContract(saved);
   }
 

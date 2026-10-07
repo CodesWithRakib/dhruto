@@ -70,10 +70,7 @@ export function PricingSummary({
         ) : null}
       </header>
 
-      <div
-        aria-live="polite"
-        className="mt-3 space-y-2 text-body-sm"
-      >
+      <div aria-live="polite" className="mt-3 space-y-2 text-body-sm">
         {isCalculating && !pricing ? (
           <p className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -105,9 +102,7 @@ export function PricingSummary({
               {pricing.discount > 0 ? (
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">{t("discount")}</dt>
-                  <dd className="tabular-nums text-success">
-                    −{formatBdt(pricing.discount)}
-                  </dd>
+                  <dd className="tabular-nums text-success">−{formatBdt(pricing.discount)}</dd>
                 </div>
               ) : null}
             </dl>

@@ -109,9 +109,9 @@ describe("ParcelsService — tenant isolation", () => {
 
   it("hides another merchant's parcel rather than confirming it exists", async () => {
     const scope = await service.resolveScope(merchantA);
-    await expect(
-      service.getParcelById(PARCEL_OF_B.id, scope),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.getParcelById(PARCEL_OF_B.id, scope)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it("lets the platform admin read any parcel", async () => {
@@ -123,16 +123,16 @@ describe("ParcelsService — tenant isolation", () => {
 
   it("hides another merchant's shipping label", async () => {
     const scope = await service.resolveScope(merchantA);
-    await expect(
-      service.getShippingLabel(PARCEL_OF_B.id, scope),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.getShippingLabel(PARCEL_OF_B.id, scope)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it("hides another merchant's history", async () => {
     const scope = await service.resolveScope(merchantA);
-    await expect(
-      service.getParcelHistory(PARCEL_OF_B.id, scope),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.getParcelHistory(PARCEL_OF_B.id, scope)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 });
 
@@ -171,9 +171,7 @@ describe("ParcelsService — public tracking payload", () => {
 
 describe("ParcelsService — tracking code generation", () => {
   it("generates a canonical, unambiguous tracking code", () => {
-    const code = new TrackingCodeService().generate(
-      new Date("2026-01-01T00:00:00.000Z"),
-    );
+    const code = new TrackingCodeService().generate(new Date("2026-01-01T00:00:00.000Z"));
     expect(code).toMatch(/^DHR-20260101-[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{6}$/);
   });
 });

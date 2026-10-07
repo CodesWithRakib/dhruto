@@ -57,10 +57,7 @@ export class NotificationsProcessor extends WorkerHost {
           jobId: String(job.id ?? `notif-${job.data.notificationId}-${Date.now()}`),
           eventId: row?.eventId ?? null,
           queue: "notifications",
-          kind:
-            row?.channel === "SMS"
-              ? IntegrationFailureKind.SMS
-              : IntegrationFailureKind.EMAIL,
+          kind: row?.channel === "SMS" ? IntegrationFailureKind.SMS : IntegrationFailureKind.EMAIL,
           referenceId: job.data.notificationId,
           merchantId: row?.merchantId ?? null,
           reason: getErrorMessage(error, "notification transport failed").slice(0, 1000),
@@ -72,9 +69,7 @@ export class NotificationsProcessor extends WorkerHost {
     } catch (writeError) {
       // Unique jobId means a replay already recorded this failure; never
       // let DLQ bookkeeping crash the worker.
-      this.logger.warn(
-        `DLQ write skipped: ${getErrorMessage(writeError, "unknown")}`,
-      );
+      this.logger.warn(`DLQ write skipped: ${getErrorMessage(writeError, "unknown")}`);
     }
   }
 }

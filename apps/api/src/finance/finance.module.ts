@@ -20,7 +20,11 @@ import {
   Hub,
 } from "../database/entities/index.js";
 import { FinanceService } from "./finance.service.js";
-import { FinanceController, FinanceAdminController, HubCashController } from "./finance.controller.js";
+import {
+  FinanceController,
+  FinanceAdminController,
+  HubCashController,
+} from "./finance.controller.js";
 import { LedgerModule } from "./ledger/ledger.module.js";
 import { IntegrationsModule } from "../integrations/integrations.module.js";
 import { MerchantsModule } from "../merchants/merchants.module.js";

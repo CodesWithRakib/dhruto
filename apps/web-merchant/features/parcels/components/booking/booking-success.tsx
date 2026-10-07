@@ -7,6 +7,7 @@ import { Button, Card, CardContent } from "@dhruto/ui";
 import type { ParcelCreatedResponse } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
+import { useFormatters } from "@/lib/format";
 
 interface BookingSuccessProps {
   parcel: ParcelCreatedResponse;
@@ -16,6 +17,7 @@ interface BookingSuccessProps {
 /** Confirmation panel shown once the parcel has been persisted by the API. */
 export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
   const t = useTranslations("BookingForm");
+  const { bdt } = useFormatters();
   const routes = useRouteBase();
   const [copied, setCopied] = useState(false);
 
@@ -38,9 +40,7 @@ export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
 
         <div>
           <h2 className="text-h3 text-foreground">{t("successTitle")}</h2>
-          <p className="mt-1 text-body-sm text-muted-foreground">
-            {t("successDescription")}
-          </p>
+          <p className="mt-1 text-body-sm text-muted-foreground">{t("successDescription")}</p>
         </div>
 
         <div className="rounded-md border border-border bg-surface-muted p-4 text-left">
@@ -76,9 +76,7 @@ export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
             </div>
             <div>
               <dt className="text-caption text-muted-foreground">{t("mobile")}</dt>
-              <dd className="font-mono font-medium text-foreground">
-                {parcel.recipientPhone}
-              </dd>
+              <dd className="font-mono font-medium text-foreground">{parcel.recipientPhone}</dd>
             </div>
             <div>
               <dt className="text-caption text-muted-foreground">{t("destination")}</dt>
@@ -89,7 +87,7 @@ export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
             <div>
               <dt className="text-caption text-muted-foreground">{t("codAmount")}</dt>
               <dd className="font-semibold tabular-nums text-foreground">
-                ৳{parcel.codAmount.toLocaleString()}
+                {bdt(parcel.codAmount)}
               </dd>
             </div>
           </dl>
@@ -97,7 +95,7 @@ export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
           <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-body-sm">
             <span className="text-muted-foreground">{t("deliveryCharge")}</span>
             <span className="font-bold tabular-nums text-foreground">
-              ৳{parcel.deliveryFee.toLocaleString()}
+              {bdt(parcel.deliveryFee)}
             </span>
           </div>
         </div>

@@ -94,7 +94,8 @@ export const financeApi = baseApi.injectEndpoints({
       ApiResponse<WalletTransactionItem[]>,
       { page?: number; limit?: number; type?: WalletTransactionType } | void
     >({
-      query: (params) => `/finance/wallet/transactions${toPageQuery((params ?? {}) as Record<string, unknown>)}`,
+      query: (params) =>
+        `/finance/wallet/transactions${toPageQuery((params ?? {}) as Record<string, unknown>)}`,
       providesTags: [WALLET_TAG],
     }),
 
@@ -144,10 +145,7 @@ export const financeApi = baseApi.injectEndpoints({
       providesTags: [FINANCE_TAG, "Parcel"],
     }),
 
-    verifyCashHandIn: builder.mutation<
-      ApiResponse<CashVerificationResult>,
-      VerifyCashLedgerDto
-    >({
+    verifyCashHandIn: builder.mutation<ApiResponse<CashVerificationResult>, VerifyCashLedgerDto>({
       query: (payload) => ({
         url: "/finance/reconciliation/verify",
         method: "POST",
@@ -164,13 +162,15 @@ export const financeApi = baseApi.injectEndpoints({
       providesTags: [FINANCE_TAG],
     }),
 
-    getDiscrepancies: builder.query<ApiResponse<CashDiscrepancyItem[]>, { status?: string } | void>({
-      query: (params) => {
-        const qs = params?.status ? `?status=${params.status}` : "";
-        return `/finance/discrepancies${qs}`;
+    getDiscrepancies: builder.query<ApiResponse<CashDiscrepancyItem[]>, { status?: string } | void>(
+      {
+        query: (params) => {
+          const qs = params?.status ? `?status=${params.status}` : "";
+          return `/finance/discrepancies${qs}`;
+        },
+        providesTags: [FINANCE_TAG],
       },
-      providesTags: [FINANCE_TAG],
-    }),
+    ),
 
     getReconciliationSummary: builder.query<ApiResponse<ReconciliationSummaryData>, void>({
       query: () => "/finance/reconciliation/summary",
@@ -191,14 +191,16 @@ export const financeApi = baseApi.injectEndpoints({
       providesTags: [FINANCE_TAG],
     }),
 
-    approvePayout: builder.mutation<ApiResponse<PayoutRequestItem>, { id: string; notes?: string }>({
-      query: ({ id, notes }) => ({
-        url: `/admin/finance/payouts/${id}/approve`,
-        method: "POST",
-        body: notes ? { notes } : {},
-      }),
-      invalidatesTags: [FINANCE_TAG],
-    }),
+    approvePayout: builder.mutation<ApiResponse<PayoutRequestItem>, { id: string; notes?: string }>(
+      {
+        query: ({ id, notes }) => ({
+          url: `/admin/finance/payouts/${id}/approve`,
+          method: "POST",
+          body: notes ? { notes } : {},
+        }),
+        invalidatesTags: [FINANCE_TAG],
+      },
+    ),
 
     processPayout: builder.mutation<
       ApiResponse<PayoutRequestItem>,
@@ -279,7 +281,12 @@ export const financeApi = baseApi.injectEndpoints({
     }),
 
     getJournalTransactions: builder.query<
-      ApiResponse<{ items: FinancialTransactionItem[]; total: number; page: number; limit: number }>,
+      ApiResponse<{
+        items: FinancialTransactionItem[];
+        total: number;
+        page: number;
+        limit: number;
+      }>,
       PageArgs & { type?: FinancialTransactionType; status?: FinancialTransactionStatus }
     >({
       query: (params) => `/admin/finance/transactions${toPageQuery(params)}`,
@@ -292,7 +299,13 @@ export const financeApi = baseApi.injectEndpoints({
 
     getCodReport: builder.query<
       ApiResponse<{ items: Record<string, unknown>[]; total: number; page: number; limit: number }>,
-      PageArgs & { from?: string; to?: string; merchantId?: string; hubId?: string; riderId?: string }
+      PageArgs & {
+        from?: string;
+        to?: string;
+        merchantId?: string;
+        hubId?: string;
+        riderId?: string;
+      }
     >({
       query: (params) => `/admin/finance/reports/cod${toPageQuery(params)}`,
       providesTags: [FINANCE_TAG],

@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  canonicalPhone,
-  isValidBangladeshPhone,
-  hashPhone,
-  maskPhone,
-} from "./phone-hash.util.js";
+import { canonicalPhone, isValidBangladeshPhone, hashPhone, maskPhone } from "./phone-hash.util.js";
 
 describe("phone privacy (intelligence identity)", () => {
   it("canonicalizes +880/880/01 forms to 01XXXXXXXXX", () => {

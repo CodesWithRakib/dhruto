@@ -120,13 +120,36 @@ interface ResolvedRecipient {
  */
 const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
   [DomainEventType.PARCEL_CREATED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_created", route: (p) => `/merchant/parcels/${String(p.parcelId)}` },
-    { kind: "merchant-email", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_created" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_created",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
+    {
+      kind: "merchant-email",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_created",
+    },
     { kind: "webhook", event: WebhookEvent.PARCEL_CREATED },
   ],
   [DomainEventType.PARCEL_ASSIGNED]: [
-    { kind: "rider-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_assigned", route: (p) => `/rider/tasks/${String(p.parcelId)}` },
-    { kind: "merchant-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_assigned", route: (p) => `/merchant/parcels/${String(p.parcelId)}` },
+    {
+      kind: "rider-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_assigned",
+      route: (p) => `/rider/tasks/${String(p.parcelId)}`,
+    },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_assigned",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
     { kind: "webhook", event: WebhookEvent.PARCEL_ASSIGNED },
   ],
   [DomainEventType.PARCEL_OUT_FOR_DELIVERY]: [
@@ -135,60 +158,185 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
     // already states the parcel is out for delivery AND carries the code the
     // generic template lacks. Adding a generic customer-sms here would send a
     // second, code-less duplicate for every fresh OTP leg.
-    { kind: "merchant-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_out_for_delivery", route: (p) => `/merchant/parcels/${String(p.parcelId)}` },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_out_for_delivery",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
     { kind: "webhook", event: WebhookEvent.PARCEL_OUT_FOR_DELIVERY },
   ],
   [DomainEventType.PARCEL_DELIVERED]: [
-    { kind: "customer-sms", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_delivered" },
-    { kind: "merchant-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_delivered", route: (p) => `/merchant/parcels/${String(p.parcelId)}` },
-    { kind: "merchant-email", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_delivered" },
+    {
+      kind: "customer-sms",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_delivered",
+    },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_delivered",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
+    {
+      kind: "merchant-email",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_delivered",
+    },
     { kind: "webhook", event: WebhookEvent.PARCEL_DELIVERED },
   ],
   [DomainEventType.PARCEL_FAILED]: [
-    { kind: "customer-sms", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_failed" },
-    { kind: "merchant-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_failed", route: (p) => `/merchant/parcels/${String(p.parcelId)}` },
-    { kind: "rider-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_failed", route: (p) => `/rider/tasks/${String(p.parcelId)}` },
+    {
+      kind: "customer-sms",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_failed",
+    },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_failed",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
+    {
+      kind: "rider-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_failed",
+      route: (p) => `/rider/tasks/${String(p.parcelId)}`,
+    },
     { kind: "webhook", event: WebhookEvent.PARCEL_FAILED },
   ],
   [DomainEventType.PARCEL_RETURNED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "parcel_returned", route: (p) => `/merchant/parcels/${String(p.parcelId)}` },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_returned",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
     { kind: "webhook", event: WebhookEvent.PARCEL_RETURNED },
   ],
   [DomainEventType.CASH_HAND_IN_SUBMITTED]: [
-    { kind: "hub-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "cash_hand_in_submitted", route: () => "/hub/cash" },
-    { kind: "rider-inapp", category: NotificationCategory.PARCEL_UPDATES, type: NotificationType.PARCEL_STATUS_UPDATE, templateKey: "cash_hand_in_submitted", route: () => "/rider/profile" },
+    {
+      kind: "hub-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "cash_hand_in_submitted",
+      route: () => "/hub/cash",
+    },
+    {
+      kind: "rider-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "cash_hand_in_submitted",
+      route: () => "/rider/profile",
+    },
   ],
   [DomainEventType.CASH_VERIFIED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.CASH_COLLECTED, templateKey: "cash_verified", route: () => "/merchant/finance" },
-    { kind: "merchant-email", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.CASH_COLLECTED, templateKey: "cash_verified" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.CASH_COLLECTED,
+      templateKey: "cash_verified",
+      route: () => "/merchant/finance",
+    },
+    {
+      kind: "merchant-email",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.CASH_COLLECTED,
+      templateKey: "cash_verified",
+    },
     { kind: "webhook", event: WebhookEvent.CASH_VERIFIED },
   ],
   [DomainEventType.SETTLEMENT_CREATED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.CASH_COLLECTED, templateKey: "settlement_created", route: () => "/merchant/finance" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.CASH_COLLECTED,
+      templateKey: "settlement_created",
+      route: () => "/merchant/finance",
+    },
     { kind: "webhook", event: WebhookEvent.SETTLEMENT_CREATED },
   ],
   [DomainEventType.PAYOUT_REQUESTED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_requested", route: () => "/merchant/finance" },
-    { kind: "merchant-email", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_requested" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_requested",
+      route: () => "/merchant/finance",
+    },
+    {
+      kind: "merchant-email",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_requested",
+    },
     { kind: "webhook", event: WebhookEvent.PAYOUT_REQUESTED },
   ],
   [DomainEventType.PAYOUT_APPROVED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_approved", route: () => "/merchant/finance" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_approved",
+      route: () => "/merchant/finance",
+    },
     { kind: "webhook", event: WebhookEvent.PAYOUT_APPROVED },
   ],
   [DomainEventType.PAYOUT_COMPLETED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_completed", route: () => "/merchant/finance" },
-    { kind: "merchant-email", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_completed" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_completed",
+      route: () => "/merchant/finance",
+    },
+    {
+      kind: "merchant-email",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_completed",
+    },
     { kind: "webhook", event: WebhookEvent.PAYOUT_COMPLETED },
   ],
   [DomainEventType.PAYOUT_FAILED]: [
-    { kind: "merchant-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_failed", route: () => "/merchant/finance" },
-    { kind: "merchant-email", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.PAYOUT_UPDATE, templateKey: "payout_failed" },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_failed",
+      route: () => "/merchant/finance",
+    },
+    {
+      kind: "merchant-email",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.PAYOUT_UPDATE,
+      templateKey: "payout_failed",
+    },
     { kind: "webhook", event: WebhookEvent.PAYOUT_FAILED },
   ],
   [DomainEventType.DISCREPANCY_OPENED]: [
-    { kind: "hub-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.CASH_COLLECTED, templateKey: "discrepancy_opened", route: () => "/hub/cash" },
-    { kind: "rider-inapp", category: NotificationCategory.FINANCIAL_UPDATES, type: NotificationType.CASH_COLLECTED, templateKey: "discrepancy_opened", route: () => "/rider/profile" },
+    {
+      kind: "hub-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.CASH_COLLECTED,
+      templateKey: "discrepancy_opened",
+      route: () => "/hub/cash",
+    },
+    {
+      kind: "rider-inapp",
+      category: NotificationCategory.FINANCIAL_UPDATES,
+      type: NotificationType.CASH_COLLECTED,
+      templateKey: "discrepancy_opened",
+      route: () => "/rider/profile",
+    },
   ],
   [DomainEventType.DISCREPANCY_RESOLVED]: [],
 };
@@ -201,33 +349,79 @@ const num = (value: unknown, fallback = 0): number =>
 function renderTemplate(key: TemplateKey, payload: Payload): RenderedTemplate {
   switch (key) {
     case "parcel_created":
-      return renderParcelCreated({ trackingCode: str(payload.trackingCode), recipientName: str(payload.recipientName) });
+      return renderParcelCreated({
+        trackingCode: str(payload.trackingCode),
+        recipientName: str(payload.recipientName),
+      });
     case "parcel_assigned":
-      return renderParcelAssigned({ trackingCode: str(payload.trackingCode), recipientName: str(payload.recipientName) });
+      return renderParcelAssigned({
+        trackingCode: str(payload.trackingCode),
+        recipientName: str(payload.recipientName),
+      });
     case "parcel_out_for_delivery":
       return renderParcelOutForDelivery({ trackingCode: str(payload.trackingCode) });
     case "parcel_delivered":
-      return renderParcelDelivered({ trackingCode: str(payload.trackingCode), codCollected: num(payload.codCollected) });
+      return renderParcelDelivered({
+        trackingCode: str(payload.trackingCode),
+        codCollected: num(payload.codCollected),
+      });
     case "parcel_failed":
-      return renderParcelFailed({ trackingCode: str(payload.trackingCode), reason: str(payload.reason, "unknown") });
+      return renderParcelFailed({
+        trackingCode: str(payload.trackingCode),
+        reason: str(payload.reason, "unknown"),
+      });
     case "parcel_returned":
-      return renderParcelReturned({ trackingCode: str(payload.trackingCode), recipientName: str(payload.recipientName) });
+      return renderParcelReturned({
+        trackingCode: str(payload.trackingCode),
+        recipientName: str(payload.recipientName),
+      });
     case "cash_hand_in_submitted":
-      return renderHandInSubmitted({ handinCode: str(payload.handinCode), itemCount: num(payload.itemCount), totalMinor: num(payload.totalMinor) });
+      return renderHandInSubmitted({
+        handinCode: str(payload.handinCode),
+        itemCount: num(payload.itemCount),
+        totalMinor: num(payload.totalMinor),
+      });
     case "cash_verified":
-      return renderCashVerified({ trackingCode: str(payload.trackingCode), netAmount: num(payload.netMinor) / 100, settlementCode: str(payload.settlementCode) });
+      return renderCashVerified({
+        trackingCode: str(payload.trackingCode),
+        netAmount: num(payload.netMinor) / 100,
+        settlementCode: str(payload.settlementCode),
+      });
     case "settlement_created":
-      return renderSettlementCreated({ trackingCode: str(payload.trackingCode), netAmount: num(payload.netMinor) / 100, settlementCode: str(payload.settlementCode) });
+      return renderSettlementCreated({
+        trackingCode: str(payload.trackingCode),
+        netAmount: num(payload.netMinor) / 100,
+        settlementCode: str(payload.settlementCode),
+      });
     case "payout_requested":
-      return renderPayoutRequested({ payoutCode: str(payload.payoutCode), amount: num(payload.amountMinor) / 100, method: str(payload.method) });
+      return renderPayoutRequested({
+        payoutCode: str(payload.payoutCode),
+        amount: num(payload.amountMinor) / 100,
+        method: str(payload.method),
+      });
     case "payout_approved":
-      return renderPayoutApproved({ payoutCode: str(payload.payoutCode), amount: num(payload.amountMinor) / 100, method: str(payload.method) });
+      return renderPayoutApproved({
+        payoutCode: str(payload.payoutCode),
+        amount: num(payload.amountMinor) / 100,
+        method: str(payload.method),
+      });
     case "payout_completed":
-      return renderPayoutCompleted({ payoutCode: str(payload.payoutCode), amount: num(payload.amountMinor) / 100, method: str(payload.method) });
+      return renderPayoutCompleted({
+        payoutCode: str(payload.payoutCode),
+        amount: num(payload.amountMinor) / 100,
+        method: str(payload.method),
+      });
     case "payout_failed":
-      return renderPayoutFailed({ payoutCode: str(payload.payoutCode), amount: num(payload.amountMinor) / 100, method: str(payload.method) });
+      return renderPayoutFailed({
+        payoutCode: str(payload.payoutCode),
+        amount: num(payload.amountMinor) / 100,
+        method: str(payload.method),
+      });
     case "discrepancy_opened":
-      return renderDiscrepancyOpened({ trackingCode: str(payload.trackingCode), differenceMinor: num(payload.differenceMinor) });
+      return renderDiscrepancyOpened({
+        trackingCode: str(payload.trackingCode),
+        differenceMinor: num(payload.differenceMinor),
+      });
   }
 }
 
@@ -326,9 +520,7 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
         try {
           await this.webhooks.attemptDelivery(row.id);
         } catch (error) {
-          this.logger.warn(
-            `Sweep webhook retry failed: ${getErrorMessage(error, "unknown")}`,
-          );
+          this.logger.warn(`Sweep webhook retry failed: ${getErrorMessage(error, "unknown")}`);
         }
       }
     }
@@ -342,9 +534,7 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
         try {
           await this.notifications.transportNotification(row.id);
         } catch (error) {
-          this.logger.warn(
-            `Sweep notification retry failed: ${getErrorMessage(error, "unknown")}`,
-          );
+          this.logger.warn(`Sweep notification retry failed: ${getErrorMessage(error, "unknown")}`);
         }
       }
     }
@@ -396,13 +586,19 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
           this.webhooksQueue,
           "webhook-delivery",
           { deliveryId: delivery.id },
-          { jobId: `webhook-${delivery.id}`, attempts: 3, backoff: { type: "exponential", delay: 15000 } },
+          {
+            jobId: `webhook-${delivery.id}`,
+            attempts: 3,
+            backoff: { type: "exponential", delay: 15000 },
+          },
           () => this.webhooks.attemptDelivery(delivery.id).then(() => undefined),
         );
       } else {
-        await this.webhooks.attemptDelivery(delivery.id).catch((error: unknown) =>
-          this.logger.warn(`Inline webhook attempt failed: ${getErrorMessage(error, "unknown")}`),
-        );
+        await this.webhooks
+          .attemptDelivery(delivery.id)
+          .catch((error: unknown) =>
+            this.logger.warn(`Inline webhook attempt failed: ${getErrorMessage(error, "unknown")}`),
+          );
       }
     }
   }
@@ -422,25 +618,24 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
       where: { hubId, isActive: true },
     });
     for (const assignment of assignments) {
-      await this.deliverNotification(
-        manager,
-        row,
-        { ...target, kind: "rider-inapp" },
-        payload,
-        {
-          key: `user:${assignment.userId}`,
-          merchantId: null,
-          userId: assignment.userId,
-          target: null,
-          route: target.route(payload),
-        },
-      );
+      await this.deliverNotification(manager, row, { ...target, kind: "rider-inapp" }, payload, {
+        key: `user:${assignment.userId}`,
+        merchantId: null,
+        userId: assignment.userId,
+        target: null,
+        route: target.route(payload),
+      });
     }
   }
 
   private async resolveRecipient(
     manager: EntityManager,
-    target: MerchantInAppTarget | MerchantEmailTarget | MerchantSmsTarget | CustomerSmsTarget | RiderInAppTarget,
+    target:
+      | MerchantInAppTarget
+      | MerchantEmailTarget
+      | MerchantSmsTarget
+      | CustomerSmsTarget
+      | RiderInAppTarget,
     payload: Payload,
   ): Promise<ResolvedRecipient | null> {
     switch (target.kind) {
@@ -455,15 +650,33 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
           });
           const email = merchant?.user?.email;
           if (!email) return null;
-          return { key: `merchant:${merchantId}`, merchantId, userId: null, target: email, route: null };
+          return {
+            key: `merchant:${merchantId}`,
+            merchantId,
+            userId: null,
+            target: email,
+            route: null,
+          };
         }
-        return { key: `merchant:${merchantId}`, merchantId, userId: null, target: null, route: target.route(payload) };
+        return {
+          key: `merchant:${merchantId}`,
+          merchantId,
+          userId: null,
+          target: null,
+          route: target.route(payload),
+        };
       }
       case "merchant-sms": {
         const merchantId = typeof payload.merchantId === "string" ? payload.merchantId : null;
         const phone = typeof payload.recipientPhone === "string" ? payload.recipientPhone : null;
         if (!merchantId || !phone) return null;
-        return { key: `merchant:${merchantId}`, merchantId, userId: null, target: phone, route: null };
+        return {
+          key: `merchant:${merchantId}`,
+          merchantId,
+          userId: null,
+          target: phone,
+          route: null,
+        };
       }
       case "customer-sms": {
         const phone = typeof payload.recipientPhone === "string" ? payload.recipientPhone : null;
@@ -476,7 +689,13 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
         if (!riderId) return null;
         const rider = await manager.getRepository(Rider).findOne({ where: { id: riderId } });
         if (!rider) return null;
-        return { key: `user:${rider.userId}`, merchantId: null, userId: rider.userId, target: null, route: target.route(payload) };
+        return {
+          key: `user:${rider.userId}`,
+          merchantId: null,
+          userId: rider.userId,
+          target: null,
+          route: target.route(payload),
+        };
       }
     }
   }
@@ -484,7 +703,12 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
   private async deliverNotification(
     manager: EntityManager,
     row: EventOutbox,
-    target: MerchantInAppTarget | MerchantEmailTarget | MerchantSmsTarget | CustomerSmsTarget | RiderInAppTarget,
+    target:
+      | MerchantInAppTarget
+      | MerchantEmailTarget
+      | MerchantSmsTarget
+      | CustomerSmsTarget
+      | RiderInAppTarget,
     payload: Payload,
     recipient: ResolvedRecipient,
   ): Promise<void> {
@@ -502,7 +726,12 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
           ? PreferenceChannel.EMAIL
           : PreferenceChannel.IN_APP;
     if (!LOCKED_CATEGORIES.includes(target.category)) {
-      const enabled = await this.preferenceEnabled(manager, recipient, target.category, preferenceChannel);
+      const enabled = await this.preferenceEnabled(
+        manager,
+        recipient,
+        target.category,
+        preferenceChannel,
+      );
       if (!enabled) {
         this.logger.log(`OUTBOX_SKIP preference off event=${row.eventId} channel=${channel}`);
         return;
@@ -555,7 +784,11 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
           this.notificationsQueue,
           "notification-send",
           { notificationId },
-          { jobId: `notif-${notificationId}`, attempts: 4, backoff: { type: "exponential", delay: 10000 } },
+          {
+            jobId: `notif-${notificationId}`,
+            attempts: 4,
+            backoff: { type: "exponential", delay: 10000 },
+          },
           () => this.notifications.transportNotification(notificationId),
         );
       } else {

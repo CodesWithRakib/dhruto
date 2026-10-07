@@ -1,8 +1,8 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { BaseEntity } from './Base.entity.js';
-import { CashLedger } from './CashLedger.entity.js';
-import { CashHandIn } from './CashHandIn.entity.js';
-import { CashDiscrepancyType, CashDiscrepancyStatus } from '@dhruto/contracts';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from "typeorm";
+import { BaseEntity } from "./Base.entity.js";
+import { CashLedger } from "./CashLedger.entity.js";
+import { CashHandIn } from "./CashHandIn.entity.js";
+import { CashDiscrepancyType, CashDiscrepancyStatus } from "@dhruto/contracts";
 
 export { CashDiscrepancyType, CashDiscrepancyStatus };
 
@@ -12,56 +12,56 @@ export { CashDiscrepancyType, CashDiscrepancyStatus };
  * overage stays OPEN until an authorized operator resolves it with an
  * explicit reason (and optional recovery posting).
  */
-@Entity('cash_discrepancies')
-@Index(['status', 'createdAt'])
-@Index(['cashLedgerId'])
+@Entity("cash_discrepancies")
+@Index(["status", "createdAt"])
+@Index(["cashLedgerId"])
 export class CashDiscrepancy extends BaseEntity {
-  @Column({ name: 'cash_ledger_id', type: 'uuid' })
+  @Column({ name: "cash_ledger_id", type: "uuid" })
   cashLedgerId: string;
 
   @ManyToOne(() => CashLedger)
-  @JoinColumn({ name: 'cash_ledger_id' })
+  @JoinColumn({ name: "cash_ledger_id" })
   cashLedger: CashLedger;
 
-  @Column({ name: 'handin_id', type: 'uuid', nullable: true })
+  @Column({ name: "handin_id", type: "uuid", nullable: true })
   handInId: string | null;
 
   @ManyToOne(() => CashHandIn, { nullable: true })
-  @JoinColumn({ name: 'handin_id' })
+  @JoinColumn({ name: "handin_id" })
   handIn: CashHandIn | null;
 
-  @Column({ type: 'enum', enum: CashDiscrepancyType })
+  @Column({ type: "enum", enum: CashDiscrepancyType })
   type: CashDiscrepancyType;
 
-  @Column({ type: 'enum', enum: CashDiscrepancyStatus, default: CashDiscrepancyStatus.OPEN })
+  @Column({ type: "enum", enum: CashDiscrepancyStatus, default: CashDiscrepancyStatus.OPEN })
   status: CashDiscrepancyStatus;
 
   /** Integer minor units. */
-  @Column({ name: 'expected_minor', type: 'bigint' })
+  @Column({ name: "expected_minor", type: "bigint" })
   expectedMinor: number;
 
-  @Column({ name: 'actual_minor', type: 'bigint' })
+  @Column({ name: "actual_minor", type: "bigint" })
   actualMinor: number;
 
   /** actual - expected (negative for SHORT). Integer minor units. */
-  @Column({ name: 'difference_minor', type: 'bigint' })
+  @Column({ name: "difference_minor", type: "bigint" })
   differenceMinor: number;
 
-  @Column({ type: 'varchar', length: 10, default: 'BDT' })
+  @Column({ type: "varchar", length: 10, default: "BDT" })
   currency: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   reason: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: "text", nullable: true })
   notes: string | null;
 
-  @Column({ name: 'reported_by', type: 'uuid', nullable: true })
+  @Column({ name: "reported_by", type: "uuid", nullable: true })
   reportedBy: string | null;
 
-  @Column({ name: 'resolved_by', type: 'uuid', nullable: true })
+  @Column({ name: "resolved_by", type: "uuid", nullable: true })
   resolvedBy: string | null;
 
-  @Column({ name: 'resolved_at', type: 'timestamptz', nullable: true })
+  @Column({ name: "resolved_at", type: "timestamptz", nullable: true })
   resolvedAt: Date | null;
 }

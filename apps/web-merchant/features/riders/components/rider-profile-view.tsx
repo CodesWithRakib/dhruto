@@ -14,16 +14,23 @@ import {
 } from "../api/riders.api";
 import { newIdempotencyKey } from "../../finance/api/finance.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
+import { useFormatters } from "@/lib/format";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { CASH_HANDIN_STATUS_TONE, RIDER_STATUS_TONE } from "@/config/status";
 
 /** Rider profile: code, hub, duty toggle and the cash hand-in workflow. */
 export function RiderProfileView() {
   const t = useTranslations("Rider");
+  const { date: fmtDate, bdt } = useFormatters();
   const [handInNotes, setHandInNotes] = React.useState("");
 
-  const { data: profileData, isLoading: profileLoading, refetch: refetchProfile } =
-    useGetRiderProfileQuery();
+  const {
+    data: profileData,
+    isLoading: profileLoading,
+    refetch: refetchProfile,
+  } = useGetRiderProfileQuery();
   const { data: cashData, refetch: refetchCash } = useGetCashSummaryQuery();
   const { data: handInsData } = useGetCashHandInsQuery();
   const handIns = handInsData?.data ?? [];
@@ -106,21 +113,35 @@ export function RiderProfileView() {
           </div>
           <dl className="grid grid-cols-2 gap-2 text-sm">
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("profile.hub")}</dt>
+              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {t("profile.hub")}
+              </dt>
               <dd className="font-semibold text-foreground">
                 {profile.hubName} ({profile.hubCode})
               </dd>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("profile.status")}</dt>
-              <dd className="font-semibold text-foreground">{profile.status}</dd>
+              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {t("profile.status")}
+              </dt>
+              <dd className="font-semibold text-foreground">
+                <EnumBadge
+                  namespace="RiderStatus"
+                  value={profile.status}
+                  tones={RIDER_STATUS_TONE}
+                />
+              </dd>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("profile.memberSince")}</dt>
-              <dd className="text-foreground">{new Date(profile.joinedAt).toLocaleDateString()}</dd>
+              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {t("profile.memberSince")}
+              </dt>
+              <dd className="text-foreground">{fmtDate(profile.joinedAt)}</dd>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("profile.riderCode")}</dt>
+              <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {t("profile.riderCode")}
+              </dt>
               <dd className="font-mono text-foreground">{profile.riderCode}</dd>
             </div>
           </dl>
@@ -147,7 +168,7 @@ export function RiderProfileView() {
                 {t("profile.pendingHandIn")}
               </p>
               <p className="font-mono text-lg font-bold tabular-nums">
-                ৳{(cash?.pendingHandIn ?? 0).toLocaleString()}
+                {bdt(cash?.pendingHandIn ?? 0)}
               </p>
             </div>
             <div className="rounded-lg bg-surface-muted p-3">
@@ -155,7 +176,7 @@ export function RiderProfileView() {
                 {t("profile.awaitingVerification")}
               </p>
               <p className="font-mono text-lg font-bold tabular-nums">
-                ৳{(cash?.awaitingVerification ?? 0).toLocaleString()}
+                {bdt(cash?.awaitingVerification ?? 0)}
               </p>
             </div>
             <div className="rounded-lg bg-surface-muted p-3">
@@ -163,7 +184,7 @@ export function RiderProfileView() {
                 {t("profile.verified")}
               </p>
               <p className="font-mono text-lg font-bold tabular-nums">
-                ৳{(cash?.verifiedByHub ?? 0).toLocaleString()}
+                {bdt(cash?.verifiedByHub ?? 0)}
               </p>
             </div>
           </div>
@@ -195,10 +216,19 @@ export function RiderProfileView() {
                 >
                   <span className="font-mono font-semibold">{batch.handinCode}</span>
                   <span className="font-mono tabular-nums text-muted-foreground">
-                    ৳{(batch.expectedMinor / 100).toLocaleString()}
+                    {bdt(batch.expectedMinor / 100)}
                   </span>
-                  <Badge variant={batch.status === "VERIFIED" ? "success" : "secondary"} className="ml-auto text-[10px]">
-                    {batch.status}
+                  <Badge
+                    variant={batch.status === "VERIFIED" ? "success" : "secondary"}
+                    className="ml-auto text-[10px]"
+                  >
+                    {
+                      <EnumBadge
+                        namespace="CashHandInStatus"
+                        value={batch.status}
+                        tones={CASH_HANDIN_STATUS_TONE}
+                      />
+                    }
                   </Badge>
                 </li>
               ))}

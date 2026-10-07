@@ -25,11 +25,12 @@ export function PublicMobileBottomNav() {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe md:hidden shadow-sm"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface pb-safe md:hidden "
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around px-1">
         {publicItems.map((item) => {
-          const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const active =
+            pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           const Icon = item.icon;
           return (
             <li key={item.href} className="flex-1">
@@ -40,7 +41,7 @@ export function PublicMobileBottomNav() {
                   "flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-caption font-medium transition-colors",
                   active
                     ? "text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground active:text-primary"
+                    : "text-muted-foreground hover:text-foreground active:text-primary",
                 )}
               >
                 <div className="relative">
@@ -62,7 +63,7 @@ export function PublicMobileBottomNav() {
               "flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-caption font-medium transition-colors",
               pathname.startsWith("/login") || pathname.includes("/dashboard")
                 ? "text-primary font-semibold"
-                : "text-muted-foreground hover:text-foreground active:text-primary"
+                : "text-muted-foreground hover:text-foreground active:text-primary",
             )}
           >
             <DestinationIcon className="h-5 w-5" aria-hidden="true" />

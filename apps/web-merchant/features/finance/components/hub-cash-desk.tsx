@@ -25,9 +25,12 @@ import {
   useGetReconciliationSummaryQuery,
 } from "../api/finance.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { PageHeader } from "@/components/page-header";
 import { toast } from "sonner";
+import { useFormatters } from "@/lib/format";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { CASH_HANDIN_STATUS_TONE, CASH_DISCREPANCY_STATUS_TONE } from "@/config/status";
 
 type CashTab = "pending" | "batches" | "discrepancies";
 
@@ -39,13 +42,18 @@ type CashTab = "pending" | "batches" | "discrepancies";
  */
 export function HubCashDesk() {
   const t = useTranslations("Finance");
+  const { bdt } = useFormatters();
   const [tab, setTab] = React.useState<CashTab>("pending");
   const [verifying, setVerifying] = React.useState<PendingReconciliationItem | null>(null);
   const [countedAmount, setCountedAmount] = React.useState("");
   const [verifyNotes, setVerifyNotes] = React.useState("");
 
   const { data: summaryRes } = useGetReconciliationSummaryQuery();
-  const { data: pendingRes, isLoading, refetch: refetchPending } = useGetPendingReconciliationsQuery();
+  const {
+    data: pendingRes,
+    isLoading,
+    refetch: refetchPending,
+  } = useGetPendingReconciliationsQuery();
   const { data: batchesRes, refetch: refetchBatches } = useGetHubHandInsQuery();
   const { data: discrepanciesRes, refetch: refetchDiscrepancies } = useGetDiscrepanciesQuery({
     status: "OPEN",
@@ -121,7 +129,9 @@ export function HubCashDesk() {
                     {card.label}
                   </p>
                   <p className="mt-1 font-mono text-2xl font-bold tabular-nums">
-                    {typeof card.value === "number" ? `৳${card.value.toLocaleString()}` : card.value}
+                    {typeof card.value === "number"
+                      ? `৳${card.value.toLocaleString()}`
+                      : card.value}
                   </p>
                 </div>
                 <span className="rounded-lg bg-warning-soft p-2.5 text-warning">
@@ -133,12 +143,18 @@ export function HubCashDesk() {
         </div>
       ) : null}
 
-      <div className="flex w-fit items-center gap-1.5 rounded-lg border border-border bg-surface-muted p-1" role="tablist">
+      <div
+        className="flex w-fit items-center gap-1.5 rounded-lg border border-border bg-surface-muted p-1"
+        role="tablist"
+      >
         {(
           [
             { key: "pending", label: `${t("cash.pendingTab")} (${pending.length})` },
             { key: "batches", label: `${t("cash.batchesTab")} (${batches.length})` },
-            { key: "discrepancies", label: `${t("cash.discrepanciesTab")} (${discrepancies.length})` },
+            {
+              key: "discrepancies",
+              label: `${t("cash.discrepanciesTab")} (${discrepancies.length})`,
+            },
           ] as Array<{ key: CashTab; label: string }>
         ).map((entry) => (
           <button
@@ -166,17 +182,25 @@ export function HubCashDesk() {
               </p>
             ) : pending.length === 0 ? (
               <div className="p-6">
-                <EmptyState icon={CheckCircle2} title={t("cash.emptyPending")} description={t("cash.emptyPendingDescription")} />
+                <EmptyState
+                  icon={CheckCircle2}
+                  title={t("cash.emptyPending")}
+                  description={t("cash.emptyPendingDescription")}
+                />
               </div>
             ) : (
               <ul className="divide-y divide-border">
                 {pending.map((item) => (
                   <li key={item.id} className="space-y-2 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-primary">{item.trackingCode}</span>
-                      <Badge variant="secondary" className="text-[10px]">{item.handInStatus}</Badge>
+                      <span className="font-mono text-xs font-bold text-primary">
+                        {item.trackingCode}
+                      </span>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {item.handInStatus}
+                      </Badge>
                       <span className="ml-auto font-mono text-sm font-bold tabular-nums">
-                        ৳{item.amount.toLocaleString()}
+                        {bdt(item.amount)}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -207,12 +231,29 @@ export function HubCashDesk() {
                 {batches.map((batch) => (
                   <li key={batch.id} className="space-y-1 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-foreground">{batch.handinCode}</span>
-                      <Badge variant={batch.status === "VERIFIED" ? "success" : batch.status === "DISCREPANCY" ? "destructive" : "secondary"} className="text-[10px]">
-                        {batch.status}
+                      <span className="font-mono text-xs font-bold text-foreground">
+                        {batch.handinCode}
+                      </span>
+                      <Badge
+                        variant={
+                          batch.status === "VERIFIED"
+                            ? "success"
+                            : batch.status === "DISCREPANCY"
+                              ? "destructive"
+                              : "secondary"
+                        }
+                        className="text-[10px]"
+                      >
+                        {
+                          <EnumBadge
+                            namespace="CashHandInStatus"
+                            value={batch.status}
+                            tones={CASH_HANDIN_STATUS_TONE}
+                          />
+                        }
                       </Badge>
                       <span className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">
-                        ৳{(batch.expectedMinor / 100).toLocaleString()} · {batch.itemCount}
+                        {bdt(batch.expectedMinor / 100)} · {batch.itemCount}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -231,7 +272,11 @@ export function HubCashDesk() {
           <CardContent className="p-0">
             {discrepancies.length === 0 ? (
               <div className="p-6">
-                <EmptyState icon={AlertTriangle} title={t("cash.emptyDiscrepancies")} description={t("cash.emptyDiscrepanciesDescription")} />
+                <EmptyState
+                  icon={AlertTriangle}
+                  title={t("cash.emptyDiscrepancies")}
+                  description={t("cash.emptyDiscrepanciesDescription")}
+                />
               </div>
             ) : (
               <ul className="divide-y divide-border">
@@ -240,15 +285,23 @@ export function HubCashDesk() {
                     <div className="flex flex-wrap items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" />
                       <span className="font-mono text-xs font-bold">{discrepancy.type}</span>
-                      <Badge variant="destructive" className="text-[10px]">{discrepancy.status}</Badge>
+                      <Badge variant="destructive" className="text-[10px]">
+                        {
+                          <EnumBadge
+                            namespace="CashDiscrepancyStatus"
+                            value={discrepancy.status}
+                            tones={CASH_DISCREPANCY_STATUS_TONE}
+                          />
+                        }
+                      </Badge>
                       <span className="ml-auto font-mono text-xs font-bold tabular-nums text-danger">
                         {discrepancy.differenceMinor > 0 ? "+" : ""}৳
                         {(discrepancy.differenceMinor / 100).toLocaleString()}
                       </span>
                     </div>
                     <p className="font-mono text-[11px] text-muted-foreground">
-                      {t("cash.expectedCash")} ৳{(discrepancy.expectedMinor / 100).toLocaleString()} ·{" "}
-                      {t("cash.verifiedCash")} ৳{(discrepancy.actualMinor / 100).toLocaleString()}
+                      {t("cash.expectedCash")} {bdt(discrepancy.expectedMinor / 100)} ·{" "}
+                      {t("cash.verifiedCash")} {bdt(discrepancy.actualMinor / 100)}
                     </p>
                     {discrepancy.notes ? (
                       <p className="text-xs text-muted-foreground">{discrepancy.notes}</p>
@@ -272,17 +325,20 @@ export function HubCashDesk() {
               <dl className="space-y-2 rounded-xl bg-surface-muted p-4 font-mono text-sm">
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{verifying.trackingCode}</dt>
-                  <dd className="font-bold tabular-nums">৳{verifying.amount.toLocaleString()}</dd>
+                  <dd className="font-bold tabular-nums">{bdt(verifying.amount)}</dd>
                 </div>
                 <div className="flex justify-between text-xs">
                   <dt className="text-muted-foreground">{t("settlements.netPayable")}</dt>
                   <dd className="font-bold tabular-nums text-success">
-                    ৳{verifying.netPayable.toLocaleString()}
+                    {bdt(verifying.netPayable)}
                   </dd>
                 </div>
               </dl>
               <div className="space-y-1.5">
-                <label htmlFor="counted-amount" className="text-xs font-semibold text-muted-foreground">
+                <label
+                  htmlFor="counted-amount"
+                  className="text-xs font-semibold text-muted-foreground"
+                >
                   {t("cash.countedAmount")} *
                 </label>
                 <Input
@@ -296,7 +352,10 @@ export function HubCashDesk() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="verify-notes" className="text-xs font-semibold text-muted-foreground">
+                <label
+                  htmlFor="verify-notes"
+                  className="text-xs font-semibold text-muted-foreground"
+                >
                   {t("cash.verificationNotes")}
                 </label>
                 <Input

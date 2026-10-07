@@ -60,46 +60,86 @@ export async function assertSafeWebhookUrl(rawUrl: string): Promise<URL> {
   try {
     url = new URL(rawUrl.trim());
   } catch {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_INVALID_URL, message: "URL is not parseable" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_INVALID_URL,
+      message: "URL is not parseable",
+    };
   }
 
   if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_INVALID_URL, message: "Only http(s) URLs are allowed" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_INVALID_URL,
+      message: "Only http(s) URLs are allowed",
+    };
   }
   if (process.env.NODE_ENV === "production" && url.protocol !== "https:") {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL, message: "HTTPS is required in production" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL,
+      message: "HTTPS is required in production",
+    };
   }
   if (url.username || url.password) {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_INVALID_URL, message: "Credentials must not be embedded in the URL" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_INVALID_URL,
+      message: "Credentials must not be embedded in the URL",
+    };
   }
 
   const host = url.hostname.toLowerCase();
   if (!host || host.length > 253) {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_INVALID_URL, message: "Invalid hostname" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_INVALID_URL,
+      message: "Invalid hostname",
+    };
   }
   if (METADATA_HOSTS.has(host)) {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL, message: "Destination is forbidden" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL,
+      message: "Destination is forbidden",
+    };
   }
 
   if (isIP(host) !== 0) {
     if (isBlockedIp(host)) {
-      throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL, message: "Destination resolves to a private address" };
+      throw {
+        status: 400 as const,
+        error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL,
+        message: "Destination resolves to a private address",
+      };
     }
     return url;
   }
 
   if (host === "localhost") {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL, message: "Destination is forbidden" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL,
+      message: "Destination is forbidden",
+    };
   }
 
   let addresses: Array<{ address: string }>;
   try {
     addresses = await lookup(host, { all: true, verbatim: true });
   } catch {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_INVALID_URL, message: "Hostname does not resolve" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_INVALID_URL,
+      message: "Hostname does not resolve",
+    };
   }
   if (addresses.length === 0 || addresses.some((entry) => isBlockedIp(entry.address))) {
-    throw { status: 400 as const, error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL, message: "Destination resolves to a private address" };
+    throw {
+      status: 400 as const,
+      error: ApiErrorCode.WEBHOOK_FORBIDDEN_URL,
+      message: "Destination resolves to a private address",
+    };
   }
 
   return url;

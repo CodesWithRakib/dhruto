@@ -55,7 +55,9 @@ test.describe("Journey 2 — Create a parcel", () => {
     expect(trackingCode).toMatch(/^DHR-\d{8}-[0-9A-Z]{6}$/);
 
     // The persisted parcel must carry server-calculated pricing and canonical phone.
-    const listResponse = await api.get(`/parcels?search=${encodeURIComponent(booking.recipientName)}`);
+    const listResponse = await api.get(
+      `/parcels?search=${encodeURIComponent(booking.recipientName)}`,
+    );
     const list = (await listResponse.json()).data as Array<{
       id: string;
       trackingCode: string;
@@ -106,7 +108,9 @@ test.describe("Journey 7 — Duplicate submission", () => {
 
     await expect(page.getByText(/parcel booked successfully/i)).toBeVisible({ timeout: 30_000 });
 
-    const listResponse = await api.get(`/parcels?search=${encodeURIComponent(booking.recipientName)}`);
+    const listResponse = await api.get(
+      `/parcels?search=${encodeURIComponent(booking.recipientName)}`,
+    );
     const list = (await listResponse.json()).data as unknown[];
     expect(list).toHaveLength(1);
   });

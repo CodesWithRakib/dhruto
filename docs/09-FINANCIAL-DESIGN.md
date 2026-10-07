@@ -187,18 +187,18 @@ money-moving code.
 
 ### Chart of accounts / postings
 
-| Event | Debit | Credit |
-|---|---|---|
-| COD collected (rider) | `RIDER_CASH_IN_HAND` gross | `COD_RECEIVABLE` gross |
-| Rider hand-in batch | `HUB_CASH` expected | `RIDER_CASH_IN_HAND` expected |
-| Hub verify + settle | `COD_RECEIVABLE` actual | `MERCHANT_AVAILABLE` net + `FEE_REVENUE` fee |
-| Count SHORT S | `ADJUSTMENT` S | `HUB_CASH` S |
-| Count OVER O | `HUB_CASH` O | `ADJUSTMENT` O |
-| Payout request | `MERCHANT_AVAILABLE` | `MERCHANT_PAYOUT_IN_TRANSIT` |
-| Payout completed | `MERCHANT_PAYOUT_IN_TRANSIT` | `PLATFORM_CASH` |
-| Payout rejected/failed/cancelled | `MERCHANT_PAYOUT_IN_TRANSIT` | `MERCHANT_AVAILABLE` |
-| Adjustment credit/debit | `ADJUSTMENT` / `MERCHANT_AVAILABLE` | `MERCHANT_AVAILABLE` / `ADJUSTMENT` |
-| Reversal | mirror of the original | mirror of the original |
+| Event                            | Debit                               | Credit                                       |
+| -------------------------------- | ----------------------------------- | -------------------------------------------- |
+| COD collected (rider)            | `RIDER_CASH_IN_HAND` gross          | `COD_RECEIVABLE` gross                       |
+| Rider hand-in batch              | `HUB_CASH` expected                 | `RIDER_CASH_IN_HAND` expected                |
+| Hub verify + settle              | `COD_RECEIVABLE` actual             | `MERCHANT_AVAILABLE` net + `FEE_REVENUE` fee |
+| Count SHORT S                    | `ADJUSTMENT` S                      | `HUB_CASH` S                                 |
+| Count OVER O                     | `HUB_CASH` O                        | `ADJUSTMENT` O                               |
+| Payout request                   | `MERCHANT_AVAILABLE`                | `MERCHANT_PAYOUT_IN_TRANSIT`                 |
+| Payout completed                 | `MERCHANT_PAYOUT_IN_TRANSIT`        | `PLATFORM_CASH`                              |
+| Payout rejected/failed/cancelled | `MERCHANT_PAYOUT_IN_TRANSIT`        | `MERCHANT_AVAILABLE`                         |
+| Adjustment credit/debit          | `ADJUSTMENT` / `MERCHANT_AVAILABLE` | `MERCHANT_AVAILABLE` / `ADJUSTMENT`          |
+| Reversal                         | mirror of the original              | mirror of the original                       |
 
 Every posting is validated (positive integer minor units, single currency,
 ΣDEBIT == ΣCREDIT) by `LedgerService.post`, which also handles idempotent

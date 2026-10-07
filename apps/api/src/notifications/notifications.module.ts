@@ -15,10 +15,7 @@ import { SmsService } from "./services/sms.service.js";
 import { EmailService } from "./services/email.service.js";
 import { MerchantsModule } from "../merchants/merchants.module.js";
 import { AuthModule } from "../auth/auth.module.js";
-import {
-  createEmailProvider,
-  createSmsProvider,
-} from "../integrations/providers.js";
+import { createEmailProvider, createSmsProvider } from "../integrations/providers.js";
 
 @Global()
 @Module({

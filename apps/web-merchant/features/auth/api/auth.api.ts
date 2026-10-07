@@ -37,7 +37,10 @@ export interface AuthResponseData {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<{ data: AuthResponseData; success: boolean; message: string }, LoginPayload>({
+    login: builder.mutation<
+      { data: AuthResponseData; success: boolean; message: string },
+      LoginPayload
+    >({
       query: (body) => ({
         url: "/auth/login",
         method: "POST",
@@ -45,7 +48,10 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth", "Merchant", "Parcel"],
     }),
-    register: builder.mutation<{ data: AuthResponseData; success: boolean; message: string }, RegisterPayload>({
+    register: builder.mutation<
+      { data: AuthResponseData; success: boolean; message: string },
+      RegisterPayload
+    >({
       query: (body) => ({
         url: "/auth/register",
         method: "POST",
@@ -68,9 +74,4 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {
-  useLoginMutation,
-  useRegisterMutation,
-  useLogoutMutation,
-  useGetMeQuery,
-} = authApi;
+export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetMeQuery } = authApi;

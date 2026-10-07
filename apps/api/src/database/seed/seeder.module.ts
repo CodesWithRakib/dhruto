@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 import {
   User,
@@ -18,8 +18,8 @@ import {
   FinancialTransaction,
   FinancialEntry,
   WebhookSubscription,
-} from '../entities/index.js';
-import { SeederService } from './seeder.service.js';
+} from "../entities/index.js";
+import { SeederService } from "./seeder.service.js";
 
 @Module({
   imports: [

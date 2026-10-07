@@ -1,8 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import {
-  type AddressParseResult,
-  DeliveryZone,
-} from "@dhruto/contracts";
+import { type AddressParseResult, DeliveryZone } from "@dhruto/contracts";
 import { BANGLADESH_DISTRICTS, DistrictInfo } from "../data/bangladesh-locations.js";
 
 @Injectable()
@@ -44,7 +41,7 @@ export class AddressParserService {
     }
 
     const lastRow = d[b.length];
-    return lastRow ? lastRow[a.length] ?? 0 : 0;
+    return lastRow ? (lastRow[a.length] ?? 0) : 0;
   }
 
   /**
@@ -63,7 +60,9 @@ export class AddressParserService {
    * Extracts 4-digit Bangladesh postal code if present.
    */
   private extractPostalCode(text: string): string | null {
-    const match = text.match(/\b(1\d{3}|2\d{3}|3\d{3}|4\d{3}|5\d{3}|6\d{3}|7\d{3}|8\d{3}|9\d{3})\b/);
+    const match = text.match(
+      /\b(1\d{3}|2\d{3}|3\d{3}|4\d{3}|5\d{3}|6\d{3}|7\d{3}|8\d{3}|9\d{3})\b/,
+    );
     return match && match[1] ? match[1] : null;
   }
 
@@ -193,7 +192,9 @@ export class AddressParserService {
               districtScore = 45;
               thanaScore = 35;
               matchedKeywords.push(thana.name);
-              suggestions.push(`Re-aligned district to ${dist.name} based on thana '${thana.name}'`);
+              suggestions.push(
+                `Re-aligned district to ${dist.name} based on thana '${thana.name}'`,
+              );
               break;
             }
           }

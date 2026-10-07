@@ -18,8 +18,11 @@ import { AlertTriangle } from "lucide-react";
 import { ExceptionStatus } from "@dhruto/contracts";
 import { useGetExceptionsQuery, useResolveExceptionMutation } from "../api/hubs.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
+import { useFormatters } from "@/lib/format";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { EXCEPTION_STATUS_TONE } from "@/config/status";
 
 interface ExceptionsViewProps {
   currentHubId: string;
@@ -28,7 +31,10 @@ interface ExceptionsViewProps {
 /** Operational exceptions with a controlled resolve workflow. */
 export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
   const t = useTranslations("Hub");
-  const [statusFilter, setStatusFilter] = React.useState<ExceptionStatus | "ALL">(ExceptionStatus.OPEN);
+  const { dateTime } = useFormatters();
+  const [statusFilter, setStatusFilter] = React.useState<ExceptionStatus | "ALL">(
+    ExceptionStatus.OPEN,
+  );
   const [resolvingId, setResolvingId] = React.useState<string | null>(null);
   const [resolutionNote, setResolutionNote] = React.useState("");
 
@@ -111,17 +117,32 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
                 <li key={exception.id} className="space-y-2 p-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" />
-                    <span className="font-mono text-xs font-bold text-foreground">{exception.type}</span>
-                    <Badge variant={exception.status === ExceptionStatus.OPEN ? "destructive" : "success"} className="text-[10px]">
-                      {exception.status}
+                    <span className="font-mono text-xs font-bold text-foreground">
+                      {exception.type}
+                    </span>
+                    <Badge
+                      variant={
+                        exception.status === ExceptionStatus.OPEN ? "destructive" : "success"
+                      }
+                      className="text-[10px]"
+                    >
+                      {
+                        <EnumBadge
+                          namespace="ExceptionStatus"
+                          value={exception.status}
+                          tones={EXCEPTION_STATUS_TONE}
+                        />
+                      }
                     </Badge>
                     <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
-                      {new Date(exception.createdAt).toLocaleString()}
+                      {dateTime(exception.createdAt)}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">{exception.description}</p>
                   <p className="font-mono text-[11px] text-muted-foreground">
-                    {[exception.trackingCode, exception.bagCode, exception.manifestCode].filter(Boolean).join(" · ")}
+                    {[exception.trackingCode, exception.bagCode, exception.manifestCode]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                     <span>
@@ -165,7 +186,10 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
             <DialogDescription>{t("exceptions.resolutionNote")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <label htmlFor="resolution-note" className="text-xs font-semibold text-muted-foreground">
+            <label
+              htmlFor="resolution-note"
+              className="text-xs font-semibold text-muted-foreground"
+            >
               {t("exceptions.resolutionNote")} *
             </label>
             <textarea

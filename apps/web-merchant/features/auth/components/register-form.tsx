@@ -103,9 +103,7 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-label leading-none">
-                {t("fullName")} *
-              </label>
+              <label className="text-label leading-none">{t("fullName")} *</label>
               <Input
                 type="text"
                 placeholder="e.g. Tanvir Ahmed"
@@ -117,9 +115,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-label leading-none">
-                {t("email")} *
-              </label>
+              <label className="text-label leading-none">{t("email")} *</label>
               <Input
                 type="email"
                 placeholder="e.g. merchant@mystore.com"
@@ -133,9 +129,7 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-label leading-none">
-                {t("phone")} *
-              </label>
+              <label className="text-label leading-none">{t("phone")} *</label>
               <Input
                 type="tel"
                 placeholder="01712345678"
@@ -147,9 +141,7 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-label leading-none">
-                {t("password")} *
-              </label>
+              <label className="text-label leading-none">{t("password")} *</label>
               <Input
                 type="password"
                 placeholder="••••••••"
@@ -162,9 +154,7 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-label leading-none">
-              {t("businessName")} *
-            </label>
+            <label className="text-label leading-none">{t("businessName")} *</label>
             <Input
               type="text"
               placeholder="e.g. Dhaka Artisan Crafts"
@@ -176,9 +166,7 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-label leading-none">
-              {t("pickupAddress")} *
-            </label>
+            <label className="text-label leading-none">{t("pickupAddress")} *</label>
             <Input
               type="text"
               placeholder="e.g. House 14, Road 5, Dhanmondi, Dhaka"
@@ -202,10 +190,7 @@ export function RegisterForm() {
 
           <div className="text-center text-caption text-muted-foreground">
             {t("alreadyAccount")}{" "}
-            <Link
-              href="/login"
-              className="text-primary font-medium hover:underline"
-            >
+            <Link href="/login" className="text-primary font-medium hover:underline">
               {t("loginNow")}
             </Link>
           </div>

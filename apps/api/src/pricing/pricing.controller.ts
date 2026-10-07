@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -63,10 +55,7 @@ export class PricingController {
   @ApiForbiddenResponse({ description: "Caller is not a merchant or admin" })
   @ApiUnprocessableEntityResponse({ description: "Validation failed" })
   @ApiTooManyRequestsResponse({ description: "Rate limit exceeded" })
-  calculate(
-    @Body() dto: PricingCalculationDto,
-    @Req() req: RequestWithId,
-  ) {
+  calculate(@Body() dto: PricingCalculationDto, @Req() req: RequestWithId) {
     const data: PricingResult = this.pricingService.calculate(dto);
 
     return {

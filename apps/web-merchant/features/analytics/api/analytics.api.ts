@@ -38,7 +38,10 @@ export interface RangeParams {
 
 export const analyticsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMerchantAnalytics: builder.query<ApiResponse<MerchantAnalyticsSummary>, AnalyticsQuery | void>({
+    getMerchantAnalytics: builder.query<
+      ApiResponse<MerchantAnalyticsSummary>,
+      AnalyticsQuery | void
+    >({
       query: (params) => ({
         url: "/analytics/merchant/summary",
         method: "GET",
@@ -47,7 +50,10 @@ export const analyticsApi = baseApi.injectEndpoints({
       providesTags: ["Parcel", "Wallet"],
     }),
 
-    getOperationalAnalytics: builder.query<ApiResponse<OperationalAnalyticsSummary>, AnalyticsQuery | void>({
+    getOperationalAnalytics: builder.query<
+      ApiResponse<OperationalAnalyticsSummary>,
+      AnalyticsQuery | void
+    >({
       query: (params) => ({
         url: "/analytics/operations/overview",
         method: "GET",
@@ -105,14 +111,21 @@ export const analyticsApi = baseApi.injectEndpoints({
     }),
 
     getDeliveryAnalytics: builder.query<
-      ApiResponse<{ range: unknown; latency: ParcelAnalyticsResponse["latency"]; firstAttemptSuccess: number | null }>,
+      ApiResponse<{
+        range: unknown;
+        latency: ParcelAnalyticsResponse["latency"];
+        firstAttemptSuccess: number | null;
+      }>,
       RangeParams | void
     >({
       query: (params) => ({ url: "/analytics/delivery", method: "GET", params: params || {} }),
       providesTags: ["Analytics"],
     }),
 
-    getHubAnalytics: builder.query<ApiResponse<{ range: unknown; hubs: HubAnalyticsItem[] }>, RangeParams | void>({
+    getHubAnalytics: builder.query<
+      ApiResponse<{ range: unknown; hubs: HubAnalyticsItem[] }>,
+      RangeParams | void
+    >({
       query: (params) => ({ url: "/analytics/hubs", method: "GET", params: params || {} }),
       providesTags: ["Analytics"],
     }),
@@ -156,7 +169,10 @@ export const analyticsApi = baseApi.injectEndpoints({
       providesTags: ["Analytics"],
     }),
 
-    getNotificationAnalytics: builder.query<ApiResponse<NotificationAnalyticsResponse>, RangeParams | void>({
+    getNotificationAnalytics: builder.query<
+      ApiResponse<NotificationAnalyticsResponse>,
+      RangeParams | void
+    >({
       query: (params) => ({ url: "/analytics/notifications", method: "GET", params: params || {} }),
       providesTags: ["Analytics"],
     }),
@@ -166,7 +182,10 @@ export const analyticsApi = baseApi.injectEndpoints({
       providesTags: ["Analytics"],
     }),
 
-    getIntelligenceAnalytics: builder.query<ApiResponse<IntelligenceAnalyticsResponse>, RangeParams | void>({
+    getIntelligenceAnalytics: builder.query<
+      ApiResponse<IntelligenceAnalyticsResponse>,
+      RangeParams | void
+    >({
       query: (params) => ({ url: "/analytics/intelligence", method: "GET", params: params || {} }),
       providesTags: ["Analytics"],
     }),

@@ -204,13 +204,7 @@ export interface BacklogBucket {
   oldestHours: number | null;
 }
 
-export const BACKLOG_BUCKETS = [
-  "<6h",
-  "6-12h",
-  "12-24h",
-  "1-2d",
-  "2d+",
-] as const;
+export const BACKLOG_BUCKETS = ["<6h", "6-12h", "12-24h", "1-2d", "2d+"] as const;
 
 export interface OverviewResponse {
   range: ResolvedRange;
@@ -339,7 +333,12 @@ export interface IntelligenceAnalyticsResponse {
     recall: number | null;
     insufficientData: boolean;
   };
-  byModelVersion: Array<{ modelVersion: string; predictions: number; outcomes: number; precision: number | null }>;
+  byModelVersion: Array<{
+    modelVersion: string;
+    predictions: number;
+    outcomes: number;
+    precision: number | null;
+  }>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -363,11 +362,51 @@ export interface AlertDefinition {
 }
 
 export const DEFAULT_ALERT_DEFINITIONS: AlertDefinition[] = [
-  { alertKey: "RTO_RATE_SPIKE", metric: "rto_rate", operator: ">", threshold: 15, severity: "WARNING", scope: "platform", enabled: true },
-  { alertKey: "RTO_RATE_CRITICAL", metric: "rto_rate", operator: ">", threshold: 25, severity: "CRITICAL", scope: "platform", enabled: true },
-  { alertKey: "SUCCESS_RATE_DROP", metric: "delivery_success_rate", operator: "<", threshold: 85, severity: "WARNING", scope: "platform", enabled: true },
-  { alertKey: "HUB_BACKLOG_HIGH", metric: "hub_pending", operator: ">", threshold: 200, severity: "WARNING", scope: "hub", enabled: true },
-  { alertKey: "NOTIFICATION_FAILURE_SPIKE", metric: "notification_failure_rate", operator: ">", threshold: 10, severity: "WARNING", scope: "platform", enabled: true },
+  {
+    alertKey: "RTO_RATE_SPIKE",
+    metric: "rto_rate",
+    operator: ">",
+    threshold: 15,
+    severity: "WARNING",
+    scope: "platform",
+    enabled: true,
+  },
+  {
+    alertKey: "RTO_RATE_CRITICAL",
+    metric: "rto_rate",
+    operator: ">",
+    threshold: 25,
+    severity: "CRITICAL",
+    scope: "platform",
+    enabled: true,
+  },
+  {
+    alertKey: "SUCCESS_RATE_DROP",
+    metric: "delivery_success_rate",
+    operator: "<",
+    threshold: 85,
+    severity: "WARNING",
+    scope: "platform",
+    enabled: true,
+  },
+  {
+    alertKey: "HUB_BACKLOG_HIGH",
+    metric: "hub_pending",
+    operator: ">",
+    threshold: 200,
+    severity: "WARNING",
+    scope: "hub",
+    enabled: true,
+  },
+  {
+    alertKey: "NOTIFICATION_FAILURE_SPIKE",
+    metric: "notification_failure_rate",
+    operator: ">",
+    threshold: 10,
+    severity: "WARNING",
+    scope: "platform",
+    enabled: true,
+  },
 ];
 
 export interface AnalyticsAlert {
@@ -394,14 +433,7 @@ export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 export const EXPORT_STATUSES = ["PENDING", "READY", "EXPIRED", "FAILED"] as const;
 export type ExportStatus = (typeof EXPORT_STATUSES)[number];
 
-export const EXPORT_DATASETS = [
-  "parcels",
-  "rto",
-  "cod",
-  "riders",
-  "hubs",
-  "finance",
-] as const;
+export const EXPORT_DATASETS = ["parcels", "rto", "cod", "riders", "hubs", "finance"] as const;
 export type ExportDataset = (typeof EXPORT_DATASETS)[number];
 
 export const exportRequestSchema = z.object({

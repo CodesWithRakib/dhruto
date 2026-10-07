@@ -79,13 +79,18 @@ export class AnalyticsMetricsService {
 
   scopedParcels(scope: TenantScope): ReturnType<Repository<Parcel>["createQueryBuilder"]> {
     const qb = this.parcelRepo.createQueryBuilder("p");
-    if (scope.merchantId) qb.andWhere("p.merchant_id = :merchantId", { merchantId: scope.merchantId });
+    if (scope.merchantId)
+      qb.andWhere("p.merchant_id = :merchantId", { merchantId: scope.merchantId });
     if (scope.hubId) qb.andWhere("p.current_hub_id = :hubId", { hubId: scope.hubId });
     if (scope.riderId) qb.andWhere("p.current_rider_id = :riderId", { riderId: scope.riderId });
     return qb;
   }
 
-  inRange(qb: { andWhere: (...args: never[]) => unknown }, alias: string, range: ResolvedRange): void {
+  inRange(
+    qb: { andWhere: (...args: never[]) => unknown },
+    alias: string,
+    range: ResolvedRange,
+  ): void {
     (qb.andWhere as (cond: string, params: object) => void)(
       `${alias}."createdAt" BETWEEN :from AND :to`,
       { from: range.from, to: range.to },
@@ -97,11 +102,19 @@ export class AnalyticsMetricsService {
   async statusCounts(
     scope: TenantScope,
     range: ResolvedRange,
-  ): Promise<{ total: number; delivered: number; rto: number; failed: number; cancelled: number; inTransit: number; byStatus: Record<string, number> }> {
+  ): Promise<{
+    total: number;
+    delivered: number;
+    rto: number;
+    failed: number;
+    cancelled: number;
+    inTransit: number;
+    byStatus: Record<string, number>;
+  }> {
     const rows = await this.scopedParcels(scope)
       .select("p.status", "status")
       .addSelect("COUNT(*)", "count")
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .groupBy("p.status")
       .getRawMany<{ status: ParcelStatus; count: string }>();
     const byStatus: Record<string, number> = {};
@@ -113,7 +126,15 @@ export class AnalyticsMetricsService {
     const failed = sum(FAILED_ATTEMPT_STATUSES);
     const cancelled = sum(TERMINAL_FAILURE_STATUSES);
     const total = Object.values(byStatus).reduce((a, b) => a + b, 0);
-    return { total, delivered, rto, failed, cancelled, inTransit: total - delivered - rto - failed - cancelled, byStatus };
+    return {
+      total,
+      delivered,
+      rto,
+      failed,
+      cancelled,
+      inTransit: total - delivered - rto - failed - cancelled,
+      byStatus,
+    };
   }
 
   eligible(delivered: number, rto: number, failed: number, cancelled: number): number {
@@ -128,12 +149,16 @@ export class AnalyticsMetricsService {
   /* ---------------- delivery latency from history ---------------- */
 
   /** CREATED → first DELIVERED-toStatus hours per parcel (cohort in range). */
-  async deliveryLatencies(scope: TenantScope, range: ResolvedRange, limit = 20000): Promise<number[]> {
+  async deliveryLatencies(
+    scope: TenantScope,
+    range: ResolvedRange,
+    limit = 20000,
+  ): Promise<number[]> {
     const parcels = await this.scopedParcels(scope)
       .select("p.id", "id")
       .addSelect("p.createdAt", "createdAt")
       .andWhere("p.status IN (:...statuses)", { statuses: DELIVERED_STATUSES })
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .limit(limit)
       .getRawMany<{ id: string; createdAt: Date }>();
     if (parcels.length === 0) return [];
@@ -169,7 +194,15 @@ export class AnalyticsMetricsService {
   async trends(
     scope: TenantScope,
     range: ResolvedRange,
-  ): Promise<Array<{ bucket: string; booked: number; delivered: number; returned: number; codCollected: number }>> {
+  ): Promise<
+    Array<{
+      bucket: string;
+      booked: number;
+      delivered: number;
+      returned: number;
+      codCollected: number;
+    }>
+  > {
     const bucket = this.ranges.bucketSql("p.createdAt", range.granularity);
     const rows = await this.scopedParcels(scope)
       .select(`${bucket}`, "bucket")
@@ -177,11 +210,17 @@ export class AnalyticsMetricsService {
       .addSelect(`SUM(CASE WHEN p.status IN (:...delivered) THEN 1 ELSE 0 END)`, "delivered")
       .addSelect(`SUM(CASE WHEN p.status IN (:...rto) THEN 1 ELSE 0 END)`, "returned")
       .addSelect(`SUM(CASE WHEN p.status IN (:...delivered) THEN p.cod_amount ELSE 0 END)`, "cod")
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .setParameters({ delivered: DELIVERED_STATUSES, rto: RTO_STATUSES })
       .groupBy("bucket")
       .orderBy("bucket", "ASC")
-      .getRawMany<{ bucket: Date; booked: string; delivered: string; returned: string; cod: string }>();
+      .getRawMany<{
+        bucket: Date;
+        booked: string;
+        delivered: string;
+        returned: string;
+        cod: string;
+      }>();
     return rows.map((r) => ({
       bucket: new Date(r.bucket).toISOString().slice(0, range.granularity === "hour" ? 13 : 10),
       booked: Number(r.booked),
@@ -193,7 +232,10 @@ export class AnalyticsMetricsService {
 
   /* ---------------- funnel from status history ---------------- */
 
-  async funnel(scope: TenantScope, range: ResolvedRange): Promise<Array<{ stage: string; count: number }>> {
+  async funnel(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<Array<{ stage: string; count: number }>> {
     const stages: Array<{ status: ParcelStatus; label: string }> = [
       { status: ParcelStatus.CREATED, label: "Created" },
       { status: ParcelStatus.PICKED_UP, label: "Picked Up" },
@@ -205,7 +247,7 @@ export class AnalyticsMetricsService {
     ];
     const parcelIds = await this.scopedParcels(scope)
       .select("p.id", "id")
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .getRawMany<{ id: string }>();
     const ids = parcelIds.map((p) => p.id);
     if (ids.length === 0) return stages.map((s) => ({ stage: s.label, count: 0 }));
@@ -229,22 +271,35 @@ export class AnalyticsMetricsService {
 
   /* ---------------- hubs ---------------- */
 
-  async hubStats(range: ResolvedRange, hubId?: string): Promise<Array<{
-    hubId: string; hubName: string; code: string;
-    incoming: number; dispatched: number; pending: number;
-    throughputPerDay: number; backlog: Array<{ bucket: string; count: number; oldestHours: number | null }>;
-    oldestPendingHours: number | null;
-  }>> {
+  async hubStats(
+    range: ResolvedRange,
+    hubId?: string,
+  ): Promise<
+    Array<{
+      hubId: string;
+      hubName: string;
+      code: string;
+      incoming: number;
+      dispatched: number;
+      pending: number;
+      throughputPerDay: number;
+      backlog: Array<{ bucket: string; count: number; oldestHours: number | null }>;
+      oldestPendingHours: number | null;
+    }>
+  > {
     const hubs = hubId
       ? await this.hubRepo.find({ where: { id: hubId } })
       : await this.hubRepo.find({ take: 100 });
-    const days = Math.max(1, (new Date(range.to).getTime() - new Date(range.from).getTime()) / 86400000);
+    const days = Math.max(
+      1,
+      (new Date(range.to).getTime() - new Date(range.from).getTime()) / 86400000,
+    );
     const out: Awaited<ReturnType<AnalyticsMetricsService["hubStats"]>> = [];
     for (const hub of hubs) {
       const incomingInRange = await this.scanRepo
         .createQueryBuilder("s")
         .where("s.hub_id = :hubId", { hubId: hub.id })
-        .andWhere('s.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+        .andWhere("s.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
         .andWhere("s.scan_type IN (:...receive)", {
           receive: ["RECEIVE_INBOUND", "RECEIVE_TRANSFER"],
         })
@@ -252,7 +307,7 @@ export class AnalyticsMetricsService {
       const dispatchedInRange = await this.scanRepo
         .createQueryBuilder("s")
         .where("s.hub_id = :hubId", { hubId: hub.id })
-        .andWhere('s.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+        .andWhere("s.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
         .andWhere("s.scan_type = :dispatch", { dispatch: "DISPATCH_BAG" })
         .getCount();
       const pendingParcels = await this.parcelRepo
@@ -269,8 +324,8 @@ export class AnalyticsMetricsService {
         .addGroupBy("p.createdAt")
         .getRawMany<{ id: string; createdAt: Date; lastEvent: Date | null }>();
       const now = Date.now();
-      const ages = pendingParcels.map((p) =>
-        (now - new Date(p.lastEvent ?? p.createdAt).getTime()) / 3600000,
+      const ages = pendingParcels.map(
+        (p) => (now - new Date(p.lastEvent ?? p.createdAt).getTime()) / 3600000,
       );
       const buckets = ["<6h", "6-12h", "12-24h", "1-2d", "2d+"].map((bucket) => ({
         bucket,
@@ -282,7 +337,10 @@ export class AnalyticsMetricsService {
         const b = buckets[idx];
         if (b) {
           b.count++;
-          b.oldestHours = b.oldestHours === null ? Math.round(age * 10) / 10 : Math.max(b.oldestHours, Math.round(age * 10) / 10);
+          b.oldestHours =
+            b.oldestHours === null
+              ? Math.round(age * 10) / 10
+              : Math.max(b.oldestHours, Math.round(age * 10) / 10);
         }
       }
       out.push({
@@ -302,12 +360,24 @@ export class AnalyticsMetricsService {
 
   /* ---------------- riders ---------------- */
 
-  async riderStats(range: ResolvedRange, hubId?: string, limit = 50): Promise<Array<{
-    riderId: string; name: string; hubName: string;
-    assigned: number; delivered: number; failed: number;
-    successRate: number | null; firstAttemptSuccess: number | null;
-    avgCompletionHours: number | null; codCollected: number;
-  }>> {
+  async riderStats(
+    range: ResolvedRange,
+    hubId?: string,
+    limit = 50,
+  ): Promise<
+    Array<{
+      riderId: string;
+      name: string;
+      hubName: string;
+      assigned: number;
+      delivered: number;
+      failed: number;
+      successRate: number | null;
+      firstAttemptSuccess: number | null;
+      avgCompletionHours: number | null;
+      codCollected: number;
+    }>
+  > {
     const riders = await this.riderRepo.find({
       where: hubId ? { hubId } : {},
       relations: ["user", "hub"],
@@ -318,7 +388,7 @@ export class AnalyticsMetricsService {
       const attempts = await this.attemptRepo
         .createQueryBuilder("a")
         .where("a.rider_id = :riderId", { riderId: rider.id })
-        .andWhere('a.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+        .andWhere("a.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
         .orderBy("a.createdAt", "ASC")
         .getMany();
       const parcelIds = [...new Set(attempts.map((a) => a.parcelId))];
@@ -348,7 +418,7 @@ export class AnalyticsMetricsService {
           .createQueryBuilder("l")
           .select("SUM(l.amount)", "sum")
           .where("l.rider_id = :riderId", { riderId: rider.id })
-          .andWhere('l.collectedAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+          .andWhere("l.collectedAt BETWEEN :from AND :to", { from: range.from, to: range.to })
           .getRawOne<{ sum: string | null }>();
         codCollected = num(ledgers?.sum);
       }
@@ -359,9 +429,16 @@ export class AnalyticsMetricsService {
         assigned: parcelIds.length,
         delivered: deliveredAttempts,
         failed: failedAttempts,
-        successRate: attempts.length > 0 ? Math.round((deliveredAttempts / attempts.length) * 1000) / 10 : null,
-        firstAttemptSuccess: firsts.size > 0 ? Math.round((firstDelivered / firsts.size) * 1000) / 10 : null,
-        avgCompletionHours: durations.length > 0 ? Math.round((durations.reduce((a, b) => a + b, 0) / durations.length) * 10) / 10 : null,
+        successRate:
+          attempts.length > 0
+            ? Math.round((deliveredAttempts / attempts.length) * 1000) / 10
+            : null,
+        firstAttemptSuccess:
+          firsts.size > 0 ? Math.round((firstDelivered / firsts.size) * 1000) / 10 : null,
+        avgCompletionHours:
+          durations.length > 0
+            ? Math.round((durations.reduce((a, b) => a + b, 0) / durations.length) * 10) / 10
+            : null,
         codCollected,
       });
     }
@@ -370,10 +447,21 @@ export class AnalyticsMetricsService {
 
   /* ---------------- merchants compare (admin) ---------------- */
 
-  async merchantCompare(range: ResolvedRange, limit = 100): Promise<Array<{
-    merchantId: string; merchantName: string; parcels: number; delivered: number;
-    successRate: number | null; rtoRate: number | null; codVolume: number; avgDeliveryHours: number | null;
-  }>> {
+  async merchantCompare(
+    range: ResolvedRange,
+    limit = 100,
+  ): Promise<
+    Array<{
+      merchantId: string;
+      merchantName: string;
+      parcels: number;
+      delivered: number;
+      successRate: number | null;
+      rtoRate: number | null;
+      codVolume: number;
+      avgDeliveryHours: number | null;
+    }>
+  > {
     const merchants = await this.merchantRepo.find({ take: limit });
     const out: Awaited<ReturnType<AnalyticsMetricsService["merchantCompare"]>> = [];
     for (const merchant of merchants) {
@@ -382,7 +470,7 @@ export class AnalyticsMetricsService {
       const eligible = this.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
       const codRow = await this.scopedParcels(scope)
         .select("SUM(p.cod_amount)", "sum")
-        .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+        .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
         .getRawOne<{ sum: string | null }>();
       const latencies = await this.deliveryLatencies(scope, range, 2000);
       out.push({
@@ -393,7 +481,10 @@ export class AnalyticsMetricsService {
         successRate: this.rate(counts.delivered, eligible),
         rtoRate: this.rate(counts.rto, eligible),
         codVolume: num(codRow?.sum),
-        avgDeliveryHours: latencies.length > 0 ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10 : null,
+        avgDeliveryHours:
+          latencies.length > 0
+            ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10
+            : null,
       });
     }
     return out.sort((a, b) => b.parcels - a.parcels);

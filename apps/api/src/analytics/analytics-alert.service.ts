@@ -1,7 +1,11 @@
 import { Injectable, Logger, Optional } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, MoreThan } from "typeorm";
-import { DEFAULT_ALERT_DEFINITIONS, type AnalyticsAlert as AlertContract, type AlertStatus } from "@dhruto/contracts";
+import {
+  DEFAULT_ALERT_DEFINITIONS,
+  type AnalyticsAlert as AlertContract,
+  type AlertStatus,
+} from "@dhruto/contracts";
 import { AnalyticsAlert } from "../database/entities/AnalyticsAlert.entity.js";
 import { User, UserRole } from "../database/entities/User.entity.js";
 import { AnalyticsMetricsService, type TenantScope } from "./analytics-metrics.service.js";
@@ -60,7 +64,12 @@ export class AnalyticsAlertService {
     const dayBucket = new Date(range.to).toISOString().slice(0, 10);
 
     const counts = await this.metrics.statusCounts(scope, range);
-    const eligible = this.metrics.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
+    const eligible = this.metrics.eligible(
+      counts.delivered,
+      counts.rto,
+      counts.failed,
+      counts.cancelled,
+    );
     const rtoRate = this.metrics.rate(counts.rto, eligible) ?? 0;
     const successRate = this.metrics.rate(counts.delivered, eligible) ?? 100;
 
@@ -104,7 +113,9 @@ export class AnalyticsAlertService {
           triggeredAt: new Date(),
         }),
       );
-      this.logger.log(`ALERT_TRIGGERED key=${def.alertKey} value=${value} severity=${def.severity}`);
+      this.logger.log(
+        `ALERT_TRIGGERED key=${def.alertKey} value=${value} severity=${def.severity}`,
+      );
       if (def.severity === "CRITICAL") {
         await this.notifyAdmins(def.alertKey, value, def.threshold).catch((error: unknown) =>
           this.logger.warn(`Alert notification failed: ${getErrorMessage(error, "unknown")}`),

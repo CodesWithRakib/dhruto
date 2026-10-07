@@ -124,10 +124,7 @@ export const parcelsApi = baseApi.injectEndpoints({
         body: booking,
         headers: { "Idempotency-Key": idempotencyKey },
       }),
-      invalidatesTags: [
-        { type: PARCEL_TAG, id: "LIST" },
-        "Merchant",
-      ],
+      invalidatesTags: [{ type: PARCEL_TAG, id: "LIST" }, "Merchant"],
     }),
   }),
 });

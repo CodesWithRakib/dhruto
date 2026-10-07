@@ -113,14 +113,11 @@ export class RiskEngineService implements RiskScorerEngine {
     score = Math.max(0, Math.min(100, Math.round(score)));
     const level =
       score < t.riskLow ? RiskLevel.LOW : score < t.riskHigh ? RiskLevel.MEDIUM : RiskLevel.HIGH;
-    const riskConfidence: RiskConfidence =
-      total >= 5 ? "HIGH" : total >= 2 ? "MEDIUM" : "LOW";
+    const riskConfidence: RiskConfidence = total >= 5 ? "HIGH" : total >= 2 ? "MEDIUM" : "LOW";
     return { score, level, reasons, riskConfidence };
   }
 
-  async scoreAndPersist(
-    features: RecipientFeatureSnapshot,
-  ): Promise<RecipientRiskSnapshot> {
+  async scoreAndPersist(features: RecipientFeatureSnapshot): Promise<RecipientRiskSnapshot> {
     const { score, level, reasons, riskConfidence } = this.score(features);
     // Aggregate row is a rolling latest view (upsert); snapshots stay append-only.
     const existing = await this.aggregateRepo.findOne({

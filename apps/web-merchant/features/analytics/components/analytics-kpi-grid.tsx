@@ -2,15 +2,9 @@
 
 import React from "react";
 import { Card, CardContent } from "@dhruto/ui";
-import {
-  CheckCircle2,
-  RotateCcw,
-  Clock,
-  Wallet,
-  TrendingUp,
-  Package,
-} from "lucide-react";
+import { CheckCircle2, RotateCcw, Clock, Wallet, TrendingUp, Package } from "lucide-react";
 import { type MerchantKpis, type MerchantFinancialAnalytics } from "@dhruto/contracts";
+import { formatBDT } from "@/lib/format";
 
 interface AnalyticsKpiGridProps {
   kpis: MerchantKpis;
@@ -61,10 +55,10 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black font-mono text-foreground">
-              {kpis.rtoRate}%
-            </span>
-            <span className={`text-xs font-medium ${kpis.rtoRate < 8 ? "text-emerald-600" : "text-amber-600"}`}>
+            <span className="text-3xl font-black font-mono text-foreground">{kpis.rtoRate}%</span>
+            <span
+              className={`text-xs font-medium ${kpis.rtoRate < 8 ? "text-emerald-600" : "text-amber-600"}`}
+            >
               {kpis.rtoRate < 8 ? "Below Target (Good)" : "Action Advised"}
             </span>
           </div>
@@ -90,13 +84,13 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
           </div>
           <div className="mt-3 flex items-baseline gap-1">
             <span className="text-3xl font-black font-mono text-foreground">
-              ৳{financials.collectedCod.toLocaleString()}
+              {formatBDT(financials.collectedCod)}
             </span>
           </div>
           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
             <span>Pending In-Transit COD</span>
             <span className="font-mono font-bold text-foreground">
-              ৳{financials.pendingCod.toLocaleString()}
+              {formatBDT(financials.pendingCod)}
             </span>
           </div>
         </CardContent>

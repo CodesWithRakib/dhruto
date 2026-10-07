@@ -17,5 +17,4 @@ export interface RateLimitOptions {
  * Implemented on top of the existing CacheService (Redis, with the in-memory
  * fallback), so no new infrastructure is introduced.
  */
-export const RateLimit = (options: RateLimitOptions) =>
-  SetMetadata(RATE_LIMIT_KEY, options);
+export const RateLimit = (options: RateLimitOptions) => SetMetadata(RATE_LIMIT_KEY, options);

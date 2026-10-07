@@ -34,7 +34,8 @@ export default function IntelligencePage() {
             Logistics AI & RTO Prediction Suite
           </h1>
           <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
-            Bilingual natural language address parsing, phonetic typo correction, and pre-dispatch customer risk assessment for Bangladesh e-commerce.
+            Bilingual natural language address parsing, phonetic typo correction, and pre-dispatch
+            customer risk assessment for Bangladesh e-commerce.
           </p>
         </div>
 
@@ -118,9 +119,7 @@ export default function IntelligencePage() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-success" />
-              <h2 className="text-base font-bold text-foreground">
-                NLP Address Parsing Engine
-              </h2>
+              <h2 className="text-base font-bold text-foreground">NLP Address Parsing Engine</h2>
             </div>
             <SmartAddressParser />
             <AddressConfirmation />
@@ -131,9 +130,7 @@ export default function IntelligencePage() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-danger" />
-              <h2 className="text-base font-bold text-foreground">
-                Recipient Risk & RTO Radar
-              </h2>
+              <h2 className="text-base font-bold text-foreground">Recipient Risk & RTO Radar</h2>
             </div>
             <RtoRiskMeter />
           </div>
@@ -148,12 +145,18 @@ export default function IntelligencePage() {
             <span>Automated Core Pipeline Integration</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-            Every shipment booked via Dhruto API or Web Portal automatically undergoes address normalization and RTO risk evaluation. High-risk shipments trigger verification flags before line-haul dispatch.
+            Every shipment booked via Dhruto API or Web Portal automatically undergoes address
+            normalization and RTO risk evaluation. High-risk shipments trigger verification flags
+            before line-haul dispatch.
           </p>
         </div>
 
         <Link href={MERCHANT_ROUTES.webhooks}>
-          <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs whitespace-nowrap">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1.5 text-xs whitespace-nowrap"
+          >
             <span>Explore Developer API</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>

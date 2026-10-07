@@ -1,7 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { NotificationChannel, NotificationStatus, WebhookDeliveryStatus, IntegrationFailureStatus } from "@dhruto/contracts";
+import {
+  NotificationChannel,
+  NotificationStatus,
+  WebhookDeliveryStatus,
+  IntegrationFailureStatus,
+} from "@dhruto/contracts";
 import { DeliveryAttempt } from "../database/entities/DeliveryAttempt.entity.js";
 import { CashLedger } from "../database/entities/CashLedger.entity.js";
 import { Settlement } from "../database/entities/Settlement.entity.js";
@@ -16,7 +21,12 @@ import { RtoPrediction } from "../database/entities/RtoPrediction.entity.js";
 import { IntelligenceRecommendation } from "../database/entities/IntelligenceRecommendation.entity.js";
 import { Hub } from "../database/entities/Hub.entity.js";
 import { Merchant } from "../database/entities/Merchant.entity.js";
-import { AnalyticsMetricsService, DELIVERED_STATUSES, RTO_STATUSES, type TenantScope } from "./analytics-metrics.service.js";
+import {
+  AnalyticsMetricsService,
+  DELIVERED_STATUSES,
+  RTO_STATUSES,
+  type TenantScope,
+} from "./analytics-metrics.service.js";
 import { AnalyticsRangeService } from "./analytics-range.service.js";
 import type { ResolvedRange } from "@dhruto/contracts";
 
@@ -69,9 +79,18 @@ export class AnalyticsDomainService {
 
   /* ---------------- RTO ---------------- */
 
-  async rto(scope: TenantScope, range: ResolvedRange): Promise<{
+  async rto(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<{
     rtoCount: number;
-    rtoRate: { value: number | null; previous: number | null; changePct: number | null; trend: "up" | "down" | "flat"; noData: boolean };
+    rtoRate: {
+      value: number | null;
+      previous: number | null;
+      changePct: number | null;
+      trend: "up" | "down" | "flat";
+      noData: boolean;
+    };
     byReason: Array<{ reason: string; count: number; percentage: number }>;
     byDistrict: Array<{ district: string; count: number; rtoRate: number | null }>;
     byHub: Array<{ hubId: string; hubName: string; count: number }>;
@@ -79,13 +98,23 @@ export class AnalyticsDomainService {
     overTime: Array<{ bucket: string; count: number; rate: number | null }>;
   }> {
     const counts = await this.metrics.statusCounts(scope, range);
-    const eligible = this.metrics.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
+    const eligible = this.metrics.eligible(
+      counts.delivered,
+      counts.rto,
+      counts.failed,
+      counts.cancelled,
+    );
     const prev = await this.metrics.statusCounts(scope, {
       ...range,
       from: range.previousFrom,
       to: range.previousTo,
     });
-    const prevEligible = this.metrics.eligible(prev.delivered, prev.rto, prev.failed, prev.cancelled);
+    const prevEligible = this.metrics.eligible(
+      prev.delivered,
+      prev.rto,
+      prev.failed,
+      prev.cancelled,
+    );
     const value = this.metrics.rate(counts.rto, eligible);
     const previous = this.metrics.rate(prev.rto, prevEligible);
 
@@ -96,7 +125,7 @@ export class AnalyticsDomainService {
       .addSelect("COUNT(*)", "count")
       .innerJoin("parcels", "p", "p.id = a.parcel_id")
       .where("a.outcome = :failed", { failed: "FAILED" })
-      .andWhere('a.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("a.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .andWhere("a.failure_reason IS NOT NULL");
     if (scope.merchantId) {
       reasonQb.andWhere("p.merchant_id = :merchantId", { merchantId: scope.merchantId });
@@ -121,17 +150,28 @@ export class AnalyticsDomainService {
       .addSelect("COUNT(*)", "count")
       .addSelect("p.district", "d")
       .where("p.status IN (:...statuses)", { statuses: RTO_STATUSES })
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .groupBy("p.district")
       .addGroupBy("p.merchant_id")
       .addGroupBy("p.current_hub_id")
-      .getRawMany<{ district: string | null; merchantId: string; hubId: string | null; count: string }>();
+      .getRawMany<{
+        district: string | null;
+        merchantId: string;
+        hubId: string | null;
+        count: string;
+      }>();
     const byDistrictMap = new Map<string, number>();
     const byMerchantMap = new Map<string, number>();
     const byHubMap = new Map<string, number>();
     for (const row of rtoParcels) {
-      byDistrictMap.set(row.district ?? "Unknown", (byDistrictMap.get(row.district ?? "Unknown") ?? 0) + Number(row.count));
-      byMerchantMap.set(row.merchantId, (byMerchantMap.get(row.merchantId) ?? 0) + Number(row.count));
+      byDistrictMap.set(
+        row.district ?? "Unknown",
+        (byDistrictMap.get(row.district ?? "Unknown") ?? 0) + Number(row.count),
+      );
+      byMerchantMap.set(
+        row.merchantId,
+        (byMerchantMap.get(row.merchantId) ?? 0) + Number(row.count),
+      );
       if (row.hubId) byHubMap.set(row.hubId, (byHubMap.get(row.hubId) ?? 0) + Number(row.count));
     }
     const byDistrict = [...byDistrictMap.entries()]
@@ -141,7 +181,11 @@ export class AnalyticsDomainService {
     const merchants = await this.merchantRepo.find();
     const merchantNames = new Map(merchants.map((m) => [m.id, m.businessName]));
     const byMerchant = [...byMerchantMap.entries()]
-      .map(([merchantId, count]) => ({ merchantId, merchantName: merchantNames.get(merchantId) ?? "—", count }))
+      .map(([merchantId, count]) => ({
+        merchantId,
+        merchantName: merchantNames.get(merchantId) ?? "—",
+        count,
+      }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
     const hubs = await this.hubRepo.find();
@@ -157,7 +201,7 @@ export class AnalyticsDomainService {
       .select(`${bucket}`, "bucket")
       .addSelect(`SUM(CASE WHEN p.status IN (:...rto) THEN 1 ELSE 0 END)`, "rto")
       .addSelect(`SUM(CASE WHEN p.status IN (:...eligible) THEN 1 ELSE 0 END)`, "eligible")
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .setParameters({ rto: RTO_STATUSES, eligible: [...DELIVERED_STATUSES, ...RTO_STATUSES] })
       .groupBy("bucket")
       .orderBy("bucket", "ASC")
@@ -176,10 +220,18 @@ export class AnalyticsDomainService {
       rtoRate: {
         value,
         previous,
-        changePct: value !== null && previous !== null && previous !== 0
-          ? Math.round(((value - previous) / previous) * 1000) / 10
-          : null,
-        trend: value === null || previous === null ? "flat" : value > previous ? "up" : value < previous ? "down" : "flat",
+        changePct:
+          value !== null && previous !== null && previous !== 0
+            ? Math.round(((value - previous) / previous) * 1000) / 10
+            : null,
+        trend:
+          value === null || previous === null
+            ? "flat"
+            : value > previous
+              ? "up"
+              : value < previous
+                ? "down"
+                : "flat",
         noData: eligible === 0,
       },
       byReason,
@@ -192,8 +244,14 @@ export class AnalyticsDomainService {
 
   /* ---------------- COD ---------------- */
 
-  async cod(scope: TenantScope, range: ResolvedRange): Promise<{
-    booked: number; collected: number; pending: number; failed: number;
+  async cod(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<{
+    booked: number;
+    collected: number;
+    pending: number;
+    failed: number;
     collectionRate: number | null;
     overTime: Array<{ bucket: string; booked: number; collected: number }>;
   }> {
@@ -201,28 +259,32 @@ export class AnalyticsDomainService {
       .scopedParcels(scope)
       .select("SUM(p.cod_amount)", "sum")
       .andWhere("p.cod_amount > 0")
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .getRawOne<{ sum: string | null }>();
     const collectedRow = await this.ledgerRepo
       .createQueryBuilder("l")
       .select("SUM(l.amount)", "sum")
       .innerJoin("parcels", "p", "p.id = l.parcel_id")
-      .where('l.collectedAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .where("l.collectedAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .andWhere("l.hand_in_status IN (:...statuses)", { statuses: ["HANDED_IN", "VERIFIED"] })
-      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     const pendingRow = await this.ledgerRepo
       .createQueryBuilder("l")
       .select("SUM(l.amount)", "sum")
       .innerJoin("parcels", "p", "p.id = l.parcel_id")
       .where("l.hand_in_status IN (:...statuses)", { statuses: ["PENDING", "HANDED_IN"] })
-      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     const rtoParcels = await this.metrics
       .scopedParcels(scope)
       .select("SUM(p.cod_amount)", "sum")
       .andWhere("p.status IN (:...statuses)", { statuses: RTO_STATUSES })
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .getRawOne<{ sum: string | null }>();
     const collected = num(collectedRow?.sum);
     const failed = num(rtoParcels?.sum);
@@ -232,8 +294,11 @@ export class AnalyticsDomainService {
       .scopedParcels(scope)
       .select(`${bucket}`, "bucket")
       .addSelect("SUM(p.cod_amount)", "booked")
-      .addSelect(`SUM(CASE WHEN p.status IN (:...delivered) THEN p.cod_amount ELSE 0 END)`, "collected")
-      .andWhere('p.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .addSelect(
+        `SUM(CASE WHEN p.status IN (:...delivered) THEN p.cod_amount ELSE 0 END)`,
+        "collected",
+      )
+      .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .setParameters({ delivered: DELIVERED_STATUSES })
       .groupBy("bucket")
       .orderBy("bucket", "ASC")
@@ -244,7 +309,8 @@ export class AnalyticsDomainService {
       collected,
       pending: num(pendingRow?.sum),
       failed,
-      collectionRate: collected + failed > 0 ? Math.round((collected / (collected + failed)) * 1000) / 10 : null,
+      collectionRate:
+        collected + failed > 0 ? Math.round((collected / (collected + failed)) * 1000) / 10 : null,
       overTime: overTimeRows.map((r) => ({
         bucket: new Date(r.bucket).toISOString().slice(0, 10),
         booked: num(r.booked),
@@ -255,17 +321,25 @@ export class AnalyticsDomainService {
 
   /* ---------------- finance (read-only) ---------------- */
 
-  async finance(scope: TenantScope, range: ResolvedRange): Promise<{
-    pendingSettlementMinor: number; settledMinor: number;
-    payoutRequestedMinor: number; payoutCompletedMinor: number;
-    codCollectedMinor: number; sourceNote: string;
+  async finance(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<{
+    pendingSettlementMinor: number;
+    settledMinor: number;
+    payoutRequestedMinor: number;
+    payoutCompletedMinor: number;
+    codCollectedMinor: number;
+    sourceNote: string;
   }> {
     const settledRow = await this.settlementRepo
       .createQueryBuilder("s")
       .select("SUM(s.net_minor)", "sum")
       .where("s.status = :status", { status: "SETTLED" })
       .andWhere('s."settled_at" BETWEEN :from AND :to', { from: range.from, to: range.to })
-      .andWhere(scope.merchantId ? "s.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .andWhere(scope.merchantId ? "s.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     // Pending = gross of VERIFIED ledgers with no settlement row (documented formula).
     const pendingRow = await this.ledgerRepo
@@ -275,28 +349,38 @@ export class AnalyticsDomainService {
       .innerJoin("parcels", "p", "p.id = l.parcel_id")
       .where("l.hand_in_status = :verified", { verified: "VERIFIED" })
       .andWhere("s.id IS NULL")
-      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     const payoutReqRow = await this.payoutRepo
       .createQueryBuilder("pw")
       .select("SUM(pw.amount)", "sum")
-      .where('pw.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
-      .andWhere("pw.status IN (:...statuses)", { statuses: ["REQUESTED", "APPROVED", "PROCESSING"] })
-      .andWhere(scope.merchantId ? "pw.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .where("pw.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
+      .andWhere("pw.status IN (:...statuses)", {
+        statuses: ["REQUESTED", "APPROVED", "PROCESSING"],
+      })
+      .andWhere(scope.merchantId ? "pw.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     const payoutDoneRow = await this.payoutRepo
       .createQueryBuilder("pw")
       .select("SUM(pw.amount)", "sum")
-      .where('pw.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .where("pw.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
       .andWhere("pw.status = :done", { done: "COMPLETED" })
-      .andWhere(scope.merchantId ? "pw.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .andWhere(scope.merchantId ? "pw.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     const codRow = await this.ledgerRepo
       .createQueryBuilder("l")
       .select("SUM(l.amount)", "sum")
       .innerJoin("parcels", "p", "p.id = l.parcel_id")
-      .where('l.collectedAt BETWEEN :from AND :to', { from: range.from, to: range.to })
-      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .where("l.collectedAt BETWEEN :from AND :to", { from: range.from, to: range.to })
+      .andWhere(scope.merchantId ? "p.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .getRawOne<{ sum: string | null }>();
     return {
       pendingSettlementMinor: Math.round(num(pendingRow?.sum) * 100),
@@ -304,15 +388,26 @@ export class AnalyticsDomainService {
       payoutRequestedMinor: Math.round(num(payoutReqRow?.sum) * 100),
       payoutCompletedMinor: Math.round(num(payoutDoneRow?.sum) * 100),
       codCollectedMinor: Math.round(num(codRow?.sum) * 100),
-      sourceNote: "Read-only view. Finance domain (wallets, ledger, settlements) is the source of truth; discrepancies are flagged, never repaired here.",
+      sourceNote:
+        "Read-only view. Finance domain (wallets, ledger, settlements) is the source of truth; discrepancies are flagged, never repaired here.",
     };
   }
 
   /* ---------------- notifications + webhooks ---------------- */
 
-  async notifications(scope: TenantScope, range: ResolvedRange): Promise<{
-    byChannel: Array<{ channel: string; sent: number; failed: number; deliveryRate: number | null }>;
-    retries: number; deadLetter: number; failureRate: number | null;
+  async notifications(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<{
+    byChannel: Array<{
+      channel: string;
+      sent: number;
+      failed: number;
+      deliveryRate: number | null;
+    }>;
+    retries: number;
+    deadLetter: number;
+    failureRate: number | null;
   }> {
     const qb = this.notificationRepo
       .createQueryBuilder("n")
@@ -320,8 +415,11 @@ export class AnalyticsDomainService {
       .addSelect("SUM(CASE WHEN n.status IN (:...sent) THEN 1 ELSE 0 END)", "sent")
       .addSelect("SUM(CASE WHEN n.status = :failed THEN 1 ELSE 0 END)", "failed")
       .addSelect("SUM(CASE WHEN n.attempt_count > 1 THEN 1 ELSE 0 END)", "retries")
-      .andWhere('n.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
-      .setParameters({ sent: [NotificationStatus.SENT, NotificationStatus.READ], failed: NotificationStatus.FAILED });
+      .andWhere("n.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
+      .setParameters({
+        sent: [NotificationStatus.SENT, NotificationStatus.READ],
+        failed: NotificationStatus.FAILED,
+      });
     if (scope.merchantId) {
       qb.andWhere("n.merchant_id = :merchantId", { merchantId: scope.merchantId });
     }
@@ -350,18 +448,30 @@ export class AnalyticsDomainService {
       byChannel,
       retries: totalRetries,
       deadLetter,
-      failureRate: totalSent + totalFailed > 0 ? Math.round((totalFailed / (totalSent + totalFailed)) * 1000) / 10 : null,
+      failureRate:
+        totalSent + totalFailed > 0
+          ? Math.round((totalFailed / (totalSent + totalFailed)) * 1000) / 10
+          : null,
     };
   }
 
-  async webhooks(scope: TenantScope, range: ResolvedRange): Promise<{
-    total: number; delivered: number; failed4xx: number; failed5xx: number;
-    pending: number; deadLetter: number; successRate: number | null;
+  async webhooks(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<{
+    total: number;
+    delivered: number;
+    failed4xx: number;
+    failed5xx: number;
+    pending: number;
+    deadLetter: number;
+    successRate: number | null;
   }> {
     const qb = this.deliveryRepo
       .createQueryBuilder("d")
-      .andWhere('d.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to });
-    if (scope.merchantId) qb.andWhere("d.merchant_id = :merchantId", { merchantId: scope.merchantId });
+      .andWhere("d.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to });
+    if (scope.merchantId)
+      qb.andWhere("d.merchant_id = :merchantId", { merchantId: scope.merchantId });
     const rows = await qb
       .select("d.status", "status")
       .addSelect("COUNT(*)", "count")
@@ -374,9 +484,13 @@ export class AnalyticsDomainService {
       .createQueryBuilder("d")
       .select("d.status_code", "code")
       .addSelect("COUNT(*)", "count")
-      .andWhere("d.status IN (:...statuses)", { statuses: [WebhookDeliveryStatus.FAILED, WebhookDeliveryStatus.DEAD_LETTER] })
-      .andWhere('d.createdAt BETWEEN :from AND :to', { from: range.from, to: range.to })
-      .andWhere(scope.merchantId ? "d.merchant_id = :merchantId" : "1=1", { merchantId: scope.merchantId ?? "" })
+      .andWhere("d.status IN (:...statuses)", {
+        statuses: [WebhookDeliveryStatus.FAILED, WebhookDeliveryStatus.DEAD_LETTER],
+      })
+      .andWhere("d.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
+      .andWhere(scope.merchantId ? "d.merchant_id = :merchantId" : "1=1", {
+        merchantId: scope.merchantId ?? "",
+      })
       .groupBy("d.status_code")
       .getRawMany<{ code: number | null; count: string }>();
     let failed4xx = 0;
@@ -402,10 +516,27 @@ export class AnalyticsDomainService {
   /* ---------------- intelligence ---------------- */
 
   async intelligence(range: ResolvedRange): Promise<{
-    address: { parses: number; highConfidence: number; lowConfidence: number; confirmations: number };
+    address: {
+      parses: number;
+      highConfidence: number;
+      lowConfidence: number;
+      confirmations: number;
+    };
     risk: { snapshots: number; high: number; unknownShare: number | null; overrides: number };
-    rto: { predictions: number; outcomes: number; correct: number; precision: number | null; recall: number | null; insufficientData: boolean };
-    byModelVersion: Array<{ modelVersion: string; predictions: number; outcomes: number; precision: number | null }>;
+    rto: {
+      predictions: number;
+      outcomes: number;
+      correct: number;
+      precision: number | null;
+      recall: number | null;
+      insufficientData: boolean;
+    };
+    byModelVersion: Array<{
+      modelVersion: string;
+      predictions: number;
+      outcomes: number;
+      precision: number | null;
+    }>;
   }> {
     const between = '"createdAt" BETWEEN :from AND :to';
     const params = { from: range.from, to: range.to };
@@ -420,7 +551,10 @@ export class AnalyticsDomainService {
       .where(between, params)
       .andWhere("p.confidence < :t", { t: 0.5 })
       .getCount();
-    const confirmations = await this.confirmationRepo.createQueryBuilder("c").where(between, params).getCount();
+    const confirmations = await this.confirmationRepo
+      .createQueryBuilder("c")
+      .where(between, params)
+      .getCount();
 
     const snapshots = await this.riskRepo.createQueryBuilder("r").where(between, params).getCount();
     const high = await this.riskRepo
@@ -474,8 +608,22 @@ export class AnalyticsDomainService {
         predictions: inRange.length,
         outcomes: labeled.length,
         correct,
-        precision: insufficientData || flagged === 0 ? null : Math.round((labeled.filter((p) => (p.level === "HIGH" || p.level === "MEDIUM") && isCorrect(p)).length / flagged) * 1000) / 10,
-        recall: insufficientData || actualRto === 0 ? null : Math.round((labeled.filter((p) => p.outcome === "RTO" && isCorrect(p)).length / actualRto) * 1000) / 10,
+        precision:
+          insufficientData || flagged === 0
+            ? null
+            : Math.round(
+                (labeled.filter((p) => (p.level === "HIGH" || p.level === "MEDIUM") && isCorrect(p))
+                  .length /
+                  flagged) *
+                  1000,
+              ) / 10,
+        recall:
+          insufficientData || actualRto === 0
+            ? null
+            : Math.round(
+                (labeled.filter((p) => p.outcome === "RTO" && isCorrect(p)).length / actualRto) *
+                  1000,
+              ) / 10,
         insufficientData,
       },
       byModelVersion: [...byVersion.entries()].map(([modelVersion, v]) => ({

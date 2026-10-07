@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 4 - ledger adoption opening balances.
@@ -10,7 +10,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * idempotent: a second run computes a zero gap and posts nothing.
  */
 export class Phase4LedgerOpeningBalances1700000000005 implements MigrationInterface {
-  name = 'Phase4LedgerOpeningBalances1700000000005';
+  name = "Phase4LedgerOpeningBalances1700000000005";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

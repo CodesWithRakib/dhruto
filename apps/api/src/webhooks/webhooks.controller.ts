@@ -14,18 +14,9 @@ import {
   ParseUUIDPipe,
   NotFoundException,
 } from "@nestjs/common";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-  ApiResponse,
-} from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { WebhooksService } from "./webhooks.service.js";
-import {
-  CreateWebhookSubscriptionDto,
-  UpdateWebhookSubscriptionDto,
-} from "./dto/webhook.dto.js";
+import { CreateWebhookSubscriptionDto, UpdateWebhookSubscriptionDto } from "./dto/webhook.dto.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
 import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
@@ -85,13 +76,15 @@ export class WebhooksController {
     description: "Full secrets are returned only once, on create/rotate responses.",
   })
   @ApiResponse({ status: 200, description: "Subscriptions." })
-  async listSubscriptions(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async listSubscriptions(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const merchantId = await this.resolveMerchantId(user);
     const subscriptions = await this.webhooksService.listSubscriptions(merchantId);
-    return envelope(HttpStatus.OK, "Webhook subscriptions retrieved successfully", subscriptions, req);
+    return envelope(
+      HttpStatus.OK,
+      "Webhook subscriptions retrieved successfully",
+      subscriptions,
+      req,
+    );
   }
 
   @Post("subscriptions")
@@ -111,7 +104,12 @@ export class WebhooksController {
   ) {
     const merchantId = await this.resolveMerchantId(user);
     const subscription = await this.webhooksService.createSubscription(merchantId, dto);
-    return envelope(HttpStatus.CREATED, "Webhook subscription registered successfully", subscription, req);
+    return envelope(
+      HttpStatus.CREATED,
+      "Webhook subscription registered successfully",
+      subscription,
+      req,
+    );
   }
 
   @Patch("subscriptions/:id")

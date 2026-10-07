@@ -24,23 +24,28 @@ import {
 } from "../features/notifications/api/notifications.api";
 import { NotificationChannel, NotificationType } from "@dhruto/contracts";
 import { getApiErrorMessage } from "../lib/api-error";
+import { formatDate } from "@/lib/format";
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSmsModal, setShowSmsModal] = useState(false);
   const [testPhone, setTestPhone] = useState("01712345678");
-  const [testMessage, setTestMessage] = useState("Dhruto Express: Your order #DHR-9821 is out for delivery with rider.");
+  const [testMessage, setTestMessage] = useState(
+    "Dhruto Express: Your order #DHR-9821 is out for delivery with rider.",
+  );
   const [smsFeedback, setSmsFeedback] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: countData, refetch: refetchCount } = useGetUnreadNotificationCountQuery(undefined, {
-    pollingInterval: 15000, skipPollingIfUnfocused: true,
+    pollingInterval: 15000,
+    skipPollingIfUnfocused: true,
   });
-  const { data: notifsData, isLoading, refetch: refetchNotifs } = useGetMyNotificationsQuery(
-    { limit: 15 },
-    { skip: !isOpen },
-  );
+  const {
+    data: notifsData,
+    isLoading,
+    refetch: refetchNotifs,
+  } = useGetMyNotificationsQuery({ limit: 15 }, { skip: !isOpen });
 
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllNotificationsAsReadMutation();
@@ -48,8 +53,26 @@ export function NotificationBell() {
 
   const unreadCount = countData?.data?.unreadCount || 0;
   const rawData = notifsData?.data as
-    | { items: Array<{ id: string; title: string; message: string; channel: string; type: string; status: string; createdAt: string }> }
-    | Array<{ id: string; title: string; message: string; channel: string; type: string; status: string; createdAt: string }>
+    | {
+        items: Array<{
+          id: string;
+          title: string;
+          message: string;
+          channel: string;
+          type: string;
+          status: string;
+          createdAt: string;
+        }>;
+      }
+    | Array<{
+        id: string;
+        title: string;
+        message: string;
+        channel: string;
+        type: string;
+        status: string;
+        createdAt: string;
+      }>
     | undefined;
   const notifications = Array.isArray(rawData) ? rawData : (rawData?.items ?? []);
 
@@ -221,9 +244,7 @@ export function NotificationBell() {
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
                           {getChannelIcon(item.channel)}
-                          <span className="text-[10px] text-muted-foreground">
-                            {item.channel}
-                          </span>
+                          <span className="text-[10px] text-muted-foreground">{item.channel}</span>
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
@@ -235,12 +256,10 @@ export function NotificationBell() {
                           {new Date(item.createdAt).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
-                          })}{" "}
-                          · {new Date(item.createdAt).toLocaleDateString()}
+                          })}
+                          {""}" · {formatDate(item.createdAt)}
                         </span>
-                        {isUnread && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        )}
+                        {isUnread && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
                       </div>
                     </div>
                   </div>
@@ -304,7 +323,8 @@ export function NotificationBell() {
                   className="w-full text-sm border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <span className="text-[11px] text-muted-foreground">
-                  {testMessage.length} characters · {Math.ceil(testMessage.length / 160) || 1} SMS part(s)
+                  {testMessage.length} characters · {Math.ceil(testMessage.length / 160) || 1} SMS
+                  part(s)
                 </span>
               </div>
 

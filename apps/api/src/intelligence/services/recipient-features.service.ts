@@ -1,11 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import {
-  FEATURE_VERSION,
-  ParcelStatus,
-  type RecipientFeatureSnapshot,
-} from "@dhruto/contracts";
+import { FEATURE_VERSION, ParcelStatus, type RecipientFeatureSnapshot } from "@dhruto/contracts";
 import { Parcel } from "../../database/entities/Parcel.entity.js";
 import { DeliveryAttempt } from "../../database/entities/DeliveryAttempt.entity.js";
 import { CashLedger } from "../../database/entities/CashLedger.entity.js";
@@ -92,7 +88,8 @@ export class RecipientFeaturesService {
       for (const ledger of ledgers) {
         const parcel = parcels.find((p) => p.id === ledger.parcelId);
         const expected = parcel ? Math.round(Number(parcel.codAmount) * 100) : 0;
-        const verified = ledger.verifiedAmount != null ? Number(ledger.verifiedAmount) : Number(ledger.amount);
+        const verified =
+          ledger.verifiedAmount != null ? Number(ledger.verifiedAmount) : Number(ledger.amount);
         if (DELIVERED_STATUSES.includes(parcel?.status as ParcelStatus)) {
           codCollectedMinor += Number.isFinite(verified) ? verified : 0;
         } else if (RETURNED_STATUSES.includes(parcel?.status as ParcelStatus)) {

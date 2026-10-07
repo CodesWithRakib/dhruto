@@ -32,20 +32,10 @@ describe("BookingForm Component", () => {
       </NextIntlClientProvider>,
     );
 
-    expect(
-      screen.getByPlaceholderText("e.g. Tanvir Ahmed"),
-    ).toBeDefined();
-    expect(
-      screen.getByPlaceholderText("01712345678"),
-    ).toBeDefined();
-    expect(
-      screen.getByPlaceholderText("e.g. Dhaka"),
-    ).toBeDefined();
-    expect(
-      screen.getByPlaceholderText("e.g. Dhanmondi"),
-    ).toBeDefined();
-    expect(
-      screen.getByRole("button", { name: /Confirm Booking/i }),
-    ).toBeDefined();
+    expect(screen.getByPlaceholderText("e.g. Tanvir Ahmed")).toBeDefined();
+    expect(screen.getByPlaceholderText("01712345678")).toBeDefined();
+    expect(screen.getByPlaceholderText("e.g. Dhaka")).toBeDefined();
+    expect(screen.getByPlaceholderText("e.g. Dhanmondi")).toBeDefined();
+    expect(screen.getByRole("button", { name: /Confirm Booking/i })).toBeDefined();
   });
 });

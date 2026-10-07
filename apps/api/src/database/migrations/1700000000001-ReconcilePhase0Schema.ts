@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Converts a database whose schema was created by the Phase 0 TypeORM
@@ -9,7 +9,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * database without dropping data.
  */
 export class ReconcilePhase0Schema1700000000001 implements MigrationInterface {
-  name = 'ReconcilePhase0Schema1700000000001';
+  name = "ReconcilePhase0Schema1700000000001";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 1. parcel_status_histories: rename the audit columns to the documented
@@ -105,12 +105,8 @@ export class ReconcilePhase0Schema1700000000001 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `DROP INDEX IF EXISTS "IDX_badd75f47a7cdc7d27d3204cf0"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX IF EXISTS "IDX_b625f677dcb5849d72445365e9"`,
-    );
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_badd75f47a7cdc7d27d3204cf0"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_b625f677dcb5849d72445365e9"`);
 
     await queryRunner.query(`
       ALTER TABLE "idempotency_records"
@@ -127,7 +123,9 @@ export class ReconcilePhase0Schema1700000000001 implements MigrationInterface {
         DROP COLUMN IF EXISTS "parcel_description";
     `);
 
-    await queryRunner.query(`ALTER TABLE "parcel_status_histories" DROP COLUMN IF EXISTS "event_type"`);
+    await queryRunner.query(
+      `ALTER TABLE "parcel_status_histories" DROP COLUMN IF EXISTS "event_type"`,
+    );
 
     await queryRunner.query(`
       DO $$ BEGIN

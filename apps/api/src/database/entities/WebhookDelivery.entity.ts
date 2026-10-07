@@ -1,62 +1,62 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { BaseEntity } from './Base.entity';
-import { WebhookSubscription } from './WebhookSubscription.entity';
-import { WebhookDeliveryStatus } from '@dhruto/contracts';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from "typeorm";
+import { BaseEntity } from "./Base.entity";
+import { WebhookSubscription } from "./WebhookSubscription.entity";
+import { WebhookDeliveryStatus } from "@dhruto/contracts";
 
 export { WebhookDeliveryStatus };
 
-@Entity('webhook_deliveries')
-@Index(['subscriptionId', 'createdAt'])
-@Index(['merchantId', 'createdAt'])
+@Entity("webhook_deliveries")
+@Index(["subscriptionId", "createdAt"])
+@Index(["merchantId", "createdAt"])
 export class WebhookDelivery extends BaseEntity {
-  @Column({ name: 'subscription_id', type: 'uuid' })
+  @Column({ name: "subscription_id", type: "uuid" })
   subscriptionId: string;
 
-  @ManyToOne(() => WebhookSubscription, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'subscription_id' })
+  @ManyToOne(() => WebhookSubscription, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "subscription_id" })
   subscription: WebhookSubscription;
 
-  @Column({ name: 'merchant_id', type: 'uuid' })
+  @Column({ name: "merchant_id", type: "uuid" })
   merchantId: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: "varchar", length: 100 })
   event: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: "jsonb" })
   payload: Record<string, unknown>;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: "varchar", length: 255 })
   signature: string;
 
   /**
    * Source outbox event for cross-system dedup. Null for ad-hoc ping/test
    * deliveries, which are never deduplicated.
    */
-  @Column({ name: 'event_id', type: 'uuid', nullable: true })
+  @Column({ name: "event_id", type: "uuid", nullable: true })
   eventId: string | null;
 
-  @Column({ name: 'status_code', type: 'int', nullable: true })
+  @Column({ name: "status_code", type: "int", nullable: true })
   statusCode: number | null;
 
-  @Column({ name: 'response_body', type: 'text', nullable: true })
+  @Column({ name: "response_body", type: "text", nullable: true })
   responseBody: string | null;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: WebhookDeliveryStatus,
     default: WebhookDeliveryStatus.PENDING,
   })
   status: WebhookDeliveryStatus;
 
-  @Column({ name: 'attempt_count', type: 'int', default: 1 })
+  @Column({ name: "attempt_count", type: "int", default: 1 })
   attemptCount: number;
 
-  @Column({ name: 'next_retry_at', type: 'timestamptz', nullable: true })
+  @Column({ name: "next_retry_at", type: "timestamptz", nullable: true })
   nextRetryAt: Date | null;
 
-  @Column({ name: 'last_attempt_at', type: 'timestamptz', nullable: true })
+  @Column({ name: "last_attempt_at", type: "timestamptz", nullable: true })
   lastAttemptAt: Date | null;
 
-  @Column({ name: 'delivered_at', type: 'timestamptz', nullable: true })
+  @Column({ name: "delivered_at", type: "timestamptz", nullable: true })
   deliveredAt: Date | null;
 }

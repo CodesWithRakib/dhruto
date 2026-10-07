@@ -202,13 +202,23 @@ export class AddressIntelligenceService {
 
     // Stage 6: confidence 0..1 from evidence (no fake precision — 2dp).
     const evidence: number[] = [];
-    if (district) evidence.push(districtMethod === AddressMatchMethod.EXACT ? 0.5 : districtMethod === AddressMatchMethod.ALIAS ? 0.45 : 0.25);
+    if (district)
+      evidence.push(
+        districtMethod === AddressMatchMethod.EXACT
+          ? 0.5
+          : districtMethod === AddressMatchMethod.ALIAS
+            ? 0.45
+            : 0.25,
+      );
     else evidence.push(0.05);
     if (thana) evidence.push(thanaMethod === AddressMatchMethod.FUZZY ? 0.28 : 0.35);
     else evidence.push(0.05);
     if (postalCode) evidence.push(0.1);
     if (/\b(house|road|sector|block|lane|flat|holding)\b/.test(normalized)) evidence.push(0.05);
-    let confidence = Math.min(1, evidence.reduce((a, b) => a + b, 0));
+    let confidence = Math.min(
+      1,
+      evidence.reduce((a, b) => a + b, 0),
+    );
     if (hasConflict) confidence = Math.max(0, confidence - 0.2);
     if (!district) confidence = Math.min(confidence, 0.3);
     confidence = Math.round(confidence * 100) / 100;
@@ -228,7 +238,10 @@ export class AddressIntelligenceService {
         hasConflict,
       });
     }
-    for (const hit of otherDistrictThanas.slice(0, Math.max(0, maxCandidates - candidates.length))) {
+    for (const hit of otherDistrictThanas.slice(
+      0,
+      Math.max(0, maxCandidates - candidates.length),
+    )) {
       const alt = districts[hit.districtIdx];
       const altThana = alt?.thanas[hit.thanaIdx];
       if (!alt) continue;

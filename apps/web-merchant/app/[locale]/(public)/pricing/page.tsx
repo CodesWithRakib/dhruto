@@ -23,9 +23,7 @@ export default async function PricingPage() {
         {items.map((item) => (
           <li key={item.title} className="rounded-lg border border-border bg-surface p-5">
             <h2 className="text-h4 text-foreground">{item.title}</h2>
-            <p className="mt-1 text-body text-muted-foreground text-pretty">
-              {item.description}
-            </p>
+            <p className="mt-1 text-body text-muted-foreground text-pretty">{item.description}</p>
           </li>
         ))}
       </ul>

@@ -1,5 +1,5 @@
-import { Entity, Column, Index } from 'typeorm';
-import { BaseEntity } from './Base.entity.js';
+import { Entity, Column, Index } from "typeorm";
+import { BaseEntity } from "./Base.entity.js";
 
 /**
  * Auditable human confirmation of a parse result.
@@ -8,27 +8,27 @@ import { BaseEntity } from './Base.entity.js';
  * when, and from which source. Manual corrections store the confirmed
  * structure here — never by overwriting `originalAddress`.
  */
-@Entity('address_confirmations')
-@Index(['parseId'])
+@Entity("address_confirmations")
+@Index(["parseId"])
 export class AddressConfirmation extends BaseEntity {
-  @Column({ name: 'parse_id', type: 'uuid' })
+  @Column({ name: "parse_id", type: "uuid" })
   parseId: string;
 
-  @Column({ name: 'parcel_id', type: 'uuid', nullable: true })
+  @Column({ name: "parcel_id", type: "uuid", nullable: true })
   parcelId: string | null;
 
-  @Column({ name: 'confirmed_by', type: 'uuid' })
+  @Column({ name: "confirmed_by", type: "uuid" })
   confirmedBy: string;
 
-  @Column({ name: 'confirmation_source', type: 'varchar', length: 16 })
+  @Column({ name: "confirmation_source", type: "varchar", length: 16 })
   confirmationSource: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: "jsonb" })
   structure: Record<string, unknown>;
 
-  @Column({ name: 'candidate_index', type: 'int', nullable: true })
+  @Column({ name: "candidate_index", type: "int", nullable: true })
   candidateIndex: number | null;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: "varchar", length: 500, nullable: true })
   reason: string | null;
 }

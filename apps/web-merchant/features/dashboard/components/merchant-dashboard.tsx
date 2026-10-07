@@ -184,9 +184,7 @@ export function MerchantDashboard() {
         accessorKey: "district",
         header: t("colDestination"),
         cell: ({ row }) => (
-          <span className="text-body-sm text-muted-foreground">
-            {row.original.district || "—"}
-          </span>
+          <span className="text-body-sm text-muted-foreground">{row.original.district || "—"}</span>
         ),
       },
       {

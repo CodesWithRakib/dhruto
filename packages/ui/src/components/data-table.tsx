@@ -1,25 +1,18 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
   PaginationState,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './table.js';
-import { Button } from './button.js';
-import { Search, X, Loader2, AlertCircle, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '../lib/utils.js';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table.js";
+import { Button } from "./button.js";
+import { Search, X, Loader2, AlertCircle, Inbox, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "../lib/utils.js";
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -60,11 +53,11 @@ export function DataTable<TData, TValue>({
   isLoading = false,
   isError = false,
   onRetry,
-  emptyMessage = 'No records found',
-  errorMessage = 'Failed to load records',
+  emptyMessage = "No records found",
+  errorMessage = "Failed to load records",
   search,
   onSearchChange,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = "Search...",
   isSearching = false,
   filterSlot,
   actionSlot,
@@ -87,7 +80,12 @@ export function DataTable<TData, TValue>({
   const totalPages = Math.max(1, pageCount || Math.ceil(effectiveTotalItems / itemsPerPage));
 
   return (
-    <div className={cn('w-full rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5', className)}>
+    <div
+      className={cn(
+        "w-full rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5",
+        className,
+      )}
+    >
       {/* Top Filters & Actions Toolbar */}
       {hasToolbar && (
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -97,17 +95,19 @@ export function DataTable<TData, TValue>({
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  value={search ?? ''}
+                  value={search ?? ""}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder={searchPlaceholder}
                   className="h-10 w-full rounded-md border border-input bg-background pl-9 pr-8 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
-                  {isSearching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  {isSearching && (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
                   {search && (
                     <button
                       type="button"
-                      onClick={() => onSearchChange('')}
+                      onClick={() => onSearchChange("")}
                       className="rounded p-0.5 text-muted-foreground hover:text-foreground"
                       aria-label="Clear search"
                     >
@@ -172,12 +172,7 @@ export function DataTable<TData, TValue>({
                       <AlertCircle className="h-6 w-6 opacity-80" />
                       <p className="text-body-sm font-medium">{errorMessage}</p>
                       {onRetry && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={onRetry}
-                          className="mt-1"
-                        >
+                        <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
                           Try again
                         </Button>
                       )}
@@ -186,15 +181,9 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="transition-colors hover:bg-surface-muted/50"
-                  >
+                  <TableRow key={row.id} className="transition-colors hover:bg-surface-muted/50">
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="px-4 py-3 text-body-sm text-foreground"
-                      >
+                      <TableCell key={cell.id} className="px-4 py-3 text-body-sm text-foreground">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -220,14 +209,14 @@ export function DataTable<TData, TValue>({
         <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex flex-wrap items-center gap-2 text-caption text-muted-foreground">
             <span>
-              Showing{' '}
+              Showing{" "}
               <span className="font-semibold text-foreground">
                 {Math.min(effectiveTotalItems, (currentPage - 1) * itemsPerPage + 1)}
-              </span>{' '}
-              to{' '}
+              </span>{" "}
+              to{" "}
               <span className="font-semibold text-foreground">
                 {Math.min(effectiveTotalItems, currentPage * itemsPerPage)}
-              </span>{' '}
+              </span>{" "}
               of <span className="font-semibold text-foreground">{effectiveTotalItems}</span> items
             </span>
             {onLimitChange && (

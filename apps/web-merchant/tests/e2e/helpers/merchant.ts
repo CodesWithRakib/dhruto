@@ -6,8 +6,7 @@ export const SEEDED_MERCHANT = {
   password: "dhruto123",
 };
 
-export const API_BASE_URL =
-  process.env.PLAYWRIGHT_API_URL || "http://localhost:4000/api/v1";
+export const API_BASE_URL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4000/api/v1";
 
 /** Signs a merchant in through the real login form and waits for the dashboard. */
 export async function loginAsMerchant(page: Page): Promise<void> {
@@ -108,7 +107,14 @@ export async function createParcelViaApi(
 export async function authedApi(
   request: APIRequestContext,
   token: string,
-): Promise<{ get: (path: string) => Promise<import("@playwright/test").APIResponse>; post: (path: string, data: unknown, headers?: Record<string, string>) => Promise<import("@playwright/test").APIResponse> }> {
+): Promise<{
+  get: (path: string) => Promise<import("@playwright/test").APIResponse>;
+  post: (
+    path: string,
+    data: unknown,
+    headers?: Record<string, string>,
+  ) => Promise<import("@playwright/test").APIResponse>;
+}> {
   const headers = { Authorization: `Bearer ${token}` };
   return {
     get: (path) => request.get(`${API_BASE_URL}${path}`, { headers }),

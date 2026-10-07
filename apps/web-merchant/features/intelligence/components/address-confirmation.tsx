@@ -4,10 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Loader2, MapPin, AlertTriangle } from "lucide-react";
 import { Button, Card, Badge } from "@dhruto/ui";
-import {
-  useParseAddressV2Mutation,
-  useConfirmAddressMutation,
-} from "../api/intelligence.api";
+import { useParseAddressV2Mutation, useConfirmAddressMutation } from "../api/intelligence.api";
 import type { AddressParseV2Result } from "@dhruto/contracts";
 import { getApiErrorMessage } from "@/lib/api-error";
 
@@ -39,7 +36,11 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
     setConfirmed(false);
     setSelected(null);
     try {
-      const res = await parse({ rawAddress: raw, includeCandidates: true, maxCandidates: 5 }).unwrap();
+      const res = await parse({
+        rawAddress: raw,
+        includeCandidates: true,
+        maxCandidates: 5,
+      }).unwrap();
       if (res.data) setResult(res.data);
     } catch (err) {
       setError(getApiErrorMessage(err, t("parseFailed")));
@@ -70,7 +71,10 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
         <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
         <h3 className="text-sm font-semibold">{t("title")}</h3>
         {result && (
-          <Badge variant={result.requiresConfirmation ? "secondary" : "default"} className="ml-auto">
+          <Badge
+            variant={result.requiresConfirmation ? "secondary" : "default"}
+            className="ml-auto"
+          >
             {t("confidence", { score: confidencePct })}
           </Badge>
         )}
@@ -88,14 +92,22 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
           aria-label={t("placeholder")}
           className="h-10 flex-1 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
-        <Button size="sm" className="h-10" disabled={isParsing || input.trim().length < 3} onClick={() => handleParse()}>
+        <Button
+          size="sm"
+          className="h-10"
+          disabled={isParsing || input.trim().length < 3}
+          onClick={() => handleParse()}
+        >
           {isParsing && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
           {t("parse")}
         </Button>
       </div>
 
       {error && (
-        <div role="alert" className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground">
+        <div
+          role="alert"
+          className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
+        >
           {error}
         </div>
       )}
@@ -103,7 +115,10 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
       {result && (
         <div className="space-y-3">
           {result.hasConflict && (
-            <div role="alert" className="flex items-start gap-2 rounded-lg border border-warning bg-warning-soft px-3 py-2 text-xs text-warning-soft-foreground">
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-lg border border-warning bg-warning-soft px-3 py-2 text-xs text-warning-soft-foreground"
+            >
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span>{result.conflictDetail ?? t("conflictHint")}</span>
             </div>
@@ -127,14 +142,18 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
                       }
                     }}
                     className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-                      selected === i ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                      selected === i
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:bg-muted/50"
                     }`}
                   >
                     <span>
                       <span className="font-medium">{c.district}</span>
                       {c.thana && <span className="text-muted-foreground"> · {c.thana}</span>}
                       {c.division && (
-                        <span className="block text-[11px] text-muted-foreground">{c.division}</span>
+                        <span className="block text-[11px] text-muted-foreground">
+                          {c.division}
+                        </span>
                       )}
                     </span>
                     <Badge variant="outline" className="shrink-0 font-mono text-[11px]">

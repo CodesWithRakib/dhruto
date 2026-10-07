@@ -1,15 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { Test, type TestingModule } from '@nestjs/testing';
-import { type INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module.js';
-import { BagStatus, HubScanType, ParcelStatus, ScanOutcome } from '@dhruto/contracts';
-import {
-  SEEDED_ACCOUNTS,
-  bearer,
-  idempotencyKey,
-  loginToken,
-} from './utils/auth.js';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { Test, type TestingModule } from "@nestjs/testing";
+import { type INestApplication } from "@nestjs/common";
+import request from "supertest";
+import { AppModule } from "../src/app.module.js";
+import { BagStatus, HubScanType, ParcelStatus, ScanOutcome } from "@dhruto/contracts";
+import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 /**
  * Phase 2 hub operations, end-to-end against the real database and the real
@@ -19,7 +14,7 @@ import {
  * receive) and the security boundaries (cross-hub isolation, unauthenticated
  * and merchant access, sealed-bag immutability, duplicate operations).
  */
-describe('Hub Operations (Phase 2 E2E)', () => {
+describe("Hub Operations (Phase 2 E2E)", () => {
   let app: INestApplication;
   let merchantToken: string;
   let dhkToken: string;
@@ -35,7 +30,7 @@ describe('Hub Operations (Phase 2 E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('api/v1');
+    app.setGlobalPrefix("api/v1");
     await app.init();
 
     [merchantToken, dhkToken, ctgToken] = await Promise.all([
@@ -45,18 +40,16 @@ describe('Hub Operations (Phase 2 E2E)', () => {
     ]);
 
     const dhk = await request(app.getHttpServer())
-      .get('/api/v1/hubs')
+      .get("/api/v1/hubs")
       .set(bearer(dhkToken))
       .expect(200);
     dhkHubId = dhk.body.data[0].id;
 
     const destinations = await request(app.getHttpServer())
-      .get('/api/v1/hubs/destinations')
+      .get("/api/v1/hubs/destinations")
       .set(bearer(dhkToken))
       .expect(200);
-    ctgHubId = destinations.body.data.find(
-      (hub: { code: string }) => hub.code === 'HUB-CTG-01',
-    ).id;
+    ctgHubId = destinations.body.data.find((hub: { code: string }) => hub.code === "HUB-CTG-01").id;
   });
 
   afterAll(async () => {
@@ -67,15 +60,15 @@ describe('Hub Operations (Phase 2 E2E)', () => {
 
   async function bookParcel(): Promise<{ id: string; trackingCode: string }> {
     const res = await request(app.getHttpServer())
-      .post('/api/v1/parcels')
+      .post("/api/v1/parcels")
       .set(bearer(merchantToken))
-      .set('Idempotency-Key', idempotencyKey('phase2'))
+      .set("Idempotency-Key", idempotencyKey("phase2"))
       .send({
         recipientName: `Hub Recipient ${unique()}`,
-        recipientPhone: '01712345678',
-        district: 'Chittagong',
-        thana: 'Panchlaish',
-        deliveryAddress: 'GEC Circle, Nasirabad, Chittagong',
+        recipientPhone: "01712345678",
+        district: "Chittagong",
+        thana: "Panchlaish",
+        deliveryAddress: "GEC Circle, Nasirabad, Chittagong",
         codAmount: 1200,
         weight: 1,
       })
@@ -84,43 +77,37 @@ describe('Hub Operations (Phase 2 E2E)', () => {
     return { id: res.body.data.id, trackingCode: res.body.data.trackingCode };
   }
 
-  describe('Authorization', () => {
-    it('rejects anonymous access to hub endpoints', async () => {
-      await request(app.getHttpServer()).get('/api/v1/hubs').expect(401);
-      await request(app.getHttpServer()).get('/api/v1/bags').expect(401);
-      await request(app.getHttpServer()).get('/api/v1/exceptions').expect(401);
+  describe("Authorization", () => {
+    it("rejects anonymous access to hub endpoints", async () => {
+      await request(app.getHttpServer()).get("/api/v1/hubs").expect(401);
+      await request(app.getHttpServer()).get("/api/v1/bags").expect(401);
+      await request(app.getHttpServer()).get("/api/v1/exceptions").expect(401);
     });
 
-    it('rejects a merchant from hub operations', async () => {
-      await request(app.getHttpServer())
-        .get('/api/v1/hubs')
-        .set(bearer(merchantToken))
-        .expect(403);
-      await request(app.getHttpServer())
-        .get('/api/v1/bags')
-        .set(bearer(merchantToken))
-        .expect(403);
+    it("rejects a merchant from hub operations", async () => {
+      await request(app.getHttpServer()).get("/api/v1/hubs").set(bearer(merchantToken)).expect(403);
+      await request(app.getHttpServer()).get("/api/v1/bags").set(bearer(merchantToken)).expect(403);
     });
 
-    it('scopes a hub operator to their own hub', async () => {
+    it("scopes a hub operator to their own hub", async () => {
       const res = await request(app.getHttpServer())
-        .get('/api/v1/hubs')
+        .get("/api/v1/hubs")
         .set(bearer(dhkToken))
         .expect(200);
 
       expect(res.body.data).toHaveLength(1);
-      expect(res.body.data[0].code).toBe('HUB-DHK-01');
+      expect(res.body.data[0].code).toBe("HUB-DHK-01");
 
       // Cross-hub reads are refused.
       await request(app.getHttpServer())
-        .get('/api/v1/hubs/HUB-CTG-01/dashboard')
+        .get("/api/v1/hubs/HUB-CTG-01/dashboard")
         .set(bearer(dhkToken))
         .expect(403);
     });
   });
 
-  describe('Inbound scanning', () => {
-    it('receives a parcel and records exactly one applied scan', async () => {
+  describe("Inbound scanning", () => {
+    it("receives a parcel and records exactly one applied scan", async () => {
       const parcel = await bookParcel();
 
       const scan = await request(app.getHttpServer())
@@ -147,21 +134,20 @@ describe('Hub Operations (Phase 2 E2E)', () => {
 
       const applied = scans.body.data.filter(
         (row: { trackingCode: string; outcome: string }) =>
-          row.trackingCode === parcel.trackingCode &&
-          row.outcome === ScanOutcome.APPLIED,
+          row.trackingCode === parcel.trackingCode && row.outcome === ScanOutcome.APPLIED,
       );
       expect(applied).toHaveLength(1);
     });
 
-    it('rejects an unknown barcode', async () => {
+    it("rejects an unknown barcode", async () => {
       await request(app.getHttpServer())
         .post(`/api/v1/hubs/${dhkHubId}/scans`)
         .set(bearer(dhkToken))
-        .send({ barcode: 'DHR-20260101-ZZZZZZ', scanType: HubScanType.RECEIVE_INBOUND })
+        .send({ barcode: "DHR-20260101-ZZZZZZ", scanType: HubScanType.RECEIVE_INBOUND })
         .expect(404);
     });
 
-    it('serializes concurrent scans of the same parcel', async () => {
+    it("serializes concurrent scans of the same parcel", async () => {
       const parcel = await bookParcel();
 
       const [a, b] = await Promise.all([
@@ -185,15 +171,14 @@ describe('Hub Operations (Phase 2 E2E)', () => {
 
       const applied = scans.body.data.filter(
         (row: { trackingCode: string; outcome: string }) =>
-          row.trackingCode === parcel.trackingCode &&
-          row.outcome === ScanOutcome.APPLIED,
+          row.trackingCode === parcel.trackingCode && row.outcome === ScanOutcome.APPLIED,
       );
       expect(applied).toHaveLength(1);
     });
   });
 
-  describe('Bagging', () => {
-    it('bags a parcel, seals the bag and freezes membership', async () => {
+  describe("Bagging", () => {
+    it("bags a parcel, seals the bag and freezes membership", async () => {
       const parcel = await bookParcel();
 
       await request(app.getHttpServer())
@@ -240,7 +225,7 @@ describe('Hub Operations (Phase 2 E2E)', () => {
         .expect(400);
     });
 
-    it('serializes two operators bagging the same parcel into different bags', async () => {
+    it("serializes two operators bagging the same parcel into different bags", async () => {
       const parcel = await bookParcel();
 
       await request(app.getHttpServer())
@@ -290,8 +275,8 @@ describe('Hub Operations (Phase 2 E2E)', () => {
     });
   });
 
-  describe('Manifest dispatch and receive', () => {
-    it('dispatches a manifest and receives it at the destination hub', async () => {
+  describe("Manifest dispatch and receive", () => {
+    it("dispatches a manifest and receives it at the destination hub", async () => {
       const parcel = await bookParcel();
 
       await request(app.getHttpServer())
@@ -335,7 +320,7 @@ describe('Hub Operations (Phase 2 E2E)', () => {
         .post(`/api/v1/manifests/${manifestId}/dispatch`)
         .set(bearer(dhkToken))
         .expect(200);
-      expect(dispatched.body.data.status).toBe('DISPATCHED');
+      expect(dispatched.body.data.status).toBe("DISPATCHED");
 
       // Only one operator may dispatch.
       await request(app.getHttpServer())
@@ -358,13 +343,11 @@ describe('Hub Operations (Phase 2 E2E)', () => {
         .expect(400);
 
       const exceptions = await request(app.getHttpServer())
-        .get('/api/v1/exceptions?status=OPEN')
+        .get("/api/v1/exceptions?status=OPEN")
         .set(bearer(ctgToken))
         .expect(200);
       expect(
-        exceptions.body.data.some(
-          (row: { type: string }) => row.type === 'UNEXPECTED_BAG',
-        ),
+        exceptions.body.data.some((row: { type: string }) => row.type === "UNEXPECTED_BAG"),
       ).toBe(true);
 
       // A missing bag blocks completion unless a partial receipt is allowed.
@@ -379,7 +362,7 @@ describe('Hub Operations (Phase 2 E2E)', () => {
         .set(bearer(ctgToken))
         .send({ scannedBagCodes: [bagCode] })
         .expect(200);
-      expect(received.body.data.status).toBe('RECEIVED');
+      expect(received.body.data.status).toBe("RECEIVED");
 
       // Parcel arrived and its history records the full chain.
       const detail = await request(app.getHttpServer())
@@ -389,11 +372,13 @@ describe('Hub Operations (Phase 2 E2E)', () => {
       expect(detail.body.data.status).toBe(ParcelStatus.DESTINATION_HUB_RECEIVED);
 
       const chain = detail.body.data.history
-        .map((h: { fromStatus: string | null; toStatus: string }) => `${h.fromStatus}->${h.toStatus}`)
-        .join(',');
-      expect(chain).toContain('ORIGIN_HUB_RECEIVED->BAGGED');
-      expect(chain).toContain('BAGGED->IN_TRANSIT');
-      expect(chain).toContain('IN_TRANSIT->DESTINATION_HUB_RECEIVED');
+        .map(
+          (h: { fromStatus: string | null; toStatus: string }) => `${h.fromStatus}->${h.toStatus}`,
+        )
+        .join(",");
+      expect(chain).toContain("ORIGIN_HUB_RECEIVED->BAGGED");
+      expect(chain).toContain("BAGGED->IN_TRANSIT");
+      expect(chain).toContain("IN_TRANSIT->DESTINATION_HUB_RECEIVED");
     });
   });
 });

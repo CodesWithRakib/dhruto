@@ -4,7 +4,8 @@ import { LoginForm } from "@/features/auth/components/login-form";
 export const metadata = {
   robots: { index: false, follow: false },
   title: "Merchant Sign In — Dhruto",
-  description: "Sign in to Dhruto Merchant Portal to manage your express shipments and COD payouts.",
+  description:
+    "Sign in to Dhruto Merchant Portal to manage your express shipments and COD payouts.",
 };
 
 export default function LoginPage() {

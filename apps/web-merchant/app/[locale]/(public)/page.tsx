@@ -42,12 +42,12 @@ export default async function HomePage() {
             {/* Left Content */}
             <div className="space-y-6 text-left">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50 px-4 py-1.5 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-4 py-1.5">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
                 </span>
-                <span className="text-xs sm:text-sm font-semibold text-emerald-800">
+                <span className="text-xs sm:text-sm font-semibold text-success">
                   {t("hero.eyebrow")}
                 </span>
               </div>
@@ -70,13 +70,17 @@ export default async function HomePage() {
               {/* CTAs */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Link href="/register">
-                  <Button size="lg" className="h-12 px-6 rounded-md text-base font-semibold shadow-md">
+                  <Button size="lg" className="h-12 px-6 rounded-md text-base font-semibold">
                     {t("hero.ctaPrimary")}
                     <ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" />
                   </Button>
                 </Link>
                 <a href="#how-it-works">
-                  <Button size="lg" variant="outline" className="h-12 px-6 rounded-md text-base font-medium">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-6 rounded-md text-base font-medium"
+                  >
                     <Play className="h-4 w-4 mr-2 fill-current" />
                     {t("hero.ctaSecondary")}
                   </Button>

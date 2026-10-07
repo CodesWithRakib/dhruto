@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcryptjs";
 
 import {
   User,
@@ -20,34 +20,31 @@ import {
   FinancialTransaction,
   FinancialEntry,
   WebhookSubscription,
-} from '../entities/index.js';
+} from "../entities/index.js";
 
-import { SEED_HUB_ASSIGNMENTS, SEED_HUBS } from './seed-hubs.data.js';
-import { SEED_USERS } from './seed-users.data.js';
-import { SEED_MERCHANTS } from './seed-merchants.data.js';
-import { SEED_RIDERS } from './seed-riders.data.js';
-import { SEED_WALLETS } from './seed-wallets.data.js';
-import { SEED_PARCELS } from './seed-parcels.data.js';
+import { SEED_HUB_ASSIGNMENTS, SEED_HUBS } from "./seed-hubs.data.js";
+import { SEED_USERS } from "./seed-users.data.js";
+import { SEED_MERCHANTS } from "./seed-merchants.data.js";
+import { SEED_RIDERS } from "./seed-riders.data.js";
+import { SEED_WALLETS } from "./seed-wallets.data.js";
+import { SEED_PARCELS } from "./seed-parcels.data.js";
 import {
   SEED_CASH_LEDGERS,
   SEED_WALLET_TRANSACTIONS,
   SEED_PAYOUT_REQUESTS,
-} from './seed-finance.data.js';
-import { SEED_NOTIFICATIONS } from './seed-notifications.data.js';
-import { SEED_WEBHOOK_SUBSCRIPTIONS } from './seed-webhooks.data.js';
-import {
-  SEED_INTELLIGENCE_PARCELS,
-  SEED_INTELLIGENCE_ATTEMPTS,
-} from './seed-intelligence.data.js';
+} from "./seed-finance.data.js";
+import { SEED_NOTIFICATIONS } from "./seed-notifications.data.js";
+import { SEED_WEBHOOK_SUBSCRIPTIONS } from "./seed-webhooks.data.js";
+import { SEED_INTELLIGENCE_PARCELS, SEED_INTELLIGENCE_ATTEMPTS } from "./seed-intelligence.data.js";
 import {
   ParcelStatus,
   FinancialTransactionType,
   FinancialTransactionStatus,
   FinancialAccount,
   EntryDirection,
-} from '@dhruto/contracts';
-import { GeoDataService } from '../../intelligence/services/geo-data.service.js';
-import { ModelRegistryService } from '../../intelligence/services/model-registry.service.js';
+} from "@dhruto/contracts";
+import { GeoDataService } from "../../intelligence/services/geo-data.service.js";
+import { ModelRegistryService } from "../../intelligence/services/model-registry.service.js";
 
 @Injectable()
 export class SeederService {
@@ -91,10 +88,10 @@ export class SeederService {
   ) {}
 
   async seed() {
-    this.logger.log('Starting deterministic production database seeding...');
+    this.logger.log("Starting deterministic production database seeding...");
     const stats: Record<string, number> = {};
 
-    const defaultPasswordHash = await bcrypt.hash('dhruto123', 10);
+    const defaultPasswordHash = await bcrypt.hash("dhruto123", 10);
 
     // 1. Seed Hubs
     const hubMap = new Map<string, Hub>();
@@ -280,7 +277,7 @@ export class SeederService {
           normalizedAddress: {
             district: pData.district,
             thana: pData.thana,
-            division: 'Dhaka',
+            division: "Dhaka",
             formattedAddress: pData.rawAddress,
           },
           weight: pData.weight,
@@ -310,14 +307,20 @@ export class SeederService {
       // Ensure chronological history events
       const existingHistory = await this.statusHistoryRepo.find({ where: { parcelId: parcel.id } });
       if (existingHistory.length === 0) {
-        const historySteps: { toStatus: ParcelStatus; fromStatus: ParcelStatus | null; role: string; reason: string; hoursAgo: number }[] = [];
+        const historySteps: {
+          toStatus: ParcelStatus;
+          fromStatus: ParcelStatus | null;
+          role: string;
+          reason: string;
+          hoursAgo: number;
+        }[] = [];
 
         // Always started with CREATED
         historySteps.push({
           toStatus: ParcelStatus.CREATED,
           fromStatus: null,
-          role: 'MERCHANT',
-          reason: 'Shipment booked via merchant portal',
+          role: "MERCHANT",
+          reason: "Shipment booked via merchant portal",
           hoursAgo: pData.createdAtOffsetHours,
         });
 
@@ -325,49 +328,57 @@ export class SeederService {
           historySteps.push({
             toStatus: ParcelStatus.ASSIGNED_TO_RIDER,
             fromStatus: ParcelStatus.CREATED,
-            role: 'HUB_MANAGER',
-            reason: 'Pickup rider assigned for collection',
+            role: "HUB_MANAGER",
+            reason: "Pickup rider assigned for collection",
             hoursAgo: Math.max(1, pData.createdAtOffsetHours - 1),
           });
           historySteps.push({
             toStatus: ParcelStatus.PICKED_UP,
             fromStatus: ParcelStatus.ASSIGNED_TO_RIDER,
-            role: 'RIDER',
-            reason: 'Parcel collected from merchant warehouse',
+            role: "RIDER",
+            reason: "Parcel collected from merchant warehouse",
             hoursAgo: Math.max(1, pData.createdAtOffsetHours - 2),
           });
           historySteps.push({
             toStatus: ParcelStatus.ORIGIN_HUB_RECEIVED,
             fromStatus: ParcelStatus.PICKED_UP,
-            role: 'HUB_MANAGER',
-            reason: 'Inbound scanning completed at sorting hub',
+            role: "HUB_MANAGER",
+            reason: "Inbound scanning completed at sorting hub",
             hoursAgo: Math.max(1, pData.createdAtOffsetHours - 3),
           });
         }
 
-        if (pData.status === ParcelStatus.IN_TRANSIT || pData.status === ParcelStatus.DESTINATION_HUB_RECEIVED || pData.status === ParcelStatus.OUT_FOR_DELIVERY || pData.status === ParcelStatus.DELIVERED) {
+        if (
+          pData.status === ParcelStatus.IN_TRANSIT ||
+          pData.status === ParcelStatus.DESTINATION_HUB_RECEIVED ||
+          pData.status === ParcelStatus.OUT_FOR_DELIVERY ||
+          pData.status === ParcelStatus.DELIVERED
+        ) {
           historySteps.push({
             toStatus: ParcelStatus.IN_TRANSIT,
             fromStatus: ParcelStatus.ORIGIN_HUB_RECEIVED,
-            role: 'HUB_MANAGER',
-            reason: 'Consolidated into manifest dispatch vehicle',
+            role: "HUB_MANAGER",
+            reason: "Consolidated into manifest dispatch vehicle",
             hoursAgo: Math.max(1, pData.createdAtOffsetHours - 5),
           });
           historySteps.push({
             toStatus: ParcelStatus.DESTINATION_HUB_RECEIVED,
             fromStatus: ParcelStatus.IN_TRANSIT,
-            role: 'HUB_MANAGER',
-            reason: 'Received and verified at local destination hub',
+            role: "HUB_MANAGER",
+            reason: "Received and verified at local destination hub",
             hoursAgo: Math.max(1, pData.createdAtOffsetHours - 7),
           });
         }
 
-        if (pData.status === ParcelStatus.OUT_FOR_DELIVERY || pData.status === ParcelStatus.DELIVERED) {
+        if (
+          pData.status === ParcelStatus.OUT_FOR_DELIVERY ||
+          pData.status === ParcelStatus.DELIVERED
+        ) {
           historySteps.push({
             toStatus: ParcelStatus.OUT_FOR_DELIVERY,
             fromStatus: ParcelStatus.DESTINATION_HUB_RECEIVED,
-            role: 'RIDER',
-            reason: 'Assigned to delivery run with OTP verification',
+            role: "RIDER",
+            reason: "Assigned to delivery run with OTP verification",
             hoursAgo: Math.max(1, pData.createdAtOffsetHours - 9),
           });
         }
@@ -376,8 +387,8 @@ export class SeederService {
           historySteps.push({
             toStatus: ParcelStatus.DELIVERED,
             fromStatus: ParcelStatus.OUT_FOR_DELIVERY,
-            role: 'RIDER',
-            reason: 'Delivered to recipient. Cash collected.',
+            role: "RIDER",
+            reason: "Delivered to recipient. Cash collected.",
             hoursAgo: Math.max(0.5, pData.createdAtOffsetHours - 10),
           });
         }
@@ -387,7 +398,7 @@ export class SeederService {
             parcelId: parcel.id,
             fromStatus: step.fromStatus,
             toStatus: step.toStatus,
-            eventType: step.fromStatus === null ? 'PARCEL_CREATED' : 'STATUS_CHANGED',
+            eventType: step.fromStatus === null ? "PARCEL_CREATED" : "STATUS_CHANGED",
             actorId: merchant.userId,
             actorRole: step.role,
             description: step.reason,
@@ -401,7 +412,9 @@ export class SeederService {
     }
     stats.parcels = parcelCount;
     stats.statusHistories = historyCount;
-    this.logger.log(`✓ Seeded ${stats.parcels} parcels and ${stats.statusHistories} chronological history records`);
+    this.logger.log(
+      `✓ Seeded ${stats.parcels} parcels and ${stats.statusHistories} chronological history records`,
+    );
 
     // 7. Seed Cash Ledgers
     let cashLedgerCount = 0;
@@ -421,7 +434,10 @@ export class SeederService {
           collectedAt: new Date(now - cData.hoursAgo * 3600 * 1000),
           handInStatus: cData.handInStatus,
           verifiedBy: hub.id,
-          verifiedAt: cData.handInStatus === 'VERIFIED' ? new Date(now - (cData.hoursAgo - 1) * 3600 * 1000) : null,
+          verifiedAt:
+            cData.handInStatus === "VERIFIED"
+              ? new Date(now - (cData.hoursAgo - 1) * 3600 * 1000)
+              : null,
         });
         await this.cashLedgerRepo.save(ledger);
         cashLedgerCount++;
@@ -509,7 +525,7 @@ export class SeederService {
           merchantId: merchant.id,
           url: wData.url,
           events: wData.events,
-          secret: 'dhr_whsec_seed00000000000000000000000000000000',
+          secret: "dhr_whsec_seed00000000000000000000000000000000",
           description: wData.description,
           status: wData.status,
           failureCount: 0,
@@ -559,15 +575,15 @@ export class SeederService {
       );
     } catch (error) {
       this.logger.warn(
-        `Geography import skipped: ${error instanceof Error ? error.message : 'unknown'}`,
+        `Geography import skipped: ${error instanceof Error ? error.message : "unknown"}`,
       );
     }
     try {
       await this.modelRegistry.ensureDefaults();
-      this.logger.log('✓ Scoring model defaults ensured');
+      this.logger.log("✓ Scoring model defaults ensured");
     } catch (error) {
       this.logger.warn(
-        `Model defaults skipped: ${error instanceof Error ? error.message : 'unknown'}`,
+        `Model defaults skipped: ${error instanceof Error ? error.message : "unknown"}`,
       );
     }
 
@@ -584,7 +600,7 @@ export class SeederService {
    */
   private async ensureSeedOpeningBalance(merchantId: string, balance: number): Promise<void> {
     const existing = await this.financialTxRepo.findOne({
-      where: { referenceType: 'OPENING_BALANCE', referenceId: merchantId },
+      where: { referenceType: "OPENING_BALANCE", referenceId: merchantId },
     });
     if (existing) return;
 
@@ -602,21 +618,41 @@ export class SeederService {
         transactionCode: code,
         type: FinancialTransactionType.ADJUSTMENT,
         status: FinancialTransactionStatus.POSTED,
-        referenceType: 'OPENING_BALANCE',
+        referenceType: "OPENING_BALANCE",
         referenceId: merchantId,
-        description: 'Seed opening balance adoption',
+        description: "Seed opening balance adoption",
         createdBy: null,
       }),
     );
     const legs =
       gap > 0
         ? [
-            { account: FinancialAccount.ADJUSTMENT, direction: EntryDirection.DEBIT, amountMinor: gap, merchantId: null },
-            { account: FinancialAccount.MERCHANT_AVAILABLE, direction: EntryDirection.CREDIT, amountMinor: gap, merchantId },
+            {
+              account: FinancialAccount.ADJUSTMENT,
+              direction: EntryDirection.DEBIT,
+              amountMinor: gap,
+              merchantId: null,
+            },
+            {
+              account: FinancialAccount.MERCHANT_AVAILABLE,
+              direction: EntryDirection.CREDIT,
+              amountMinor: gap,
+              merchantId,
+            },
           ]
         : [
-            { account: FinancialAccount.MERCHANT_AVAILABLE, direction: EntryDirection.DEBIT, amountMinor: -gap, merchantId },
-            { account: FinancialAccount.ADJUSTMENT, direction: EntryDirection.CREDIT, amountMinor: -gap, merchantId: null },
+            {
+              account: FinancialAccount.MERCHANT_AVAILABLE,
+              direction: EntryDirection.DEBIT,
+              amountMinor: -gap,
+              merchantId,
+            },
+            {
+              account: FinancialAccount.ADJUSTMENT,
+              direction: EntryDirection.CREDIT,
+              amountMinor: -gap,
+              merchantId: null,
+            },
           ];
     await this.financialEntryRepo.save(
       legs.map((leg) =>
@@ -625,9 +661,9 @@ export class SeederService {
           account: leg.account,
           direction: leg.direction,
           amountMinor: leg.amountMinor,
-          currency: 'BDT',
+          currency: "BDT",
           merchantId: leg.merchantId,
-          memo: 'Seed opening balance adoption',
+          memo: "Seed opening balance adoption",
         }),
       ),
     );

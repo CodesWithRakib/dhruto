@@ -1414,6 +1414,108 @@
       }
     ]
   },
+  "Pagination": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page}",
+    "pageOf": "Page {page} of {totalPages}",
+    "perPage": "Per page"
+  },
+  "ConfirmDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "failed": "Action failed. Please try again."
+  },
+  "ActiveFilters": {
+    "label": "Active filters",
+    "remove": "Remove {label} filter",
+    "clearAll": "Clear all"
+  },
+  "States": {
+    "loadErrorTitle": "Something went wrong",
+    "loadErrorDescription": "We couldn't load this data. Check your connection and try again.",
+    "retry": "Try again",
+    "noResultsTitle": "No results found",
+    "noResultsDescription": "No records match your current filters.",
+    "emptyTitle": "Nothing here yet",
+    "clearFilters": "Clear filters"
+  },
+  "PayoutStatus": {
+    "REQUESTED": "Requested",
+    "APPROVED": "Approved",
+    "PROCESSING": "Processing",
+    "COMPLETED": "Completed",
+    "FAILED": "Failed",
+    "REJECTED": "Rejected",
+    "CANCELLED": "Cancelled"
+  },
+  "PayoutMethod": {
+    "BKASH": "bKash",
+    "NAGAD": "Nagad",
+    "ROCKET": "Rocket",
+    "BANK_TRANSFER": "Bank transfer"
+  },
+  "WalletTransactionType": {
+    "COD_CREDIT": "COD credit",
+    "DELIVERY_FEE": "Delivery fee",
+    "RETURN_FEE": "Return fee",
+    "PAYOUT_DEBIT": "Payout",
+    "ADJUSTMENT_CREDIT": "Adjustment credit",
+    "ADJUSTMENT_DEBIT": "Adjustment debit"
+  },
+  "SettlementStatus": {
+    "SETTLED": "Settled",
+    "REVERSED": "Reversed"
+  },
+  "BagStatus": {
+    "OPEN": "Open",
+    "SEALED": "Sealed",
+    "IN_TRANSIT": "In transit",
+    "RECEIVED": "Received",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled"
+  },
+  "ManifestStatus": {
+    "CREATED": "Created",
+    "DISPATCHED": "Dispatched",
+    "IN_TRANSIT": "In transit",
+    "RECEIVED": "Received",
+    "RECONCILED": "Reconciled",
+    "CANCELLED": "Cancelled"
+  },
+  "ExceptionStatus": {
+    "OPEN": "Open",
+    "RESOLVED": "Resolved",
+    "DISMISSED": "Dismissed"
+  },
+  "CashHandInStatus": {
+    "SUBMITTED": "Submitted",
+    "VERIFIED": "Verified",
+    "DISCREPANCY": "Discrepancy",
+    "RESOLVED": "Resolved"
+  },
+  "CashDiscrepancyStatus": {
+    "OPEN": "Open",
+    "RESOLVED": "Resolved"
+  },
+  "FinancialTransactionStatus": {
+    "POSTED": "Posted",
+    "REVERSED": "Reversed"
+  },
+  "RiderStatus": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "PENDING": "Pending",
+    "SUSPENDED": "Suspended",
+    "ON_DUTY": "On duty",
+    "OFF_DUTY": "Off duty"
+  },
+  "ScanOutcome": {
+    "APPLIED": "Applied",
+    "DUPLICATE": "Duplicate",
+    "REJECTED": "Rejected"
+  },
   "ParcelStatus": {
     "created": "Created",
     "pickupRequested": "Pickup requested",

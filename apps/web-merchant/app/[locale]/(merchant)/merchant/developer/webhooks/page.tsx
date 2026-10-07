@@ -31,11 +31,7 @@ import {
   useListWebhookDeliveriesQuery,
   useRetryWebhookDeliveryMutation,
 } from "@/features/webhooks/api/webhooks.api";
-import {
-  WebhookEvent,
-  WebhookDeliveryStatus,
-  type WebhookDeliveryItem,
-} from "@dhruto/contracts";
+import { WebhookEvent, WebhookDeliveryStatus, type WebhookDeliveryItem } from "@dhruto/contracts";
 import type { DataTableRow } from "@/lib/data-table";
 import { getApiErrorMessage } from "@/lib/api-error";
 
@@ -127,10 +123,19 @@ export default function WebhooksDeveloperPage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   // Queries & Mutations
-  const { data: subsData, isLoading: isLoadingSubs, refetch: refetchSubs } =
-    useListWebhookSubscriptionsQuery();
-  const { data: deliveriesData, isLoading: isLoadingDeliveries, refetch: refetchDeliveries } =
-    useListWebhookDeliveriesQuery(undefined, { pollingInterval: 10000, skipPollingIfUnfocused: true });
+  const {
+    data: subsData,
+    isLoading: isLoadingSubs,
+    refetch: refetchSubs,
+  } = useListWebhookSubscriptionsQuery();
+  const {
+    data: deliveriesData,
+    isLoading: isLoadingDeliveries,
+    refetch: refetchDeliveries,
+  } = useListWebhookDeliveriesQuery(undefined, {
+    pollingInterval: 10000,
+    skipPollingIfUnfocused: true,
+  });
 
   const [createSub, { isLoading: isCreating }] = useCreateWebhookSubscriptionMutation();
   const [updateSub] = useUpdateWebhookSubscriptionMutation();
@@ -142,9 +147,7 @@ export default function WebhooksDeveloperPage() {
 
   const subscriptions = subsData?.data || [];
   const deliveryPayload = deliveriesData?.data as
-    | { items: WebhookDeliveryItem[]; total: number }
-    | WebhookDeliveryItem[]
-    | undefined;
+    { items: WebhookDeliveryItem[]; total: number } | WebhookDeliveryItem[] | undefined;
   const deliveries: WebhookDeliveryItem[] = Array.isArray(deliveryPayload)
     ? deliveryPayload
     : (deliveryPayload?.items ?? []);
@@ -155,9 +158,14 @@ export default function WebhooksDeveloperPage() {
   });
 
   const totalDeliveries = deliveries.length;
-  const deliveredCount = deliveries.filter((d) => d.status === WebhookDeliveryStatus.DELIVERED).length;
-  const deadLetterCount = deliveries.filter((d) => d.status === WebhookDeliveryStatus.DEAD_LETTER).length;
-  const successRate = totalDeliveries > 0 ? Math.round((deliveredCount / totalDeliveries) * 100) : 100;
+  const deliveredCount = deliveries.filter(
+    (d) => d.status === WebhookDeliveryStatus.DELIVERED,
+  ).length;
+  const deadLetterCount = deliveries.filter(
+    (d) => d.status === WebhookDeliveryStatus.DEAD_LETTER,
+  ).length;
+  const successRate =
+    totalDeliveries > 0 ? Math.round((deliveredCount / totalDeliveries) * 100) : 100;
 
   const toggleRevealSecret = (id: string) => {
     setRevealedSecrets((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -208,7 +216,9 @@ export default function WebhooksDeveloperPage() {
   };
 
   const handleRotateSecret = async (id: string) => {
-    if (!confirm("Rotate this endpoint's signing secret? The old secret stops working immediately.")) {
+    if (
+      !confirm("Rotate this endpoint's signing secret? The old secret stops working immediately.")
+    ) {
       return;
     }
     try {
@@ -308,12 +318,16 @@ export default function WebhooksDeveloperPage() {
               <Webhook className="h-6 w-6" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">Webhooks & Integrations</h1>
-            <Badge variant="outline" className="text-xs bg-primary-soft text-primary border-primary">
+            <Badge
+              variant="outline"
+              className="text-xs bg-primary-soft text-primary border-primary"
+            >
               v1.0 Live
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            Configure secure HMAC-SHA256 signed HTTP endpoints to receive real-time updates for parcels, COD collections, and payouts.
+            Configure secure HMAC-SHA256 signed HTTP endpoints to receive real-time updates for
+            parcels, COD collections, and payouts.
           </p>
         </div>
 
@@ -358,12 +372,16 @@ export default function WebhooksDeveloperPage() {
           <span className="text-xs text-muted-foreground font-medium">Delivery Success Rate</span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="text-2xl font-bold text-success">{successRate}%</span>
-            <span className="text-xs text-muted-foreground">{deliveredCount}/{totalDeliveries} delivered</span>
+            <span className="text-xs text-muted-foreground">
+              {deliveredCount}/{totalDeliveries} delivered
+            </span>
           </div>
         </Card>
 
         <Card className="p-4 bg-card/60 backdrop-blur-xs border">
-          <span className="text-xs text-muted-foreground font-medium">Total Dispatches (Logged)</span>
+          <span className="text-xs text-muted-foreground font-medium">
+            Total Dispatches (Logged)
+          </span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="text-2xl font-bold">{totalDeliveries}</span>
             <Radio className="h-4 w-4 text-primary animate-pulse" />
@@ -373,13 +391,19 @@ export default function WebhooksDeveloperPage() {
         <Card className="p-4 bg-card/60 backdrop-blur-xs border">
           <span className="text-xs text-muted-foreground font-medium">Dead Letter Queue (DLQ)</span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className={`text-2xl font-bold ${deadLetterCount > 0 ? "text-warning" : "text-muted-foreground"}`}>
+            <span
+              className={`text-2xl font-bold ${deadLetterCount > 0 ? "text-warning" : "text-muted-foreground"}`}
+            >
               {deadLetterCount}
             </span>
             {deadLetterCount > 0 ? (
-              <Badge variant="destructive" className="text-xs">Needs Attention</Badge>
+              <Badge variant="destructive" className="text-xs">
+                Needs Attention
+              </Badge>
             ) : (
-              <Badge variant="secondary" className="text-xs text-success">Clean</Badge>
+              <Badge variant="secondary" className="text-xs text-success">
+                Clean
+              </Badge>
             )}
           </div>
         </Card>
@@ -389,7 +413,9 @@ export default function WebhooksDeveloperPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Active Subscriptions</h2>
-          <span className="text-xs text-muted-foreground">Signed with X-Dhruto-Signature (HMAC-SHA256)</span>
+          <span className="text-xs text-muted-foreground">
+            Signed with X-Dhruto-Signature (HMAC-SHA256)
+          </span>
         </div>
 
         {isLoadingSubs ? (
@@ -402,7 +428,8 @@ export default function WebhooksDeveloperPage() {
             <Webhook className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
             <h3 className="font-semibold text-base mb-1">No webhook endpoints configured</h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-              Add your server endpoint URL to receive automated HTTP notifications whenever parcels are created, delivered, or settled.
+              Add your server endpoint URL to receive automated HTTP notifications whenever parcels
+              are created, delivered, or settled.
             </p>
             <Button
               onClick={() => setShowCreateModal(true)}
@@ -452,29 +479,47 @@ export default function WebhooksDeveloperPage() {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2 rounded-lg border max-w-xl">
                         <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                         <span className="font-medium shrink-0">Signing Secret:</span>
-                        <span className="font-mono text-xs truncate select-all" title={sub.secretPreview || "Masked preview"}>
-                          {isRevealed ? (sub.secretPreview || sub.secret) : "••••••••••••••••••••••••••••••••"}
+                        <span
+                          className="font-mono text-xs truncate select-all"
+                          title={sub.secretPreview || "Masked preview"}
+                        >
+                          {isRevealed
+                            ? sub.secretPreview || sub.secret
+                            : "••••••••••••••••••••••••••••••••"}
                         </span>
                         <div className="flex items-center gap-1 ml-auto shrink-0">
                           <button
                             onClick={() => toggleRevealSecret(sub.id)}
                             className="p-1 hover:text-foreground rounded transition-colors"
                             title={isRevealed ? "Hide preview" : "Reveal masked preview"}
-                            aria-label={isRevealed ? "Hide secret preview" : "Reveal secret preview"}
+                            aria-label={
+                              isRevealed ? "Hide secret preview" : "Reveal secret preview"
+                            }
                           >
-                            {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                            {isRevealed ? (
+                              <EyeOff className="h-3.5 w-3.5" />
+                            ) : (
+                              <Eye className="h-3.5 w-3.5" />
+                            )}
                           </button>
                           <button
-                            onClick={() => handleCopySecret(sub.id, sub.secretPreview || sub.secret)}
+                            onClick={() =>
+                              handleCopySecret(sub.id, sub.secretPreview || sub.secret)
+                            }
                             className="p-1 hover:text-foreground rounded transition-colors"
                             title="Copy masked preview"
                           >
-                            {isCopied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                            {isCopied ? (
+                              <Check className="h-3.5 w-3.5 text-success" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
                           </button>
                         </div>
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        Full secret is shown only once at creation/rotation. Use Rotate to issue a new one.
+                        Full secret is shown only once at creation/rotation. Use Rotate to issue a
+                        new one.
                       </p>
 
                       {/* Subscribed Events */}
@@ -547,9 +592,12 @@ export default function WebhooksDeveloperPage() {
       <div className="space-y-4 pt-4 border-t">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Delivery Audit Logs & Dead Letter Queue</h2>
+            <h2 className="text-lg font-semibold tracking-tight">
+              Delivery Audit Logs & Dead Letter Queue
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Real-time audit trail of outbound HTTP dispatches with retry logs and automatic backoff.
+              Real-time audit trail of outbound HTTP dispatches with retry logs and automatic
+              backoff.
             </p>
           </div>
 
@@ -558,7 +606,9 @@ export default function WebhooksDeveloperPage() {
             <button
               onClick={() => setFilterStatus("ALL")}
               className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
-                filterStatus === "ALL" ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground"
+                filterStatus === "ALL"
+                  ? "bg-background text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               All ({deliveries.length})
@@ -566,7 +616,9 @@ export default function WebhooksDeveloperPage() {
             <button
               onClick={() => setFilterStatus(WebhookDeliveryStatus.DELIVERED)}
               className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
-                filterStatus === WebhookDeliveryStatus.DELIVERED ? "bg-background text-success" : "text-muted-foreground hover:text-foreground"
+                filterStatus === WebhookDeliveryStatus.DELIVERED
+                  ? "bg-background text-success"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Delivered ({deliveredCount})
@@ -574,7 +626,9 @@ export default function WebhooksDeveloperPage() {
             <button
               onClick={() => setFilterStatus(WebhookDeliveryStatus.FAILED)}
               className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
-                filterStatus === WebhookDeliveryStatus.FAILED ? "bg-background text-danger" : "text-muted-foreground hover:text-foreground"
+                filterStatus === WebhookDeliveryStatus.FAILED
+                  ? "bg-background text-danger"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Failed ({deliveries.filter((d) => d.status === WebhookDeliveryStatus.FAILED).length})
@@ -582,7 +636,9 @@ export default function WebhooksDeveloperPage() {
             <button
               onClick={() => setFilterStatus(WebhookDeliveryStatus.DEAD_LETTER)}
               className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
-                filterStatus === WebhookDeliveryStatus.DEAD_LETTER ? "bg-background text-warning" : "text-muted-foreground hover:text-foreground"
+                filterStatus === WebhookDeliveryStatus.DEAD_LETTER
+                  ? "bg-background text-warning"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Dead Letter ({deadLetterCount})
@@ -622,15 +678,16 @@ export default function WebhooksDeveloperPage() {
                     header: "Status",
                     cell: ({ row }: DataTableRow<WebhookDeliveryItem>) => {
                       const isDelivered = row.original.status === WebhookDeliveryStatus.DELIVERED;
-                      const isDeadLetter = row.original.status === WebhookDeliveryStatus.DEAD_LETTER;
+                      const isDeadLetter =
+                        row.original.status === WebhookDeliveryStatus.DEAD_LETTER;
                       return (
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                             isDelivered
                               ? "bg-success-soft text-success border-success"
                               : isDeadLetter
-                              ? "bg-warning-soft text-warning border-warning"
-                              : "bg-danger-soft text-danger border-danger"
+                                ? "bg-warning-soft text-warning border-warning"
+                                : "bg-danger-soft text-danger border-danger"
                           }`}
                         >
                           {isDelivered && <CheckCircle2 className="h-3 w-3" />}
@@ -638,7 +695,7 @@ export default function WebhooksDeveloperPage() {
                           {row.original.status}
                         </span>
                       );
-                    }
+                    },
                   },
                   {
                     accessorKey: "statusCode",
@@ -783,7 +840,9 @@ export default function WebhooksDeveloperPage() {
                       <label
                         key={event}
                         className={`flex items-start gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
-                          checked ? "bg-primary-soft border-primary text-foreground" : "bg-card border-transparent text-muted-foreground"
+                          checked
+                            ? "bg-primary-soft border-primary text-foreground"
+                            : "bg-card border-transparent text-muted-foreground"
                         }`}
                       >
                         <input
@@ -793,8 +852,12 @@ export default function WebhooksDeveloperPage() {
                           className="mt-0.5 rounded text-primary focus:ring-ring"
                         />
                         <div>
-                          <span className="font-mono font-medium block text-foreground">{label}</span>
-                          <span className="text-[10px] text-muted-foreground leading-tight block">{desc}</span>
+                          <span className="font-mono font-medium block text-foreground">
+                            {label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground leading-tight block">
+                            {desc}
+                          </span>
                         </div>
                       </label>
                     );
@@ -803,9 +866,7 @@ export default function WebhooksDeveloperPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium block mb-1">
-                  Custom Secret (Optional)
-                </label>
+                <label className="text-xs font-medium block mb-1">Custom Secret (Optional)</label>
                 <input
                   type="text"
                   placeholder="Leave empty to auto-generate secure dhr_whsec_... key"
@@ -836,7 +897,11 @@ export default function WebhooksDeveloperPage() {
                   disabled={isCreating}
                   className="bg-primary hover:bg-primary-hover text-primary-foreground flex items-center gap-1.5"
                 >
-                  {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  {isCreating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
                   Register Endpoint
                 </Button>
               </div>
@@ -872,10 +937,19 @@ export default function WebhooksDeveloperPage() {
                   Outbound Request Headers
                 </span>
                 <div className="bg-muted/40 p-3 rounded-lg border font-mono text-xs space-y-1">
-                  <div><span className="text-primary">X-Dhruto-Event:</span> {inspectDelivery.event}</div>
-                  <div><span className="text-primary">X-Dhruto-Delivery:</span> {inspectDelivery.id}</div>
-                  <div className="break-all"><span className="text-primary">X-Dhruto-Signature:</span> {inspectDelivery.signature}</div>
-                  <div><span className="text-primary">Content-Type:</span> application/json</div>
+                  <div>
+                    <span className="text-primary">X-Dhruto-Event:</span> {inspectDelivery.event}
+                  </div>
+                  <div>
+                    <span className="text-primary">X-Dhruto-Delivery:</span> {inspectDelivery.id}
+                  </div>
+                  <div className="break-all">
+                    <span className="text-primary">X-Dhruto-Signature:</span>{" "}
+                    {inspectDelivery.signature}
+                  </div>
+                  <div>
+                    <span className="text-primary">Content-Type:</span> application/json
+                  </div>
                 </div>
               </div>
 

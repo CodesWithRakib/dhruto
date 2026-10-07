@@ -1,16 +1,16 @@
-import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { AppModule } from '../app.module.js';
+import { NestFactory } from "@nestjs/core";
+import { Logger } from "@nestjs/common";
+import { DataSource } from "typeorm";
+import { AppModule } from "../app.module.js";
 
-type MigrationCommand = 'run' | 'revert' | 'show';
+type MigrationCommand = "run" | "revert" | "show";
 
 async function bootstrap(): Promise<void> {
-  const logger = new Logger('MigrationCLI');
-  const command = (process.argv[2] as MigrationCommand | undefined) ?? 'run';
+  const logger = new Logger("MigrationCLI");
+  const command = (process.argv[2] as MigrationCommand | undefined) ?? "run";
 
   const app = await NestFactory.createApplicationContext(AppModule, {
-    logger: ['log', 'error', 'warn'],
+    logger: ["log", "error", "warn"],
   });
 
   try {
@@ -22,28 +22,28 @@ async function bootstrap(): Promise<void> {
       await dataSource.initialize();
     }
 
-    if (command === 'show') {
+    if (command === "show") {
       const pending = await dataSource.showMigrations();
-      logger.log(`Pending migrations: ${pending ? 'yes' : 'none'}`);
+      logger.log(`Pending migrations: ${pending ? "yes" : "none"}`);
       return;
     }
 
-    if (command === 'revert') {
-      await dataSource.undoLastMigration({ transaction: 'each' });
-      logger.log('Reverted the last migration.');
+    if (command === "revert") {
+      await dataSource.undoLastMigration({ transaction: "each" });
+      logger.log("Reverted the last migration.");
       return;
     }
 
-    const applied = await dataSource.runMigrations({ transaction: 'each' });
+    const applied = await dataSource.runMigrations({ transaction: "each" });
     if (applied.length === 0) {
-      logger.log('No pending migrations. Database schema is up to date.');
+      logger.log("No pending migrations. Database schema is up to date.");
     } else {
       for (const migration of applied) {
         logger.log(`Applied migration: ${migration.name}`);
       }
     }
   } catch (error) {
-    logger.error('Migration failed', error instanceof Error ? error.stack : String(error));
+    logger.error("Migration failed", error instanceof Error ? error.stack : String(error));
     process.exitCode = 1;
   } finally {
     await app.close();

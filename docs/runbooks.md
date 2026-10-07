@@ -16,7 +16,7 @@
 ## redis-outage
 
 - **Diagnose**: health `cacheDriver: memory-fallback`; `Queue unavailable,
-  executing inline` warnings; BullMQ `reachable: false`.
+executing inline` warnings; BullMQ `reachable: false`.
 - **Immediate**: no action required for correctness — cache fail-open,
   jobs run inline, rate limits best-effort. Expect higher DB load + latency.
 - **Recovery**: restart Redis (AOF replays, ≤1s job loss) → app reconnects

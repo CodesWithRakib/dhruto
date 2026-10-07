@@ -1,9 +1,9 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { BaseEntity } from './Base.entity.js';
-import { Merchant } from './Merchant.entity.js';
-import { Parcel } from './Parcel.entity.js';
-import { CashLedger } from './CashLedger.entity.js';
-import { SettlementStatus } from '@dhruto/contracts';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from "typeorm";
+import { BaseEntity } from "./Base.entity.js";
+import { Merchant } from "./Merchant.entity.js";
+import { Parcel } from "./Parcel.entity.js";
+import { CashLedger } from "./CashLedger.entity.js";
+import { SettlementStatus } from "@dhruto/contracts";
 
 export { SettlementStatus };
 
@@ -15,57 +15,57 @@ export { SettlementStatus };
  * transaction that moved the money. Reversals create a linked record rather
  * than mutating this one.
  */
-@Entity('settlements')
-@Index(['merchantId', 'status'])
-@Index(['parcelId'], { unique: true })
-@Index(['batchId'])
+@Entity("settlements")
+@Index(["merchantId", "status"])
+@Index(["parcelId"], { unique: true })
+@Index(["batchId"])
 export class Settlement extends BaseEntity {
-  @Column({ name: 'settlement_code', type: 'varchar', length: 20, unique: true })
+  @Column({ name: "settlement_code", type: "varchar", length: 20, unique: true })
   settlementCode: string;
 
-  @Column({ name: 'merchant_id', type: 'uuid' })
+  @Column({ name: "merchant_id", type: "uuid" })
   merchantId: string;
 
   @ManyToOne(() => Merchant)
-  @JoinColumn({ name: 'merchant_id' })
+  @JoinColumn({ name: "merchant_id" })
   merchant: Merchant;
 
-  @Column({ name: 'parcel_id', type: 'uuid', unique: true })
+  @Column({ name: "parcel_id", type: "uuid", unique: true })
   parcelId: string;
 
   @ManyToOne(() => Parcel)
-  @JoinColumn({ name: 'parcel_id' })
+  @JoinColumn({ name: "parcel_id" })
   parcel: Parcel;
 
-  @Column({ name: 'cash_ledger_id', type: 'uuid', unique: true })
+  @Column({ name: "cash_ledger_id", type: "uuid", unique: true })
   cashLedgerId: string;
 
   @ManyToOne(() => CashLedger)
-  @JoinColumn({ name: 'cash_ledger_id' })
+  @JoinColumn({ name: "cash_ledger_id" })
   cashLedger: CashLedger;
 
   /** Integer minor units. */
-  @Column({ name: 'gross_minor', type: 'bigint' })
+  @Column({ name: "gross_minor", type: "bigint" })
   grossMinor: number;
 
-  @Column({ name: 'fee_minor', type: 'bigint' })
+  @Column({ name: "fee_minor", type: "bigint" })
   feeMinor: number;
 
-  @Column({ name: 'net_minor', type: 'bigint' })
+  @Column({ name: "net_minor", type: "bigint" })
   netMinor: number;
 
-  @Column({ type: 'varchar', length: 10, default: 'BDT' })
+  @Column({ type: "varchar", length: 10, default: "BDT" })
   currency: string;
 
-  @Column({ type: 'enum', enum: SettlementStatus, default: SettlementStatus.SETTLED })
+  @Column({ type: "enum", enum: SettlementStatus, default: SettlementStatus.SETTLED })
   status: SettlementStatus;
 
-  @Column({ name: 'transaction_id', type: 'uuid' })
+  @Column({ name: "transaction_id", type: "uuid" })
   transactionId: string;
 
-  @Column({ name: 'batch_id', type: 'uuid', nullable: true })
+  @Column({ name: "batch_id", type: "uuid", nullable: true })
   batchId: string | null;
 
-  @Column({ name: 'settled_at', type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ name: "settled_at", type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   settledAt: Date;
 }

@@ -13,13 +13,7 @@ import {
   ParseUUIDPipe,
   NotFoundException,
 } from "@nestjs/common";
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
-  ApiResponse,
-} from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { NotificationsService } from "./notifications.service.js";
 import { TestSmsDto, UpdatePreferencesDto } from "./dto/notification.dto.js";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
@@ -108,10 +102,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Unread notification count for the bell" })
   @ApiResponse({ status: 200, description: "Unread count." })
-  async getUnreadCount(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getUnreadCount(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const scope = await this.resolveScope(user);
     const count = await this.notificationsService.getUnreadCount(scope);
     return envelope(
@@ -141,10 +132,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Mark all notifications as read" })
   @ApiResponse({ status: 200, description: "Marked all as read." })
-  async markAllAsRead(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async markAllAsRead(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const scope = await this.resolveScope(user);
     const result = await this.notificationsService.markAllAsRead(scope);
     return envelope(
@@ -162,10 +150,7 @@ export class NotificationsController {
     description: "Financial and security categories are locked on and cannot be disabled.",
   })
   @ApiResponse({ status: 200, description: "Preference matrix." })
-  async getPreferences(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getPreferences(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const scope = await this.resolveScope(user);
     const preferences = await this.notificationsService.getPreferences(scope);
     return envelope(HttpStatus.OK, "Preferences retrieved successfully", preferences, req);
@@ -192,7 +177,8 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Send an immediate test SMS",
-    description: "Rate-limited. The attempt is persisted before transport, honestly reported after.",
+    description:
+      "Rate-limited. The attempt is persisted before transport, honestly reported after.",
   })
   @ApiResponse({ status: 200, description: "Test SMS attempted." })
   @ApiResponse({ status: 429, description: "Too many test sends." })

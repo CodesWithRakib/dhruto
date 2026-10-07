@@ -6,7 +6,7 @@ import { Card, CardContent, Button, Input } from "@dhruto/ui";
 import { Search, RefreshCw, Package } from "lucide-react";
 import { useGetRiderTasksQuery, useStartDeliveryMutation } from "../api/riders.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { RiderTaskCard } from "./rider-task-card";
 import { toast } from "sonner";
 
@@ -31,9 +31,7 @@ export function RiderTasksView() {
       task.recipientName.toLowerCase().includes(search.trim().toLowerCase());
     const matchesFilter =
       filter === "ALL" ||
-      (filter === "ATTEMPTED"
-        ? ATTEMPTED_STATUSES.includes(task.status)
-        : task.status === filter);
+      (filter === "ATTEMPTED" ? ATTEMPTED_STATUSES.includes(task.status) : task.status === filter);
     return matchesSearch && matchesFilter;
   });
 
@@ -61,7 +59,10 @@ export function RiderTasksView() {
       <Card>
         <CardContent className="space-y-3 p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -82,7 +83,13 @@ export function RiderTasksView() {
                 {entry.label}
               </Button>
             ))}
-            <Button size="sm" variant="ghost" onClick={() => refetch()} className="h-9 shrink-0 text-xs" aria-label={t("refresh")}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => refetch()}
+              className="h-9 shrink-0 text-xs"
+              aria-label={t("refresh")}
+            >
               <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
@@ -94,7 +101,11 @@ export function RiderTasksView() {
           {t("loading")}
         </p>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Package} title={t("tasks.empty")} description={t("tasks.emptyDescription")} />
+        <EmptyState
+          icon={Package}
+          title={t("tasks.empty")}
+          description={t("tasks.emptyDescription")}
+        />
       ) : (
         <ul className="space-y-3">
           {filtered.map((task) => (

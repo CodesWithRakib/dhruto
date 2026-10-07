@@ -144,11 +144,7 @@ export enum GeoPlaceKind {
 }
 
 export type GeoAliasType =
-  | "spelling_variant"
-  | "abbreviation"
-  | "transliteration"
-  | "historical_name"
-  | "common_usage";
+  "spelling_variant" | "abbreviation" | "transliteration" | "historical_name" | "common_usage";
 
 export interface GeoDatasetVersionInfo {
   version: string;
@@ -349,18 +345,29 @@ export interface ScoringModelRecord {
 export interface AddressParserEngine {
   readonly parserVersion: string;
   readonly datasetVersion: string;
-  parse(rawAddress: string, opts?: { districtHint?: string; maxCandidates?: number }): AddressParseV2Result;
+  parse(
+    rawAddress: string,
+    opts?: { districtHint?: string; maxCandidates?: number },
+  ): AddressParseV2Result;
 }
 
 export interface RiskScorerEngine {
   readonly scoringVersion: string;
-  score(features: RecipientFeatureSnapshot): { score: number; level: RiskLevel; reasons: RiskReason[] };
+  score(features: RecipientFeatureSnapshot): {
+    score: number;
+    level: RiskLevel;
+    reasons: RiskReason[];
+  };
 }
 
 export interface RtoPredictorEngine {
   readonly modelType: RtoModelType;
   readonly modelVersion: string;
-  predict(features: RtoFeatureSet): { score: number; level: RtoPredictionLevel; reasons: RiskReason[] };
+  predict(features: RtoFeatureSet): {
+    score: number;
+    level: RtoPredictionLevel;
+    reasons: RiskReason[];
+  };
 }
 
 export interface RecommendationEngine {

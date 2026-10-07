@@ -9,10 +9,7 @@ import type { ParcelListFilters } from "../hooks/use-parcels-list";
 
 export interface ParcelFilterControlsProps {
   filters: ParcelListFilters;
-  updateFilter: <K extends keyof ParcelListFilters>(
-    key: K,
-    value: ParcelListFilters[K],
-  ) => void;
+  updateFilter: <K extends keyof ParcelListFilters>(key: K, value: ParcelListFilters[K]) => void;
   resetFilters: () => void;
   activeFilterCount: number;
   /** Distinguishes duplicate ids when rendered in a sheet and a toolbar. */

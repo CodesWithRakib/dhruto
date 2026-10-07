@@ -32,17 +32,17 @@ Admin → platform + comparison. Exports enforce identical scoping + ownership.
 
 ## Performance (measured, dev dataset ~50 parcels, cold cache)
 
-| Endpoint (30d) | Measured |
-|---|---|
-| `GET /analytics/overview` | 156ms |
-| `GET /analytics/parcels` | 35ms |
-| `GET /analytics/hubs` | 45ms |
-| `GET /analytics/riders` | 165ms |
-| `GET /analytics/rto/v2` | 53ms |
-| `GET /analytics/cod/v2` | 31ms |
-| `GET /analytics/finance` | 47ms |
-| `GET /analytics/notifications` | 34ms |
-| `GET /analytics/intelligence` (90d) | 51ms |
+| Endpoint (30d)                      | Measured |
+| ----------------------------------- | -------- |
+| `GET /analytics/overview`           | 156ms    |
+| `GET /analytics/parcels`            | 35ms     |
+| `GET /analytics/hubs`               | 45ms     |
+| `GET /analytics/riders`             | 165ms    |
+| `GET /analytics/rto/v2`             | 53ms     |
+| `GET /analytics/cod/v2`             | 31ms     |
+| `GET /analytics/finance`            | 47ms     |
+| `GET /analytics/notifications`      | 34ms     |
+| `GET /analytics/intelligence` (90d) | 51ms     |
 
 Budgets: simple KPI P95 < 500ms, dashboard P95 < 1s, large exports async
 (BullMQ `analytics-exports`, idempotent per export id, 72h expiry).

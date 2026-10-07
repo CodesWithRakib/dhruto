@@ -116,7 +116,8 @@ export function renderParcelOutForDelivery(vars: ParcelOutForDeliveryVars): Rend
 }
 
 export function renderParcelDelivered(vars: ParcelDeliveredVars): RenderedTemplate {
-  const cod = vars.codCollected > 0 ? ` COD collected: ৳${vars.codCollected.toLocaleString("en-US")}.` : "";
+  const cod =
+    vars.codCollected > 0 ? ` COD collected: ৳${vars.codCollected.toLocaleString("en-US")}.` : "";
   const codBn =
     vars.codCollected > 0 ? ` সংগৃহীত COD: ৳${vars.codCollected.toLocaleString("en-US")}।` : "";
   return {

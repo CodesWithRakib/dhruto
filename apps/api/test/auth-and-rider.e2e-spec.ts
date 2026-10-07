@@ -4,12 +4,7 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { ZodValidationPipe } from "nestjs-zod";
-import {
-  SEEDED_ACCOUNTS,
-  bearer,
-  idempotencyKey,
-  loginToken,
-} from "./utils/auth.js";
+import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
   let app: INestApplication;
@@ -98,9 +93,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
     });
 
     it("GET /api/v1/auth/me - rejects request without Authorization header with 401", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/api/v1/auth/me")
-        .expect(401);
+      const res = await request(app.getHttpServer()).get("/api/v1/auth/me").expect(401);
 
       expect(res.body.statusCode).toBe(401);
     });

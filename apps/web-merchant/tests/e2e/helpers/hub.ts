@@ -40,7 +40,9 @@ async function hubIdFor(request: APIRequestContext, token: string, code: string)
   // DHK operator sees only DHK; fall back to the destinations list for CTG.
   const direct = hubs.find((hub) => hub.code === code);
   if (direct) return direct.id;
-  const dest = await request.get(`${API_BASE_URL}/hubs/destinations`, { headers: authHeaders(token) });
+  const dest = await request.get(`${API_BASE_URL}/hubs/destinations`, {
+    headers: authHeaders(token),
+  });
   const all = ((await dest.json()).data ?? []) as Array<{ id: string; code: string }>;
   const found = all.find((hub) => hub.code === code);
   if (!found) throw new Error(`Hub ${code} not visible`);
@@ -65,7 +67,11 @@ export async function inboundParcel(
   const created = await createParcelViaApi(request, merchantToken, makeBookingFixture("HUB"));
   const scan = await request.post(`${API_BASE_URL}/hubs/${hubId}/scans`, {
     headers: { ...authHeaders(hubToken), "Content-Type": "application/json" },
-    data: { barcode: created.trackingCode, scanType: "RECEIVE_INBOUND", idempotencyKey: crypto.randomUUID() },
+    data: {
+      barcode: created.trackingCode,
+      scanType: "RECEIVE_INBOUND",
+      idempotencyKey: crypto.randomUUID(),
+    },
   });
   if (!scan.ok()) throw new Error(`Inbound scan failed: ${scan.status()} ${await scan.text()}`);
   return { id: created.id, trackingCode: created.trackingCode };
@@ -98,7 +104,11 @@ export async function addParcelToBag(
   if (!response.ok()) throw new Error(`Add parcel failed: ${await response.text()}`);
 }
 
-export async function sealBag(request: APIRequestContext, hubToken: string, bagId: string): Promise<void> {
+export async function sealBag(
+  request: APIRequestContext,
+  hubToken: string,
+  bagId: string,
+): Promise<void> {
   const response = await request.post(`${API_BASE_URL}/bags/${bagId}/seal`, {
     headers: { ...authHeaders(hubToken), "Content-Type": "application/json" },
     data: { sealTag: `SEAL-${Date.now().toString().slice(-6)}` },

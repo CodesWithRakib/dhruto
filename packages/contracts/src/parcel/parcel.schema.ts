@@ -270,9 +270,7 @@ export const parcelAddressIntelligenceSchema = z.object({
   rtoProbability: z.number().nullable(),
 });
 
-export type ParcelAddressIntelligence = z.infer<
-  typeof parcelAddressIntelligenceSchema
->;
+export type ParcelAddressIntelligence = z.infer<typeof parcelAddressIntelligenceSchema>;
 
 export const parcelDetailsResponseSchema = parcelSummarySchema.extend({
   merchantId: z.string().uuid(),

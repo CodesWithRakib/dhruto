@@ -37,9 +37,7 @@ test.describe("Mobile merchant experience", () => {
     await expect(page.getByText("Total delivery charge")).toBeVisible({ timeout: 20_000 });
 
     // Touch targets should be at least 44px tall on mobile.
-    const confirmBox = await page
-      .getByRole("button", { name: /confirm booking/i })
-      .boundingBox();
+    const confirmBox = await page.getByRole("button", { name: /confirm booking/i }).boundingBox();
     expect(confirmBox?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 
@@ -52,9 +50,9 @@ test.describe("Mobile merchant experience", () => {
     await page.goto("/en/merchant/parcels");
     // Scope to the card list: the desktop table is still in the DOM (just
     // display:none), so a bare text query would hit it too.
-    await expect(
-      page.getByRole("listitem").filter({ hasText: created.trackingCode }),
-    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("listitem").filter({ hasText: created.trackingCode })).toBeVisible({
+      timeout: 20_000,
+    });
     await expectNoHorizontalOverflow(page);
 
     // Desktop table is hidden on phones.

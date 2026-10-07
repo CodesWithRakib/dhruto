@@ -1,4 +1,4 @@
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from "nestjs-zod";
 import {
   addParcelToBagSchema,
   createBagSchema,
@@ -7,7 +7,7 @@ import {
   receiveManifestSchema,
   resolveExceptionSchema,
   sealBagSchema,
-} from '@dhruto/contracts';
+} from "@dhruto/contracts";
 
 export class CreateBagDto extends createZodDto(createBagSchema) {}
 export class AddParcelToBagDto extends createZodDto(addParcelToBagSchema) {}

@@ -7,22 +7,22 @@ Node 26.8.1, dataset ~1300 parcels. Load generator on the same box
 
 ## API benchmarks (concurrency 25, 200 reqs unless noted)
 
-| Endpoint | Before P50 | Before P95 | Before P99 | After P50 | After P95 | After P99 | Errors |
-|---|---|---|---|---|---|---|---|
-| GET /health | 29.7 | 76.4 | 249.9 | 40.3 | 436.6¹ | 455.1 | 0 |
-| POST login (5×, conc 1) | 1982² | 2008² | 2019² | 99.1 | 106.6 | 106.6 | 0 |
-| GET parcels list | 76.4 | 107.5 | 121.6 | 91.6 | 172.6 | 175.1 | 0 |
-| POST parcels (60×, conc 10) | 28.3 | 362 | 597.9 | 11.1 | 422 | 425.7 | 0 |
-| GET analytics/overview | 20.8 | 377.8 | 389.9 | 20.5 | 127.4 | 128.2 | 0 |
-| POST intelligence parse | 23.6 | 115.4 | 183.6 | 21.1 | 109.5 | 115.6 | 0 |
+| Endpoint                    | Before P50 | Before P95 | Before P99 | After P50 | After P95 | After P99 | Errors |
+| --------------------------- | ---------- | ---------- | ---------- | --------- | --------- | --------- | ------ |
+| GET /health                 | 29.7       | 76.4       | 249.9      | 40.3      | 436.6¹    | 455.1     | 0      |
+| POST login (5×, conc 1)     | 1982²      | 2008²      | 2019²      | 99.1      | 106.6     | 106.6     | 0      |
+| GET parcels list            | 76.4       | 107.5      | 121.6      | 91.6      | 172.6     | 175.1     | 0      |
+| POST parcels (60×, conc 10) | 28.3       | 362        | 597.9      | 11.1      | 422       | 425.7     | 0      |
+| GET analytics/overview      | 20.8       | 377.8      | 389.9      | 20.5      | 127.4     | 128.2     | 0      |
+| POST intelligence parse     | 23.6       | 115.4      | 183.6      | 21.1      | 109.5     | 115.6     | 0      |
 
 ¹ Health outlier is cold-start + same-box generator contention: warm
- re-probe (n=100 sequential) gives **p50 14.6 / p95 19.1 / p99 24.9** —
- target P95 < 100ms met when warm.
+re-probe (n=100 sequential) gives **p50 14.6 / p95 19.1 / p99 24.9** —
+target P95 < 100ms met when warm.
 ² Before-login hammered 200 concurrent bcrypt hashes (pure-JS, event-loop
- blocking) → 2s each and loop starvation. Realistic single-login cost is
- ~100ms. bcrypt cost is intentional and untouched; lesson recorded: keep
- auth concurrency low, never weaken hashing.
+blocking) → 2s each and loop starvation. Realistic single-login cost is
+~100ms. bcrypt cost is intentional and untouched; lesson recorded: keep
+auth concurrency low, never weaken hashing.
 
 Targets: simple read P95 < 300ms ✓ (list 173, parse 110);
 authenticated normal P95 < 500ms ✓ (analytics 127, create 422);

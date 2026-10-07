@@ -2,12 +2,12 @@
 
 ## Rules (advisory by default)
 
-| Trigger | Action |
-|---|---|
-| Address needs confirmation | `VERIFY_ADDRESS` |
-| Risk or RTO HIGH | `MANUAL_REVIEW` + `CALL_CUSTOMER` |
-| Risk HIGH | `SUGGEST_PREPAID` |
-| Risk or RTO MEDIUM | `REVIEW_BEFORE_DISPATCH` |
+| Trigger                    | Action                            |
+| -------------------------- | --------------------------------- |
+| Address needs confirmation | `VERIFY_ADDRESS`                  |
+| Risk or RTO HIGH           | `MANUAL_REVIEW` + `CALL_CUSTOMER` |
+| Risk HIGH                  | `SUGGEST_PREPAID`                 |
+| Risk or RTO MEDIUM         | `REVIEW_BEFORE_DISPATCH`          |
 
 Every recommendation carries structured `reasons`. Persisting one **never**
 mutates parcel, finance or delivery state.

@@ -21,7 +21,10 @@ describe("Rider bilingual catalog", () => {
   });
 
   it("has no empty Rider strings in either locale", () => {
-    for (const [locale, catalog] of [["en", en], ["bn", bn]] as const) {
+    for (const [locale, catalog] of [
+      ["en", en],
+      ["bn", bn],
+    ] as const) {
       const walk = (value: unknown, path: string): void => {
         if (typeof value === "string") {
           expect(value.trim(), `${locale}:${path}`).not.toBe("");

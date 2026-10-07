@@ -24,16 +24,24 @@ import {
 import { IntegrationFailureStatus, type IntegrationFailureItem } from "@dhruto/contracts";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { PageHeader } from "@/components/page-header";
+import { useFormatters } from "@/lib/format";
 
 /** Admin-only operational view: queues, providers, dead-letter + outbox replay. */
 export function AdminIntegrationsDashboard() {
   const t = useTranslations("AdminIntegrations");
+  const { dateTime } = useFormatters();
   const [failurePage, setFailurePage] = React.useState(1);
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
-  const overview = useGetIntegrationOverviewQuery(undefined, { pollingInterval: 15000, skipPollingIfUnfocused: true });
+  const overview = useGetIntegrationOverviewQuery(undefined, {
+    pollingInterval: 15000,
+    skipPollingIfUnfocused: true,
+  });
   const failures = useListIntegrationFailuresQuery({ page: failurePage, limit: 20 });
-  const outbox = useGetOutboxOverviewQuery(undefined, { pollingInterval: 15000, skipPollingIfUnfocused: true });
+  const outbox = useGetOutboxOverviewQuery(undefined, {
+    pollingInterval: 15000,
+    skipPollingIfUnfocused: true,
+  });
 
   const [replay, { isLoading: isReplaying }] = useReplayIntegrationFailureMutation();
   const [resolve, { isLoading: isResolving }] = useResolveIntegrationFailureMutation();
@@ -264,9 +272,7 @@ export function AdminIntegrationsDashboard() {
                   header: t("colLastAttempt"),
                   cell: ({ row }: { row: { original: IntegrationFailureItem } }) => (
                     <span>
-                      {row.original.lastAttemptAt
-                        ? new Date(row.original.lastAttemptAt).toLocaleString()
-                        : "—"}
+                      {row.original.lastAttemptAt ? dateTime(row.original.lastAttemptAt) : "—"}
                     </span>
                   ),
                 },
@@ -277,7 +283,10 @@ export function AdminIntegrationsDashboard() {
                 .filter((f) => f.status === IntegrationFailureStatus.OPEN)
                 .slice(0, 5)
                 .map((f) => (
-                  <div key={f.id} className="flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px]">
+                  <div
+                    key={f.id}
+                    className="flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px]"
+                  >
                     <span className="max-w-[180px] truncate font-mono">{f.jobId ?? f.id}</span>
                     <Button
                       size="sm"

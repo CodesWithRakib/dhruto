@@ -5,7 +5,7 @@
 - Parser `address-parser-v1.0`, dataset `bd-geo-2026-10`, risk `rule-risk-v1`,
   RTO `rule-based-rto-v1` (type `RULE_BASED`), features `features-v1`.
 - Every parse/risk/prediction row carries its versions; `GET
-  /intelligence/health` and `GET /admin/intelligence/versions` expose the
+/intelligence/health` and `GET /admin/intelligence/versions` expose the
   active set. Bump versions only with a documented change; old rows stay
   reproducible.
 

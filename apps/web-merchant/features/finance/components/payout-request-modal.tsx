@@ -4,9 +4,18 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { PayoutMethod } from "@dhruto/contracts";
 import { useRequestPayoutMutation, newIdempotencyKey } from "../api/finance.api";
-import { X, CheckCircle, AlertCircle, Building2, Smartphone, ArrowRight, Loader2 } from "lucide-react";
+import {
+  X,
+  CheckCircle,
+  AlertCircle,
+  Building2,
+  Smartphone,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 import { Button, Input, Label } from "@dhruto/ui";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { useFormatters } from "@/lib/format";
 
 interface PayoutRequestModalProps {
   isOpen: boolean;
@@ -28,6 +37,7 @@ const METHODS: Array<{ method: PayoutMethod; label: string }> = [
  */
 export function PayoutRequestModal({ isOpen, onClose, availableBalance }: PayoutRequestModalProps) {
   const t = useTranslations("Finance");
+  const { bdt } = useFormatters();
   const [method, setMethod] = React.useState<PayoutMethod>(PayoutMethod.BKASH);
   const [accountNumber, setAccountNumber] = React.useState("");
   const [accountType, setAccountType] = React.useState<"PERSONAL" | "MERCHANT">("PERSONAL");
@@ -89,7 +99,8 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
             accountType,
             bankName: method === PayoutMethod.BANK_TRANSFER ? bankName.trim() : undefined,
             branchName: method === PayoutMethod.BANK_TRANSFER ? branchName.trim() : undefined,
-            accountHolderName: method === PayoutMethod.BANK_TRANSFER ? accountHolderName.trim() : undefined,
+            accountHolderName:
+              method === PayoutMethod.BANK_TRANSFER ? accountHolderName.trim() : undefined,
           },
         },
         idempotencyKey,
@@ -111,9 +122,12 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
       <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-6 sm:p-8">
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div>
-            <h3 className="text-xl font-bold tracking-tight text-foreground">{t("payoutModalTitle")}</h3>
+            <h3 className="text-xl font-bold tracking-tight text-foreground">
+              {t("payoutModalTitle")}
+            </h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {t("payout.availableNow")}: <span className="font-semibold text-success">৳{availableBalance.toLocaleString()}</span>
+              {t("payout.availableNow")}:{" "}
+              <span className="font-semibold text-success">{bdt(availableBalance)}</span>
             </p>
           </div>
           <button
@@ -126,14 +140,20 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
         </div>
 
         {errorMsg && (
-          <div role="alert" className="mt-4 flex items-center gap-2 rounded-2xl border border-danger bg-danger-soft p-3.5 text-xs text-danger">
+          <div
+            role="alert"
+            className="mt-4 flex items-center gap-2 rounded-2xl border border-danger bg-danger-soft p-3.5 text-xs text-danger"
+          >
             <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {successMsg && (
-          <div role="status" className="mt-4 flex items-center gap-2 rounded-2xl border border-success bg-success-soft p-3.5 text-xs text-success">
+          <div
+            role="status"
+            className="mt-4 flex items-center gap-2 rounded-2xl border border-success bg-success-soft p-3.5 text-xs text-success"
+          >
             <CheckCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="font-mono">{successMsg}</span>
           </div>
@@ -170,7 +190,10 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
             </div>
 
             <div>
-              <Label htmlFor="account-num-input" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="account-num-input"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 {t("accountNumber")}
               </Label>
               <Input
@@ -207,7 +230,9 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
             {method === PayoutMethod.BANK_TRANSFER && (
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="holder-name-input" className="text-xs text-muted-foreground">{t("payout.accountHolder")}</Label>
+                  <Label htmlFor="holder-name-input" className="text-xs text-muted-foreground">
+                    {t("payout.accountHolder")}
+                  </Label>
                   <Input
                     id="holder-name-input"
                     type="text"
@@ -218,7 +243,9 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="bank-name-input" className="text-xs text-muted-foreground">Bank</Label>
+                    <Label htmlFor="bank-name-input" className="text-xs text-muted-foreground">
+                      Bank
+                    </Label>
                     <Input
                       id="bank-name-input"
                       type="text"
@@ -228,7 +255,9 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                     />
                   </div>
                   <div>
-                    <Label htmlFor="branch-name-input" className="text-xs text-muted-foreground">Branch</Label>
+                    <Label htmlFor="branch-name-input" className="text-xs text-muted-foreground">
+                      Branch
+                    </Label>
                     <Input
                       id="branch-name-input"
                       type="text"
@@ -243,15 +272,27 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
 
             <div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="payout-amount-input" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Label
+                  htmlFor="payout-amount-input"
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >
                   {t("amount")}
                 </Label>
                 <span className="text-[11px] text-muted-foreground">
-                  {isUnderMin ? <span className="font-semibold text-danger">{t("payout.minimum")}</span> : t("payout.minimum")}
+                  {isUnderMin ? (
+                    <span className="font-semibold text-danger">{t("payout.minimum")}</span>
+                  ) : (
+                    t("payout.minimum")
+                  )}
                 </span>
               </div>
               <div className="relative mt-1.5">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground" aria-hidden="true">৳</span>
+                <span
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  ৳
+                </span>
                 <Input
                   id="payout-amount-input"
                   type="number"
@@ -273,7 +314,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                     disabled={val > availableBalance}
                     className="rounded-xl border border-border bg-surface-muted px-2.5 py-1 text-xs font-medium text-foreground transition-colors disabled:opacity-40"
                   >
-                    +৳{val.toLocaleString()}
+                    +{bdt(val)}
                   </button>
                 ))}
                 <button
@@ -282,7 +323,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   disabled={availableBalance < 100}
                   className="rounded-xl border border-success bg-success-soft px-2.5 py-1 text-xs font-semibold text-success transition-colors"
                 >
-                  Max (৳{availableBalance.toLocaleString()})
+                  Max ({bdt(availableBalance)})
                 </button>
               </div>
             </div>
@@ -291,7 +332,11 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
               <Button type="button" variant="outline" onClick={onClose} className="w-1/3">
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isOverBalance || numAmount < 100} className="w-2/3 gap-2 font-bold">
+              <Button
+                type="submit"
+                disabled={isOverBalance || numAmount < 100}
+                className="w-2/3 gap-2 font-bold"
+              >
                 <span>{t("payout.reviewTitle")}</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>
@@ -304,7 +349,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
             <dl className="space-y-2 rounded-xl bg-surface-muted p-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">{t("payout.requestedAmount")}</dt>
-                <dd className="font-mono font-bold tabular-nums">৳{numAmount.toLocaleString()}</dd>
+                <dd className="font-mono font-bold tabular-nums">{bdt(numAmount)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">{t("payout.method")}</dt>
@@ -316,14 +361,24 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
               </div>
               <div className="flex justify-between border-t border-border pt-2">
                 <dt className="text-muted-foreground">{t("payout.netPayout")}</dt>
-                <dd className="font-mono font-bold tabular-nums text-success">৳{numAmount.toLocaleString()}</dd>
+                <dd className="font-mono font-bold tabular-nums text-success">{bdt(numAmount)}</dd>
               </div>
             </dl>
             <div className="flex items-center gap-3">
-              <Button type="button" variant="outline" onClick={() => setReviewing(false)} className="w-1/3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setReviewing(false)}
+                className="w-1/3"
+              >
                 {t("cancel")}
               </Button>
-              <Button type="button" onClick={handleSubmit} disabled={isLoading} className="w-2/3 gap-2 font-bold">
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="w-2/3 gap-2 font-bold"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

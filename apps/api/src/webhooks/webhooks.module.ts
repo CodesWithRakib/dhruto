@@ -16,12 +16,7 @@ import { AuthModule } from "../auth/auth.module.js";
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      WebhookSubscription,
-      WebhookDelivery,
-      Merchant,
-      IntegrationFailure,
-    ]),
+    TypeOrmModule.forFeature([WebhookSubscription, WebhookDelivery, Merchant, IntegrationFailure]),
     BullModule.registerQueue({
       name: "webhooks",
     }),

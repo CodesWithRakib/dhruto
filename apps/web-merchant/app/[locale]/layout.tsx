@@ -1,11 +1,6 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
-import {
-  Inter,
-  Noto_Sans_Bengali,
-  Hind_Siliguri,
-  Plus_Jakarta_Sans,
-} from "next/font/google";
+import { Inter, Noto_Sans_Bengali, Hind_Siliguri, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -114,7 +109,9 @@ export default async function LocaleLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${plusJakartaSans.variable} ${hindSiliguri.variable} ${notoSansBengali.variable}`}
     >
-      <body className={`min-h-screen bg-background ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}>
+      <body
+        className={`min-h-screen bg-background ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}
+      >
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <NetworkStatus />

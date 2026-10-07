@@ -84,9 +84,7 @@ export function ShippingLabelView({ parcelId }: ShippingLabelViewProps) {
               <Truck className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-xl font-black tracking-tighter">DHRUTO</span>
-            <span className="ml-1 border border-black px-1 text-[9px] font-bold">
-              EXPRESS
-            </span>
+            <span className="ml-1 border border-black px-1 text-[9px] font-bold">EXPRESS</span>
           </div>
           <div className="text-right">
             <span className="block text-[9px] font-bold uppercase">{t("hub")}</span>
@@ -110,15 +108,9 @@ export function ShippingLabelView({ parcelId }: ShippingLabelViewProps) {
         {/* Recipient + COD */}
         <div className="grid grid-cols-3 divide-x-2 divide-black border-b-2 border-black">
           <div className="col-span-2 space-y-1 p-3">
-            <span className="block text-[9px] font-extrabold uppercase">
-              {t("to")}
-            </span>
-            <p className="text-sm font-black uppercase leading-tight">
-              {label.recipientName}
-            </p>
-            <p className="font-mono text-sm font-bold tracking-tight">
-              {label.recipientPhone}
-            </p>
+            <span className="block text-[9px] font-extrabold uppercase">{t("to")}</span>
+            <p className="text-sm font-black uppercase leading-tight">{label.recipientName}</p>
+            <p className="font-mono text-sm font-bold tracking-tight">{label.recipientPhone}</p>
             <p className="mt-1 text-[11px] leading-tight">{label.deliveryAddress}</p>
             <p className="mt-1 text-[11px] font-black uppercase">
               {label.thana}, {label.district}

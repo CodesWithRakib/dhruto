@@ -1,4 +1,17 @@
-import { ParcelStatus } from "@dhruto/contracts";
+import {
+  BagStatus,
+  CashDiscrepancyStatus,
+  CashHandInStatus,
+  ExceptionStatus,
+  FinancialTransactionStatus,
+  ManifestStatus,
+  ParcelStatus,
+  PayoutStatus,
+  RiderDutyStatus,
+  ScanOutcome,
+  SettlementStatus,
+  WalletTransactionType,
+} from "@dhruto/contracts";
 import {
   AlertTriangle,
   BadgeCheck,
@@ -131,4 +144,110 @@ export function statusConfig(status: ParcelStatus): StatusConfig {
       icon: CircleDashed,
     }
   );
+}
+
+/* ------------------------------------------------------------------ */
+/* Non-parcel domain statuses                                          */
+/* ------------------------------------------------------------------ */
+/**
+ * Every other status surface in Dhruto. Parcel status is richer (it also owns
+ * an icon and a lifecycle), so it keeps `PARCEL_STATUS_CONFIG`; everything else
+ * only maps a value to a semantic tone here. `EnumBadge` combines one of these
+ * maps with a message namespace, which means a payout "COMPLETED" and a
+ * settlement "SETTLED" always render with the same success tone.
+ */
+export const STATUS_TONE_FALLBACK: StatusTone = "neutral";
+
+export const PAYOUT_STATUS_TONE: Record<PayoutStatus, StatusTone> = {
+  [PayoutStatus.REQUESTED]: "warning",
+  [PayoutStatus.APPROVED]: "info",
+  [PayoutStatus.PROCESSING]: "info",
+  [PayoutStatus.COMPLETED]: "success",
+  [PayoutStatus.FAILED]: "danger",
+  [PayoutStatus.REJECTED]: "danger",
+  [PayoutStatus.CANCELLED]: "neutral",
+};
+
+export const WALLET_TRANSACTION_TONE: Record<WalletTransactionType, StatusTone> = {
+  [WalletTransactionType.COD_CREDIT]: "success",
+  [WalletTransactionType.DELIVERY_FEE]: "danger",
+  [WalletTransactionType.RETURN_FEE]: "danger",
+  [WalletTransactionType.PAYOUT_DEBIT]: "warning",
+  [WalletTransactionType.ADJUSTMENT_CREDIT]: "info",
+  [WalletTransactionType.ADJUSTMENT_DEBIT]: "info",
+};
+
+export const BAG_STATUS_TONE: Record<BagStatus, StatusTone> = {
+  [BagStatus.OPEN]: "neutral",
+  [BagStatus.SEALED]: "info",
+  [BagStatus.IN_TRANSIT]: "info",
+  [BagStatus.RECEIVED]: "success",
+  [BagStatus.COMPLETED]: "success",
+  [BagStatus.CANCELLED]: "danger",
+};
+
+export const MANIFEST_STATUS_TONE: Record<ManifestStatus, StatusTone> = {
+  [ManifestStatus.CREATED]: "neutral",
+  [ManifestStatus.DISPATCHED]: "info",
+  [ManifestStatus.IN_TRANSIT]: "info",
+  [ManifestStatus.RECEIVED]: "success",
+  [ManifestStatus.RECONCILED]: "success",
+  [ManifestStatus.CANCELLED]: "danger",
+};
+
+export const EXCEPTION_STATUS_TONE: Record<ExceptionStatus, StatusTone> = {
+  [ExceptionStatus.OPEN]: "danger",
+  [ExceptionStatus.RESOLVED]: "success",
+  [ExceptionStatus.DISMISSED]: "neutral",
+};
+
+export const SETTLEMENT_STATUS_TONE: Record<SettlementStatus, StatusTone> = {
+  [SettlementStatus.SETTLED]: "success",
+  [SettlementStatus.REVERSED]: "danger",
+};
+
+export const CASH_HANDIN_STATUS_TONE: Record<CashHandInStatus, StatusTone> = {
+  [CashHandInStatus.SUBMITTED]: "warning",
+  [CashHandInStatus.VERIFIED]: "success",
+  [CashHandInStatus.DISCREPANCY]: "danger",
+  [CashHandInStatus.RESOLVED]: "info",
+};
+
+export const CASH_DISCREPANCY_STATUS_TONE: Record<CashDiscrepancyStatus, StatusTone> = {
+  [CashDiscrepancyStatus.OPEN]: "danger",
+  [CashDiscrepancyStatus.RESOLVED]: "success",
+};
+
+export const FINANCIAL_TXN_STATUS_TONE: Record<FinancialTransactionStatus, StatusTone> = {
+  [FinancialTransactionStatus.POSTED]: "success",
+  [FinancialTransactionStatus.REVERSED]: "danger",
+};
+
+export const RIDER_DUTY_TONE: Record<RiderDutyStatus, StatusTone> = {
+  [RiderDutyStatus.ON_DUTY]: "success",
+  [RiderDutyStatus.OFF_DUTY]: "neutral",
+};
+
+/**
+ * Rider account status is a plain string on the wire (the API does not expose
+ * an enum), so this is an open map with a neutral fallback for new values.
+ */
+export const RIDER_STATUS_TONE: Record<string, StatusTone> = {
+  ACTIVE: "success",
+  ON_DUTY: "success",
+  PENDING: "warning",
+  SUSPENDED: "danger",
+  INACTIVE: "neutral",
+  OFF_DUTY: "neutral",
+};
+
+export const SCAN_OUTCOME_TONE: Record<ScanOutcome, StatusTone> = {
+  [ScanOutcome.APPLIED]: "success",
+  [ScanOutcome.DUPLICATE]: "warning",
+  [ScanOutcome.REJECTED]: "danger",
+};
+
+/** Never trust an unrecognised wire value: fall back to the neutral tone. */
+export function resolveTone(map: Record<string, StatusTone>, value: string): StatusTone {
+  return map[value] ?? STATUS_TONE_FALLBACK;
 }

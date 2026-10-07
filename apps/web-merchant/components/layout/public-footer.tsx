@@ -26,27 +26,37 @@ export function PublicFooter() {
 
           {/* Quick links */}
           <div>
-            <h2 className="text-body font-semibold text-white mb-4">
-              {t("quickLinks")}
-            </h2>
+            <h2 className="text-body font-semibold text-white mb-4">{t("quickLinks")}</h2>
             <ul className="space-y-2.5">
               <li>
-                <Link href="/" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {tn("home")}
                 </Link>
               </li>
               <li>
-                <Link href="/services" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/services"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {tn("services")}
                 </Link>
               </li>
               <li>
-                <Link href="/track" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/track"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {tn("tracking")}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/about"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {t("career")}
                 </Link>
               </li>
@@ -55,27 +65,37 @@ export function PublicFooter() {
 
           {/* Support */}
           <div>
-            <h2 className="text-body font-semibold text-white mb-4">
-              {t("support")}
-            </h2>
+            <h2 className="text-body font-semibold text-white mb-4">{t("support")}</h2>
             <ul className="space-y-2.5">
               <li>
-                <Link href="/faq" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/faq"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {t("faq")}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/contact"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {t("contact")}
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/terms"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {t("returnPolicy")}
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-body text-muted-foreground hover:text-white transition-colors">
+                <Link
+                  href="/terms"
+                  className="text-body text-muted-foreground hover:text-white transition-colors"
+                >
                   {t("terms")}
                 </Link>
               </li>
@@ -84,9 +104,7 @@ export function PublicFooter() {
 
           {/* Socials & Connect */}
           <div>
-            <h2 className="text-body font-semibold text-white mb-4">
-              {t("connect")}
-            </h2>
+            <h2 className="text-body font-semibold text-white mb-4">{t("connect")}</h2>
             <div className="flex items-center gap-3">
               <a
                 href="https://facebook.com"

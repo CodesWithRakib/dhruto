@@ -17,16 +17,14 @@ import {
 } from "@dhruto/ui";
 import { Package, Lock, Scan, AlertTriangle, CheckCircle2, Truck } from "lucide-react";
 import { BagStatus } from "@dhruto/contracts";
-import {
-  useGetBagByIdQuery,
-  useAddParcelToBagMutation,
-  useSealBagMutation,
-} from "../api/hubs.api";
+import { useGetBagByIdQuery, useAddParcelToBagMutation, useSealBagMutation } from "../api/hubs.api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { Link } from "@/lib/navigation";
 import { HUB_ROUTES } from "@/config/routes";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { BAG_STATUS_TONE } from "@/config/status";
 
 interface BagDetailsViewProps {
   bagId: string;
@@ -114,19 +112,28 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
     <div className="space-y-6">
       {/* Status banner — text + icon, never color alone */}
       {bag.status === BagStatus.SEALED ? (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success">
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success"
+        >
           <Lock className="h-4 w-4" aria-hidden="true" />
           {t("bags.sealedBanner")}
         </p>
       ) : null}
       {bag.status === BagStatus.IN_TRANSIT ? (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-info bg-info-soft px-4 py-3 text-xs font-semibold text-info">
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-info bg-info-soft px-4 py-3 text-xs font-semibold text-info"
+        >
           <Truck className="h-4 w-4" aria-hidden="true" />
           {t("bags.inTransitBanner")}
         </p>
       ) : null}
       {bag.status === BagStatus.RECEIVED ? (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success">
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success"
+        >
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {t("bags.receivedBanner")}
         </p>
@@ -136,39 +143,63 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       <Card>
         <CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.details")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.details")}
+            </p>
             <p className="font-mono text-sm font-bold text-foreground">{bag.bagCode}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("status")}</p>
-            <Badge variant={isOpen ? "secondary" : "success"} className="mt-1 text-[11px]">{bag.status}</Badge>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("status")}
+            </p>
+            <Badge variant={isOpen ? "secondary" : "success"} className="mt-1 text-[11px]">
+              {<EnumBadge namespace="BagStatus" value={bag.status} tones={BAG_STATUS_TONE} />}
+            </Badge>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.destination")}</p>
-            <p className="text-sm font-semibold text-foreground">{bag.destinationHubName} ({bag.destinationHubCode})</p>
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.parcelsInBag")}</p>
-            <p className="font-mono text-sm font-bold tabular-nums text-foreground">
-              {t("bags.parcelCount", { count: bag.parcelCount })} · {t("bags.totalWeight", { weight: bag.totalWeightKg })}
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.destination")}
+            </p>
+            <p className="text-sm font-semibold text-foreground">
+              {bag.destinationHubName} ({bag.destinationHubCode})
             </p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.createdBy")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.parcelsInBag")}
+            </p>
+            <p className="font-mono text-sm font-bold tabular-nums text-foreground">
+              {t("bags.parcelCount", { count: bag.parcelCount })} ·{" "}
+              {t("bags.totalWeight", { weight: bag.totalWeightKg })}
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.createdBy")}
+            </p>
             <p className="text-sm text-foreground">{bag.createdByName ?? "—"}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.sealedBy")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.sealedBy")}
+            </p>
             <p className="text-sm text-foreground">{bag.sealedByName ?? "—"}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.sealTag")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.sealTag")}
+            </p>
             <p className="font-mono text-sm text-foreground">{bag.sealTag ?? "—"}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("bags.manifest")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("bags.manifest")}
+            </p>
             {bag.manifestId && bag.manifestCode ? (
-              <Link href={HUB_ROUTES.manifest(bag.manifestId)} className="font-mono text-sm font-semibold text-primary hover:underline">
+              <Link
+                href={HUB_ROUTES.manifest(bag.manifestId)}
+                className="font-mono text-sm font-semibold text-primary hover:underline"
+              >
                 {bag.manifestCode}
               </Link>
             ) : (
@@ -184,7 +215,10 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
           <CardContent className="space-y-3 p-4">
             <form onSubmit={handleAddParcel} className="flex gap-2">
               <div className="relative flex-1">
-                <Scan className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Scan
+                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <Input
                   ref={inputRef}
                   type="text"
@@ -199,11 +233,19 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
                   autoFocus
                 />
               </div>
-              <Button type="submit" disabled={isAdding || !trackingInput.trim()} className="h-12 px-6">
+              <Button
+                type="submit"
+                disabled={isAdding || !trackingInput.trim()}
+                className="h-12 px-6"
+              >
                 {isAdding ? t("bags.adding") : t("bags.addParcel")}
               </Button>
             </form>
-            <Button variant="outline" onClick={() => setConfirmSealOpen(true)} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmSealOpen(true)}
+              className="w-full sm:w-auto"
+            >
               <Lock className="h-4 w-4" aria-hidden="true" />
               {t("bags.seal")}
             </Button>
@@ -224,10 +266,17 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
           ) : (
             <ul className="divide-y divide-border">
               {bag.parcels.map((parcel) => (
-                <li key={parcel.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs">
-                  <span className="font-mono font-semibold text-foreground">{parcel.trackingCode}</span>
+                <li
+                  key={parcel.id}
+                  className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs"
+                >
+                  <span className="font-mono font-semibold text-foreground">
+                    {parcel.trackingCode}
+                  </span>
                   <span className="text-muted-foreground">{parcel.recipientName}</span>
-                  <Badge variant="secondary" className="ml-auto text-[10px]">{parcel.status}</Badge>
+                  <Badge variant="secondary" className="ml-auto text-[10px]">
+                    {parcel.status}
+                  </Badge>
                 </li>
               ))}
             </ul>

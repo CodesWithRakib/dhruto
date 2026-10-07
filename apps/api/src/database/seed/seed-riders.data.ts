@@ -1,4 +1,4 @@
-import { RiderStatus } from '../entities/Rider.entity.js';
+import { RiderStatus } from "../entities/Rider.entity.js";
 
 export interface SeedRiderData {
   userEmail: string;
@@ -9,21 +9,21 @@ export interface SeedRiderData {
 
 export const SEED_RIDERS: SeedRiderData[] = [
   {
-    userEmail: 'rider@dhruto.com',
-    hubCode: 'HUB-DHK-01',
+    userEmail: "rider@dhruto.com",
+    hubCode: "HUB-DHK-01",
     status: RiderStatus.ON_DUTY,
-    riderCode: 'RDR-000001',
+    riderCode: "RDR-000001",
   },
   {
-    userEmail: 'rider2@dhruto.com',
-    hubCode: 'HUB-DHK-01',
+    userEmail: "rider2@dhruto.com",
+    hubCode: "HUB-DHK-01",
     status: RiderStatus.ON_DUTY,
-    riderCode: 'RDR-000002',
+    riderCode: "RDR-000002",
   },
   {
-    userEmail: 'rider3@dhruto.com',
-    hubCode: 'HUB-CTG-01',
+    userEmail: "rider3@dhruto.com",
+    hubCode: "HUB-CTG-01",
     status: RiderStatus.ACTIVE,
-    riderCode: 'RDR-000003',
+    riderCode: "RDR-000003",
   },
 ];

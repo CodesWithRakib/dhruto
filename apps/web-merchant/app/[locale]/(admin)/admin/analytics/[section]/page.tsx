@@ -1,6 +1,9 @@
 import React from "react";
 import type { Metadata } from "next";
-import { AdminSectionDashboard, type AnalyticsSection } from "@/features/analytics/components/admin-section-dashboard";
+import {
+  AdminSectionDashboard,
+  type AnalyticsSection,
+} from "@/features/analytics/components/admin-section-dashboard";
 
 const TITLES: Record<string, string> = {
   parcels: "Parcel Analytics",
@@ -17,7 +20,11 @@ const TITLES: Record<string, string> = {
   reports: "Reports & Exports",
 };
 
-export async function generateMetadata({ params }: { params: Promise<{ section: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ section: string }>;
+}): Promise<Metadata> {
   const { section } = await params;
   return {
     title: `${TITLES[section] ?? "Analytics"} — Admin`,
@@ -26,7 +33,11 @@ export async function generateMetadata({ params }: { params: Promise<{ section: 
   };
 }
 
-export default async function AdminAnalyticsSectionPage({ params }: { params: Promise<{ section: string }> }) {
+export default async function AdminAnalyticsSectionPage({
+  params,
+}: {
+  params: Promise<{ section: string }>;
+}) {
   const { section } = await params;
   return <AdminSectionDashboard section={section as AnalyticsSection} />;
 }

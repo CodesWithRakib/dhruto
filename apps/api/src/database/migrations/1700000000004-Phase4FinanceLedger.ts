@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 4 - Finance ledger, settlement, hand-in batches and discrepancies.
@@ -11,7 +11,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * collected amount. All statements are idempotent.
  */
 export class Phase4FinanceLedger1700000000004 implements MigrationInterface {
-  name = 'Phase4FinanceLedger1700000000004';
+  name = "Phase4FinanceLedger1700000000004";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // ------------------------------------------------------------------
@@ -312,8 +312,12 @@ export class Phase4FinanceLedger1700000000004 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "cash_ledgers" DROP COLUMN IF EXISTS "verified_amount";`);
     await queryRunner.query(`ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "approved_at";`);
     await queryRunner.query(`ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "approved_by";`);
-    await queryRunner.query(`ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "failure_reason";`);
-    await queryRunner.query(`ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "idempotency_key";`);
+    await queryRunner.query(
+      `ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "failure_reason";`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "idempotency_key";`,
+    );
     await queryRunner.query(`ALTER TABLE "payout_requests" DROP COLUMN IF EXISTS "payout_code";`);
   }
 }

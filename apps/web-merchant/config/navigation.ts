@@ -104,9 +104,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
   ADMIN: [
     {
       labelKey: "groupOverview",
-      items: [
-        { href: ADMIN_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
-      ],
+      items: [{ href: ADMIN_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard }],
     },
     {
       labelKey: "groupOperations",
@@ -195,24 +193,9 @@ const BOTTOM_HREFS: Record<AppRole, string[]> = {
     MERCHANT_ROUTES.createBooking,
     MERCHANT_ROUTES.finance,
   ],
-  ADMIN: [
-    ADMIN_ROUTES.dashboard,
-    ADMIN_ROUTES.parcels,
-    ADMIN_ROUTES.finance,
-    ADMIN_ROUTES.hub,
-  ],
-  HUB_MANAGER: [
-    HUB_ROUTES.dashboard,
-    HUB_ROUTES.scanner,
-    HUB_ROUTES.bags,
-    HUB_ROUTES.manifests,
-  ],
-  RIDER: [
-    RIDER_ROUTES.dashboard,
-    RIDER_ROUTES.tasks,
-    RIDER_ROUTES.history,
-    RIDER_ROUTES.profile,
-  ],
+  ADMIN: [ADMIN_ROUTES.dashboard, ADMIN_ROUTES.parcels, ADMIN_ROUTES.finance, ADMIN_ROUTES.hub],
+  HUB_MANAGER: [HUB_ROUTES.dashboard, HUB_ROUTES.scanner, HUB_ROUTES.bags, HUB_ROUTES.manifests],
+  RIDER: [RIDER_ROUTES.dashboard, RIDER_ROUTES.tasks, RIDER_ROUTES.history, RIDER_ROUTES.profile],
   CUSTOMER: [],
 };
 

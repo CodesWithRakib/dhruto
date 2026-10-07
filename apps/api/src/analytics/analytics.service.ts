@@ -1,11 +1,9 @@
-import { Injectable, Optional } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CacheService } from '../common/cache/cache.service.js';
-import {
-  PayoutRequest,
-} from '../database/entities';
-import { ParcelStatus } from '@dhruto/contracts';
+import { Injectable, Optional } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CacheService } from "../common/cache/cache.service.js";
+import { PayoutRequest } from "../database/entities";
+import { ParcelStatus } from "@dhruto/contracts";
 import {
   MerchantAnalyticsSummary,
   OperationalAnalyticsSummary,
@@ -15,12 +13,12 @@ import {
   TopRiderMetric,
   RtoAnalytics,
   CodFlowAnalytics,
-} from '@dhruto/contracts';
-import { AnalyticsQueryDto } from './dto/analytics.dto';
-import { AnalyticsMetricsService, DELIVERED_STATUSES } from './analytics-metrics.service.js';
-import { AnalyticsDomainService } from './analytics-domain.service.js';
-import { AnalyticsRangeService } from './analytics-range.service.js';
-import { RtoPrediction } from '../database/entities/RtoPrediction.entity.js';
+} from "@dhruto/contracts";
+import { AnalyticsQueryDto } from "./dto/analytics.dto";
+import { AnalyticsMetricsService, DELIVERED_STATUSES } from "./analytics-metrics.service.js";
+import { AnalyticsDomainService } from "./analytics-domain.service.js";
+import { AnalyticsRangeService } from "./analytics-range.service.js";
+import { RtoPrediction } from "../database/entities/RtoPrediction.entity.js";
 
 /**
  * Legacy-shape analytics facade over the centralized metric layer.
@@ -49,9 +47,13 @@ export class AnalyticsService {
     merchantId: string,
     query: AnalyticsQueryDto,
   ): Promise<MerchantAnalyticsSummary> {
-    const cacheKey = `analytics:merchant:v2:${merchantId}:${query.period || '30d'}:${query.startDate || ''}:${query.endDate || ''}:${query.hubId || ''}`;
+    const cacheKey = `analytics:merchant:v2:${merchantId}:${query.period || "30d"}:${query.startDate || ""}:${query.endDate || ""}:${query.hubId || ""}`;
     if (this.cacheService) {
-      return this.cacheService.wrap(cacheKey, () => this.computeMerchantSummary(merchantId, query), 60);
+      return this.cacheService.wrap(
+        cacheKey,
+        () => this.computeMerchantSummary(merchantId, query),
+        60,
+      );
     }
     return this.computeMerchantSummary(merchantId, query);
   }
@@ -61,29 +63,35 @@ export class AnalyticsService {
     query: AnalyticsQueryDto,
   ): Promise<MerchantAnalyticsSummary> {
     const range = this.ranges.resolve({
-      preset: (query.period as never) ?? '30d',
+      preset: (query.period as never) ?? "30d",
       from: query.startDate,
       to: query.endDate,
     });
     const scope = { merchantId };
     const counts = await this.metrics.statusCounts(scope, range);
-    const eligible = this.metrics.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
+    const eligible = this.metrics.eligible(
+      counts.delivered,
+      counts.rto,
+      counts.failed,
+      counts.cancelled,
+    );
     const latencies = await this.metrics.deliveryLatencies(scope, range);
-    const avgDeliveryHours = latencies.length > 0
-      ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10
-      : 0;
+    const avgDeliveryHours =
+      latencies.length > 0
+        ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10
+        : 0;
 
     const cod = await this.domain.cod(scope, range);
     const feeRow = await this.metrics
       .scopedParcels(scope)
-      .select('SUM(p.delivery_fee)', 'sum')
+      .select("SUM(p.delivery_fee)", "sum")
       .andWhere('p."createdAt" BETWEEN :from AND :to', { from: range.from, to: range.to })
       .getRawOne<{ sum: string | null }>();
     const payoutsRow = await this.payoutRepo
-      .createQueryBuilder('pw')
-      .select('SUM(pw.amount)', 'sum')
-      .where('pw.merchant_id = :merchantId', { merchantId })
-      .andWhere('pw.status = :done', { done: 'COMPLETED' })
+      .createQueryBuilder("pw")
+      .select("SUM(pw.amount)", "sum")
+      .where("pw.merchant_id = :merchantId", { merchantId })
+      .andWhere("pw.status = :done", { done: "COMPLETED" })
       .andWhere('pw."createdAt" BETWEEN :from AND :to', { from: range.from, to: range.to })
       .getRawOne<{ sum: string | null }>();
 
@@ -98,29 +106,31 @@ export class AnalyticsService {
 
     const districtRows = await this.metrics
       .scopedParcels(scope)
-      .select('p.district', 'district')
-      .addSelect('COUNT(*)', 'count')
-      .addSelect(`SUM(CASE WHEN p.status IN (:...delivered) THEN 1 ELSE 0 END)`, 'delivered')
+      .select("p.district", "district")
+      .addSelect("COUNT(*)", "count")
+      .addSelect(`SUM(CASE WHEN p.status IN (:...delivered) THEN 1 ELSE 0 END)`, "delivered")
       .andWhere('p."createdAt" BETWEEN :from AND :to', { from: range.from, to: range.to })
       .setParameters({ delivered: DELIVERED_STATUSES })
-      .groupBy('p.district')
-      .orderBy('count', 'DESC')
+      .groupBy("p.district")
+      .orderBy("count", "DESC")
       .limit(5)
       .getRawMany<{ district: string | null; count: string; delivered: string }>();
     const total = counts.total;
     const topDistricts: DistrictMetric[] = districtRows.map((r) => ({
-      district: r.district ?? 'Unknown',
+      district: r.district ?? "Unknown",
       orderCount: Number(r.count),
       percentage: total > 0 ? Math.round((Number(r.count) / total) * 1000) / 10 : 0,
-      successRate: Number(r.count) > 0 ? Math.round((Number(r.delivered) / Number(r.count)) * 1000) / 10 : 0,
+      successRate:
+        Number(r.count) > 0 ? Math.round((Number(r.delivered) / Number(r.count)) * 1000) / 10 : 0,
     }));
 
-    const pendingOrders = (counts.byStatus[ParcelStatus.CREATED] ?? 0)
-      + (counts.byStatus[ParcelStatus.PICKUP_REQUESTED] ?? 0)
-      + (counts.byStatus[ParcelStatus.PICKUP_ASSIGNED] ?? 0);
+    const pendingOrders =
+      (counts.byStatus[ParcelStatus.CREATED] ?? 0) +
+      (counts.byStatus[ParcelStatus.PICKUP_REQUESTED] ?? 0) +
+      (counts.byStatus[ParcelStatus.PICKUP_ASSIGNED] ?? 0);
 
     return {
-      period: query.period || '30d',
+      period: query.period || "30d",
       startDate: range.from,
       endDate: range.to,
       kpis: {
@@ -148,22 +158,29 @@ export class AnalyticsService {
   }
 
   async getOperationalSummary(query: AnalyticsQueryDto): Promise<OperationalAnalyticsSummary> {
-    const cacheKey = `analytics:ops:v2:${query.period || '30d'}:${query.startDate || ''}:${query.endDate || ''}:${query.hubId || ''}`;
+    const cacheKey = `analytics:ops:v2:${query.period || "30d"}:${query.startDate || ""}:${query.endDate || ""}:${query.hubId || ""}`;
     if (this.cacheService) {
       return this.cacheService.wrap(cacheKey, () => this.computeOperationalSummary(query), 60);
     }
     return this.computeOperationalSummary(query);
   }
 
-  private async computeOperationalSummary(query: AnalyticsQueryDto): Promise<OperationalAnalyticsSummary> {
+  private async computeOperationalSummary(
+    query: AnalyticsQueryDto,
+  ): Promise<OperationalAnalyticsSummary> {
     const range = this.ranges.resolve({
-      preset: (query.period as never) ?? '30d',
+      preset: (query.period as never) ?? "30d",
       from: query.startDate,
       to: query.endDate,
     });
     const scope = query.hubId ? { hubId: query.hubId } : {};
     const counts = await this.metrics.statusCounts(scope, range);
-    const eligible = this.metrics.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
+    const eligible = this.metrics.eligible(
+      counts.delivered,
+      counts.rto,
+      counts.failed,
+      counts.cancelled,
+    );
 
     const hubs = await this.metrics.hubStats(range, query.hubId);
     const hubThroughputList: HubThroughputMetric[] = hubs.map((h) => ({
@@ -180,7 +197,7 @@ export class AnalyticsService {
     const topRiders: TopRiderMetric[] = riders.map((r) => ({
       riderId: r.riderId,
       name: r.name,
-      phone: '',
+      phone: "",
       hubName: r.hubName,
       deliveredCount: r.delivered,
       completionRate: r.successRate ?? 0,
@@ -193,7 +210,7 @@ export class AnalyticsService {
     const codDetail = await this.domain.cod(scope, range);
 
     return {
-      period: query.period || '30d',
+      period: query.period || "30d",
       totalShipments: counts.total,
       activeHubsCount: hubs.length,
       activeRidersCount: riders.filter((r) => r.assigned > 0).length,
@@ -218,9 +235,12 @@ export class AnalyticsService {
     return summary.topRiders;
   }
 
-  async getRtoAnalytics(query: AnalyticsQueryDto, scope?: { merchantId?: string; hubId?: string }): Promise<RtoAnalytics> {
+  async getRtoAnalytics(
+    query: AnalyticsQueryDto,
+    scope?: { merchantId?: string; hubId?: string },
+  ): Promise<RtoAnalytics> {
     const range = this.ranges.resolve({
-      preset: (query.period as never) ?? '30d',
+      preset: (query.period as never) ?? "30d",
       from: query.startDate,
       to: query.endDate,
     });
@@ -230,17 +250,19 @@ export class AnalyticsService {
     // Risk-tier correlation from real RTO prediction levels in range
     // (merchant-scoped when a tenant scope is provided).
     const predictionQb = this.predictionRepo
-      .createQueryBuilder('p')
+      .createQueryBuilder("p")
       .where('p."predicted_at" BETWEEN :from AND :to', { from: range.from, to: range.to });
     if (effectiveScope.merchantId) {
-      predictionQb.andWhere('p.merchant_id = :merchantId', { merchantId: effectiveScope.merchantId });
+      predictionQb.andWhere("p.merchant_id = :merchantId", {
+        merchantId: effectiveScope.merchantId,
+      });
     }
     const predictions = await predictionQb.getMany();
-    const tiers = ['HIGH', 'MEDIUM', 'LOW'] as const;
+    const tiers = ["HIGH", "MEDIUM", "LOW"] as const;
     const byRiskTier = tiers.map((tier) => {
       const group = predictions.filter((p) => p.level === tier);
       const labeled = group.filter((p) => p.outcome !== null);
-      const rtoOutcomes = labeled.filter((p) => p.outcome === 'RTO').length;
+      const rtoOutcomes = labeled.filter((p) => p.outcome === "RTO").length;
       return {
         tier,
         parcelCount: group.length,
@@ -263,9 +285,12 @@ export class AnalyticsService {
     };
   }
 
-  async getCodAnalytics(query: AnalyticsQueryDto, scope?: { merchantId?: string; hubId?: string }): Promise<CodFlowAnalytics> {
+  async getCodAnalytics(
+    query: AnalyticsQueryDto,
+    scope?: { merchantId?: string; hubId?: string },
+  ): Promise<CodFlowAnalytics> {
     const range = this.ranges.resolve({
-      preset: (query.period as never) ?? '30d',
+      preset: (query.period as never) ?? "30d",
       from: query.startDate,
       to: query.endDate,
     });

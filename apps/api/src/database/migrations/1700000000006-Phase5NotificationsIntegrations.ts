@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 5 - Notifications, webhooks, queues and integrations.
@@ -9,7 +9,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * idempotent.
  */
 export class Phase5NotificationsIntegrations1700000000006 implements MigrationInterface {
-  name = 'Phase5NotificationsIntegrations1700000000006';
+  name = "Phase5NotificationsIntegrations1700000000006";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -162,8 +162,12 @@ export class Phase5NotificationsIntegrations1700000000006 implements MigrationIn
     await queryRunner.query(`DROP TABLE IF EXISTS "event_outbox";`);
     await queryRunner.query(`DROP TYPE IF EXISTS "public"."integration_failures_status_enum";`);
     await queryRunner.query(`DROP TYPE IF EXISTS "public"."integration_failures_kind_enum";`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "public"."notification_preferences_channel_enum";`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "public"."notification_preferences_category_enum";`);
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "public"."notification_preferences_channel_enum";`,
+    );
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "public"."notification_preferences_category_enum";`,
+    );
     await queryRunner.query(`DROP TYPE IF EXISTS "public"."event_outbox_status_enum";`);
   }
 }

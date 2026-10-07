@@ -14,10 +14,7 @@ import {
   FinancialTransactionStatus,
   FinancialTransactionType,
 } from "@dhruto/contracts";
-import {
-  FinancialEntry,
-  FinancialTransaction,
-} from "../../database/entities/index.js";
+import { FinancialEntry, FinancialTransaction } from "../../database/entities/index.js";
 import {
   IdempotencyClaimConflict,
   IdempotencyService,
@@ -64,10 +61,7 @@ export class LedgerService {
    * Posts a balanced transaction. With an idempotency key/scope the response
    * is replayed instead of duplicated.
    */
-  async post(
-    manager: EntityManager,
-    input: PostLedgerInput,
-  ): Promise<FinancialTransaction> {
+  async post(manager: EntityManager, input: PostLedgerInput): Promise<FinancialTransaction> {
     this.assertBalancedInput(input);
 
     if (input.idempotencyKey && input.idempotencyScope) {
@@ -83,8 +77,7 @@ export class LedgerService {
         requestHash,
       );
       if (resolution.kind === "replay") {
-        const transactionId = (resolution.response as { transactionId?: string })
-          .transactionId;
+        const transactionId = (resolution.response as { transactionId?: string }).transactionId;
         const existing = transactionId
           ? await manager.findOne(FinancialTransaction, {
               where: { id: transactionId },

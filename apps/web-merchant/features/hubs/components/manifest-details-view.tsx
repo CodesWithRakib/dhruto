@@ -25,8 +25,10 @@ import {
 import { getApiErrorMessage } from "@/lib/api-error";
 import { Link } from "@/lib/navigation";
 import { HUB_ROUTES } from "@/config/routes";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { MANIFEST_STATUS_TONE, BAG_STATUS_TONE } from "@/config/status";
 
 interface ManifestDetailsViewProps {
   manifestId: string;
@@ -51,7 +53,8 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
   const manifest = data?.data;
   const reconciliation = manifest?.reconciliation;
   const receivable =
-    manifest?.status === ManifestStatus.DISPATCHED || manifest?.status === ManifestStatus.IN_TRANSIT;
+    manifest?.status === ManifestStatus.DISPATCHED ||
+    manifest?.status === ManifestStatus.IN_TRANSIT;
 
   const handleDispatch = async () => {
     try {
@@ -82,7 +85,10 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
 
   const handleReceive = async () => {
     try {
-      const res = await receiveMutation({ manifestId, receipt: { scannedBagCodes, allowPartial } }).unwrap();
+      const res = await receiveMutation({
+        manifestId,
+        receipt: { scannedBagCodes, allowPartial },
+      }).unwrap();
       toast.success(res.message);
       setScannedBagCodes([]);
       refetch();
@@ -117,20 +123,30 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
   return (
     <div className="space-y-6">
       {/* State banners */}
-      {manifest.status === ManifestStatus.DISPATCHED || manifest.status === ManifestStatus.IN_TRANSIT ? (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-info bg-info-soft px-4 py-3 text-xs font-semibold text-info">
+      {manifest.status === ManifestStatus.DISPATCHED ||
+      manifest.status === ManifestStatus.IN_TRANSIT ? (
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-info bg-info-soft px-4 py-3 text-xs font-semibold text-info"
+        >
           <Truck className="h-4 w-4" aria-hidden="true" />
           {t("manifests.dispatchedBanner")}
         </p>
       ) : null}
       {manifest.status === ManifestStatus.RECEIVED ? (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success">
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success"
+        >
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {t("manifests.receivedBanner")}
         </p>
       ) : null}
       {manifest.status === ManifestStatus.RECONCILED ? (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-warning bg-warning-soft px-4 py-3 text-xs font-semibold text-warning">
+        <p
+          role="status"
+          className="flex items-center gap-2 rounded-xl border border-warning bg-warning-soft px-4 py-3 text-xs font-semibold text-warning"
+        >
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           {t("manifests.reconciledBanner")}
         </p>
@@ -140,12 +156,22 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       <Card>
         <CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.details")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("manifests.details")}
+            </p>
             <p className="font-mono text-sm font-bold text-foreground">{manifest.manifestCode}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("status")}</p>
-            <Badge className="mt-1 text-[11px]">{manifest.status}</Badge>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("status")}
+            </p>
+            {
+              <EnumBadge
+                namespace="ManifestStatus"
+                value={manifest.status}
+                tones={MANIFEST_STATUS_TONE}
+              />
+            }
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Route</p>
@@ -154,17 +180,23 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
             </p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.vehicle")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("manifests.vehicle")}
+            </p>
             <p className="font-mono text-sm text-foreground">{manifest.vehicleNumber}</p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.bagsInManifest")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("manifests.bagsInManifest")}
+            </p>
             <p className="font-mono text-sm font-bold tabular-nums text-foreground">
               {manifest.bagCount} · {t("manifests.parcelCount", { count: manifest.parcelCount })}
             </p>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.driverName")}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {t("manifests.driverName")}
+            </p>
             <p className="text-sm text-foreground">{manifest.driverName ?? "—"}</p>
           </div>
         </CardContent>
@@ -192,13 +224,18 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
           <ul className="divide-y divide-border">
             {manifest.bags.map((bag) => (
               <li key={bag.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs">
-                <Link href={HUB_ROUTES.bag(bag.id)} className="font-mono font-semibold text-primary hover:underline">
+                <Link
+                  href={HUB_ROUTES.bag(bag.id)}
+                  className="font-mono font-semibold text-primary hover:underline"
+                >
                   {bag.bagCode}
                 </Link>
                 <span className="text-muted-foreground">
                   {t("bags.parcelCount", { count: bag.parcelCount })}
                 </span>
-                <Badge variant="secondary" className="ml-auto text-[10px]">{bag.status}</Badge>
+                <Badge variant="secondary" className="ml-auto text-[10px]">
+                  {<EnumBadge namespace="BagStatus" value={bag.status} tones={BAG_STATUS_TONE} />}
+                </Badge>
               </li>
             ))}
           </ul>
@@ -256,7 +293,11 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
               />
               {t("manifests.allowPartial")}
             </label>
-            <Button onClick={handleReceive} disabled={isReceiving} className="w-full gap-1.5 sm:w-auto">
+            <Button
+              onClick={handleReceive}
+              disabled={isReceiving}
+              className="w-full gap-1.5 sm:w-auto"
+            >
               <PackageCheck className="h-4 w-4" aria-hidden="true" />
               {isReceiving ? t("manifests.receiving") : t("manifests.completeReceive")}
             </Button>
@@ -273,19 +314,33 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
             </h2>
             <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.expected")}</p>
-                <p className="font-mono text-xl font-bold tabular-nums">{reconciliation.expectedBagCount}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("manifests.expected")}
+                </p>
+                <p className="font-mono text-xl font-bold tabular-nums">
+                  {reconciliation.expectedBagCount}
+                </p>
               </div>
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.received")}</p>
-                <p className="font-mono text-xl font-bold tabular-nums">{reconciliation.receivedBagCount}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("manifests.received")}
+                </p>
+                <p className="font-mono text-xl font-bold tabular-nums">
+                  {reconciliation.receivedBagCount}
+                </p>
               </div>
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.missing")}</p>
-                <p className="font-mono text-xl font-bold tabular-nums">{reconciliation.missingBagCodes.length}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("manifests.missing")}
+                </p>
+                <p className="font-mono text-xl font-bold tabular-nums">
+                  {reconciliation.missingBagCodes.length}
+                </p>
               </div>
               <div className="rounded-lg bg-surface-muted p-3">
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("manifests.expected")} parcels</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("manifests.expected")} parcels
+                </p>
                 <p className="font-mono text-xl font-bold tabular-nums">
                   {reconciliation.receivedParcelCount}/{reconciliation.expectedParcelCount}
                 </p>
@@ -294,13 +349,17 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
             {reconciliation.missingBagCodes.length > 0 ? (
               <div className="rounded-lg border border-warning bg-warning-soft p-3 text-xs">
                 <p className="font-semibold text-warning">{t("manifests.missing")}:</p>
-                <p className="font-mono text-warning">{reconciliation.missingBagCodes.join(", ")}</p>
+                <p className="font-mono text-warning">
+                  {reconciliation.missingBagCodes.join(", ")}
+                </p>
               </div>
             ) : null}
             {reconciliation.missingTrackingCodes.length > 0 ? (
               <div className="rounded-lg border border-warning bg-warning-soft p-3 text-xs">
                 <p className="font-semibold text-warning">{t("manifests.missing")} parcels:</p>
-                <p className="font-mono text-warning">{reconciliation.missingTrackingCodes.join(", ")}</p>
+                <p className="font-mono text-warning">
+                  {reconciliation.missingTrackingCodes.join(", ")}
+                </p>
               </div>
             ) : null}
           </CardContent>

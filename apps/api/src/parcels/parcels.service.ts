@@ -7,12 +7,7 @@ import {
   Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import {
-  Brackets,
-  DataSource,
-  QueryFailedError,
-  Repository,
-} from "typeorm";
+import { Brackets, DataSource, QueryFailedError, Repository } from "typeorm";
 import {
   ApiErrorCode,
   DomainEventType,
@@ -50,8 +45,7 @@ import { CacheService } from "../common/cache/cache.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
 import { TrackingCodeService } from "./services/tracking-code.service.js";
 
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const PARCEL_CREATE_SCOPE = "PARCEL_CREATE";
 const TRACKING_CACHE_TTL_SECONDS = 60;
@@ -65,22 +59,55 @@ const BACKEND_UNKNOWN_ACTOR = "00000000-0000-0000-0000-000000000000";
 const STATUS_DESCRIPTIONS: Record<string, { en: string; bn: string }> = {
   [ParcelStatus.CREATED]: { en: "Booking Created", bn: "বুকিং সম্পন্ন হয়েছে" },
   [ParcelStatus.PICKUP_REQUESTED]: { en: "Pickup Requested", bn: "পিকআপের অনুরোধ গৃহীত হয়েছে" },
-  [ParcelStatus.PICKUP_ASSIGNED]: { en: "Rider Assigned for Pickup", bn: "পিকআপের জন্য রাইডার নিযুক্ত" },
+  [ParcelStatus.PICKUP_ASSIGNED]: {
+    en: "Rider Assigned for Pickup",
+    bn: "পিকআপের জন্য রাইডার নিযুক্ত",
+  },
   [ParcelStatus.PICKED_UP]: { en: "Parcel Picked Up", bn: "পার্সেল পিকআপ সম্পন্ন হয়েছে" },
-  [ParcelStatus.ORIGIN_HUB_RECEIVED]: { en: "Received at Sorting Hub", bn: "সর্টিং হাবে পার্সেল গৃহীত হয়েছে" },
+  [ParcelStatus.ORIGIN_HUB_RECEIVED]: {
+    en: "Received at Sorting Hub",
+    bn: "সর্টিং হাবে পার্সেল গৃহীত হয়েছে",
+  },
   [ParcelStatus.BAGGED]: { en: "Packed in Transit Bag", bn: "ট্রানজিট ব্যাগে সংরক্ষিত" },
-  [ParcelStatus.IN_TRANSIT]: { en: "In Transit to Destination Hub", bn: "গন্তব্য হাবে প্রেরিত হচ্ছে" },
-  [ParcelStatus.DESTINATION_HUB_RECEIVED]: { en: "Reached Destination Hub", bn: "গন্তব্য ডেলিভারি হাবে পৌঁছেছে" },
-  [ParcelStatus.ASSIGNED_TO_RIDER]: { en: "Assigned to Delivery Rider", bn: "ডেলিভারি রাইডার নির্ধারিত" },
+  [ParcelStatus.IN_TRANSIT]: {
+    en: "In Transit to Destination Hub",
+    bn: "গন্তব্য হাবে প্রেরিত হচ্ছে",
+  },
+  [ParcelStatus.DESTINATION_HUB_RECEIVED]: {
+    en: "Reached Destination Hub",
+    bn: "গন্তব্য ডেলিভারি হাবে পৌঁছেছে",
+  },
+  [ParcelStatus.ASSIGNED_TO_RIDER]: {
+    en: "Assigned to Delivery Rider",
+    bn: "ডেলিভারি রাইডার নির্ধারিত",
+  },
   [ParcelStatus.OUT_FOR_DELIVERY]: { en: "Out for Delivery", bn: "ডেলিভারির জন্য বের হয়েছে" },
-  [ParcelStatus.DELIVERY_ATTEMPTED]: { en: "Delivery Attempted", bn: "ডেলিভারির চেষ্টা করা হয়েছে" },
+  [ParcelStatus.DELIVERY_ATTEMPTED]: {
+    en: "Delivery Attempted",
+    bn: "ডেলিভারির চেষ্টা করা হয়েছে",
+  },
   [ParcelStatus.RESCHEDULED]: { en: "Delivery Rescheduled", bn: "ডেলিভারি পুনঃনির্ধারিত হয়েছে" },
   [ParcelStatus.DELIVERED]: { en: "Delivered to Recipient", bn: "সফলভাবে ডেলিভারি সম্পন্ন" },
-  [ParcelStatus.CASH_PENDING]: { en: "Cash Collected from Recipient", bn: "ক্যাশ গ্রহণ করা হয়েছে" },
-  [ParcelStatus.CASH_VERIFIED]: { en: "COD Amount Verified & Reconciled", bn: "ক্যাশ যাচাই সম্পন্ন" },
-  [ParcelStatus.RTO_INITIATED]: { en: "Return to Merchant Initiated", bn: "মার্চেন্টকে ফেরত প্রক্রিয়া শুরু" },
-  [ParcelStatus.RETURN_IN_TRANSIT]: { en: "Return in Transit", bn: "ফেরত পার্সেল ট্রানজিটে রয়েছে" },
-  [ParcelStatus.RETURNED_TO_MERCHANT]: { en: "Returned to Merchant", bn: "মার্চেন্টের নিকট ফেরত সম্পন্ন" },
+  [ParcelStatus.CASH_PENDING]: {
+    en: "Cash Collected from Recipient",
+    bn: "ক্যাশ গ্রহণ করা হয়েছে",
+  },
+  [ParcelStatus.CASH_VERIFIED]: {
+    en: "COD Amount Verified & Reconciled",
+    bn: "ক্যাশ যাচাই সম্পন্ন",
+  },
+  [ParcelStatus.RTO_INITIATED]: {
+    en: "Return to Merchant Initiated",
+    bn: "মার্চেন্টকে ফেরত প্রক্রিয়া শুরু",
+  },
+  [ParcelStatus.RETURN_IN_TRANSIT]: {
+    en: "Return in Transit",
+    bn: "ফেরত পার্সেল ট্রানজিটে রয়েছে",
+  },
+  [ParcelStatus.RETURNED_TO_MERCHANT]: {
+    en: "Returned to Merchant",
+    bn: "মার্চেন্টের নিকট ফেরত সম্পন্ন",
+  },
   [ParcelStatus.CANCELLED]: { en: "Order Cancelled", bn: "অর্ডার বাতিল করা হয়েছে" },
   [ParcelStatus.LOST]: { en: "Marked as Lost", bn: "হারিয়ে গেছে" },
   [ParcelStatus.DAMAGED]: { en: "Marked as Damaged", bn: "ক্ষতিগ্রস্ত হয়েছে" },
@@ -212,10 +239,7 @@ export class ParcelsService {
     const requestHash = IdempotencyService.fingerprint(booking);
 
     if (idempotencyKey) {
-      const existing = await this.idempotencyService.find(
-        idempotencyKey,
-        PARCEL_CREATE_SCOPE,
-      );
+      const existing = await this.idempotencyService.find(idempotencyKey, PARCEL_CREATE_SCOPE);
       if (existing) {
         const resolution = await this.idempotencyService.resolve(
           idempotencyKey,
@@ -233,10 +257,7 @@ export class ParcelsService {
       codAmount: booking.codAmount,
     });
 
-    const normalizedAddress = await this.buildNormalizedAddress(
-      booking,
-      pricing.zone,
-    );
+    const normalizedAddress = await this.buildNormalizedAddress(booking, pricing.zone);
 
     const attempts = TrackingCodeService.MAX_ATTEMPTS;
     for (let attempt = 0; attempt < attempts; attempt += 1) {
@@ -268,9 +289,7 @@ export class ParcelsService {
           return this.resolveIdempotency(resolution, idempotencyKey as string);
         }
         if (isTrackingCodeCollision(error)) {
-          this.logger.warn(
-            this.trackingCodeService.describeExhausted(attempt + 1),
-          );
+          this.logger.warn(this.trackingCodeService.describeExhausted(attempt + 1));
           continue;
         }
         throw error;
@@ -302,85 +321,83 @@ export class ParcelsService {
       requestHash,
     } = params;
 
-    return this.dataSource.transaction<ParcelCreatedResponse>(
-      async (manager) => {
-        if (idempotencyKey) {
-          await this.idempotencyService.claim(manager, {
-            key: idempotencyKey,
-            scope: PARCEL_CREATE_SCOPE,
-            userId: merchant.userId,
-            requestHash,
-          });
-        }
+    return this.dataSource.transaction<ParcelCreatedResponse>(async (manager) => {
+      if (idempotencyKey) {
+        await this.idempotencyService.claim(manager, {
+          key: idempotencyKey,
+          scope: PARCEL_CREATE_SCOPE,
+          userId: merchant.userId,
+          requestHash,
+        });
+      }
 
-        const parcel = manager.create(Parcel, {
-          merchantId: merchant.id,
-          trackingCode,
-          recipientName: booking.recipientName,
-          recipientPhone: booking.recipientPhone,
-          parcelDescription: booking.parcelDescription ?? null,
-          rawAddress: booking.deliveryAddress,
+      const parcel = manager.create(Parcel, {
+        merchantId: merchant.id,
+        trackingCode,
+        recipientName: booking.recipientName,
+        recipientPhone: booking.recipientPhone,
+        parcelDescription: booking.parcelDescription ?? null,
+        rawAddress: booking.deliveryAddress,
+        district: booking.district,
+        thana: booking.thana,
+        normalizedAddress: {
+          ...normalizedAddress,
           district: booking.district,
           thana: booking.thana,
-          normalizedAddress: {
-            ...normalizedAddress,
-            district: booking.district,
-            thana: booking.thana,
-          },
-          weight: Number(booking.weight),
-          codAmount: Number(booking.codAmount),
-          deliveryFee: pricing.totalFee,
-          status: ParcelStatus.CREATED,
-        });
-        const saved = await manager.save(parcel);
+        },
+        weight: Number(booking.weight),
+        codAmount: Number(booking.codAmount),
+        deliveryFee: pricing.totalFee,
+        status: ParcelStatus.CREATED,
+      });
+      const saved = await manager.save(parcel);
 
-        const history = manager.create(ParcelStatusHistory, {
+      const history = manager.create(ParcelStatusHistory, {
+        parcelId: saved.id,
+        fromStatus: null,
+        toStatus: ParcelStatus.CREATED,
+        eventType: "PARCEL_CREATED",
+        actorId: merchant.userId,
+        actorRole: UserRole.MERCHANT,
+        description: "Initial booking created",
+        metadata: { pricing },
+      });
+      await manager.save(history);
+
+      // Transactional domain event: stored atomically with the booking
+      // so fan-out (notifications, webhooks) can never lose it. Transport
+      // happens asynchronously in the outbox relay and workers.
+      await this.outboxService.append(manager, {
+        eventType: DomainEventType.PARCEL_CREATED,
+        aggregateType: "parcel",
+        aggregateId: saved.id,
+        actorId: merchant.userId,
+        payload: {
           parcelId: saved.id,
-          fromStatus: null,
-          toStatus: ParcelStatus.CREATED,
-          eventType: "PARCEL_CREATED",
-          actorId: merchant.userId,
-          actorRole: UserRole.MERCHANT,
-          description: "Initial booking created",
-          metadata: { pricing },
+          trackingCode: saved.trackingCode,
+          merchantId: merchant.id,
+          recipientName: saved.recipientName,
+        },
+      });
+
+      const response = this.toSummary(saved);
+
+      if (idempotencyKey) {
+        await this.idempotencyService.complete(manager, {
+          key: idempotencyKey,
+          scope: PARCEL_CREATE_SCOPE,
+          statusCode: 201,
+          response: response as unknown as Record<string, unknown>,
+          userId: merchant.userId,
         });
-        await manager.save(history);
+      }
 
-        // Transactional domain event: stored atomically with the booking
-        // so fan-out (notifications, webhooks) can never lose it. Transport
-        // happens asynchronously in the outbox relay and workers.
-        await this.outboxService.append(manager, {
-          eventType: DomainEventType.PARCEL_CREATED,
-          aggregateType: "parcel",
-          aggregateId: saved.id,
-          actorId: merchant.userId,
-          payload: {
-            parcelId: saved.id,
-            trackingCode: saved.trackingCode,
-            merchantId: merchant.id,
-            recipientName: saved.recipientName,
-          },
-        });
+      this.logger.log(
+        `PARCEL_CREATED parcel=${saved.id} trackingCode=${saved.trackingCode} merchant=${merchant.id} zone=${pricing.zone} totalFee=${pricing.totalFee}`,
+      );
 
-        const response = this.toSummary(saved);
-
-        if (idempotencyKey) {
-          await this.idempotencyService.complete(manager, {
-            key: idempotencyKey,
-            scope: PARCEL_CREATE_SCOPE,
-            statusCode: 201,
-            response: response as unknown as Record<string, unknown>,
-            userId: merchant.userId,
-          });
-        }
-
-        this.logger.log(
-          `PARCEL_CREATED parcel=${saved.id} trackingCode=${saved.trackingCode} merchant=${merchant.id} zone=${pricing.zone} totalFee=${pricing.totalFee}`,
-        );
-
-        return response;
-      },
-    );
+      return response;
+    });
   }
 
   /** Enriches the parcel with Phase 6 intelligence metadata when available. */
@@ -413,9 +430,7 @@ export class ParcelsService {
         rtoProbability: analysis.riskProfile.rtoProbability,
       };
     } catch (error) {
-      this.logger.warn(
-        `Address intelligence skipped: ${(error as Error).message}`,
-      );
+      this.logger.warn(`Address intelligence skipped: ${(error as Error).message}`);
       return base;
     }
   }
@@ -435,15 +450,13 @@ export class ParcelsService {
     if (resolution.kind === "conflict") {
       this.idempotencyService.logConflict(PARCEL_CREATE_SCOPE, key);
       throw new ConflictException({
-        message:
-          "This Idempotency-Key was already used with a different request payload",
+        message: "This Idempotency-Key was already used with a different request payload",
         error: ApiErrorCode.IDEMPOTENCY_CONFLICT,
       });
     }
 
     throw new ConflictException({
-      message:
-        "A request with this Idempotency-Key is still in progress; retry shortly",
+      message: "A request with this Idempotency-Key is still in progress; retry shortly",
       error: ApiErrorCode.IDEMPOTENCY_IN_PROGRESS,
     });
   }
@@ -452,10 +465,7 @@ export class ParcelsService {
   /* Read                                                               */
   /* ------------------------------------------------------------------ */
 
-  async listParcels(
-    query: ParcelListQuery,
-    scope: ParcelAccessScope,
-  ): Promise<ParcelListResult> {
+  async listParcels(query: ParcelListQuery, scope: ParcelAccessScope): Promise<ParcelListResult> {
     const qb = this.parcelRepo.createQueryBuilder("parcel");
 
     if (scope.merchantId) {
@@ -502,15 +512,13 @@ export class ParcelsService {
       const op = query.order === "ASC" ? ">" : "<";
       qb.andWhere(
         new Brackets((inner) => {
-          inner
-            .where(`parcel.createdAt ${op} :cursorAt`, { cursorAt: cursor.createdAt })
-            .orWhere(
-              new Brackets((same) => {
-                same
-                  .where("parcel.createdAt = :cursorAtEq", { cursorAtEq: cursor.createdAt })
-                  .andWhere(`parcel.id ${op} :cursorId`, { cursorId: cursor.id });
-              }),
-            );
+          inner.where(`parcel.createdAt ${op} :cursorAt`, { cursorAt: cursor.createdAt }).orWhere(
+            new Brackets((same) => {
+              same
+                .where("parcel.createdAt = :cursorAtEq", { cursorAtEq: cursor.createdAt })
+                .andWhere(`parcel.id ${op} :cursorId`, { cursorId: cursor.id });
+            }),
+          );
         }),
       );
     } else {
@@ -560,10 +568,7 @@ export class ParcelsService {
     };
   }
 
-  async getParcelById(
-    idOrCode: string,
-    scope: ParcelAccessScope,
-  ): Promise<ParcelDetailsResponse> {
+  async getParcelById(idOrCode: string, scope: ParcelAccessScope): Promise<ParcelDetailsResponse> {
     const parcel = await this.findParcelOrThrow(idOrCode, [
       "merchant",
       "currentHub",
@@ -668,10 +673,7 @@ export class ParcelsService {
     idOrCode: string,
     scope: ParcelAccessScope,
   ): Promise<ShippingLabelResponse> {
-    const parcel = await this.findParcelOrThrow(idOrCode, [
-      "merchant",
-      "currentHub",
-    ]);
+    const parcel = await this.findParcelOrThrow(idOrCode, ["merchant", "currentHub"]);
     this.assertOwnership(parcel, scope);
 
     const legacy = this.readLegacyAddress(parcel);
@@ -680,9 +682,7 @@ export class ParcelsService {
     const zone = this.pricingService.resolveZone(district, thana);
     const routingHub = await this.resolveRoutingHub(parcel);
 
-    this.logger.log(
-      `LABEL_GENERATED parcel=${parcel.id} trackingCode=${parcel.trackingCode}`,
-    );
+    this.logger.log(`LABEL_GENERATED parcel=${parcel.id} trackingCode=${parcel.trackingCode}`);
 
     return {
       trackingCode: parcel.trackingCode,
@@ -735,10 +735,7 @@ export class ParcelsService {
     reassigned: boolean;
     message: string;
   }> {
-    if (
-      actor.role !== UserRole.ADMIN &&
-      actor.role !== UserRole.HUB_MANAGER
-    ) {
+    if (actor.role !== UserRole.ADMIN && actor.role !== UserRole.HUB_MANAGER) {
       throw new ForbiddenException({
         message: "Only admins and hub managers can assign riders",
         error: ApiErrorCode.FORBIDDEN,
@@ -881,10 +878,7 @@ export class ParcelsService {
   /* Mapping helpers                                                    */
   /* ------------------------------------------------------------------ */
 
-  private async findParcelOrThrow(
-    idOrCode: string,
-    relations: string[] = [],
-  ): Promise<Parcel> {
+  private async findParcelOrThrow(idOrCode: string, relations: string[] = []): Promise<Parcel> {
     const parcel = await this.parcelRepo.findOne({
       where: UUID_REGEX.test(idOrCode)
         ? { id: idOrCode }
@@ -961,15 +955,11 @@ export class ParcelsService {
    * Projects the reserved `normalized_address` payload into the explicit
    * address-intelligence contract. Nothing else from that column is exposed.
    */
-  private toAddressIntelligence(
-    parcel: Parcel,
-  ): ParcelDetailsResponse["addressIntelligence"] {
+  private toAddressIntelligence(parcel: Parcel): ParcelDetailsResponse["addressIntelligence"] {
     const raw = (parcel.normalizedAddress ?? {}) as Record<string, unknown>;
     const legacy = this.readLegacyAddress(parcel);
-    const number = (value: unknown): number | null =>
-      typeof value === "number" ? value : null;
-    const text = (value: unknown): string | null =>
-      typeof value === "string" ? value : null;
+    const number = (value: unknown): number | null => (typeof value === "number" ? value : null);
+    const text = (value: unknown): string | null => (typeof value === "string" ? value : null);
 
     return {
       district: parcel.district ?? legacy.district,
@@ -1024,9 +1014,7 @@ function isTrackingCodeCollision(error: unknown): boolean {
   if (driverError?.code !== PG_UNIQUE_VIOLATION) {
     return false;
   }
-  const haystack = `${driverError.constraint ?? ""} ${
-    driverError.detail ?? ""
-  }`.toLowerCase();
+  const haystack = `${driverError.constraint ?? ""} ${driverError.detail ?? ""}`.toLowerCase();
   return haystack.includes("tracking_code");
 }
 
@@ -1044,7 +1032,9 @@ export function encodeParcelCursor(createdAt: Date, id: string): string {
   return Buffer.from(raw, "utf8").toString("base64url");
 }
 
-export function decodeParcelCursor(cursor: string | undefined): { createdAt: Date; id: string } | null {
+export function decodeParcelCursor(
+  cursor: string | undefined,
+): { createdAt: Date; id: string } | null {
   if (!cursor) return null;
   try {
     const raw = Buffer.from(cursor, "base64url").toString("utf8");
@@ -1058,4 +1048,3 @@ export function decodeParcelCursor(cursor: string | undefined): { createdAt: Dat
     return null;
   }
 }
-

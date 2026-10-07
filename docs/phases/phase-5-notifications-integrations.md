@@ -59,10 +59,11 @@ and `sweepDueTransports` retries due webhook/old-pending notifications.
 Fan-out matrix (see `outbox-relay.service.ts` `FANOUT`): parcel events notify
 merchant in-app (+ email for created/delivered, + customer SMS for
 delivered/failed), rider events target rider in-app, cash hand-in targets hub
-+ rider in-app, financial events target merchant in-app + email (locked
-categories bypass preferences) plus webhooks for created/assigned/OFD/
-delivered/failed/returned/cash-verified/settlement-created/payout
-requested/approved/completed/failed.
+
+- rider in-app, financial events target merchant in-app + email (locked
+  categories bypass preferences) plus webhooks for created/assigned/OFD/
+  delivered/failed/returned/cash-verified/settlement-created/payout
+  requested/approved/completed/failed.
 
 Deduplication: `dedupeKey = eventId:channel:recipientKey` with `orIgnore()` —
 replaying the same event never duplicates notifications. Webhook deliveries
@@ -177,7 +178,7 @@ RTK Query (`baseApi` + `features/*/api/*`, `tagTypes` incl. `Notification`,
 `Webhook`, `Integration`). Pages (all `noindex`, role layouts):
 
 - Merchant `/merchant/notifications` (center + preferences), `/merchant/
-  developer/webhooks` (endpoints, full 13-event picker, create/edit/
+developer/webhooks` (endpoints, full 13-event picker, create/edit/
   enable-disable/rotate with show-once secret + copy, ping, delivery logs with
   payload inspector + replay).
 - Rider `/rider/notifications`, hub `/hub/notifications` (center; rider keeps
@@ -186,7 +187,7 @@ RTK Query (`baseApi` + `features/*/api/*`, `tagTypes` incl. `Notification`,
   with replay, 15s polling).
 - `NotificationBell` dropdown (15s unread poll, mark read/all-read, test-SMS
   modal with BD normalization hint); `NotificationCenter` (paginated, unread
-  filter, safe deep-links to parcel/finance/task routes only); 
+  filter, safe deep-links to parcel/finance/task routes only);
   `NotificationPreferences` (3×3 matrix + locale, locked rows disabled).
 
 i18n: all strings via `messages/en.json` + `messages/bn.json`

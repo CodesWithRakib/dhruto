@@ -95,7 +95,7 @@ export function PublicHeader() {
                 {t("signIn")}
               </Link>
               <Link href="/register">
-                <Button size="sm" className="h-9 px-4 rounded-full font-medium shadow-sm">
+                <Button size="sm" className="h-9 px-4 rounded-full font-medium">
                   {t("register")}
                 </Button>
               </Link>

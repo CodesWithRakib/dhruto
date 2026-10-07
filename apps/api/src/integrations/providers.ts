@@ -1,9 +1,5 @@
 import { Logger } from "@nestjs/common";
-import {
-  PROVIDER_ERROR_CODES,
-  ProviderErrorKind,
-  type ProviderErrorCode,
-} from "@dhruto/contracts";
+import { PROVIDER_ERROR_CODES, ProviderErrorKind, type ProviderErrorCode } from "@dhruto/contracts";
 
 /**
  * Provider abstractions — Phase 5 integration boundary.
@@ -49,7 +45,8 @@ export function classifyHttpStatus(status: number): {
   if (status === 408 || status === 425 || status === 429) {
     return {
       kind: ProviderErrorKind.TRANSIENT,
-      code: status === 429 ? PROVIDER_ERROR_CODES.RATE_LIMITED : PROVIDER_ERROR_CODES.PROVIDER_TIMEOUT,
+      code:
+        status === 429 ? PROVIDER_ERROR_CODES.RATE_LIMITED : PROVIDER_ERROR_CODES.PROVIDER_TIMEOUT,
     };
   }
   if (status >= 500) {
@@ -71,7 +68,11 @@ export function classifyNetworkError(error: unknown): {
 } {
   const message = error instanceof Error ? error.message : "Unknown network error";
   if (/timeout|timed out|abort/i.test(message)) {
-    return { kind: ProviderErrorKind.TRANSIENT, code: PROVIDER_ERROR_CODES.PROVIDER_TIMEOUT, message };
+    return {
+      kind: ProviderErrorKind.TRANSIENT,
+      code: PROVIDER_ERROR_CODES.PROVIDER_TIMEOUT,
+      message,
+    };
   }
   return { kind: ProviderErrorKind.TRANSIENT, code: PROVIDER_ERROR_CODES.NETWORK_ERROR, message };
 }
@@ -141,7 +142,13 @@ export class HttpSmsProvider implements SmsProvider {
       });
       const latencyMs = Date.now() - started;
       if (response.ok) {
-        return { success: true, provider: this.name, providerMessageId: messageId("sms"), latencyMs, statusCode: response.status };
+        return {
+          success: true,
+          provider: this.name,
+          providerMessageId: messageId("sms"),
+          latencyMs,
+          statusCode: response.status,
+        };
       }
       const mapped = classifyHttpStatus(response.status);
       return {
@@ -180,8 +187,15 @@ export class LogEmailProvider implements EmailProvider {
   async sendEmail(to: string, subject: string, bodyText: string): Promise<SendResult> {
     const started = Date.now();
     const providerMessageId = messageId("email");
-    this.logger.log(`LOG_EMAIL to=${to} id=${providerMessageId} subject_len=${subject.length} body_len=${bodyText.length}`);
-    return { success: true, provider: this.name, providerMessageId, latencyMs: Date.now() - started };
+    this.logger.log(
+      `LOG_EMAIL to=${to} id=${providerMessageId} subject_len=${subject.length} body_len=${bodyText.length}`,
+    );
+    return {
+      success: true,
+      provider: this.name,
+      providerMessageId,
+      latencyMs: Date.now() - started,
+    };
   }
 }
 
@@ -196,7 +210,12 @@ export class HttpEmailProvider implements EmailProvider {
     private readonly timeoutMs = 8000,
   ) {}
 
-  async sendEmail(to: string, subject: string, bodyText: string, htmlBody?: string): Promise<SendResult> {
+  async sendEmail(
+    to: string,
+    subject: string,
+    bodyText: string,
+    htmlBody?: string,
+  ): Promise<SendResult> {
     const started = Date.now();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -212,7 +231,13 @@ export class HttpEmailProvider implements EmailProvider {
       });
       const latencyMs = Date.now() - started;
       if (response.ok) {
-        return { success: true, provider: this.name, providerMessageId: messageId("email"), latencyMs, statusCode: response.status };
+        return {
+          success: true,
+          provider: this.name,
+          providerMessageId: messageId("email"),
+          latencyMs,
+          statusCode: response.status,
+        };
       }
       const mapped = classifyHttpStatus(response.status);
       return {

@@ -92,10 +92,7 @@ export const hubsApi = baseApi.injectEndpoints({
     }),
 
     /* ------------------------------ Scans ------------------------------ */
-    scanBarcode: builder.mutation<
-      ApiResponse<HubScanResult>,
-      { hubId: string; scan: HubScanDto }
-    >({
+    scanBarcode: builder.mutation<ApiResponse<HubScanResult>, { hubId: string; scan: HubScanDto }>({
       query: ({ hubId, scan }) => ({
         url: `/hubs/${hubId}/scans`,
         method: "POST",
@@ -124,10 +121,7 @@ export const hubsApi = baseApi.injectEndpoints({
     }),
 
     /* ------------------------------ Bags ------------------------------ */
-    createBag: builder.mutation<
-      ApiResponse<BagDetails>,
-      { hubId: string; bag: CreateBagDto }
-    >({
+    createBag: builder.mutation<ApiResponse<BagDetails>, { hubId: string; bag: CreateBagDto }>({
       query: ({ hubId, bag }) => ({
         url: `/hubs/${hubId}/bags`,
         method: "POST",
@@ -138,10 +132,7 @@ export const hubsApi = baseApi.injectEndpoints({
         { type: HUB_TAG, id: `DASHBOARD_${hubId}` },
       ],
     }),
-    getBags: builder.query<
-      ApiResponse<BagListItem[]>,
-      { hubId?: string; status?: BagStatus }
-    >({
+    getBags: builder.query<ApiResponse<BagListItem[]>, { hubId?: string; status?: BagStatus }>({
       query: (params) => {
         const query = new URLSearchParams();
         if (params?.hubId) query.set("hubId", params.hubId);
@@ -200,9 +191,7 @@ export const hubsApi = baseApi.injectEndpoints({
     }),
     getManifests: builder.query<ApiResponse<ManifestListItem[]>, string>({
       query: (hubId) => `/hubs/${hubId}/manifests`,
-      providesTags: (_result, _error, hubId) => [
-        { type: HUB_TAG, id: `MANIFEST_LIST_${hubId}` },
-      ],
+      providesTags: (_result, _error, hubId) => [{ type: HUB_TAG, id: `MANIFEST_LIST_${hubId}` }],
     }),
     getManifestById: builder.query<ApiResponse<ManifestDetails>, string>({
       query: (id) => `/manifests/${id}`,

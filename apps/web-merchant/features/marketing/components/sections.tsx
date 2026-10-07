@@ -14,10 +14,7 @@ export function Section({
   id?: string;
 }) {
   return (
-    <section
-      id={id}
-      className={cn("py-14 sm:py-20", muted && "bg-surface-muted/60", className)}
-    >
+    <section id={id} className={cn("py-14 sm:py-20", muted && "bg-surface-muted/60", className)}>
       <div className="dhruto-container">{children}</div>
     </section>
   );
@@ -57,17 +54,12 @@ export function FeatureGrid({ items }: { items: FeatureItem[] }) {
       {items.map((item) => {
         const Icon = item.icon;
         return (
-          <li
-            key={item.title}
-            className="rounded-lg border border-border bg-surface p-5"
-          >
+          <li key={item.title} className="rounded-lg border border-border bg-surface p-5">
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <h3 className="mt-3 text-h4 text-foreground">{item.title}</h3>
-            <p className="mt-1 text-body text-muted-foreground text-pretty">
-              {item.description}
-            </p>
+            <p className="mt-1 text-body text-muted-foreground text-pretty">{item.description}</p>
           </li>
         );
       })}
@@ -84,9 +76,7 @@ export function StepFlow({ steps }: { steps: { title: string; description: strin
             {index + 1}
           </span>
           <h3 className="mt-3 text-h4 text-foreground">{step.title}</h3>
-          <p className="mt-1 text-body-sm text-muted-foreground text-pretty">
-            {step.description}
-          </p>
+          <p className="mt-1 text-body-sm text-muted-foreground text-pretty">{step.description}</p>
         </li>
       ))}
     </ol>

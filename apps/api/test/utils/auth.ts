@@ -24,9 +24,7 @@ export async function loginToken(
 
   const token = res.body?.data?.tokens?.accessToken;
   if (!token) {
-    throw new Error(
-      `Login failed for ${email}: ${res.status} ${JSON.stringify(res.body)}`,
-    );
+    throw new Error(`Login failed for ${email}: ${res.status} ${JSON.stringify(res.body)}`);
   }
   return token as string;
 }

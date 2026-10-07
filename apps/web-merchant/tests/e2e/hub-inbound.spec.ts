@@ -1,16 +1,6 @@
 import { expect, test } from "./fixtures/cdp";
-import {
-  API_BASE_URL,
-  createParcelViaApi,
-  makeBookingFixture,
-} from "./helpers/merchant";
-import {
-  apiLogin,
-  dhkHubId,
-  loginAsHub,
-  SEEDED_HUB_DHK,
-  SEEDED_MERCHANT,
-} from "./helpers/hub";
+import { API_BASE_URL, createParcelViaApi, makeBookingFixture } from "./helpers/merchant";
+import { apiLogin, dhkHubId, loginAsHub, SEEDED_HUB_DHK, SEEDED_MERCHANT } from "./helpers/hub";
 
 test.describe("Journey — Hub inbound", () => {
   test("hub login lands on the hub dashboard with live metrics", async ({ page }) => {
@@ -48,8 +38,9 @@ test.describe("Journey — Hub inbound", () => {
     const scans = await request.get(`${API_BASE_URL}/hubs/${hubId}/scans?limit=100`, {
       headers: { Authorization: `Bearer ${hubToken}` },
     });
-    const rows = (((await scans.json()).data ?? []) as Array<{ trackingCode: string | null; outcome: string }>)
-      .filter((row) => row.trackingCode === created.trackingCode && row.outcome === "APPLIED");
+    const rows = (
+      ((await scans.json()).data ?? []) as Array<{ trackingCode: string | null; outcome: string }>
+    ).filter((row) => row.trackingCode === created.trackingCode && row.outcome === "APPLIED");
     expect(rows).toHaveLength(1);
   });
 
@@ -59,17 +50,26 @@ test.describe("Journey — Hub inbound", () => {
 
     await page.getByLabel(/tracking code or bag code/i).fill("DHR-20260101-ZZZZZZ");
     await page.getByRole("button", { name: /process scan/i }).click();
-    await expect(page.getByText(/scan rejected|not found/i).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/scan rejected|not found/i).first()).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
-  test("parcel lookup finds an inbound parcel without merchant pricing", async ({ page, request }) => {
+  test("parcel lookup finds an inbound parcel without merchant pricing", async ({
+    page,
+    request,
+  }) => {
     const merchantToken = await apiLogin(request, SEEDED_MERCHANT);
     const hubToken = await apiLogin(request, SEEDED_HUB_DHK);
     const hubId = await dhkHubId(request, hubToken);
     const created = await createParcelViaApi(request, merchantToken, makeBookingFixture("HUBL"));
     await request.post(`${API_BASE_URL}/hubs/${hubId}/scans`, {
       headers: { Authorization: `Bearer ${hubToken}`, "Content-Type": "application/json" },
-      data: { barcode: created.trackingCode, scanType: "RECEIVE_INBOUND", idempotencyKey: crypto.randomUUID() },
+      data: {
+        barcode: created.trackingCode,
+        scanType: "RECEIVE_INBOUND",
+        idempotencyKey: crypto.randomUUID(),
+      },
     });
 
     await loginAsHub(page, "DHK");

@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 7 - Analytics alerts and report exports.
@@ -9,7 +9,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  *   content, expiry and idempotency keys. All statements idempotent.
  */
 export class Phase7Analytics1700000000008 implements MigrationInterface {
-  name = 'Phase7Analytics1700000000008';
+  name = "Phase7Analytics1700000000008";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

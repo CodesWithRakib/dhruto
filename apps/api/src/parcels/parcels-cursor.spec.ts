@@ -17,7 +17,13 @@ describe("parcel keyset cursor", () => {
     expect(decodeParcelCursor(undefined)).toBeNull();
     expect(decodeParcelCursor("")).toBeNull();
     expect(decodeParcelCursor("not-a-cursor!!!")).toBeNull();
-    expect(decodeParcelCursor(Buffer.from("no-separator", "utf8").toString("base64url"))).toBeNull();
-    expect(decodeParcelCursor(Buffer.from("bad-date|d2c58e83-5991-4469-8bf8-34a200236cf8", "utf8").toString("base64url"))).toBeNull();
+    expect(
+      decodeParcelCursor(Buffer.from("no-separator", "utf8").toString("base64url")),
+    ).toBeNull();
+    expect(
+      decodeParcelCursor(
+        Buffer.from("bad-date|d2c58e83-5991-4469-8bf8-34a200236cf8", "utf8").toString("base64url"),
+      ),
+    ).toBeNull();
   });
 });

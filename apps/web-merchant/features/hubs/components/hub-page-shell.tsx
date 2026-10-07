@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { RefreshCw, Warehouse } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
 import { useActiveHub } from "../hooks/use-active-hub";
 import { HubSelector } from "./hub-selector";
 import type { HubSummary } from "@dhruto/contracts";

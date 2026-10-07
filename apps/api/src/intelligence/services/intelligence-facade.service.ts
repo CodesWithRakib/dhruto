@@ -63,7 +63,11 @@ export class IntelligenceFacadeService {
 
   async confirmAddress(
     parseId: string,
-    input: { candidateIndex?: number; manualStructure?: AddressParseV2Result["structuredAddress"]; reason?: string },
+    input: {
+      candidateIndex?: number;
+      manualStructure?: AddressParseV2Result["structuredAddress"];
+      reason?: string;
+    },
     actorId: string,
     source: ConfirmationSource,
     parcelId?: string,
@@ -128,9 +132,7 @@ export class IntelligenceFacadeService {
         reason: input.reason ?? null,
       }),
     );
-    this.logger.log(
-      `ADDRESS_CONFIRMED parse=${parseId} actor=${actorId} source=${source}`,
-    );
+    this.logger.log(`ADDRESS_CONFIRMED parse=${parseId} actor=${actorId} source=${source}`);
     return {
       id: row.id,
       parseId,
@@ -193,9 +195,11 @@ export class IntelligenceFacadeService {
       asOf,
       addressConfidence: address.confidence,
     });
-    await this.risk.scoreAndPersist(merchantFeatures).catch((error: unknown) =>
-      this.logger.warn(`Merchant risk snapshot failed: ${getErrorMessage(error, "unknown")}`),
-    );
+    await this.risk
+      .scoreAndPersist(merchantFeatures)
+      .catch((error: unknown) =>
+        this.logger.warn(`Merchant risk snapshot failed: ${getErrorMessage(error, "unknown")}`),
+      );
 
     const total = platformFeatures.totalOrders;
     const rtoFeatures = {
@@ -234,14 +238,13 @@ export class IntelligenceFacadeService {
     } else if (prediction.outcome === null) {
       // Converge outcomes lazily: terminal parcel state fills the label.
       // Feature set is frozen at predictedAt, so this never leaks the future.
-      const terminal =
-        ["DELIVERED", "CASH_PENDING", "CASH_VERIFIED"].includes(parcel.status)
-          ? "DELIVERED"
-          : ["RTO_INITIATED", "RETURN_IN_TRANSIT", "RETURNED_TO_MERCHANT", "CANCELLED"].includes(
+      const terminal = ["DELIVERED", "CASH_PENDING", "CASH_VERIFIED"].includes(parcel.status)
+        ? "DELIVERED"
+        : ["RTO_INITIATED", "RETURN_IN_TRANSIT", "RETURNED_TO_MERCHANT", "CANCELLED"].includes(
               parcel.status,
             )
-            ? "RTO"
-            : null;
+          ? "RTO"
+          : null;
       if (terminal) {
         prediction.outcome = terminal;
         prediction.outcomeAt = new Date();
@@ -250,9 +253,16 @@ export class IntelligenceFacadeService {
     }
 
     const recItems = this.recommendations.recommend({
-      risk: { score: snapshot.riskScore, level: snapshot.level as never, reasons: snapshot.reasons as never },
+      risk: {
+        score: snapshot.riskScore,
+        level: snapshot.level as never,
+        reasons: snapshot.reasons as never,
+      },
       rto: { score: rtoResult.score, level: rtoResult.level },
-      address: { confidence: address.confidence, requiresConfirmation: address.requiresConfirmation },
+      address: {
+        confidence: address.confidence,
+        requiresConfirmation: address.requiresConfirmation,
+      },
     });
     const recommendations = await this.recommendations.persistForParcel(
       parcelId,

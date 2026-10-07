@@ -138,9 +138,7 @@ export class GeoDataService implements OnModuleInit {
     return hits;
   }
 
-  thanaAliasEntries(
-    normalizedAlias: string,
-  ): Array<{ districtIdx: number; thanaIdx: number }> {
+  thanaAliasEntries(normalizedAlias: string): Array<{ districtIdx: number; thanaIdx: number }> {
     return this.thanaAliasIndex.get(normalizedAlias) ?? [];
   }
 
@@ -149,7 +147,13 @@ export class GeoDataService implements OnModuleInit {
    * places (code-keyed) and aliases (alias-keyed). Old versions are marked
    * SUPERSEDED, never deleted. Safe to re-run; reports counts.
    */
-  async ensureImported(): Promise<{ version: string; divisions: number; districts: number; upazilas: number; aliases: number }> {
+  async ensureImported(): Promise<{
+    version: string;
+    divisions: number;
+    districts: number;
+    upazilas: number;
+    aliases: number;
+  }> {
     return this.dataSource.transaction(async (manager) => {
       let versionRow = await manager
         .getRepository(GeoDatasetVersion)
@@ -177,13 +181,21 @@ export class GeoDataService implements OnModuleInit {
         if (!division) {
           division =
             (await manager.getRepository(GeoPlace).findOne({
-              where: { code: `BD-DIV-${divisionName.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4)}` },
+              where: {
+                code: `BD-DIV-${divisionName
+                  .toUpperCase()
+                  .replace(/[^A-Z]/g, "")
+                  .slice(0, 4)}`,
+              },
             })) ?? undefined;
           if (!division) {
             division = await manager.getRepository(GeoPlace).save(
               manager.getRepository(GeoPlace).create({
                 kind: "DIVISION",
-                code: `BD-DIV-${divisionName.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4)}`,
+                code: `BD-DIV-${divisionName
+                  .toUpperCase()
+                  .replace(/[^A-Z]/g, "")
+                  .slice(0, 4)}`,
                 name: divisionName,
                 nameBn: null,
                 parentId: null,
@@ -198,7 +210,9 @@ export class GeoDataService implements OnModuleInit {
           divisions.set(divisionName, division);
         }
         const districtCode = d.code;
-        let district = await manager.getRepository(GeoPlace).findOne({ where: { code: districtCode } });
+        let district = await manager
+          .getRepository(GeoPlace)
+          .findOne({ where: { code: districtCode } });
         if (!district) {
           district = await manager.getRepository(GeoPlace).save(
             manager.getRepository(GeoPlace).create({
@@ -217,7 +231,10 @@ export class GeoDataService implements OnModuleInit {
         }
         districtCount++;
         for (const t of d.thanas) {
-          const code = `${districtCode}-${t.name.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6)}`;
+          const code = `${districtCode}-${t.name
+            .toUpperCase()
+            .replace(/[^A-Z]/g, "")
+            .slice(0, 6)}`;
           const existing = await manager.getRepository(GeoPlace).findOne({ where: { code } });
           if (!existing) {
             await manager.getRepository(GeoPlace).save(

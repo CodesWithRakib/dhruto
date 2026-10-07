@@ -23,8 +23,7 @@ export function useActiveHub() {
     if (stored) setSelectedHubId(stored);
   }, []);
 
-  const activeHub =
-    hubs.find((hub) => hub.id === selectedHubId) ?? hubs[0] ?? null;
+  const activeHub = hubs.find((hub) => hub.id === selectedHubId) ?? hubs[0] ?? null;
 
   const setActiveHubId = React.useCallback((hubId: string) => {
     setSelectedHubId(hubId);
@@ -33,5 +32,13 @@ export function useActiveHub() {
     }
   }, []);
 
-  return { hubs, activeHub, activeHubId: activeHub?.id ?? null, setActiveHubId, isLoading, isError, refetch };
+  return {
+    hubs,
+    activeHub,
+    activeHubId: activeHub?.id ?? null,
+    setActiveHubId,
+    isLoading,
+    isError,
+    refetch,
+  };
 }

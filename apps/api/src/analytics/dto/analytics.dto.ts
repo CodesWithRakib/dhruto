@@ -1,14 +1,13 @@
 import { createZodDto } from "nestjs-zod";
 import { z } from "zod";
-import {
-  analyticsQuerySchema,
-  exportRequestSchema,
-} from "@dhruto/contracts";
+import { analyticsQuerySchema, exportRequestSchema } from "@dhruto/contracts";
 
 export class AnalyticsQueryDto extends createZodDto(analyticsQuerySchema) {}
 
 const rangeQuerySchema = z.object({
-  preset: z.enum(["today", "yesterday", "7d", "30d", "month", "last-month", "90d", "custom"]).optional(),
+  preset: z
+    .enum(["today", "yesterday", "7d", "30d", "month", "last-month", "90d", "custom"])
+    .optional(),
   from: z.string().optional(),
   to: z.string().optional(),
   timezone: z.string().max(64).optional(),

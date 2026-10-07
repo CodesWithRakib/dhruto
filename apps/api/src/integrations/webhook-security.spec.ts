@@ -32,9 +32,9 @@ describe("webhook signing (HMAC-SHA256)", () => {
     const timestamp = 1700000000;
     const sig = generateSignature(payload, secret, timestamp);
     expect(verifySignature(payload, secret, sig)).toBe(true);
-    expect(
-      verifySignature({ ...payload, data: { trackingCode: "DHR-2" } }, secret, sig),
-    ).toBe(false);
+    expect(verifySignature({ ...payload, data: { trackingCode: "DHR-2" } }, secret, sig)).toBe(
+      false,
+    );
   });
 
   it("rejects wrong secrets and malformed signatures", () => {
@@ -99,9 +99,7 @@ describe("domain event contract", () => {
     const wrongVersion = { ...event, version: 999 };
     expect(domainEventSchema.safeParse(wrongVersion).success).toBe(false);
     // Non-UUID event ids must fail.
-    expect(
-      domainEventSchema.safeParse({ ...event, eventId: "not-a-uuid" }).success,
-    ).toBe(false);
+    expect(domainEventSchema.safeParse({ ...event, eventId: "not-a-uuid" }).success).toBe(false);
   });
 
   it("keeps notification dedupe keys deterministic (event+recipient+channel)", () => {

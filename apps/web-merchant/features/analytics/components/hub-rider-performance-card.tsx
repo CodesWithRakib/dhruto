@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from "@dhruto/ui";
 import { Warehouse, Bike } from "lucide-react";
 import { type HubThroughputMetric, type TopRiderMetric } from "@dhruto/contracts";
+import { formatBDT } from "@/lib/format";
 
 interface HubRiderPerformanceCardProps {
   hubs: HubThroughputMetric[];
@@ -51,16 +52,24 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
 
               <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
                 <div className="p-2 rounded bg-muted/30">
-                  <span className="text-muted-foreground block text-[10px] uppercase">Incoming</span>
+                  <span className="text-muted-foreground block text-[10px] uppercase">
+                    Incoming
+                  </span>
                   <span className="font-mono font-bold text-foreground">{hub.totalIncoming}</span>
                 </div>
                 <div className="p-2 rounded bg-muted/30">
                   <span className="text-muted-foreground block text-[10px] uppercase">Sorted</span>
-                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{hub.totalSorted}</span>
+                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                    {hub.totalSorted}
+                  </span>
                 </div>
                 <div className="p-2 rounded bg-muted/30">
-                  <span className="text-muted-foreground block text-[10px] uppercase">Dispatched</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{hub.totalDispatched}</span>
+                  <span className="text-muted-foreground block text-[10px] uppercase">
+                    Dispatched
+                  </span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    {hub.totalDispatched}
+                  </span>
                 </div>
               </div>
             </div>
@@ -91,7 +100,10 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
 
         <CardContent className="pt-6 space-y-3">
           {riders.map((rider, index) => (
-            <div key={rider.riderId} className="p-3 rounded-lg border bg-card flex items-center justify-between text-xs">
+            <div
+              key={rider.riderId}
+              className="p-3 rounded-lg border bg-card flex items-center justify-between text-xs"
+            >
               <div className="flex items-center gap-3">
                 <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
                   {index + 1}
@@ -109,7 +121,7 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
                   {rider.deliveredCount} Delivered ({rider.completionRate}%)
                 </div>
                 <span className="text-[11px] text-muted-foreground font-mono block">
-                  ৳{rider.cashCollected.toLocaleString()} Cash Collected
+                  {formatBDT(rider.cashCollected)} Cash Collected
                 </span>
               </div>
             </div>

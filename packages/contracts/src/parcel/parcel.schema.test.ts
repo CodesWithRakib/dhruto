@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  BANGLADESH_PHONE_REGEX,
-  parcelBookingSchema,
-  ParcelStatus,
-} from "./parcel.schema.js";
+import { BANGLADESH_PHONE_REGEX, parcelBookingSchema, ParcelStatus } from "./parcel.schema.js";
 
 describe("Bangladesh Phone Validation Regex", () => {
   it("should accept valid 11-digit Bangladeshi mobile numbers", () => {

@@ -6,21 +6,26 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/lib/navigation";
 import { Loader2, TriangleAlert } from "lucide-react";
 import { Button, Card, TrendLineChart, GroupedBarChart } from "@dhruto/ui";
-import {
-  useGetAnalyticsOverviewQuery,
-  useListAlertsQuery,
-} from "../api/analytics.api";
+import { useGetAnalyticsOverviewQuery, useListAlertsQuery } from "../api/analytics.api";
 import { MetricCard } from "./metric-card";
-import { FilterBar, filterFromSearch, filterToSearch, filterToApiParams, type FilterState } from "./filter-bar";
+import {
+  FilterBar,
+  filterFromSearch,
+  filterToSearch,
+  filterToApiParams,
+  type FilterState,
+} from "./filter-bar";
 import { ExportButton } from "./export-button";
 import { PageHeader } from "@/components/page-header";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { useFormatters } from "@/lib/format";
 
 const taka = (v: number): string => `৳${Math.round(v).toLocaleString()}`;
 
 /** Admin executive overview: KPIs with previous-period deltas, trends, alerts. */
 export function AdminOverviewDashboard() {
   const t = useTranslations("AnalyticsOverview");
+  const { dateTime } = useFormatters();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [filter, setFilter] = React.useState<FilterState>(() => filterFromSearch(searchParams));
@@ -43,8 +48,21 @@ export function AdminOverviewDashboard() {
         description={t("subtitle")}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <ExportButton dataset="parcels" preset={filter.preset} from={apiParams.from} to={apiParams.to} />
-            <Button variant="outline" size="sm" onClick={() => { overview.refetch(); alerts.refetch(); }} className="h-8 text-xs">
+            <ExportButton
+              dataset="parcels"
+              preset={filter.preset}
+              from={apiParams.from}
+              to={apiParams.to}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                overview.refetch();
+                alerts.refetch();
+              }}
+              className="h-8 text-xs"
+            >
               {t("refresh")}
             </Button>
           </div>
@@ -64,20 +82,52 @@ export function AdminOverviewDashboard() {
       ) : overview.isError || !data ? (
         <Card className="space-y-2 p-6 text-center">
           <p className="text-sm font-medium">{t("loadErrorTitle")}</p>
-          <p className="text-xs text-muted-foreground">{overview.error ? getApiErrorMessage(overview.error, "") : t("loadErrorDescription")}</p>
-          <Button variant="outline" size="sm" onClick={() => overview.refetch()}>{t("retry")}</Button>
+          <p className="text-xs text-muted-foreground">
+            {overview.error ? getApiErrorMessage(overview.error, "") : t("loadErrorDescription")}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => overview.refetch()}>
+            {t("retry")}
+          </Button>
         </Card>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard label={t("kpiParcels")} kpi={data.kpis.totalParcels} />
-            <MetricCard label={t("kpiSuccess")} kpi={data.kpis.successRate} format={(v) => `${v}%`} />
-            <MetricCard label={t("kpiRto")} kpi={data.kpis.rtoRate} format={(v) => `${v}%`} invertTrend />
+            <MetricCard
+              label={t("kpiSuccess")}
+              kpi={data.kpis.successRate}
+              format={(v) => `${v}%`}
+            />
+            <MetricCard
+              label={t("kpiRto")}
+              kpi={data.kpis.rtoRate}
+              format={(v) => `${v}%`}
+              invertTrend
+            />
             <MetricCard label={t("kpiCod")} kpi={data.kpis.codCollected} format={taka} />
             <MetricCard label={t("kpiDelivered")} kpi={data.kpis.delivered} />
-            <MetricCard label={t("kpiAvgHours")} kpi={data.kpis.avgDeliveryHours} format={(v) => `${v}h`} invertTrend />
-            <MetricCard label={t("kpiPendingSettlement")} kpi={data.kpis.pendingSettlement} format={taka} />
-            <MetricCard label={t("kpiInTransit")} kpi={{ value: data.kpis.inTransit, previous: null, changePct: null, trend: "flat", noData: false }} hint={t("inTransitHint")} />
+            <MetricCard
+              label={t("kpiAvgHours")}
+              kpi={data.kpis.avgDeliveryHours}
+              format={(v) => `${v}h`}
+              invertTrend
+            />
+            <MetricCard
+              label={t("kpiPendingSettlement")}
+              kpi={data.kpis.pendingSettlement}
+              format={taka}
+            />
+            <MetricCard
+              label={t("kpiInTransit")}
+              kpi={{
+                value: data.kpis.inTransit,
+                previous: null,
+                changePct: null,
+                trend: "flat",
+                noData: false,
+              }}
+              hint={t("inTransitHint")}
+            />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -104,17 +154,26 @@ export function AdminOverviewDashboard() {
       <Card className="p-4">
         <div className="mb-2 flex items-center gap-2">
           <TriangleAlert className="h-4 w-4 text-warning" aria-hidden="true" />
-          <h3 className="text-sm font-semibold">{t("openAlerts", { count: alerts.data?.data?.length ?? 0 })}</h3>
+          <h3 className="text-sm font-semibold">
+            {t("openAlerts", { count: alerts.data?.data?.length ?? 0 })}
+          </h3>
         </div>
         {!alerts.data?.data?.length ? (
           <p className="py-2 text-center text-xs text-muted-foreground">{t("noAlerts")}</p>
         ) : (
           <ul className="space-y-1.5">
             {alerts.data.data.slice(0, 5).map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs">
+              <li
+                key={a.id}
+                className="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs"
+              >
                 <span className="font-mono font-medium">{a.alertKey}</span>
-                <span className="text-muted-foreground">{a.severity} · {a.metricValue} vs {a.threshold}</span>
-                <span className="ml-auto text-[11px] text-muted-foreground">{new Date(a.triggeredAt).toLocaleString()}</span>
+                <span className="text-muted-foreground">
+                  {a.severity} · {a.metricValue} vs {a.threshold}
+                </span>
+                <span className="ml-auto text-[11px] text-muted-foreground">
+                  {dateTime(a.triggeredAt)}
+                </span>
               </li>
             ))}
           </ul>

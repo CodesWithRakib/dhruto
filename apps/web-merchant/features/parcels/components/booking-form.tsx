@@ -66,15 +66,8 @@ export function BookingForm() {
   const t = useTranslations("BookingForm");
   const tErrors = useTranslations("ApiErrors");
 
-  const {
-    form,
-    onSubmit,
-    isLoading,
-    createdParcel,
-    serverError,
-    serverErrorKey,
-    resetForm,
-  } = useParcelBooking();
+  const { form, onSubmit, isLoading, createdParcel, serverError, serverErrorKey, resetForm } =
+    useParcelBooking();
 
   const [showSmartFill, setShowSmartFill] = useState(false);
 
@@ -83,7 +76,11 @@ export function BookingForm() {
   const weight = Number(form.watch("weight")) || 0;
   const codAmount = Number(form.watch("codAmount")) || 0;
 
-  const { pricing, isCalculating, isError: isPricingError } = useParcelPricing({
+  const {
+    pricing,
+    isCalculating,
+    isError: isPricingError,
+  } = useParcelPricing({
     district,
     thana,
     weight,
@@ -126,9 +123,7 @@ export function BookingForm() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {showSmartFill ? (
-            <SmartAddressFill onApply={handleApplyParsedAddress} />
-          ) : null}
+          {showSmartFill ? <SmartAddressFill onApply={handleApplyParsedAddress} /> : null}
 
           {displayedError ? (
             <div
@@ -144,12 +139,7 @@ export function BookingForm() {
           ) : null}
 
           <Form {...form}>
-            <form
-              id="parcel-booking-form"
-              onSubmit={onSubmit}
-              noValidate
-              className="space-y-6"
-            >
+            <form id="parcel-booking-form" onSubmit={onSubmit} noValidate className="space-y-6">
               <Section
                 icon={User}
                 title={t("sectionRecipient")}
@@ -312,11 +302,7 @@ export function BookingForm() {
                 </div>
               </Section>
 
-              <Section
-                icon={Wallet}
-                title={t("sectionCod")}
-                description={t("sectionCodHint")}
-              >
+              <Section icon={Wallet} title={t("sectionCod")} description={t("sectionCodHint")}>
                 <FormField
                   control={form.control}
                   name="codAmount"
@@ -353,20 +339,10 @@ export function BookingForm() {
         </CardContent>
 
         <CardFooter className="flex flex-col-reverse gap-2 border-t border-border sm:flex-row sm:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => form.reset()}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="outline" onClick={() => form.reset()} disabled={isLoading}>
             {t("reset")}
           </Button>
-          <Button
-            type="submit"
-            form="parcel-booking-form"
-            disabled={isLoading}
-            className="gap-2"
-          >
+          <Button type="submit" form="parcel-booking-form" disabled={isLoading} className="gap-2">
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

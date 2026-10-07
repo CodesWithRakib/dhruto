@@ -11,24 +11,9 @@ import { RolesGuard } from "./guards/roles.guard.js";
 
 @Global()
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Merchant, Rider, Hub]),
-    ConfigModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, Merchant, Rider, Hub]), ConfigModule],
   controllers: [AuthController],
-  providers: [
-    CustomJwtService,
-    PasswordService,
-    AuthService,
-    JwtAuthGuard,
-    RolesGuard,
-  ],
-  exports: [
-    CustomJwtService,
-    PasswordService,
-    AuthService,
-    JwtAuthGuard,
-    RolesGuard,
-  ],
+  providers: [CustomJwtService, PasswordService, AuthService, JwtAuthGuard, RolesGuard],
+  exports: [CustomJwtService, PasswordService, AuthService, JwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}

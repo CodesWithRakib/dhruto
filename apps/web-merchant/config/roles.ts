@@ -1,10 +1,4 @@
-import {
-  ADMIN_ROUTES,
-  HUB_ROUTES,
-  MERCHANT_ROUTES,
-  PUBLIC_ROUTES,
-  RIDER_ROUTES,
-} from "./routes";
+import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
 
 /**
  * Dhruto — Centralized role configuration.
@@ -18,13 +12,7 @@ import {
  */
 export type AppRole = "ADMIN" | "MERCHANT" | "HUB_MANAGER" | "RIDER" | "CUSTOMER";
 
-export const ALL_ROLES: AppRole[] = [
-  "ADMIN",
-  "MERCHANT",
-  "HUB_MANAGER",
-  "RIDER",
-  "CUSTOMER",
-];
+export const ALL_ROLES: AppRole[] = ["ADMIN", "MERCHANT", "HUB_MANAGER", "RIDER", "CUSTOMER"];
 
 /** A top-level surface of the application, matching the route groups. */
 export type AppSection = "public" | "auth" | "merchant" | "admin" | "hub" | "rider";
@@ -98,9 +86,6 @@ export function homeForRole(role: string | undefined | null): RoleHome {
 }
 
 /** True when `role` is permitted to open `section`. */
-export function canAccessSection(
-  role: string | undefined | null,
-  section: AppSection,
-): boolean {
+export function canAccessSection(role: string | undefined | null, section: AppSection): boolean {
   return roleConfigFor(role).sections.includes(section);
 }

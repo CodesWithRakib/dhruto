@@ -20,9 +20,7 @@ const PAGINATION_KEYS = ["page", "limit", "total", "nextCursor", "hasMore"];
 @Injectable()
 export class ResponseTransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context
-      .switchToHttp()
-      .getRequest<RequestWithId & { user?: unknown }>();
+    const request = context.switchToHttp().getRequest<RequestWithId & { user?: unknown }>();
     const path = request?.originalUrl || request?.url || "unknown";
     const requestId = request?.requestId || "unknown";
     const timestamp = new Date().toISOString();
@@ -53,14 +51,8 @@ export class ResponseTransformInterceptor implements NestInterceptor {
         if ("success" in envelope) {
           const result: Record<string, unknown> = { ...envelope };
           result.path = result.path || path;
-          result.requestId =
-            result.requestId ||
-            readMetaString(envelope, "requestId") ||
-            requestId;
-          result.timestamp =
-            result.timestamp ||
-            readMetaString(envelope, "timestamp") ||
-            timestamp;
+          result.requestId = result.requestId || readMetaString(envelope, "requestId") || requestId;
+          result.timestamp = result.timestamp || readMetaString(envelope, "timestamp") || timestamp;
 
           const pagination = extractPagination(envelope);
           if (pagination) {
@@ -86,10 +78,7 @@ export class ResponseTransformInterceptor implements NestInterceptor {
   }
 }
 
-function readMetaString(
-  envelope: Record<string, unknown>,
-  key: string,
-): string | undefined {
+function readMetaString(envelope: Record<string, unknown>, key: string): string | undefined {
   const meta = envelope.meta;
   if (meta && typeof meta === "object") {
     const value = (meta as Record<string, unknown>)[key];
@@ -105,9 +94,7 @@ function readMetaString(
  * Prefers an explicit `meta.pagination`; otherwise treats `meta` as pagination
  * when it carries one of the documented pagination keys.
  */
-function extractPagination(
-  envelope: Record<string, unknown>,
-): Record<string, unknown> | undefined {
+function extractPagination(envelope: Record<string, unknown>): Record<string, unknown> | undefined {
   const meta = envelope.meta;
   if (!meta || typeof meta !== "object") {
     return undefined;

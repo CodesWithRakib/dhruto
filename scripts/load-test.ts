@@ -67,7 +67,9 @@ async function runScenario(
   totalRequests: number,
   concurrency: number,
 ): Promise<BenchmarkResult> {
-  process.stdout.write(`Benchmarking [${name}] (${totalRequests} requests, concurrency ${concurrency})... `);
+  process.stdout.write(
+    `Benchmarking [${name}] (${totalRequests} requests, concurrency ${concurrency})... `,
+  );
 
   const latencies: number[] = [];
   let errors = 0;
@@ -146,9 +148,7 @@ async function main() {
   const results: BenchmarkResult[] = [];
 
   // Scenario 1: Health Liveness Probe
-  results.push(
-    await runScenario("Health Probe (/health)", "GET", "/health", undefined, 600, 25),
-  );
+  results.push(await runScenario("Health Probe (/health)", "GET", "/health", undefined, 600, 25));
 
   // Scenario 2: Dynamic Pricing Engine Calculation
   const pricingPayload = JSON.stringify({
@@ -158,12 +158,26 @@ async function main() {
     codAmount: 1500,
   });
   results.push(
-    await runScenario("Dynamic Pricing (/pricing/calculate)", "POST", "/api/v1/pricing/calculate", pricingPayload, 500, 25),
+    await runScenario(
+      "Dynamic Pricing (/pricing/calculate)",
+      "POST",
+      "/api/v1/pricing/calculate",
+      pricingPayload,
+      500,
+      25,
+    ),
   );
 
   // Scenario 3: Realtime Observability & Telemetry Snapshot
   results.push(
-    await runScenario("System Observability (/health/metrics)", "GET", "/health/metrics", undefined, 400, 20),
+    await runScenario(
+      "System Observability (/health/metrics)",
+      "GET",
+      "/health/metrics",
+      undefined,
+      400,
+      20,
+    ),
   );
 
   console.log("\n=================================================");

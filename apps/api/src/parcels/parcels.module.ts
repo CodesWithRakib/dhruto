@@ -20,26 +20,14 @@ import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Parcel,
-      ParcelStatusHistory,
-      Merchant,
-      ParcelAssignment,
-      Rider,
-      Hub,
-    ]),
+    TypeOrmModule.forFeature([Parcel, ParcelStatusHistory, Merchant, ParcelAssignment, Rider, Hub]),
     PricingModule,
     IdempotencyModule,
     // OutboxService for transactional domain-event emission.
     IntegrationsModule,
   ],
   controllers: [ParcelsController, TrackingController],
-  providers: [
-    ParcelsService,
-    ParcelLifecycleService,
-    TrackingCodeService,
-    RateLimitGuard,
-  ],
+  providers: [ParcelsService, ParcelLifecycleService, TrackingCodeService, RateLimitGuard],
   // ParcelLifecycleService is exported so the hub module routes its status
   // changes through the same centralized state machine (docs/08-STATE-MACHINE.md).
   exports: [ParcelsService, ParcelLifecycleService],

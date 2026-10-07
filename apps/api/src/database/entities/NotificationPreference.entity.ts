@@ -1,6 +1,6 @@
-import { Entity, Column, Index } from 'typeorm';
-import { BaseEntity } from './Base.entity.js';
-import { NotificationCategory, PreferenceChannel } from '@dhruto/contracts';
+import { Entity, Column, Index } from "typeorm";
+import { BaseEntity } from "./Base.entity.js";
+import { NotificationCategory, PreferenceChannel } from "@dhruto/contracts";
 
 export { NotificationCategory, PreferenceChannel };
 
@@ -8,23 +8,23 @@ export { NotificationCategory, PreferenceChannel };
  * Per-recipient channel preferences. Absence of a row means "enabled".
  * Financial and security categories are locked on at the service layer.
  */
-@Entity('notification_preferences')
-@Index(['userId', 'channel', 'category'], { unique: true })
-@Index(['merchantId', 'channel', 'category'], { unique: true })
+@Entity("notification_preferences")
+@Index(["userId", "channel", "category"], { unique: true })
+@Index(["merchantId", "channel", "category"], { unique: true })
 export class NotificationPreference extends BaseEntity {
-  @Column({ name: 'user_id', type: 'uuid', nullable: true })
+  @Column({ name: "user_id", type: "uuid", nullable: true })
   userId: string | null;
 
-  @Column({ name: 'merchant_id', type: 'uuid', nullable: true })
+  @Column({ name: "merchant_id", type: "uuid", nullable: true })
   merchantId: string | null;
 
-  @Column({ type: 'enum', enum: NotificationCategory })
+  @Column({ type: "enum", enum: NotificationCategory })
   category: NotificationCategory;
 
-  @Column({ type: 'enum', enum: PreferenceChannel })
+  @Column({ type: "enum", enum: PreferenceChannel })
   channel: PreferenceChannel;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   enabled: boolean;
 
   /**
@@ -32,6 +32,6 @@ export class NotificationPreference extends BaseEntity {
    * preference row and set through the preferences endpoint; defaults to
    * English with English fallback for missing templates.
    */
-  @Column({ type: 'varchar', length: 5, default: 'en' })
+  @Column({ type: "varchar", length: 5, default: "en" })
   locale: string;
 }

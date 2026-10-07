@@ -2,14 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import {
-  ShieldCheck,
-  AlertTriangle,
-  Loader2,
-  CheckCircle2,
-  MapPin,
-  RotateCcw,
-} from "lucide-react";
+import { ShieldCheck, AlertTriangle, Loader2, CheckCircle2, MapPin, RotateCcw } from "lucide-react";
 import { Button, Card, Badge } from "@dhruto/ui";
 import {
   useGetParcelIntelligenceQuery,
@@ -114,7 +107,9 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
           </div>
           <p className="mt-1 text-sm font-medium">
             {intel.address.structuredAddress.district ?? "—"}
-            {intel.address.structuredAddress.thana ? ` · ${intel.address.structuredAddress.thana}` : ""}
+            {intel.address.structuredAddress.thana
+              ? ` · ${intel.address.structuredAddress.thana}`
+              : ""}
           </p>
           <p className="text-[11px] text-muted-foreground">
             {t("confidence", { score: Math.round(intel.address.confidence * 100) })}
@@ -147,7 +142,10 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
           <ul className="space-y-1">
             {intel.risk.reasons.map((r) => (
               <li key={r.code} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                <span aria-hidden="true" className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                <span
+                  aria-hidden="true"
+                  className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary"
+                />
                 {r.detail}
               </li>
             ))}
@@ -244,7 +242,10 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
       )}
 
       {feedback && (
-        <div role="alert" className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground">
+        <div
+          role="alert"
+          className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
+        >
           {feedback}
         </div>
       )}

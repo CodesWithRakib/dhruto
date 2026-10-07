@@ -64,7 +64,11 @@ export class SmsService {
   /**
    * Sends successful delivery & COD receipt notice.
    */
-  async sendDeliveryReceipt(phone: string, trackingCode: string, codAmount: number): Promise<SmsSendResult> {
+  async sendDeliveryReceipt(
+    phone: string,
+    trackingCode: string,
+    codAmount: number,
+  ): Promise<SmsSendResult> {
     const message = `Dhruto Express: Parcel ${trackingCode} delivered successfully! COD Collected: ৳${codAmount.toLocaleString()}. Thank you for shipping with Dhruto.`;
     return this.sendSms(phone, message);
   }

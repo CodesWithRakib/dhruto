@@ -51,12 +51,7 @@ import {
   WalletTransactionType,
 } from "@dhruto/contracts";
 
-function envelope(
-  statusCode: number,
-  message: string,
-  data: unknown,
-  req?: RequestWithId,
-) {
+function envelope(statusCode: number, message: string, data: unknown, req?: RequestWithId) {
   return {
     success: true,
     statusCode,
@@ -108,10 +103,7 @@ export class FinanceController {
   @ApiResponse({ status: 200, description: "Wallet retrieved." })
   @ApiResponse({ status: 401, description: "Authentication required." })
   @ApiResponse({ status: 403, description: "Merchant role required." })
-  async getMyWallet(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getMyWallet(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const merchantId = await requireMerchant(this.merchantsService, user);
     const wallet = await this.financeService.getMerchantWallet(merchantId);
     return envelope(HttpStatus.OK, "Merchant wallet retrieved successfully", wallet, req);
@@ -152,7 +144,11 @@ export class FinanceController {
     description:
       "Reserves available balance through a balanced PAYOUT_RESERVATION posting. Accepts an Idempotency-Key: repeats replay the recorded request.",
   })
-  @ApiHeader({ name: "Idempotency-Key", required: false, description: "Makes duplicate submissions safe" })
+  @ApiHeader({
+    name: "Idempotency-Key",
+    required: false,
+    description: "Makes duplicate submissions safe",
+  })
   @ApiResponse({ status: 200, description: "Payout requested." })
   @ApiResponse({ status: 400, description: "Insufficient balance." })
   @ApiResponse({ status: 409, description: "Key reused with another payload." })
@@ -181,10 +177,7 @@ export class FinanceController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Get merchant payout withdrawal history" })
   @ApiResponse({ status: 200, description: "Payout history." })
-  async getMyPayouts(
-    @CurrentUser() user: AuthenticatedUser,
-    @Req() req?: RequestWithId,
-  ) {
+  async getMyPayouts(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
     const merchantId = await requireMerchant(this.merchantsService, user);
     const payouts = await this.financeService.getMerchantPayouts(merchantId);
     return envelope(HttpStatus.OK, "Payouts retrieved successfully", payouts, req);
@@ -210,7 +203,8 @@ export class FinanceController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Merchant cancels a pending payout",
-    description: "Only REQUESTED payouts can be cancelled; reserved funds are released through reversal postings.",
+    description:
+      "Only REQUESTED payouts can be cancelled; reserved funds are released through reversal postings.",
   })
   @ApiResponse({ status: 200, description: "Payout cancelled." })
   @ApiResponse({ status: 400, description: "Payout is no longer cancellable." })
@@ -228,7 +222,8 @@ export class FinanceController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Merchant parcel settlements",
-    description: "Per-parcel financial close: gross COD, fee snapshot, net payable and ledger reference.",
+    description:
+      "Per-parcel financial close: gross COD, fee snapshot, net payable and ledger reference.",
   })
   @ApiQuery({ name: "page", required: false, type: Number })
   @ApiQuery({ name: "limit", required: false, type: Number })
@@ -287,7 +282,12 @@ export class HubCashController {
     @Req() req?: RequestWithId,
   ) {
     const items = await this.financeService.getPendingReconciliations(user);
-    return envelope(HttpStatus.OK, "Pending cash reconciliations retrieved successfully", items, req);
+    return envelope(
+      HttpStatus.OK,
+      "Pending cash reconciliations retrieved successfully",
+      items,
+      req,
+    );
   }
 
   @Post("reconciliation/verify")
@@ -317,7 +317,11 @@ export class HubCashController {
     summary: "Rider hand-in batches for the hub",
     description: "Batch custody records with server-computed expected totals and derived status.",
   })
-  @ApiQuery({ name: "status", required: false, description: "SUBMITTED | VERIFIED | DISCREPANCY | RESOLVED" })
+  @ApiQuery({
+    name: "status",
+    required: false,
+    description: "SUBMITTED | VERIFIED | DISCREPANCY | RESOLVED",
+  })
   @ApiResponse({ status: 200, description: "Hand-in batches." })
   async getHubHandIns(
     @CurrentUser() user: AuthenticatedUser,
@@ -402,7 +406,8 @@ export class FinanceAdminController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Approve a requested payout",
-    description: "REQUESTED -> APPROVED. No money moves at approval; disbursement happens on process.",
+    description:
+      "REQUESTED -> APPROVED. No money moves at approval; disbursement happens on process.",
   })
   @ApiResponse({ status: 200, description: "Payout approved." })
   @ApiResponse({ status: 400, description: "Payout is not approvable." })
@@ -465,7 +470,8 @@ export class FinanceAdminController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "Group settled parcels into a reporting batch",
-    description: "Batches never move money (funds release at verification); they group settlements for review and payout reference.",
+    description:
+      "Batches never move money (funds release at verification); they group settlements for review and payout reference.",
   })
   @ApiResponse({ status: 201, description: "Batch created." })
   async createSettlementBatch(
@@ -510,7 +516,8 @@ export class FinanceAdminController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Resolve a cash discrepancy",
-    description: "An optional recovery amount is posted back to the merchant wallet through the journal.",
+    description:
+      "An optional recovery amount is posted back to the merchant wallet through the journal.",
   })
   @ApiResponse({ status: 200, description: "Discrepancy resolved." })
   async resolveDiscrepancy(
@@ -528,7 +535,8 @@ export class FinanceAdminController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "Create a manual financial adjustment",
-    description: "Requires a reason; posts balanced ADJUSTMENT entries and updates the materialized wallet atomically. Accepts an Idempotency-Key.",
+    description:
+      "Requires a reason; posts balanced ADJUSTMENT entries and updates the materialized wallet atomically. Accepts an Idempotency-Key.",
   })
   @ApiResponse({ status: 201, description: "Adjustment posted." })
   async createAdjustment(
@@ -550,7 +558,8 @@ export class FinanceAdminController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Reverse a posted transaction",
-    description: "Posts mirror entries and marks the original REVERSED. The original is never edited.",
+    description:
+      "Posts mirror entries and marks the original REVERSED. The original is never edited.",
   })
   @ApiResponse({ status: 200, description: "Reversal posted." })
   @ApiResponse({ status: 400, description: "Transaction cannot be reversed." })
@@ -631,7 +640,16 @@ export class FinanceAdminController {
     if (format === "csv") {
       return toCsvResponse(
         result.items,
-        ["settlementCode", "trackingCode", "merchantId", "grossMinor", "feeMinor", "netMinor", "status", "settledAt"],
+        [
+          "settlementCode",
+          "trackingCode",
+          "merchantId",
+          "grossMinor",
+          "feeMinor",
+          "netMinor",
+          "status",
+          "settledAt",
+        ],
         "cod-report.csv",
       );
     }
@@ -660,7 +678,15 @@ export class FinanceAdminController {
     if (format === "csv") {
       return toCsvResponse(
         result.items,
-        ["payoutCode", "merchantId", "amount", "payoutMethod", "status", "transactionReference", "createdAt"],
+        [
+          "payoutCode",
+          "merchantId",
+          "amount",
+          "payoutMethod",
+          "status",
+          "transactionReference",
+          "createdAt",
+        ],
         "payout-report.csv",
       );
     }
@@ -691,10 +717,7 @@ export class FinanceAdminController {
   })
   @ApiQuery({ name: "merchantId", required: false })
   @ApiResponse({ status: 200, description: "Reconciliation verdict." })
-  async reconciliationCheck(
-    @Query("merchantId") merchantId?: string,
-    @Req() req?: RequestWithId,
-  ) {
+  async reconciliationCheck(@Query("merchantId") merchantId?: string, @Req() req?: RequestWithId) {
     const result = await this.financeService.reconciliationCheck(merchantId);
     return envelope(
       HttpStatus.OK,
@@ -705,11 +728,7 @@ export class FinanceAdminController {
   }
 }
 
-function toCsvResponse(
-  rows: object[],
-  columns: string[],
-  filename: string,
-) {
+function toCsvResponse(rows: object[], columns: string[], filename: string) {
   const escape = (value: unknown): string => {
     const text = value === null || value === undefined ? "" : String(value);
     return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;

@@ -41,10 +41,7 @@ export interface EventDeliveryInput {
   data: Record<string, unknown>;
 }
 
-function toSubscriptionItem(
-  s: WebhookSubscription,
-  secret: string,
-): WebhookSubscriptionItem {
+function toSubscriptionItem(s: WebhookSubscription, secret: string): WebhookSubscriptionItem {
   return {
     id: s.id,
     merchantId: s.merchantId,
@@ -352,10 +349,13 @@ export class WebhooksService {
     const deliveries: WebhookDelivery[] = [];
 
     for (const sub of matchingSubs) {
-      const delivery = await this.createDeliveryForEvent(
-        this.subscriptionRepo.manager,
-        { subscriptionId: sub.id, merchantId, event, eventId: null, data: payload },
-      );
+      const delivery = await this.createDeliveryForEvent(this.subscriptionRepo.manager, {
+        subscriptionId: sub.id,
+        merchantId,
+        event,
+        eventId: null,
+        data: payload,
+      });
       deliveries.push(delivery);
       await this.enqueueDelivery(delivery.id);
     }
@@ -591,7 +591,11 @@ export class WebhooksService {
         this.webhooksQueue,
         "webhook-delivery",
         { deliveryId },
-        { jobId: `webhook-${deliveryId}-${Date.now()}`, attempts: 3, backoff: { type: "exponential", delay: 15000 } },
+        {
+          jobId: `webhook-${deliveryId}-${Date.now()}`,
+          attempts: 3,
+          backoff: { type: "exponential", delay: 15000 },
+        },
         () => this.attemptDelivery(deliveryId).then(() => undefined),
       );
     } else {

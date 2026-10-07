@@ -4,12 +4,7 @@ import { type INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { DataSource } from "typeorm";
 import { AppModule } from "../src/app.module.js";
-import {
-  SEEDED_ACCOUNTS,
-  bearer,
-  idempotencyKey,
-  loginToken,
-} from "./utils/auth.js";
+import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 /**
  * Phase 4 finance ledger, end-to-end against the real database.
@@ -146,9 +141,7 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
         .get("/api/v1/admin/finance/overview")
         .set(bearer(dhkManagerToken))
         .expect(403);
-      await request(app.getHttpServer())
-        .get("/api/v1/finance/reconciliation/pending")
-        .expect(401);
+      await request(app.getHttpServer()).get("/api/v1/finance/reconciliation/pending").expect(401);
     });
 
     it("isolates merchants from each other's wallets", async () => {
@@ -283,9 +276,7 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
         .get("/api/v1/finance/discrepancies?status=RESOLVED")
         .set(bearer(adminToken))
         .expect(200);
-      expect(
-        resolved.body.data.some((d: { id: string }) => d.id === record.id),
-      ).toBe(true);
+      expect(resolved.body.data.some((d: { id: string }) => d.id === record.id)).toBe(true);
     });
   });
 
@@ -432,7 +423,11 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
         .post("/api/v1/finance/payouts/request")
         .set(bearer(merchantToken))
         .set("Idempotency-Key", idempotencyKey("fin4-reject"))
-        .send({ amount: 300, payoutMethod: "ROCKET", accountDetails: { accountNumber: "01900112233" } })
+        .send({
+          amount: 300,
+          payoutMethod: "ROCKET",
+          accountDetails: { accountNumber: "01900112233" },
+        })
         .expect(200);
       await request(app.getHttpServer())
         .post(`/api/v1/admin/finance/payouts/${requested.body.data.id}/process`)
@@ -451,7 +446,11 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
         .post("/api/v1/finance/payouts/request")
         .set(bearer(merchantToken))
         .set("Idempotency-Key", idempotencyKey("fin4-fail"))
-        .send({ amount: 300, payoutMethod: "BKASH", accountDetails: { accountNumber: "01700112244" } })
+        .send({
+          amount: 300,
+          payoutMethod: "BKASH",
+          accountDetails: { accountNumber: "01700112244" },
+        })
         .expect(200);
       await request(app.getHttpServer())
         .post(`/api/v1/admin/finance/payouts/${second.body.data.id}/approve`)

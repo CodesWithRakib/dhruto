@@ -16,8 +16,14 @@ import {
 import { useGetSystemMetricsQuery } from "../api/observability.api";
 
 export function SystemObservabilityCard() {
-  const { data: metrics, isLoading, isError, refetch } = useGetSystemMetricsQuery(undefined, {
-    pollingInterval: 15000, skipPollingIfUnfocused: true,
+  const {
+    data: metrics,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetSystemMetricsQuery(undefined, {
+    pollingInterval: 15000,
+    skipPollingIfUnfocused: true,
   });
 
   if (isLoading) {
@@ -73,12 +79,16 @@ export function SystemObservabilityCard() {
               <div>
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-lg">System Scale & Observability Center</CardTitle>
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] border-emerald-500/30">
+                  <Badge
+                    variant="outline"
+                    className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] border-emerald-500/30"
+                  >
                     {metrics.status.toUpperCase()}
                   </Badge>
                 </div>
                 <CardDescription>
-                  Node {metrics.nodeVersion} • Env: {metrics.environment} • Uptime: {formatUptime(metrics.uptimeSeconds)}
+                  Node {metrics.nodeVersion} • Env: {metrics.environment} • Uptime:{" "}
+                  {formatUptime(metrics.uptimeSeconds)}
                 </CardDescription>
               </div>
             </div>
@@ -106,14 +116,19 @@ export function SystemObservabilityCard() {
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
-                  {metrics.database.latencyMs} <span className="text-xs font-normal text-muted-foreground">ms</span>
+                  {metrics.database.latencyMs}{" "}
+                  <span className="text-xs font-normal text-muted-foreground">ms</span>
                 </span>
-                <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/30">
+                <Badge
+                  variant="outline"
+                  className="text-[10px] text-emerald-600 border-emerald-500/30"
+                >
                   {metrics.database.status.toUpperCase()}
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground font-mono">
-                Pool: {metrics.database.clientPool.active} active / {metrics.database.clientPool.total} pool
+                Pool: {metrics.database.clientPool.active} active /{" "}
+                {metrics.database.clientPool.total} pool
               </p>
             </div>
 
@@ -125,14 +140,16 @@ export function SystemObservabilityCard() {
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
-                  {metrics.cache.hitRate}% <span className="text-xs font-normal text-muted-foreground">Hit Rate</span>
+                  {metrics.cache.hitRate}%{" "}
+                  <span className="text-xs font-normal text-muted-foreground">Hit Rate</span>
                 </span>
                 <Badge variant="outline" className="text-[10px] font-mono capitalize">
                   {metrics.cache.driver}
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground font-mono">
-                {metrics.cache.hits} hits • {metrics.cache.misses} misses ({metrics.cache.keysCount} keys)
+                {metrics.cache.hits} hits • {metrics.cache.misses} misses ({metrics.cache.keysCount}{" "}
+                keys)
               </p>
             </div>
 
@@ -144,9 +161,14 @@ export function SystemObservabilityCard() {
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
-                  {metrics.memory.heapUsedMb} <span className="text-xs font-normal text-muted-foreground">/ {metrics.memory.heapTotalMb} MB</span>
+                  {metrics.memory.heapUsedMb}{" "}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    / {metrics.memory.heapTotalMb} MB
+                  </span>
                 </span>
-                <span className="text-xs font-mono font-bold text-muted-foreground">{heapPct}%</span>
+                <span className="text-xs font-mono font-bold text-muted-foreground">
+                  {heapPct}%
+                </span>
               </div>
               <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                 <div
@@ -164,14 +186,16 @@ export function SystemObservabilityCard() {
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
-                  {metrics.telemetry.p95LatencyMs} <span className="text-xs font-normal text-muted-foreground">ms p95</span>
+                  {metrics.telemetry.p95LatencyMs}{" "}
+                  <span className="text-xs font-normal text-muted-foreground">ms p95</span>
                 </span>
                 <Badge variant="outline" className="text-[10px] font-mono text-blue-600">
                   {metrics.telemetry.currentRps} RPS
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground font-mono">
-                {metrics.telemetry.totalRequests.toLocaleString()} requests • {metrics.telemetry.errorRate}% err
+                {metrics.telemetry.totalRequests.toLocaleString()} requests •{" "}
+                {metrics.telemetry.errorRate}% err
               </p>
             </div>
           </div>
@@ -189,13 +213,18 @@ export function SystemObservabilityCard() {
                   <Gauge className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Load Testing & High-Throughput Baseline</CardTitle>
+                  <CardTitle className="text-base">
+                    Load Testing & High-Throughput Baseline
+                  </CardTitle>
                   <CardDescription>
                     Automated benchmark validating concurrency and SLA targets
                   </CardDescription>
                 </div>
               </div>
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 font-mono text-xs">
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/10 text-emerald-600 font-mono text-xs"
+              >
                 SLA PASSED
               </Badge>
             </div>
@@ -208,7 +237,8 @@ export function SystemObservabilityCard() {
                 <span className="text-xs text-muted-foreground">Target: &ge; 250 RPS</span>
               </div>
               <div className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-lg">
-                600 RPS <span className="text-xs font-normal text-muted-foreground">(2.4x Target)</span>
+                600 RPS{" "}
+                <span className="text-xs font-normal text-muted-foreground">(2.4x Target)</span>
               </div>
             </div>
 
@@ -218,7 +248,8 @@ export function SystemObservabilityCard() {
                 <span className="text-xs text-muted-foreground">Target: &lt; 300 ms</span>
               </div>
               <div className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-lg">
-                45.8 ms <span className="text-xs font-normal text-muted-foreground">(-84% lower)</span>
+                45.8 ms{" "}
+                <span className="text-xs font-normal text-muted-foreground">(-84% lower)</span>
               </div>
             </div>
 
@@ -228,7 +259,8 @@ export function SystemObservabilityCard() {
                 <span className="text-xs text-muted-foreground">Target: &lt; 1.00%</span>
               </div>
               <div className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-lg">
-                0.00% <span className="text-xs font-normal text-muted-foreground">(Zero Faults)</span>
+                0.00%{" "}
+                <span className="text-xs font-normal text-muted-foreground">(Zero Faults)</span>
               </div>
             </div>
           </CardContent>
@@ -259,7 +291,9 @@ export function SystemObservabilityCard() {
             <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Recovery Point Objective (RPO)</span>
-                <span className="text-xs text-muted-foreground">WAL Streaming & automated daily snapshots</span>
+                <span className="text-xs text-muted-foreground">
+                  WAL Streaming & automated daily snapshots
+                </span>
               </div>
               <span className="font-mono font-bold text-sm text-foreground">&lt; 15 Mins</span>
             </div>
@@ -267,7 +301,9 @@ export function SystemObservabilityCard() {
             <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Recovery Time Objective (RTO)</span>
-                <span className="text-xs text-muted-foreground">Automated replica promotion & DNS edge failover</span>
+                <span className="text-xs text-muted-foreground">
+                  Automated replica promotion & DNS edge failover
+                </span>
               </div>
               <span className="font-mono font-bold text-sm text-foreground">&lt; 30 Mins</span>
             </div>
@@ -275,7 +311,9 @@ export function SystemObservabilityCard() {
             <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Backup Integrity Verification</span>
-                <span className="text-xs text-muted-foreground">SHA-256 cryptographic tamper check</span>
+                <span className="text-xs text-muted-foreground">
+                  SHA-256 cryptographic tamper check
+                </span>
               </div>
               <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs font-mono">
                 <CheckCircle2 className="h-4 w-4" />

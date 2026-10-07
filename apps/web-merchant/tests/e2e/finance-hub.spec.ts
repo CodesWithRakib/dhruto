@@ -18,7 +18,7 @@ test.describe("Journey — Hub cash desk", () => {
     const me = await request.get(`${API_BASE_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${riderToken}` },
     });
-    const riderId = ((await me.json()).data.rider.id as string) as string;
+    const riderId = (await me.json()).data.rider.id as string as string;
     await request.post(`${API_BASE_URL}/parcels/${created.id}/assign-rider`, {
       headers: { Authorization: `Bearer ${managerToken}`, "Content-Type": "application/json" },
       data: { riderId },
@@ -27,7 +27,7 @@ test.describe("Journey — Hub cash desk", () => {
       `${API_BASE_URL}/riders/me/parcels/${created.id}/start-delivery`,
       { headers: { Authorization: `Bearer ${riderToken}` } },
     );
-    const otp = ((await started.json()).data.otp as string) as string;
+    const otp = (await started.json()).data.otp as string as string;
     await request.post(`${API_BASE_URL}/riders/me/deliveries/${created.id}/complete`, {
       headers: { Authorization: `Bearer ${riderToken}`, "Content-Type": "application/json" },
       data: { otp, codAmountCollected: 2000 },
@@ -49,13 +49,16 @@ test.describe("Journey — Hub cash desk", () => {
       .click();
     await expect(page.getByText(/verify cash and settle/i)).toBeVisible();
     await page.getByLabel(/counted amount/i).fill("2000");
-    await page.getByRole("dialog").getByRole("button", { name: /^confirm$/i }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^confirm$/i })
+      .click();
     // Success toast confirms settlement; the row leaves the pending list.
     await expect(page.getByText(/settled/i).first()).toBeVisible({ timeout: 20_000 });
     await page.keyboard.press("Escape");
-    await expect(
-      page.locator("li", { hasText: created.trackingCode }),
-    ).toBeHidden({ timeout: 20_000 });
+    await expect(page.locator("li", { hasText: created.trackingCode })).toBeHidden({
+      timeout: 20_000,
+    });
   });
 
   test("a counted shortfall opens a discrepancy instead of settling silently", async ({
@@ -82,7 +85,10 @@ test.describe("Journey — Hub cash desk", () => {
       .getByRole("button", { name: /verify cash/i })
       .click();
     await page.getByLabel(/counted amount/i).fill("2900");
-    await page.getByRole("dialog").getByRole("button", { name: /^confirm$/i }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^confirm$/i })
+      .click();
     await expect(page.getByText(/variance|discrepancy/i).first()).toBeVisible({ timeout: 20_000 });
 
     await page.getByRole("tab", { name: /discrepancies/i }).click();

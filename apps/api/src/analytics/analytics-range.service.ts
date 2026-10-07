@@ -76,7 +76,14 @@ export class AnalyticsRangeService {
         case "last-month": {
           const dhaka = this.toDhakaParts(now);
           const firstThis = new Date(Date.UTC(dhaka.year, dhaka.month - 1, 1) - 6 * 3600 * 1000);
-          const firstPrev = new Date(Date.UTC(dhaka.month === 1 ? dhaka.year - 1 : dhaka.year, dhaka.month === 1 ? 11 : dhaka.month - 2, 1) - 6 * 3600 * 1000);
+          const firstPrev = new Date(
+            Date.UTC(
+              dhaka.month === 1 ? dhaka.year - 1 : dhaka.year,
+              dhaka.month === 1 ? 11 : dhaka.month - 2,
+              1,
+            ) -
+              6 * 3600 * 1000,
+          );
           from = firstPrev;
           to = new Date(firstThis.getTime() - 1);
           break;

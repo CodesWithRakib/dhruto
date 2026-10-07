@@ -50,10 +50,7 @@ test.describe("Journey 4 — Parcel details and label", () => {
     await expect(label.locator("svg").filter({ hasText: created.trackingCode })).toBeVisible();
   });
 
-  test("a parcel owned by another merchant is reported as not found", async ({
-    page,
-    request,
-  }) => {
+  test("a parcel owned by another merchant is reported as not found", async ({ page, request }) => {
     // The seeded second merchant owns parcels the first merchant must not see.
     const otherLogin = await request.post(`${API_BASE_URL}/auth/login`, {
       data: { emailOrPhone: "merchant2@dhruto.com", password: "dhruto123" },

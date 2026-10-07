@@ -42,9 +42,7 @@ export class RiskScoringService {
     let score = 25; // Base starting score
 
     // 1. Phone number validation
-    const hasValidPrefix = VALID_BD_PHONE_PREFIXES.some((p) =>
-      normalizedPhone.startsWith(p),
-    );
+    const hasValidPrefix = VALID_BD_PHONE_PREFIXES.some((p) => normalizedPhone.startsWith(p));
     const hasValidLength = normalizedPhone.length === 11;
 
     if (!hasValidPrefix || !hasValidLength) {
@@ -202,8 +200,7 @@ export class RiskScoringService {
         p.status === ParcelStatus.CANCELLED,
     ).length;
 
-    const completionRate =
-      totalOrders > 0 ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
+    const completionRate = totalOrders > 0 ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
 
     return {
       totalOrders,

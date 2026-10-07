@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { createParcelViaApi, makeBookingFixture, loginAsMerchant, readAccessToken } from "./helpers/merchant";
+import {
+  createParcelViaApi,
+  makeBookingFixture,
+  loginAsMerchant,
+  readAccessToken,
+} from "./helpers/merchant";
 
 test.describe("Public tracking", () => {
   test("Journey 5 — a valid tracking code shows status and timeline without signing in", async ({
@@ -32,9 +37,7 @@ test.describe("Public tracking", () => {
   });
 
   test("public tracking never exposes merchant or financial data", async ({ request }) => {
-    const response = await request.get(
-      "http://localhost:4000/api/v1/tracking/DHR-20260101-AAAAAA",
-    );
+    const response = await request.get("http://localhost:4000/api/v1/tracking/DHR-20260101-AAAAAA");
     // Unknown code -> 404 with a stable code, never a payload.
     expect(response.status()).toBe(404);
     const body = await response.json();

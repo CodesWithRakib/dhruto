@@ -1,8 +1,5 @@
 import { createZodDto } from "nestjs-zod";
-import {
-  createNotificationSchema,
-  updatePreferencesSchema,
-} from "@dhruto/contracts";
+import { createNotificationSchema, updatePreferencesSchema } from "@dhruto/contracts";
 import { z } from "zod";
 
 export class CreateNotificationDto extends createZodDto(createNotificationSchema) {}

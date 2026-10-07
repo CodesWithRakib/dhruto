@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { type MerchantWalletData } from "@dhruto/contracts";
 import { Wallet, Clock, ArrowUpRight, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@dhruto/ui";
+import { useFormatters } from "@/lib/format";
 
 interface WalletCardProps {
   wallet?: MerchantWalletData;
@@ -14,6 +15,7 @@ interface WalletCardProps {
 
 export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardProps) {
   const t = useTranslations("Finance");
+  const { bdt } = useFormatters();
   const balance = Number(wallet?.balance || 0);
   const pending = Number(wallet?.pendingBalance || 0);
   const withdrawn = Number(wallet?.withdrawnTotal || 0);
@@ -36,7 +38,7 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
           <p className="text-sm font-medium text-success">{t("availableBalance")}</p>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
-              ৳{isLoading ? "…" : balance.toLocaleString()}
+              {bdt(isLoading ? "…" : balance)}
             </span>
             <span className="text-xs font-semibold uppercase tracking-wider text-success">
               {currency}
@@ -77,7 +79,7 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
             <p className="text-sm font-medium text-muted-foreground">{t("pendingSettlement")}</p>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-3xl font-bold tabular-nums text-foreground sm:text-4xl">
-                ৳{isLoading ? "…" : pending.toLocaleString()}
+                {bdt(isLoading ? "…" : pending)}
               </span>
             </div>
           </div>
@@ -97,7 +99,7 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
             <p className="text-sm font-medium text-muted-foreground">{t("lifetimeWithdrawn")}</p>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-3xl font-bold tabular-nums text-foreground sm:text-4xl">
-                ৳{isLoading ? "…" : withdrawn.toLocaleString()}
+                {bdt(isLoading ? "…" : withdrawn)}
               </span>
             </div>
             <p className="mt-2 text-xs font-medium text-muted-foreground">{t("payout.minimum")}</p>

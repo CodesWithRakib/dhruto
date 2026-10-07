@@ -7,7 +7,8 @@ import { History } from "lucide-react";
 import { useGetRiderHistoryQuery } from "../api/riders.api";
 import { Link } from "@/lib/navigation";
 import { RIDER_ROUTES } from "@/config/routes";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
+import { useFormatters } from "@/lib/format";
 
 type HistoryFilter = "ALL" | "DELIVERED" | "FAILED";
 
@@ -21,6 +22,7 @@ const FAILED_GROUP = ["DELIVERY_ATTEMPTED", "RESCHEDULED"];
  */
 export function RiderHistoryView() {
   const t = useTranslations("Rider");
+  const { date: fmtDate } = useFormatters();
   const [filter, setFilter] = React.useState<HistoryFilter>("ALL");
 
   const { data, isLoading, refetch } = useGetRiderHistoryQuery({ page: 1, limit: 100 });
@@ -65,7 +67,11 @@ export function RiderHistoryView() {
             </p>
           ) : items.length === 0 ? (
             <div className="p-6">
-              <EmptyState icon={History} title={t("history.empty")} description={t("history.emptyDescription")} />
+              <EmptyState
+                icon={History}
+                title={t("history.empty")}
+                description={t("history.emptyDescription")}
+              />
             </div>
           ) : (
             <ul className="divide-y divide-border">
@@ -91,7 +97,7 @@ export function RiderHistoryView() {
                         : ""}
                     </span>
                     <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
-                      {new Date(item.updatedAt).toLocaleDateString()}
+                      {fmtDate(item.updatedAt)}
                     </span>
                   </Link>
                 </li>

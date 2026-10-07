@@ -24,11 +24,7 @@ import { vi } from "vitest";
 import React from "react";
 
 vi.mock("@/lib/navigation", () => ({
-  Link: ({
-    href,
-    children,
-    ...props
-  }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
+  Link: ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
     React.createElement("a", { href, ...props }, children),
   useRouter: () => ({
     push: vi.fn(),

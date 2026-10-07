@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { CustomJwtService } from "../jwt/custom-jwt.service.js";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator.js";
@@ -36,7 +31,9 @@ export class JwtAuthGuard implements CanActivate {
 
     const trimmedHeader = authHeader.trim();
     if (!trimmedHeader.toLowerCase().startsWith("bearer ")) {
-      throw new UnauthorizedException("Invalid authorization header format (must be Bearer <token>)");
+      throw new UnauthorizedException(
+        "Invalid authorization header format (must be Bearer <token>)",
+      );
     }
 
     // Extract token cleanly, removing any accidental quotes or whitespace

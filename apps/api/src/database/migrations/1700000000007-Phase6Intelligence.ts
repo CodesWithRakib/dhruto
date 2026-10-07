@@ -1,4 +1,4 @@
-import { type MigrationInterface, type QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from "typeorm";
 
 /**
  * Phase 6 - Intelligence & smart decision engine.
@@ -12,7 +12,7 @@ import { type MigrationInterface, type QueryRunner } from 'typeorm';
  * Phone numbers are stored as HMAC hashes only — never raw.
  */
 export class Phase6Intelligence1700000000007 implements MigrationInterface {
-  name = 'Phase6Intelligence1700000000007';
+  name = "Phase6Intelligence1700000000007";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`

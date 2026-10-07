@@ -38,7 +38,5 @@ export const ADMIN_ROUTE_BASE: RouteBase = {
 /** Resolves the active link base from the current pathname. */
 export function useRouteBase(): RouteBase {
   const pathname = usePathname();
-  return stripLocale(pathname).startsWith("/admin")
-    ? ADMIN_ROUTE_BASE
-    : MERCHANT_ROUTE_BASE;
+  return stripLocale(pathname).startsWith("/admin") ? ADMIN_ROUTE_BASE : MERCHANT_ROUTE_BASE;
 }

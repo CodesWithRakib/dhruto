@@ -4,12 +4,7 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { ZodValidationPipe } from "nestjs-zod";
-import {
-  SEEDED_ACCOUNTS,
-  bearer,
-  idempotencyKey,
-  loginToken,
-} from "./utils/auth.js";
+import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 describe("Rider Delivery & Cash Reconciliation (E2E / Integration)", () => {
   let app: INestApplication;

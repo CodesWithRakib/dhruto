@@ -48,9 +48,7 @@ export const ORIGIN_HUB_INBOUND_FROM: readonly ParcelStatus[] = [
   ParcelStatus.PICKED_UP,
 ];
 
-export const ALLOWED_PARCEL_TRANSITIONS: Readonly<
-  Record<ParcelStatus, readonly ParcelStatus[]>
-> = {
+export const ALLOWED_PARCEL_TRANSITIONS: Readonly<Record<ParcelStatus, readonly ParcelStatus[]>> = {
   [ParcelStatus.CREATED]: [ParcelStatus.PICKUP_REQUESTED, ParcelStatus.CANCELLED],
   [ParcelStatus.PICKUP_REQUESTED]: [ParcelStatus.PICKUP_ASSIGNED, ParcelStatus.CANCELLED],
   [ParcelStatus.PICKUP_ASSIGNED]: [ParcelStatus.PICKED_UP, ParcelStatus.CANCELLED],
@@ -64,10 +62,7 @@ export const ALLOWED_PARCEL_TRANSITIONS: Readonly<
   ],
   [ParcelStatus.DESTINATION_HUB_RECEIVED]: [ParcelStatus.ASSIGNED_TO_RIDER],
   [ParcelStatus.ASSIGNED_TO_RIDER]: [ParcelStatus.OUT_FOR_DELIVERY],
-  [ParcelStatus.OUT_FOR_DELIVERY]: [
-    ParcelStatus.DELIVERED,
-    ParcelStatus.DELIVERY_ATTEMPTED,
-  ],
+  [ParcelStatus.OUT_FOR_DELIVERY]: [ParcelStatus.DELIVERED, ParcelStatus.DELIVERY_ATTEMPTED],
   [ParcelStatus.DELIVERY_ATTEMPTED]: [
     ParcelStatus.RESCHEDULED,
     ParcelStatus.OUT_FOR_DELIVERY,
@@ -98,16 +93,10 @@ export class ParcelLifecycleService {
     if (from === to) {
       return false;
     }
-    if (
-      to === ParcelStatus.ASSIGNED_TO_RIDER &&
-      PRE_PICKUP_RIDER_ASSIGNMENT_FROM.includes(from)
-    ) {
+    if (to === ParcelStatus.ASSIGNED_TO_RIDER && PRE_PICKUP_RIDER_ASSIGNMENT_FROM.includes(from)) {
       return true;
     }
-    if (
-      to === ParcelStatus.ORIGIN_HUB_RECEIVED &&
-      ORIGIN_HUB_INBOUND_FROM.includes(from)
-    ) {
+    if (to === ParcelStatus.ORIGIN_HUB_RECEIVED && ORIGIN_HUB_INBOUND_FROM.includes(from)) {
       return true;
     }
     return (ALLOWED_PARCEL_TRANSITIONS[from] ?? []).includes(to);

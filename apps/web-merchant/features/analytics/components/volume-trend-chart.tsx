@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@dhruto/ui";
 import { BarChart2, Calendar } from "lucide-react";
 import { type DailyTrendPoint } from "@dhruto/contracts";
+import { formatBDT } from "@/lib/format";
 
 interface VolumeTrendChartProps {
   trends: DailyTrendPoint[];
@@ -18,7 +19,10 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
   }
 
   // Calculate maximum values for scaling
-  const maxCount = Math.max(...trends.map((t) => Math.max(t.booked, t.delivered, t.returned, 1)), 10);
+  const maxCount = Math.max(
+    ...trends.map((t) => Math.max(t.booked, t.delivered, t.returned, 1)),
+    10,
+  );
   const maxCod = Math.max(...trends.map((t) => t.codCollected || 1), 5000);
   const totalBooked = trends.reduce((acc, t) => acc + t.booked, 0);
   const totalDelivered = trends.reduce((acc, t) => acc + t.delivered, 0);
@@ -35,7 +39,8 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
             <div>
               <CardTitle className="text-lg">Delivery Velocity & Volume Trends</CardTitle>
               <CardDescription>
-                Chronological timeline of daily order creation, delivery fulfillment, and COD cashflows
+                Chronological timeline of daily order creation, delivery fulfillment, and COD
+                cashflows
               </CardDescription>
             </div>
           </div>
@@ -122,7 +127,7 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
                     ) : (
                       <div className="flex justify-between gap-2 text-primary font-bold">
                         <span>COD Collected:</span>
-                        <span className="font-mono">৳{point.codCollected.toLocaleString()}</span>
+                        <span className="font-mono">{formatBDT(point.codCollected)}</span>
                       </div>
                     )}
                   </div>
@@ -172,7 +177,7 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
           <div className="p-3 rounded-lg border bg-muted/20">
             <span className="text-muted-foreground block">Period COD Collected</span>
             <span className="text-lg font-bold font-mono text-foreground">
-              ৳{totalCod.toLocaleString()}
+              {formatBDT(totalCod)}
             </span>
           </div>
 

@@ -35,15 +35,16 @@ test.describe("Journey 3 — Parcel list", () => {
     await expect(page.getByRole("row").filter({ hasText: created.trackingCode })).toBeVisible();
 
     // No stray results for a search that cannot match.
-    await page
-      .getByRole("searchbox", { name: /search by tracking id/i })
-      .fill(`NOPE${Date.now()}`);
+    await page.getByRole("searchbox", { name: /search by tracking id/i }).fill(`NOPE${Date.now()}`);
     await expect(page.getByText(/no parcels match your filters/i)).toBeVisible({
       timeout: 20_000,
     });
 
     // Clearing filters restores results.
-    await page.getByRole("button", { name: /clear filters/i }).first().click();
+    await page
+      .getByRole("button", { name: /clear filters/i })
+      .first()
+      .click();
     await expect(page.getByRole("row").filter({ hasText: created.trackingCode })).toBeVisible({
       timeout: 20_000,
     });

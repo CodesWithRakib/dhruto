@@ -2,55 +2,23 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import {
-  Card,
-  CardContent,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@dhruto/ui";
-import { History, Smartphone, Building2, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Card, CardContent, Button } from "@dhruto/ui";
+import { History, Smartphone, Building2 } from "lucide-react";
 import { type PayoutRequestItem } from "@dhruto/contracts";
 import { useGetMyPayoutsQuery, useCancelPayoutMutation } from "../api/finance.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/feedback/states";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EnumBadge } from "@/components/data-display/enum-badge";
+import { PAYOUT_STATUS_TONE } from "@/config/status";
 import { toast } from "sonner";
-
-function StatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case "COMPLETED":
-      return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-success bg-success-soft px-2.5 py-1 text-xs font-semibold text-success">
-          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-          {status}
-        </span>
-      );
-    case "REJECTED":
-    case "FAILED":
-    case "CANCELLED":
-      return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-danger bg-danger-soft px-2.5 py-1 text-xs font-semibold text-danger">
-          <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
-          {status}
-        </span>
-      );
-    default:
-      return (
-        <span className="inline-flex items-center gap-1 rounded-md border border-warning bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning">
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          {status}
-        </span>
-      );
-  }
-}
+import { useFormatters } from "@/lib/format";
 
 /** Merchant payout history with cancel flow for pending requests. */
 export function PayoutsView({ onChanged }: { onChanged: () => void }) {
   const t = useTranslations("Finance");
+  const tMethod = useTranslations("PayoutMethod");
+  const { bdt, date: fmtDate } = useFormatters();
   const [cancelling, setCancelling] = React.useState<PayoutRequestItem | null>(null);
   const { data, isLoading, refetch } = useGetMyPayoutsQuery();
   const [cancelPayout, { isLoading: isCancelling }] = useCancelPayoutMutation();
@@ -80,7 +48,13 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
   }
 
   if (payouts.length === 0) {
-    return <EmptyState icon={History} title={t("payout.empty")} description={t("payout.emptyDescription")} />;
+    return (
+      <EmptyState
+        icon={History}
+        title={t("payout.empty")}
+        description={t("payout.emptyDescription")}
+      />
+    );
   }
 
   return (
@@ -95,20 +69,26 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
                 ) : (
                   <Smartphone className="h-4 w-4 text-primary" aria-hidden="true" />
                 )}
-                {payout.payoutMethod}
+                {tMethod(payout.payoutMethod)}
               </span>
-              <span className="font-mono text-[11px] text-muted-foreground">{payout.payoutCode}</span>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {payout.payoutCode}
+              </span>
               <span className="ml-auto font-mono text-sm font-bold tabular-nums">
-                ৳{Number(payout.amount).toLocaleString()}
+                {bdt(Number(payout.amount))}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="font-mono">
                 {t("payout.destination")}: {payout.accountDetails.accountNumber}
               </span>
-              <span>{new Date(payout.createdAt).toLocaleDateString()}</span>
+              <span>{fmtDate(payout.createdAt)}</span>
               <span className="ml-auto">
-                <StatusBadge status={payout.status} />
+                <EnumBadge
+                  namespace="PayoutStatus"
+                  value={payout.status}
+                  tones={PAYOUT_STATUS_TONE}
+                />
               </span>
             </div>
             {payout.transactionReference ? (
@@ -124,7 +104,12 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
             ) : null}
             {payout.status === "REQUESTED" ? (
               <div className="pt-1">
-                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setCancelling(payout)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() => setCancelling(payout)}
+                >
                   {t("cancel")}
                 </Button>
               </div>
@@ -133,27 +118,21 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
         </Card>
       ))}
 
-      <Dialog open={cancelling !== null} onOpenChange={(open) => !open && setCancelling(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("payout.cancelTitle")}</DialogTitle>
-            <DialogDescription>{t("payout.cancelMessage")}</DialogDescription>
-          </DialogHeader>
-          {cancelling ? (
-            <p className="font-mono text-sm font-bold tabular-nums">
-              ৳{Number(cancelling.amount).toLocaleString()} · {cancelling.payoutCode}
-            </p>
-          ) : null}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setCancelling(null)}>
-              {t("cancel")}
-            </Button>
-            <Button type="button" onClick={handleCancel} disabled={isCancelling}>
-              {t("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={cancelling !== null}
+        onOpenChange={(open) => !open && setCancelling(null)}
+        tone="danger"
+        title={t("payout.cancelTitle")}
+        description={
+          cancelling
+            ? `${t("payout.cancelMessage")} ${bdt(Number(cancelling.amount))} · ${cancelling.payoutCode}`
+            : t("payout.cancelMessage")
+        }
+        confirmLabel={t("confirm")}
+        cancelLabel={t("cancel")}
+        loading={isCancelling}
+        onConfirm={handleCancel}
+      />
     </div>
   );
 }
