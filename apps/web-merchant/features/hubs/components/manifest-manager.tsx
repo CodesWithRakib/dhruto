@@ -11,9 +11,16 @@ import {
   Button,
   Input,
   Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  DataTable,
+  ColumnDef,
 } from "@dhruto/ui";
 import { Truck, Plus, Send, AlertCircle, FileText, ArrowRight } from "lucide-react";
-import { BagStatus, ManifestStatus } from "@dhruto/contracts";
+import { BagStatus, ManifestStatus, type ManifestListItem } from "@dhruto/contracts";
 import {
   useGetManifestsQuery,
   useCreateManifestMutation,
@@ -134,6 +141,103 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
     }
   };
 
+  const columns: ColumnDef<ManifestListItem>[] = React.useMemo(() => [
+    {
+      accessorKey: "manifestCode",
+      header: "Manifest",
+      cell: ({ row }) => (
+        <Link
+          href={HUB_ROUTES.manifest(row.original.id)}
+          className="font-mono text-xs font-semibold text-primary hover:underline"
+        >
+          {row.original.manifestCode}
+        </Link>
+      ),
+    },
+    {
+      id: "route",
+      header: "Route",
+      cell: ({ row }) => (
+        <div className="text-xs">
+          <span className="font-medium">{row.original.originHubName}</span>
+          <ArrowRight
+            className="mx-1 inline h-3 w-3 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <span className="font-medium text-primary">
+            {row.original.destinationHubName}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "vehicleNumber",
+      header: t("manifests.vehicle"),
+      cell: ({ row }) => <span className="font-mono text-xs">{row.original.vehicleNumber}</span>,
+    },
+    {
+      accessorKey: "bagCount",
+      header: () => <div className="text-center">{t("bags.title")}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <Badge variant="secondary" className="font-mono">
+            {row.original.bagCount}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: () => <div className="text-center">{t("status")}</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <Badge
+            variant={
+              row.original.status === ManifestStatus.CREATED
+                ? "secondary"
+                : row.original.status === ManifestStatus.DISPATCHED ||
+                    row.original.status === ManifestStatus.IN_TRANSIT
+                  ? "default"
+                  : "success"
+            }
+            className="text-[10px]"
+          >
+            <EnumBadge
+              namespace="ManifestStatus"
+              value={row.original.status}
+              tones={MANIFEST_STATUS_TONE}
+            />
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">{t("actions")}</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-2">
+          {row.original.status === ManifestStatus.CREATED ? (
+            <Button
+              size="sm"
+              onClick={() => handleDispatch(row.original.id)}
+              disabled={isDispatching}
+              className="h-8 gap-1.5"
+            >
+              <Send className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("manifests.dispatch")}
+            </Button>
+          ) : null}
+          <Link href={HUB_ROUTES.manifest(row.original.id)}>
+            <Button size="sm" variant="outline" className="h-8 gap-1">
+              <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("bags.details")}
+            </Button>
+          </Link>
+        </div>
+      ),
+    },
+  ], [t, isDispatching]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -174,22 +278,25 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                   <label htmlFor="manifest-destination" className="mb-1 block text-sm font-medium">
                     {t("manifests.destination")} <span className="text-danger">*</span>
                   </label>
-                  <select
-                    id="manifest-destination"
+                  <Select
                     value={destHubId}
-                    onChange={(event) => {
-                      setDestHubId(event.target.value);
+                    onValueChange={(value) => {
+                      setDestHubId(value);
                       setSelectedBagIds([]);
                     }}
-                    className="w-full rounded-md border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary"
                     required
                   >
-                    {destinations.map((hub) => (
-                      <option key={hub.id} value={hub.id}>
-                        {hub.name} ({hub.code})
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="manifest-destination" className="w-full">
+                      <SelectValue placeholder={t("manifests.destination")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {destinations.map((hub) => (
+                        <SelectItem key={hub.id} value={hub.id}>
+                          {hub.name} ({hub.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -314,91 +421,16 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
             </div>
           ) : (
             <>
-              <div className="hidden overflow-x-auto md:block">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="px-4 py-3 font-semibold">Manifest</th>
-                      <th className="px-4 py-3 font-semibold">Route</th>
-                      <th className="px-4 py-3 font-semibold">{t("manifests.vehicle")}</th>
-                      <th className="px-4 py-3 text-center font-semibold">{t("bags.title")}</th>
-                      <th className="px-4 py-3 text-center font-semibold">{t("status")}</th>
-                      <th className="px-4 py-3 text-right font-semibold">{t("actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {manifests.map((manifest) => (
-                      <tr key={manifest.id}>
-                        <td className="px-4 py-3">
-                          <Link
-                            href={HUB_ROUTES.manifest(manifest.id)}
-                            className="font-mono text-xs font-semibold text-primary hover:underline"
-                          >
-                            {manifest.manifestCode}
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3 text-xs">
-                          <span className="font-medium">{manifest.originHubName}</span>
-                          <ArrowRight
-                            className="mx-1 inline h-3 w-3 text-muted-foreground"
-                            aria-hidden="true"
-                          />
-                          <span className="font-medium text-primary">
-                            {manifest.destinationHubName}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 font-mono text-xs">{manifest.vehicleNumber}</td>
-                        <td className="px-4 py-3 text-center">
-                          <Badge variant="secondary" className="font-mono">
-                            {manifest.bagCount}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <Badge
-                            variant={
-                              manifest.status === ManifestStatus.CREATED
-                                ? "secondary"
-                                : manifest.status === ManifestStatus.DISPATCHED ||
-                                    manifest.status === ManifestStatus.IN_TRANSIT
-                                  ? "default"
-                                  : "success"
-                            }
-                            className="text-[10px]"
-                          >
-                            {
-                              <EnumBadge
-                                namespace="ManifestStatus"
-                                value={manifest.status}
-                                tones={MANIFEST_STATUS_TONE}
-                              />
-                            }
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-2">
-                            {manifest.status === ManifestStatus.CREATED ? (
-                              <Button
-                                size="sm"
-                                onClick={() => handleDispatch(manifest.id)}
-                                disabled={isDispatching}
-                                className="h-8 gap-1.5"
-                              >
-                                <Send className="h-3.5 w-3.5" aria-hidden="true" />
-                                {t("manifests.dispatch")}
-                              </Button>
-                            ) : null}
-                            <Link href={HUB_ROUTES.manifest(manifest.id)}>
-                              <Button size="sm" variant="outline" className="h-8 gap-1">
-                                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                                {t("bags.details")}
-                              </Button>
-                            </Link>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={columns}
+                  data={manifests}
+                  totalItems={manifests.length}
+                  pageCount={1}
+                  currentPage={1}
+                  itemsPerPage={manifests.length}
+                  emptyMessage={t("manifests.empty")}
+                />
               </div>
               <ul className="divide-y divide-border md:hidden">
                 {manifests.map((manifest) => (

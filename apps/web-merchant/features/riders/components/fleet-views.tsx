@@ -13,6 +13,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  DataTable,
+  ColumnDef,
 } from "@dhruto/ui";
 import { Bike, UserCheck, History } from "lucide-react";
 import { type RiderListItem } from "@dhruto/contracts";
@@ -91,21 +98,23 @@ export function AssignRiderDialog({
             <label htmlFor="assign-rider" className="text-xs font-semibold text-muted-foreground">
               {t("fleet.selectRider")} *
             </label>
-            <select
-              id="assign-rider"
+            <Select
               value={riderId}
-              onChange={(event) => setRiderId(event.target.value)}
-              className="w-full rounded-lg border border-input bg-background p-2.5 text-sm outline-none"
+              onValueChange={setRiderId}
               required
             >
-              <option value="">{t("fleet.selectRider")}</option>
-              {riders.map((rider) => (
-                <option key={rider.id} value={rider.id}>
-                  {rider.name} ({rider.riderCode}) ·{" "}
-                  {t("fleet.activeTasks", { count: rider.activeTaskCount })}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="assign-rider" className="w-full">
+                <SelectValue placeholder={t("fleet.selectRider")} />
+              </SelectTrigger>
+              <SelectContent>
+                {riders.map((rider) => (
+                  <SelectItem key={rider.id} value={rider.id}>
+                    {rider.name} ({rider.riderCode}) ·{" "}
+                    {t("fleet.activeTasks", { count: rider.activeTaskCount })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -128,6 +137,63 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
   const { data, isLoading, refetch } = useGetFleetRidersQuery(hubId ? { hubId } : undefined);
   const riders = data?.data ?? [];
 
+  const columns: ColumnDef<RiderListItem>[] = React.useMemo(() => [
+    {
+      id: "rider",
+      header: t("profile.riderCode"),
+      cell: ({ row }) => (
+        <div>
+          <p className="font-semibold text-foreground">{row.original.name}</p>
+          <p className="font-mono text-[11px] text-muted-foreground">
+            {row.original.riderCode}
+          </p>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "hubName",
+      header: t("profile.hub"),
+      cell: ({ row }) => <span className="text-xs">{row.original.hubName}</span>,
+    },
+    {
+      accessorKey: "status",
+      header: t("profile.status"),
+      cell: ({ row }) => (
+        <EnumBadge
+          namespace="RiderStatus"
+          value={row.original.status}
+          tones={RIDER_STATUS_TONE}
+        />
+      ),
+    },
+    {
+      id: "tasks",
+      header: () => <div className="text-right">{t("tasks.title")}</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono text-xs tabular-nums">
+          {t("fleet.activeTasks", { count: row.original.activeTaskCount })} ·{" "}
+          {t("fleet.deliveredToday", { count: row.original.deliveredTodayCount })}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">{t("actions")}</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => setSelectedRider(row.original)}
+          >
+            {t("tasks.openDetails")}
+          </Button>
+        </div>
+      ),
+    },
+  ], [t]);
+
   return (
     <div className="space-y-4">
       <PageHeader title={t("fleet.title")} description={t("fleet.subtitle")} />
@@ -143,52 +209,16 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
             </div>
           ) : (
             <>
-              <div className="hidden overflow-x-auto md:block">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="px-4 py-3 font-semibold">{t("profile.riderCode")}</th>
-                      <th className="px-4 py-3 font-semibold">{t("profile.hub")}</th>
-                      <th className="px-4 py-3 font-semibold">{t("profile.status")}</th>
-                      <th className="px-4 py-3 text-right font-semibold">{t("tasks.title")}</th>
-                      <th className="px-4 py-3 text-right font-semibold">{t("actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {riders.map((rider) => (
-                      <tr key={rider.id}>
-                        <td className="px-4 py-3">
-                          <p className="font-semibold text-foreground">{rider.name}</p>
-                          <p className="font-mono text-[11px] text-muted-foreground">
-                            {rider.riderCode}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 text-xs">{rider.hubName}</td>
-                        <td className="px-4 py-3">
-                          <EnumBadge
-                            namespace="RiderStatus"
-                            value={rider.status}
-                            tones={RIDER_STATUS_TONE}
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">
-                          {t("fleet.activeTasks", { count: rider.activeTaskCount })} ·{" "}
-                          {t("fleet.deliveredToday", { count: rider.deliveredTodayCount })}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs"
-                            onClick={() => setSelectedRider(rider)}
-                          >
-                            {t("tasks.openDetails")}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={columns}
+                  data={riders}
+                  totalItems={riders.length}
+                  pageCount={1}
+                  currentPage={1}
+                  itemsPerPage={riders.length}
+                  emptyMessage={t("dashboard.noTasks")}
+                />
               </div>
               <ul className="divide-y divide-border md:hidden">
                 {riders.map((rider) => (

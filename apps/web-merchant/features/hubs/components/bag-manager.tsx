@@ -13,9 +13,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  DataTable,
+  ColumnDef,
 } from "@dhruto/ui";
 import { Package, Plus, Lock } from "lucide-react";
-import { BagStatus } from "@dhruto/contracts";
+import { BagStatus, type BagListItem } from "@dhruto/contracts";
 import {
   useGetBagsQuery,
   useCreateBagMutation,
@@ -113,6 +120,73 @@ export function BagManager({ currentHubId }: BagManagerProps) {
     }
   };
 
+  const columns: ColumnDef<BagListItem>[] = React.useMemo(() => [
+    {
+      accessorKey: "bagCode",
+      header: "Bag",
+      cell: ({ row }) => (
+        <div>
+          <Link
+            href={HUB_ROUTES.bag(row.original.id)}
+            className="font-mono font-bold text-primary hover:underline"
+          >
+            {row.original.bagCode}
+          </Link>
+          <p className="font-mono text-[11px] text-muted-foreground">
+            {row.original.sealTag ?? ""}
+          </p>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "destinationHubName",
+      header: t("bags.destination"),
+      cell: ({ row }) => <span className="text-xs font-medium">{row.original.destinationHubName}</span>,
+    },
+    {
+      accessorKey: "status",
+      header: t("status"),
+      cell: ({ row }) => (
+        <Badge
+          variant={
+            row.original.status === BagStatus.OPEN
+              ? "secondary"
+              : row.original.status === BagStatus.SEALED
+                ? "default"
+                : "success"
+          }
+          className="text-[10px]"
+        >
+          <EnumBadge namespace="BagStatus" value={row.original.status} tones={BAG_STATUS_TONE} />
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "parcelCount",
+      header: () => <div className="text-right">{t("bags.parcelsInBag")}</div>,
+      cell: ({ row }) => <div className="text-right font-mono tabular-nums">{row.original.parcelCount}</div>,
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">{t("actions")}</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1.5">
+          {row.original.status === BagStatus.OPEN ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSealConfirm(row.original.id)}
+              className="h-7 text-[11px]"
+            >
+              <Lock className="h-3 w-3" aria-hidden="true" />
+              {t("bags.seal")}
+            </Button>
+          ) : null}
+        </div>
+      ),
+    },
+  ], [t]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -144,19 +218,22 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                 >
                   {t("bags.destination")} *
                 </label>
-                <select
-                  id="bag-destination"
+                <Select
                   value={destHubId}
-                  onChange={(event) => setDestHubId(event.target.value)}
-                  className="w-full rounded-lg border border-input bg-background p-2.5 text-xs font-medium outline-none"
+                  onValueChange={setDestHubId}
                   required
                 >
-                  {destinations.map((hub) => (
-                    <option key={hub.id} value={hub.id}>
-                      {hub.name} ({hub.code})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="bag-destination" className="w-full">
+                    <SelectValue placeholder={t("bags.destination")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {destinations.map((hub) => (
+                      <SelectItem key={hub.id} value={hub.id}>
+                        {hub.name} ({hub.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="bag-notes" className="text-xs font-semibold text-muted-foreground">
@@ -207,77 +284,16 @@ export function BagManager({ currentHubId }: BagManagerProps) {
             </div>
           ) : (
             <>
-              {/* Desktop table */}
-              <div className="hidden overflow-x-auto md:block">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="px-4 py-3 font-semibold">Bag</th>
-                      <th className="px-4 py-3 font-semibold">{t("bags.destination")}</th>
-                      <th className="px-4 py-3 font-semibold">{t("status")}</th>
-                      <th className="px-4 py-3 text-right font-semibold">
-                        {t("bags.parcelsInBag")}
-                      </th>
-                      <th className="px-4 py-3 text-right font-semibold">{t("actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {bags.map((bag) => (
-                      <tr key={bag.id}>
-                        <td className="px-4 py-3">
-                          <Link
-                            href={HUB_ROUTES.bag(bag.id)}
-                            className="font-mono font-bold text-primary hover:underline"
-                          >
-                            {bag.bagCode}
-                          </Link>
-                          <p className="font-mono text-[11px] text-muted-foreground">
-                            {bag.sealTag ?? ""}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 text-xs font-medium">{bag.destinationHubName}</td>
-                        <td className="px-4 py-3">
-                          <Badge
-                            variant={
-                              bag.status === BagStatus.OPEN
-                                ? "secondary"
-                                : bag.status === BagStatus.SEALED
-                                  ? "default"
-                                  : "success"
-                            }
-                            className="text-[10px]"
-                          >
-                            {
-                              <EnumBadge
-                                namespace="BagStatus"
-                                value={bag.status}
-                                tones={BAG_STATUS_TONE}
-                              />
-                            }
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono tabular-nums">
-                          {bag.parcelCount}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {bag.status === BagStatus.OPEN ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openSealConfirm(bag.id)}
-                                className="h-7 text-[11px]"
-                              >
-                                <Lock className="h-3 w-3" aria-hidden="true" />
-                                {t("bags.seal")}
-                              </Button>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={columns}
+                  data={bags}
+                  totalItems={bags.length}
+                  pageCount={1}
+                  currentPage={1}
+                  itemsPerPage={bags.length}
+                  emptyMessage={t("bags.empty")}
+                />
               </div>
               {/* Mobile cards */}
               <ul className="divide-y divide-border md:hidden">

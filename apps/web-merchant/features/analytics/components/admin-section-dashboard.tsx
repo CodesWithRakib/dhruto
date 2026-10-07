@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/lib/navigation";
 import { Loader2 } from "lucide-react";
-import { Button, Card, Badge, TrendLineChart, GroupedBarChart } from "@dhruto/ui";
+import { Button, Card, Badge, TrendLineChart, GroupedBarChart, DataTable, ColumnDef } from "@dhruto/ui";
 import {
   useGetParcelAnalyticsQuery,
   useGetDeliveryAnalyticsQuery,
@@ -108,31 +108,28 @@ function SimpleTable({
   head: string[];
   rows: Array<Array<string | number | null>>;
 }) {
+  const columns: ColumnDef<Array<string | number | null>>[] = React.useMemo(() => {
+    return head.map((h, j) => ({
+      accessorKey: String(j),
+      id: String(j),
+      header: h,
+      cell: ({ row }) => {
+        const c = row.original[j];
+        return (
+          <span className={j > 0 ? "font-mono" : ""}>
+            {c === null ? "—" : typeof c === "number" ? c.toLocaleString() : String(c)}
+          </span>
+        );
+      },
+    }));
+  }, [head]);
+
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="w-full min-w-[520px] text-xs">
-        <thead>
-          <tr className="border-b bg-muted/40 text-left text-muted-foreground">
-            {head.map((h) => (
-              <th key={h} className="px-3 py-2 font-medium">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-b last:border-0 hover:bg-muted/30">
-              {r.map((c, j) => (
-                <td key={j} className={`px-3 py-2 ${j > 0 ? "font-mono" : ""}`}>
-                  {c === null ? "—" : typeof c === "number" ? c.toLocaleString() : c}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={rows}
+      className="p-0 border-0 shadow-none"
+    />
   );
 }
 
@@ -196,7 +193,7 @@ export function AdminSectionDashboard({ section }: { section: AnalyticsSection }
   const dataset = SECTION_DATASET[section];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
         title={t(`section_${section}_title`)}
         description={t(`section_${section}_desc`)}

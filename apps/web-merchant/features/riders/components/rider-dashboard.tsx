@@ -68,7 +68,7 @@ export function RiderDashboard() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-24 text-center" role="status" aria-live="polite">
+      <div className="w-full px-4 py-24 text-center" role="status" aria-live="polite">
         <RefreshCw className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" aria-hidden="true" />
         <p className="font-medium text-muted-foreground">{t("loading")}</p>
       </div>
@@ -77,7 +77,7 @@ export function RiderDashboard() {
 
   if (isError || !dashboard) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-6">
+      <div className="w-full px-4 py-6">
         <EmptyState
           icon={AlertTriangle}
           tone="error"
@@ -121,7 +121,7 @@ export function RiderDashboard() {
   ];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 px-4 py-6">
       <PageHeader
         title={t("dashboard.title")}
         description={t("dashboard.subtitle", {

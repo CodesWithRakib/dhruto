@@ -1,8 +1,9 @@
 "use client";
 
-import * as React from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent } from "@dhruto/ui";
+import { Card, CardContent, ColumnDef, DataTable } from "@dhruto/ui";
+import { type SettlementItem } from "@dhruto/contracts";
 import { ReceiptText } from "lucide-react";
 import { useGetMySettlementsQuery } from "../api/finance.api";
 import { EmptyState, ErrorState, LoadingState, RetryButton } from "@/components/feedback/states";
@@ -35,6 +36,66 @@ export function SettlementsView() {
 
   const setPage = (next: number) => query.set({ page: next }, { resetPageKeys: [] });
 
+  const columns: ColumnDef<SettlementItem>[] = useMemo(
+    () => [
+      {
+        id: "settlementCode",
+        header: t("settlements.settlementCode"),
+        cell: ({ row }) => (
+          <div>
+            <p className="font-mono text-xs font-bold text-primary">
+              {row.original.settlementCode}
+            </p>
+            <p className="font-mono text-[11px] text-muted-foreground">
+              {row.original.trackingCode}
+            </p>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "grossMinor",
+        header: () => <div className="text-right">{t("settlements.grossCod")}</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-mono tabular-nums">
+            {bdt(row.original.grossMinor / 100)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "feeMinor",
+        header: () => <div className="text-right">{t("settlements.deliveryFee")}</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-mono tabular-nums text-muted-foreground">
+            {bdt(row.original.feeMinor / 100)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "netMinor",
+        header: () => <div className="text-right">{t("settlements.netPayable")}</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-mono font-bold tabular-nums text-success">
+            {bdt(row.original.netMinor / 100)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: () => <div className="text-center">{t("status")}</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-center">
+            <EnumBadge
+              namespace="SettlementStatus"
+              value={row.original.status}
+              tones={SETTLEMENT_STATUS_TONE}
+            />
+          </div>
+        ),
+      },
+    ],
+    [bdt, t]
+  );
+
   return (
     <div className="space-y-4">
       <Card>
@@ -57,59 +118,18 @@ export function SettlementsView() {
             </div>
           ) : (
             <>
-              {/* Data-heavy table: horizontal scroll container on tablet and up. */}
-              <div className="hidden overflow-x-auto md:block">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th scope="col" className="px-4 py-3 font-semibold">
-                        {t("settlements.settlementCode")}
-                      </th>
-                      <th scope="col" className="px-4 py-3 text-right font-semibold">
-                        {t("settlements.grossCod")}
-                      </th>
-                      <th scope="col" className="px-4 py-3 text-right font-semibold">
-                        {t("settlements.deliveryFee")}
-                      </th>
-                      <th scope="col" className="px-4 py-3 text-right font-semibold">
-                        {t("settlements.netPayable")}
-                      </th>
-                      <th scope="col" className="px-4 py-3 text-center font-semibold">
-                        {t("status")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {items.map((settlement) => (
-                      <tr key={settlement.id}>
-                        <td className="px-4 py-3">
-                          <p className="font-mono text-xs font-bold text-primary">
-                            {settlement.settlementCode}
-                          </p>
-                          <p className="font-mono text-[11px] text-muted-foreground">
-                            {settlement.trackingCode}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono tabular-nums">
-                          {bdt(settlement.grossMinor / 100)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono tabular-nums text-muted-foreground">
-                          {bdt(settlement.feeMinor / 100)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-bold tabular-nums text-success">
-                          {bdt(settlement.netMinor / 100)}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <EnumBadge
-                            namespace="SettlementStatus"
-                            value={settlement.status}
-                            tones={SETTLEMENT_STATUS_TONE}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={columns}
+                  data={items}
+                  totalItems={total}
+                  pageCount={pageCount}
+                  currentPage={page}
+                  itemsPerPage={PAGE_SIZE}
+                  onPageChange={setPage}
+                  isLoading={isLoading && items.length === 0}
+                  emptyMessage={t("settlements.empty")}
+                />
               </div>
 
               {/* Mobile: a table would be unusable here, so records become cards. */}
@@ -140,7 +160,7 @@ export function SettlementsView() {
               </ul>
 
               <Pagination
-                className="border-t border-border px-4 py-3"
+                className="border-t border-border px-4 py-3 md:hidden"
                 page={page}
                 totalPages={pageCount}
                 onPageChange={setPage}

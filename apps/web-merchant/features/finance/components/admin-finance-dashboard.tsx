@@ -14,6 +14,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@dhruto/ui";
 import { RefreshCw, AlertTriangle, CheckCircle2, Download } from "lucide-react";
 import { PayoutStatus, type PayoutRequestItem } from "@dhruto/contracts";
@@ -213,7 +218,7 @@ export function AdminFinanceDashboard() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 px-4 py-6">
       <PageHeader
         title={t("admin.title")}
         description={t("admin.subtitle")}
@@ -493,15 +498,18 @@ export function AdminFinanceDashboard() {
                 >
                   {t("admin.adjustDirection")} *
                 </label>
-                <select
-                  id="adjust-direction"
+                <Select
                   value={adjustDirection}
-                  onChange={(e) => setAdjustDirection(e.target.value as "CREDIT" | "DEBIT")}
-                  className="w-full rounded-lg border border-input bg-background p-2.5 text-sm outline-none"
+                  onValueChange={(val) => setAdjustDirection(val as "CREDIT" | "DEBIT")}
                 >
-                  <option value="CREDIT">{t("admin.adjustCredit")}</option>
-                  <option value="DEBIT">{t("admin.adjustDebit")}</option>
-                </select>
+                  <SelectTrigger id="adjust-direction" className="w-full">
+                    <SelectValue placeholder={t("admin.adjustDirection")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CREDIT">{t("admin.adjustCredit")}</SelectItem>
+                    <SelectItem value="DEBIT">{t("admin.adjustDebit")}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <label

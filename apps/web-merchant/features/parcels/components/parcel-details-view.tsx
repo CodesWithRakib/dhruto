@@ -136,7 +136,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const intelligence = parcel.addressIntelligence;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <Link href={routes.parcels}>
           <Button variant="ghost" size="sm" className="-ml-2 gap-1.5">

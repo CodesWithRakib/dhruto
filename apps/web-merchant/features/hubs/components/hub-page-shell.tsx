@@ -27,7 +27,7 @@ export function HubPageShell({ title, description, actions, children }: HubPageS
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-24 text-center" role="status" aria-live="polite">
+      <div className="w-full px-4 py-24 text-center" role="status" aria-live="polite">
         <RefreshCw className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" aria-hidden="true" />
         <p className="font-medium text-muted-foreground">{t("loadingHubs")}</p>
       </div>
@@ -36,7 +36,7 @@ export function HubPageShell({ title, description, actions, children }: HubPageS
 
   if (isError || hubs.length === 0 || !activeHub) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="w-full px-4 py-6">
         <EmptyState
           icon={Warehouse}
           title={t("noHubs")}
@@ -48,7 +48,7 @@ export function HubPageShell({ title, description, actions, children }: HubPageS
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 px-4 py-6">
       <PageHeader
         title={typeof title === "function" ? title(activeHub) : title}
         description={typeof description === "function" ? description(activeHub) : description}

@@ -13,7 +13,7 @@ export default function MerchantNotificationsPage() {
   return (
     <div className="space-y-6 pb-20 sm:pb-6">
       <NotificationCenter />
-      <div className="mx-auto max-w-4xl px-4 sm:px-6">
+      <div className="w-full px-4 sm:px-6">
         <NotificationPreferences />
       </div>
     </div>

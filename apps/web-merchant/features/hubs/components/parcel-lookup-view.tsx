@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, Button, Input } from "@dhruto/ui";
+import { Card, CardContent, Button, Input, DataTable, ColumnDef } from "@dhruto/ui";
 import { Search, Package, AlertTriangle, UserCheck } from "lucide-react";
 import { useLazyLookupParcelQuery, useGetHubInventoryQuery } from "../api/hubs.api";
 import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
@@ -39,6 +39,35 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
 
   const parcel = lookupData?.data;
   const inventory = inventoryData?.data;
+
+  const columns: ColumnDef<any>[] = React.useMemo(() => [
+    {
+      accessorKey: "trackingCode",
+      header: t("lookup.searchLabel"),
+      cell: ({ row }) => (
+        <span className="font-mono text-xs font-semibold">{row.original.trackingCode}</span>
+      ),
+    },
+    {
+      accessorKey: "recipientName",
+      header: t("lookup.recipient"),
+      cell: ({ row }) => <span className="text-xs">{row.original.recipientName}</span>,
+    },
+    {
+      accessorKey: "district",
+      header: t("lookup.destination"),
+      cell: ({ row }) => <span className="text-xs">{row.original.district ?? "—"}</span>,
+    },
+    {
+      accessorKey: "status",
+      header: () => <div className="text-center">{t("status")}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <StatusBadge status={row.original.status} className="text-[10px]" />
+        </div>
+      ),
+    },
+  ], [t]);
 
   const handleLookup = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -175,31 +204,16 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
             </div>
           ) : (
             <>
-              <div className="hidden overflow-x-auto md:block">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="px-4 py-3 font-semibold">{t("lookup.searchLabel")}</th>
-                      <th className="px-4 py-3 font-semibold">{t("lookup.recipient")}</th>
-                      <th className="px-4 py-3 font-semibold">{t("lookup.destination")}</th>
-                      <th className="px-4 py-3 text-center font-semibold">{t("status")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {inventory.parcels.map((item) => (
-                      <tr key={item.id}>
-                        <td className="px-4 py-2.5 font-mono text-xs font-semibold">
-                          {item.trackingCode}
-                        </td>
-                        <td className="px-4 py-2.5 text-xs">{item.recipientName}</td>
-                        <td className="px-4 py-2.5 text-xs">{item.district ?? "—"}</td>
-                        <td className="px-4 py-2.5 text-center">
-                          <StatusBadge status={item.status} className="text-[10px]" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={columns}
+                  data={inventory.parcels}
+                  totalItems={inventory.parcels.length}
+                  pageCount={1}
+                  currentPage={1}
+                  itemsPerPage={inventory.parcels.length}
+                  emptyMessage={t("dashboard.noRecentScans")}
+                />
               </div>
               <ul className="divide-y divide-border md:hidden">
                 {inventory.parcels.map((item) => (

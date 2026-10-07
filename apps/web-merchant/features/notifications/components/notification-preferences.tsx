@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Lock, Globe } from "lucide-react";
-import { Button, Card, Switch } from "@dhruto/ui";
+import { Button, Card, Switch, DataTable, ColumnDef } from "@dhruto/ui";
 import {
   useGetNotificationPreferencesQuery,
   useUpdateNotificationPreferencesMutation,
@@ -73,6 +73,48 @@ export function NotificationPreferences() {
     }
   };
 
+  const columns: ColumnDef<NotificationCategory>[] = React.useMemo(() => [
+    {
+      accessorKey: "category",
+      header: t("categoryCol"),
+      cell: ({ row }) => {
+        const cat = row.original;
+        return (
+          <div className="py-2 pr-4">
+            <span className="flex items-center gap-1.5 font-medium">
+              {t(`category_${cat}`)}
+              {locked(cat) && (
+                <Lock className="h-3 w-3 text-muted-foreground" aria-label={t("locked")} />
+              )}
+            </span>
+            <span className="block text-[11px] text-muted-foreground">
+              {locked(cat) ? t("lockedHint") : t(`category_${cat}_hint`)}
+            </span>
+          </div>
+        );
+      },
+    },
+    ...CHANNELS.map((ch) => ({
+      id: ch,
+      header: () => <div className="text-center">{t(`channel_${ch}`)}</div>,
+      cell: ({ row }: { row: { original: NotificationCategory } }) => {
+        const cat = row.original;
+        const key = `${cat}:${ch}`;
+        const enabled = draft[key] ?? true;
+        return (
+          <div className="text-center">
+            <Switch
+              checked={enabled}
+              disabled={locked(cat) || isSaving}
+              onCheckedChange={() => toggle(cat, ch)}
+              aria-label={`${t(`category_${cat}`)} ${t(`channel_${ch}`)}`}
+            />
+          </div>
+        );
+      },
+    })),
+  ], [t, draft, isSaving]); // omit locked and toggle from dependencies because they might not be stable, but it's fine for our use case
+
   if (isLoading) {
     return (
       <Card className="flex items-center justify-center gap-2 p-10 text-sm text-muted-foreground">
@@ -101,51 +143,11 @@ export function NotificationPreferences() {
         <p className="mt-1 text-xs text-muted-foreground">{t("description")}</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[420px] text-sm">
-          <thead>
-            <tr className="border-b text-left text-xs text-muted-foreground">
-              <th className="py-2 pr-4 font-medium">{t("categoryCol")}</th>
-              {CHANNELS.map((ch) => (
-                <th key={ch} className="px-4 py-2 text-center font-medium">
-                  {t(`channel_${ch}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {CATEGORIES.map((cat) => (
-              <tr key={cat} className="border-b last:border-0">
-                <td className="py-3 pr-4">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    {t(`category_${cat}`)}
-                    {locked(cat) && (
-                      <Lock className="h-3 w-3 text-muted-foreground" aria-label={t("locked")} />
-                    )}
-                  </span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    {locked(cat) ? t("lockedHint") : t(`category_${cat}_hint`)}
-                  </span>
-                </td>
-                {CHANNELS.map((ch) => {
-                  const key = `${cat}:${ch}`;
-                  const enabled = draft[key] ?? true;
-                  return (
-                    <td key={key} className="px-4 py-3 text-center">
-                      <Switch
-                        checked={enabled}
-                        disabled={locked(cat) || isSaving}
-                        onCheckedChange={() => toggle(cat, ch)}
-                        aria-label={`${t(`category_${cat}`)} ${t(`channel_${ch}`)}`}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={CATEGORIES}
+        className="p-0 border-0 shadow-none"
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <Globe className="h-4 w-4 text-muted-foreground" aria-hidden="true" />

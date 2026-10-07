@@ -14,6 +14,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@dhruto/ui";
 import {
   Phone,
@@ -498,19 +503,22 @@ export function TaskDetailsView({ parcelId }: TaskDetailsViewProps) {
               <label htmlFor="fail-reason" className="text-xs font-semibold text-muted-foreground">
                 {t("details.failReason")} *
               </label>
-              <select
-                id="fail-reason"
+              <Select
                 value={failReason}
-                onChange={(event) => setFailReason(event.target.value as DeliveryFailureReason)}
-                className="w-full rounded-lg border border-input bg-background p-2.5 text-sm outline-none"
+                onValueChange={(value) => setFailReason(value as DeliveryFailureReason)}
                 required
               >
-                {FAILURE_REASONS.map((reason) => (
-                  <option key={reason} value={reason}>
-                    {t(`failReasons.${reason}` as "failReasons.CUSTOMER_UNAVAILABLE")}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="fail-reason" className="w-full">
+                  <SelectValue placeholder={t("details.failReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {FAILURE_REASONS.map((reason) => (
+                    <SelectItem key={reason} value={reason}>
+                      {t(`failReasons.${reason}` as "failReasons.CUSTOMER_UNAVAILABLE")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label htmlFor="fail-notes" className="text-xs font-semibold text-muted-foreground">

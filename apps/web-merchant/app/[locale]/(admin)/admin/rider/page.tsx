@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AdminRiderPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="w-full px-4 py-6">
       <FleetRidersView />
     </div>
   );

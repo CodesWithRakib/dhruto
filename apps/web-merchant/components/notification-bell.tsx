@@ -90,8 +90,9 @@ export function NotificationBell() {
   }, [isOpen]);
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
+    const nextIsOpen = !isOpen;
+    setIsOpen(nextIsOpen);
+    if (nextIsOpen && notifsData) {
       refetchNotifs();
     }
   };

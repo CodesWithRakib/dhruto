@@ -98,7 +98,7 @@ export function HubCashDesk() {
     : [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 px-4 py-6">
       <PageHeader
         title={t("cash.title")}
         description={t("cash.subtitle")}

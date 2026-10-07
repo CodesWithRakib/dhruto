@@ -12,6 +12,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table.js";
 import { Button } from "./button.js";
 import { Search, X, Loader2, AlertCircle, Inbox, ChevronLeft, ChevronRight } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { cn } from "../lib/utils.js";
 
 export interface DataTableProps<TData, TValue> {
@@ -191,10 +192,11 @@ export function DataTable<TData, TValue>({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                      <Inbox className="h-8 w-8 stroke-1 text-muted-foreground/60" />
-                      <p className="text-body-sm font-medium">{emptyMessage}</p>
+                  <TableCell colSpan={columns.length} className="h-48 text-center py-10">
+                    <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                      <img src="/images/empty-state.jpg" alt="Empty" className="h-32 w-32 object-contain opacity-80 mix-blend-multiply" />
+                      <p className="text-sm font-medium text-foreground">{emptyMessage}</p>
+                      <p className="text-xs">Try adjusting your filters or check back later.</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -222,17 +224,21 @@ export function DataTable<TData, TValue>({
             {onLimitChange && (
               <div className="flex items-center gap-1.5 sm:ml-2">
                 <span>Per page:</span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => onLimitChange(Number(e.target.value))}
-                  className="h-7 rounded border border-input bg-background px-1.5 text-caption text-foreground outline-none focus:ring-1 focus:ring-primary"
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={(val) => onLimitChange(Number(val))}
                 >
-                  {[5, 10, 20, 50].map((limit) => (
-                    <option key={limit} value={limit}>
-                      {limit}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="h-7 w-[70px] text-caption px-2 border-input bg-background focus:ring-1 focus:ring-primary">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[5, 10, 20, 50].map((limit) => (
+                      <SelectItem key={limit} value={String(limit)} className="text-caption">
+                        {limit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
           </div>

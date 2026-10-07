@@ -11,6 +11,11 @@ import {
   Button,
   Input,
   Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@dhruto/ui";
 import {
   Scan,
@@ -378,18 +383,21 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                 {t("scanner.noOpenBags")}
               </Badge>
             ) : (
-              <select
+              <Select
                 value={selectedBagId}
-                onChange={(event) => setSelectedBagId(event.target.value)}
-                aria-label={t("scanner.targetBag")}
-                className="rounded-lg border border-primary/40 bg-background px-3 py-2 font-mono text-xs font-medium outline-none"
+                onValueChange={setSelectedBagId}
               >
-                {openBags.map((bag) => (
-                  <option key={bag.id} value={bag.id}>
-                    {bag.bagCode} → {bag.destinationHubName}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger aria-label={t("scanner.targetBag")} className="w-[300px] font-mono text-xs">
+                  <SelectValue placeholder={t("scanner.targetBag")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {openBags.map((bag) => (
+                    <SelectItem key={bag.id} value={bag.id} className="font-mono text-xs">
+                      {bag.bagCode} → {bag.destinationHubName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
         </Card>

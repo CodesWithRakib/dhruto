@@ -89,7 +89,7 @@ export function AdminIntegrationsDashboard() {
   const failureRows: IntegrationFailureItem[] = failureItems;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
         title={t("title")}
         description={t("subtitle")}

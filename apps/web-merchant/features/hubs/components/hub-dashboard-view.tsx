@@ -184,7 +184,7 @@ export function HubDashboardView() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 px-4 py-6">
       <PageHeader
         title={t("dashboard.title")}
         description={

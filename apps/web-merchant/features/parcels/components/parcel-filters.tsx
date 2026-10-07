@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Button, Input, Label } from "@dhruto/ui";
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@dhruto/ui";
 import { ParcelStatus } from "@dhruto/contracts";
 import { PARCEL_STATUS_CONFIG } from "@/config/status";
 import type { ParcelListFilters } from "../hooks/use-parcels-list";
@@ -18,8 +18,7 @@ export interface ParcelFilterControlsProps {
   stacked?: boolean;
 }
 
-const SELECT_CLASS =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-body-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 
 /**
  * All merchant parcel filters. Filters are applied by the API, never in the
@@ -44,21 +43,24 @@ export function ParcelFilterControls({
         <Label htmlFor={id("status")} className="text-caption text-muted-foreground">
           {t("status")}
         </Label>
-        <select
-          id={id("status")}
-          value={filters.status}
-          onChange={(event) =>
-            updateFilter("status", event.target.value as ParcelListFilters["status"])
+        <Select
+          value={filters.status || "all"}
+          onValueChange={(value) =>
+            updateFilter("status", (value === "all" ? "" : value) as ParcelListFilters["status"])
           }
-          className={SELECT_CLASS}
         >
-          <option value="">{t("all")}</option>
-          {Object.values(ParcelStatus).map((status) => (
-            <option key={status} value={status}>
-              {tStatus(PARCEL_STATUS_CONFIG[status].labelKey)}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id={id("status")}>
+            <SelectValue placeholder={t("all")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("all")}</SelectItem>
+            {Object.values(ParcelStatus).map((status) => (
+              <SelectItem key={status} value={status}>
+                {tStatus(PARCEL_STATUS_CONFIG[status].labelKey)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1.5">
