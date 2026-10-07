@@ -101,7 +101,7 @@ export default async function HomePage() {
 
       {/* 5 — How It Works ("কীভাবে কাজ করে") */}
       {steps.length > 0 && (
-        <Section id="how-it-works">
+        <Section id="how-it-works" className="dhruto-hero-dark">
           <SectionHeading
             eyebrow={t("how.eyebrow")}
             title={t("how.title")}

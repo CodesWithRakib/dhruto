@@ -18,6 +18,7 @@ import {
   HubUserAssignment,
   FinancialTransaction,
   FinancialEntry,
+  WebhookSubscription,
 } from '../entities/index.js';
 
 import { SEED_HUB_ASSIGNMENTS, SEED_HUBS } from './seed-hubs.data.js';
@@ -32,6 +33,7 @@ import {
   SEED_PAYOUT_REQUESTS,
 } from './seed-finance.data.js';
 import { SEED_NOTIFICATIONS } from './seed-notifications.data.js';
+import { SEED_WEBHOOK_SUBSCRIPTIONS } from './seed-webhooks.data.js';
 import {
   ParcelStatus,
   FinancialTransactionType,
@@ -73,6 +75,8 @@ export class SeederService {
     private readonly notificationRepo: Repository<Notification>,
     @InjectRepository(HubUserAssignment)
     private readonly hubAssignmentRepo: Repository<HubUserAssignment>,
+    @InjectRepository(WebhookSubscription)
+    private readonly webhookSubscriptionRepo: Repository<WebhookSubscription>,
   ) {}
 
   async seed() {
@@ -480,9 +484,34 @@ export class SeederService {
     stats.notifications = notifCount;
     this.logger.log(`✓ Seeded ${stats.notifications} in-app notifications`);
 
+    // 11. Seed webhook subscriptions (inactive examples only).
+    let webhookCount = 0;
+    for (const wData of SEED_WEBHOOK_SUBSCRIPTIONS) {
+      const merchant = merchantMap.get(wData.merchantEmail);
+      if (!merchant) continue;
+
+      const existing = await this.webhookSubscriptionRepo.findOne({
+        where: { merchantId: merchant.id, url: wData.url },
+      });
+      if (!existing) {
+        const sub = this.webhookSubscriptionRepo.create({
+          merchantId: merchant.id,
+          url: wData.url,
+          events: wData.events,
+          secret: 'dhr_whsec_seed00000000000000000000000000000000',
+          description: wData.description,
+          status: wData.status,
+          failureCount: 0,
+        });
+        await this.webhookSubscriptionRepo.save(sub);
+        webhookCount++;
+      }
+    }
+    this.logger.log(`✓ Seeded ${webhookCount} webhook subscriptions`);
+
     return {
       success: true,
-      stats,
+      stats: { ...stats, webhookSubscriptions: webhookCount },
     };
   }
 

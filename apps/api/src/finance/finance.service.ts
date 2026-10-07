@@ -6,7 +6,6 @@ import {
   ConflictException,
   HttpStatus,
   Logger,
-  Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
@@ -63,9 +62,7 @@ import {
   CashDiscrepancyStatus as DiscrepancyStatus,
   CashDiscrepancyType as DiscrepancyType,
   CashHandInStatus as BatchStatus,
-  WebhookEvent,
-  NotificationChannel,
-  NotificationType,
+  DomainEventType,
 } from "@dhruto/contracts";
 import { toMinor, toMajor, netPayableMinor, CURRENCY_BDT } from "../common/money/money.js";
 import { LedgerService } from "./ledger/ledger.service.js";
@@ -73,8 +70,7 @@ import {
   IdempotencyClaimConflict,
   IdempotencyService,
 } from "../common/idempotency/idempotency.service.js";
-import { NotificationsService } from "../notifications/notifications.service.js";
-import { WebhooksService } from "../webhooks/webhooks.service.js";
+import { OutboxService } from "../integrations/outbox.service.js";
 import { UserRole } from "../database/entities/index.js";
 
 /** Account details as returned by the API contract (masked). */
@@ -155,10 +151,7 @@ export class FinanceService {
     private readonly dataSource: DataSource,
     private readonly ledger: LedgerService,
     private readonly idempotency: IdempotencyService,
-    @Optional()
-    private readonly notificationsService?: NotificationsService,
-    @Optional()
-    private readonly webhooksService?: WebhooksService,
+    private readonly outbox: OutboxService,
   ) {}
 
   /* ================================================================== */
@@ -354,9 +347,19 @@ export class FinanceService {
         `Merchant ${merchantId} requested payout ${payoutCode} of ৳${toMajor(requestedMinor)} via ${dto.payoutMethod}`,
       );
 
-      await this.notifyMerchant(merchantId, NotificationType.PAYOUT_UPDATE, "Payout Requested",
-        `Payout request ${payoutCode} for ৳${toMajor(requestedMinor).toLocaleString()} submitted and reserved from your wallet.`,
-        { payoutId: payout.id, payoutCode });
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.PAYOUT_REQUESTED,
+        aggregateType: "payout",
+        aggregateId: payout.id,
+        actorId,
+        payload: {
+          payoutId: payout.id,
+          payoutCode,
+          merchantId,
+          amountMinor: requestedMinor,
+          method: dto.payoutMethod,
+        },
+      });
 
       return toPayoutItem(payout);
     }).catch(async (error) => {
@@ -454,9 +457,19 @@ export class FinanceService {
       if (dto.notes?.trim()) payout.notes = dto.notes.trim();
       await manager.getRepository(PayoutRequest).save(payout);
 
-      await this.notifyMerchant(payout.merchantId, NotificationType.PAYOUT_UPDATE,
-        "Payout Approved", `Payout ${payout.payoutCode} approved and queued for processing.`,
-        { payoutId: payout.id, payoutCode: payout.payoutCode });
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.PAYOUT_APPROVED,
+        aggregateType: "payout",
+        aggregateId: payout.id,
+        actorId: adminId,
+        payload: {
+          payoutId: payout.id,
+          payoutCode: payout.payoutCode,
+          merchantId: payout.merchantId,
+          amountMinor: toMinor(payout.amount),
+          method: payout.payoutMethod,
+        },
+      });
 
       return toPayoutItem(payout);
     });
@@ -530,9 +543,20 @@ export class FinanceService {
           `Payout ${locked.id} (৳${toMajor(amountMinor)}) marked as COMPLETED. Ref: ${dto.transactionReference}`,
         );
 
-        await this.dispatchPayoutEvent(locked, WebhookEvent.PAYOUT_COMPLETED,
-          "Payout Disbursed",
-          `Payout of ৳${toMajor(amountMinor).toLocaleString()} via ${locked.payoutMethod} completed. Ref: ${locked.transactionReference || "N/A"}.`);
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PAYOUT_COMPLETED,
+          aggregateType: "payout",
+          aggregateId: locked.id,
+          actorId: adminId,
+          payload: {
+            payoutId: locked.id,
+            payoutCode: locked.payoutCode,
+            merchantId: locked.merchantId,
+            amountMinor,
+            method: locked.payoutMethod,
+            transactionReference: locked.transactionReference,
+          },
+        });
 
         return toPayoutItem(locked);
       });
@@ -579,11 +603,25 @@ export class FinanceService {
             : `Funds released for failed payout: ${locked.failureReason}`,
         );
 
-        await this.dispatchPayoutEvent(locked, WebhookEvent.PAYOUT_COMPLETED,
-          dto.status === PayoutStatus.REJECTED ? "Payout Rejected" : "Payout Failed",
-          dto.status === PayoutStatus.REJECTED
-            ? `Payout ${locked.payoutCode} rejected. Reserved funds released to your wallet.`
-            : `Payout ${locked.payoutCode} failed externally. Reserved funds released to your wallet.`);
+        // A rejected or failed payout is a payout failure, never a
+        // completion — the old code mis-emitted PAYOUT_COMPLETED here.
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PAYOUT_FAILED,
+          aggregateType: "payout",
+          aggregateId: locked.id,
+          actorId: adminId,
+          payload: {
+            payoutId: locked.id,
+            payoutCode: locked.payoutCode,
+            merchantId: locked.merchantId,
+            amountMinor: toMinor(locked.amount),
+            method: locked.payoutMethod,
+            reason:
+              dto.status === PayoutStatus.REJECTED
+                ? locked.rejectionReason
+                : locked.failureReason,
+          },
+        });
 
         return toPayoutItem(locked);
       });
@@ -906,46 +944,60 @@ export class FinanceService {
 
       await this.recomputeHandIn(manager, ledger.id, verifier.id);
 
+      // Transactional fan-out triggers: the relay notifies the merchant
+      // (in-app + email), publishes webhooks and opens hub/rider alerts.
+      // Direct fire-and-forget dispatch is gone — slow providers can delay
+      // communication but never the settlement itself.
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.CASH_VERIFIED,
+        aggregateType: "cash_ledger",
+        aggregateId: ledger.id,
+        actorId: verifier.id,
+        payload: {
+          cashLedgerId: ledger.id,
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: merchant.id,
+          netMinor,
+          settlementCode: settlement.settlementCode,
+        },
+      });
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.SETTLEMENT_CREATED,
+        aggregateType: "settlement",
+        aggregateId: settlement.id,
+        actorId: verifier.id,
+        payload: {
+          settlementId: settlement.id,
+          settlementCode: settlement.settlementCode,
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: merchant.id,
+          netMinor,
+        },
+      });
+      if (discrepancyId) {
+        const riderId = ledger.riderId;
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.DISCREPANCY_OPENED,
+          aggregateType: "cash_discrepancy",
+          aggregateId: discrepancyId,
+          actorId: verifier.id,
+          payload: {
+            discrepancyId,
+            cashLedgerId: ledger.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: merchant.id,
+            riderId,
+            hubId: ledger.hubId,
+            differenceMinor: mismatchMinor,
+          },
+        });
+      }
+
       this.logger.log(
         `Reconciled cash for parcel ${parcel.trackingCode}: COD ৳${toMajor(actualMinor)}, fee ৳${toMajor(feeLegMinor)}, settled ৳${toMajor(netMinor)} to ${merchant.businessName}`,
       );
-
-      if (this.webhooksService) {
-        await this.webhooksService
-          .dispatchEvent(WebhookEvent.CASH_VERIFIED, merchant.id, {
-            parcelId: parcel.id,
-            trackingCode: parcel.trackingCode,
-            verifiedAmount: toMajor(actualMinor),
-            deliveryFee: toMajor(feeLegMinor),
-            netSettled: toMajor(netMinor),
-            newWalletBalance: toMajor(newMinor),
-          })
-          .catch((err) =>
-            this.logger.warn(`Failed to dispatch cash.verified webhook: ${err.message}`),
-          );
-      }
-      if (this.notificationsService) {
-        await this.notificationsService
-          .createNotification({
-            merchantId: merchant.id,
-            channel: NotificationChannel.IN_APP,
-            type: NotificationType.CASH_COLLECTED,
-            title: mismatchMinor === 0 ? "Cash Verified & Settled" : "Cash Settled With Discrepancy",
-            message:
-              mismatchMinor === 0
-                ? `COD ৳${toMajor(actualMinor)} verified for ${parcel.trackingCode}. ৳${toMajor(netMinor)} credited to wallet.`
-                : `COD for ${parcel.trackingCode} settled on counted ৳${toMajor(actualMinor)} (variance ৳${toMajor(mismatchMinor)} recorded for review).`,
-            metadata: {
-              parcelId: parcel.id,
-              trackingCode: parcel.trackingCode,
-              netSettled: toMajor(netMinor),
-              settlementCode: settlement.settlementCode,
-            },
-          })
-          .catch((err) =>
-            this.logger.warn(`Failed to dispatch cash verified notification: ${err.message}`),
-          );
-      }
 
       return {
         cashLedger: {
@@ -2171,51 +2223,10 @@ export class FinanceService {
     };
   }
 
-  private async notifyMerchant(
-    merchantId: string,
-    type: NotificationType,
-    title: string,
-    message: string,
-    metadata: Record<string, unknown>,
-  ): Promise<void> {
-    if (!this.notificationsService) return;
-    await this.notificationsService
-      .createNotification({
-        merchantId,
-        channel: NotificationChannel.IN_APP,
-        type,
-        title,
-        message,
-        metadata,
-      })
-      .catch((err) => this.logger.warn(`Failed to dispatch finance notification: ${err.message}`));
-  }
-
-  private async dispatchPayoutEvent(
-    payout: PayoutRequest,
-    event: WebhookEvent,
-    title: string,
-    message: string,
-  ): Promise<void> {
-    if (this.webhooksService) {
-      await this.webhooksService
-        .dispatchEvent(event, payout.merchantId, {
-          payoutRequestId: payout.id,
-          payoutCode: payout.payoutCode,
-          amount: Number(payout.amount),
-          payoutMethod: payout.payoutMethod,
-          status: payout.status,
-          transactionReference: payout.transactionReference,
-        })
-        .catch((err) =>
-          this.logger.warn(`Failed to dispatch payout webhook: ${err.message}`),
-        );
-    }
-    await this.notifyMerchant(payout.merchantId, NotificationType.PAYOUT_UPDATE, title, message, {
-      payoutId: payout.id,
-      payoutCode: payout.payoutCode,
-      amount: Number(payout.amount),
-    });
-  }
+  // Payout and settlement fan-out now flows exclusively through the
+  // transactional outbox (appended inside the money-moving transactions
+  // above). The relay notifies merchants and publishes webhooks
+  // asynchronously; provider outages can delay communication but never the
+  // financial fact.
 }
 

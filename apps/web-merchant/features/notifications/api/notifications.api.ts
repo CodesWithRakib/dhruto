@@ -1,9 +1,18 @@
 import { baseApi } from "../../../lib/api/base-api";
 import {
   type NotificationItem,
+  type PaginatedNotificationsResponse,
   type UnreadNotificationCountResponse,
+  type NotificationPreferenceItem,
+  type SupportedLocale,
+  type UpdatePreferencesDto,
   type ApiResponse,
 } from "@dhruto/contracts";
+
+export interface PreferencesResponse {
+  items: NotificationPreferenceItem[];
+  locale: SupportedLocale;
+}
 
 export const notificationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -13,13 +22,14 @@ export const notificationsApi = baseApi.injectEndpoints({
     }),
 
     getMyNotifications: builder.query<
-      ApiResponse<NotificationItem[]>,
-      { limit?: number; unreadOnly?: boolean } | void
+      ApiResponse<PaginatedNotificationsResponse>,
+      { page?: number; limit?: number; unreadOnly?: boolean } | void
     >({
       query: (params) => {
+        const page = params?.page ?? 1;
         const limit = params?.limit ?? 20;
         const unreadOnly = params?.unreadOnly ?? false;
-        return `/notifications/me?limit=${limit}&unreadOnly=${unreadOnly}`;
+        return `/notifications/me?page=${page}&limit=${limit}&unreadOnly=${unreadOnly}`;
       },
       providesTags: ["Notification"],
     }),
@@ -36,6 +46,20 @@ export const notificationsApi = baseApi.injectEndpoints({
       query: () => ({
         url: "/notifications/read-all",
         method: "POST",
+      }),
+      invalidatesTags: ["Notification"],
+    }),
+
+    getNotificationPreferences: builder.query<ApiResponse<PreferencesResponse>, void>({
+      query: () => "/notifications/preferences",
+      providesTags: ["Notification"],
+    }),
+
+    updateNotificationPreferences: builder.mutation<ApiResponse<PreferencesResponse>, UpdatePreferencesDto>({
+      query: (payload) => ({
+        url: "/notifications/preferences",
+        method: "POST",
+        body: payload,
       }),
       invalidatesTags: ["Notification"],
     }),
@@ -59,5 +83,7 @@ export const {
   useGetMyNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
+  useGetNotificationPreferencesQuery,
+  useUpdateNotificationPreferencesMutation,
   useTestSmsNotificationMutation,
 } = notificationsApi;

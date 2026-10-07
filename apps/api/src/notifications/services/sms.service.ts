@@ -24,14 +24,17 @@ export class SmsService {
   }
 
   /**
-   * Dispatches SMS message to recipient via simulated BD SMS gateway (SSL Wireless / Greenweb compatible).
+   * Legacy direct SMS helper. Prefer the SmsProvider abstraction
+   * (`SMS_PROVIDER`) for new code paths. Message bodies are never logged:
+   * OTPs and customer text stay out of logs.
    */
   async sendSms(to: string, message: string): Promise<SmsSendResult> {
     const normalizedPhone = this.normalizePhoneNumber(to);
     const messageId = `sms_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
-    // In a live environment with API credentials, this executes an HTTP POST to SMS gateway
-    this.logger.log(`[SMS-GATEWAY] Dispatched SMS to "${normalizedPhone}" (ID: ${messageId}): "${message}"`);
+    this.logger.log(
+      `[SMS-GATEWAY] Dispatched SMS to "${normalizedPhone}" (ID: ${messageId}, chars: ${message.length})`,
+    );
 
     return {
       success: true,

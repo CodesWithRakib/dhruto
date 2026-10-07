@@ -15,6 +15,7 @@ import {
 } from "../database/entities/index.js";
 import { PricingModule } from "../pricing/pricing.module.js";
 import { IdempotencyModule } from "../common/idempotency/idempotency.module.js";
+import { IntegrationsModule } from "../integrations/integrations.module.js";
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
 
 @Module({
@@ -29,6 +30,8 @@ import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
     ]),
     PricingModule,
     IdempotencyModule,
+    // OutboxService for transactional domain-event emission.
+    IntegrationsModule,
   ],
   controllers: [ParcelsController, TrackingController],
   providers: [

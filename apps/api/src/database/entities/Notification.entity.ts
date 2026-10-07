@@ -69,4 +69,31 @@ export class Notification extends BaseEntity {
 
   @Column({ name: 'failure_reason', type: 'text', nullable: true })
   failureReason: string | null;
+
+  /**
+   * Source domain event for fan-out deduplication. Null for ad-hoc sends
+   * (e.g. test SMS), which are never deduplicated.
+   */
+  @Column({ name: 'event_id', type: 'uuid', nullable: true })
+  eventId: string | null;
+
+  /**
+   * Stable dedup key `${eventId}:${channel}:${recipient}`. The migration
+   * enforces uniqueness where event_id is present, so event replays never
+   * duplicate a recipient's notification.
+   */
+  @Column({ name: 'dedupe_key', type: 'varchar', length: 255, nullable: true })
+  dedupeKey: string | null;
+
+  @Column({ name: 'provider_message_id', type: 'varchar', length: 128, nullable: true })
+  providerMessageId: string | null;
+
+  @Column({ name: 'attempt_count', type: 'int', default: 0 })
+  attemptCount: number;
+
+  @Column({ name: 'template_key', type: 'varchar', length: 100, nullable: true })
+  templateKey: string | null;
+
+  @Column({ type: 'varchar', length: 5, default: 'en' })
+  locale: string;
 }

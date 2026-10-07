@@ -115,13 +115,38 @@
    * The font families themselves are injected by the app via next/font
    * (Plus Jakarta Sans / Inter for Latin, Hind Siliguri / Noto Sans Bengali for Bangla).
    */
-  --font-sans: var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+  --font-sans:
+    var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
-  --font-bangla: var(--font-hind-siliguri), var(--font-noto-bengali), var(--font-plus-jakarta),
-    "SolaimanLipi", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas,
-    monospace;
+  --font-bangla:
+    var(--font-hind-siliguri), var(--font-noto-bengali), var(--font-plus-jakarta), "SolaimanLipi",
+    ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, monospace;
 
   /* Bangla needs a roomier line-height than Latin. */
   --leading-bangla: 1.625;
+
+  /* ------------------------------------------------------------------
+   * 9. Hero / section background schemas
+   * ------------------------------------------------------------------
+   * Schema A — "Deep Forest" (dark, teal-green radial glow)
+   */
+  --hero-dark-base: 196 45% 7%; /* #0A1519 — near-black navy edge */
+  --hero-dark-mid: 180 40% 11%; /* #11272A — deep teal body */
+  --hero-dark-glow: 168 55% 18%; /* #154A40 — top-center glow */
+  --hero-dark-accent: 172 66% 36%; /* #1F9A88 — teal accent / active step */
+  --hero-dark-gold: 36 45% 66%; /* #D3B07E — badges / numbered dots */
+  --hero-dark-foreground: 0 0% 100%;
+  --hero-dark-muted: 180 12% 72%; /* #B0C2C2 — body copy on dark */
+  --hero-dark-chip: 180 25% 16%; /* #1F3333 — pill / chip surface */
+
+  /* Schema B — "Mint Mist" (light, same hue family) */
+  --hero-light-base: 150 33% 97%; /* #F5FAF7 */
+  --hero-light-mid: 152 45% 93%; /* #E4F4EC */
+  --hero-light-glow: 160 55% 85%; /* #C6EEDD — top-center glow */
+  --hero-light-accent: 152 69% 19%; /* #0F5132 — brand primary */
+  --hero-light-gold: 36 70% 50%; /* #D98E26 — badges */
+  --hero-light-foreground: 222 47% 11%;
+  --hero-light-muted: 215 16% 40%;
+  --hero-light-chip: 0 0% 100%;
 }

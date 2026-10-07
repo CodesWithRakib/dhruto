@@ -16,6 +16,7 @@ import {
   HubUserAssignment,
   FinancialTransaction,
   FinancialEntry,
+  WebhookSubscription,
 } from '../entities/index.js';
 import { SeederService } from './seeder.service.js';
 
@@ -36,6 +37,7 @@ import { SeederService } from './seeder.service.js';
       HubUserAssignment,
       FinancialTransaction,
       FinancialEntry,
+      WebhookSubscription,
     ]),
   ],
   providers: [SeederService],

@@ -40,6 +40,7 @@ import { CashHandInStatus as BatchHandInStatus } from "@dhruto/contracts";
 import {
   ApiErrorCode,
   DeliveryAttemptOutcome,
+  DomainEventType,
   FinancialTransactionType,
   EntryDirection,
   FinancialAccount,
@@ -69,9 +70,8 @@ import {
   IdempotencyService,
 } from "../common/idempotency/idempotency.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
-import { WebhooksService } from "../webhooks/webhooks.service.js";
-import { WebhookEvent } from "@dhruto/contracts";
 import { LedgerService } from "../finance/ledger/ledger.service.js";
+import { OutboxService } from "../integrations/outbox.service.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
 import { UserRole } from "../database/entities/index.js";
 
@@ -132,10 +132,9 @@ export class RidersService {
     private readonly passwordService: PasswordService,
     private readonly idempotency: IdempotencyService,
     private readonly ledger: LedgerService,
+    private readonly outbox: OutboxService,
     @Optional()
     private readonly notificationsService?: NotificationsService,
-    @Optional()
-    private readonly webhooksService?: WebhooksService,
   ) {}
 
   /* ================================================================== */
@@ -495,6 +494,25 @@ export class RidersService {
         `Parcel ${parcel.trackingCode} is OUT_FOR_DELIVERY by rider ${riderId}`,
       );
 
+      // Transactional fan-out trigger: notifications + webhooks relay
+      // asynchronously; the OTP SMS below stays synchronous (handoff path).
+      // recipientPhone is included so the outbox relay can resolve the
+      // customer SMS target — the OTP secret itself NEVER goes in the event.
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.PARCEL_OUT_FOR_DELIVERY,
+        aggregateType: "parcel",
+        aggregateId: parcel.id,
+        actorId: userId,
+        payload: {
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: parcel.merchantId,
+          riderId,
+          recipientPhone: parcel.recipientPhone,
+          recipientName: parcel.recipientName,
+        },
+      });
+
       const expiresAt = parcel.otpExpiresAt?.toISOString() ?? new Date().toISOString();
       // Side effects after the state change; failures only warn.
       await this.dispatchOutForDelivery(parcel, riderId, otp);
@@ -574,13 +592,7 @@ export class RidersService {
 
       if (this.notificationsService) {
         await this.notificationsService
-          .notifyOutForDelivery(
-            parcel.id,
-            parcel.trackingCode,
-            parcel.recipientPhone,
-            otp,
-            parcel.merchantId,
-          )
+          .sendDeliveryOtpSms(parcel.recipientPhone, parcel.trackingCode, otp)
           .catch((err) =>
             this.logger.warn(`Failed to dispatch OTP notification: ${err.message}`),
           );
@@ -938,6 +950,23 @@ export class RidersService {
           message: "Parcel marked as delivered successfully.",
         };
 
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PARCEL_DELIVERED,
+          aggregateType: "parcel",
+          aggregateId: parcel.id,
+          actorId: userId,
+          payload: {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: parcel.merchantId,
+            riderId,
+            codCollected: collectedAmount,
+            attemptId: attempt.id,
+            recipientPhone: parcel.recipientPhone,
+            recipientName: parcel.recipientName,
+          },
+        });
+
         if (idempotencyKey) {
           await this.idempotency.complete(manager, {
             key: idempotencyKey,
@@ -1038,6 +1067,24 @@ export class RidersService {
       }
 
       await manager.getRepository(Parcel).save(parcel);
+
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.PARCEL_FAILED,
+        aggregateType: "parcel",
+        aggregateId: parcel.id,
+        actorId: userId,
+        payload: {
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: parcel.merchantId,
+          riderId,
+          reason: dto.reason,
+          attemptId: attempt.id,
+          rescheduledFor: rescheduledFor?.toISOString() ?? null,
+          recipientPhone: parcel.recipientPhone,
+          recipientName: parcel.recipientName,
+        },
+      });
 
       return {
         parcelId: parcel.id,
@@ -1177,6 +1224,21 @@ export class RidersService {
           { account: FinancialAccount.RIDER_CASH_IN_HAND, direction: EntryDirection.CREDIT, amountMinor: totalMinor },
         ],
         createdBy: userId,
+      });
+
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.CASH_HAND_IN_SUBMITTED,
+        aggregateType: "cash_handin",
+        aggregateId: batch.id,
+        actorId: userId,
+        payload: {
+          handinId: batch.id,
+          handinCode: batch.handinCode,
+          riderId,
+          hubId: rider.hubId ?? null,
+          itemCount: pendingLedgers.length,
+          totalMinor,
+        },
       });
 
       this.logger.log(
@@ -1698,35 +1760,19 @@ export class RidersService {
     riderId: string,
     otp: string | null,
   ): Promise<void> {
+    // Single ownership: the outbox relay owns merchant in-app + webhook +
+    // generic customer fan-out for OUT_FOR_DELIVERY. This critical path sends
+    // ONLY the OTP SMS (which already tells the customer the parcel is out
+    // for delivery). Sending the full notifyOutForDelivery here would
+    // duplicate the merchant in-app row and the webhook delivery.
     // The OTP travels to the customer through the SMS body only. It is never
     // written to notification metadata, logs, or the rider response.
+    void riderId;
     if (this.notificationsService && otp) {
       await this.notificationsService
-        .notifyOutForDelivery(
-          parcel.id,
-          parcel.trackingCode,
-          parcel.recipientPhone,
-          otp,
-          parcel.merchantId,
-        )
+        .sendDeliveryOtpSms(parcel.recipientPhone, parcel.trackingCode, otp)
         .catch((err) =>
-          this.logger.warn(`Failed to dispatch out-for-delivery notification: ${err.message}`),
-        );
-    }
-    if (this.webhooksService) {
-      await this.webhooksService
-        .dispatchEvent(
-          WebhookEvent.PARCEL_OUT_FOR_DELIVERY,
-          parcel.merchantId,
-          {
-            parcelId: parcel.id,
-            trackingCode: parcel.trackingCode,
-            status: parcel.status,
-            riderId,
-          },
-        )
-        .catch((err) =>
-          this.logger.warn(`Failed to dispatch out-for-delivery webhook: ${err.message}`),
+          this.logger.warn(`Failed to dispatch out-for-delivery OTP SMS: ${err.message}`),
         );
     }
   }
@@ -1735,37 +1781,15 @@ export class RidersService {
     parcel: Parcel,
     collectedAmount: number,
   ): Promise<void> {
-    if (this.notificationsService) {
-      await this.notificationsService
-        .notifyDeliveryComplete(
-          parcel.id,
-          parcel.trackingCode,
-          parcel.recipientPhone,
-          collectedAmount,
-          parcel.merchantId,
-        )
-        .catch((err) =>
-          this.logger.warn(`Failed to dispatch delivery complete notification: ${err.message}`),
-        );
-    }
-    if (this.webhooksService) {
-      const ledger = await this.cashLedgerRepo.findOne({ where: { parcelId: parcel.id } });
-      await this.webhooksService
-        .dispatchEvent(
-          WebhookEvent.PARCEL_DELIVERED,
-          parcel.merchantId,
-          {
-            parcelId: parcel.id,
-            trackingCode: parcel.trackingCode,
-            status: parcel.status,
-            codAmountCollected: collectedAmount,
-            cashLedgerId: ledger?.id || null,
-          },
-        )
-        .catch((err) =>
-          this.logger.warn(`Failed to dispatch parcel delivered webhook: ${err.message}`),
-        );
-    }
+    // Single ownership: PARCEL_DELIVERED fan-out (customer SMS + merchant
+    // in-app/email + webhook) is owned by the outbox relay. The direct
+    // notify + dispatch path was removed to prevent duplicate notifications
+    // and duplicate webhook deliveries for the same event.
+    // Kept as a no-op hook for observability; failures here never affect the
+    // already-committed delivery transaction.
+    void parcel;
+    void collectedAmount;
+    return;
   }
 
   /**

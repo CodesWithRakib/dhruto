@@ -24,6 +24,8 @@ import { Button, Badge, Card, DataTable } from "@dhruto/ui";
 import {
   useListWebhookSubscriptionsQuery,
   useCreateWebhookSubscriptionMutation,
+  useUpdateWebhookSubscriptionMutation,
+  useRotateWebhookSecretMutation,
   useDeleteWebhookSubscriptionMutation,
   usePingWebhookSubscriptionMutation,
   useListWebhookDeliveriesQuery,
@@ -44,6 +46,11 @@ const AVAILABLE_EVENTS = [
     desc: "Triggered whenever a merchant books a new parcel",
   },
   {
+    event: WebhookEvent.PARCEL_ASSIGNED,
+    label: "parcel.assigned",
+    desc: "Dispatched when a rider is assigned to the parcel",
+  },
+  {
     event: WebhookEvent.PARCEL_OUT_FOR_DELIVERY,
     label: "parcel.out_for_delivery",
     desc: "Dispatched when rider departs for destination",
@@ -54,14 +61,44 @@ const AVAILABLE_EVENTS = [
     desc: "Dispatched when customer confirms delivery receipt",
   },
   {
+    event: WebhookEvent.PARCEL_FAILED,
+    label: "parcel.failed",
+    desc: "Dispatched when a delivery attempt fails",
+  },
+  {
+    event: WebhookEvent.PARCEL_RETURNED,
+    label: "parcel.returned",
+    desc: "Dispatched when a parcel is returned to origin (RTO)",
+  },
+  {
     event: WebhookEvent.CASH_VERIFIED,
     label: "cash.verified",
     desc: "Dispatched when COD cash is reconciled & credited to wallet",
   },
   {
+    event: WebhookEvent.SETTLEMENT_CREATED,
+    label: "settlement.created",
+    desc: "Dispatched when a per-parcel settlement is posted",
+  },
+  {
+    event: WebhookEvent.PAYOUT_REQUESTED,
+    label: "payout.requested",
+    desc: "Dispatched when a payout withdrawal is requested",
+  },
+  {
+    event: WebhookEvent.PAYOUT_APPROVED,
+    label: "payout.approved",
+    desc: "Dispatched when a payout is approved for processing",
+  },
+  {
     event: WebhookEvent.PAYOUT_COMPLETED,
     label: "payout.completed",
     desc: "Dispatched when merchant payout withdrawal completes",
+  },
+  {
+    event: WebhookEvent.PAYOUT_FAILED,
+    label: "payout.failed",
+    desc: "Dispatched when a payout fails and funds return to wallet",
   },
   {
     event: WebhookEvent.PING,
@@ -96,12 +133,21 @@ export default function WebhooksDeveloperPage() {
     useListWebhookDeliveriesQuery(undefined, { pollingInterval: 10000 });
 
   const [createSub, { isLoading: isCreating }] = useCreateWebhookSubscriptionMutation();
+  const [updateSub] = useUpdateWebhookSubscriptionMutation();
+  const [rotateSecret, { isLoading: isRotating }] = useRotateWebhookSecretMutation();
   const [deleteSub, { isLoading: isDeleting }] = useDeleteWebhookSubscriptionMutation();
   const [pingSub, { isLoading: isPinging }] = usePingWebhookSubscriptionMutation();
   const [retryDelivery, { isLoading: isRetrying }] = useRetryWebhookDeliveryMutation();
+  const [freshSecret, setFreshSecret] = React.useState<{ id: string; secret: string } | null>(null);
 
   const subscriptions = subsData?.data || [];
-  const deliveries = deliveriesData?.data || [];
+  const deliveryPayload = deliveriesData?.data as
+    | { items: WebhookDeliveryItem[]; total: number }
+    | WebhookDeliveryItem[]
+    | undefined;
+  const deliveries: WebhookDeliveryItem[] = Array.isArray(deliveryPayload)
+    ? deliveryPayload
+    : (deliveryPayload?.items ?? []);
 
   const filteredDeliveries = deliveries.filter((d) => {
     if (filterStatus === "ALL") return true;
@@ -139,12 +185,17 @@ export default function WebhooksDeveloperPage() {
     }
 
     try {
-      await createSub({
+      const created = await createSub({
         url,
         description: description || undefined,
         events: selectedEvents,
         secret: customSecret.trim() ? customSecret.trim() : undefined,
       }).unwrap();
+
+      // Full secret is returned exactly once on create — surface it immediately.
+      if (created.data?.secret) {
+        setFreshSecret({ id: created.data.id, secret: created.data.secret });
+      }
 
       setUrl("");
       setDescription("");
@@ -153,6 +204,33 @@ export default function WebhooksDeveloperPage() {
       refetchSubs();
     } catch (err) {
       setFormError(getApiErrorMessage(err, "Failed to register webhook subscription."));
+    }
+  };
+
+  const handleRotateSecret = async (id: string) => {
+    if (!confirm("Rotate this endpoint's signing secret? The old secret stops working immediately.")) {
+      return;
+    }
+    try {
+      const result = await rotateSecret(id).unwrap();
+      if (result.data?.secret) {
+        setFreshSecret({ id, secret: result.data.secret });
+      }
+      refetchSubs();
+    } catch {
+      // Ignore —badge via refetch state
+    }
+  };
+
+  const handleToggleStatus = async (id: string, current: string) => {
+    try {
+      await updateSub({
+        id,
+        payload: { status: current === "ACTIVE" ? "INACTIVE" : "ACTIVE" },
+      }).unwrap();
+      refetchSubs();
+    } catch {
+      // Ignore
     }
   };
 
@@ -187,6 +265,41 @@ export default function WebhooksDeveloperPage() {
 
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-300">
+      {freshSecret && (
+        <div
+          role="alert"
+          className="rounded-xl border border-warning bg-warning-soft p-4 text-sm text-warning-soft-foreground"
+        >
+          <p className="font-semibold">
+            Signing secret — shown once. Copy it now; it will never be displayed again.
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <code className="break-all rounded bg-background px-2 py-1 font-mono text-xs select-all">
+              {freshSecret.secret}
+            </code>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(freshSecret.secret);
+                setCopiedSecretId(freshSecret.id);
+                setTimeout(() => setCopiedSecretId(null), 2000);
+              }}
+            >
+              {copiedSecretId === freshSecret.id ? (
+                <Check className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              Copy
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setFreshSecret(null)}>
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              Dismiss
+            </Button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b">
         <div>
@@ -335,30 +448,34 @@ export default function WebhooksDeveloperPage() {
                         <p className="text-xs text-muted-foreground">{sub.description}</p>
                       )}
 
-                      {/* Secret Key Bar */}
+                      {/* Secret Key Bar — list responses carry only the masked preview */}
                       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2 rounded-lg border max-w-xl">
                         <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                         <span className="font-medium shrink-0">Signing Secret:</span>
-                        <span className="font-mono text-xs truncate select-all">
-                          {isRevealed ? sub.secret : "••••••••••••••••••••••••••••••••"}
+                        <span className="font-mono text-xs truncate select-all" title={sub.secretPreview || "Masked preview"}>
+                          {isRevealed ? (sub.secretPreview || sub.secret) : "••••••••••••••••••••••••••••••••"}
                         </span>
                         <div className="flex items-center gap-1 ml-auto shrink-0">
                           <button
                             onClick={() => toggleRevealSecret(sub.id)}
                             className="p-1 hover:text-foreground rounded transition-colors"
-                            title={isRevealed ? "Hide secret" : "Reveal secret"}
+                            title={isRevealed ? "Hide preview" : "Reveal masked preview"}
+                            aria-label={isRevealed ? "Hide secret preview" : "Reveal secret preview"}
                           >
                             {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                           </button>
                           <button
-                            onClick={() => handleCopySecret(sub.id, sub.secret)}
+                            onClick={() => handleCopySecret(sub.id, sub.secretPreview || sub.secret)}
                             className="p-1 hover:text-foreground rounded transition-colors"
-                            title="Copy secret"
+                            title="Copy masked preview"
                           >
                             {isCopied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                           </button>
                         </div>
                       </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Full secret is shown only once at creation/rotation. Use Rotate to issue a new one.
+                      </p>
 
                       {/* Subscribed Events */}
                       <div className="flex items-center gap-1.5 flex-wrap pt-1">
@@ -376,7 +493,7 @@ export default function WebhooksDeveloperPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0 md:self-start">
+                    <div className="flex flex-wrap items-center gap-2 shrink-0 md:self-start">
                       <Button
                         size="sm"
                         variant="outline"
@@ -386,6 +503,26 @@ export default function WebhooksDeveloperPage() {
                       >
                         <Send className="h-3.5 w-3.5 text-info" />
                         Test Ping
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isRotating}
+                        onClick={() => handleRotateSecret(sub.id)}
+                        className="flex items-center gap-1.5 text-xs"
+                        title="Rotate signing secret (old secret stops working)"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Rotate
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleToggleStatus(sub.id, sub.status)}
+                        className="flex items-center gap-1.5 text-xs"
+                        title={sub.status === "ACTIVE" ? "Disable endpoint" : "Enable endpoint"}
+                      >
+                        {sub.status === "ACTIVE" ? "Disable" : "Enable"}
                       </Button>
                       <Button
                         size="sm"

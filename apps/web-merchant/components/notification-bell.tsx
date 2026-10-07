@@ -47,7 +47,11 @@ export function NotificationBell() {
   const [testSms, { isLoading: isSendingSms }] = useTestSmsNotificationMutation();
 
   const unreadCount = countData?.data?.unreadCount || 0;
-  const notifications = notifsData?.data || [];
+  const rawData = notifsData?.data as
+    | { items: Array<{ id: string; title: string; message: string; channel: string; type: string; status: string; createdAt: string }> }
+    | Array<{ id: string; title: string; message: string; channel: string; type: string; status: string; createdAt: string }>
+    | undefined;
+  const notifications = Array.isArray(rawData) ? rawData : (rawData?.items ?? []);
 
   // Close dropdown on outside click
   useEffect(() => {

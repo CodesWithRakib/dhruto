@@ -28,6 +28,13 @@ export class WebhookDelivery extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   signature: string;
 
+  /**
+   * Source outbox event for cross-system dedup. Null for ad-hoc ping/test
+   * deliveries, which are never deduplicated.
+   */
+  @Column({ name: 'event_id', type: 'uuid', nullable: true })
+  eventId: string | null;
+
   @Column({ name: 'status_code', type: 'int', nullable: true })
   statusCode: number | null;
 

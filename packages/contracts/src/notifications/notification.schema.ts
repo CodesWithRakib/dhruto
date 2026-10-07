@@ -50,6 +50,13 @@ export interface NotificationItem {
   createdAt: string;
 }
 
+export interface PaginatedNotificationsResponse {
+  items: NotificationItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface UnreadNotificationCountResponse {
   unreadCount: number;
 }

@@ -36,9 +36,26 @@ const logger = new Logger("QueuesModule");
         };
       },
     }),
-    BullModule.registerQueue({
-      name: "notifications",
-    }),
+    BullModule.registerQueue(
+      {
+        name: "notifications",
+        defaultJobOptions: {
+          attempts: 4,
+          backoff: { type: "exponential", delay: 10000 },
+          removeOnComplete: 1000,
+          removeOnFail: 5000,
+        },
+      },
+      {
+        name: "webhooks",
+        defaultJobOptions: {
+          attempts: 3,
+          backoff: { type: "exponential", delay: 15000 },
+          removeOnComplete: 1000,
+          removeOnFail: 5000,
+        },
+      },
+    ),
   ],
   exports: [BullModule],
 })

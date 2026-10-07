@@ -1,4 +1,6 @@
-import { Controller, Get, HttpStatus } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Optional } from "@nestjs/common";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 import { ApiTags, ApiOperation, ApiResponse as SwaggerApiResponse } from "@nestjs/swagger";
 import { DataSource } from "typeorm";
 import {
@@ -8,6 +10,7 @@ import {
 } from "@dhruto/contracts";
 import { CacheService } from "../common/cache/cache.service.js";
 import { TelemetryService } from "../common/interceptors/telemetry.interceptor.js";
+import { queueCounts } from "../integrations/queue-helper.js";
 
 @ApiTags("Health & Observability")
 @Controller(["health", "system"])
@@ -16,6 +19,8 @@ export class HealthController {
     private readonly dataSource: DataSource,
     private readonly cacheService: CacheService,
     private readonly telemetryService: TelemetryService,
+    @Optional() @InjectQueue("notifications") private readonly notificationsQueue?: Queue,
+    @Optional() @InjectQueue("webhooks") private readonly webhooksQueue?: Queue,
   ) {}
 
   @Get()
@@ -100,13 +105,23 @@ export class HealthController {
       externalMb: Number((mem.external / (1024 * 1024)).toFixed(1)),
     };
 
+    // Real BullMQ counters (degraded shape when Redis is unreachable —
+    // never hardcoded numbers).
+    const [notifications, webhooks] = await Promise.all([
+      this.notificationsQueue
+        ? queueCounts(this.notificationsQueue)
+        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+      this.webhooksQueue
+        ? queueCounts(this.webhooksQueue)
+        : Promise.resolve({ reachable: false, waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }),
+    ]);
     const queue: QueueHealth = {
-      status: "healthy",
-      waiting: 0,
-      active: 0,
-      completed: 128,
-      failed: 0,
-      delayed: 0,
+      status: notifications.reachable && webhooks.reachable ? "healthy" : "degraded",
+      waiting: notifications.waiting + webhooks.waiting,
+      active: notifications.active + webhooks.active,
+      completed: notifications.completed + webhooks.completed,
+      failed: notifications.failed + webhooks.failed,
+      delayed: notifications.delayed + webhooks.delayed,
     };
 
     const isHealthy = db.connected && cache.connected;

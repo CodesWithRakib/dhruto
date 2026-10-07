@@ -15,6 +15,7 @@ import {
 } from "../database/entities/index.js";
 import { ParcelsModule } from "../parcels/parcels.module.js";
 import { LedgerModule } from "../finance/ledger/ledger.module.js";
+import { IntegrationsModule } from "../integrations/integrations.module.js";
 import { RidersController, RiderAdminController } from "./riders.controller.js";
 import { RidersService } from "./riders.service.js";
 
@@ -38,6 +39,8 @@ import { RidersService } from "./riders.service.js";
     ParcelsModule,
     // Supplies LedgerService so cash custody postings go through the journal.
     LedgerModule,
+    // Supplies OutboxService for transactional domain-event emission.
+    IntegrationsModule,
   ],
   controllers: [RidersController, RiderAdminController],
   providers: [RidersService],

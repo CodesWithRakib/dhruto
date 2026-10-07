@@ -30,5 +30,8 @@ export * from './Wallet.entity.js';
 export * from './WalletTransaction.entity.js';
 export * from './PayoutRequest.entity.js';
 export * from './Notification.entity.js';
+export * from './EventOutbox.entity.js';
+export * from './NotificationPreference.entity.js';
+export * from './IntegrationFailure.entity.js';
 export * from './WebhookSubscription.entity.js';
 export * from './WebhookDelivery.entity.js';

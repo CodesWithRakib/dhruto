@@ -15,10 +15,8 @@ import {
 } from "typeorm";
 import {
   ApiErrorCode,
-  NotificationChannel,
-  NotificationType,
+  DomainEventType,
   ParcelStatus,
-  WebhookEvent,
   type ParcelBooking,
   type ParcelCreatedResponse,
   type ParcelDetailsResponse,
@@ -46,8 +44,7 @@ import {
   IdempotencyService,
 } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
-import { NotificationsService } from "../notifications/notifications.service.js";
-import { WebhooksService } from "../webhooks/webhooks.service.js";
+import { OutboxService } from "../integrations/outbox.service.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
@@ -136,10 +133,7 @@ export class ParcelsService {
     private readonly idempotencyService: IdempotencyService,
     private readonly lifecycle: ParcelLifecycleService,
     private readonly trackingCodeService: TrackingCodeService,
-    @Optional()
-    private readonly notificationsService?: NotificationsService,
-    @Optional()
-    private readonly webhooksService?: WebhooksService,
+    private readonly outboxService: OutboxService,
     @Optional()
     private readonly intelligenceService?: IntelligenceService,
     @Optional()
@@ -261,11 +255,6 @@ export class ParcelsService {
           requestHash,
         });
 
-        // Post-commit side effects are deliberately not awaited: an unreachable
-        // merchant webhook endpoint must never delay the booking response
-        // (delivery is retried by the webhook worker).
-        this.afterParcelCreated(merchant, response);
-
         return response;
       } catch (error) {
         if (error instanceof IdempotencyClaimConflict) {
@@ -355,6 +344,22 @@ export class ParcelsService {
         });
         await manager.save(history);
 
+        // Transactional domain event: stored atomically with the booking
+        // so fan-out (notifications, webhooks) can never lose it. Transport
+        // happens asynchronously in the outbox relay and workers.
+        await this.outboxService.append(manager, {
+          eventType: DomainEventType.PARCEL_CREATED,
+          aggregateType: "parcel",
+          aggregateId: saved.id,
+          actorId: merchant.userId,
+          payload: {
+            parcelId: saved.id,
+            trackingCode: saved.trackingCode,
+            merchantId: merchant.id,
+            recipientName: saved.recipientName,
+          },
+        });
+
         const response = this.toSummary(saved);
 
         if (idempotencyKey) {
@@ -374,48 +379,6 @@ export class ParcelsService {
         return response;
       },
     );
-  }
-
-  /**
-   * Best-effort post-commit side effects: intelligence enrichment, webhook
-   * dispatch and the in-app notification. Failures here must never fail the
-   * booking that already committed.
-   */
-  private afterParcelCreated(
-    merchant: Merchant,
-    response: ParcelCreatedResponse,
-  ): void {
-    if (this.webhooksService) {
-      void this.webhooksService
-        .dispatchEvent(WebhookEvent.PARCEL_CREATED, merchant.id, {
-          ...response,
-        })
-        .catch((error: Error) =>
-          this.logger.warn(
-            `PARCEL_CREATION_EVENT_FAILED webhook: ${error.message}`,
-          ),
-        );
-    }
-
-    if (this.notificationsService) {
-      void this.notificationsService
-        .createNotification({
-          merchantId: merchant.id,
-          channel: NotificationChannel.IN_APP,
-          type: NotificationType.PARCEL_STATUS_UPDATE,
-          title: "Parcel Booking Created",
-          message: `Parcel ${response.trackingCode} booked for ${response.recipientName}.`,
-          metadata: {
-            parcelId: response.id,
-            trackingCode: response.trackingCode,
-          },
-        })
-        .catch((error: Error) =>
-          this.logger.warn(
-            `PARCEL_CREATION_EVENT_FAILED notification: ${error.message}`,
-          ),
-        );
-    }
   }
 
   /** Enriches the parcel with Phase 6 intelligence metadata when available. */
@@ -834,6 +797,21 @@ export class ParcelsService {
         metadata: { riderId: rider.id, previousRiderId: previousRiderId ?? null },
       });
       await manager.save(history);
+
+      await this.outboxService.append(manager, {
+        eventType: DomainEventType.PARCEL_ASSIGNED,
+        aggregateType: "parcel",
+        aggregateId: parcel.id,
+        actorId: UUID_REGEX.test(actor.id) ? actor.id : null,
+        payload: {
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: parcel.merchantId,
+          recipientName: parcel.recipientName,
+          riderId: rider.id,
+          reassigned,
+        },
+      });
 
       await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
 

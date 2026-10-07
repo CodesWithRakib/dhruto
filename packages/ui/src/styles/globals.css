@@ -19,6 +19,10 @@
 
   body {
     background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse 70% 50% at 50% 0%, hsl(var(--hero-dark-glow) / 0.7), transparent 70%),
+      linear-gradient(180deg, hsl(var(--hero-dark-mid)) 0%, hsl(var(--hero-dark-base)) 100%);
+    background-attachment: fixed;
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -92,6 +96,58 @@
   /* Primary content width — replaces ad-hoc container padding. */
   .dhruto-container {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Section backgrounds — Schema A (dark) */
+  .dhruto-hero-dark {
+    color: hsl(var(--hero-dark-foreground));
+    background:
+      radial-gradient(ellipse 60% 55% at 50% 0%, hsl(var(--hero-dark-glow) / 0.85), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 100% 100%, hsl(var(--hero-dark-accent) / 0.12), transparent 70%),
+      linear-gradient(180deg, hsl(var(--hero-dark-mid)) 0%, hsl(var(--hero-dark-base)) 100%);
+    --hero-accent: var(--hero-dark-accent);
+    --hero-gold: var(--hero-dark-gold);
+    --hero-muted: var(--hero-dark-muted);
+    --hero-chip: var(--hero-dark-chip);
+
+    /* Re-map semantic tokens so nested components adapt automatically */
+    --foreground: var(--hero-dark-foreground);
+    --muted-foreground: var(--hero-dark-muted);
+    --surface: 180 32% 13%; /* #16302F — card on dark */
+    --border: 172 30% 22%; /* #274943 */
+    --primary: var(--hero-dark-accent);
+    --primary-foreground: 0 0% 100%;
+  }
+
+  /* Section backgrounds — Schema B (light) */
+  .dhruto-hero-light {
+    color: hsl(var(--hero-light-foreground));
+    background:
+      radial-gradient(ellipse 60% 55% at 50% 0%, hsl(var(--hero-light-glow) / 0.9), transparent 70%),
+      radial-gradient(ellipse 50% 60% at 100% 100%, hsl(var(--hero-light-accent) / 0.06), transparent 70%),
+      linear-gradient(180deg, hsl(var(--hero-light-mid)) 0%, hsl(var(--hero-light-base)) 100%);
+    --hero-accent: var(--hero-light-accent);
+    --hero-gold: var(--hero-light-gold);
+    --hero-muted: var(--hero-light-muted);
+    --hero-chip: var(--hero-light-chip);
+  }
+
+  /* Shared helpers that adapt to whichever schema wraps them */
+  .dhruto-hero-muted {
+    color: hsl(var(--hero-muted));
+  }
+  .dhruto-hero-chip {
+    @apply rounded-full px-3 py-1 text-xs font-semibold;
+    background: hsl(var(--hero-chip));
+    border: 1px solid hsl(var(--hero-accent) / 0.3);
+  }
+  .dhruto-hero-badge {
+    background: hsl(var(--hero-gold));
+    color: hsl(var(--hero-dark-base));
+  }
+  .dhruto-hero-accent {
+    background: hsl(var(--hero-accent));
+    color: #fff;
   }
 }
 

@@ -68,6 +68,7 @@ function buildService(parcel: unknown, history: unknown[] = []) {
     { find: () => Promise.resolve(null) } as never,
     new ParcelLifecycleService(),
     new TrackingCodeService(),
+    { append: () => Promise.resolve(null) } as never,
   );
 }
 

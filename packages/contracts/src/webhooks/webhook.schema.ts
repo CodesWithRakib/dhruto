@@ -9,10 +9,16 @@ export enum WebhookEvent {
   PARCEL_FAILED = "parcel.failed",
   PARCEL_RETURNED = "parcel.returned",
   CASH_VERIFIED = "cash.verified",
+  SETTLEMENT_CREATED = "settlement.created",
   PAYOUT_REQUESTED = "payout.requested",
+  PAYOUT_APPROVED = "payout.approved",
   PAYOUT_COMPLETED = "payout.completed",
+  PAYOUT_FAILED = "payout.failed",
   ALL = "*",
 }
+
+/** Public webhook envelope version, independent of the REST API version. */
+export const WEBHOOK_PAYLOAD_VERSION = 1 as const;
 
 export enum WebhookDeliveryStatus {
   PENDING = "PENDING",
@@ -39,17 +45,29 @@ export const updateWebhookSubscriptionSchema = z.object({
 
 export type UpdateWebhookSubscriptionDto = z.infer<typeof updateWebhookSubscriptionSchema>;
 
+/**
+ * Full secret is returned ONLY on create/rotate responses. List/detail
+ * responses carry the masked preview instead.
+ */
 export interface WebhookSubscriptionItem {
   id: string;
   merchantId: string;
   url: string;
   events: string[];
   secret: string;
+  secretPreview: string;
   status: "ACTIVE" | "INACTIVE";
   description?: string;
   failureCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface WebhookSecretRotationResult {
+  id: string;
+  secret: string;
+  secretPreview: string;
+  message: string;
 }
 
 export interface WebhookDeliveryItem {
