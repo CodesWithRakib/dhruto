@@ -43,4 +43,9 @@ export class WebhooksProcessor extends WorkerHost {
       `Worker exhausted after ${job.attemptsMade} attempts: ${getErrorMessage(error, "unknown")}`,
     );
   }
+
+  @OnWorkerEvent("error")
+  onError(error: Error): void {
+    this.logger.debug(`Webhook worker connection error: ${getErrorMessage(error, "unknown")}`);
+  }
 }

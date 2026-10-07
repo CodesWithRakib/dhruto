@@ -12,6 +12,9 @@ const logger = new Logger("QueueHelper");
  * already persisted before this runs, so inline execution only affects
  * transport timing, never business correctness.
  */
+let lastQueueWarnAt = 0;
+const QUEUE_WARN_THROTTLE_MS = 30000;
+
 export async function enqueueOrInline<T>(
   queue: Queue,
   name: string,
@@ -29,7 +32,11 @@ export async function enqueueOrInline<T>(
     });
     return { mode: "queued" };
   } catch (error) {
-    logger.warn(`Queue unavailable, executing inline: ${getErrorMessage(error, "queue error")}`);
+    const now = Date.now();
+    if (now - lastQueueWarnAt > QUEUE_WARN_THROTTLE_MS) {
+      lastQueueWarnAt = now;
+      logger.warn(`Queue unavailable, executing inline: ${getErrorMessage(error, "queue error")}`);
+    }
     await inlineFn();
     return { mode: "inline" };
   }

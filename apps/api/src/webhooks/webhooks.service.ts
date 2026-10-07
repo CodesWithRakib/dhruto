@@ -252,7 +252,7 @@ export class WebhooksService {
   async createDeliveryForEvent(
     manager: EntityManager,
     input: EventDeliveryInput,
-  ): Promise<WebhookDelivery> {
+  ): Promise<{ delivery: WebhookDelivery; created: boolean }> {
     const timestamp = Math.floor(Date.now() / 1000);
     const eventId = input.eventId ?? null;
     const envelope = {
@@ -279,10 +279,10 @@ export class WebhooksService {
       });
       if (duplicate) {
         this.logger.log(`WEBHOOK_DEDUP subscription=${sub.id} event=${input.eventId}`);
-        return duplicate;
+        return { delivery: duplicate, created: false };
       }
       try {
-        return await manager.getRepository(WebhookDelivery).save(
+        const saved = await manager.getRepository(WebhookDelivery).save(
           manager.getRepository(WebhookDelivery).create({
             subscriptionId: sub.id,
             merchantId: input.merchantId,
@@ -295,6 +295,7 @@ export class WebhooksService {
             lastAttemptAt: null,
           }),
         );
+        return { delivery: saved, created: true };
       } catch (error) {
         // Lost a concurrent insert race: the unique index won, reuse it.
         if (isUniqueViolation(error)) {
@@ -302,13 +303,13 @@ export class WebhooksService {
             where: { subscriptionId: sub.id, eventId: input.eventId },
           });
           this.logger.log(`WEBHOOK_DEDUP_RACE subscription=${sub.id} event=${input.eventId}`);
-          return raced;
+          return { delivery: raced, created: false };
         }
         throw error;
       }
     }
 
-    return manager.getRepository(WebhookDelivery).save(
+    const saved = await manager.getRepository(WebhookDelivery).save(
       manager.getRepository(WebhookDelivery).create({
         subscriptionId: sub.id,
         merchantId: input.merchantId,
@@ -321,6 +322,7 @@ export class WebhooksService {
         lastAttemptAt: null,
       }),
     );
+    return { delivery: saved, created: true };
   }
 
   /**
@@ -349,7 +351,7 @@ export class WebhooksService {
     const deliveries: WebhookDelivery[] = [];
 
     for (const sub of matchingSubs) {
-      const delivery = await this.createDeliveryForEvent(this.subscriptionRepo.manager, {
+      const { delivery } = await this.createDeliveryForEvent(this.subscriptionRepo.manager, {
         subscriptionId: sub.id,
         merchantId,
         event,
@@ -378,7 +380,10 @@ export class WebhooksService {
         error: ApiErrorCode.WEBHOOK_NOT_FOUND,
       });
     }
-    if (delivery.status === WebhookDeliveryStatus.DELIVERED) {
+    if (
+      delivery.status === WebhookDeliveryStatus.DELIVERED ||
+      delivery.status === WebhookDeliveryStatus.DEAD_LETTER
+    ) {
       return delivery.status;
     }
     const sub = delivery.subscription;
@@ -621,10 +626,19 @@ export class WebhooksService {
   }
 
   private async recordDeadLetter(delivery: WebhookDelivery, reason: string): Promise<void> {
+    const jobId = `webhook-${delivery.id}`;
     try {
+      const existing = await this.failureRepo.findOne({ where: { jobId } });
+      if (existing) {
+        existing.reason = reason.slice(0, 1000);
+        existing.attempts = delivery.attemptCount;
+        existing.lastAttemptAt = new Date();
+        await this.failureRepo.save(existing);
+        return;
+      }
       await this.failureRepo.save(
         this.failureRepo.create({
-          jobId: `webhook-${delivery.id}`,
+          jobId,
           eventId: delivery.eventId,
           queue: "webhooks",
           kind: IntegrationFailureKind.WEBHOOK,
@@ -638,7 +652,7 @@ export class WebhooksService {
       );
     } catch (error) {
       // Unique jobId: already recorded (e.g. duplicate final-failure events).
-      this.logger.warn(`DLQ write skipped: ${getErrorMessage(error, "unknown")}`);
+      this.logger.debug(`DLQ write skipped: ${getErrorMessage(error, "unknown")}`);
     }
   }
 

@@ -18,6 +18,7 @@ const logger = new Logger("QueuesModule");
               maxRetriesPerRequest: null,
               enableOfflineQueue: false,
               lazyConnect: true,
+              retryStrategy: (times: number) => Math.min(times * 1000, 15000),
             }
           : {
               host: redis?.host || "localhost",
@@ -25,6 +26,7 @@ const logger = new Logger("QueuesModule");
               maxRetriesPerRequest: null,
               enableOfflineQueue: false,
               lazyConnect: true,
+              retryStrategy: (times: number) => Math.min(times * 1000, 15000),
             };
 
         logger.log(

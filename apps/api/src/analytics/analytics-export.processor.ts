@@ -25,4 +25,9 @@ export class AnalyticsExportProcessor extends WorkerHost {
       `EXPORT_FAILED job=${job?.id} export=${job?.data?.exportId} error=${getErrorMessage(error, "unknown")}`,
     );
   }
+
+  @OnWorkerEvent("error")
+  onError(error: Error): void {
+    this.logger.debug(`Analytics export worker connection error: ${getErrorMessage(error, "unknown")}`);
+  }
 }

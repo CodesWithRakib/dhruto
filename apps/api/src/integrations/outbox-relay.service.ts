@@ -574,13 +574,16 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     });
     const matching = subs.filter((s) => s.events.includes(event) || s.events.includes("*"));
     for (const sub of matching) {
-      const delivery = await this.webhooks.createDeliveryForEvent(manager, {
+      const { delivery, created } = await this.webhooks.createDeliveryForEvent(manager, {
         subscriptionId: sub.id,
         merchantId,
         event,
         eventId: row.eventId,
         data: payload,
       });
+      if (!created || delivery.status !== WebhookDeliveryStatus.PENDING || delivery.attemptCount > 0) {
+        continue;
+      }
       if (this.webhooksQueue) {
         await enqueueOrInline(
           this.webhooksQueue,
@@ -591,7 +594,15 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
             attempts: 3,
             backoff: { type: "exponential", delay: 15000 },
           },
-          () => this.webhooks.attemptDelivery(delivery.id).then(() => undefined),
+          () =>
+            this.webhooks
+              .attemptDelivery(delivery.id)
+              .then(() => undefined)
+              .catch((error: unknown) =>
+                this.logger.warn(
+                  `Inline webhook attempt failed: ${getErrorMessage(error, "unknown")}`,
+                ),
+              ),
         );
       } else {
         await this.webhooks
@@ -789,10 +800,23 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
             attempts: 4,
             backoff: { type: "exponential", delay: 10000 },
           },
-          () => this.notifications.transportNotification(notificationId),
+          () =>
+            this.notifications
+              .transportNotification(notificationId)
+              .catch((error: unknown) =>
+                this.logger.warn(
+                  `Inline notification transport failed: ${getErrorMessage(error, "unknown")}`,
+                ),
+              ),
         );
       } else {
-        await this.notifications.transportNotification(notificationId);
+        await this.notifications
+          .transportNotification(notificationId)
+          .catch((error: unknown) =>
+            this.logger.warn(
+              `Inline notification transport failed: ${getErrorMessage(error, "unknown")}`,
+            ),
+          );
       }
     }
   }

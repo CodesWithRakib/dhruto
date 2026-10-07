@@ -764,7 +764,12 @@
     "active": "Active Subscriptions",
     "logs": "Delivery Audit Logs & Dead Letter Queue",
     "testPing": "Test Ping",
-    "signingSecret": "Signing Secret"
+    "signingSecret": "Signing Secret",
+    "rotateConfirmTitle": "Rotate this signing secret?",
+    "rotateConfirmDescription": "The old secret stops working immediately. Update your endpoint before delivery is retried.",
+    "deleteConfirmTitle": "Delete this webhook subscription?",
+    "deleteConfirmDescription": "Deliveries stop immediately and this cannot be undone.",
+    "registerFailed": "Failed to register webhook subscription."
   },
   "Notifications": {
     "title": "Notifications",

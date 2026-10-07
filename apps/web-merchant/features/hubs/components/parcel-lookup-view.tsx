@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, Button, Input, Badge } from "@dhruto/ui";
+import { Card, CardContent, Button, Input } from "@dhruto/ui";
 import { Search, Package, AlertTriangle, UserCheck } from "lucide-react";
 import { useLazyLookupParcelQuery, useGetHubInventoryQuery } from "../api/hubs.api";
 import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
+import { StatusBadge } from "@/components/data-display/status-badge";
 
 /** Parcel states that may be handed to a rider from this hub. */
 const ASSIGNABLE_STATUSES = [
@@ -110,7 +111,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
                     {t("lookup.currentStatus")}
                   </p>
-                  <Badge className="mt-1 text-[11px]">{parcel.status}</Badge>
+                  <StatusBadge status={parcel.status} className="mt-1" />
                 </div>
                 <div>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -193,9 +194,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                         <td className="px-4 py-2.5 text-xs">{item.recipientName}</td>
                         <td className="px-4 py-2.5 text-xs">{item.district ?? "—"}</td>
                         <td className="px-4 py-2.5 text-center">
-                          <Badge variant="secondary" className="text-[10px]">
-                            {item.status}
-                          </Badge>
+                          <StatusBadge status={item.status} className="text-[10px]" />
                         </td>
                       </tr>
                     ))}
@@ -207,9 +206,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   <li key={item.id} className="space-y-1 p-4">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono text-xs font-bold">{item.trackingCode}</span>
-                      <Badge variant="secondary" className="text-[10px]">
-                        {item.status}
-                      </Badge>
+                      <StatusBadge status={item.status} className="text-[10px]" />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {item.recipientName} · {item.district ?? "—"}

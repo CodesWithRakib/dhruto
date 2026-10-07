@@ -75,6 +75,7 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
         this.redisClient = client;
         this.isRedisConnected = true;
       } else {
+        client.disconnect();
         this.logger.log(
           "Redis not available. Initialized resilient in-memory TTL/LRU cache layer.",
         );

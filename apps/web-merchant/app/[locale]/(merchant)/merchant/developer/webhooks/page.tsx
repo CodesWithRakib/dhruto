@@ -34,6 +34,8 @@ import {
 import { WebhookEvent, WebhookDeliveryStatus, type WebhookDeliveryItem } from "@dhruto/contracts";
 import type { DataTableRow } from "@/lib/data-table";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { useTranslations } from "next-intl";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const AVAILABLE_EVENTS = [
   {
@@ -104,6 +106,15 @@ const AVAILABLE_EVENTS = [
 ];
 
 export default function WebhooksDeveloperPage() {
+  const t = useTranslations("Webhooks");
+  /**
+   * Destructive actions never call the API straight from the button: they open
+   * the shared confirm dialog first, which owns the loading state, blocks
+   * duplicate submits and surfaces the API error if the call fails.
+   */
+  const [pendingAction, setPendingAction] = React.useState<
+    { type: "rotate"; id: string } | { type: "delete"; id: string } | null
+  >(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [revealedSecrets, setRevealedSecrets] = useState<Record<string, boolean>>({});
   const [copiedSecretId, setCopiedSecretId] = useState<string | null>(null);
@@ -211,25 +222,25 @@ export default function WebhooksDeveloperPage() {
       setShowCreateModal(false);
       refetchSubs();
     } catch (err) {
-      setFormError(getApiErrorMessage(err, "Failed to register webhook subscription."));
+      setFormError(getApiErrorMessage(err, t("registerFailed")));
     }
   };
 
-  const handleRotateSecret = async (id: string) => {
-    if (
-      !confirm("Rotate this endpoint's signing secret? The old secret stops working immediately.")
-    ) {
-      return;
-    }
-    try {
-      const result = await rotateSecret(id).unwrap();
+  const handleRotateSecret = (id: string) => {
+    setPendingAction({ type: "rotate", id });
+  };
+
+  const runPendingAction = async () => {
+    if (!pendingAction) return;
+    if (pendingAction.type === "rotate") {
+      const result = await rotateSecret(pendingAction.id).unwrap();
       if (result.data?.secret) {
-        setFreshSecret({ id, secret: result.data.secret });
+        setFreshSecret({ id: pendingAction.id, secret: result.data.secret });
       }
-      refetchSubs();
-    } catch {
-      // Ignore —badge via refetch state
+    } else {
+      await deleteSub(pendingAction.id).unwrap();
     }
+    refetchSubs();
   };
 
   const handleToggleStatus = async (id: string, current: string) => {
@@ -244,15 +255,8 @@ export default function WebhooksDeveloperPage() {
     }
   };
 
-  const handleDeleteSubscription = async (id: string) => {
-    if (confirm("Are you sure you want to delete this webhook subscription?")) {
-      try {
-        await deleteSub(id).unwrap();
-        refetchSubs();
-      } catch {
-        // Ignore
-      }
-    }
+  const handleDeleteSubscription = (id: string) => {
+    setPendingAction({ type: "delete", id });
   };
 
   const handlePing = async (id: string) => {
@@ -982,6 +986,19 @@ export default function WebhooksDeveloperPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => !open && setPendingAction(null)}
+        tone="danger"
+        title={pendingAction?.type === "rotate" ? t("rotateConfirmTitle") : t("deleteConfirmTitle")}
+        description={
+          pendingAction?.type === "rotate"
+            ? t("rotateConfirmDescription")
+            : t("deleteConfirmDescription")
+        }
+        onConfirm={runPendingAction}
+      />
     </div>
   );
 }

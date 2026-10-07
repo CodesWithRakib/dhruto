@@ -98,7 +98,7 @@ export function FinanceDashboard() {
       />
 
       <div
-        className="flex w-fit items-center gap-1.5 rounded-lg border border-border bg-surface-muted p-1"
+        className="flex w-fit max-w-full snap-x items-center gap-1.5 overflow-x-auto rounded-lg border border-border bg-surface-muted p-1"
         role="tablist"
       >
         {tabs.map((tab) => (
@@ -107,7 +107,7 @@ export function FinanceDashboard() {
             role="tab"
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 rounded-md px-3.5 py-2 text-xs font-semibold transition-all ${
+            className={`flex shrink-0 snap-start items-center gap-2 rounded-md px-3.5 py-2 text-xs font-semibold transition-all ${
               activeTab === tab.key
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

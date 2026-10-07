@@ -72,4 +72,9 @@ export class NotificationsProcessor extends WorkerHost {
       this.logger.warn(`DLQ write skipped: ${getErrorMessage(writeError, "unknown")}`);
     }
   }
+
+  @OnWorkerEvent("error")
+  onError(error: Error): void {
+    this.logger.debug(`Notifications worker connection error: ${getErrorMessage(error, "unknown")}`);
+  }
 }

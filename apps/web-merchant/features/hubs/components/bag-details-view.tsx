@@ -25,6 +25,7 @@ import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
 import { EnumBadge } from "@/components/data-display/enum-badge";
 import { BAG_STATUS_TONE } from "@/config/status";
+import { StatusBadge } from "@/components/data-display/status-badge";
 
 interface BagDetailsViewProps {
   bagId: string;
@@ -274,9 +275,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
                     {parcel.trackingCode}
                   </span>
                   <span className="text-muted-foreground">{parcel.recipientName}</span>
-                  <Badge variant="secondary" className="ml-auto text-[10px]">
-                    {parcel.status}
-                  </Badge>
+                  <StatusBadge status={parcel.status} className="ml-auto" />
                 </li>
               ))}
             </ul>
