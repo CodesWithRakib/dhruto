@@ -101,6 +101,8 @@ export interface ParcelPaginationMeta {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+  /** Opaque keyset cursor for the next page (null when exhausted). */
+  nextCursor: string | null;
 }
 
 export interface ParcelListResult {
@@ -491,26 +493,69 @@ export class ParcelsService {
     }
 
     const sortColumn = PARCEL_SORT_COLUMNS[query.sort] ?? "parcel.createdAt";
-    qb.orderBy(sortColumn, query.order);
-    // Stable tiebreaker so pagination never repeats or skips rows.
-    qb.addOrderBy("parcel.id", "DESC");
+    const cursor = decodeParcelCursor(query.cursor);
+    if (cursor) {
+      // Keyset mode: stable createdAt+id ordering in the requested direction.
+      // No OFFSET — concurrent inserts can neither duplicate nor skip rows.
+      qb.orderBy("parcel.createdAt", query.order);
+      qb.addOrderBy("parcel.id", query.order === "ASC" ? "ASC" : "DESC");
+      const op = query.order === "ASC" ? ">" : "<";
+      qb.andWhere(
+        new Brackets((inner) => {
+          inner
+            .where(`parcel.createdAt ${op} :cursorAt`, { cursorAt: cursor.createdAt })
+            .orWhere(
+              new Brackets((same) => {
+                same
+                  .where("parcel.createdAt = :cursorAtEq", { cursorAtEq: cursor.createdAt })
+                  .andWhere(`parcel.id ${op} :cursorId`, { cursorId: cursor.id });
+              }),
+            );
+        }),
+      );
+    } else {
+      qb.orderBy(sortColumn, query.order);
+      // Stable tiebreaker so pagination never repeats or skips rows.
+      qb.addOrderBy("parcel.id", "DESC");
+    }
 
     const page = query.page;
     const limit = query.limit;
-    qb.skip((page - 1) * limit).take(limit);
+    if (cursor) {
+      // Fetch one extra row to detect the next page without a second query.
+      qb.take(limit + 1);
+    } else {
+      qb.skip((page - 1) * limit).take(limit);
+    }
 
     const [rows, total] = await qb.getManyAndCount();
     const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
 
+    let items = rows;
+    let nextCursor: string | null = null;
+    if (cursor) {
+      if (rows.length > limit) {
+        const last = rows[limit - 1];
+        if (last) nextCursor = encodeParcelCursor(last.createdAt, last.id);
+        items = rows.slice(0, limit);
+      }
+    } else if (rows.length === limit && page < totalPages && query.sort === "createdAt") {
+      // Offset mode still emits a cursor (createdAt sorts only) so clients
+      // can switch to keyset paging for subsequent pages without refetching.
+      const last = rows[rows.length - 1];
+      if (last) nextCursor = encodeParcelCursor(last.createdAt, last.id);
+    }
+
     return {
-      items: rows.map((row) => this.toSummary(row)),
+      items: items.map((row) => this.toSummary(row)),
       pagination: {
         page,
         limit,
         total,
         totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
+        hasNextPage: cursor ? nextCursor !== null : page < totalPages,
+        hasPreviousPage: cursor ? true : page > 1,
+        nextCursor,
       },
     };
   }
@@ -984,3 +1029,33 @@ function isTrackingCodeCollision(error: unknown): boolean {
   }`.toLowerCase();
   return haystack.includes("tracking_code");
 }
+
+/* ------------------------------------------------------------------ */
+/* Cursor helpers                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Opaque keyset cursor: base64url(<ISO createdAt>|<uuid id>).
+ * Invalid cursors return null so callers fall back to offset pagination
+ * instead of failing the request.
+ */
+export function encodeParcelCursor(createdAt: Date, id: string): string {
+  const raw = `${new Date(createdAt).toISOString()}|${id}`;
+  return Buffer.from(raw, "utf8").toString("base64url");
+}
+
+export function decodeParcelCursor(cursor: string | undefined): { createdAt: Date; id: string } | null {
+  if (!cursor) return null;
+  try {
+    const raw = Buffer.from(cursor, "base64url").toString("utf8");
+    const separator = raw.lastIndexOf("|");
+    if (separator <= 0) return null;
+    const createdAt = new Date(raw.slice(0, separator));
+    const id = raw.slice(separator + 1);
+    if (Number.isNaN(createdAt.getTime()) || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+    return { createdAt, id };
+  } catch {
+    return null;
+  }
+}
+

@@ -5,7 +5,7 @@ import { AnalyticsExportService } from "./analytics-export.service.js";
 import { getErrorMessage } from "../common/utils/error.util.js";
 
 /** Background report generation: idempotent per export id (retries safe). */
-@Processor("analytics-exports")
+@Processor("analytics-exports", { concurrency: 2 })
 export class AnalyticsExportProcessor extends WorkerHost {
   private readonly logger = new Logger(AnalyticsExportProcessor.name);
 

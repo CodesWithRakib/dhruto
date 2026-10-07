@@ -3,6 +3,8 @@ import { Logger } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { cleanupOpenApiDoc } from "nestjs-zod";
 import helmet from "helmet";
+import compression from "compression";
+import { json, urlencoded } from "express";
 
 import { AppModule } from "./app.module.js";
 
@@ -20,6 +22,15 @@ async function bootstrap() {
       contentSecurityPolicy: false, // Allow Swagger UI inline scripts/styles
     }),
   );
+
+  // Response compression (skips tiny responses internally; measured CPU cost
+  // is negligible vs dashboard/report payload savings).
+  app.use(compression());
+
+  // Bounded request bodies: 1mb JSON + urlencoded. Parcel/label payloads are
+  // kilobytes; unbounded bodies are a memory-exhaustion vector.
+  app.use(json({ limit: "1mb" }));
+  app.use(urlencoded({ extended: true, limit: "1mb" }));
 
   // Global Prefix (excluding root health probes for container orchestrators)
   app.setGlobalPrefix(apiPrefix.replace(/^\//, ""), {

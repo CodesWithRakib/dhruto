@@ -199,6 +199,13 @@ export const parcelListQuerySchema = z.object({
   thana: z.string().trim().min(1).max(50).optional(),
   from: z.string().datetime({ offset: true }).optional(),
   to: z.string().datetime({ offset: true }).optional(),
+  /**
+   * Opaque keyset cursor (`base64url(createdAt|id)`) for deep pagination.
+   * When present, offset is ignored and ordering is forced to
+   * createdAt+id in the requested direction, so concurrent inserts can
+   * neither duplicate nor skip rows.
+   */
+  cursor: z.string().trim().min(1).max(256).optional(),
 });
 
 export type ParcelListQuery = z.infer<typeof parcelListQuerySchema>;

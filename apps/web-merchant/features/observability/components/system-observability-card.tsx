@@ -17,7 +17,7 @@ import { useGetSystemMetricsQuery } from "../api/observability.api";
 
 export function SystemObservabilityCard() {
   const { data: metrics, isLoading, isError, refetch } = useGetSystemMetricsQuery(undefined, {
-    pollingInterval: 15000,
+    pollingInterval: 15000, skipPollingIfUnfocused: true,
   });
 
   if (isLoading) {

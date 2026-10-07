@@ -24,7 +24,7 @@ interface NotificationSendJob {
  * permanent failures complete the job as FAILED without retry. Exhausted
  * jobs land in the dead-letter table for admin replay.
  */
-@Processor("notifications")
+@Processor("notifications", { concurrency: 5 })
 export class NotificationsProcessor extends WorkerHost {
   private readonly logger = new Logger(NotificationsProcessor.name);
 

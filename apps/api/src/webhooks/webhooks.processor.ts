@@ -16,7 +16,7 @@ interface WebhookDeliveryJob {
  * service throws on transport failure for BullMQ retry with exponential
  * backoff; exhausted jobs are dead-lettered with a DLQ row for admin replay.
  */
-@Processor("webhooks")
+@Processor("webhooks", { concurrency: 5 })
 export class WebhooksProcessor extends WorkerHost {
   private readonly logger = new Logger(WebhooksProcessor.name);
 

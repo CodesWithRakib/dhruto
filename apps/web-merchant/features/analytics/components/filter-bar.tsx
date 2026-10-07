@@ -46,23 +46,23 @@ export function FilterBar({ value, onChange }: FilterBarProps) {
           {t(`preset_${p}`)}
         </Button>
       ))}
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
         <input
           type="date"
           value={from}
           max={to || undefined}
           onChange={(e) => setFrom(e.target.value)}
           aria-label={t("fromLabel")}
-          className="h-8 rounded-lg border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-8 min-w-0 max-w-[150px] flex-1 rounded-lg border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
-        <span className="text-xs text-muted-foreground">→</span>
+        <span className="shrink-0 text-xs text-muted-foreground">→</span>
         <input
           type="date"
           value={to}
           min={from || undefined}
           onChange={(e) => setTo(e.target.value)}
           aria-label={t("toLabel")}
-          className="h-8 rounded-lg border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-8 min-w-0 max-w-[150px] flex-1 rounded-lg border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
         <Button
           variant={value.preset === "custom" ? "default" : "outline"}

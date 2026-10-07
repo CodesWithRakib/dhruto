@@ -166,10 +166,15 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   async delPattern(pattern: string): Promise<void> {
     try {
       if (this.isRedisConnected && this.redisClient) {
-        const keys = await this.redisClient.keys(pattern);
-        if (keys.length > 0) {
-          await this.redisClient.del(...keys);
-        }
+        // SCAN (not KEYS): non-blocking on large keyspaces. Batch 100.
+        let cursor = "0";
+        do {
+          const [next, keys] = (await this.redisClient.scan(cursor, "MATCH", pattern, "COUNT", 100)) as [string, string[]];
+          cursor = next;
+          if (keys.length > 0) {
+            await this.redisClient.del(...keys);
+          }
+        } while (cursor !== "0");
       }
 
       // In-memory pattern delete (simple prefix / wildcard match)
@@ -185,19 +190,35 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Cache-Aside wrapper: returns cached value or executes fetcher and caches result
+   * Cache-Aside wrapper with single-flight: concurrent misses for the same
+   * key share one fetcher promise instead of stampeding the database.
+   * Failures are not cached; the flight entry is always released.
    */
+  private readonly inflight = new Map<string, Promise<unknown>>();
+
   async wrap<T>(key: string, fetcher: () => Promise<T>, ttlSeconds = 300): Promise<T> {
     const cached = await this.get<T>(key);
     if (cached !== null && cached !== undefined) {
       return cached;
     }
 
-    const fresh = await fetcher();
-    if (fresh !== null && fresh !== undefined) {
-      await this.set(key, fresh, ttlSeconds);
+    const ongoing = this.inflight.get(key);
+    if (ongoing) {
+      return ongoing as Promise<T>;
     }
-    return fresh;
+    const flight = (async (): Promise<T> => {
+      try {
+        const fresh = await fetcher();
+        if (fresh !== null && fresh !== undefined) {
+          await this.set(key, fresh, ttlSeconds);
+        }
+        return fresh;
+      } finally {
+        this.inflight.delete(key);
+      }
+    })();
+    this.inflight.set(key, flight);
+    return flight;
   }
 
   getHealth(): CacheHealth {

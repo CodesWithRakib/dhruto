@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@dhruto/ui", "@dhruto/contracts"],
   reactStrictMode: true,
   poweredByHeader: false,
+  // Standalone output for minimal Docker images (Phase 8 deployment readiness).
+  output: "standalone",
   async headers() {
     return [
       {

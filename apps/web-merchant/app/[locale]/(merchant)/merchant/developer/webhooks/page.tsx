@@ -130,7 +130,7 @@ export default function WebhooksDeveloperPage() {
   const { data: subsData, isLoading: isLoadingSubs, refetch: refetchSubs } =
     useListWebhookSubscriptionsQuery();
   const { data: deliveriesData, isLoading: isLoadingDeliveries, refetch: refetchDeliveries } =
-    useListWebhookDeliveriesQuery(undefined, { pollingInterval: 10000 });
+    useListWebhookDeliveriesQuery(undefined, { pollingInterval: 10000, skipPollingIfUnfocused: true });
 
   const [createSub, { isLoading: isCreating }] = useCreateWebhookSubscriptionMutation();
   const [updateSub] = useUpdateWebhookSubscriptionMutation();

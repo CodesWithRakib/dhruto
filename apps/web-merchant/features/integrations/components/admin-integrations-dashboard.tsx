@@ -31,9 +31,9 @@ export function AdminIntegrationsDashboard() {
   const [failurePage, setFailurePage] = React.useState(1);
   const [feedback, setFeedback] = React.useState<string | null>(null);
 
-  const overview = useGetIntegrationOverviewQuery(undefined, { pollingInterval: 15000 });
+  const overview = useGetIntegrationOverviewQuery(undefined, { pollingInterval: 15000, skipPollingIfUnfocused: true });
   const failures = useListIntegrationFailuresQuery({ page: failurePage, limit: 20 });
-  const outbox = useGetOutboxOverviewQuery(undefined, { pollingInterval: 15000 });
+  const outbox = useGetOutboxOverviewQuery(undefined, { pollingInterval: 15000, skipPollingIfUnfocused: true });
 
   const [replay, { isLoading: isReplaying }] = useReplayIntegrationFailureMutation();
   const [resolve, { isLoading: isResolving }] = useResolveIntegrationFailureMutation();
