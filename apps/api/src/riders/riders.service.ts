@@ -70,6 +70,7 @@ import {
   IdempotencyService,
 } from "../common/idempotency/idempotency.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
+import { RtoPredictionService } from "../intelligence/services/rto-engine.service.js";
 import { LedgerService } from "../finance/ledger/ledger.service.js";
 import { OutboxService } from "../integrations/outbox.service.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
@@ -135,6 +136,8 @@ export class RidersService {
     private readonly outbox: OutboxService,
     @Optional()
     private readonly notificationsService?: NotificationsService,
+    @Optional()
+    private readonly rtoPredictions?: RtoPredictionService,
   ) {}
 
   /* ================================================================== */
@@ -979,6 +982,14 @@ export class RidersService {
 
         // Side effects after commit; failures only warn.
         await this.dispatchDeliveryComplete(parcel, collectedAmount);
+        // Intelligence outcome labeling (async, advisory — never blocks delivery).
+        if (this.rtoPredictions) {
+          await this.rtoPredictions
+            .recordOutcome(parcel.id, parcel.status)
+            .catch((err) =>
+              this.logger.warn(`RTO outcome labeling failed: ${err.message}`),
+            );
+        }
 
         return result;
       });

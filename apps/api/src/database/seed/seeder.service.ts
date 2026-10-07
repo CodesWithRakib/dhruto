@@ -11,6 +11,7 @@ import {
   Parcel,
   ParcelStatusHistory,
   CashLedger,
+  DeliveryAttempt,
   Wallet,
   WalletTransaction,
   PayoutRequest,
@@ -35,12 +36,18 @@ import {
 import { SEED_NOTIFICATIONS } from './seed-notifications.data.js';
 import { SEED_WEBHOOK_SUBSCRIPTIONS } from './seed-webhooks.data.js';
 import {
+  SEED_INTELLIGENCE_PARCELS,
+  SEED_INTELLIGENCE_ATTEMPTS,
+} from './seed-intelligence.data.js';
+import {
   ParcelStatus,
   FinancialTransactionType,
   FinancialTransactionStatus,
   FinancialAccount,
   EntryDirection,
 } from '@dhruto/contracts';
+import { GeoDataService } from '../../intelligence/services/geo-data.service.js';
+import { ModelRegistryService } from '../../intelligence/services/model-registry.service.js';
 
 @Injectable()
 export class SeederService {
@@ -77,6 +84,10 @@ export class SeederService {
     private readonly hubAssignmentRepo: Repository<HubUserAssignment>,
     @InjectRepository(WebhookSubscription)
     private readonly webhookSubscriptionRepo: Repository<WebhookSubscription>,
+    @InjectRepository(DeliveryAttempt)
+    private readonly attemptRepo: Repository<DeliveryAttempt>,
+    private readonly geoDataService: GeoDataService,
+    private readonly modelRegistry: ModelRegistryService,
   ) {}
 
   async seed() {
@@ -245,7 +256,7 @@ export class SeederService {
     const parcelMap = new Map<string, Parcel>();
     const now = Date.now();
 
-    for (const pData of SEED_PARCELS) {
+    for (const pData of [...SEED_PARCELS, ...SEED_INTELLIGENCE_PARCELS]) {
       const merchant = merchantMap.get(pData.merchantEmail);
       if (!merchant) continue;
 
@@ -508,6 +519,57 @@ export class SeederService {
       }
     }
     this.logger.log(`✓ Seeded ${webhookCount} webhook subscriptions`);
+
+    // 12. Seed intelligence delivery attempts (recipient histories the risk
+    // engine scores from — relational rows, never bare score fixtures).
+    let attemptCount = 0;
+    for (const aData of SEED_INTELLIGENCE_ATTEMPTS) {
+      const parcel = parcelMap.get(aData.trackingCode);
+      const rider = aData.riderEmail ? riderMap.get(aData.riderEmail) : null;
+      if (!parcel || !rider) continue;
+      const existing = await this.attemptRepo.findOne({
+        where: { parcelId: parcel.id, attemptNumber: aData.attemptNumber },
+      });
+      if (!existing) {
+        const attempt = this.attemptRepo.create({
+          parcelId: parcel.id,
+          riderId: rider.id,
+          attemptNumber: aData.attemptNumber,
+          outcome: aData.outcome,
+          failureReason: aData.failureReason ?? null,
+          notes: aData.notes ?? null,
+          rescheduledFor: null,
+          metadata: { seeded: true },
+        });
+        attempt.createdAt = new Date(now - aData.hoursAgo * 3600 * 1000);
+        await this.attemptRepo.save(attempt);
+        attemptCount++;
+      }
+    }
+    stats.deliveryAttempts = attemptCount;
+    this.logger.log(`✓ Seeded ${attemptCount} intelligence delivery attempts`);
+
+    // 13. Geography dataset import + scoring model defaults (idempotent).
+    try {
+      const geo = await this.geoDataService.ensureImported();
+      stats.geoDistricts = geo.districts;
+      stats.geoUpazilas = geo.upazilas;
+      this.logger.log(
+        `✓ Geography dataset ${geo.version}: ${geo.districts} districts, ${geo.upazilas} upazilas`,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Geography import skipped: ${error instanceof Error ? error.message : 'unknown'}`,
+      );
+    }
+    try {
+      await this.modelRegistry.ensureDefaults();
+      this.logger.log('✓ Scoring model defaults ensured');
+    } catch (error) {
+      this.logger.warn(
+        `Model defaults skipped: ${error instanceof Error ? error.message : 'unknown'}`,
+      );
+    }
 
     return {
       success: true,

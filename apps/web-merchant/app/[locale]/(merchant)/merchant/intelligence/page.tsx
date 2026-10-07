@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { SmartAddressParser } from "@/features/intelligence/components/smart-address-parser";
 import { RtoRiskMeter } from "@/features/intelligence/components/rto-risk-meter";
+import { AddressConfirmation } from "@/features/intelligence/components/address-confirmation";
 import { Link } from "@/lib/navigation";
 import { Button } from "@dhruto/ui";
 import { MERCHANT_ROUTES } from "@/config/routes";
@@ -60,20 +61,20 @@ export default function IntelligencePage() {
 
         <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Thana Lexicon</span>
+            <span>Upazila Lexicon</span>
             <Cpu className="h-4 w-4 text-info" />
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">150+</div>
+          <div className="text-2xl font-black text-foreground font-mono">240+</div>
           <p className="text-xs text-muted-foreground">With postal code matching</p>
         </div>
 
         <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>RTO Loss Reduction</span>
+            <span>Scoring Model</span>
             <TrendingDown className="h-4 w-4 text-primary" />
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">~38%</div>
-          <p className="text-xs text-muted-foreground">Through pre-dispatch phone audit</p>
+          <div className="text-2xl font-black text-foreground font-mono">v1</div>
+          <p className="text-xs text-muted-foreground">Explainable rule baseline, ML-ready</p>
         </div>
 
         <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
@@ -122,6 +123,7 @@ export default function IntelligencePage() {
               </h2>
             </div>
             <SmartAddressParser />
+            <AddressConfirmation />
           </div>
         )}
 

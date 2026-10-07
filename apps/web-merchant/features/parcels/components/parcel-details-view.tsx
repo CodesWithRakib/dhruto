@@ -32,6 +32,7 @@ import { StatusBadge } from "@/components/data-display/status-badge";
 import { PARCEL_STATUS_CONFIG } from "@/config/status";
 import { ErrorState, LoadingState } from "@/components/feedback/states";
 import { useGetParcelByIdQuery } from "../api/parcels.api";
+import { ParcelIntelligencePanel } from "@/features/intelligence/components/parcel-intelligence-panel";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -339,6 +340,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
                 ) : null}
               </div>
             ) : null}
+            <ParcelIntelligencePanel parcelId={parcel.id} />
           </section>
         </CardContent>
       </Card>

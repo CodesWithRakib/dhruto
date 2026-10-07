@@ -116,7 +116,7 @@ export function SmartAddressParser({
     switch (zone) {
       case "INSIDE_DHAKA":
         return { label: "Inside Dhaka (Same Day / Next Day)", color: "text-success bg-success-soft border-success" };
-      case "DHAKA_SUBURB":
+      case "DHAKA_SUBURBS":
         return { label: "Dhaka Suburb (Gazipur / Narayanganj)", color: "text-warning bg-warning-soft border-warning" };
       case "OUTSIDE_DHAKA":
       default:
@@ -140,7 +140,7 @@ export function SmartAddressParser({
             </div>
           </div>
           <Badge variant="outline" className="bg-background text-xs font-mono">
-            64 Districts • 150+ Thanas
+            64 Districts • 240+ Upazilas
           </Badge>
         </div>
       </CardHeader>
