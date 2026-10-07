@@ -22,3 +22,4 @@ export * from "./components/switch.js";
 export * from "./components/sheet.js";
 export * from "./components/alert.js";
 export * from "./components/textarea.js";
+export * from "./components/charts.js";

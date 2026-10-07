@@ -124,6 +124,16 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
       ],
     },
     {
+      labelKey: "groupAnalytics",
+      items: [
+        { href: `${ADMIN_ROUTES.analytics}/parcels`, labelKey: "parcels", icon: PackageSearch },
+        { href: `${ADMIN_ROUTES.analytics}/rto`, labelKey: "rto", icon: History },
+        { href: `${ADMIN_ROUTES.analytics}/cod`, labelKey: "financials", icon: Wallet },
+        { href: `${ADMIN_ROUTES.analytics}/alerts`, labelKey: "alerts", icon: ClipboardList },
+        { href: `${ADMIN_ROUTES.analytics}/reports`, labelKey: "reports", icon: FileText },
+      ],
+    },
+    {
       labelKey: "groupNetwork",
       items: [
         {

@@ -46,3 +46,5 @@ export * from './RtoPrediction.entity.js';
 export * from './IntelligenceRecommendation.entity.js';
 export * from './IntelligenceFeedback.entity.js';
 export * from './ScoringModel.entity.js';
+export * from './AnalyticsAlert.entity.js';
+export * from './ReportExport.entity.js';

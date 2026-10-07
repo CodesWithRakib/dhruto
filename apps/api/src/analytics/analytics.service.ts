@@ -1,16 +1,9 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CacheService } from '../common/cache/cache.service.js';
 import {
-  Parcel,
-  Rider,
-  Hub,
-  CashLedger,
-  CashHandInStatus,
   PayoutRequest,
-  Bag,
-  Manifest,
 } from '../database/entities';
 import { ParcelStatus } from '@dhruto/contracts';
 import {
@@ -24,51 +17,39 @@ import {
   CodFlowAnalytics,
 } from '@dhruto/contracts';
 import { AnalyticsQueryDto } from './dto/analytics.dto';
+import { AnalyticsMetricsService, DELIVERED_STATUSES } from './analytics-metrics.service.js';
+import { AnalyticsDomainService } from './analytics-domain.service.js';
+import { AnalyticsRangeService } from './analytics-range.service.js';
+import { RtoPrediction } from '../database/entities/RtoPrediction.entity.js';
 
+/**
+ * Legacy-shape analytics facade over the centralized metric layer.
+ *
+ * Same response contracts as before (merchant/operations dashboards keep
+ * working), but every number now comes from real aggregate queries — the
+ * hardcoded velocities, invented multipliers and synthetic trend filler are
+ * gone. New Phase 7 endpoints live alongside these in the v2 controller
+ * surface.
+ */
 @Injectable()
 export class AnalyticsService {
   constructor(
-    @InjectRepository(Parcel)
-    private readonly parcelRepo: Repository<Parcel>,
-    @InjectRepository(Rider)
-    private readonly riderRepo: Repository<Rider>,
-    @InjectRepository(Hub)
-    private readonly hubRepo: Repository<Hub>,
-    @InjectRepository(CashLedger)
-    private readonly cashLedgerRepo: Repository<CashLedger>,
     @InjectRepository(PayoutRequest)
     private readonly payoutRepo: Repository<PayoutRequest>,
-    @InjectRepository(Bag)
-    private readonly bagRepo: Repository<Bag>,
-    @InjectRepository(Manifest)
-    private readonly manifestRepo: Repository<Manifest>,
+    @InjectRepository(RtoPrediction)
+    private readonly predictionRepo: Repository<RtoPrediction>,
+    private readonly metrics: AnalyticsMetricsService,
+    private readonly domain: AnalyticsDomainService,
+    private readonly ranges: AnalyticsRangeService,
     @Optional()
     private readonly cacheService?: CacheService,
   ) {}
-
-  private resolveDateRange(query: AnalyticsQueryDto): { start: Date; end: Date; periodStr: string } {
-    const end = query.endDate ? new Date(query.endDate) : new Date();
-    let start = query.startDate ? new Date(query.startDate) : new Date();
-
-    if (!query.startDate) {
-      const days = query.period === '7d' ? 7 : query.period === '90d' ? 90 : 30;
-      start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
-    }
-
-    return {
-      start,
-      end,
-      periodStr: query.period || '30d',
-    };
-  }
 
   async getMerchantSummary(
     merchantId: string,
     query: AnalyticsQueryDto,
   ): Promise<MerchantAnalyticsSummary> {
-    const period =
-      query.period || (query as { timeframe?: string }).timeframe || '30d';
-    const cacheKey = `analytics:merchant:${merchantId}:${period}:${query.startDate || ''}:${query.endDate || ''}`;
+    const cacheKey = `analytics:merchant:v2:${merchantId}:${query.period || '30d'}:${query.startDate || ''}:${query.endDate || ''}:${query.hubId || ''}`;
     if (this.cacheService) {
       return this.cacheService.wrap(cacheKey, () => this.computeMerchantSummary(merchantId, query), 60);
     }
@@ -79,320 +60,151 @@ export class AnalyticsService {
     merchantId: string,
     query: AnalyticsQueryDto,
   ): Promise<MerchantAnalyticsSummary> {
-    const { start, end, periodStr } = this.resolveDateRange(query);
-
-    // Fetch parcels for merchant within timeframe
-    const parcels = await this.parcelRepo.find({
-      where: {
-        merchant: { id: merchantId },
-        createdAt: Between(start, end),
-      },
-      order: { createdAt: 'DESC' },
+    const range = this.ranges.resolve({
+      preset: (query.period as never) ?? '30d',
+      from: query.startDate,
+      to: query.endDate,
     });
+    const scope = { merchantId };
+    const counts = await this.metrics.statusCounts(scope, range);
+    const eligible = this.metrics.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
+    const latencies = await this.metrics.deliveryLatencies(scope, range);
+    const avgDeliveryHours = latencies.length > 0
+      ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10
+      : 0;
 
-    // Fallback to all-time if specific window is empty (e.g. fresh seeding)
-    const effectiveParcels =
-      parcels.length > 0
-        ? parcels
-        : await this.parcelRepo.find({
-            where: { merchant: { id: merchantId } },
-            order: { createdAt: 'DESC' },
-            take: 200,
-          });
+    const cod = await this.domain.cod(scope, range);
+    const feeRow = await this.metrics
+      .scopedParcels(scope)
+      .select('SUM(p.delivery_fee)', 'sum')
+      .andWhere('p."createdAt" BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .getRawOne<{ sum: string | null }>();
+    const payoutsRow = await this.payoutRepo
+      .createQueryBuilder('pw')
+      .select('SUM(pw.amount)', 'sum')
+      .where('pw.merchant_id = :merchantId', { merchantId })
+      .andWhere('pw.status = :done', { done: 'COMPLETED' })
+      .andWhere('pw."createdAt" BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .getRawOne<{ sum: string | null }>();
 
-    let deliveredOrders = 0;
-    let inTransitOrders = 0;
-    let pendingOrders = 0;
-    let returnedOrders = 0;
-    let cancelledOrders = 0;
-    let totalBookedCod = 0;
-    let collectedCod = 0;
-    let deliveryCharges = 0;
+    const trends = await this.metrics.trends(scope, range);
+    const dailyTrends: DailyTrendPoint[] = trends.map((t) => ({
+      date: t.bucket,
+      booked: t.booked,
+      delivered: t.delivered,
+      returned: t.returned,
+      codCollected: t.codCollected,
+    }));
 
-    const statusBreakdown: Record<string, number> = {};
-    const districtMap = new Map<string, { count: number; delivered: number }>();
-    const trendMap = new Map<string, { booked: number; delivered: number; returned: number; cod: number }>();
+    const districtRows = await this.metrics
+      .scopedParcels(scope)
+      .select('p.district', 'district')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect(`SUM(CASE WHEN p.status IN (:...delivered) THEN 1 ELSE 0 END)`, 'delivered')
+      .andWhere('p."createdAt" BETWEEN :from AND :to', { from: range.from, to: range.to })
+      .setParameters({ delivered: DELIVERED_STATUSES })
+      .groupBy('p.district')
+      .orderBy('count', 'DESC')
+      .limit(5)
+      .getRawMany<{ district: string | null; count: string; delivered: string }>();
+    const total = counts.total;
+    const topDistricts: DistrictMetric[] = districtRows.map((r) => ({
+      district: r.district ?? 'Unknown',
+      orderCount: Number(r.count),
+      percentage: total > 0 ? Math.round((Number(r.count) / total) * 1000) / 10 : 0,
+      successRate: Number(r.count) > 0 ? Math.round((Number(r.delivered) / Number(r.count)) * 1000) / 10 : 0,
+    }));
 
-    for (const p of effectiveParcels) {
-      statusBreakdown[p.status] = (statusBreakdown[p.status] || 0) + 1;
-      totalBookedCod += Number(p.codAmount || 0);
-      deliveryCharges += Number(p.deliveryFee || 0);
-
-      // Destination district is a first-class parcel column (Phase 1).
-      const dist = p.district ?? 'Dhaka';
-      const currentDist = districtMap.get(dist) || { count: 0, delivered: 0 };
-      currentDist.count += 1;
-
-      // Categorize statuses
-      if (p.status === ParcelStatus.DELIVERED) {
-        deliveredOrders += 1;
-        collectedCod += Number(p.codAmount || 0);
-        currentDist.delivered += 1;
-      } else if (
-        [
-          ParcelStatus.IN_TRANSIT,
-          ParcelStatus.OUT_FOR_DELIVERY,
-          ParcelStatus.ORIGIN_HUB_RECEIVED,
-          ParcelStatus.DESTINATION_HUB_RECEIVED,
-          ParcelStatus.BAGGED,
-          ParcelStatus.ASSIGNED_TO_RIDER,
-          ParcelStatus.DELIVERY_ATTEMPTED,
-        ].includes(p.status)
-      ) {
-        inTransitOrders += 1;
-      } else if (
-        [
-          ParcelStatus.CREATED,
-          ParcelStatus.PICKUP_REQUESTED,
-          ParcelStatus.PICKUP_ASSIGNED,
-          ParcelStatus.PICKED_UP,
-        ].includes(p.status)
-      ) {
-        pendingOrders += 1;
-      } else if (
-        [
-          ParcelStatus.CANCELLED,
-          ParcelStatus.RTO_INITIATED,
-          ParcelStatus.RETURN_IN_TRANSIT,
-          ParcelStatus.RETURNED_TO_MERCHANT,
-        ].includes(p.status)
-      ) {
-        returnedOrders += 1;
-        if (p.status === ParcelStatus.CANCELLED) {
-          cancelledOrders += 1;
-        }
-      }
-
-      districtMap.set(dist, currentDist);
-
-      // Aggregate daily trends
-      const dateKey = p.createdAt
-        ? p.createdAt.toISOString().slice(0, 10)
-        : new Date().toISOString().slice(0, 10);
-      const trend = trendMap.get(dateKey) || { booked: 0, delivered: 0, returned: 0, cod: 0 };
-      trend.booked += 1;
-      if (p.status === ParcelStatus.DELIVERED) {
-        trend.delivered += 1;
-        trend.cod += Number(p.codAmount || 0);
-      }
-      if (
-        [
-          ParcelStatus.CANCELLED,
-          ParcelStatus.RTO_INITIATED,
-          ParcelStatus.RETURN_IN_TRANSIT,
-          ParcelStatus.RETURNED_TO_MERCHANT,
-        ].includes(p.status)
-      ) {
-        trend.returned += 1;
-      }
-      trendMap.set(dateKey, trend);
-    }
-
-    const totalOrders = effectiveParcels.length;
-    const closedOrders = deliveredOrders + returnedOrders;
-    const deliverySuccessRate =
-      closedOrders > 0
-        ? Math.round((deliveredOrders / closedOrders) * 100)
-        : totalOrders > 0
-        ? Math.round((deliveredOrders / totalOrders) * 100)
-        : 100;
-    const rtoRate = closedOrders > 0 ? Math.round((returnedOrders / closedOrders) * 100) : 0;
-
-    const pendingCod = totalBookedCod - collectedCod;
-
-    // Settled payouts
-    const payouts = await this.payoutRepo.find({
-      where: { merchant: { id: merchantId } },
-    });
-    const netSettledPayouts = payouts
-      .filter((po) => po.status === 'COMPLETED')
-      .reduce((sum, po) => sum + Number(po.amount || 0), 0);
-
-    // Top Districts
-    const topDistricts: DistrictMetric[] = Array.from(districtMap.entries())
-      .map(([district, data]) => ({
-        district,
-        orderCount: data.count,
-        percentage: totalOrders > 0 ? Math.round((data.count / totalOrders) * 100) : 0,
-        successRate: data.count > 0 ? Math.round((data.delivered / data.count) * 100) : 0,
-      }))
-      .sort((a, b) => b.orderCount - a.orderCount)
-      .slice(0, 5);
-
-    // Daily Trends
-    let dailyTrends: DailyTrendPoint[] = Array.from(trendMap.entries())
-      .map(([date, d]) => ({
-        date,
-        booked: d.booked,
-        delivered: d.delivered,
-        returned: d.returned,
-        codCollected: d.cod,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    if (dailyTrends.length < 5) {
-      dailyTrends = this.generateSampleDailyTrends(end, dailyTrends);
-    }
+    const pendingOrders = (counts.byStatus[ParcelStatus.CREATED] ?? 0)
+      + (counts.byStatus[ParcelStatus.PICKUP_REQUESTED] ?? 0)
+      + (counts.byStatus[ParcelStatus.PICKUP_ASSIGNED] ?? 0);
 
     return {
-      period: periodStr,
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
+      period: query.period || '30d',
+      startDate: range.from,
+      endDate: range.to,
       kpis: {
-        totalOrders,
-        deliveredOrders,
-        inTransitOrders,
+        totalOrders: counts.total,
+        deliveredOrders: counts.delivered,
+        inTransitOrders: counts.inTransit,
         pendingOrders,
-        returnedOrders,
-        cancelledOrders,
-        deliverySuccessRate,
-        rtoRate,
-        avgDeliveryHours: 21.4,
+        returnedOrders: counts.rto,
+        cancelledOrders: counts.cancelled,
+        deliverySuccessRate: this.metrics.rate(counts.delivered, eligible) ?? 0,
+        rtoRate: this.metrics.rate(counts.rto, eligible) ?? 0,
+        avgDeliveryHours,
       },
       financials: {
-        totalBookedCod,
-        collectedCod,
-        pendingCod: Math.max(0, pendingCod),
-        deliveryCharges,
-        netSettledPayouts,
+        totalBookedCod: cod.booked,
+        collectedCod: cod.collected,
+        pendingCod: cod.pending,
+        deliveryCharges: Number(feeRow?.sum ?? 0),
+        netSettledPayouts: Number(payoutsRow?.sum ?? 0),
       },
-      statusBreakdown,
+      statusBreakdown: counts.byStatus,
       dailyTrends,
       topDistricts,
     };
   }
 
   async getOperationalSummary(query: AnalyticsQueryDto): Promise<OperationalAnalyticsSummary> {
-    const { periodStr } = this.resolveDateRange(query);
+    const cacheKey = `analytics:ops:v2:${query.period || '30d'}:${query.startDate || ''}:${query.endDate || ''}:${query.hubId || ''}`;
+    if (this.cacheService) {
+      return this.cacheService.wrap(cacheKey, () => this.computeOperationalSummary(query), 60);
+    }
+    return this.computeOperationalSummary(query);
+  }
 
-    const [totalShipments, activeHubsCount, activeRidersCount] = await Promise.all([
-      this.parcelRepo.count(),
-      this.hubRepo.count(),
-      this.riderRepo.count(),
-    ]);
-
-    const deliveredCount = await this.parcelRepo.count({
-      where: { status: ParcelStatus.DELIVERED },
+  private async computeOperationalSummary(query: AnalyticsQueryDto): Promise<OperationalAnalyticsSummary> {
+    const range = this.ranges.resolve({
+      preset: (query.period as never) ?? '30d',
+      from: query.startDate,
+      to: query.endDate,
     });
-    const returnedCount = await this.parcelRepo.count({
-      where: { status: ParcelStatus.CANCELLED },
-    });
+    const scope = query.hubId ? { hubId: query.hubId } : {};
+    const counts = await this.metrics.statusCounts(scope, range);
+    const eligible = this.metrics.eligible(counts.delivered, counts.rto, counts.failed, counts.cancelled);
 
-    const networkSuccessRate =
-      totalShipments > 0 ? Math.round((deliveredCount / totalShipments) * 100) : 94;
-    const networkRtoRate =
-      totalShipments > 0 ? Math.round((returnedCount / totalShipments) * 100) : 5;
+    const hubs = await this.metrics.hubStats(range, query.hubId);
+    const hubThroughputList: HubThroughputMetric[] = hubs.map((h) => ({
+      hubId: h.hubId,
+      hubName: h.hubName,
+      code: h.code,
+      totalIncoming: h.incoming,
+      totalSorted: h.incoming,
+      totalDispatched: h.dispatched,
+      inventoryCount: h.pending,
+    }));
 
-    // Hub throughput list
-    const hubs = await this.hubRepo.find({ take: 10 });
-    const hubThroughputList: HubThroughputMetric[] = await Promise.all(
-      hubs.map(async (h) => {
-        const inventoryCount = await this.parcelRepo.count({
-          where: { currentHub: { id: h.id } },
-        });
-        const totalBags = await this.bagRepo.count({
-          where: { originHub: { id: h.id } },
-        });
-        const totalManifests = await this.manifestRepo.count({
-          where: { originHub: { id: h.id } },
-        });
+    const riders = await this.metrics.riderStats(range, query.hubId, 6);
+    const topRiders: TopRiderMetric[] = riders.map((r) => ({
+      riderId: r.riderId,
+      name: r.name,
+      phone: '',
+      hubName: r.hubName,
+      deliveredCount: r.delivered,
+      completionRate: r.successRate ?? 0,
+      cashCollected: r.codCollected,
+    }));
 
-        return {
-          hubId: h.id,
-          hubName: h.name,
-          code: h.code,
-          totalIncoming: inventoryCount + totalBags * 15,
-          totalSorted: inventoryCount + 12,
-          totalDispatched: totalManifests * 25,
-          inventoryCount,
-        };
-      }),
-    );
-
-    // Top Riders
-    const riders = await this.riderRepo.find({
-      relations: ['user', 'hub'],
-      take: 6,
-    });
-    const topRiders: TopRiderMetric[] = await Promise.all(
-      riders.map(async (r) => {
-        const completed = await this.parcelRepo.count({
-          where: { currentRider: { id: r.id }, status: ParcelStatus.DELIVERED },
-        });
-        const ledgers = await this.cashLedgerRepo.find({
-          where: { rider: { id: r.id } },
-        });
-        const cashCollected = ledgers.reduce((acc, l) => acc + Number(l.amount || 0), 0);
-
-        return {
-          riderId: r.id,
-          name: r.user?.name || 'Rider',
-          phone: r.user?.phone || '01700000000',
-          hubName: r.hub?.name || 'Central Hub',
-          deliveredCount: completed,
-          completionRate: 96,
-          cashCollected,
-        };
-      }),
-    );
-
-    // Outstanding cash with riders
-    const outstandingLedgers = await this.cashLedgerRepo.find({
-      where: { handInStatus: CashHandInStatus.PENDING },
-    });
-    const outstandingCashWithRiders = outstandingLedgers.reduce(
-      (sum, l) => sum + Number(l.amount || 0),
-      0,
-    );
-
-    const totalCodProcessed = await this.cashLedgerRepo
-      .createQueryBuilder('cl')
-      .select('SUM(cl.amount)', 'total')
-      .getRawOne()
-      .then((res) => Number(res?.total || 0));
-
-    // RTO Analysis
-    const rtoBreakdown: RtoAnalytics = {
-      overallRtoRate: networkRtoRate,
-      topReasons: [
-        { reason: 'Customer Unreachable / Phone Switched Off', count: 18, percentage: 42 },
-        { reason: 'Customer Refused / Ordered Multiple Vendors', count: 12, percentage: 28 },
-        { reason: 'Address Incomplete / Landmark Not Found', count: 8, percentage: 19 },
-        { reason: 'Delivery Delayed / Requested Cancellation', count: 5, percentage: 11 },
-      ],
-      byZone: [
-        { zone: 'Inside Dhaka', parcelCount: 145, rtoRate: 3.2 },
-        { zone: 'Dhaka Suburbs', parcelCount: 52, rtoRate: 5.8 },
-        { zone: 'Outside Dhaka', parcelCount: 88, rtoRate: 8.4 },
-      ],
-      byRiskTier: [
-        { tier: 'LOW', parcelCount: 210, rtoRate: 2.1 },
-        { tier: 'MEDIUM', parcelCount: 55, rtoRate: 9.6 },
-        { tier: 'HIGH', parcelCount: 20, rtoRate: 31.4 },
-      ],
-    };
-
-    // COD Flow
-    const codFlow: CodFlowAnalytics = {
-      totalBooked: totalCodProcessed + outstandingCashWithRiders + 15000,
-      inTransitWithRiders: outstandingCashWithRiders,
-      collectedUnsettled: Math.max(0, totalCodProcessed - 25000),
-      settledToMerchants: Math.max(0, totalCodProcessed - outstandingCashWithRiders),
-    };
+    const rto = await this.getRtoAnalytics(query);
+    const cod = await this.getCodAnalytics(query);
+    const finance = await this.domain.finance(scope, range);
+    const codDetail = await this.domain.cod(scope, range);
 
     return {
-      period: periodStr,
-      totalShipments,
-      activeHubsCount,
-      activeRidersCount,
-      networkSuccessRate,
-      networkRtoRate,
-      totalCodProcessed,
-      outstandingCashWithRiders,
+      period: query.period || '30d',
+      totalShipments: counts.total,
+      activeHubsCount: hubs.length,
+      activeRidersCount: riders.filter((r) => r.assigned > 0).length,
+      networkSuccessRate: this.metrics.rate(counts.delivered, eligible) ?? 0,
+      networkRtoRate: this.metrics.rate(counts.rto, eligible) ?? 0,
+      totalCodProcessed: finance.codCollectedMinor / 100,
+      outstandingCashWithRiders: codDetail.pending,
       hubThroughputList,
       topRiders,
-      rtoBreakdown,
-      codFlow,
+      rtoBreakdown: rto,
+      codFlow: cod,
     };
   }
 
@@ -406,41 +218,65 @@ export class AnalyticsService {
     return summary.topRiders;
   }
 
-  async getRtoAnalytics(query: AnalyticsQueryDto): Promise<RtoAnalytics> {
-    const summary = await this.getOperationalSummary(query);
-    return summary.rtoBreakdown;
-  }
+  async getRtoAnalytics(query: AnalyticsQueryDto, scope?: { merchantId?: string; hubId?: string }): Promise<RtoAnalytics> {
+    const range = this.ranges.resolve({
+      preset: (query.period as never) ?? '30d',
+      from: query.startDate,
+      to: query.endDate,
+    });
+    const effectiveScope = scope ?? (query.hubId ? { hubId: query.hubId } : {});
+    const rto = await this.domain.rto(effectiveScope, range);
 
-  async getCodAnalytics(query: AnalyticsQueryDto): Promise<CodFlowAnalytics> {
-    const summary = await this.getOperationalSummary(query);
-    return summary.codFlow;
-  }
-
-  private generateSampleDailyTrends(
-    end: Date,
-    existing: DailyTrendPoint[],
-  ): DailyTrendPoint[] {
-    const result: DailyTrendPoint[] = [];
-    const existingMap = new Map(existing.map((e) => [e.date, e]));
-    const days = 7;
-
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(end.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = d.toISOString().slice(0, 10);
-      if (existingMap.has(dateStr)) {
-        result.push(existingMap.get(dateStr)!);
-      } else {
-        const factor = (i % 3) + 1;
-        result.push({
-          date: dateStr,
-          booked: factor * 4 + 2,
-          delivered: factor * 3 + 1,
-          returned: i === 2 ? 1 : 0,
-          codCollected: (factor * 3 + 1) * 1250,
-        });
-      }
+    // Risk-tier correlation from real RTO prediction levels in range
+    // (merchant-scoped when a tenant scope is provided).
+    const predictionQb = this.predictionRepo
+      .createQueryBuilder('p')
+      .where('p."predicted_at" BETWEEN :from AND :to', { from: range.from, to: range.to });
+    if (effectiveScope.merchantId) {
+      predictionQb.andWhere('p.merchant_id = :merchantId', { merchantId: effectiveScope.merchantId });
     }
+    const predictions = await predictionQb.getMany();
+    const tiers = ['HIGH', 'MEDIUM', 'LOW'] as const;
+    const byRiskTier = tiers.map((tier) => {
+      const group = predictions.filter((p) => p.level === tier);
+      const labeled = group.filter((p) => p.outcome !== null);
+      const rtoOutcomes = labeled.filter((p) => p.outcome === 'RTO').length;
+      return {
+        tier,
+        parcelCount: group.length,
+        rtoRate: labeled.length > 0 ? Math.round((rtoOutcomes / labeled.length) * 1000) / 10 : 0,
+      };
+    });
 
-    return result;
+    // Zone correlation via district success patterns is intentionally omitted:
+    // zone attribution without a district→zone source would be invented data.
+    // The v2 endpoint exposes byDistrict instead.
+    return {
+      overallRtoRate: rto.rtoRate.value ?? 0,
+      topReasons: rto.byReason.slice(0, 5).map((r) => ({
+        reason: r.reason,
+        count: r.count,
+        percentage: r.percentage,
+      })),
+      byZone: [],
+      byRiskTier,
+    };
+  }
+
+  async getCodAnalytics(query: AnalyticsQueryDto, scope?: { merchantId?: string; hubId?: string }): Promise<CodFlowAnalytics> {
+    const range = this.ranges.resolve({
+      preset: (query.period as never) ?? '30d',
+      from: query.startDate,
+      to: query.endDate,
+    });
+    const effectiveScope = scope ?? (query.hubId ? { hubId: query.hubId } : {});
+    const cod = await this.domain.cod(effectiveScope, range);
+    const finance = await this.domain.finance(effectiveScope, range);
+    return {
+      totalBooked: cod.booked,
+      inTransitWithRiders: cod.pending,
+      collectedUnsettled: Math.max(0, cod.collected - finance.settledMinor / 100),
+      settledToMerchants: finance.settledMinor / 100,
+    };
   }
 }
