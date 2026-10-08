@@ -24,8 +24,14 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 const PUBLIC_LINKS = [
   { href: "/", labelKey: "home" },
   { href: "/services", labelKey: "services" },
-  { href: "/pricing", labelKey: "calculator" },
   { href: "/track", labelKey: "tracking" },
+  { href: "/pricing", labelKey: "calculator" },
+  { href: "/about", labelKey: "about" },
+] as const;
+
+/** Extra links shown only in the mobile drawer, where space is not a constraint. */
+const MOBILE_EXTRA_LINKS = [
+  { href: "/faq", labelKey: "faq" },
   { href: "/contact", labelKey: "support" },
 ] as const;
 
@@ -221,7 +227,7 @@ export function PublicHeader() {
             )}
 
             <ul className="flex flex-col gap-1">
-              {PUBLIC_LINKS.map((link) => {
+              {[...PUBLIC_LINKS, ...MOBILE_EXTRA_LINKS].map((link) => {
                 const active = isActiveRoute(pathname, link.href);
                 return (
                   <li key={link.href}>

@@ -1,29 +1,31 @@
 "use client";
 
 import { Home, Search, DollarSign, Layers, LogIn, LayoutDashboard } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/lib/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { homeForRole } from "@/config/roles";
 import { cn } from "@/lib/cn";
 
 export function PublicMobileBottomNav() {
+  const t = useTranslations("Nav");
   const pathname = usePathname();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   const publicItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/track", label: "Track", icon: Search },
-    { href: "/pricing", label: "Pricing", icon: DollarSign },
-    { href: "/services", label: "Services", icon: Layers },
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/track", label: t("tracking"), icon: Search },
+    { href: "/pricing", label: t("pricing"), icon: DollarSign },
+    { href: "/services", label: t("services"), icon: Layers },
   ];
 
   const destinationHref = isAuthenticated && user ? homeForRole(user.role).href : "/login";
-  const destinationLabel = isAuthenticated ? "Dashboard" : "Sign In";
+  const destinationLabel = isAuthenticated ? t("dashboard") : t("signIn");
   const DestinationIcon = isAuthenticated ? LayoutDashboard : LogIn;
 
   return (
     <nav
-      aria-label="Mobile Navigation"
+      aria-label={t("primaryLabel")}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-surface/85 backdrop-blur-2xl pb-safe md:hidden shadow-2xl"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around px-2 py-1">

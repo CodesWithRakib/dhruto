@@ -114,9 +114,7 @@ export default async function HomePage() {
                     S
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  <span className="font-bold text-foreground">12,000+</span> Merchants Trust Dhruto Across Bangladesh
-                </div>
+                <div className="text-xs text-muted-foreground">{t("hero.trust")}</div>
               </div>
             </div>
 
@@ -186,22 +184,22 @@ export default async function HomePage() {
             <div className="relative z-10 mx-auto max-w-3xl space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary">
                 <Zap className="h-3.5 w-3.5" />
-                <span>Next-Day Delivery • 100% Guaranteed Settlement</span>
+                <span>{t("finalCta.badge")}</span>
               </div>
 
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight text-balance">
-                Ready to Accelerate Your Logistics?
+                {t("finalCta.title")}
               </h2>
 
               <p className="text-base sm:text-lg text-muted-foreground text-pretty max-w-xl mx-auto leading-relaxed">
-                Join thousands of merchants who trust Dhruto for instant pickups, automated COD cash reconciliations, and nationwide reach.
+                {t("finalCta.description")}
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                 <Link href="/register">
                   <Button size="lg" className="h-14 px-8 rounded-2xl text-base font-bold shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/45 transition-all">
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Create Free Merchant Account
+                    {t("finalCta.primary")}
                     <ArrowRight className="h-4 w-4 ml-1.5" />
                   </Button>
                 </Link>
@@ -212,7 +210,7 @@ export default async function HomePage() {
                     className="h-14 px-7 rounded-2xl text-base font-semibold border-border/60 bg-surface/50 hover:bg-surface/80 transition-all"
                   >
                     <Headphones className="h-4 w-4 mr-2" />
-                    Contact Logistics Team
+                    {t("finalCta.secondary")}
                   </Button>
                 </Link>
               </div>

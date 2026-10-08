@@ -29,8 +29,11 @@ const logger = new Logger("QueuesModule");
               retryStrategy: (times: number) => Math.min(times * 1000, 15000),
             };
 
+        const targetEndpoint = redis?.url
+          ? redis.url.replace(/:[^:@]+@/, ":****@")
+          : `${redis?.host || "localhost"}:${redis?.port || 6379}`;
         logger.log(
-          `Configured BullMQ queue infrastructure with Redis host: ${redis?.host || "localhost"}:${redis?.port || 6379}`,
+          `Configured BullMQ queue infrastructure with Redis: ${targetEndpoint}`,
         );
 
         return {

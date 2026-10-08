@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { MarketingPage } from "@/features/marketing/components/marketing-page";
+import { LegalPage } from "@/features/marketing/components/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -15,15 +15,12 @@ export default async function TermsPage() {
   const sections = t.raw("sections") as { title: string; body: string }[];
 
   return (
-    <MarketingPage eyebrow={t("eyebrow")} title={t("title")} description={t("updated")}>
-      <div className="max-w-3xl space-y-6">
-        {sections.map((section) => (
-          <section key={section.title} className="space-y-1.5">
-            <h2 className="text-h4 text-foreground">{section.title}</h2>
-            <p className="text-body text-muted-foreground text-pretty">{section.body}</p>
-          </section>
-        ))}
-      </div>
-    </MarketingPage>
+    <LegalPage
+      eyebrow={t("eyebrow")}
+      title={t("title")}
+      updated={t("updated")}
+      sections={sections}
+      footerNote={t("footerNote")}
+    />
   );
 }

@@ -38,6 +38,36 @@ const VALID_SORTS: ReadonlyArray<NonNullable<ParcelListParams["sort"]>> = [
 const VALID_LIMITS = [5, 10, 20, 50];
 const VALID_STATUSES = new Set<string>(Object.values(ParcelStatus));
 
+/**
+ * Sorting the list is a real backend capability (`sort` + `order`), so the UI
+ * exposes named orders instead of raw column keys. Each option maps to exactly
+ * one API pair; the label lives in the `ParcelList` message namespace.
+ */
+export type ParcelSortValue = "newest" | "oldest" | "codHigh" | "codLow" | "updated";
+
+export const PARCEL_SORT_OPTIONS: ReadonlyArray<{
+  value: ParcelSortValue;
+  sort: NonNullable<ParcelListParams["sort"]>;
+  order: NonNullable<ParcelListParams["order"]>;
+}> = [
+  { value: "newest", sort: "createdAt", order: "DESC" },
+  { value: "updated", sort: "updatedAt", order: "DESC" },
+  { value: "oldest", sort: "createdAt", order: "ASC" },
+  { value: "codHigh", sort: "codAmount", order: "DESC" },
+  { value: "codLow", sort: "codAmount", order: "ASC" },
+];
+
+/** Reverse of `PARCEL_SORT_OPTIONS`, used to reflect the URL back into the UI. */
+export function sortValueFromQuery(
+  sort: NonNullable<ParcelListParams["sort"]>,
+  order: NonNullable<ParcelListParams["order"]>,
+): ParcelSortValue {
+  const match = PARCEL_SORT_OPTIONS.find(
+    (option) => option.sort === sort && option.order === order,
+  );
+  return match?.value ?? "newest";
+}
+
 export interface NormalizedListQuery {
   page: number;
   limit: number;
@@ -206,6 +236,22 @@ export function useParcelsList() {
     [query],
   );
 
+  /**
+   * Applies a `from`/`to` window in one navigation. Setting the two bounds via
+   * separate calls would race: each call reads the same URL snapshot, so the
+   * second would overwrite the first.
+   */
+  const setDateRange = useCallback(
+    (range: { from: string; to: string }) => {
+      query.set({ from: range.from, to: range.to });
+    },
+    [query],
+  );
+
+  const clearDateRange = useCallback(() => {
+    query.remove("from", "to");
+  }, [query]);
+
   const resetFilters = useCallback(() => {
     setSearch("");
     setDistrict("");
@@ -232,6 +278,19 @@ export function useParcelsList() {
   const setOrder = useCallback(
     (next: NonNullable<ParcelListParams["order"]>) =>
       query.set({ order: next }, { resetPageKeys: [] }),
+    [query],
+  );
+
+  /**
+   * Applies a named sort order in a single navigation. Writing `sort` and
+   * `order` in two calls would push two history entries and fire two requests.
+   */
+  const setSortValue = useCallback(
+    (next: ParcelSortValue) => {
+      const option = PARCEL_SORT_OPTIONS.find((candidate) => candidate.value === next);
+      if (!option) return;
+      query.set({ sort: option.sort, order: option.order }, { resetPageKeys: [] });
+    },
     [query],
   );
 
@@ -278,8 +337,12 @@ export function useParcelsList() {
     setSort,
     order,
     setOrder,
+    sortValue: sortValueFromQuery(sort, order),
+    setSortValue,
     filters,
     updateFilter,
+    setDateRange,
+    clearDateRange,
     resetFilters,
     activeFilterCount,
     emptyFilters: EMPTY_FILTERS,

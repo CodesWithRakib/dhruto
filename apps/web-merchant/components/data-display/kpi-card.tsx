@@ -21,6 +21,11 @@ export interface KpiCardProps {
   icon: LucideIcon;
   tone?: KpiTone;
   hint?: string;
+  /**
+   * Opt into a tinted, higher-emphasis surface. Used sparingly so one KPI can
+   * lead a row instead of every card looking identical.
+   */
+  emphasis?: boolean;
   className?: string;
 }
 
@@ -34,17 +39,26 @@ export function KpiCard({
   icon: Icon,
   tone = "primary",
   hint,
+  emphasis = false,
   className,
 }: KpiCardProps) {
   return (
-    <Card className={cn("dhruto-animate-in bg-surface transition-all duration-fast ease-out hover:shadow-soft", className)}>
+    <Card
+      className={cn(
+        "dhruto-animate-in transition-all duration-fast ease-out hover:shadow-soft",
+        emphasis ? "border-primary/25 bg-primary-soft/40" : "bg-surface",
+        className,
+      )}
+    >
       <div className="flex items-start justify-between gap-3 p-4 sm:p-5">
         <div className="min-w-0 space-y-1">
           <p className="truncate text-caption font-semibold uppercase tracking-wider text-muted-foreground">
             {label}
           </p>
           <p className="text-h2 tabular-nums tracking-tight text-foreground">{value}</p>
-          {hint ? <p className="truncate text-caption text-muted-foreground">{hint}</p> : null}
+          {hint ? (
+            <p className="line-clamp-2 text-caption text-muted-foreground">{hint}</p>
+          ) : null}
         </div>
         <span
           className={cn(

@@ -13,6 +13,12 @@ import { useFormatters } from "@/lib/format";
 
 interface PublicTrackingViewProps {
   initialCode?: string;
+  /**
+   * Hide the built-in heading + search form. The public `/track` pages render
+   * their own hero and search above this view; the dashboard surfaces keep the
+   * default intro.
+   */
+  showIntro?: boolean;
 }
 
 /**
@@ -22,7 +28,7 @@ interface PublicTrackingViewProps {
  * fallback/demo data, and the API deliberately omits merchant identity,
  * financials and internal ids.
  */
-export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps) {
+export function PublicTrackingView({ initialCode = "", showIntro = true }: PublicTrackingViewProps) {
   const t = useTranslations("Tracking");
   const locale = useLocale();
   const router = useRouter();
@@ -90,6 +96,7 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
 
   return (
     <div className="dhruto-container max-w-3xl py-10 sm:py-14">
+      {showIntro ? (
       <div className="space-y-3 text-center">
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary-soft text-primary">
           <Package className="h-7 w-7" aria-hidden="true" />
@@ -125,6 +132,7 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
           </Button>
         </form>
       </div>
+      ) : null}
 
       <div aria-live="polite" className="py-6">
         {isFetching && !tracking ? (

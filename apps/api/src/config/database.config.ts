@@ -32,10 +32,15 @@ export const databaseConfig = registerAs<TypeOrmModuleOptions>("database", () =>
     },
   };
 
+  const isSsl =
+    (databaseUrl && databaseUrl.includes("sslmode=require")) ||
+    process.env.DB_SSL === "true";
+
   if (databaseUrl) {
     return {
       ...baseConfig,
       url: databaseUrl,
+      ssl: isSsl ? { rejectUnauthorized: false } : undefined,
     };
   }
 
@@ -46,5 +51,6 @@ export const databaseConfig = registerAs<TypeOrmModuleOptions>("database", () =>
     username: process.env.DB_USERNAME || "postgres",
     password: process.env.DB_PASSWORD || "password",
     database: process.env.DB_DATABASE || "dhruto",
+    ssl: isSsl ? { rejectUnauthorized: false } : undefined,
   };
 });

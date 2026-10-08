@@ -1,8 +1,10 @@
 import React from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Navigation, ShieldCheck, Zap } from "lucide-react";
 
 export function HeroVisual() {
+  const t = useTranslations("Home");
   return (
     <div className="relative mx-auto flex w-full max-w-lg lg:max-w-none items-center justify-center p-2 sm:p-4">
       {/* Background radial glow */}
@@ -34,8 +36,8 @@ export function HeroVisual() {
             <Zap className="h-4 w-4" />
           </span>
           <div>
-            <p className="text-xs font-bold text-foreground leading-tight">Express 45-Min</p>
-            <p className="text-[11px] text-muted-foreground leading-tight">Dhaka Metro Active</p>
+            <p className="text-xs font-bold text-foreground leading-tight">{t("heroVisual.expressTitle")}</p>
+            <p className="text-[11px] text-muted-foreground leading-tight">{t("heroVisual.expressSubtitle")}</p>
           </div>
         </div>
 
@@ -45,8 +47,8 @@ export function HeroVisual() {
             <ShieldCheck className="h-5 w-5" />
           </span>
           <div className="text-left">
-            <p className="text-xs font-bold text-foreground leading-tight">৳24,500 Collected</p>
-            <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Instant Wallet Settlement</p>
+            <p className="text-xs font-bold text-foreground leading-tight">{t("heroVisual.codAmount")}</p>
+            <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{t("heroVisual.codSubtitle")}</p>
           </div>
         </div>
 
@@ -55,18 +57,18 @@ export function HeroVisual() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
               <Navigation className="h-3.5 w-3.5 text-primary rotate-45" />
-              <span>TRK-89214-BD</span>
+              <span>{t("heroVisual.code")}</span>
             </div>
             <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-semibold text-success-soft-foreground border border-success/30">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-ping" aria-hidden="true" />
-              In Transit
+              {t("heroVisual.status")}
             </span>
           </div>
 
           <div className="mt-2.5 space-y-1.5">
             <div className="flex justify-between text-[11px] text-muted-foreground font-medium">
-              <span>Gulshan ➔ Dhanmondi</span>
-              <span className="text-foreground font-semibold">ETA 18m</span>
+              <span>{t("heroVisual.route")}</span>
+              <span className="text-foreground font-semibold">{t("heroVisual.eta")}</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
               <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-primary to-success" />

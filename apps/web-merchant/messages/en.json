@@ -63,7 +63,53 @@
     "futureFeature": "Coming soon",
     "loadErrorTitle": "Could not load your dashboard",
     "loadErrorDescription": "We could not reach the server. Check your connection and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "headerContext": "Today",
+    "health": {
+      "title": "Network health",
+      "description": "Last 30 days across your shipments.",
+      "successRate": "Delivery success",
+      "successRateHint": "Delivered share of all bookings",
+      "rtoRate": "Return rate",
+      "rtoRateHint": "Share of parcels returned to origin",
+      "avgDelivery": "Avg delivery time",
+      "avgDeliveryHint": "From booking to doorstep",
+      "hours": "{hours} hrs",
+      "pendingCod": "Pending COD",
+      "pendingCodHint": "Cash still to be collected and settled",
+      "unavailable": "Some health metrics need the analytics service. They will appear once it responds."
+    },
+    "attention": {
+      "title": "Needs attention",
+      "description": "Items that could delay a delivery or hold up your cash.",
+      "pendingTitle": "Waiting for pickup",
+      "pendingDesc": "{count} parcels have not been picked up yet.",
+      "rtoTitle": "Returns to origin",
+      "rtoDesc": "{count} parcels are being returned to you.",
+      "codTitle": "COD to be settled",
+      "codDesc": "{amount} has been booked but not yet collected.",
+      "viewParcels": "View parcels",
+      "viewFinance": "Open finance"
+    },
+    "recentErrorTitle": "Could not load recent shipments",
+    "recentErrorDescription": "The list failed to load. Your other dashboard data is unaffected.",
+    "emptyRecentTitle": "No shipments yet",
+    "emptyRecentDescription": "Book your first parcel and it will appear here with its live status.",
+    "emptyOverviewTitle": "Let's get your first shipment moving",
+    "emptyOverviewDescription": "You have no parcels yet. Create a booking to start shipping, or track an existing Dhruto shipment.",
+    "performance": {
+      "title": "Shipment activity",
+      "description": "Daily parcel movement over the last 30 days.",
+      "metricLabel": "Choose metric",
+      "delivered": "Delivered",
+      "booked": "Booked",
+      "totalLabel": "Total {metric}",
+      "period": "Last 30 days",
+      "emptyTitle": "No activity in this period",
+      "emptyDescription": "Once you ship parcels, their daily movement will show up here.",
+      "errorTitle": "Activity could not be loaded",
+      "errorDescription": "The analytics service did not respond. Your shipments are unaffected."
+    }
   },
   "LocaleSwitcher": {
     "label": "Change language"
@@ -231,7 +277,39 @@
     "paginationLabel": "Parcel list pagination",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {page} of {totalPages}"
+    "pageOf": "Page {page} of {totalPages}",
+    "refresh": "Refresh",
+    "countShipments": "shipments in this view",
+    "countFiltered": "{count} filters applied",
+    "quickFiltersLabel": "Quick status filters",
+    "searchHint": "Search matches tracking ID, recipient name or phone number.",
+    "copyTrackingCode": "Copy tracking ID",
+    "trackingCopied": "Tracking ID copied",
+    "copyFailed": "Could not copy to clipboard",
+    "viewDetails": "View details",
+    "clearSearch": "Clear search",
+    "noResultsHint": "Try a different search term, widen the date range, or clear the filters.",
+    "emptyHint": "Confirmed bookings appear here with live status updates.",
+    "quickRange": "Quick date range",
+    "rangeToday": "Today",
+    "rangeLast7": "Last 7 days",
+    "rangeLast30": "Last 30 days",
+    "clearRange": "Clear dates",
+    "sortLabel": "Sort shipments",
+    "sort": {
+      "newest": "Newest first",
+      "updated": "Recently updated",
+      "oldest": "Oldest first",
+      "codHigh": "Highest COD",
+      "codLow": "Lowest COD"
+    }
+  },
+  "DataTable": {
+    "showingRange": "Showing {from} to {to} of {total} items",
+    "perPage": "Per page:",
+    "pageOf": "Page {page} of {totalPages}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "ParcelDetails": {
     "title": "Shipment Details",
@@ -319,7 +397,60 @@
     "copied": "Copied",
     "loadError": "Couldn't load tracking",
     "loadErrorDesc": "Check your connection and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "eyebrow": "Shipment tracking",
+    "badge": "Live status, no account needed",
+    "features": {
+      "eyebrow": "What you get",
+      "title": "More than a status label",
+      "description": "Every Dhruto tracking link shows the same record our operations team sees.",
+      "items": [
+        {
+          "title": "Live parcel status",
+          "description": "The current stage of your parcel, from pickup through sorting to delivery."
+        },
+        {
+          "title": "Milestone timeline",
+          "description": "Every scan recorded in order, with the time it happened."
+        },
+        {
+          "title": "Destination & hub",
+          "description": "Where the parcel is headed and the hub currently holding it."
+        },
+        {
+          "title": "Recipient-safe details",
+          "description": "Contact details are masked so public tracking never leaks personal data."
+        }
+      ]
+    },
+    "how": {
+      "eyebrow": "How to track",
+      "title": "Track a parcel in three steps",
+      "description": "No account, no app — just the tracking code from your confirmation message.",
+      "items": [
+        {
+          "title": "Find your code",
+          "description": "Your tracking code looks like DHR-20261008-ABC123 and is in your confirmation SMS or email."
+        },
+        {
+          "title": "Enter the code",
+          "description": "Paste it into the search box and submit — the lookup is instant."
+        },
+        {
+          "title": "Follow the journey",
+          "description": "Scroll the timeline to see every scan and the expected next step."
+        }
+      ]
+    },
+    "privacyNote": "Public tracking deliberately masks recipient phone numbers and never exposes merchant financials.",
+    "cta": {
+      "eyebrow": "Shipping with Dhruto?",
+      "title": "Track every parcel from one dashboard",
+      "description": "Merchant accounts see all shipments, COD collection and settlement in one place.",
+      "primary": "Create merchant account",
+      "secondary": "Contact support",
+      "note": "Free registration · no account needed to track"
+    }
   },
   "Hub": {
     "title": "Hub Operations Center",
@@ -1043,7 +1174,8 @@
     "groupAnalytics": "Analytics",
     "rto": "RTO",
     "alerts": "Alerts",
-    "settings": "Settings"
+    "settings": "Settings",
+    "faq": "Help"
   },
   "Footer": {
     "tagline": "Next-Gen Logistics & Courier OS",
@@ -1080,7 +1212,18 @@
       "ctaPrimary": "Book Now",
       "ctaSecondary": "How It Works?",
       "trackTitle": "Track Your Shipment",
-      "trackSubtitle": "Enter your tracking code to view live parcel updates."
+      "trackSubtitle": "Enter your tracking code to view live parcel updates.",
+      "trust": "Trusted by 12,000+ merchants across Bangladesh"
+    },
+    "heroVisual": {
+      "expressTitle": "Express 45-Min",
+      "expressSubtitle": "Dhaka Metro active",
+      "codAmount": "৳24,500 collected",
+      "codSubtitle": "Instant wallet settlement",
+      "code": "TRK-89214-BD",
+      "status": "In transit",
+      "route": "Gulshan ➔ Dhanmondi",
+      "eta": "ETA 18m"
     },
     "capabilities": {
       "items": [
@@ -1207,6 +1350,7 @@
       ]
     },
     "finalCta": {
+      "badge": "Next-day delivery • 100% guaranteed settlement",
       "title": "Ready to ship with Dhruto?",
       "description": "Create a merchant account and start booking parcels today.",
       "primary": "Create merchant account",
@@ -1270,7 +1414,101 @@
         "title": "Developer API",
         "description": "Webhooks and signed endpoints to build delivery into your own systems."
       }
-    ]
+    ],
+    "badge": "Nationwide network • 64 districts",
+    "stats": {
+      "coverage": "64",
+      "coverageLabel": "Districts covered",
+      "thanas": "495+",
+      "thanasLabel": "Thanas served",
+      "daily": "10K+",
+      "dailyLabel": "Parcels moved daily",
+      "sla": "99.5%",
+      "slaLabel": "On-time delivery"
+    },
+    "grid": {
+      "eyebrow": "What we ship",
+      "title": "One platform, every delivery need",
+      "description": "From same-day city drops to nationwide line-haul, each service runs on the same trackable parcel record."
+    },
+    "showcase": {
+      "eyebrow": "Under the hood",
+      "title": "From pickup to proof of delivery",
+      "description": "Every service is powered by the same scanned, auditable parcel journey.",
+      "items": [
+        {
+          "eyebrow": "Step 01 · Pickup",
+          "title": "Doorstep pickup, on schedule",
+          "description": "A rider is assigned the moment you book, collects from your warehouse and scans the parcel into the network.",
+          "bullets": [
+            "Scheduled or on-demand pickup windows",
+            "Barcode scan at the point of collection",
+            "Live pickup status in your dashboard"
+          ]
+        },
+        {
+          "eyebrow": "Step 02 · COD",
+          "title": "Cash on delivery, settled automatically",
+          "description": "The rider collects cash at the doorstep; the amount is counted at the hub and settled to your merchant wallet.",
+          "bullets": [
+            "Doorstep cash collection with OTP handoff",
+            "Hub counting and variance control",
+            "Settlement into bKash, Nagad, Rocket or bank"
+          ]
+        },
+        {
+          "eyebrow": "Step 03 · Visibility",
+          "title": "Tracking that answers 'where is my parcel?'",
+          "description": "A public tracking link and a bilingual status timeline keep buyers informed without a single support call.",
+          "bullets": [
+            "Public tracking with no account required",
+            "Milestone timeline in English and Bangla",
+            "SMS and webhook status updates"
+          ]
+        },
+        {
+          "eyebrow": "Step 04 · Returns",
+          "title": "Returns and RTO without the black hole",
+          "description": "When a delivery cannot be completed, the parcel re-enters the network with a documented return-to-origin path.",
+          "bullets": [
+            "Recorded delivery attempts with reasons",
+            "Return-to-origin routing to the merchant",
+            "Full audit trail for every handover"
+          ]
+        }
+      ]
+    },
+    "guarantees": {
+      "eyebrow": "Service standards",
+      "title": "What every Dhruto shipment gets",
+      "description": "The same guarantees apply whether you ship one parcel or ten thousand.",
+      "items": [
+        {
+          "title": "Scanned at every hop",
+          "description": "Each handover is recorded, so parcel status is based on scans — not guesswork."
+        },
+        {
+          "title": "Transparent fees",
+          "description": "Delivery and COD charges are calculated and shown before you confirm a booking."
+        },
+        {
+          "title": "Bilingual by default",
+          "description": "Merchants, riders and recipients can work in English or Bangla on every surface."
+        },
+        {
+          "title": "API-ready",
+          "description": "Signed webhooks and a documented API let your own systems book and track automatically."
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "Ready when you are",
+      "title": "Put your deliveries on Dhruto",
+      "description": "Open a merchant account and ship across all 64 districts with automated COD settlement.",
+      "primary": "Create merchant account",
+      "secondary": "Talk to the team",
+      "note": "Free registration · no advance deposit required"
+    }
   },
   "Pricing": {
     "eyebrow": "Pricing",
@@ -1294,6 +1532,65 @@
         "description": "Regular volume unlocks negotiated per-parcel rates and settlement cycles."
       }
     ],
+    "badge": "No hidden fees",
+    "heroPrimary": "Calculate delivery cost",
+    "heroSecondary": "Request a quote",
+    "factors": {
+      "eyebrow": "How charges add up",
+      "title": "You only pay for distance, weight and cash handling",
+      "description": "Every delivery charge is built from four real inputs — there are no hidden surcharges."
+    },
+    "rates": {
+      "eyebrow": "Standard rates",
+      "title": "Weight and zone rates at a glance",
+      "description": "Published rates for individual parcels, before any volume discount is applied.",
+      "zone": "Delivery zone",
+      "upTo1kg": "Up to 1 kg",
+      "perKg": "Each extra kg",
+      "sla": "Delivery time",
+      "note": "Rates shown are standard published rates for individual parcels. Regular merchants get negotiated per-parcel pricing.",
+      "rows": [
+        { "zone": "Inside Dhaka", "upTo1kg": "৳60", "perKg": "+৳15", "sla": "12–24 hours" },
+        { "zone": "Dhaka suburbs", "upTo1kg": "৳100", "perKg": "+৳20", "sla": "24–36 hours" },
+        { "zone": "Outside Dhaka", "upTo1kg": "৳130", "perKg": "+৳25", "sla": "36–48 hours" }
+      ]
+    },
+    "included": {
+      "title": "Every delivery includes",
+      "items": [
+        "Door-to-door delivery in every district",
+        "Public tracking link and bilingual timeline",
+        "Documented delivery attempts and RTO routing",
+        "COD reconciliation into your merchant wallet"
+      ]
+    },
+    "faq": {
+      "eyebrow": "Pricing questions",
+      "title": "Questions about cost",
+      "description": "The short answers to what merchants ask most about charges.",
+      "items": [
+        {
+          "question": "How is the delivery charge calculated?",
+          "answer": "Charges combine the destination zone, the parcel's billable weight and any cash-on-delivery handling fee. The exact amount is shown before you confirm a booking."
+        },
+        {
+          "question": "Do you charge extra for cash on delivery?",
+          "answer": "A flat COD handling fee applies per collected order. It is calculated transparently and never bundled into a hidden charge."
+        },
+        {
+          "question": "Can I get lower rates for high volume?",
+          "answer": "Yes. Regular monthly volume unlocks negotiated per-parcel rates. Request a quote with your expected volume and pickup locations."
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "No hidden surprises",
+      "title": "Know your cost before you ship",
+      "description": "Use the estimator or request a quote tailored to your pickup locations and monthly volume.",
+      "primary": "Create merchant account",
+      "secondary": "Request a quote",
+      "note": "Free registration · transparent COD settlement"
+    },
     "quoteNote": "Final rates depend on your pickup location, parcel profile and monthly volume.",
     "quoteCta": "Request a quote"
   },
@@ -1321,7 +1618,96 @@
         "title": "Accessibility",
         "description": "Bilingual and mobile-first for every operator in the chain."
       }
-    ]
+    ],
+    "badge": "Logistics infrastructure built in Bangladesh",
+    "heroPrimary": "Create merchant account",
+    "heroSecondary": "Talk to our team",
+    "floatingStat": {
+      "value": "10K+ parcels/day",
+      "label": "Moving through the network"
+    },
+    "stats": {
+      "coverage": "64",
+      "coverageLabel": "Districts covered",
+      "thanas": "495+",
+      "thanasLabel": "Thanas served",
+      "operations": "24/7",
+      "operationsLabel": "Operations desk",
+      "auditable": "100%",
+      "auditableLabel": "COD auditable"
+    },
+    "story": {
+      "eyebrow": "Our story",
+      "title": "Why Dhruto exists",
+      "description": "Built to remove the guesswork from shipping for Bangladeshi businesses."
+    },
+    "mission": {
+      "eyebrow": "What drives us",
+      "title": "Reliability, transparency, reach",
+      "description": "Three commitments shape every part of the platform.",
+      "items": [
+        {
+          "title": "The problem",
+          "description": "Growing online businesses were losing money to unreliable pickups, unclear COD reconciliation and parcels that could not be tracked."
+        },
+        {
+          "title": "Our approach",
+          "description": "One connected parcel record — scanned at every handover, from merchant booking through hub sorting to last-mile delivery and settlement."
+        },
+        {
+          "title": "Our vision",
+          "description": "Delivery infrastructure any Bangladeshi business can build on, without running its own courier operation."
+        }
+      ]
+    },
+    "valuesEyebrow": "Principles",
+    "valuesTitle": "The way we work",
+    "valuesDescription": "The values behind every product decision we make.",
+    "showcase": {
+      "eyebrow": "How we build",
+      "title": "Technology with operators in mind",
+      "description": "Every feature is designed for the people actually moving parcels.",
+      "items": [
+        {
+          "eyebrow": "Coverage",
+          "title": "Nationwide by design, not by patchwork",
+          "description": "Urban and rural delivery run on the same hub network, so reach does not depend on where a merchant is based.",
+          "bullets": [
+            "Sorting hubs across all divisions",
+            "Daily line-haul between Dhaka and the districts",
+            "Home delivery down to the thana level"
+          ]
+        },
+        {
+          "eyebrow": "Transparency",
+          "title": "Every taka of COD is traceable",
+          "description": "Cash collected at the doorstep is counted, verified and settled with a full audit trail.",
+          "bullets": [
+            "Rider hand-in and hub verification",
+            "Settlement into wallet, bKash, Nagad or bank",
+            "Immutable financial records"
+          ]
+        },
+        {
+          "eyebrow": "Bilingual",
+          "title": "Built for English and Bangla operators",
+          "description": "Merchants, hub staff and riders all work in the language they think in — on phones first.",
+          "bullets": [
+            "Bangla and English interfaces",
+            "Mobile-first for riders and hub teams",
+            "API-ready for merchant systems"
+          ]
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "Ship with us",
+      "title": "Build your delivery on Dhruto",
+      "description": "Open a merchant account and connect your business to a nationwide logistics network.",
+      "primary": "Create merchant account",
+      "secondary": "Talk to our team",
+      "note": "Free registration · nationwide coverage"
+    }
   },
   "Contact": {
     "eyebrow": "Contact",
@@ -1340,6 +1726,51 @@
       "title": "Coverage",
       "value": "Nationwide, Bangladesh",
       "detail": "Operations across all 64 districts through our hub network."
+    },
+    "badge": "Merchant onboarding & support",
+    "form": {
+      "title": "Send us a message",
+      "description": "Tell us what you need and we will route it to the right person.",
+      "name": "Your name",
+      "namePlaceholder": "e.g. Tanvir Ahmed",
+      "email": "Email",
+      "emailPlaceholder": "e.g. merchant@mystore.com",
+      "topic": "Topic",
+      "topics": {
+        "general": "General enquiry",
+        "onboarding": "Merchant onboarding",
+        "pricing": "Pricing & volume rates",
+        "support": "Shipment support"
+      },
+      "message": "Message",
+      "messagePlaceholder": "Describe your question, your business or the shipment you need help with.",
+      "submit": "Compose email",
+      "note": "Opens your mail app with the message ready to send.",
+      "successTitle": "Your message is ready",
+      "successDescription": "We opened your mail app with the details filled in. Send it and our team will reply within one business day."
+    },
+    "support": {
+      "responseTitle": "Typical response time",
+      "responseValue": "Within 1 business day",
+      "responseDetail": "Merchant support requests are triaged by our operations desk during business hours.",
+      "portalTitle": "Already a merchant?",
+      "portalDetail": "Account holders can reach support directly from the portal, where we can see your shipments and settlement history.",
+      "quickTitle": "Quick links",
+      "quickTrack": "Track a shipment",
+      "quickPricing": "Estimate delivery cost",
+      "quickFaq": "Read the FAQ"
+    },
+    "help": {
+      "title": "Answers before you write",
+      "description": "The fastest answers to the questions we receive most."
+    },
+    "cta": {
+      "eyebrow": "Ready to ship",
+      "title": "Start with a merchant account",
+      "description": "Onboard in minutes and connect your business to nationwide delivery.",
+      "primary": "Create merchant account",
+      "secondary": "Read the FAQ",
+      "note": "Free registration · no advance deposit required"
     },
     "note": "Merchant account holders can also reach support directly from the portal."
   },
@@ -1380,7 +1811,36 @@
         "question": "Is Dhruto available in Bangla?",
         "answer": "Yes. The merchant portal, rider terminal and public pages are all available in both English and Bangla."
       }
-    ]
+    ],
+    "badge": "Help center",
+    "searchLabel": "Search help",
+    "searchPlaceholder": "Search questions — e.g. COD, tracking, returns",
+    "resultAll": "{count} questions",
+    "resultFiltered": "{count} matching questions",
+    "noResults": "No matching questions",
+    "noResultsHint": "Try a different word, or send us a message and our team will help.",
+    "topics": {
+      "eyebrow": "Browse by topic",
+      "title": "Jump straight to what you need",
+      "description": "Go deeper on the area you are asking about.",
+      "open": "Explore",
+      "servicesTitle": "Services",
+      "servicesDesc": "Same-day, nationwide, COD and returns — how each service works.",
+      "pricingTitle": "Pricing",
+      "pricingDesc": "How delivery charges are calculated and how to get volume rates.",
+      "trackingTitle": "Tracking",
+      "trackingDesc": "Track any parcel with a tracking code — no account needed.",
+      "contactTitle": "Contact support",
+      "contactDesc": "Talk to our team about onboarding, rates or a shipment."
+    },
+    "cta": {
+      "eyebrow": "Still have a question?",
+      "title": "Talk to the Dhruto team",
+      "description": "Create an account or send us a message — we usually reply within one business day.",
+      "primary": "Create merchant account",
+      "secondary": "Contact support",
+      "note": "Free registration · nationwide coverage"
+    }
   },
   "Privacy": {
     "eyebrow": "Legal",
@@ -1411,7 +1871,8 @@
         "title": "Your choices",
         "body": "Merchants can update their account details and manage access from the portal. For data requests, contact us using the details on the contact page."
       }
-    ]
+    ],
+    "footerNote": "Questions about this policy can be sent to our team using the details on the contact page."
   },
   "Terms": {
     "eyebrow": "Legal",
@@ -1446,7 +1907,8 @@
         "title": "Contact",
         "body": "Questions about these terms can be sent using the details on the contact page."
       }
-    ]
+    ],
+    "footerNote": "If any term is unclear, contact our team before using the service."
   },
   "Pagination": {
     "label": "Pagination",

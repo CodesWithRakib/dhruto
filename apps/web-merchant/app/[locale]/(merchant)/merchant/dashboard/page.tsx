@@ -9,5 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
-  return <MerchantDashboard />;
+  // Capture the date on the server so the client header hydrates identically.
+  return <MerchantDashboard today={new Date().toISOString()} />;
 }

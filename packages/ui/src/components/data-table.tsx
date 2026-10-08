@@ -15,6 +15,34 @@ import { Search, X, Loader2, AlertCircle, ChevronLeft, ChevronRight, Inbox } fro
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { cn } from "../lib/utils.js";
 
+/**
+ * Translated copy for the table's own chrome. Every entry is optional so
+ * existing callers keep the built-in English defaults, while locale-aware
+ * pages can render the whole table (pagination, empty, error) in Bangla.
+ *
+ * `showingRange` supports `{from}`, `{to}` and `{total}` placeholders, and
+ * `pageOf` supports `{page}` and `{totalPages}`.
+ */
+export interface DataTableLabels {
+  emptyMessage?: string;
+  emptyHint?: string;
+  errorMessage?: string;
+  retry?: string;
+  clearSearch?: string;
+  showingRange?: string;
+  perPage?: string;
+  pageOf?: string;
+  previous?: string;
+  next?: string;
+}
+
+/** Replaces `{placeholder}` tokens without pulling in an i18n dependency. */
+function fill(template: string, values: Record<string, number | string>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in values ? String(values[key]) : match,
+  );
+}
+
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -37,6 +65,14 @@ export interface DataTableProps<TData, TValue> {
   isSearching?: boolean;
   filterSlot?: React.ReactNode;
   actionSlot?: React.ReactNode;
+  /** Translated table chrome. Unset entries fall back to English defaults. */
+  labels?: DataTableLabels;
+  /**
+   * Localizes the numbers interpolated into `labels` (Bangla numerals, digit
+   * grouping). The table stays locale-agnostic: callers pass the same
+   * formatter their app already uses for amounts and counts.
+   */
+  formatNumber?: (value: number) => string;
   className?: string;
 }
 
@@ -62,6 +98,8 @@ export function DataTable<TData, TValue>({
   isSearching = false,
   filterSlot,
   actionSlot,
+  labels,
+  formatNumber,
   className,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
@@ -79,6 +117,13 @@ export function DataTable<TData, TValue>({
   const hasToolbar = Boolean(onSearchChange || filterSlot || actionSlot);
   const effectiveTotalItems = totalItems ?? data.length;
   const totalPages = Math.max(1, pageCount || Math.ceil(effectiveTotalItems / itemsPerPage));
+
+  // `labels` wins over the props/defaults so callers can localize every string
+  // the table owns without replacing the component.
+  const errorText = labels?.errorMessage ?? errorMessage;
+  const emptyText = labels?.emptyMessage ?? emptyMessage;
+  const num = (value: number): number | string =>
+    formatNumber ? formatNumber(value) : value;
 
   return (
     <div
@@ -111,7 +156,7 @@ export function DataTable<TData, TValue>({
                       type="button"
                       onClick={() => onSearchChange("")}
                       className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                      aria-label="Clear search"
+                      aria-label={labels?.clearSearch ?? "Clear search"}
                     >
                       <X className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
@@ -174,10 +219,10 @@ export function DataTable<TData, TValue>({
                       <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-danger-soft text-danger-soft-foreground">
                         <AlertCircle className="h-5 w-5" aria-hidden="true" />
                       </span>
-                      <p className="text-body-sm font-medium text-foreground">{errorMessage}</p>
+                      <p className="text-body-sm font-medium text-foreground">{errorText}</p>
                       {onRetry && (
                         <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
-                          Try again
+                          {labels?.retry ?? "Try again"}
                         </Button>
                       )}
                     </div>
@@ -200,8 +245,10 @@ export function DataTable<TData, TValue>({
                       <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface-muted text-muted-foreground">
                         <Inbox className="h-5 w-5" aria-hidden="true" />
                       </span>
-                      <p className="text-body-sm font-semibold text-foreground">{emptyMessage}</p>
-                      <p className="text-caption text-muted-foreground">Try adjusting your filters or check back later.</p>
+                      <p className="text-body-sm font-semibold text-foreground">{emptyText}</p>
+                      <p className="text-caption text-muted-foreground">
+                        {labels?.emptyHint ?? "Try adjusting your filters or check back later."}
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -215,20 +262,16 @@ export function DataTable<TData, TValue>({
       {effectiveTotalItems > 0 && (
         <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:px-5">
           <div className="flex flex-wrap items-center justify-center gap-2 text-caption text-muted-foreground">
-            <span aria-live="polite">
-              Showing{" "}
-              <span className="font-semibold tabular-nums text-foreground">
-                {Math.min(effectiveTotalItems, (currentPage - 1) * itemsPerPage + 1)}
-              </span>{" "}
-              to{" "}
-              <span className="font-semibold tabular-nums text-foreground">
-                {Math.min(effectiveTotalItems, currentPage * itemsPerPage)}
-              </span>{" "}
-              of <span className="font-semibold tabular-nums text-foreground">{effectiveTotalItems}</span> items
+            <span aria-live="polite" className="tabular-nums">
+              {fill(labels?.showingRange ?? "Showing {from} to {to} of {total} items", {
+                from: num(Math.min(effectiveTotalItems, (currentPage - 1) * itemsPerPage + 1)),
+                to: num(Math.min(effectiveTotalItems, currentPage * itemsPerPage)),
+                total: num(effectiveTotalItems),
+              })}
             </span>
             {onLimitChange && (
               <div className="flex items-center gap-1.5 sm:ml-2">
-                <span>Per page:</span>
+                <span>{labels?.perPage ?? "Per page:"}</span>
                 <Select
                   value={String(itemsPerPage)}
                   onValueChange={(val) => onLimitChange(Number(val))}
@@ -257,10 +300,13 @@ export function DataTable<TData, TValue>({
               className="h-8 gap-1 px-2.5 text-caption font-medium"
             >
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              Previous
+              {labels?.previous ?? "Previous"}
             </Button>
             <span className="min-w-24 px-2 text-center text-caption font-medium tabular-nums text-foreground" aria-live="polite">
-              Page {currentPage} of {totalPages}
+              {fill(labels?.pageOf ?? "Page {page} of {totalPages}", {
+                page: num(currentPage),
+                totalPages: num(totalPages),
+              })}
             </span>
             <Button
               variant="outline"
@@ -269,7 +315,7 @@ export function DataTable<TData, TValue>({
               onClick={() => onPageChange?.(currentPage + 1)}
               className="h-8 gap-1 px-2.5 text-caption font-medium"
             >
-              Next
+              {labels?.next ?? "Next"}
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
