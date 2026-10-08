@@ -29,6 +29,9 @@ module.exports = {
         surface: {
           DEFAULT: "hsl(var(--surface))",
           muted: "hsl(var(--surface-muted))",
+          elevated: "hsl(var(--surface-elevated))",
+          hover: "hsl(var(--surface-hover))",
+          selected: "hsl(var(--surface-selected))",
         },
 
         border: "hsl(var(--border))",
@@ -132,6 +135,39 @@ module.exports = {
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
         DEFAULT: "var(--radius-md)",
+      },
+
+      boxShadow: {
+        soft: "var(--shadow-soft)",
+        lift: "var(--shadow-lift)",
+      },
+
+      transitionTimingFunction: {
+        out: "var(--ease-out)",
+        spring: "var(--ease-spring)",
+      },
+
+      transitionDuration: {
+        fast: "var(--duration-fast)",
+        base: "var(--duration-base)",
+        slow: "var(--duration-slow)",
+      },
+
+      keyframes: {
+        "dhruto-fade-slide": {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "dhruto-shimmer": {
+          "0%, 100%": { opacity: "0.55" },
+          "50%": { opacity: "1" },
+        },
+      },
+
+      animation: {
+        "dhruto-in": "dhruto-fade-slide var(--duration-base) var(--ease-out) both",
+        "dhruto-in-slow": "dhruto-fade-slide var(--duration-slow) var(--ease-out) both",
+        "dhruto-shimmer": "dhruto-shimmer 1.6s ease-in-out infinite",
       },
 
       spacing: {

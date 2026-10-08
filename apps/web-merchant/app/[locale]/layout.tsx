@@ -110,7 +110,7 @@ export default async function LocaleLayout({
       className={`${inter.variable} ${plusJakartaSans.variable} ${hindSiliguri.variable} ${notoSansBengali.variable}`}
     >
       <body
-        className={`min-h-screen bg-background ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}
+        className={`min-h-screen ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           <Providers>

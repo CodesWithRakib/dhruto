@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         Skip to content
       </a>
 
-      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-surface shadow-black/40 lg:grid-cols-2">
+      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-lift lg:grid-cols-2">
         {/* Brand panel */}
         <aside className="dhruto-hero-dark relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
           <div className="relative z-10 space-y-6">
@@ -32,24 +32,24 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <Logo inverted />
             </Link>
             <div className="space-y-3">
-              <p className="text-4xl font-extrabold leading-tight text-white text-balance">
+              <p className="text-balance text-4xl font-extrabold leading-tight text-[hsl(var(--hero-dark-foreground))]">
                 Fast Delivery,
                 <br />
-                <span className="text-[hsl(var(--gold))]">Greater Connections</span>
+                <span className="text-[hsl(var(--hero-dark-gold))]">Greater Connections</span>
               </p>
-              <p className="max-w-sm text-body text-muted-foreground">
+              <p className="max-w-sm text-body text-[hsl(var(--hero-dark-muted))]">
                 We deliver your parcels safely and on time, across every corner.
               </p>
             </div>
             <ul className="flex flex-wrap gap-5">
               {FEATURES.map(({ icon: Icon, title, sub }) => (
                 <li key={title} className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-primary-soft text-primary-soft-foreground">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[hsl(var(--hero-dark-foreground)/0.15)] bg-[hsl(var(--hero-dark-foreground)/0.08)] text-[hsl(var(--hero-dark-foreground))]">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <span className="leading-tight">
-                    <span className="block text-xs font-semibold text-white">{title}</span>
-                    <span className="block text-[11px] text-muted-foreground">{sub}</span>
+                    <span className="block text-xs font-semibold text-[hsl(var(--hero-dark-foreground))]">{title}</span>
+                    <span className="block text-[11px] text-[hsl(var(--hero-dark-muted))]">{sub}</span>
                   </span>
                 </li>
               ))}
@@ -65,7 +65,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               priority
               className="h-auto w-full [mask-image:linear-gradient(to_bottom,transparent,black_18%)]"
             />
-            <p className="absolute bottom-6 left-10 rotate-[-6deg] font-serif text-2xl italic text-[hsl(var(--gold))]">
+            <p className="absolute bottom-6 left-10 rotate-[-6deg] font-serif text-2xl italic text-[hsl(var(--hero-dark-gold))]">
               Delivering Tomorrow
             </p>
           </div>

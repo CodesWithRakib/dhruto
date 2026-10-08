@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { cleanTokenValue, TOKEN_STORAGE_KEYS } from "../lib/api/auth-token";
 
 export interface UserProfile {
   id: string;
@@ -16,13 +17,6 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-const cleanStorageToken = (val: string | null): string | null => {
-  if (!val || val === "undefined" || val === "null" || val.trim() === "") {
-    return null;
-  }
-  return val.replace(/^["']|["']$/g, "").trim();
-};
-
 const getInitialState = (): AuthState => {
   if (typeof window === "undefined") {
     return {
@@ -34,10 +28,10 @@ const getInitialState = (): AuthState => {
   }
 
   try {
-    const rawToken = localStorage.getItem("dhruto_access_token");
-    const rawRefreshToken = localStorage.getItem("dhruto_refresh_token");
-    const token = cleanStorageToken(rawToken);
-    const refreshToken = cleanStorageToken(rawRefreshToken);
+    const rawToken = localStorage.getItem(TOKEN_STORAGE_KEYS.ACCESS_KEY);
+    const rawRefreshToken = localStorage.getItem(TOKEN_STORAGE_KEYS.REFRESH_KEY);
+    const token = cleanTokenValue(rawToken);
+    const refreshToken = cleanTokenValue(rawRefreshToken);
 
     const userStr = localStorage.getItem("dhruto_user");
     let user: UserProfile | null = null;
@@ -77,8 +71,8 @@ export const authSlice = createSlice({
         refreshToken: string;
       }>,
     ) => {
-      const validToken = cleanStorageToken(action.payload.accessToken);
-      const validRefreshToken = cleanStorageToken(action.payload.refreshToken);
+      const validToken = cleanTokenValue(action.payload.accessToken);
+      const validRefreshToken = cleanTokenValue(action.payload.refreshToken);
 
       state.user = action.payload.user;
       state.accessToken = validToken;

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { PaginationMeta, ParcelStatus } from "@dhruto/contracts";
+import { ParcelStatus } from "@dhruto/contracts";
+import type { PaginationMeta } from "@dhruto/contracts";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useQueryState } from "@/hooks/use-query-state";
 import { useGetParcelsQuery, type ParcelListParams } from "../api/parcels.api";
@@ -28,6 +29,47 @@ const EMPTY_FILTERS: ParcelListFilters = {
 export const PARCELS_DEFAULT_LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 400;
 
+const VALID_SORTS: ReadonlyArray<NonNullable<ParcelListParams["sort"]>> = [
+  "createdAt",
+  "updatedAt",
+  "codAmount",
+  "deliveryFee",
+];
+const VALID_LIMITS = [5, 10, 20, 50];
+const VALID_STATUSES = new Set<string>(Object.values(ParcelStatus));
+
+export interface NormalizedListQuery {
+  page: number;
+  limit: number;
+  sort: NonNullable<ParcelListParams["sort"]>;
+  order: NonNullable<ParcelListParams["order"]>;
+  status: ParcelStatus | "";
+}
+
+/**
+ * Malformed query strings (?page=-1, ?limit=abc, ?sort=dropTable) must never
+ * reach the API. Unknown values fall back to the list defaults, so a pasted
+ * or hand-edited URL degrades to page 1 instead of a broken request.
+ */
+export function normalizeParcelListQuery(input: {
+  page: number;
+  limit: number;
+  sort: string;
+  order: string;
+  status: string;
+}): NormalizedListQuery {
+  const page = Number.isFinite(input.page) ? Math.floor(input.page) : 1;
+  return {
+    page: page >= 1 ? page : 1,
+    limit: VALID_LIMITS.includes(input.limit) ? input.limit : PARCELS_DEFAULT_LIMIT,
+    sort: (VALID_SORTS as readonly string[]).includes(input.sort)
+      ? (input.sort as NonNullable<ParcelListParams["sort"]>)
+      : "createdAt",
+    order: input.order?.toUpperCase() === "ASC" ? "ASC" : "DESC",
+    status: VALID_STATUSES.has(input.status) ? (input.status as ParcelStatus) : "",
+  };
+}
+
 /**
  * Free-text filters: the field keeps a local copy so typing stays responsive,
  * and only the settled value is written to the URL, so the API sees one
@@ -51,26 +93,34 @@ function isTextKey(key: keyof ParcelListFilters): key is TextKey {
 export function useParcelsList() {
   const query = useQueryState();
 
+  const rawPage = query.getNumber("page", 1) ?? 1;
+  const rawLimit = query.getNumber("limit", PARCELS_DEFAULT_LIMIT) ?? PARCELS_DEFAULT_LIMIT;
+  const rawSort = query.getString("sort", "createdAt") ?? "createdAt";
+  const rawOrder = query.getString("order", "DESC") ?? "DESC";
+  const rawStatus = query.getString("status", "") ?? "";
+  const normalized = normalizeParcelListQuery({
+    page: rawPage,
+    limit: rawLimit,
+    sort: rawSort,
+    order: rawOrder,
+    status: rawStatus,
+  });
+  const page = normalized.page;
+  const limit = normalized.limit;
+  const sort = normalized.sort;
+  const order = normalized.order;
+
   const urlFilters = useMemo<ParcelListFilters>(
     () => ({
       search: query.getString("search", "") ?? "",
-      status: (query.getString("status", "") ?? "") as ParcelStatus | "",
+      status: normalized.status,
       district: query.getString("district", "") ?? "",
       thana: query.getString("thana", "") ?? "",
       from: query.getString("from", "") ?? "",
       to: query.getString("to", "") ?? "",
     }),
-    [query],
+    [query, normalized.status],
   );
-
-  const page = query.getNumber("page", 1) ?? 1;
-  const limit = query.getNumber("limit", PARCELS_DEFAULT_LIMIT) ?? PARCELS_DEFAULT_LIMIT;
-  const sort = (query.getString("sort", "createdAt") ?? "createdAt") as NonNullable<
-    ParcelListParams["sort"]
-  >;
-  const order = (query.getString("order", "DESC") ?? "DESC") as NonNullable<
-    ParcelListParams["order"]
-  >;
 
   const [search, setSearch] = useState(urlFilters.search);
   const [district, setDistrict] = useState(urlFilters.district);
@@ -169,7 +219,7 @@ export function useParcelsList() {
   );
 
   const setLimit = useCallback(
-    (next: number) => query.set({ limit: next }, { resetPageKeys: [] }),
+    (next: number) => query.set({ limit: next }),
     [query],
   );
 

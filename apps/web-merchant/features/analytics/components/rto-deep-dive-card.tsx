@@ -13,11 +13,11 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
   if (!rto) return null;
 
   return (
-    <Card className="shadow-sm border-rose-500/20">
-      <CardHeader className="border-b bg-rose-500/5">
+    <Card className="border-danger/20 shadow-soft">
+      <CardHeader className="border-b border-border/70 bg-danger-soft/40">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
-            <div className="p-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
+            <div className="p-2 bg-danger-soft text-danger-soft-foreground rounded-lg">
               <ShieldAlert className="h-5 w-5" />
             </div>
             <div>
@@ -30,7 +30,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
           </div>
           <Badge
             variant="outline"
-            className="text-xs font-mono border-rose-500/30 text-rose-600 dark:text-rose-400"
+            className="text-xs font-mono border-danger/30 text-danger-soft-foreground"
           >
             Network RTO: {rto.overallRtoRate}%
           </Badge>
@@ -48,7 +48,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
               <div key={reason.reason} className="p-2.5 rounded-lg border bg-card space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-foreground flex items-center gap-1.5">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning-soft-foreground shrink-0" />
                     {reason.reason}
                   </span>
                   <div className="flex items-center gap-2">
@@ -58,9 +58,9 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
                     </Badge>
                   </div>
                 </div>
-                <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-surface-muted rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-amber-500 h-full rounded-full"
+                    className="bg-warning h-full rounded-full"
                     style={{ width: `${Math.min(100, Math.max(5, reason.percentage))}%` }}
                   />
                 </div>
@@ -90,7 +90,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
                     </span>
                   </div>
                   <span
-                    className={`font-mono font-bold ${z.rtoRate < 5 ? "text-emerald-600" : z.rtoRate < 8 ? "text-amber-600" : "text-rose-600"}`}
+                    className={`font-mono font-bold ${z.rtoRate < 5 ? "text-success-soft-foreground" : z.rtoRate < 8 ? "text-warning-soft-foreground" : "text-danger-soft-foreground"}`}
                   >
                     {z.rtoRate}% RTO
                   </span>
@@ -102,7 +102,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
           {/* Cognitive Risk Tier Correlation */}
           <div className="space-y-3">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              <Sparkles className="h-3.5 w-3.5 text-warning-soft-foreground" />
               AI Risk Tier Correlation
             </span>
             <div className="space-y-2 text-xs">
@@ -119,7 +119,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
                   </div>
                   <div className="text-right">
                     <span
-                      className={`font-mono font-black ${rt.tier === "LOW" ? "text-emerald-600" : rt.tier === "MEDIUM" ? "text-amber-600" : "text-rose-600"}`}
+                      className={`font-mono font-black ${rt.tier === "LOW" ? "text-success-soft-foreground" : rt.tier === "MEDIUM" ? "text-warning-soft-foreground" : "text-danger-soft-foreground"}`}
                     >
                       {rt.rtoRate}% RTO
                     </span>

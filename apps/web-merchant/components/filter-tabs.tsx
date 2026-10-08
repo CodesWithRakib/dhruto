@@ -51,11 +51,11 @@ export function FilterTabs<T extends string>({
             aria-pressed={isActive}
             onClick={() => onValueChange(option.value)}
             className={cn(
-              "whitespace-nowrap rounded-md px-3 py-1.5 text-caption font-semibold transition-colors",
+              "whitespace-nowrap rounded-md px-3 py-1.5 text-caption font-semibold transition-all duration-fast ease-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
               isActive
-                ? "bg-surface text-foreground "
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-surface text-foreground shadow-soft"
+                : "text-muted-foreground hover:bg-surface/60 hover:text-foreground",
             )}
           >
             {option.label}

@@ -11,6 +11,7 @@ import {
   Phone,
   User,
   Wallet,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Button,
@@ -29,6 +30,7 @@ import {
   Input,
 } from "@dhruto/ui";
 import type { AddressParseResult } from "@dhruto/contracts";
+import { AlertCard } from "@/components/data-display/cards";
 import { useParcelBooking } from "../hooks/use-parcel-booking";
 import { useParcelPricing } from "../hooks/use-parcel-pricing";
 import { PricingSummary } from "./booking/pricing-summary";
@@ -42,7 +44,7 @@ function Section({
   description,
   children,
 }: {
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   description: string;
   children: React.ReactNode;
@@ -50,7 +52,7 @@ function Section({
   return (
     <fieldset className="space-y-4 border-0 p-0">
       <legend className="sr-only">{title}</legend>
-      <div className="flex items-start gap-2 border-b border-border pb-3">
+      <div className="flex items-start gap-2 border-b border-border/70 pb-3">
         <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
         <div>
           <p className="text-body-sm font-semibold text-foreground">{title}</p>
@@ -126,16 +128,15 @@ export function BookingForm() {
           {showSmartFill ? <SmartAddressFill onApply={handleApplyParsedAddress} /> : null}
 
           {displayedError ? (
-            <div
-              role="alert"
-              className="flex items-start gap-3 rounded-md border border-danger bg-danger-soft p-4 text-body-sm text-danger-soft-foreground"
-            >
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-              <div>
-                <p className="font-semibold">{t("submissionError")}</p>
-                <p>{displayedError}</p>
-              </div>
-            </div>
+            <AlertCard tone="danger">
+              <span className="flex items-start gap-2.5">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>
+                  <span className="block font-semibold">{t("submissionError")}</span>
+                  <span>{displayedError}</span>
+                </span>
+              </span>
+            </AlertCard>
           ) : null}
 
           <Form {...form}>

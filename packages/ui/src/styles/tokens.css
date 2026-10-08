@@ -18,13 +18,16 @@
 
 :root {
   /* ------------------------------------------------------------------
-   * 1. Base surfaces
+   * 1. Base surfaces (Clean, Crisp, Professional High-Contrast Canvas)
    * ------------------------------------------------------------------ */
-  --background: 210 40% 98%; /* #F8FAFC */
-  --foreground: 222 47% 11%; /* #0F172A */
+  --background: 210 40% 98%; /* #F8FAFC — clean soft neutral */
+  --foreground: 222 47% 11%; /* #0F172A — deep slate text */
 
-  --surface: 0 0% 100%; /* #FFFFFF — cards, panels, sheets */
+  --surface: 0 0% 100%; /* #FFFFFF — clean white cards, panels, sheets */
   --surface-muted: 210 40% 96%; /* #F1F5F9 — subtle section wash */
+  --surface-elevated: 0 0% 100%; /* elevated panels — pair with shadow-soft */
+  --surface-hover: 210 40% 96%; /* row / interactive hover wash */
+  --surface-selected: 141 84% 93%; /* selected rows, active pills (primary-soft) */
 
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
@@ -56,8 +59,8 @@
   /* ------------------------------------------------------------------
    * 4. Neutral / secondary
    * ------------------------------------------------------------------ */
-  --secondary: 157 61% 30%; /* #1E7A57 */
-  --secondary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
 
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
@@ -68,10 +71,10 @@
   /* ------------------------------------------------------------------
    * 5. Semantic states
    * ------------------------------------------------------------------ */
-  --success: 176 79% 30%; /* #108981 */
+  --success: 142 72% 36%;
   --success-foreground: 0 0% 100%;
   --success-soft: 141 84% 93%;
-  --success-soft-foreground: 152 69% 19%;
+  --success-soft-foreground: 142 72% 26%;
 
   --warning: 38 92% 50%; /* #F59E0B */
   --warning-foreground: 0 0% 100%;
@@ -97,8 +100,21 @@
    * ------------------------------------------------------------------ */
   --border: 214 32% 91%; /* #E2E8F0 */
   --input: 214 32% 91%;
-  --ring: 142 72% 36%;
+  --ring: 152 69% 19%;
   --overlay: 222 47% 11%;
+
+  /* Soft elevation — prefer surface contrast over shadows. Only `soft` and
+   * `lift` are allowed; never introduce heavy card shadows. */
+  --shadow-soft: 0 1px 2px hsl(222 47% 11% / 0.04);
+  --shadow-lift: 0 8px 24px -12px hsl(222 47% 11% / 0.18);
+
+  /* Skeleton + motion — one rhythm for the whole product. */
+  --skeleton: 214 32% 91%;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 
   /* ------------------------------------------------------------------
    * 7. Radius — one rhythm for the whole system
@@ -150,3 +166,40 @@
   --hero-light-muted: 215 16% 40%;
   --hero-light-chip: 0 0% 100%;
 }
+
+/* ------------------------------------------------------------------
+ * 10. Theme Overrides (Red Theme)
+ * ------------------------------------------------------------------ */
+:root[data-theme="red"] {
+  /* Brand Colors Override */
+  --primary: 347 77% 50%; /* #E11D48 - Crimson Red */
+  --primary-hover: 347 77% 40%;
+  --primary-soft: 350 84% 93%;
+  --primary-soft-foreground: 347 77% 50%;
+  
+  --brand-green: 347 77% 50%;
+  --brand-green-hover: 347 77% 40%;
+  --ring: 347 77% 50%;
+  
+  /* Hero / section background schemas override for Red */
+  /* Schema A — "Deep Ruby" (dark) */
+  --hero-dark-base: 350 45% 7%;
+  --hero-dark-mid: 345 40% 11%;
+  --hero-dark-glow: 347 55% 18%;
+  --hero-dark-accent: 347 77% 50%;
+  --hero-dark-gold: 36 45% 66%;
+  --hero-dark-foreground: 0 0% 100%;
+  --hero-dark-muted: 345 12% 72%;
+  --hero-dark-chip: 345 25% 16%;
+
+  /* Schema B — "Ruby Mist" (light) */
+  --hero-light-base: 350 33% 97%;
+  --hero-light-mid: 345 45% 93%;
+  --hero-light-glow: 347 55% 85%;
+  --hero-light-accent: 347 77% 50%;
+  --hero-light-gold: 36 70% 50%;
+  --hero-light-foreground: 222 47% 11%;
+  --hero-light-muted: 215 16% 40%;
+  --hero-light-chip: 0 0% 100%;
+}
+

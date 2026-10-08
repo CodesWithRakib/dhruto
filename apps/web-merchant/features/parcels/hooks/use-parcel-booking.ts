@@ -10,6 +10,7 @@ import {
   type ParcelCreatedResponse,
 } from "@dhruto/contracts";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useCreateParcelMutation } from "../api/parcels.api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { getApiErrorKey } from "@/lib/api-errors";
@@ -68,6 +69,7 @@ function applyFieldErrors(
 }
 
 export function useParcelBooking() {
+  const t = useTranslations("BookingForm");
   const [createdParcel, setCreatedParcel] = useState<ParcelCreatedResponse | null>(null);
   /** Raw server message, used only when no error key is recognised. */
   const [serverError, setServerError] = useState<string | null>(null);
@@ -133,18 +135,18 @@ export function useParcelBooking() {
         setServerError(
           getApiErrorMessage(
             err,
-            "Failed to create parcel booking. Please check your inputs and try again.",
+            t("createFailed"),
           ),
         );
 
         // Field-level messages are already shown next to the inputs; only
         // surface a toast when the failure has no field to attach to.
         if (!mappedToFields) {
-          toast.error("Booking submission failed");
+          toast.error(t("submitFailed"));
         }
       }
     },
-    [createParcelMutation, form],
+    [createParcelMutation, form, t],
   );
 
   const resetForm = useCallback(() => {

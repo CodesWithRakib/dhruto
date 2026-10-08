@@ -11,7 +11,7 @@ import {
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table.js";
 import { Button } from "./button.js";
-import { Search, X, Loader2, AlertCircle, Inbox, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, X, Loader2, AlertCircle, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { cn } from "../lib/utils.js";
 
@@ -83,36 +83,37 @@ export function DataTable<TData, TValue>({
   return (
     <div
       className={cn(
-        "w-full rounded-lg border border-border bg-surface p-4 shadow-sm sm:p-5",
+        "dhruto-animate-in w-full rounded-xl border border-border/70 bg-surface shadow-soft",
         className,
       )}
     >
       {/* Top Filters & Actions Toolbar */}
       {hasToolbar && (
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex w-full flex-1 flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center">
             {onSearchChange && (
               <div className="relative w-full sm:w-80">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <input
-                  type="text"
+                  type="search"
                   value={search ?? ""}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="h-10 w-full rounded-md border border-input bg-background pl-9 pr-8 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  aria-label={searchPlaceholder}
+                  className="h-10 w-full rounded-lg border border-input bg-surface pl-9 pr-9 text-body-sm text-foreground transition-colors placeholder:text-muted-foreground hover:border-muted-foreground/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25 [&::-webkit-search-cancel-button]:hidden"
                 />
                 <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
                   {isSearching && (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
                   )}
                   {search && (
                     <button
                       type="button"
                       onClick={() => onSearchChange("")}
-                      className="rounded p-0.5 text-muted-foreground hover:text-foreground"
+                      className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                       aria-label="Clear search"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -131,16 +132,16 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Inner Table Container */}
-      <div className="overflow-hidden rounded-md border border-border bg-surface">
+      <div className="overflow-hidden bg-surface sm:rounded-b-none">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-surface-muted/60">
+            <TableHeader className="dhruto-table-header border-b border-border/70">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className="border-b-0 hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="px-4 py-3 text-caption font-semibold uppercase tracking-wider text-muted-foreground"
+                      className="whitespace-nowrap px-4 py-3 text-caption font-semibold uppercase tracking-wider text-muted-foreground"
                     >
                       {header.isPlaceholder
                         ? null
@@ -150,14 +151,14 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody className="divide-y divide-border">
+            <TableBody className="divide-y divide-border/60">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={`skeleton-${index}`} className="animate-pulse">
+                  <TableRow key={`skeleton-${index}`} className="hover:bg-transparent">
                     {columns.map((_, colIndex) => (
                       <TableCell key={colIndex} className="px-4 py-3.5">
                         <div
-                          className="h-4 rounded bg-surface-muted"
+                          className="dhruto-skeleton h-4 rounded-md"
                           style={{
                             width: `${Math.max(40, ((colIndex * 37) % 80) + 30)}%`,
                           }}
@@ -167,11 +168,13 @@ export function DataTable<TData, TValue>({
                   </TableRow>
                 ))
               ) : isError ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-danger">
-                      <AlertCircle className="h-6 w-6 opacity-80" />
-                      <p className="text-body-sm font-medium">{errorMessage}</p>
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={columns.length} className="h-36 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-danger-soft text-danger-soft-foreground">
+                        <AlertCircle className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <p className="text-body-sm font-medium text-foreground">{errorMessage}</p>
                       {onRetry && (
                         <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
                           Try again
@@ -182,21 +185,23 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="transition-colors hover:bg-surface-muted/50">
+                  <TableRow key={row.id} className="dhruto-animate-in hover:bg-surface-muted/50">
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="px-4 py-3 text-body-sm text-foreground">
+                      <TableCell key={cell.id} className="whitespace-nowrap px-4 py-3 text-table text-foreground">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-48 text-center py-10">
-                    <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                      <img src="/images/empty-state.jpg" alt="Empty" className="h-32 w-32 object-contain opacity-80 mix-blend-multiply" />
-                      <p className="text-sm font-medium text-foreground">{emptyMessage}</p>
-                      <p className="text-xs">Try adjusting your filters or check back later.</p>
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={columns.length} className="h-48 px-4 py-10 text-center">
+                    <div className="mx-auto flex max-w-sm flex-col items-center justify-center gap-2.5">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface-muted text-muted-foreground">
+                        <Inbox className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <p className="text-body-sm font-semibold text-foreground">{emptyMessage}</p>
+                      <p className="text-caption text-muted-foreground">Try adjusting your filters or check back later.</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -208,18 +213,18 @@ export function DataTable<TData, TValue>({
 
       {/* Pagination Bar */}
       {effectiveTotalItems > 0 && (
-        <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="flex flex-wrap items-center gap-2 text-caption text-muted-foreground">
-            <span>
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:px-5">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-caption text-muted-foreground">
+            <span aria-live="polite">
               Showing{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-semibold tabular-nums text-foreground">
                 {Math.min(effectiveTotalItems, (currentPage - 1) * itemsPerPage + 1)}
               </span>{" "}
               to{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-semibold tabular-nums text-foreground">
                 {Math.min(effectiveTotalItems, currentPage * itemsPerPage)}
               </span>{" "}
-              of <span className="font-semibold text-foreground">{effectiveTotalItems}</span> items
+              of <span className="font-semibold tabular-nums text-foreground">{effectiveTotalItems}</span> items
             </span>
             {onLimitChange && (
               <div className="flex items-center gap-1.5 sm:ml-2">
@@ -228,7 +233,7 @@ export function DataTable<TData, TValue>({
                   value={String(itemsPerPage)}
                   onValueChange={(val) => onLimitChange(Number(val))}
                 >
-                  <SelectTrigger className="h-7 w-[70px] text-caption px-2 border-input bg-background focus:ring-1 focus:ring-primary">
+                  <SelectTrigger className="h-7 w-[70px] border-input bg-surface px-2 text-caption focus:ring-2 focus:ring-ring/25">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -251,10 +256,10 @@ export function DataTable<TData, TValue>({
               onClick={() => onPageChange?.(currentPage - 1)}
               className="h-8 gap-1 px-2.5 text-caption font-medium"
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
               Previous
             </Button>
-            <span className="px-2 text-caption font-medium text-foreground">
+            <span className="min-w-24 px-2 text-center text-caption font-medium tabular-nums text-foreground" aria-live="polite">
               Page {currentPage} of {totalPages}
             </span>
             <Button
@@ -265,7 +270,7 @@ export function DataTable<TData, TValue>({
               className="h-8 gap-1 px-2.5 text-caption font-medium"
             >
               Next
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           </div>
         </div>

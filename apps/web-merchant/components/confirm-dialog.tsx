@@ -44,9 +44,15 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const t = useTranslations("ConfirmDialog");
   const [error, setError] = React.useState<string | null>(null);
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
-    if (open) setError(null);
+    if (open) {
+      setError(null);
+      const frame = requestAnimationFrame(() => cancelRef.current?.focus());
+      return () => cancelAnimationFrame(frame);
+    }
+    return undefined;
   }, [open]);
 
   const handleConfirm = async () => {
@@ -61,15 +67,17 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2.5 text-h3">
             {tone === "danger" ? (
-              <TriangleAlert className="h-4 w-4 text-danger" aria-hidden="true" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-danger-soft text-danger-soft-foreground">
+                <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+              </span>
             ) : null}
             {title}
           </DialogTitle>
-          {description ? <DialogDescription>{description}</DialogDescription> : null}
+          {description ? <DialogDescription className="pt-1">{description}</DialogDescription> : null}
         </DialogHeader>
         {error ? (
           <p
@@ -79,8 +87,9 @@ export function ConfirmDialog({
             {error}
           </p>
         ) : null}
-        <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
           <Button
+            ref={cancelRef}
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
@@ -93,7 +102,6 @@ export function ConfirmDialog({
             size="sm"
             onClick={handleConfirm}
             disabled={loading}
-            autoFocus
           >
             {loading ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden="true" />

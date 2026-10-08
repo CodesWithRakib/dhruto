@@ -4,7 +4,6 @@ import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/navigation";
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
   DataTable,
+  KpiGridSkeleton,
   type ColumnDef,
 } from "@dhruto/ui";
 import {
@@ -19,17 +19,24 @@ import {
   CheckCircle2,
   Clock,
   FileText,
+  Package,
   PackagePlus,
   Printer,
   Truck,
   UploadCloud,
+  type LucideIcon,
 } from "lucide-react";
 import type { ParcelStatus } from "@dhruto/contracts";
 import { useGetMerchantDashboardQuery } from "../../merchants/api/merchants.api";
 import { useAppSelector } from "@/store/hooks";
 import { MERCHANT_ROUTES } from "@/config/routes";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { KpiCard } from "@/components/data-display/kpi-card";
+import { InteractiveCard } from "@/components/data-display/cards";
+import { PageHeader } from "@/components/page-header";
+import { Stagger } from "@/components/motion/fade-in";
 import { ErrorState, RetryButton } from "@/components/feedback/states";
+import { useFormatters } from "@/lib/format";
 
 interface ShipmentRow {
   id: string;
@@ -47,41 +54,25 @@ function MetricCard({
   caption,
   icon: Icon,
   tone,
-  isLoading,
 }: {
   label: string;
-  value: number;
+  value: string;
   caption: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   tone: "primary" | "success" | "info" | "warning";
-  isLoading: boolean;
 }) {
-  const toneClass = {
-    primary: "bg-primary-soft text-primary",
-    success: "bg-success-soft text-success-soft-foreground",
-    info: "bg-info-soft text-info-soft-foreground",
-    warning: "bg-warning-soft text-warning-soft-foreground",
-  }[tone];
-
   return (
-    <Card className="p-4 sm:p-5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
-          {label}
-        </span>
-        <span className={`flex h-8 w-8 items-center justify-center rounded-md ${toneClass}`}>
-          <Icon className="h-4 w-4" aria-hidden="true" />
-        </span>
-      </div>
-      <p className="mt-2 text-h2 font-bold tabular-nums text-foreground">
-        {isLoading ? "—" : value.toLocaleString()}
-      </p>
-      <p className="mt-1 text-caption text-muted-foreground">{caption}</p>
-    </Card>
+    <KpiCard
+      label={label}
+      value={value}
+      hint={caption}
+      icon={Icon}
+      tone={tone}
+    />
   );
 }
 
-/** A quick action tile. `disabled` marks later-phase functionality. */
+/** A quick action tile built on the shared interactive card. */
 function QuickAction({
   href,
   icon: Icon,
@@ -91,25 +82,25 @@ function QuickAction({
   disabled,
 }: {
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   description: string;
   badge?: string;
   disabled?: boolean;
 }) {
   const content = (
-    <Card className="flex h-full flex-col p-5">
-      <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-soft text-primary">
+    <InteractiveCard className="h-full p-5">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
       <h3 className="mt-3 text-body-sm font-semibold text-foreground">{title}</h3>
       <p className="mt-1 text-caption text-muted-foreground">{description}</p>
       {badge ? (
-        <Badge variant="secondary" className="mt-3 w-fit">
+        <span className="mt-3 inline-flex w-fit items-center rounded-md bg-surface-muted px-2 py-0.5 text-caption font-semibold text-muted-foreground">
           {badge}
-        </Badge>
+        </span>
       ) : null}
-    </Card>
+    </InteractiveCard>
   );
 
   if (disabled) {
@@ -121,7 +112,10 @@ function QuickAction({
   }
 
   return (
-    <Link href={href} className="group">
+    <Link
+      href={href}
+      className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+    >
       {content}
     </Link>
   );
@@ -131,6 +125,7 @@ export function MerchantDashboard() {
   const t = useTranslations("Index");
   const { user } = useAppSelector((state) => state.auth);
   const { data, isLoading, isError, refetch } = useGetMerchantDashboardQuery();
+  const { bdt, number } = useFormatters();
 
   const stats = data?.data?.stats ?? {
     totalOrders: 0,
@@ -197,7 +192,7 @@ export function MerchantDashboard() {
         header: t("colCod"),
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
-            ৳ {row.original.codAmount.toLocaleString()}
+            {bdt(row.original.codAmount)}
           </span>
         ),
       },
@@ -216,7 +211,7 @@ export function MerchantDashboard() {
         ),
       },
     ],
-    [t],
+    [t, bdt],
   );
 
   if (isError) {
@@ -233,55 +228,53 @@ export function MerchantDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 border-b border-border pb-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-h2 font-bold tracking-tight text-foreground">
-            {user ? t("greeting", { name: user.name }) : t("dashboardTitle")}
-          </h1>
-          <p className="mt-1 text-body text-muted-foreground">{t("dashboardSubtitle")}</p>
-        </div>
-        <Link href={MERCHANT_ROUTES.createBooking}>
-          <Button className="gap-2">
-            <PackagePlus className="h-4 w-4" aria-hidden="true" />
-            {t("bookNew")}
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title={user ? t("greeting", { name: user.name }) : t("dashboardTitle")}
+        description={t("dashboardSubtitle")}
+        actions={
+          <Link href={MERCHANT_ROUTES.createBooking}>
+            <Button className="gap-2">
+              <PackagePlus className="h-4 w-4" aria-hidden="true" />
+              {t("bookNew")}
+            </Button>
+          </Link>
+        }
+      />
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <MetricCard
-          label={t("totalBookings")}
-          value={stats.totalOrders}
-          caption={t("totalBookingsHint")}
-          icon={Truck}
-          tone="primary"
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label={t("delivered")}
-          value={stats.deliveredOrders}
-          caption={t("deliveredHint")}
-          icon={CheckCircle2}
-          tone="success"
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label={t("inTransit")}
-          value={stats.inTransitOrders}
-          caption={t("inTransitHint")}
-          icon={Truck}
-          tone="info"
-          isLoading={isLoading}
-        />
-        <MetricCard
-          label={t("pending")}
-          value={stats.pendingOrders}
-          caption={t("pendingHint")}
-          icon={Clock}
-          tone="warning"
-          isLoading={isLoading}
-        />
-      </div>
+      {isLoading ? (
+        <KpiGridSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <MetricCard
+            label={t("totalBookings")}
+            value={number(stats.totalOrders)}
+            caption={t("totalBookingsHint")}
+            icon={Package}
+            tone="primary"
+          />
+          <MetricCard
+            label={t("delivered")}
+            value={number(stats.deliveredOrders)}
+            caption={t("deliveredHint")}
+            icon={CheckCircle2}
+            tone="success"
+          />
+          <MetricCard
+            label={t("inTransit")}
+            value={number(stats.inTransitOrders)}
+            caption={t("inTransitHint")}
+            icon={Truck}
+            tone="info"
+          />
+          <MetricCard
+            label={t("pending")}
+            value={number(stats.pendingOrders)}
+            caption={t("pendingHint")}
+            icon={Clock}
+            tone="warning"
+          />
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* min-w-0: a grid item defaults to min-width:auto, so the wide shipment
@@ -323,13 +316,13 @@ export function MerchantDashboard() {
                   {t("codCollected")}
                 </dt>
                 <dd className="mt-0.5 text-h3 font-bold tabular-nums text-foreground">
-                  ৳ {stats.collectedCodAmount.toLocaleString()}
+                  {bdt(stats.collectedCodAmount)}
                 </dd>
               </div>
-              <div className="border-t border-border pt-3">
+              <div className="border-t border-border/70 pt-3">
                 <dt className="text-caption text-muted-foreground">{t("codPending")}</dt>
                 <dd className="font-semibold tabular-nums text-foreground">
-                  ৳ {pendingCod.toLocaleString()}
+                  {bdt(pendingCod)}
                 </dd>
               </div>
             </dl>
@@ -346,7 +339,7 @@ export function MerchantDashboard() {
             <h2 className="text-h4 font-bold text-foreground">{t("returnsTitle")}</h2>
             <p className="mt-1 text-caption text-muted-foreground">{t("returnsHint")}</p>
             <p className="mt-3 text-h3 font-bold tabular-nums text-foreground">
-              {stats.returnedOrders.toLocaleString()}
+              {number(stats.returnedOrders)}
             </p>
             <Link
               href={MERCHANT_ROUTES.parcels}
@@ -360,7 +353,7 @@ export function MerchantDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-h4 font-bold text-foreground">{t("quickActions")}</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickAction
             href={MERCHANT_ROUTES.createBooking}
             icon={PackagePlus}
@@ -387,7 +380,7 @@ export function MerchantDashboard() {
             title={t("viewReports")}
             description={t("viewReportsDesc")}
           />
-        </div>
+        </Stagger>
       </section>
     </div>
   );

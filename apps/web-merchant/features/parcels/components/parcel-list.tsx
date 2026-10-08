@@ -3,30 +3,28 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Badge,
   Button,
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
   DataTable,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
   type ColumnDef,
 } from "@dhruto/ui";
-import { Eye, Filter, Hash, Plus, Printer } from "lucide-react";
+import { Eye, Hash, Plus, Printer } from "lucide-react";
 import type { ParcelListItem } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
 import { statusConfig } from "@/config/status";
 import { StatusBadge } from "@/components/data-display/status-badge";
 import { ActiveFilters, type ActiveFilter } from "@/components/active-filters";
+import { FilterButton } from "@/components/filters/filter-button";
+import { FilterSheet } from "@/components/filters/filter-sheet";
 import { DebouncedSearchInput } from "@/components/search-input";
 import { Pagination } from "@/components/pagination";
 import { EmptyState, ErrorState, LoadingState, RetryButton } from "@/components/feedback/states";
 import { useFormatters } from "@/lib/format";
+import { rememberListUrl } from "@/lib/last-list-url";
 import { useParcelsList } from "../hooks/use-parcels-list";
 import { ParcelFilterControls } from "./parcel-filters";
 import { ParcelCard } from "./parcel-card";
@@ -202,11 +200,17 @@ export function ParcelList() {
 
   const handleLimitChange = useCallback(
     (nextLimit: number) => {
+      // setLimit already returns to page 1 in a single navigation.
       setLimit(nextLimit);
-      setPage(1);
     },
-    [setLimit, setPage],
+    [setLimit],
   );
+
+  // Remember this workspace so details → Back restores filters and page.
+  const listBase = routes.parcels;
+  React.useEffect(() => {
+    rememberListUrl(listBase);
+  });
 
   const hasNoResults = !isLoading && !isError && parcels.length === 0;
 
@@ -235,6 +239,7 @@ export function ParcelList() {
         <DebouncedSearchInput
           className="flex-1 sm:max-w-none"
           debounceMs={0}
+          slashShortcut
           value={filters.search}
           onChange={(value) => updateFilter("search", value)}
           placeholder={t("searchPlaceholder")}
@@ -242,21 +247,12 @@ export function ParcelList() {
           loading={isFetching}
         />
 
-        <Button
-          type="button"
-          variant="outline"
+        <FilterButton
+          count={activeFilterCount}
+          label={t("filters")}
           onClick={() => setFiltersOpen(true)}
-          className="gap-2 lg:hidden"
-          aria-expanded={filtersOpen}
-        >
-          <Filter className="h-4 w-4" aria-hidden="true" />
-          {t("filters")}
-          {activeFilterCount > 0 ? (
-            <Badge variant="secondary" className="ml-1">
-              {activeFilterCount}
-            </Badge>
-          ) : null}
-        </Button>
+          expanded={filtersOpen}
+        />
       </div>
 
       <ActiveFilters filters={chips} onRemove={handleRemoveFilter} onClearAll={resetFilters} />
@@ -273,28 +269,25 @@ export function ParcelList() {
       </div>
 
       {/* Mobile filter sheet */}
-      <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{t("filters")}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-4">
-            <ParcelFilterControls
-              idPrefix="mobile"
-              stacked
-              filters={filters}
-              updateFilter={updateFilter}
-              resetFilters={resetFilters}
-              activeFilterCount={activeFilterCount}
-            />
-          </div>
-          <div className="mt-4 flex justify-end">
-            <Button type="button" onClick={() => setFiltersOpen(false)}>
-              {t("applyFilters")}
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FilterSheet
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
+        title={t("filters")}
+        activeFilters={chips}
+        onRemoveFilter={handleRemoveFilter}
+        onClearAll={resetFilters}
+        applyLabel={t("applyFilters")}
+        clearLabel={t("clearFilters")}
+      >
+        <ParcelFilterControls
+          idPrefix="mobile"
+          stacked
+          filters={filters}
+          updateFilter={updateFilter}
+          resetFilters={resetFilters}
+          activeFilterCount={activeFilterCount}
+        />
+      </FilterSheet>
 
       {/* States */}
       {isError ? (

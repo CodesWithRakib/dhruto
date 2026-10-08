@@ -7,6 +7,7 @@ import { Button } from "@dhruto/ui";
 import { useRequestReportMutation, useListReportsQuery } from "../api/analytics.api";
 import type { ExportDataset } from "@dhruto/contracts";
 import { getApiErrorMessage } from "@/lib/api-error";
+import { getStoredAccessToken } from "@/lib/api/auth-token";
 
 /**
  * Report export button: requests CSV/XLSX, polls the report list, downloads
@@ -48,10 +49,7 @@ export function ExportButton({
         return;
       }
       const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("dhruto_access_token")?.replace(/^["']|["']$/g, "")
-          : null;
+      const token = getStoredAccessToken();
       const resp = await fetch(`${base}/analytics/reports/${exportId}/download`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

@@ -183,7 +183,10 @@ export default function WebhooksDeveloperPage() {
   };
 
   const handleCopySecret = (id: string, secret: string) => {
-    navigator.clipboard.writeText(secret);
+    if (!secret) return;
+    void navigator.clipboard.writeText(secret).catch(() => {
+      // Clipboard can be denied; the preview stays visible for manual copy.
+    });
     setCopiedSecretId(id);
     setTimeout(() => setCopiedSecretId(null), 2000);
   };
@@ -479,16 +482,18 @@ export default function WebhooksDeveloperPage() {
                         <p className="text-xs text-muted-foreground">{sub.description}</p>
                       )}
 
-                      {/* Secret Key Bar — list responses carry only the masked preview */}
+                      {/* Secret Key Bar — list responses carry only the masked preview.
+                          Never fall back to `sub.secret` here: full secrets are
+                          only ever shown once via the create/rotate flow above. */}
                       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2 rounded-lg border max-w-xl">
-                        <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                        <ShieldCheck className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
                         <span className="font-medium shrink-0">Signing Secret:</span>
                         <span
                           className="font-mono text-xs truncate select-all"
                           title={sub.secretPreview || "Masked preview"}
                         >
                           {isRevealed
-                            ? sub.secretPreview || sub.secret
+                            ? sub.secretPreview || "••••••••••••••••••••••••••••••••"
                             : "••••••••••••••••••••••••••••••••"}
                         </span>
                         <div className="flex items-center gap-1 ml-auto shrink-0">
@@ -507,11 +512,10 @@ export default function WebhooksDeveloperPage() {
                             )}
                           </button>
                           <button
-                            onClick={() =>
-                              handleCopySecret(sub.id, sub.secretPreview || sub.secret)
-                            }
+                            onClick={() => handleCopySecret(sub.id, sub.secretPreview)}
                             className="p-1 hover:text-foreground rounded transition-colors"
                             title="Copy masked preview"
+                            aria-label="Copy masked secret preview"
                           >
                             {isCopied ? (
                               <Check className="h-3.5 w-3.5 text-success" />

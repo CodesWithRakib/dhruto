@@ -1,23 +1,11 @@
 import { ImageResponse } from "next/og";
 
-/** Dhruto brand colours, mirrored from the design tokens. */
-const BRAND_GREEN = "#16A34A";
-const BRAND_INK = "#0F172A";
+/** Dhruto brand colours */
+const BRAND_RED = "#E11D48";
 const SURFACE = "#FFFFFF";
 
-/**
- * Renders the Dhruto app icon at a given size.
- *
- * Design: a green field with a white rounded "parcel" tile and a green
- * upward chevron — a delivery/velocity mark. Pure geometry, so no font or
- * binary asset is required. `maskable` variants pad the mark into the safe
- * zone so Android can crop it to any shape.
- */
 export function renderBrandIcon(size: number, maskable = false) {
-  const field = maskable ? size : Math.round(size * 0.86);
-  const tile = Math.round(field * (maskable ? 0.52 : 0.6));
-  const radius = Math.round(tile * 0.24);
-
+  // Center the SVG path for the app icon (viewBox is 48)
   return new ImageResponse(
     <div
       style={{
@@ -26,48 +14,39 @@ export function renderBrandIcon(size: number, maskable = false) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: maskable ? BRAND_GREEN : "transparent",
+        background: maskable ? BRAND_RED : "transparent",
       }}
     >
       <div
         style={{
-          width: field,
-          height: field,
-          borderRadius: maskable ? size : Math.round(size * 0.2),
-          background: maskable ? "transparent" : BRAND_GREEN,
+          width: size,
+          height: size,
+          borderRadius: maskable ? "50%" : Math.round(size * 0.2),
+          background: maskable ? "transparent" : SURFACE,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          boxShadow: maskable ? "none" : "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <div
-          style={{
-            width: tile,
-            height: tile,
-            borderRadius: radius,
-            background: SURFACE,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+        <svg
+          width={size * 0.7}
+          height={size * 0.7}
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Upward chevron — the "velocity" mark. */}
-          <div
-            style={{
-              width: Math.round(tile * 0.42),
-              height: Math.round(tile * 0.42),
-              borderLeft: `${Math.round(tile * 0.14)}px solid ${BRAND_GREEN}`,
-              borderTop: `${Math.round(tile * 0.14)}px solid ${BRAND_GREEN}`,
-              transform: "rotate(45deg)",
-              marginTop: Math.round(tile * 0.16),
-              display: "flex",
-            }}
-          />
-        </div>
+          <g fill={maskable ? SURFACE : BRAND_RED} style={{ transform: "scale(1.1) translate(0px, 1px)", transformOrigin: "center" }}>
+            <path d="M18 10 H30 A14 14 0 0 1 44 24 A14 14 0 0 1 30 38 H18 Z" />
+            <path d="M4 16 H14 V20 H4 Z" />
+            <path d="M1 24 H12 V28 H1 Z" />
+            <path d="M6 32 H14 V36 H6 Z" />
+          </g>
+        </svg>
       </div>
     </div>,
     { width: size, height: size },
   );
 }
 
-export const BRAND = { BRAND_GREEN, BRAND_INK };
+export const BRAND = { BRAND_RED, BRAND_INK: "#111827" };

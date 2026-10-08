@@ -5,12 +5,13 @@ import { useTranslations } from "next-intl";
 import {
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   Building2,
   Clock,
   MapPin,
   Package,
   Printer,
-  Search,
+  RefreshCw,
   ShieldCheck,
   Truck,
   User,
@@ -24,16 +25,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  DetailsSkeleton,
 } from "@dhruto/ui";
 import { ParcelStatus } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
 import { StatusBadge } from "@/components/data-display/status-badge";
-import { PARCEL_STATUS_CONFIG } from "@/config/status";
-import { ErrorState, LoadingState } from "@/components/feedback/states";
+import { HighlightCard } from "@/components/data-display/cards";
+import { Timeline, TimelineItem } from "@/components/data-display/timeline";
+import { PARCEL_STATUS_CONFIG, statusConfig } from "@/config/status";
+import { ErrorState, RetryButton } from "@/components/feedback/states";
 import { useGetParcelByIdQuery } from "../api/parcels.api";
 import { ParcelIntelligencePanel } from "@/features/intelligence/components/parcel-intelligence-panel";
 import { useFormatters } from "@/lib/format";
+import { lastListUrl } from "@/lib/last-list-url";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -86,39 +91,42 @@ function isReturnFlow(status: ParcelStatus): boolean {
   ].includes(status);
 }
 
-function formatBdt(value: number): string {
-  return `৳${value.toLocaleString()}`;
-}
-
 export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const t = useTranslations("ParcelDetails");
-  const { dateTime } = useFormatters();
+  const tStates = useTranslations("States");
+  const { bdt, dateTime } = useFormatters();
   const tStatus = useTranslations("ParcelStatus");
   const routes = useRouteBase();
 
   const { data, isLoading, isError, refetch } = useGetParcelByIdQuery(parcelId);
 
+  // Back returns to the exact list workspace (filters + page) when the user
+  // arrived from it; deep links fall back to the list root.
+  const [backHref, setBackHref] = React.useState(routes.parcels);
+  React.useEffect(() => {
+    setBackHref(lastListUrl(routes.parcels, routes.parcels));
+  }, [routes.parcels]);
+
   if (isLoading) {
-    return (
-      <div className="rounded-md border border-border bg-surface">
-        <LoadingState title={t("loading")} />
-      </div>
-    );
+    return <DetailsSkeleton />;
   }
 
   if (isError || !data?.data) {
     return (
-      <div className="rounded-md border border-border bg-surface">
+      <div className="rounded-xl border border-border/70 bg-surface">
         <ErrorState
           title={t("notFoundTitle")}
           description={t("notFoundDescription")}
           action={
-            <Link href={routes.parcels}>
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                {t("back")}
-              </Button>
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <RetryButton label={tStates("retry")} onRetry={() => void refetch()} />
+              <Link href={routes.parcels}>
+                <Button variant="outline" size="sm">
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  {t("back")}
+                </Button>
+              </Link>
+            </div>
           }
         />
       </div>
@@ -128,17 +136,33 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const parcel = data.data;
   const netReceivable = Math.max(0, parcel.codAmount - parcel.deliveryFee);
   const milestones = isReturnFlow(parcel.status) ? RETURN_MILESTONES : MILESTONES;
-  const currentStep = Math.max(
-    1,
-    milestones.findIndex((milestone) => milestone.statuses.includes(parcel.status)) + 1,
+  // Unknown/terminal statuses (cancelled, lost, damaged) match no milestone:
+  // show the track unpassed instead of implying step 1 is complete.
+  const matchedStep = milestones.findIndex((milestone) =>
+    milestone.statuses.includes(parcel.status),
   );
+  // "What happens next" is derived from the same milestone order as the
+  // progress track, so guidance can never contradict the lifecycle.
+  const nextMilestone = matchedStep === -1 ? undefined : milestones[matchedStep + 1];
+  const nextStep: { tone: "info" | "success" | "warning"; body: string } =
+    matchedStep === -1
+      ? { tone: "warning", body: t("exceptionNext") }
+      : nextMilestone
+        ? {
+            tone: "info",
+            body: t("nextIs", { stage: tStatus(nextMilestone.labelKey) }),
+          }
+        : isReturnFlow(parcel.status)
+          ? { tone: "success", body: t("returnedNext") }
+          : { tone: "success", body: t("deliveredNext") };
+  const currentStep = matchedStep === -1 ? 0 : matchedStep + 1;
   const progress = milestones.length > 1 ? ((currentStep - 1) / (milestones.length - 1)) * 100 : 0;
   const intelligence = parcel.addressIntelligence;
 
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <Link href={routes.parcels}>
+        <Link href={backHref}>
           <Button variant="ghost" size="sm" className="-ml-2 gap-1.5">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t("back")}
@@ -146,7 +170,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         </Link>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void refetch()}>
-            <Search className="h-4 w-4" aria-hidden="true" />
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
             {t("refresh")}
           </Button>
           <Link href={routes.parcelLabel(parcel.id)}>
@@ -175,22 +199,30 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         </CardHeader>
 
         {/* Progress track */}
-        <CardContent className="border-b border-border py-6">
-          <ol className="relative mx-auto flex max-w-2xl justify-between">
+        <CardContent className="border-b border-border/70 py-6">
+          <ol
+            className="relative mx-auto flex max-w-2xl justify-between"
+            aria-label={t("orderStatus")}
+          >
             <div
               className="absolute left-0 top-3.5 h-0.5 w-full bg-surface-muted"
               aria-hidden="true"
             />
             <div
-              className="absolute left-0 top-3.5 h-0.5 bg-primary transition-all"
+              className="absolute left-0 top-3.5 h-0.5 bg-primary transition-all duration-base ease-out"
               style={{ width: `${progress}%` }}
               aria-hidden="true"
             />
             {milestones.map((milestone, index) => {
               const step = index + 1;
               const isPassed = currentStep >= step;
+              const isCurrent = currentStep === step;
               return (
-                <li key={milestone.labelKey} className="relative z-10 flex flex-col items-center">
+                <li
+                  key={milestone.labelKey}
+                  className="relative z-10 flex min-w-0 flex-1 flex-col items-center"
+                  aria-current={isCurrent ? "step" : undefined}
+                >
                   <span
                     aria-hidden="true"
                     className={
@@ -204,8 +236,8 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
                   <span
                     className={
                       isPassed
-                        ? "mt-2 max-w-[80px] text-center text-caption font-medium text-foreground"
-                        : "mt-2 max-w-[80px] text-center text-caption text-muted-foreground"
+                        ? "mt-2 max-w-full px-1 text-center text-caption font-medium text-foreground"
+                        : "mt-2 max-w-full px-1 text-center text-caption text-muted-foreground"
                     }
                   >
                     {tStatus(milestone.labelKey)}
@@ -254,17 +286,17 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t("codCollection")}</span>
                 <span className="font-bold tabular-nums text-foreground">
-                  {formatBdt(parcel.codAmount)}
+                  {bdt(parcel.codAmount)}
                 </span>
               </div>
-              <div className="flex items-center justify-between border-b border-border pb-2 text-caption text-muted-foreground">
+              <div className="flex items-center justify-between border-b border-border/70 pb-2 text-caption text-muted-foreground">
                 <span>{t("deliveryFee")}</span>
-                <span className="tabular-nums">− {formatBdt(parcel.deliveryFee)}</span>
+                <span className="tabular-nums">− {bdt(parcel.deliveryFee)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-foreground">{t("netReceivable")}</span>
                 <span className="text-h4 font-bold tabular-nums text-primary">
-                  {formatBdt(netReceivable)}
+                  {bdt(netReceivable)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-caption text-muted-foreground">
@@ -351,6 +383,18 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         </CardContent>
       </Card>
 
+      <HighlightCard tone={nextStep.tone}>
+        <p className="flex items-start gap-2.5 text-body-sm">
+          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>
+            <span className="block text-caption font-semibold uppercase tracking-wider opacity-80">
+              {t("whatsNext")}
+            </span>
+            <span className="mt-0.5 block font-medium text-foreground">{nextStep.body}</span>
+          </span>
+        </p>
+      </HighlightCard>
+
       {/* History */}
       <Card>
         <CardHeader className="border-b border-border pb-3">
@@ -367,40 +411,34 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
               {t("noHistory")}
             </p>
           ) : (
-            <ol className="relative ml-3 space-y-6 border-l border-border pl-6">
+            <Timeline label={t("statusHistory")}>
               {[...parcel.history]
                 .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .map((entry) => (
-                  <li key={entry.id} className="relative">
-                    <span
-                      aria-hidden="true"
-                      className="absolute -left-[31px] top-1 h-2.5 w-2.5 rounded-full bg-primary"
-                    />
-                    <div className="flex flex-wrap items-center gap-2">
-                      <StatusBadge status={entry.toStatus} />
-                      {entry.fromStatus ? (
-                        <span className="text-caption text-muted-foreground">
-                          {t("fromStatus", {
-                            status: tStatus(PARCEL_STATUS_CONFIG[entry.fromStatus].labelKey),
-                          })}
-                        </span>
-                      ) : null}
-                      <time
-                        dateTime={entry.createdAt}
-                        className="font-mono text-caption text-muted-foreground"
-                      >
-                        {dateTime(entry.createdAt)}
-                      </time>
-                    </div>
+                .map((entry, index) => (
+                  <TimelineItem
+                    key={entry.id}
+                    title={<StatusBadge status={entry.toStatus} />}
+                    timestamp={dateTime(entry.createdAt)}
+                    dateTime={entry.createdAt}
+                    tone={statusConfig(entry.toStatus as ParcelStatus).tone}
+                    current={index === 0}
+                  >
+                    {entry.fromStatus ? (
+                      <span className="mt-1 block text-caption text-muted-foreground">
+                        {t("fromStatus", {
+                          status: tStatus(PARCEL_STATUS_CONFIG[entry.fromStatus].labelKey),
+                        })}
+                      </span>
+                    ) : null}
                     {entry.description ? (
                       <p className="mt-1 text-body-sm text-muted-foreground">{entry.description}</p>
                     ) : null}
                     <p className="mt-1 text-caption text-muted-foreground">
                       {t("recordedBy", { role: entry.actorRole })}
                     </p>
-                  </li>
+                  </TimelineItem>
                 ))}
-            </ol>
+            </Timeline>
           )}
         </CardContent>
       </Card>

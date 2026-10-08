@@ -106,23 +106,23 @@ export function RtoRiskMeter({
       case "LOW":
         return {
           label: "Low Risk (Safe)",
-          color: "text-success bg-success-soft border-success   ",
-          icon: <ShieldCheck className="h-5 w-5 text-success " />,
+          color: "text-success-soft-foreground bg-success-soft border-success/30",
+          icon: <ShieldCheck className="h-5 w-5 text-success-soft-foreground" />,
           progressColor: "bg-success",
         };
       case "MEDIUM":
         return {
           label: "Moderate Risk (Verify)",
-          color: "text-warning bg-warning-soft border-warning   ",
-          icon: <Shield className="h-5 w-5 text-warning " />,
+          color: "text-warning-soft-foreground bg-warning-soft border-warning/30",
+          icon: <Shield className="h-5 w-5 text-warning-soft-foreground" />,
           progressColor: "bg-warning",
         };
       case "HIGH":
       default:
         return {
           label: "High Risk (Action Needed)",
-          color: "text-danger bg-danger-soft border-danger   ",
-          icon: <ShieldAlert className="h-5 w-5 text-danger " />,
+          color: "text-danger-soft-foreground bg-danger-soft border-danger/30",
+          icon: <ShieldAlert className="h-5 w-5 text-danger-soft-foreground" />,
           progressColor: "bg-danger",
         };
     }
@@ -132,19 +132,19 @@ export function RtoRiskMeter({
     switch (impact) {
       case "POSITIVE":
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-success-soft text-success  ">
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-success-soft text-success-soft-foreground">
             Positive
           </span>
         );
       case "WARNING":
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-warning-soft text-warning  ">
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-warning-soft text-warning-soft-foreground">
             Warning
           </span>
         );
       case "CRITICAL":
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-danger-soft text-danger  ">
+          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase bg-danger-soft text-danger-soft-foreground">
             Critical
           </span>
         );

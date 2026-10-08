@@ -5,6 +5,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@dhru
 import { BarChart2, Calendar } from "lucide-react";
 import { type DailyTrendPoint } from "@dhruto/contracts";
 import { formatBDT } from "@/lib/format";
+import { FilterTabs } from "@/components/filter-tabs";
+import { EmptyState } from "@/components/feedback/states";
 
 interface VolumeTrendChartProps {
   trends: DailyTrendPoint[];
@@ -15,7 +17,15 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   if (!trends || trends.length === 0) {
-    return null;
+    return (
+      <Card>
+        <EmptyState
+          title="No trend data for this period"
+          description="Try a wider date range to see delivery velocity and volume."
+          icon={BarChart2}
+        />
+      </Card>
+    );
   }
 
   // Calculate maximum values for scaling
@@ -29,12 +39,12 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
   const totalCod = trends.reduce((acc, t) => acc + t.codCollected, 0);
 
   return (
-    <Card className="shadow-sm border-primary/20">
-      <CardHeader className="border-b bg-muted/20">
+    <Card className="shadow-soft border-primary/20">
+      <CardHeader className="border-b border-border/70 bg-surface-muted/40">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center space-x-2">
-            <div className="p-2 bg-primary/10 text-primary rounded-lg">
-              <BarChart2 className="h-5 w-5" />
+            <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
+              <BarChart2 className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
               <CardTitle className="text-lg">Delivery Velocity & Volume Trends</CardTitle>
@@ -45,22 +55,15 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMetricType("count")}
-              className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${metricType === "count" ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-            >
-              Order Count
-            </button>
-            <button
-              type="button"
-              onClick={() => setMetricType("cod")}
-              className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-all ${metricType === "cod" ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-            >
-              COD Revenue (৳)
-            </button>
-          </div>
+          <FilterTabs
+            value={metricType}
+            onValueChange={setMetricType}
+            label="Trend metric"
+            options={[
+              { value: "count", label: "Order Count" },
+              { value: "cod", label: "COD Revenue (৳)" },
+            ]}
+          />
         </div>
       </CardHeader>
 
@@ -69,15 +72,15 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-b pb-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 font-medium">
-              <span className="h-3 w-3 rounded-full bg-blue-500 inline-block" />
+              <span className="h-3 w-3 rounded-full bg-info inline-block" aria-hidden="true" />
               <span>Booked ({totalBooked})</span>
             </div>
             <div className="flex items-center gap-1.5 font-medium">
-              <span className="h-3 w-3 rounded-full bg-emerald-500 inline-block" />
+              <span className="h-3 w-3 rounded-full bg-success inline-block" aria-hidden="true" />
               <span>Delivered ({totalDelivered})</span>
             </div>
             <div className="flex items-center gap-1.5 font-medium">
-              <span className="h-3 w-3 rounded-full bg-rose-500 inline-block" />
+              <span className="h-3 w-3 rounded-full bg-danger inline-block" aria-hidden="true" />
               <span>RTO / Returned</span>
             </div>
           </div>
@@ -111,15 +114,15 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
                     </div>
                     {metricType === "count" ? (
                       <div className="space-y-0.5">
-                        <div className="flex justify-between gap-2 text-blue-600 dark:text-blue-400">
+                        <div className="flex justify-between gap-2 text-info-soft-foreground">
                           <span>Booked:</span>
                           <span className="font-mono font-bold">{point.booked}</span>
                         </div>
-                        <div className="flex justify-between gap-2 text-emerald-600 dark:text-emerald-400">
+                        <div className="flex justify-between gap-2 text-success-soft-foreground">
                           <span>Delivered:</span>
                           <span className="font-mono font-bold">{point.delivered}</span>
                         </div>
-                        <div className="flex justify-between gap-2 text-rose-600 dark:text-rose-400">
+                        <div className="flex justify-between gap-2 text-danger-soft-foreground">
                           <span>Returned:</span>
                           <span className="font-mono font-bold">{point.returned}</span>
                         </div>
@@ -138,12 +141,12 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
                   <div className="w-full flex items-end justify-center gap-1 h-full">
                     {/* Booked Bar */}
                     <div
-                      className="w-1/2 max-w-[14px] bg-blue-500/80 hover:bg-blue-600 rounded-t-sm transition-all duration-300"
+                      className="w-1/2 max-w-[14px] rounded-t-sm bg-info/80 transition-all duration-base ease-out hover:bg-info"
                       style={{ height: `${bookedHeight}%` }}
                     />
                     {/* Delivered Bar */}
                     <div
-                      className="w-1/2 max-w-[14px] bg-emerald-500/90 hover:bg-emerald-600 rounded-t-sm transition-all duration-300"
+                      className="w-1/2 max-w-[14px] rounded-t-sm bg-success/90 transition-all duration-base ease-out hover:bg-success"
                       style={{ height: `${deliveredHeight}%` }}
                     />
                   </div>
@@ -166,24 +169,24 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
         </div>
 
         {/* Footer Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2">
-          <div className="p-3 rounded-lg border bg-muted/20">
-            <span className="text-muted-foreground block">Period Total Deliveries</span>
-            <span className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
+        <div className="grid grid-cols-1 gap-3 pt-2 text-xs sm:grid-cols-3">
+          <div className="rounded-lg border border-border/70 bg-surface-muted/40 p-3">
+            <span className="block text-muted-foreground">Period Total Deliveries</span>
+            <span className="font-mono text-lg font-bold text-success-soft-foreground">
               {totalDelivered} orders
             </span>
           </div>
 
-          <div className="p-3 rounded-lg border bg-muted/20">
-            <span className="text-muted-foreground block">Period COD Collected</span>
-            <span className="text-lg font-bold font-mono text-foreground">
+          <div className="rounded-lg border border-border/70 bg-surface-muted/40 p-3">
+            <span className="block text-muted-foreground">Period COD Collected</span>
+            <span className="font-mono text-lg font-bold text-foreground">
               {formatBDT(totalCod)}
             </span>
           </div>
 
-          <div className="p-3 rounded-lg border bg-muted/20">
-            <span className="text-muted-foreground block">Daily Booking Velocity</span>
-            <span className="text-lg font-bold font-mono text-blue-600 dark:text-blue-400">
+          <div className="rounded-lg border border-border/70 bg-surface-muted/40 p-3">
+            <span className="block text-muted-foreground">Daily Booking Velocity</span>
+            <span className="font-mono text-lg font-bold text-info-soft-foreground">
               {(totalBooked / Math.max(1, trends.length)).toFixed(1)} / day
             </span>
           </div>

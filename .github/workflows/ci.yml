@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  # Fast, deterministic gates for every PR.
+  quality:
+    name: lint / typecheck / unit / build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec turbo run lint typecheck test build --output-logs=errors-only
+
+  # Full business-journey suite against a real backend. Runs on main and on
+  # demand only: it boots Postgres + Redis, migrates, seeds and drives real
+  # browsers, so it is too heavy for every PR push.
+  e2e:
+    name: e2e journeys
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: dhruto
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d dhruto"
+          --health-interval=5s --health-timeout=5s --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=5s --health-retries=5
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+      NEXT_PUBLIC_APP_NAME: Dhruto Merchant Portal
+      PLAYWRIGHT_TEST_BASE_URL: http://localhost:5000
+      PLAYWRIGHT_API_URL: http://localhost:4000/api/v1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # API environment comes from repo settings (DHRUTO_API_ENV holds the
+      # full apps/api/.env content). Never commit environment secrets.
+      - name: Write API environment
+        run: printf '%s' "${{ secrets.DHRUTO_API_ENV }}" > apps/api/.env
+
+      - name: Migrate and seed
+        run: pnpm --filter @dhruto/api db:setup
+
+      - name: Start API
+        run: |
+          pnpm --filter @dhruto/api start > /tmp/api.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:4000/health >/dev/null 2>&1 && break
+            sleep 2
+          done
+          curl -fsS http://localhost:4000/health
+
+      - name: Build and start web
+        run: |
+          pnpm --filter @dhruto/web-merchant build
+          pnpm --filter @dhruto/web-merchant start > /tmp/web.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:5000/en >/dev/null 2>&1 && break
+            sleep 2
+          done
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @dhruto/web-merchant exec playwright install --with-deps chromium
+
+      - name: Run E2E journeys
+        run: pnpm --filter @dhruto/web-merchant test:e2e
+
+      - name: Upload trace artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web-merchant/test-results/

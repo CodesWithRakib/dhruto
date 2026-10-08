@@ -36,9 +36,11 @@ function Frame({
   description,
   action,
   className,
+  alert,
 }: StateViewProps & {
   icon: React.ReactNode;
   tone?: "neutral" | "danger" | "warning";
+  alert?: boolean;
 }) {
   const toneClass =
     tone === "danger"
@@ -49,18 +51,18 @@ function Frame({
 
   return (
     <div
-      role="status"
+      role={alert ? "alert" : "status"}
       className={cn(
-        "flex flex-col items-center justify-center gap-3 px-6 py-12 text-center",
+        "dhruto-animate-in flex flex-col items-center justify-center gap-3 px-6 py-12 text-center",
         className,
       )}
     >
-      <span className={cn("flex h-12 w-12 items-center justify-center rounded-md", toneClass)}>
+      <span className={cn("flex h-12 w-12 items-center justify-center rounded-xl", toneClass)}>
         {icon}
       </span>
-      {title ? <p className="text-h4 text-foreground">{title}</p> : null}
+      {title ? <p className="text-h4 text-balance text-foreground">{title}</p> : null}
       {description ? (
-        <p className="max-w-md text-body-sm text-muted-foreground">{description}</p>
+        <p className="max-w-md text-body-sm text-pretty text-muted-foreground">{description}</p>
       ) : null}
       {action ? <div className="mt-1">{action}</div> : null}
     </div>
@@ -110,6 +112,7 @@ export function ErrorState({ title, description, action, className }: StateViewP
     <Frame
       className={className}
       tone="danger"
+      alert
       title={title}
       description={description}
       action={action}

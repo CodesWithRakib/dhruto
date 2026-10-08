@@ -19,10 +19,6 @@
 
   body {
     background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(ellipse 70% 50% at 50% 0%, hsl(var(--hero-dark-glow) / 0.7), transparent 70%),
-      linear-gradient(180deg, hsl(var(--hero-dark-mid)) 0%, hsl(var(--hero-dark-base)) 100%);
-    background-attachment: fixed;
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -113,8 +109,6 @@
     /* Re-map semantic tokens so nested components adapt automatically */
     --foreground: var(--hero-dark-foreground);
     --muted-foreground: var(--hero-dark-muted);
-    --surface: 180 32% 13%; /* #16302F — card on dark */
-    --border: 172 30% 22%; /* #274943 */
     --primary: var(--hero-dark-accent);
     --primary-foreground: 0 0% 100%;
   }
@@ -140,6 +134,7 @@
     @apply rounded-full px-3 py-1 text-xs font-semibold;
     background: hsl(var(--hero-chip));
     border: 1px solid hsl(var(--hero-accent) / 0.3);
+    color: hsl(var(--hero-muted));
   }
   .dhruto-hero-badge {
     background: hsl(var(--hero-gold));
@@ -147,7 +142,47 @@
   }
   .dhruto-hero-accent {
     background: hsl(var(--hero-accent));
-    color: #fff;
+    color: hsl(var(--hero-dark-foreground));
+  }
+
+  /* Premium product surfaces — contrast over borders/shadows. */
+  .dhruto-surface {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border) / 0.7);
+  }
+  .dhruto-surface-elevated {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: var(--shadow-soft);
+  }
+  .dhruto-surface-lift {
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* Subtle entrance — respects prefers-reduced-motion via the global guard. */
+  .dhruto-animate-in {
+    animation: dhruto-fade-slide var(--duration-base) var(--ease-out) both;
+  }
+  .dhruto-animate-in-slow {
+    animation: dhruto-fade-slide var(--duration-slow) var(--ease-out) both;
+  }
+
+  /* Table polish shared by every DataTable instance. */
+  .dhruto-table-header {
+    background: hsl(var(--surface-muted) / 0.7);
+  }
+
+  /* Skeleton shimmer — single tone driven by --skeleton. */
+  .dhruto-skeleton {
+    background: hsl(var(--skeleton) / 0.7);
+    animation: dhruto-shimmer 1.6s ease-in-out infinite;
+  }
+
+  /* Subtle logistics route pattern for heroes/empty states (CSS only). */
+  .dhruto-route-pattern {
+    background-image: radial-gradient(hsl(var(--primary) / 0.14) 1px, transparent 1px);
+    background-size: 18px 18px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
   }
 }
 
@@ -174,6 +209,29 @@
   }
   .text-pretty {
     text-wrap: pretty;
+  }
+}
+
+@keyframes dhruto-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dhruto-shimmer {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
   }
 }
 

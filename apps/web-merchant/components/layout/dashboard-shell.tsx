@@ -4,13 +4,6 @@ import * as React from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown, LogOut, Menu, User, X } from "lucide-react";
 import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -30,9 +23,11 @@ import {
 } from "@/config/roles";
 import { isActiveRoute } from "@/config/routes";
 import { cn } from "@/lib/cn";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { logout } from "@/store/auth.slice";
+import { useAppSelector } from "@/store/hooks";
+import { useSignOut } from "@/lib/auth/session";
 import { NotificationBell } from "@/components/notification-bell";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
 /** Dashboard sections that render inside this shell. */
@@ -89,9 +84,9 @@ export function DashboardShell({
   const t = useTranslations("Nav");
   const locale = useLocale();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const pathname = usePathname();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { signOut } = useSignOut();
 
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
@@ -133,28 +128,28 @@ export function DashboardShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [drawerOpen]);
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
-    dispatch(logout());
+    await signOut();
     router.push("/login");
   };
 
   // Prevent flash of protected dashboard content before hydration or redirect
   if (!mounted || !isAuthenticated || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm font-medium text-muted-foreground">Loading workspace...</p>
+          <p className="text-sm font-medium text-muted-foreground">{t("loadingWorkspace")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 h-screen hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
+      <aside className="sticky top-0 h-screen hidden w-64 shrink-0 border-r border-border bg-surface/50 backdrop-blur-md lg:flex lg:flex-col">
         <div className="flex h-16 items-center border-b border-border px-5">
           <Link href="/" aria-label="Dhruto" className="rounded-md">
             <Logo size="sm" />
@@ -175,7 +170,7 @@ export function DashboardShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-surface px-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-surface/50 backdrop-blur-md px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
@@ -196,6 +191,7 @@ export function DashboardShell({
 
           <div className="flex items-center gap-2">
             <LanguageSwitcher currentLocale={locale} label={t("language")} />
+            <ThemeSwitcher />
             <NotificationBell />
             {/* User Profile Dropdown */}
             <DropdownMenu>
@@ -203,9 +199,9 @@ export function DashboardShell({
                 <button
                   type="button"
                   className="flex items-center gap-2.5 rounded-lg p-1.5 text-left transition-colors hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 border-l border-border pl-3 ml-1"
-                  aria-label="User account menu"
+                  aria-label={t("accountMenu")}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0F172A] font-bold text-white text-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                     {(user?.name || "M").charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden flex-col text-left sm:flex">
@@ -263,49 +259,28 @@ export function DashboardShell({
         </header>
 
         {/* Confirmation Modal for Logout */}
-        <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
-          <DialogContent className="max-w-md rounded-2xl p-6">
-            <DialogHeader className="space-y-2 text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger-soft text-danger">
-                <LogOut className="h-6 w-6" aria-hidden="true" />
-              </div>
-              <DialogTitle className="text-lg font-bold text-foreground">
-                {t("logoutConfirmTitle")}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                {t("logoutConfirmMessage")}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowLogoutModal(false)}
-                className="w-full sm:w-auto"
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleConfirmLogout}
-                className="w-full sm:w-auto bg-danger text-danger-foreground hover:bg-danger/90"
-              >
-                <LogOut className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                {t("confirmSignOut")}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ConfirmDialog
+          open={showLogoutModal}
+          onOpenChange={setShowLogoutModal}
+          title={t("logoutConfirmTitle")}
+          description={t("logoutConfirmMessage")}
+          confirmLabel={t("confirmSignOut")}
+          cancelLabel={t("cancel")}
+          tone="danger"
+          onConfirm={() => {
+            handleConfirmLogout();
+          }}
+        />
 
         <main
           id="main-content"
+          key={pathname}
           className={cn(
             "flex-1 px-4 py-6 sm:px-6 lg:px-8",
             showBottomNav ? "pb-28 lg:pb-6" : undefined,
           )}
         >
-          <div className="w-full">{children}</div>
+          <div className="dhruto-animate-in w-full">{children}</div>
         </main>
 
         {/* Mobile bottom navigation — role specific, safe-area aware. */}

@@ -90,7 +90,23 @@
     "registerBtn": "নিবন্ধন সম্পন্ন করুন",
     "alreadyAccount": "ইতিমধ্যে অ্যাকাউন্ট রয়েছে?",
     "loginNow": "লগইন করুন",
-    "logout": "লগআউট"
+    "logout": "লগআউট",
+    "welcomeBackBadge": "ফিরে স্বাগতম",
+    "welcomeBack": "ফিরে আসায় স্বাগতম, {name}!",
+    "accountCreated": "মার্চেন্ট অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম, {name}।",
+    "signInFailed": "সাইন ইন ব্যর্থ হয়েছে",
+    "registrationFailed": "নিবন্ধন ব্যর্থ হয়েছে",
+    "credentialsRequired": "ইমেইল/ফোন এবং পাসওয়ার্ড দুটোই দিন।",
+    "requiredFields": "সব প্রয়োজনীয় তথ্য পূরণ করুন।",
+    "invalidCredentials": "ভুল ইমেইল/ফোন বা পাসওয়ার্ড। তথ্য যাচাই করে আবার চেষ্টা করুন।",
+    "registrationFailedDesc": "নিবন্ধন ব্যর্থ হয়েছে। তথ্য যাচাই করুন।",
+    "showPassword": "পাসওয়ার্ড দেখুন",
+    "hidePassword": "পাসওয়ার্ড লুকান",
+    "fullNamePlaceholder": "যেমন তানভীর আহমেদ",
+    "emailPlaceholder": "যেমন merchant@mystore.com",
+    "phonePlaceholder": "01712345678",
+    "businessNamePlaceholder": "যেমন ঢাকা আর্টিসান ক্রাফটস",
+    "pickupAddressPlaceholder": "যেমন বাসা ১৪, রোড ৫, ধানমন্ডি, ঢাকা"
   },
   "BookingForm": {
     "title": "নতুন পার্সেল বুকিং",
@@ -125,6 +141,8 @@
     "viewDetails": "বিস্তারিত দেখুন",
     "printLabel": "লেবেল প্রিন্ট",
     "submissionError": "বুকিং তৈরি করা যায়নি",
+    "submitFailed": "বুকিং জমা ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    "createFailed": "পার্সেল বুকিং তৈরি করা যায়নি। তথ্য যাচাই করে আবার চেষ্টা করুন।",
     "pageTitle": "পার্সেল বুক করুন",
     "pageSubtitle": "প্রাপক ও প্যাকেজের তথ্য পূরণ করুন। ডেলিভারি চার্জ ধ্রুতো হিসাব করে নিশ্চিত করার আগে দেখানো হবে।",
     "sectionRecipient": "প্রাপক",
@@ -255,7 +273,12 @@
     "statusHistoryHint": "এই পার্সেলের প্রতিটি ঘটনার অপরিবর্তনীয় রেকর্ড।",
     "noHistory": "এখনো কোনো ইতিহাস নেই।",
     "fromStatus": "{status} থেকে",
-    "recordedBy": "রেকর্ড করেছেন {role}"
+    "recordedBy": "রেকর্ড করেছেন {role}",
+    "whatsNext": "এরপর কী হবে",
+    "nextIs": "পরবর্তী ধাপ: {stage}",
+    "deliveredNext": "ডেলিভারি সম্পন্ন। COD রাইডার হ্যান্ড-ইন ও যাচাইকরণের মাধ্যমে আপনার সেটেলমেন্টে যুক্ত হবে।",
+    "returnedNext": "আপনার কাছে ফেরত এসেছে। পার্সেলের যাত্রা সম্পন্ন।",
+    "exceptionNext": "এই শিপমেন্টে নজর দেওয়া প্রয়োজন। ট্র্যাকিং কোডসহ সাপোর্টে যোগাযোগ করুন।"
   },
   "ShippingLabel": {
     "title": "শিপিং লেবেল",
@@ -291,7 +314,12 @@
     "location": "বর্তমান অবস্থান",
     "locationPending": "পরবর্তী হাব স্ক্যানের অপেক্ষায়",
     "lastUpdated": "সর্বশেষ হালনাগাদ {date}",
-    "statusLabel": "অবস্থা: {status}"
+    "statusLabel": "অবস্থা: {status}",
+    "copyCode": "কোড কপি করুন",
+    "copied": "কপি হয়েছে",
+    "loadError": "ট্র্যাকিং লোড করা যায়নি",
+    "loadErrorDesc": "সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+    "retry": "আবার চেষ্টা করুন"
   },
   "Hub": {
     "title": "হাব অপারেশন সেন্টার",
@@ -954,7 +982,8 @@
     "advanceNeeded": "ডেলিভারি ফি অগ্রিম গ্রহণ প্রয়োজন"
   },
   "Nav": {
-    "home": "হোম",
+    "loadingWorkspace": "ওয়ার্কস্পেস লোড হচ্ছে…",
+    "accountMenu": "ব্যবহারকারী অ্যাকাউন্ট মেনু",    "home": "হোম",
     "tracking": "ট্র্যাকিং",
     "services": "সেবা সমূহ",
     "pricing": "ক্যালকুলেটর",

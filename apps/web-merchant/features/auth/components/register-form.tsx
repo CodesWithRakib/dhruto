@@ -41,7 +41,7 @@ export function RegisterForm() {
     setErrorMessage(null);
 
     if (!name || !email || !phone || !password || !businessName || !pickupAddress) {
-      setErrorMessage("Please fill in all required fields.");
+      setErrorMessage(t("requiredFields"));
       return;
     }
 
@@ -68,17 +68,17 @@ export function RegisterForm() {
             refreshToken,
           }),
         );
-        toast.success(`Merchant account created! Welcome, ${payloadData.user.name}.`);
+        toast.success(t("accountCreated", { name: payloadData.user.name }));
         // New merchants land on their own dashboard.
         router.replace(homeForRole(payloadData.user.role).href);
       }
     } catch (err) {
       const message = getApiErrorMessage(
         err,
-        "Registration failed. Please verify your information.",
+        t("registrationFailedDesc"),
       );
       setErrorMessage(message);
-      toast.error("Registration failed", { description: message });
+      toast.error(t("registrationFailed"), { description: message });
     }
   };
 
@@ -106,7 +106,7 @@ export function RegisterForm() {
               <label className="text-label leading-none">{t("fullName")} *</label>
               <Input
                 type="text"
-                placeholder="e.g. Tanvir Ahmed"
+                placeholder={t("fullNamePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
@@ -118,7 +118,7 @@ export function RegisterForm() {
               <label className="text-label leading-none">{t("email")} *</label>
               <Input
                 type="email"
-                placeholder="e.g. merchant@mystore.com"
+                placeholder={t("emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -132,7 +132,7 @@ export function RegisterForm() {
               <label className="text-label leading-none">{t("phone")} *</label>
               <Input
                 type="tel"
-                placeholder="01712345678"
+                placeholder={t("phonePlaceholder")}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 disabled={isLoading}
@@ -155,9 +155,9 @@ export function RegisterForm() {
 
           <div className="space-y-2">
             <label className="text-label leading-none">{t("businessName")} *</label>
-            <Input
-              type="text"
-              placeholder="e.g. Dhaka Artisan Crafts"
+              <Input
+                type="text"
+                placeholder={t("businessNamePlaceholder")}
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
               disabled={isLoading}
@@ -167,9 +167,9 @@ export function RegisterForm() {
 
           <div className="space-y-2">
             <label className="text-label leading-none">{t("pickupAddress")} *</label>
-            <Input
-              type="text"
-              placeholder="e.g. House 14, Road 5, Dhanmondi, Dhaka"
+              <Input
+                type="text"
+                placeholder={t("pickupAddressPlaceholder")}
               value={pickupAddress}
               onChange={(e) => setPickupAddress(e.target.value)}
               disabled={isLoading}

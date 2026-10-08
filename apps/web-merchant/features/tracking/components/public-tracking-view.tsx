@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Badge, Button, Card, CardContent, CardHeader, Input } from "@dhruto/ui";
-import { AlertCircle, Building2, Check, MapPin, Package, Phone, Search } from "lucide-react";
+import { Badge, Button, Card, CardContent, CardHeader, DetailsSkeleton, Input } from "@dhruto/ui";
+import { Building2, Check, Copy, MapPin, Package, Phone, Search } from "lucide-react";
 import { useGetPublicTrackingQuery } from "@/features/parcels/api/parcels.api";
-import { useRouter } from "@/lib/navigation";
+import { usePathname, useRouter } from "@/lib/navigation";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { Timeline, TimelineItem } from "@/components/data-display/timeline";
+import { ErrorState, NotFoundState, RetryButton } from "@/components/feedback/states";
+import { useFormatters } from "@/lib/format";
 
 interface PublicTrackingViewProps {
   initialCode?: string;
@@ -23,9 +26,20 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
   const t = useTranslations("Tracking");
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
+  const { dateTime } = useFormatters();
+
+  // Stay inside the console the user is in: merchant and admin reuse this
+  // view, so searches must not leak to the public /track namespace.
+  const trackBase = pathname.includes("/merchant/track")
+    ? "/merchant/track"
+    : pathname.includes("/admin/track")
+      ? "/admin/track"
+      : "/track";
 
   const [inputCode, setInputCode] = useState(initialCode);
   const [activeCode, setActiveCode] = useState(initialCode.trim());
+  const [copied, setCopied] = useState(false);
 
   // Keep the query in sync when the user lands on /track/:code directly.
   useEffect(() => {
@@ -33,19 +47,45 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
     setActiveCode(initialCode.trim());
   }, [initialCode]);
 
-  const { data, isFetching, isError } = useGetPublicTrackingQuery(activeCode, {
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const { data, isFetching, isError, error, refetch } = useGetPublicTrackingQuery(activeCode, {
     skip: activeCode.length === 0,
   });
 
   const tracking = data?.data;
-  const isNotFound = Boolean(activeCode) && !isFetching && (isError || !tracking);
+  // A 404 means "no such shipment"; any other failure is a network/server
+  // error and gets a retry action instead of a not-found message.
+  const isNotFoundError =
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    (error as { status?: unknown }).status === 404;
+  const showNotFound = Boolean(activeCode) && !isFetching && (isNotFoundError || (!tracking && !isError));
+  const showError = Boolean(activeCode) && !isFetching && isError && !isNotFoundError && !tracking;
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     const clean = inputCode.trim().toUpperCase();
     if (!clean) return;
     setActiveCode(clean);
-    router.push(`/track/${encodeURIComponent(clean)}`);
+    // Replace so repeated searches don't spam the history stack; the URL
+    // still reflects the active code for sharing and back-navigation.
+    router.replace(`${trackBase}/${encodeURIComponent(clean)}`);
+  };
+
+  const handleCopy = async () => {
+    if (!tracking) return;
+    try {
+      await navigator.clipboard.writeText(tracking.trackingCode);
+      setCopied(true);
+    } catch {
+      // Clipboard unavailable (permissions, insecure context) — no-op.
+    }
   };
 
   return (
@@ -86,26 +126,30 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
         </form>
       </div>
 
-      <p
-        role="status"
-        aria-live="polite"
-        className="py-6 text-center text-body text-muted-foreground"
-      >
-        {isFetching ? t("loading") : ""}
-      </p>
+      <div aria-live="polite" className="py-6">
+        {isFetching && !tracking ? (
+          <DetailsSkeleton />
+        ) : showError ? (
+          <Card>
+            <ErrorState
+              title={t("loadError")}
+              description={t("loadErrorDesc")}
+              action={<RetryButton label={t("retry")} onRetry={() => void refetch()} />}
+            />
+          </Card>
+        ) : null}
+      </div>
 
-      {isNotFound ? (
-        <Card className="p-8 text-center">
-          <AlertCircle className="mx-auto mb-2 h-9 w-9 text-danger" aria-hidden="true" />
-          <h2 className="text-h3 text-foreground">{t("notFound")}</h2>
-          <p className="mt-1 text-body text-muted-foreground">{t("notFoundDesc")}</p>
+      {showNotFound ? (
+        <Card>
+          <NotFoundState title={t("notFound")} description={t("notFoundDesc")} />
         </Card>
       ) : null}
 
       {!isFetching && tracking ? (
         <div className="space-y-6">
           <Card>
-            <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b border-border px-6 py-4">
+            <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b border-border/70 px-6 py-4">
               <div className="min-w-0">
                 <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("trackingId")}
@@ -114,7 +158,26 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
                   {tracking.trackingCode}
                 </p>
               </div>
-              <StatusBadge status={tracking.status} withIcon className="shrink-0 px-3 py-1" />
+              <div className="flex shrink-0 items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => void handleCopy()}
+                  aria-label={t("copyCode")}
+                  title={t("copyCode")}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                  ) : (
+                    <Copy className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </Button>
+                <span className="sr-only" role="status">
+                  {copied ? t("copied") : ""}
+                </span>
+                <StatusBadge status={tracking.status} withIcon className="px-3 py-1" />
+              </div>
             </CardHeader>
 
             <CardContent className="grid gap-5 p-6 sm:grid-cols-3">
@@ -154,50 +217,32 @@ export function PublicTrackingView({ initialCode = "" }: PublicTrackingViewProps
                 {t("timeline")}
               </h2>
 
-              <ol className="relative ml-2 space-y-8 border-l-2 border-border pb-2 pl-6">
+              <Timeline label={t("timeline")}>
                 {tracking.timeline.map((event, index) => {
                   const label = locale === "bn" ? event.labelBn : event.labelEn;
                   const isLatest = index === tracking.timeline.length - 1;
                   return (
-                    <li key={`${event.timestamp}-${index}`} className="relative">
-                      <span
-                        aria-hidden="true"
-                        className={
-                          isLatest
-                            ? "absolute -left-[33px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
-                            : "absolute -left-[33px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-surface-muted text-muted-foreground"
-                        }
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                      </span>
-                      <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between">
-                        <span className="text-body font-bold text-foreground">{label}</span>
-                        <time
-                          dateTime={event.timestamp}
-                          className="font-mono text-caption tabular-nums text-muted-foreground"
-                        >
-                          {new Date(event.timestamp).toLocaleString(locale, {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })}
-                        </time>
-                      </div>
+                    <TimelineItem
+                      key={`${event.timestamp}-${index}`}
+                      title={label}
+                      timestamp={dateTime(event.timestamp)}
+                      dateTime={event.timestamp}
+                      tone={isLatest ? "primary" : "neutral"}
+                      current={isLatest}
+                    >
                       {event.note ? (
                         <p className="mt-1 text-body-sm text-muted-foreground">{event.note}</p>
                       ) : null}
-                    </li>
+                    </TimelineItem>
                   );
                 })}
-              </ol>
+              </Timeline>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-6 py-4 text-caption text-muted-foreground">
               <span>
                 {t("lastUpdated", {
-                  date: new Date(tracking.updatedAt).toLocaleString(locale, {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }),
+                  date: dateTime(tracking.updatedAt),
                 })}
               </span>
               <Badge variant="secondary">

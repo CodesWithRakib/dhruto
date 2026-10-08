@@ -14,7 +14,7 @@ import {
   Mail,
   RefreshCw,
 } from "lucide-react";
-import { Button, Badge, Card } from "@dhruto/ui";
+import { Button, Badge, Card, ListSkeleton } from "@dhruto/ui";
 import {
   useGetMyNotificationsQuery,
   useMarkNotificationAsReadMutation,
@@ -22,6 +22,8 @@ import {
 } from "../api/notifications.api";
 import { NotificationChannel, NotificationType } from "@dhruto/contracts";
 import { PageHeader } from "@/components/page-header";
+import { Pagination } from "@/components/pagination";
+import { EmptyState, ErrorState, RetryButton } from "@/components/feedback/states";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { useFormatters } from "@/lib/format";
 
@@ -48,22 +50,22 @@ function resolveRoute(metadata: Record<string, unknown> | undefined): string | n
 
 function TypeIcon({ type }: { type: string }) {
   if (type === NotificationType.CASH_COLLECTED || type === NotificationType.PAYOUT_UPDATE) {
-    return <Wallet className="h-4 w-4 text-success" aria-hidden="true" />;
+    return <Wallet className="h-4 w-4 text-success-soft-foreground" aria-hidden="true" />;
   }
   if (type === NotificationType.DELIVERY_OTP || type === NotificationType.PARCEL_STATUS_UPDATE) {
-    return <Truck className="h-4 w-4 text-info" aria-hidden="true" />;
+    return <Truck className="h-4 w-4 text-info-soft-foreground" aria-hidden="true" />;
   }
   return <Info className="h-4 w-4 text-muted-foreground" aria-hidden="true" />;
 }
 
 function ChannelIcon({ channel }: { channel: string }) {
   if (channel === NotificationChannel.SMS) {
-    return <Smartphone className="h-3.5 w-3.5 text-info" aria-label="SMS" />;
+    return <Smartphone className="h-3.5 w-3.5 text-info-soft-foreground" aria-label="SMS" />;
   }
   if (channel === NotificationChannel.EMAIL) {
-    return <Mail className="h-3.5 w-3.5 text-info" aria-label="Email" />;
+    return <Mail className="h-3.5 w-3.5 text-info-soft-foreground" aria-label="Email" />;
   }
-  return <Bell className="h-3.5 w-3.5 text-primary" aria-label="In-app" />;
+  return <Bell className="h-3.5 w-3.5 text-primary-soft-foreground" aria-label="In-app" />;
 }
 
 /**
@@ -84,26 +86,34 @@ export function NotificationCenter() {
     limit: PAGE_SIZE,
     unreadOnly,
   });
-  const [markAsRead, { isLoading: isMarking }] = useMarkNotificationAsReadMutation();
+  const [markAsRead] = useMarkNotificationAsReadMutation();
   const [markAll, { isLoading: isMarkingAll }] = useMarkAllNotificationsAsReadMutation();
+  const [pendingId, setPendingId] = React.useState<string | null>(null);
 
   const payload = data?.data;
   const items = payload?.items ?? [];
   const total = payload?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const handleOpen = async (id: string, status: string, metadata?: Record<string, unknown>) => {
+  const handleOpen = (id: string, status: string, metadata?: Record<string, unknown>) => {
     setActionError(null);
-    if (status !== "READ") {
-      try {
-        await markAsRead(id).unwrap();
-      } catch (err) {
-        setActionError(getApiErrorMessage(err, t("markReadFailed")));
-        return;
-      }
-    }
     const route = resolveRoute(metadata);
+    // Navigate first for instant feedback; the read-receipt follows in the
+    // background. Read state is non-financial and the list refetches, so a
+    // failure self-corrects without ever showing false state.
     if (route) router.push(route as never);
+    if (status !== "READ") {
+      setPendingId(id);
+      markAsRead(id)
+        .unwrap()
+        .catch((err: unknown) => {
+          // Only visible when staying on this page (no navigation happened).
+          if (!route) setActionError(getApiErrorMessage(err, t("markReadFailed")));
+        })
+        .finally(() => {
+          setPendingId((current) => (current === id ? null : current));
+        });
+    }
   };
 
   const handleMarkAll = async () => {
@@ -145,12 +155,11 @@ export function NotificationCenter() {
         }
       />
 
-      <div className="flex items-center gap-2" role="tablist" aria-label={t("filterLabel")}>
+      <div className="flex items-center gap-2" role="group" aria-label={t("filterLabel")}>
         <Button
           variant={!unreadOnly ? "default" : "outline"}
           size="sm"
-          role="tab"
-          aria-selected={!unreadOnly}
+          aria-pressed={!unreadOnly}
           onClick={() => {
             setUnreadOnly(false);
             setPage(1);
@@ -161,8 +170,7 @@ export function NotificationCenter() {
         <Button
           variant={unreadOnly ? "default" : "outline"}
           size="sm"
-          role="tab"
-          aria-selected={unreadOnly}
+          aria-pressed={unreadOnly}
           onClick={() => {
             setUnreadOnly(true);
             setPage(1);
@@ -186,42 +194,38 @@ export function NotificationCenter() {
         </div>
       )}
 
+      {isLoading ? (
+        <ListSkeleton rows={5} />
+      ) : (
       <Card className="divide-y divide-border/50 overflow-hidden">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
-            <span className="text-sm">{t("loading")}</span>
-          </div>
-        ) : isError ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 px-4 text-center">
-            <Info className="h-8 w-8 text-danger" aria-hidden="true" />
-            <p className="text-sm font-medium">{t("loadErrorTitle")}</p>
-            <p className="text-xs text-muted-foreground">{t("loadErrorDescription")}</p>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              {t("retry")}
-            </Button>
-          </div>
+        {isError ? (
+          <ErrorState
+            title={t("loadErrorTitle")}
+            description={t("loadErrorDescription")}
+            action={<RetryButton label={t("retry")} onRetry={() => refetch()} />}
+          />
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-16 px-4 text-center">
-            <Bell className="h-8 w-8 opacity-30" aria-hidden="true" />
-            <p className="text-sm font-medium">{t("noNotifications")}</p>
-            <p className="text-xs text-muted-foreground">{t("emptyHint")}</p>
-          </div>
+          <EmptyState
+            title={t("noNotifications")}
+            description={t("emptyHint")}
+            icon={Bell}
+          />
         ) : (
           items.map((item) => {
             const isUnread = item.status !== "READ";
+            const isPending = pendingId === item.id;
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => handleOpen(item.id, item.status, item.metadata)}
-                disabled={isMarking}
-                className={`flex w-full gap-3 p-4 text-left transition-colors hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-60 ${
-                  isUnread ? "bg-primary/5" : ""
+                disabled={isPending}
+                className={`flex w-full gap-3 p-4 text-left transition-colors duration-fast ease-out hover:bg-surface-muted/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset disabled:opacity-60 ${
+                  isUnread ? "bg-primary-soft/40" : ""
                 }`}
                 aria-label={`${item.title} — ${isUnread ? t("unread") : t("read")}`}
               >
-                <div className="mt-0.5 h-fit rounded-lg border border-border bg-card p-1.5">
+                <div className="mt-0.5 h-fit rounded-lg border border-border/70 bg-surface p-1.5">
                   <TypeIcon type={item.type} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -238,11 +242,13 @@ export function NotificationCenter() {
                     {item.message}
                   </p>
                   <div className="mt-1.5 flex items-center justify-between">
-                    <span className="text-[11px] text-muted-foreground/70">
+                    <span className="text-[11px] tabular-nums text-muted-foreground/70">
                       {dateTime(item.createdAt)}
                     </span>
                     <span className="flex items-center gap-2">
-                      {isUnread ? (
+                      {isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden="true" />
+                      ) : isUnread ? (
                         <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
                           {t("unread")}
                         </Badge>
@@ -257,29 +263,14 @@ export function NotificationCenter() {
           })
         )}
       </Card>
+      )}
 
       {totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-2" aria-label={t("paginationLabel")}>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t("previous")}
-          </Button>
-          <span className="text-xs text-muted-foreground" aria-live="polite">
-            {t("pageOf", { page, totalPages })}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            {t("next")}
-          </Button>
-        </nav>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={(next) => setPage(next)}
+        />
       )}
     </div>
   );

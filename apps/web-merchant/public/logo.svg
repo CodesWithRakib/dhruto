@@ -1,0 +1,14 @@
+<svg viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fast Delivery Icon (Red) -->
+  <g fill="#E11D48">
+    <path d="M18 10 H30 A14 14 0 0 1 44 24 A14 14 0 0 1 30 38 H18 Z" />
+    <path d="M4 16 H14 V20 H4 Z" />
+    <path d="M1 24 H12 V28 H1 Z" />
+    <path d="M6 32 H14 V36 H6 Z" />
+  </g>
+  <!-- Bilingual Wordmark -->
+  <g fill="#111827">
+    <text x="52" y="28" font-family="system-ui, sans-serif" font-weight="900" font-size="22" letter-spacing="-0.5">Dhruto</text>
+    <text x="54" y="42" font-family="system-ui, sans-serif" font-weight="600" font-size="12" fill="#6B7280">দ্রুত</text>
+  </g>
+</svg>

@@ -25,7 +25,6 @@ const PAGE_SIZE = 20;
 /** Merchant finance surface: wallet, statement, payouts and settlements. */
 export function FinanceDashboard() {
   const t = useTranslations("Finance");
-  const [activeTab, setActiveTab] = React.useState<MerchantTab>("statement");
   const [isPayoutModalOpen, setIsPayoutModalOpen] = React.useState(false);
   const [page, setPage] = React.useState(1);
 
@@ -33,6 +32,14 @@ export function FinanceDashboard() {
   // survives a reload; the parent owns both the filter and the query.
   const query = useQueryState();
   const typeFilter = query.getString("type", ALL_TRANSACTION_TYPES) ?? ALL_TRANSACTION_TYPES;
+
+  // The active tab also lives in the URL so refresh/share keep context.
+  const tabParam = query.getString("tab", "statement") ?? "statement";
+  const activeTab: MerchantTab =
+    tabParam === "payouts" || tabParam === "settlements" ? tabParam : "statement";
+  const setActiveTab = (tab: MerchantTab) => {
+    query.set({ tab: tab === "statement" ? null : tab });
+  };
 
   const {
     data: walletRes,
@@ -98,18 +105,21 @@ export function FinanceDashboard() {
       />
 
       <div
-        className="flex w-fit max-w-full snap-x items-center gap-1.5 overflow-x-auto rounded-lg border border-border bg-surface-muted p-1"
+        className="flex w-fit max-w-full snap-x items-center gap-1 overflow-x-auto rounded-xl border border-border/70 bg-surface-muted p-1"
         role="tablist"
+        aria-label={t("title")}
       >
         {tabs.map((tab) => (
           <button
             key={tab.key}
             role="tab"
+            id={`finance-tab-${tab.key}`}
             aria-selected={activeTab === tab.key}
+            aria-controls="finance-tabpanel"
             onClick={() => setActiveTab(tab.key)}
-            className={`flex shrink-0 snap-start items-center gap-2 rounded-md px-3.5 py-2 text-xs font-semibold transition-all ${
+            className={`flex shrink-0 snap-start items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-fast ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 ${
               activeTab === tab.key
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-soft"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -119,6 +129,7 @@ export function FinanceDashboard() {
         ))}
       </div>
 
+      <div role="tabpanel" id="finance-tabpanel" aria-labelledby={`finance-tab-${activeTab}`}>
       {activeTab === "statement" && (
         <TransactionsTable
           transactions={transactions}
@@ -134,6 +145,8 @@ export function FinanceDashboard() {
       {activeTab === "payouts" && <PayoutsView onChanged={handleRefresh} />}
 
       {activeTab === "settlements" && <SettlementsView />}
+
+      </div>
 
       <PayoutRequestModal
         isOpen={isPayoutModalOpen}

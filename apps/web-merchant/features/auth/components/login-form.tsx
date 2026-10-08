@@ -30,7 +30,7 @@ export function LoginForm() {
     setErrorMessage(null);
 
     if (!emailOrPhone.trim() || !password) {
-      setErrorMessage("Please enter both email/phone and password.");
+      setErrorMessage(t("credentialsRequired"));
       return;
     }
 
@@ -52,17 +52,17 @@ export function LoginForm() {
             refreshToken,
           }),
         );
-        toast.success(`Welcome back, ${payloadData.user.name}!`);
+        toast.success(t("welcomeBack", { name: payloadData.user.name }));
         // Route each role to its own application surface.
         router.replace(homeForRole(payloadData.user.role).href);
       }
     } catch (err) {
       const message = getApiErrorMessage(
         err,
-        "Invalid email/phone or password. Please verify your credentials.",
+        t("invalidCredentials"),
       );
       setErrorMessage(message);
-      toast.error("Sign in failed", { description: message });
+      toast.error(t("signInFailed"), { description: message });
     }
   };
 
@@ -70,7 +70,7 @@ export function LoginForm() {
     <div className="w-full">
       <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-soft-foreground">
         <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-        Welcome Back
+        {t("welcomeBackBadge")}
       </span>
 
       <h1 className="mt-4 text-4xl font-extrabold leading-tight text-foreground">
@@ -131,7 +131,7 @@ export function LoginForm() {
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>

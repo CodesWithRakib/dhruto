@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, Button, Input, DataTable, ColumnDef } from "@dhruto/ui";
 import { Search, Package, AlertTriangle, UserCheck } from "lucide-react";
 import { useLazyLookupParcelQuery, useGetHubInventoryQuery } from "../api/hubs.api";
+import type { HubInventory } from "@dhruto/contracts";
 import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
@@ -40,7 +41,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
   const parcel = lookupData?.data;
   const inventory = inventoryData?.data;
 
-  const columns: ColumnDef<any>[] = React.useMemo(() => [
+  const columns: ColumnDef<HubInventory["parcels"][number]>[] = React.useMemo(() => [
     {
       accessorKey: "trackingCode",
       header: t("lookup.searchLabel"),

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from "@dhruto/ui";
+import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, KpiGridSkeleton } from "@dhruto/ui";
 import {
   Server,
   Database,
@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useGetSystemMetricsQuery } from "../api/observability.api";
+import { ErrorState, RetryButton } from "@/components/feedback/states";
 
 export function SystemObservabilityCard() {
   const {
@@ -27,29 +28,16 @@ export function SystemObservabilityCard() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-12 space-x-2 text-muted-foreground animate-pulse">
-        <Activity className="h-6 w-6 animate-spin text-primary" />
-        <span className="text-sm font-medium">Connecting to system telemetry probes...</span>
-      </div>
-    );
+    return <KpiGridSkeleton count={4} />;
   }
 
   if (isError || !metrics) {
     return (
-      <Card className="border-destructive/30">
-        <CardContent className="pt-6 text-center space-y-2">
-          <p className="text-sm text-destructive font-medium">
-            Telemetry service probe unreachable. Verify API server health.
-          </p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="text-xs px-3 py-1.5 rounded-md bg-muted hover:bg-muted/80 font-semibold"
-          >
-            Retry Connection
-          </button>
-        </CardContent>
+      <Card className="border-danger/30">
+        <ErrorState
+          title="Telemetry service probe unreachable. Verify API server health."
+          action={<RetryButton label="Retry Connection" onRetry={() => refetch()} />}
+        />
       </Card>
     );
   }
@@ -69,19 +57,19 @@ export function SystemObservabilityCard() {
   return (
     <div className="space-y-6">
       {/* Primary Status Banner */}
-      <Card className="shadow-sm border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 via-card to-card">
-        <CardHeader className="border-b bg-emerald-500/5 pb-4">
+      <Card className="shadow-soft border-success/20 bg-gradient-to-r from-success-soft/40 via-card to-card">
+        <CardHeader className="border-b border-border/70 bg-success-soft/30 pb-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                <Server className="h-6 w-6" />
+              <div className="p-2.5 bg-success-soft text-success-soft-foreground rounded-xl">
+                <Server className="h-6 w-6" aria-hidden="true" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-lg">System Scale & Observability Center</CardTitle>
                   <Badge
                     variant="outline"
-                    className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] border-emerald-500/30"
+                    className="bg-success-soft text-success-soft-foreground font-mono text-[11px] border-success/30"
                   >
                     {metrics.status.toUpperCase()}
                   </Badge>
@@ -94,14 +82,15 @@ export function SystemObservabilityCard() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => refetch()}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border bg-card hover:bg-muted text-muted-foreground transition-all shadow-sm"
               >
-                <RefreshCw className="h-3.5 w-3.5" />
+                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Refresh Live</span>
-              </button>
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -109,19 +98,19 @@ export function SystemObservabilityCard() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Database Telemetry */}
-            <div className="p-4 rounded-xl border bg-card/60 backdrop-blur-sm space-y-2">
+            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>PostgreSQL DB</span>
-                <Database className="h-4 w-4 text-blue-500" />
+                <Database className="h-4 w-4 text-info-soft-foreground" aria-hidden="true" />
               </div>
               <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-black font-mono text-foreground">
+                <span className="text-2xl font-black font-mono tabular-nums text-foreground">
                   {metrics.database.latencyMs}{" "}
                   <span className="text-xs font-normal text-muted-foreground">ms</span>
                 </span>
                 <Badge
                   variant="outline"
-                  className="text-[10px] text-emerald-600 border-emerald-500/30"
+                  className="text-[10px] text-success-soft-foreground border-success/30"
                 >
                   {metrics.database.status.toUpperCase()}
                 </Badge>
@@ -133,10 +122,10 @@ export function SystemObservabilityCard() {
             </div>
 
             {/* Cache Layer Telemetry */}
-            <div className="p-4 rounded-xl border bg-card/60 backdrop-blur-sm space-y-2">
+            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>Multi-Tier Cache</span>
-                <Zap className="h-4 w-4 text-amber-500" />
+                <Zap className="h-4 w-4 text-warning-soft-foreground" aria-hidden="true" />
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
@@ -154,10 +143,10 @@ export function SystemObservabilityCard() {
             </div>
 
             {/* Memory Usage */}
-            <div className="p-4 rounded-xl border bg-card/60 backdrop-blur-sm space-y-2">
+            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>Heap Memory</span>
-                <Cpu className="h-4 w-4 text-purple-500" />
+                <Cpu className="h-4 w-4 text-primary-soft-foreground" aria-hidden="true" />
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
@@ -170,7 +159,7 @@ export function SystemObservabilityCard() {
                   {heapPct}%
                 </span>
               </div>
-              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-surface-muted rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-primary h-1.5 rounded-full transition-all duration-500"
                   style={{ width: `${heapPct}%` }}
@@ -179,17 +168,17 @@ export function SystemObservabilityCard() {
             </div>
 
             {/* Request Throughput */}
-            <div className="p-4 rounded-xl border bg-card/60 backdrop-blur-sm space-y-2">
+            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>Live Telemetry</span>
-                <Activity className="h-4 w-4 text-emerald-500" />
+                <Activity className="h-4 w-4 text-success" aria-hidden="true" />
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-black font-mono text-foreground">
                   {metrics.telemetry.p95LatencyMs}{" "}
                   <span className="text-xs font-normal text-muted-foreground">ms p95</span>
                 </span>
-                <Badge variant="outline" className="text-[10px] font-mono text-blue-600">
+                <Badge variant="outline" className="text-[10px] font-mono text-info-soft-foreground border-info/30">
                   {metrics.telemetry.currentRps} RPS
                 </Badge>
               </div>
@@ -205,12 +194,12 @@ export function SystemObservabilityCard() {
       {/* Load Testing Benchmark & SLA Targets Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Load Test Results */}
-        <Card className="shadow-sm border-primary/20">
-          <CardHeader className="border-b bg-muted/20">
+        <Card className="shadow-soft border-primary/20">
+          <CardHeader className="border-b border-border/70 bg-surface-muted/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 text-primary rounded-lg">
-                  <Gauge className="h-5 w-5" />
+                <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
+                  <Gauge className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div>
                   <CardTitle className="text-base">
@@ -223,7 +212,7 @@ export function SystemObservabilityCard() {
               </div>
               <Badge
                 variant="outline"
-                className="bg-emerald-500/10 text-emerald-600 font-mono text-xs"
+                className="bg-success-soft text-success-soft-foreground font-mono text-xs border-success/30"
               >
                 SLA PASSED
               </Badge>
@@ -236,7 +225,7 @@ export function SystemObservabilityCard() {
                 <span className="font-bold text-sm block">System Average Throughput</span>
                 <span className="text-xs text-muted-foreground">Target: &ge; 250 RPS</span>
               </div>
-              <div className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-lg">
+              <div className="text-right font-mono font-bold text-success-soft-foreground text-lg">
                 600 RPS{" "}
                 <span className="text-xs font-normal text-muted-foreground">(2.4x Target)</span>
               </div>
@@ -247,7 +236,7 @@ export function SystemObservabilityCard() {
                 <span className="font-bold text-sm block">Dynamic Pricing Latency (p95)</span>
                 <span className="text-xs text-muted-foreground">Target: &lt; 300 ms</span>
               </div>
-              <div className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-lg">
+              <div className="text-right font-mono font-bold text-success-soft-foreground text-lg">
                 45.8 ms{" "}
                 <span className="text-xs font-normal text-muted-foreground">(-84% lower)</span>
               </div>
@@ -258,7 +247,7 @@ export function SystemObservabilityCard() {
                 <span className="font-bold text-sm block">Error Rate Under Concurrency</span>
                 <span className="text-xs text-muted-foreground">Target: &lt; 1.00%</span>
               </div>
-              <div className="text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 text-lg">
+              <div className="text-right font-mono font-bold text-success-soft-foreground text-lg">
                 0.00%{" "}
                 <span className="text-xs font-normal text-muted-foreground">(Zero Faults)</span>
               </div>
@@ -267,12 +256,12 @@ export function SystemObservabilityCard() {
         </Card>
 
         {/* High-Availability & Disaster Recovery */}
-        <Card className="shadow-sm border-primary/20">
-          <CardHeader className="border-b bg-muted/20">
+        <Card className="shadow-soft border-primary/20">
+          <CardHeader className="border-b border-border/70 bg-surface-muted/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 text-primary rounded-lg">
-                  <ShieldCheck className="h-5 w-5" />
+                <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
+                  <ShieldCheck className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div>
                   <CardTitle className="text-base">Disaster Recovery & High Availability</CardTitle>
@@ -281,7 +270,7 @@ export function SystemObservabilityCard() {
                   </CardDescription>
                 </div>
               </div>
-              <Badge variant="outline" className="bg-blue-500/10 text-blue-600 font-mono text-xs">
+              <Badge variant="outline" className="bg-info-soft text-info-soft-foreground font-mono text-xs border-info/30">
                 RPO &lt; 15m
               </Badge>
             </div>
@@ -315,8 +304,8 @@ export function SystemObservabilityCard() {
                   SHA-256 cryptographic tamper check
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs font-mono">
-                <CheckCircle2 className="h-4 w-4" />
+              <div className="flex items-center gap-1.5 text-success-soft-foreground font-bold text-xs font-mono">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 <span>VERIFIED</span>
               </div>
             </div>

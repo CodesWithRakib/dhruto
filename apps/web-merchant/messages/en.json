@@ -90,7 +90,23 @@
     "registerBtn": "Create Merchant Account",
     "alreadyAccount": "Already have an account?",
     "loginNow": "Sign In",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+    "welcomeBackBadge": "Welcome Back",
+    "welcomeBack": "Welcome back, {name}!",
+    "accountCreated": "Merchant account created! Welcome, {name}.",
+    "signInFailed": "Sign in failed",
+    "registrationFailed": "Registration failed",
+    "credentialsRequired": "Please enter both email/phone and password.",
+    "requiredFields": "Please fill in all required fields.",
+    "invalidCredentials": "Invalid email/phone or password. Please verify your credentials.",
+    "registrationFailedDesc": "Registration failed. Please verify your information.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "fullNamePlaceholder": "e.g. Tanvir Ahmed",
+    "emailPlaceholder": "e.g. merchant@mystore.com",
+    "phonePlaceholder": "01712345678",
+    "businessNamePlaceholder": "e.g. Dhaka Artisan Crafts",
+    "pickupAddressPlaceholder": "e.g. House 14, Road 5, Dhanmondi, Dhaka"
   },
   "BookingForm": {
     "title": "Create New Parcel Booking",
@@ -125,6 +141,8 @@
     "viewDetails": "View details",
     "printLabel": "Print label",
     "submissionError": "Booking could not be created",
+    "submitFailed": "Booking submission failed. Please try again.",
+    "createFailed": "Failed to create parcel booking. Please check your inputs and try again.",
     "pageTitle": "Book a Parcel",
     "pageSubtitle": "Fill in the recipient and package details. Delivery fees are calculated by Dhruto and shown before you confirm.",
     "sectionRecipient": "Recipient",
@@ -255,7 +273,12 @@
     "statusHistoryHint": "Append-only record of every lifecycle event for this parcel.",
     "noHistory": "No history recorded yet.",
     "fromStatus": "from {status}",
-    "recordedBy": "Recorded by {role}"
+    "recordedBy": "Recorded by {role}",
+    "whatsNext": "What happens next",
+    "nextIs": "Next stage: {stage}",
+    "deliveredNext": "Delivered. COD moves through rider hand-in and verification into your settlement.",
+    "returnedNext": "Returned to you. The parcel journey is complete.",
+    "exceptionNext": "This shipment needs attention. Contact support with the tracking code."
   },
   "ShippingLabel": {
     "title": "Shipping Label",
@@ -291,7 +314,12 @@
     "location": "Current location",
     "locationPending": "Awaiting the next hub scan",
     "lastUpdated": "Last updated {date}",
-    "statusLabel": "Status: {status}"
+    "statusLabel": "Status: {status}",
+    "copyCode": "Copy code",
+    "copied": "Copied",
+    "loadError": "Couldn't load tracking",
+    "loadErrorDesc": "Check your connection and try again.",
+    "retry": "Try again"
   },
   "Hub": {
     "title": "Hub Operations Center",
@@ -954,7 +982,8 @@
     "advanceNeeded": "Advance Fee Suggested"
   },
   "Nav": {
-    "home": "Home",
+    "loadingWorkspace": "Loading workspace...",
+    "accountMenu": "User account menu",    "home": "Home",
     "tracking": "Tracking",
     "services": "Services",
     "pricing": "Calculator",

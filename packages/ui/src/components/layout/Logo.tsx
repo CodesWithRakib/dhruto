@@ -10,12 +10,6 @@ export interface LogoProps {
   className?: string;
 }
 
-const sizeMap = {
-  sm: { box: "h-7 w-7 rounded-lg", glyph: "h-4 w-4", text: "text-h4" },
-  default: { box: "h-9 w-9 rounded-xl", glyph: "h-5 w-5", text: "text-h3" },
-  lg: { box: "h-11 w-11 rounded-xl", glyph: "h-6 w-6", text: "text-h2" },
-} as const;
-
 /**
  * Dhruto brand lockup. Renders a tokenized mark + wordmark.
  * Exactly reflects the Dhruto courier identity from design mockups.
@@ -26,42 +20,36 @@ export function Logo({
   inverted = false,
   className,
 }: LogoProps) {
-  const s = sizeMap[size];
+  // Scaling factors for different sizes based on standard Tailwind text sizes
+  const width = size === "sm" ? 110 : size === "default" ? 130 : 160;
+  const height = size === "sm" ? 34 : size === "default" ? 40 : 48;
+
   return (
-    <span className={cn("inline-flex items-center gap-2.5 select-none", className)}>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "inline-flex items-center justify-center bg-primary text-white shadow-sm ring-1 ring-primary/20",
-          s.box,
-        )}
+    <span className={cn("inline-flex items-center select-none", className)}>
+      <svg
+        width={markOnly ? height : width}
+        height={height}
+        viewBox={markOnly ? "0 0 48 48" : "0 0 160 48"}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="shrink-0"
       >
-        {/* Sleek forward arrow / leaf courier icon */}
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={s.glyph}
-        >
-          <path d="M4 12h12" />
-          <path d="m11 7 5 5-5 5" />
-          <circle cx="19" cy="12" r="1.5" fill="currentColor" />
-        </svg>
-      </span>
-      {!markOnly ? (
-        <span
-          className={cn(
-            "font-bold tracking-tight",
-            inverted ? "text-white" : "text-foreground",
-            s.text,
-          )}
-        >
-          Dhruto
-        </span>
-      ) : null}
+        {/* Fast Delivery Icon (Dynamic color) */}
+        <g fill="hsl(var(--primary))">
+          <path d="M18 10 H30 A14 14 0 0 1 44 24 A14 14 0 0 1 30 38 H18 Z" />
+          <path d="M4 16 H14 V20 H4 Z" />
+          <path d="M1 24 H12 V28 H1 Z" />
+          <path d="M6 32 H14 V36 H6 Z" />
+        </g>
+        
+        {/* Bilingual Wordmark */}
+        {!markOnly && (
+          <g className={inverted ? "fill-white" : "fill-foreground"}>
+            <text x="52" y="28" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="22" letterSpacing="-0.5">Dhruto</text>
+            <text x="54" y="42" fontFamily="system-ui, sans-serif" fontWeight="600" fontSize="12" className={inverted ? "fill-white/70" : "fill-muted-foreground"}>দ্রুত</text>
+          </g>
+        )}
+      </svg>
     </span>
   );
 }
