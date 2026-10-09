@@ -9,6 +9,7 @@ import "@/features/tracking/styles/tracking.css";
 import "@/features/about/styles/about.css";
 import "@/features/services/styles/services.css";
 import "@/features/pricing/styles/pricing.css";
+import "@/features/contact/styles/contact.css";
 
 /**
  * Public surface: marketing pages and public tracking.
