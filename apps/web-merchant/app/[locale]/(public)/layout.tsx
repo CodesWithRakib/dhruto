@@ -7,6 +7,7 @@ import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import "@/features/marketing/styles/marketing.css";
 import "@/features/tracking/styles/tracking.css";
 import "@/features/about/styles/about.css";
+import "@/features/services/styles/services.css";
 
 /**
  * Public surface: marketing pages and public tracking.
