@@ -1,9 +1,7 @@
-import { Controller, Get, Patch, Body, UseGuards, HttpCode, HttpStatus, Req } from "@nestjs/common";
+import { Controller, Get, Patch, Body, HttpCode, HttpStatus, Req } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse } from "@nestjs/swagger";
 import { MerchantsService } from "./merchants.service.js";
 import { UpdateMerchantDto } from "./dto/update-merchant.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { UserRole } from "../database/entities/User.entity.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
@@ -12,7 +10,6 @@ import { type RequestWithId } from "../common/middleware/request-id.middleware.j
 
 @ApiTags("Merchants")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller("merchants")
 export class MerchantsController {
   constructor(private readonly merchantsService: MerchantsService) {}

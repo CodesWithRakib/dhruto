@@ -30,8 +30,6 @@ import {
   CashHandInDto,
   SetDutyDto,
 } from "./dto/rider-delivery.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole, ParcelStatus } from "../database/entities/index.js";
@@ -55,7 +53,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
 
 @ApiTags("Riders")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.RIDER, UserRole.ADMIN)
 @Controller("riders")
 export class RidersController {
@@ -388,7 +386,7 @@ export class RidersController {
  */
 @ApiTags("Riders")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.ADMIN, UserRole.HUB_MANAGER)
 @Controller("riders")
 export class RiderAdminController {

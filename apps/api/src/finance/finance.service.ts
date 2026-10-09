@@ -360,8 +360,12 @@ export class FinanceService {
               { aggregateId: payout.id, merchantId },
               {
                 payoutId: payout.id,
+                payoutCode,
+                merchantId,
                 amountPaisa: requestedMinor,
+                amountMinor: requestedMinor,
                 paymentMethod: dto.payoutMethod,
+                method: dto.payoutMethod,
               },
             ),
           );
@@ -485,7 +489,11 @@ export class FinanceService {
             { aggregateId: payout.id, merchantId: payout.merchantId },
             {
               payoutId: payout.id,
+              payoutCode: payout.payoutCode,
+              merchantId: payout.merchantId,
               amountPaisa: toMinor(payout.amount),
+              amountMinor: toMinor(payout.amount),
+              method: payout.payoutMethod,
             },
           ),
         );
@@ -584,7 +592,11 @@ export class FinanceService {
               { aggregateId: locked.id, merchantId: locked.merchantId },
               {
                 payoutId: locked.id,
+                payoutCode: locked.payoutCode,
+                merchantId: locked.merchantId,
                 amountPaisa: amountMinor,
+                amountMinor,
+                method: locked.payoutMethod,
                 transactionRef: locked.transactionReference ?? undefined,
               },
             ),
@@ -660,6 +672,10 @@ export class FinanceService {
               { aggregateId: locked.id, merchantId: locked.merchantId },
               {
                 payoutId: locked.id,
+                payoutCode: locked.payoutCode,
+                merchantId: locked.merchantId,
+                amountMinor: toMinor(locked.amount),
+                method: locked.payoutMethod,
                 reason: dto.status === PayoutStatus.REJECTED ? (locked.rejectionReason ?? "Rejected") : (locked.failureReason ?? "Failed"),
               },
             ),
@@ -1019,8 +1035,14 @@ export class FinanceService {
             { aggregateId: ledger.id, merchantId: merchant.id },
             {
               handInId: ledger.id,
+              cashLedgerId: ledger.id,
+              parcelId: parcel.id,
+              trackingCode: parcel.trackingCode,
+              merchantId: merchant.id,
               hubId: ledger.hubId,
               verifiedAmount: netMinor,
+              netMinor,
+              settlementCode: settlement.settlementCode,
             },
           ),
         );
@@ -1030,7 +1052,12 @@ export class FinanceService {
             { aggregateId: settlement.id, merchantId: merchant.id },
             {
               settlementId: settlement.id,
+              settlementCode: settlement.settlementCode,
+              parcelId: parcel.id,
+              trackingCode: parcel.trackingCode,
+              merchantId: merchant.id,
               totalAmountPaisa: netMinor,
+              netMinor,
             },
           ),
         );
@@ -1041,8 +1068,14 @@ export class FinanceService {
               { aggregateId: discrepancyId, merchantId: merchant.id },
               {
                 discrepancyId,
+                cashLedgerId: ledger.id,
+                trackingCode: parcel.trackingCode,
+                merchantId: merchant.id,
+                riderId: ledger.riderId,
+                hubId: ledger.hubId,
                 reason: `Mismatch: difference of ৳${toMajor(mismatchMinor)}`,
                 amountPaisa: mismatchMinor,
+                differenceMinor: mismatchMinor,
               },
             ),
           );

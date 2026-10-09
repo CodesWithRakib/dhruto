@@ -22,6 +22,7 @@ import {
 import { BagStatus, ExceptionStatus, HubScanType, ScanOutcome } from "@dhruto/contracts";
 import { HubsService } from "./hubs.service.js";
 import {
+  AddParcelToBagDto,
   CreateBagDto,
   CreateManifestDto,
   HubScanDto,
@@ -29,8 +30,6 @@ import {
   ResolveExceptionDto,
   SealBagDto,
 } from "./dto/hub.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
@@ -48,7 +47,7 @@ import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
  */
 @ApiTags("Hubs")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(...HUB_OPERATION_ROLES)
 @Controller()
 export class HubsController {
@@ -285,10 +284,14 @@ export class HubsController {
   })
   async addParcelToBag(
     @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
-    @Body("parcelTrackingCode") trackingCode: string,
+    @Body() dto: AddParcelToBagDto,
     @CurrentUser() user: AuthenticatedUser | null,
   ) {
-    const result = await this.hubsService.addParcelToBag(this.actor(user), id, trackingCode);
+    const result = await this.hubsService.addParcelToBag(
+      this.actor(user),
+      id,
+      dto.parcelTrackingCode,
+    );
     return {
       success: true,
       statusCode: HttpStatus.OK,

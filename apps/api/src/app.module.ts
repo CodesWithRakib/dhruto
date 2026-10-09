@@ -1,6 +1,6 @@
 import { Module, type NestModule, type MiddlewareConsumer } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR, APP_GUARD } from "@nestjs/core";
 import { DhrutoValidationPipe } from "./common/pipes/validation.pipe.js";
 import { EventsModule } from "./events/events.module.js";
 
@@ -24,6 +24,8 @@ import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 import { SeederModule } from "./database/seed/seeder.module.js";
 
 import { CacheModule } from "./common/cache/cache.module.js";
+import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard.js";
+import { RolesGuard } from "./auth/guards/roles.guard.js";
 import { RequestIdMiddleware } from "./common/middleware/request-id.middleware.js";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor.js";
 import { TelemetryInterceptor } from "./common/interceptors/telemetry.interceptor.js";
@@ -61,6 +63,19 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     {
       provide: APP_PIPE,
       useClass: DhrutoValidationPipe,
+    },
+    // T-SEC-04: default-deny authentication + authorization. Every route
+    // requires a valid Bearer token and its declared roles unless marked
+    // @Public(). Per-controller @UseGuards for these two guards were
+    // removed to keep a single enforcement path (rate limiting stays
+    // opt-in per route via @RateLimit metadata).
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     {
       provide: APP_FILTER,

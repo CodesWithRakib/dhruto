@@ -10,10 +10,12 @@ import {
   type QueueHealth,
 } from "@dhruto/contracts";
 import { CacheService } from "../common/cache/cache.service.js";
+import { Public } from "../auth/decorators/public.decorator.js";
 import { TelemetryService } from "../common/interceptors/telemetry.interceptor.js";
 import { queueCounts } from "../integrations/queue-helper.js";
 
 @ApiTags("Health & Observability")
+@Public()
 @Controller(["health", "system"])
 export class HealthController {
   constructor(

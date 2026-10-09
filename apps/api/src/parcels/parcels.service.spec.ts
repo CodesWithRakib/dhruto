@@ -64,6 +64,7 @@ function buildService(parcel: unknown, history: unknown[] = []) {
     {} as never,
     {} as never,
     {} as never,
+    {} as never,
     new PricingService(),
     { find: () => Promise.resolve(null) } as never,
     new ParcelLifecycleService(),

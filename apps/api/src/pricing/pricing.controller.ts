@@ -29,8 +29,6 @@ import {
   type PricingCalculation,
   type PricingResult,
 } from "@dhruto/contracts";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { UserRole } from "../database/entities/User.entity.js";
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
@@ -101,7 +99,7 @@ export class PricingResultDto implements PricingResult {
  */
 @ApiTags("Pricing")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.MERCHANT, UserRole.ADMIN)
 @Controller("pricing")
 export class PricingController {

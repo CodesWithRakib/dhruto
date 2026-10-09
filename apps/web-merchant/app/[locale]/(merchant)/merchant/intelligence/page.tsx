@@ -14,12 +14,16 @@ import {
 import { SmartAddressParser } from "@/features/intelligence/components/smart-address-parser";
 import { RtoRiskMeter } from "@/features/intelligence/components/rto-risk-meter";
 import { AddressConfirmation } from "@/features/intelligence/components/address-confirmation";
+import { useGetIntelligenceHealthQuery } from "@/features/intelligence/api/intelligence.api";
 import { Link } from "@/lib/navigation";
 import { Button } from "@dhruto/ui";
 import { MERCHANT_ROUTES } from "@/config/routes";
 
 export default function IntelligencePage() {
   const [activeTab, setActiveTab] = useState<"both" | "address" | "risk">("both");
+  // Phase 3 (T-LIT-01): KPI strip reads live health instead of statics.
+  const { data: health, isLoading: healthLoading } = useGetIntelligenceHealthQuery();
+  const h = health?.data;
 
   return (
     <div className="w-full space-y-8">
@@ -49,14 +53,16 @@ export default function IntelligencePage() {
         </div>
       </div>
 
-      {/* KPI Highlight Strip */}
+      {/* KPI Highlight Strip (live from GET /intelligence/health) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
             <span>District Coverage</span>
             <MapPin className="h-4 w-4 text-success" />
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">64 / 64</div>
+          <div className="text-2xl font-black text-foreground font-mono">
+            {healthLoading ? "—" : `${h?.districts ?? 0} districts`}
+          </div>
           <p className="text-xs text-muted-foreground">All Bangladesh divisions & hubs</p>
         </div>
 
@@ -65,7 +71,9 @@ export default function IntelligencePage() {
             <span>Upazila Lexicon</span>
             <Cpu className="h-4 w-4 text-info" />
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">240+</div>
+          <div className="text-2xl font-black text-foreground font-mono">
+            {healthLoading ? "—" : `${h?.thanas ?? 0} thanas`}
+          </div>
           <p className="text-xs text-muted-foreground">With postal code matching</p>
         </div>
 
@@ -74,17 +82,21 @@ export default function IntelligencePage() {
             <span>Scoring Model</span>
             <TrendingDown className="h-4 w-4 text-primary" />
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">v1</div>
+          <div className="text-2xl font-black text-foreground font-mono">
+            {healthLoading ? "—" : (h?.models?.[0]?.version ?? h?.datasetVersion ?? "—")}
+          </div>
           <p className="text-xs text-muted-foreground">Explainable rule baseline, ML-ready</p>
         </div>
 
         <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Carrier Validation</span>
+            <span>Geo Dataset</span>
             <CheckCircle2 className="h-4 w-4 text-warning" />
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">100%</div>
-          <p className="text-xs text-muted-foreground">GP, Robi, BL, Teletalk detection</p>
+          <div className="text-2xl font-black text-foreground font-mono">
+            {healthLoading ? "—" : (h?.datasetVersion ?? "—")}
+          </div>
+          <p className="text-xs text-muted-foreground">{h?.datasetSource ?? "Bangladesh geo index"}</p>
         </div>
       </div>
 

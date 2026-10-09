@@ -141,6 +141,29 @@ export class AnalyticsMetricsService {
     return delivered + rto + failed + cancelled;
   }
 
+  /**
+   * Phase 3 (T-LIT-01): distinct riders/hubs touching in-range parcels.
+   * "Active in period" — scoped like every other overview metric.
+   */
+  async overviewActivity(
+    scope: TenantScope,
+    range: ResolvedRange,
+  ): Promise<{ activeRiders: number; activeHubs: number }> {
+    const [riders, hubs] = await Promise.all([
+      this.scopedParcels(scope)
+        .select("COUNT(DISTINCT p.current_rider_id)", "n")
+        .andWhere("p.current_rider_id IS NOT NULL")
+        .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
+        .getRawOne<{ n: string }>(),
+      this.scopedParcels(scope)
+        .select("COUNT(DISTINCT p.current_hub_id)", "n")
+        .andWhere("p.current_hub_id IS NOT NULL")
+        .andWhere("p.createdAt BETWEEN :from AND :to", { from: range.from, to: range.to })
+        .getRawOne<{ n: string }>(),
+    ]);
+    return { activeRiders: Number(riders?.n ?? 0), activeHubs: Number(hubs?.n ?? 0) };
+  }
+
   rate(numerator: number, eligible: number): number | null {
     if (eligible <= 0) return null;
     return Math.round((numerator / eligible) * 1000) / 10;

@@ -2,6 +2,9 @@ import { DomainEventType } from "@dhruto/contracts";
 import { DomainEvent, type DomainEventMetadata } from "../base/domain-event.base.js";
 
 export interface ParcelCreatedPayload {
+  /** Relay contract: aggregate + merchant identity for fan-out routing. */
+  parcelId?: string | null;
+  merchantId?: string | null;
   trackingCode: string;
   recipientName: string;
   recipientPhone: string;
@@ -23,9 +26,14 @@ export class ParcelCreatedEvent extends DomainEvent<ParcelCreatedPayload> {
 }
 
 export interface ParcelAssignedPayload {
+  /** Relay contract: aggregate + merchant identity for fan-out routing. */
+  parcelId?: string | null;
+  merchantId?: string | null;
+  recipientName?: string | null;
   trackingCode: string;
   riderId: string;
   hubId?: string | null;
+  reassigned?: boolean;
 }
 
 export class ParcelAssignedEvent extends DomainEvent<ParcelAssignedPayload> {
@@ -38,6 +46,10 @@ export class ParcelAssignedEvent extends DomainEvent<ParcelAssignedPayload> {
 }
 
 export interface ParcelOutForDeliveryPayload {
+  /** Relay contract: aggregate + merchant identity for fan-out routing. */
+  parcelId?: string | null;
+  merchantId?: string | null;
+  recipientName?: string | null;
   trackingCode: string;
   riderId: string;
   recipientPhone: string;
@@ -53,6 +65,12 @@ export class ParcelOutForDeliveryEvent extends DomainEvent<ParcelOutForDeliveryP
 }
 
 export interface ParcelDeliveredPayload {
+  /** Relay contract: aggregate + merchant/customer identity for fan-out. */
+  parcelId?: string | null;
+  merchantId?: string | null;
+  recipientPhone?: string | null;
+  recipientName?: string | null;
+  attemptId?: string | null;
   trackingCode: string;
   riderId: string;
   codCollected: number;
@@ -68,6 +86,13 @@ export class ParcelDeliveredEvent extends DomainEvent<ParcelDeliveredPayload> {
 }
 
 export interface ParcelFailedPayload {
+  /** Relay contract: aggregate + merchant/customer identity for fan-out. */
+  parcelId?: string | null;
+  merchantId?: string | null;
+  recipientPhone?: string | null;
+  recipientName?: string | null;
+  attemptId?: string | null;
+  rescheduledFor?: string | null;
   trackingCode: string;
   riderId: string;
   reason: string;
@@ -83,6 +108,10 @@ export class ParcelFailedEvent extends DomainEvent<ParcelFailedPayload> {
 }
 
 export interface ParcelReturnedPayload {
+  /** Relay contract: aggregate + merchant identity for fan-out routing. */
+  parcelId?: string | null;
+  merchantId?: string | null;
+  recipientName?: string | null;
   trackingCode: string;
   hubId?: string | null;
 }

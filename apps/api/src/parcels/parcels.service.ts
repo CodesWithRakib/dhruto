@@ -24,6 +24,7 @@ import {
 } from "@dhruto/contracts";
 import {
   Hub,
+  HubUserAssignment,
   Merchant,
   Parcel,
   ParcelAssignment,
@@ -40,7 +41,7 @@ import {
 } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
-import { DomainEventPublisher, ParcelCreatedEvent, ParcelAssignedEvent } from "../events/index.js";
+import { DomainEventPublisher, ParcelCreatedEvent, ParcelAssignedEvent, ParcelReturnedEvent } from "../events/index.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
@@ -158,6 +159,8 @@ export class ParcelsService {
     private readonly riderRepo: Repository<Rider>,
     @InjectRepository(Hub)
     private readonly hubRepo: Repository<Hub>,
+    @InjectRepository(HubUserAssignment)
+    private readonly hubAssignmentRepo: Repository<HubUserAssignment>,
     private readonly dataSource: DataSource,
     private readonly pricingService: PricingService,
     private readonly idempotencyService: IdempotencyService,
@@ -207,8 +210,7 @@ export class ParcelsService {
    * Rejects cross-tenant access. A parcel owned by another merchant is reported
    * as not-found so the endpoint does not confirm its existence.
    */
-  private assertOwnership(parcel: Parcel, scope: ParcelAccessScope): void {
-    if (scope.isAdmin || !scope.merchantId) {
+  private assertOwnership(parcel: Parcel, scope: ParcelAccessScope): void {    if (scope.isAdmin || !scope.merchantId) {
       return;
     }
     if (parcel.merchantId !== scope.merchantId) {
@@ -379,7 +381,9 @@ export class ParcelsService {
               merchantId: merchant.id,
             },
             {
+              parcelId: saved.id,
               trackingCode: saved.trackingCode,
+              merchantId: merchant.id,
               recipientName: saved.recipientName,
               recipientPhone: saved.recipientPhone,
               district: saved.district,
@@ -875,9 +879,13 @@ export class ParcelsService {
               merchantId: parcel.merchantId,
             },
             {
+              parcelId: parcel.id,
               trackingCode: parcel.trackingCode,
+              merchantId: parcel.merchantId,
+              recipientName: parcel.recipientName,
               riderId: rider.id,
               hubId: parcel.currentHubId,
+              reassigned,
             },
           ),
         );
@@ -914,6 +922,293 @@ export class ParcelsService {
           ? "Parcel reassigned to rider successfully"
           : "Parcel assigned to rider successfully",
       };
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Cancel + RTO initiation (Phase 3)                                   */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * Cancels a parcel inside the pre-pickup window encoded by the lifecycle
+   * (`CREATED | PICKUP_REQUESTED | PICKUP_ASSIGNED → CANCELLED`).
+   * Merchants cancel their own parcels; admins cancel any. Repeating a
+   * cancel is a 200 replay, never an error. No domain event is emitted:
+   * there is no cancel fan-out target, and status visibility flows through
+   * the parcel record itself.
+   */
+  async cancelParcel(
+    idOrCode: string,
+    actor: AuthenticatedUser,
+  ): Promise<{ parcelId: string; trackingCode: string; status: ParcelStatus }> {
+    const scope = await this.resolveScope(actor);
+    return this.dataSource.transaction(async (manager) => {
+      const parcel = await manager.getRepository(Parcel).findOne({
+        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+      });
+      if (!parcel) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      this.assertOwnership(parcel, scope);
+
+      if (parcel.status === ParcelStatus.CANCELLED) {
+        return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+      }
+
+      const fromStatus = parcel.status;
+      this.lifecycle.assertTransition(fromStatus, ParcelStatus.CANCELLED);
+      parcel.status = ParcelStatus.CANCELLED;
+      await manager.save(parcel);
+
+      await manager.save(
+        manager.create(ParcelStatusHistory, {
+          parcelId: parcel.id,
+          fromStatus,
+          toStatus: ParcelStatus.CANCELLED,
+          eventType: "STATUS_CHANGED",
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
+          actorRole: actor.role,
+          description: `Parcel cancelled by ${actor.role}`,
+        }),
+      );
+
+      await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
+      this.logger.log(`PARCEL_CANCELLED parcel=${parcel.id} actor=${actor.id}`);
+      return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+    });
+  }
+
+  /**
+   * Opens a return-to-origin case from a failed delivery
+   * (`DELIVERY_ATTEMPTED → RTO_INITIATED`). Hub managers and admins only;
+   * merchants watch progress through parcel status. Repeat initiation is a
+   * 200 replay. Downstream transit/return steps ride the existing lifecycle
+   * once hub-scan mapping for RTO legs is decided (Q-RTO follow-up).
+   */
+  /**
+   * Scopes hub-manager RTO commands to the parcel's current hub (Phase 4).
+   * Admins bypass. A hub manager with no active assignment on the parcel's
+   * hub — or a parcel with no hub context — is refused, so one hub cannot
+   * drive another hub's returns.
+   */
+  private async assertRtoHubScope(actor: AuthenticatedUser, parcel: Parcel): Promise<void> {
+    if (actor.role === UserRole.ADMIN) {
+      return;
+    }
+    if (!parcel.currentHubId) {
+      throw new ForbiddenException({
+        message: "Parcel has no hub context for return operations",
+        error: ApiErrorCode.HUB_FORBIDDEN,
+      });
+    }
+    const assignment = await this.hubAssignmentRepo.findOne({
+      where: { userId: actor.id, hubId: parcel.currentHubId, isActive: true },
+      select: ["id"],
+    });
+    if (!assignment) {
+      throw new ForbiddenException({
+        message: "Access denied: parcel belongs to another hub",
+        error: ApiErrorCode.HUB_FORBIDDEN,
+      });
+    }
+  }
+
+  async initiateRto(
+    idOrCode: string,
+    actor: AuthenticatedUser,
+  ): Promise<{ parcelId: string; trackingCode: string; status: ParcelStatus }> {
+    if (actor.role !== UserRole.ADMIN && actor.role !== UserRole.HUB_MANAGER) {
+      throw new ForbiddenException({
+        message: "Only hub managers and admins can initiate returns",
+        error: ApiErrorCode.FORBIDDEN,
+      });
+    }
+    return this.dataSource.transaction(async (manager) => {
+      const parcel = await manager.getRepository(Parcel).findOne({
+        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+      });
+      if (!parcel) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      await this.assertRtoHubScope(actor, parcel);
+
+      if (
+        parcel.status === ParcelStatus.RTO_INITIATED ||
+        parcel.status === ParcelStatus.RETURN_IN_TRANSIT ||
+        parcel.status === ParcelStatus.RETURNED_TO_MERCHANT
+      ) {
+        return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+      }
+
+      const fromStatus = parcel.status;
+      this.lifecycle.assertTransition(fromStatus, ParcelStatus.RTO_INITIATED);
+      parcel.status = ParcelStatus.RTO_INITIATED;
+      await manager.save(parcel);
+
+      await manager.save(
+        manager.create(ParcelStatusHistory, {
+          parcelId: parcel.id,
+          fromStatus,
+          toStatus: ParcelStatus.RTO_INITIATED,
+          eventType: "STATUS_CHANGED",
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
+          actorRole: actor.role,
+          description: `Return-to-origin initiated by ${actor.role}`,
+        }),
+      );
+
+      await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
+      this.logger.log(`PARCEL_RTO_INITIATED parcel=${parcel.id} actor=${actor.id}`);
+      return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+    });
+  }
+
+  /**
+   * Advances an initiated return onto its return leg
+   * (`RTO_INITIATED → RETURN_IN_TRANSIT`). Same hub scope as initiation.
+   * Repeating the advance replays the state.
+   */
+  async advanceRto(
+    idOrCode: string,
+    actor: AuthenticatedUser,
+  ): Promise<{ parcelId: string; trackingCode: string; status: ParcelStatus }> {
+    if (actor.role !== UserRole.ADMIN && actor.role !== UserRole.HUB_MANAGER) {
+      throw new ForbiddenException({
+        message: "Only hub managers and admins can advance returns",
+        error: ApiErrorCode.FORBIDDEN,
+      });
+    }
+    return this.dataSource.transaction(async (manager) => {
+      const parcel = await manager.getRepository(Parcel).findOne({
+        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+      });
+      if (!parcel) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      await this.assertRtoHubScope(actor, parcel);
+
+      if (
+        parcel.status === ParcelStatus.RETURN_IN_TRANSIT ||
+        parcel.status === ParcelStatus.RETURNED_TO_MERCHANT
+      ) {
+        return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+      }
+
+      const fromStatus = parcel.status;
+      this.lifecycle.assertTransition(fromStatus, ParcelStatus.RETURN_IN_TRANSIT);
+      parcel.status = ParcelStatus.RETURN_IN_TRANSIT;
+      await manager.save(parcel);
+
+      await manager.save(
+        manager.create(ParcelStatusHistory, {
+          parcelId: parcel.id,
+          fromStatus,
+          toStatus: ParcelStatus.RETURN_IN_TRANSIT,
+          eventType: "STATUS_CHANGED",
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
+          actorRole: actor.role,
+          description: `Return in transit by ${actor.role}`,
+        }),
+      );
+
+      await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
+      this.logger.log(`PARCEL_RETURN_IN_TRANSIT parcel=${parcel.id} actor=${actor.id}`);
+      return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+    });
+  }
+
+  /**
+   * Completes a return (`RETURN_IN_TRANSIT → RETURNED_TO_MERCHANT`) and
+   * emits the first-ever `PARCEL_RETURNED` domain event so merchant
+   * notifications and webhooks fan out through the standard relay.
+   * Repeating the completion replays without duplicating the event: the
+   * terminal-state replay returns before any write.
+   */
+  async completeRto(
+    idOrCode: string,
+    actor: AuthenticatedUser,
+  ): Promise<{ parcelId: string; trackingCode: string; status: ParcelStatus }> {
+    if (actor.role !== UserRole.ADMIN && actor.role !== UserRole.HUB_MANAGER) {
+      throw new ForbiddenException({
+        message: "Only hub managers and admins can complete returns",
+        error: ApiErrorCode.FORBIDDEN,
+      });
+    }
+    return this.dataSource.transaction(async (manager) => {
+      const parcel = await manager.getRepository(Parcel).findOne({
+        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+      });
+      if (!parcel) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      await this.assertRtoHubScope(actor, parcel);
+
+      if (parcel.status === ParcelStatus.RETURNED_TO_MERCHANT) {
+        return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+      }
+
+      const fromStatus = parcel.status;
+      this.lifecycle.assertTransition(fromStatus, ParcelStatus.RETURNED_TO_MERCHANT);
+      parcel.status = ParcelStatus.RETURNED_TO_MERCHANT;
+      await manager.save(parcel);
+
+      await manager.save(
+        manager.create(ParcelStatusHistory, {
+          parcelId: parcel.id,
+          fromStatus,
+          toStatus: ParcelStatus.RETURNED_TO_MERCHANT,
+          eventType: "STATUS_CHANGED",
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
+          actorRole: actor.role,
+          description: `Returned to merchant by ${actor.role}`,
+        }),
+      );
+
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new ParcelReturnedEvent(
+            { aggregateId: parcel.id, merchantId: parcel.merchantId },
+            {
+              parcelId: parcel.id,
+              trackingCode: parcel.trackingCode,
+              merchantId: parcel.merchantId,
+              recipientName: parcel.recipientName,
+              hubId: parcel.currentHubId,
+            },
+          ),
+        );
+      } else {
+        await this.outboxService.append(manager, {
+          eventType: DomainEventType.PARCEL_RETURNED,
+          aggregateType: "parcel",
+          aggregateId: parcel.id,
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : null,
+          payload: {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: parcel.merchantId,
+            recipientName: parcel.recipientName,
+            hubId: parcel.currentHubId,
+          },
+        });
+      }
+
+      await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
+      this.logger.log(`PARCEL_RETURNED_TO_MERCHANT parcel=${parcel.id} actor=${actor.id}`);
+      return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
     });
   }
 

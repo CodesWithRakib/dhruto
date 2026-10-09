@@ -78,6 +78,26 @@ describe("Parcels API — Phase 1 merchant parcel core (E2E / Integration)", () 
       expect(res.body.errorCode).toBe("IDEMPOTENCY_KEY_REQUIRED");
     });
 
+    it("rejects Idempotency-Key values outside 16-128 chars with 400 (T-IDEM-01)", async () => {
+      const short = await request(app.getHttpServer())
+        .post("/api/v1/parcels")
+        .set(bearer(merchantToken))
+        .set("Idempotency-Key", "too-short")
+        .send(VALID_BOOKING);
+
+      expect(short.status).toBe(400);
+      expect(short.body.errorCode).toBe("VALIDATION_ERROR");
+
+      const overlong = await request(app.getHttpServer())
+        .post("/api/v1/parcels")
+        .set(bearer(merchantToken))
+        .set("Idempotency-Key", `k-${"x".repeat(130)}`)
+        .send(VALID_BOOKING);
+
+      expect(overlong.status).toBe(400);
+      expect(overlong.body.errorCode).toBe("VALIDATION_ERROR");
+    });
+
     it("rejects an invalid Bangladesh phone with 422", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/v1/parcels")

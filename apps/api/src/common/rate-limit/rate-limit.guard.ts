@@ -24,11 +24,13 @@ interface RateLimitedRequest {
 }
 
 /**
- * Fixed-window rate limiter.
+ * Fixed-window rate limiter (T-SEC-02).
  *
- * Counters are stored in the shared cache so the limit holds across instances.
- * A best-effort limiter is appropriate here: it protects public tracking and
- * command endpoints from abuse without adding infrastructure.
+ * The shared atomic counter (`CacheService.incr`) is authoritative whenever
+ * Redis is reachable, so the limit holds across instances. When Redis is
+ * unavailable the per-instance memory window enforces the limit instead:
+ * precision degrades, but abuse protection is never silently disabled.
+ * No account lockout is performed — only the request is throttled (429).
  */
 @Injectable()
 export class RateLimitGuard implements CanActivate {
@@ -54,6 +56,21 @@ export class RateLimitGuard implements CanActivate {
     const key = `rl:${options.scope}:${identity}`;
     const now = Date.now();
 
+    // Shared atomic counter first (multi-instance correct when Redis is up).
+    const shared = await this.cacheService.incr(key, options.windowSeconds).catch(() => null);
+    if (shared) {
+      // Mirror into memory so a later Redis outage continues from a warm window.
+      RateLimitGuard.inFlight.set(key, {
+        count: shared.count,
+        resetAt: now + shared.ttlSeconds * 1000,
+      });
+      if (shared.count > options.limit) {
+        this.reject(context, Math.max(1, shared.ttlSeconds));
+      }
+      return true;
+    }
+
+    // Redis unavailable: authoritative per-instance memory window.
     let existing = RateLimitGuard.inFlight.get(key);
     if (!existing || existing.resetAt <= now) {
       existing = { count: 0, resetAt: now + options.windowSeconds * 1000 };
@@ -61,28 +78,27 @@ export class RateLimitGuard implements CanActivate {
     }
 
     existing.count += 1;
-    void this.cacheService.set(
-      key,
-      existing,
-      Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
-    );
-
     if (existing.count > options.limit) {
-      const retryAfter = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
-      context
-        .switchToHttp()
-        .getResponse<{ setHeader(name: string, value: string): void }>()
-        .setHeader("Retry-After", String(retryAfter));
-      throw new HttpException(
-        {
-          message: "Too many requests. Please slow down and try again shortly.",
-          error: ApiErrorCode.RATE_LIMIT_EXCEEDED,
-        },
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+      this.reject(context, Math.max(1, Math.ceil((existing.resetAt - now) / 1000)));
     }
-
     return true;
+  }
+
+  private reject(
+    context: ExecutionContext,
+    retryAfter: number,
+  ): never {
+    context
+      .switchToHttp()
+      .getResponse<{ setHeader(name: string, value: string): void }>()
+      .setHeader("Retry-After", String(retryAfter));
+    throw new HttpException(
+      {
+        message: "Too many requests. Please slow down and try again shortly.",
+        error: ApiErrorCode.RATE_LIMIT_EXCEEDED,
+      },
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
   }
 
   private resolveIdentity(request: RateLimitedRequest): string {

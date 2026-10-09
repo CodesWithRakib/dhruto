@@ -4,7 +4,8 @@ import { AuthService } from "./services/auth.service.js";
 import { RegisterDto, LoginDto, RefreshTokenDto } from "./dto/auth.dto.js";
 import { Public } from "./decorators/public.decorator.js";
 import { CurrentUser } from "./decorators/current-user.decorator.js";
-import { JwtAuthGuard } from "./guards/jwt-auth.guard.js";
+import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
+import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 import { type AuthenticatedUser } from "./jwt/jwt.interface.js";
 import { type RequestWithId } from "../common/middleware/request-id.middleware.js";
 
@@ -16,9 +17,12 @@ export class AuthController {
   @Public()
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 10, windowSeconds: 60, scope: "auth-register" })
   @ApiOperation({
-    summary: "Register a new user account (Merchant, Rider, etc.)",
-    description: "Creates user credentials, sets password hash, and creates associated entity.",
+    summary: "Register a new merchant account",
+    description:
+      "Public registration is merchant-only. Privileged roles (ADMIN, HUB_MANAGER, RIDER) are provisioned server-side and rejected here with 403.",
   })
   async register(@Body() dto: RegisterDto, @Req() req: RequestWithId) {
     const result = await this.authService.register(dto);
@@ -37,6 +41,11 @@ export class AuthController {
   @Public()
   @Post("login")
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  // 60/min/IP (not lower): carrier-grade NAT in BD puts many users behind
+  // one IP, and bcrypt makes 1 guess/sec uneconomical. No per-account
+  // lockout — throttling must never become a lockout oracle for attackers.
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "auth-login" })
   @ApiOperation({
     summary: "Authenticate user and issue JWT tokens",
     description:
@@ -59,6 +68,8 @@ export class AuthController {
   @Public()
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "auth-refresh" })
   @ApiOperation({
     summary: "Refresh access token using a refresh token",
   })
@@ -96,7 +107,6 @@ export class AuthController {
   }
 
   @Get("me")
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("JWT-auth")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

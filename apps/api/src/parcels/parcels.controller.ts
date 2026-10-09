@@ -30,14 +30,13 @@ import {
 import { ApiErrorCode, ParcelStatus } from "@dhruto/contracts";
 import { ParcelsService } from "./parcels.service.js";
 import { CreateParcelDto } from "./dto/create-parcel.dto.js";
+import { AssignRiderDto } from "./dto/assign-rider.dto.js";
 import { ParcelResponseDto } from "./dto/parcel-response.dto.js";
 import { ParcelListQueryDto } from "./dto/parcel-list-query.dto.js";
 import {
   ParcelDetailsResponseDto,
   ParcelHistoryResponseDto,
 } from "./dto/parcel-details-response.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole } from "../database/entities/User.entity.js";
@@ -48,7 +47,7 @@ import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 
 @ApiTags("Parcels")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.MERCHANT, UserRole.ADMIN)
 @Controller("parcels")
 export class ParcelsController {
@@ -93,6 +92,16 @@ export class ParcelsController {
       throw new BadRequestException({
         message: "Idempotency-Key header is required for parcel creation requests",
         error: ApiErrorCode.IDEMPOTENCY_KEY_REQUIRED,
+      });
+    }
+    // Phase 3 (T-IDEM-01): enforce the documented 16–128 char contract.
+    // Shorter keys collide too easily across merchants; longer keys exceed
+    // the idempotency_records.key column (varchar 128).
+    const trimmedKey = idempotencyKey.trim();
+    if (trimmedKey.length < 16 || trimmedKey.length > 128) {
+      throw new BadRequestException({
+        message: "Idempotency-Key must be between 16 and 128 characters",
+        error: ApiErrorCode.VALIDATION_ERROR,
       });
     }
 
@@ -254,16 +263,136 @@ export class ParcelsController {
   @ApiNotFoundResponse({ description: "Parcel or rider not found" })
   async assignRider(
     @Param("id") id: string,
-    @Body("riderId") riderId: string,
+    @Body() dto: AssignRiderDto,
     @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
   ) {
-    const result = await this.parcelsService.assignRider(id, riderId, user);
+    const result = await this.parcelsService.assignRider(id, dto.riderId, user);
 
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: result.message,
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post(":id/cancel")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-cancel" })
+  @ApiOperation({
+    summary: "Cancel a parcel inside the pre-pickup window",
+    description:
+      "Phase 3 operational command. Allowed from CREATED, PICKUP_REQUESTED and PICKUP_ASSIGNED only; merchants cancel their own parcels. Repeating a cancel replays the cancelled state.",
+  })
+  @ApiOkResponse({ description: "Parcel cancelled" })
+  @ApiNotFoundResponse({ description: "Parcel not found" })
+  async cancelParcel(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.cancelParcel(id, user);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Parcel cancelled successfully",
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post(":id/rto")
+  @Roles(UserRole.ADMIN, UserRole.HUB_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-rto" })
+  @ApiOperation({
+    summary: "Initiate return-to-origin from a failed delivery",
+    description:
+      "Phase 3 operational command. Allowed from DELIVERY_ATTEMPTED only; hub managers and admins. Repeating initiation replays the RTO state.",
+  })
+  @ApiOkResponse({ description: "Return-to-origin initiated" })
+  @ApiNotFoundResponse({ description: "Parcel not found" })
+  async initiateRto(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.initiateRto(id, user);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Return-to-origin initiated successfully",
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post(":id/rto-advance")
+  @Roles(UserRole.ADMIN, UserRole.HUB_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-rto" })
+  @ApiOperation({
+    summary: "Move an initiated return onto its return leg",
+    description:
+      "Phase 4 operational command. Allowed from RTO_INITIATED only; hub managers are scoped to the parcel's current hub. Repeating the advance replays the state.",
+  })
+  @ApiOkResponse({ description: "Return in transit" })
+  @ApiNotFoundResponse({ description: "Parcel not found" })
+  async advanceRto(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.advanceRto(id, user);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Return marked in transit successfully",
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post(":id/rto-complete")
+  @Roles(UserRole.ADMIN, UserRole.HUB_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-rto" })
+  @ApiOperation({
+    summary: "Complete a return to the merchant",
+    description:
+      "Phase 4 operational command. Allowed from RETURN_IN_TRANSIT only; emits the PARCEL_RETURNED domain event for merchant notifications and webhooks. Repeating the completion replays without duplicating the event.",
+  })
+  @ApiOkResponse({ description: "Return completed" })
+  @ApiNotFoundResponse({ description: "Parcel not found" })
+  async completeRto(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.completeRto(id, user);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Parcel returned to merchant successfully",
       data: result,
       meta: {
         requestId: req.requestId || "unknown",

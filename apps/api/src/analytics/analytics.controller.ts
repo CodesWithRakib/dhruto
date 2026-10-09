@@ -26,8 +26,6 @@ import {
   AnalyticsRangeQueryDto,
   ExportRequestDto,
 } from "./dto/analytics.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole } from "../database/entities/index.js";
@@ -98,7 +96,7 @@ function kpi(
  */
 @ApiTags("Analytics")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Controller("analytics")
 export class AnalyticsController {
   constructor(
@@ -335,6 +333,9 @@ export class AnalyticsController {
     const cod = await this.domain.cod(scope, range);
     const prevCod = await this.domain.cod(scope, prevRange);
     const merchants = scope.merchantId ? 1 : await this.merchantRepo.count();
+    // Phase 3 (T-LIT-01): previously hardcoded 0. Distinct riders/hubs with
+    // in-range parcel activity, under the same tenant scope as the rest.
+    const activity = await this.metrics.overviewActivity(scope, range);
     return {
       range,
       generatedAt: new Date().toISOString(),
@@ -351,8 +352,8 @@ export class AnalyticsController {
         codCollected: kpi(cod.collected, prevCod.collected),
         pendingSettlement: kpi(finance.pendingSettlementMinor / 100, null),
         activeMerchants: merchants,
-        activeRiders: 0,
-        activeHubs: 0,
+        activeRiders: activity.activeRiders,
+        activeHubs: activity.activeHubs,
       },
       trends,
       generatedAtNote: "Aggregated on read from transactional tables (Asia/Dhaka buckets).",
@@ -392,6 +393,13 @@ export class AnalyticsController {
           };
         });
         void created;
+        // Phase 3 (T-LIT-01): previously hardcoded []. Bottlenecks are the
+        // funnel stages with the largest stage-to-stage dropoff.
+        const bottlenecks = funnel
+          .filter((s) => s.dropoff !== null && (s.dropoff as number) > 0)
+          .sort((a, b) => (b.dropoff as number) - (a.dropoff as number))
+          .slice(0, 3)
+          .map((s) => ({ stage: s.stage, count: s.count, dropoff: s.dropoff }));
         return {
           range,
           funnel,
@@ -408,7 +416,7 @@ export class AnalyticsController {
             p95: this.metrics.percentile(latencies, 95),
             p99: this.metrics.percentile(latencies, 99),
           },
-          bottlenecks: [],
+          bottlenecks,
         };
       },
       120,
@@ -693,13 +701,24 @@ export class AnalyticsController {
   async listAlerts(
     @Query("status") status: string | undefined,
     @Query("limit") limit: string | undefined,
+    @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
   ) {
+    // Phase 4 (T-SCOPE-01): hub managers see platform alerts plus alerts
+    // scoped to their assigned hubs; admins see everything.
+    let hubIds: string[] | undefined;
+    if (user.role === UserRole.HUB_MANAGER) {
+      const assignments = await this.hubAssignmentRepo.find({
+        where: { userId: user.id, isActive: true },
+      });
+      hubIds = assignments.map((a) => a.hubId);
+    }
     const data = await this.alerts.list(
       status === "OPEN" || status === "ACKNOWLEDGED" || status === "RESOLVED"
         ? (status as AlertStatus)
         : undefined,
       limit ? Number(limit) : 100,
+      hubIds,
     );
     return envelope(HttpStatus.OK, "Alerts retrieved successfully", data, req);
   }
@@ -724,7 +743,15 @@ export class AnalyticsController {
     @CurrentUser() user: AuthenticatedUser,
     @Req() req: RequestWithId,
   ) {
-    const data = await this.alerts.acknowledge(id, user.id);
+    // Phase 4 (T-SCOPE-01): hub managers ack only in-scope alerts.
+    let hubIds: string[] | undefined;
+    if (user.role === UserRole.HUB_MANAGER) {
+      const assignments = await this.hubAssignmentRepo.find({
+        where: { userId: user.id, isActive: true },
+      });
+      hubIds = assignments.map((a) => a.hubId);
+    }
+    const data = await this.alerts.acknowledge(id, user.id, hubIds);
     return envelope(HttpStatus.OK, "Alert acknowledged", data, req);
   }
 

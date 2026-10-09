@@ -32,8 +32,6 @@ import {
   CreateSettlementBatchDto,
   ResolveDiscrepancyDto,
 } from "./dto/finance.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole } from "../database/entities/index.js";
@@ -85,7 +83,7 @@ async function requireMerchant(
  */
 @ApiTags("Finance")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.MERCHANT)
 @Controller("finance")
 export class FinanceController {
@@ -264,7 +262,7 @@ export class FinanceController {
  */
 @ApiTags("Finance")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.ADMIN, UserRole.HUB_MANAGER)
 @Controller("finance")
 export class HubCashController {
@@ -362,7 +360,7 @@ export class HubCashController {
  */
 @ApiTags("Finance")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.ADMIN)
 @Controller("admin/finance")
 export class FinanceAdminController {

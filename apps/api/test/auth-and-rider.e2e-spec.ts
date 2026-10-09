@@ -16,9 +16,9 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
   let testParcelId: string;
   let generatedOtp: string;
 
-  const riderEmail = `rider_${Date.now()}@dhruto.com`;
-  const riderPhone = `017${Math.floor(10000000 + Math.random() * 90000000)}`;
-  const riderPassword = "riderPassword123";
+  const merchantEmail = `merchant_${Date.now()}@dhruto.com`;
+  const merchantPhone = `017${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const merchantPassword = "merchantPassword123";
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -32,6 +32,17 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
 
     merchantToken = await loginToken(app, SEEDED_ACCOUNTS.merchant);
     hubManagerToken = await loginToken(app, SEEDED_ACCOUNTS.hubManager);
+
+    // Rider flow uses the seeded rider (public registration is
+    // merchant-only since T-SEC-01; riders are provisioned server-side).
+    const seededRiderToken = await loginToken(app, SEEDED_ACCOUNTS.rider);
+    const me = await request(app.getHttpServer())
+      .get("/api/v1/auth/me")
+      .set("Authorization", `Bearer ${seededRiderToken}`)
+      .expect(200);
+    riderToken = seededRiderToken;
+    riderId = me.body.data.rider.id as string;
+    expect(riderId).toBeDefined();
   });
 
   afterAll(async () => {
@@ -39,57 +50,88 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
   });
 
   describe("1. Custom JWT Authentication", () => {
-    it("POST /api/v1/auth/register - registers a new rider account", async () => {
+    it("POST /api/v1/auth/register - registers a new merchant account", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/v1/auth/register")
         .send({
-          name: "Test Rider Karim",
-          email: riderEmail,
-          phone: riderPhone,
-          password: riderPassword,
-          role: "RIDER",
+          name: "Test Merchant Rahim",
+          email: merchantEmail,
+          phone: merchantPhone,
+          password: merchantPassword,
         })
         .expect(201);
 
       expect(res.body.success).toBe(true);
       expect(res.body.data.tokens.accessToken).toBeDefined();
       expect(res.body.data.tokens.refreshToken).toBeDefined();
-      expect(res.body.data.user.email).toBe(riderEmail);
-      expect(res.body.data.user.role).toBe("RIDER");
-      expect(res.body.data.user.riderId).toBeDefined();
+      expect(res.body.data.user.email).toBe(merchantEmail);
+      expect(res.body.data.user.role).toBe("MERCHANT");
+      expect(res.body.data.user.merchantId).toBeDefined();
 
-      riderId = res.body.data.user.riderId;
+      riderRefreshToken = res.body.data.tokens.refreshToken;
     });
 
-    it("POST /api/v1/auth/login - succeeds with registered rider credentials", async () => {
+    it("POST /api/v1/auth/register - rejects privileged roles with 403 (T-SEC-01)", async () => {
+      for (const role of ["ADMIN", "HUB_MANAGER", "RIDER", "CUSTOMER"]) {
+        const res = await request(app.getHttpServer())
+          .post("/api/v1/auth/register")
+          .send({
+            name: `Escalation ${role}`,
+            email: `escalate_${role}_${Date.now()}@dhruto.com`,
+            phone: `017${Math.floor(10000000 + Math.random() * 90000000)}`,
+            password: "escalation123",
+            role,
+          })
+          .expect(403);
+
+        expect(res.body.success).toBe(false);
+      }
+    });
+
+    it("POST /api/v1/auth/register - rejects invalid roles with 422", async () => {
+      await request(app.getHttpServer())
+        .post("/api/v1/auth/register")
+        .send({
+          name: "Bad Role",
+          email: `badrole_${Date.now()}@dhruto.com`,
+          phone: `017${Math.floor(10000000 + Math.random() * 90000000)}`,
+          password: "badrole123",
+          role: "SUPER_ADMIN",
+        })
+        .expect(422);
+    });
+
+    it("POST /api/v1/auth/login - succeeds with registered merchant credentials", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/v1/auth/login")
         .send({
-          emailOrPhone: riderEmail,
-          password: riderPassword,
+          emailOrPhone: merchantEmail,
+          password: merchantPassword,
         })
         .expect(200);
 
       expect(res.body.success).toBe(true);
       expect(res.body.data.tokens.accessToken).toBeDefined();
       expect(res.body.data.tokens.refreshToken).toBeDefined();
-      expect(res.body.data.user.email).toBe(riderEmail);
-      expect(res.body.data.user.role).toBe("RIDER");
-
-      riderToken = res.body.data.tokens.accessToken;
-      riderRefreshToken = res.body.data.tokens.refreshToken;
+      expect(res.body.data.user.email).toBe(merchantEmail);
+      expect(res.body.data.user.role).toBe("MERCHANT");
     });
 
     it("GET /api/v1/auth/me - returns user profile with valid Bearer token", async () => {
+      const login = await request(app.getHttpServer())
+        .post("/api/v1/auth/login")
+        .send({ emailOrPhone: merchantEmail, password: merchantPassword })
+        .expect(200);
+
       const res = await request(app.getHttpServer())
         .get("/api/v1/auth/me")
-        .set("Authorization", `Bearer ${riderToken}`)
+        .set("Authorization", `Bearer ${login.body.data.tokens.accessToken}`)
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.data.email).toBe(riderEmail);
-      expect(res.body.data.role).toBe("RIDER");
-      expect(res.body.data.rider).toBeDefined();
+      expect(res.body.data.email).toBe(merchantEmail);
+      expect(res.body.data.role).toBe("MERCHANT");
+      expect(res.body.data.merchant).toBeDefined();
     });
 
     it("GET /api/v1/auth/me - rejects request without Authorization header with 401", async () => {

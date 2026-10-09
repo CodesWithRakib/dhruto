@@ -5,6 +5,11 @@ export interface PayoutRequestedPayload {
   payoutId: string;
   amountPaisa: number;
   paymentMethod: string;
+  /** Relay contract (fan-out + templates). */
+  payoutCode?: string | null;
+  merchantId?: string | null;
+  amountMinor?: number | null;
+  method?: string | null;
 }
 
 export class PayoutRequestedEvent extends DomainEvent<PayoutRequestedPayload> {
@@ -19,6 +24,11 @@ export class PayoutRequestedEvent extends DomainEvent<PayoutRequestedPayload> {
 export interface PayoutApprovedPayload {
   payoutId: string;
   amountPaisa: number;
+  /** Relay contract (fan-out + templates). */
+  payoutCode?: string | null;
+  merchantId?: string | null;
+  amountMinor?: number | null;
+  method?: string | null;
 }
 
 export class PayoutApprovedEvent extends DomainEvent<PayoutApprovedPayload> {
@@ -34,6 +44,11 @@ export interface PayoutCompletedPayload {
   payoutId: string;
   amountPaisa: number;
   transactionRef?: string;
+  /** Relay contract (fan-out + templates). */
+  payoutCode?: string | null;
+  merchantId?: string | null;
+  amountMinor?: number | null;
+  method?: string | null;
 }
 
 export class PayoutCompletedEvent extends DomainEvent<PayoutCompletedPayload> {
@@ -48,6 +63,11 @@ export class PayoutCompletedEvent extends DomainEvent<PayoutCompletedPayload> {
 export interface PayoutFailedPayload {
   payoutId: string;
   reason: string;
+  /** Relay contract (fan-out + templates). */
+  payoutCode?: string | null;
+  merchantId?: string | null;
+  amountMinor?: number | null;
+  method?: string | null;
 }
 
 export class PayoutFailedEvent extends DomainEvent<PayoutFailedPayload> {
@@ -63,6 +83,13 @@ export interface CashVerifiedPayload {
   handInId: string;
   hubId?: string | null;
   verifiedAmount: number;
+  /** Relay contract (fan-out + templates). */
+  cashLedgerId?: string | null;
+  parcelId?: string | null;
+  trackingCode?: string | null;
+  merchantId?: string | null;
+  netMinor?: number | null;
+  settlementCode?: string | null;
 }
 
 export class CashVerifiedEvent extends DomainEvent<CashVerifiedPayload> {
@@ -77,6 +104,12 @@ export class CashVerifiedEvent extends DomainEvent<CashVerifiedPayload> {
 export interface SettlementCreatedPayload {
   settlementId: string;
   totalAmountPaisa: number;
+  /** Relay contract (fan-out + templates). */
+  settlementCode?: string | null;
+  parcelId?: string | null;
+  trackingCode?: string | null;
+  merchantId?: string | null;
+  netMinor?: number | null;
 }
 
 export class SettlementCreatedEvent extends DomainEvent<SettlementCreatedPayload> {
@@ -92,6 +125,13 @@ export interface DiscrepancyOpenedPayload {
   discrepancyId: string;
   reason: string;
   amountPaisa?: number;
+  /** Relay contract (fan-out + templates). */
+  cashLedgerId?: string | null;
+  trackingCode?: string | null;
+  merchantId?: string | null;
+  riderId?: string | null;
+  hubId?: string | null;
+  differenceMinor?: number | null;
 }
 
 export class DiscrepancyOpenedEvent extends DomainEvent<DiscrepancyOpenedPayload> {

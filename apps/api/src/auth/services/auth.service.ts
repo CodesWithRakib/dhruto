@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Logger,
   OnModuleInit,
+  ForbiddenException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -24,9 +25,20 @@ import { PasswordService } from "./password.service.js";
 import { RegisterDto, LoginDto } from "../dto/auth.dto.js";
 import { getErrorMessage } from "../../common/utils/error.util.js";
 
+/**
+ * Demo-seed gate (Phase 3, T-SEED-01). Production boots must never create
+ * publicly-known credentials; an explicit `SEED_DEMO_DATA=true` escape hatch
+ * covers disaster-recovery bootstrapping.
+ */
+export function shouldSeedDemoData(env: NodeJS.ProcessEnv): boolean {
+  if (env.NODE_ENV === "production" && env.SEED_DEMO_DATA !== "true") {
+    return false;
+  }
+  return true;
+}
+
 @Injectable()
-export class AuthService implements OnModuleInit {
-  private readonly logger = new Logger(AuthService.name);
+export class AuthService implements OnModuleInit {  private readonly logger = new Logger(AuthService.name);
 
   constructor(
     @InjectRepository(User)
@@ -58,8 +70,17 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Seed default demo users for development and testing.
+   *
+   * Phase 3 (T-SEED-01): never runs in production. Seeding a
+   * publicly-known ADMIN credential into a production database would be a
+   * critical account-takeover vector; production accounts are provisioned
+   * exclusively through server-side admin workflows.
    */
   async onModuleInit() {
+    if (!shouldSeedDemoData(process.env)) {
+      this.logger.log("Skipping demo seed (production without SEED_DEMO_DATA=true)");
+      return;
+    }
     try {
       await this.seedDemoData();
     } catch (err) {
@@ -202,7 +223,13 @@ export class AuthService implements OnModuleInit {
     }
 
     const passwordHash = await this.passwordService.hash(dto.password);
-    const role = dto.role || UserRole.MERCHANT;
+    // T-SEC-01: public registration is merchant-only. Privileged roles
+    // (ADMIN, HUB_MANAGER, RIDER, CUSTOMER) are provisioned exclusively
+    // through server-side workflows (seed/admin), never the public body.
+    if (dto.role && dto.role !== UserRole.MERCHANT) {
+      throw new ForbiddenException("Public registration is available for merchant accounts only");
+    }
+    const role = UserRole.MERCHANT;
 
     const user = this.userRepo.create({
       name: dto.name,

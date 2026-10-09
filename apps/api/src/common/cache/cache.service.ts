@@ -170,6 +170,35 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Atomic fixed-window counter for abuse protection (T-SEC-02).
+   *
+   * Redis path: `INCR` is atomic across application instances; `EXPIRE` is
+   * set when the window opens (count === 1). Returns `{ count, ttlSeconds }`
+   * or `null` when Redis is unavailable — callers then enforce the limit
+   * with the per-instance memory window instead, so a Redis outage degrades
+   * precision but never silently disables protection.
+   */
+  async incr(
+    key: string,
+    windowSeconds: number,
+  ): Promise<{ count: number; ttlSeconds: number } | null> {
+    if (this.isRedisConnected && this.redisClient) {
+      try {
+        const count = await this.redisClient.incr(key);
+        if (count === 1) {
+          await this.redisClient.expire(key, windowSeconds);
+        }
+        const ttl = await this.redisClient.ttl(key);
+        return { count, ttlSeconds: ttl > 0 ? ttl : windowSeconds };
+      } catch (err) {
+        this.logger.warn(`Cache incr error for key "${key}": ${(err as Error).message}`);
+        return null;
+      }
+    }
+    return null;
+  }
+
   async delPattern(pattern: string): Promise<void> {
     try {
       if (this.isRedisConnected && this.redisClient) {

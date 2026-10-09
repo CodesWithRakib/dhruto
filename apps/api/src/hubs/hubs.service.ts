@@ -1636,6 +1636,15 @@ export class HubsService {
       requireActive: false,
     });
 
+    // Phase 3 (T-EXC-01): resolving is terminal. Re-resolving would silently
+    // rewrite audit history (resolver, timestamp, note), so reject it.
+    if (exception.status === ExceptionStatus.RESOLVED) {
+      throw new ConflictException({
+        message: `Exception "${exceptionId}" is already resolved`,
+        error: ApiErrorCode.EXCEPTION_ALREADY_RESOLVED,
+      });
+    }
+
     exception.status = ExceptionStatus.RESOLVED;
     exception.resolvedBy = user.id;
     exception.resolvedAt = new Date();

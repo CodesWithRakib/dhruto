@@ -10,7 +10,6 @@ import {
   ScanLine,
   Search,
   Settings,
-  UploadCloud,
   User,
   Warehouse,
   Wallet,
@@ -63,11 +62,10 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           labelKey: "createBooking",
           icon: PlusCircle,
         },
-        {
-          href: `${MERCHANT_ROUTES.createBooking}?mode=bulk`,
-          labelKey: "bulkUpload",
-          icon: UploadCloud,
-        },
+        // Phase 3 (T-BULK-01): bulk import has no UI/API yet — the
+        // `?mode=bulk` entry promised a dead page, so it is removed from
+        // the sidebar. The dashboard keeps a disabled "coming soon" card
+        // until bulk is specified (Q-BULK).
         {
           href: MERCHANT_ROUTES.parcels,
           labelKey: "shipments",

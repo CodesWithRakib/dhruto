@@ -509,9 +509,12 @@ export class RidersService {
           new ParcelOutForDeliveryEvent(
             { aggregateId: parcel.id, merchantId: parcel.merchantId },
             {
+              parcelId: parcel.id,
               trackingCode: parcel.trackingCode,
+              merchantId: parcel.merchantId,
               riderId,
               recipientPhone: parcel.recipientPhone,
+              recipientName: parcel.recipientName,
             },
           ),
         );
@@ -969,9 +972,14 @@ export class RidersService {
           new ParcelDeliveredEvent(
             { aggregateId: parcel.id, merchantId: parcel.merchantId },
             {
+              parcelId: parcel.id,
               trackingCode: parcel.trackingCode,
+              merchantId: parcel.merchantId,
               riderId,
               codCollected: collectedAmount,
+              attemptId: attempt.id,
+              recipientPhone: parcel.recipientPhone,
+              recipientName: parcel.recipientName,
             },
           ),
         );
@@ -1108,9 +1116,15 @@ export class RidersService {
           new ParcelFailedEvent(
             { aggregateId: parcel.id, merchantId: parcel.merchantId },
             {
+              parcelId: parcel.id,
               trackingCode: parcel.trackingCode,
+              merchantId: parcel.merchantId,
               riderId,
               reason: dto.reason,
+              attemptId: attempt.id,
+              rescheduledFor: rescheduledFor?.toISOString() ?? null,
+              recipientPhone: parcel.recipientPhone,
+              recipientName: parcel.recipientName,
             },
           ),
         );

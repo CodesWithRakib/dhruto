@@ -16,8 +16,6 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { NotificationsService } from "./notifications.service.js";
 import { TestSmsDto, UpdatePreferencesDto } from "./dto/notification.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole } from "../database/entities/index.js";
@@ -49,7 +47,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
  */
 @ApiTags("Notifications")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.MERCHANT, UserRole.RIDER, UserRole.HUB_MANAGER, UserRole.ADMIN)
 @Controller("notifications")
 export class NotificationsController {

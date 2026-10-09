@@ -1,8 +1,9 @@
-import { Injectable, Logger, Optional } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger, Optional } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, MoreThan } from "typeorm";
 import {
   DEFAULT_ALERT_DEFINITIONS,
+  ApiErrorCode,
   type AnalyticsAlert as AlertContract,
   type AlertStatus,
 } from "@dhruto/contracts";
@@ -37,18 +38,56 @@ export class AnalyticsAlertService {
     @Optional() private readonly notifications?: NotificationsService,
   ) {}
 
-  async list(status?: AlertStatus, limit = 100): Promise<AlertContract[]> {
-    const rows = await this.alertRepo.find({
-      where: status ? { status } : {},
-      order: { triggeredAt: "DESC" },
-      take: Math.min(200, Math.max(1, limit)),
-    });
+  /**
+   * Phase 4 (T-SCOPE-01): hub managers see platform alerts plus alerts
+   * scoped to their assigned hubs — never other hubs' or merchants' rows.
+   * Pass no `hubIds` for the unfiltered (admin) view.
+   */
+  async list(status?: AlertStatus, limit = 100, hubIds?: string[]): Promise<AlertContract[]> {
+    const take = Math.min(200, Math.max(1, limit));
+    if (!hubIds) {
+      const rows = await this.alertRepo.find({
+        where: status ? { status } : {},
+        order: { triggeredAt: "DESC" },
+        take,
+      });
+      return rows.map((r) => this.toContract(r));
+    }
+    const qb = this.alertRepo.createQueryBuilder("a").orderBy("a.triggeredAt", "DESC").take(take);
+    if (hubIds.length > 0) {
+      qb.where("(a.scope = :platform OR (a.scope = :hub AND a.scope_id IN (:...hubIds)))", {
+        platform: "platform",
+        hub: "hub",
+        hubIds,
+      });
+    } else {
+      // Manager with no assignments: platform alerts only.
+      qb.where("a.scope = :platform", { platform: "platform" });
+    }
+    if (status) qb.andWhere("a.status = :status", { status });
+    // NOTE: merchant/rider-scoped rows are never visible to hub managers.
+    const rows = await qb.getMany();
     return rows.map((r) => this.toContract(r));
   }
 
-  async acknowledge(id: string, actorId: string): Promise<AlertContract> {
+  /**
+   * Phase 4 (T-SCOPE-01): hub managers may only acknowledge platform alerts
+   * or alerts scoped to their assigned hubs. Pass no `hubIds` for admins.
+   */
+  async acknowledge(id: string, actorId: string, hubIds?: string[]): Promise<AlertContract> {
     const row = await this.alertRepo.findOne({ where: { id } });
     if (!row) throw new Error("Alert not found");
+    if (hubIds) {
+      const inScope =
+        row.scope === "platform" ||
+        (row.scope === "hub" && row.scopeId !== null && hubIds.includes(row.scopeId));
+      if (!inScope) {
+        throw new ForbiddenException({
+          message: "Alert is outside your hub scope",
+          error: ApiErrorCode.ANALYTICS_SCOPE_FORBIDDEN,
+        });
+      }
+    }
     if (row.status === "OPEN") {
       row.status = "ACKNOWLEDGED";
       row.acknowledgedBy = actorId;

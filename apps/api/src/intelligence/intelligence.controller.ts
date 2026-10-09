@@ -28,8 +28,6 @@ import {
   RecommendationOverrideDto,
   IntelligenceFeedbackDto,
 } from "./dto/intelligence.dto.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole } from "../database/entities/index.js";
@@ -62,7 +60,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
  */
 @ApiTags("Intelligence")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Controller("intelligence")
 export class IntelligenceController {
   constructor(

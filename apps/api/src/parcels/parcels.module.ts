@@ -12,6 +12,7 @@ import {
   ParcelAssignment,
   Rider,
   Hub,
+  HubUserAssignment,
 } from "../database/entities/index.js";
 import { PricingModule } from "../pricing/pricing.module.js";
 import { IdempotencyModule } from "../common/idempotency/idempotency.module.js";
@@ -20,7 +21,7 @@ import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Parcel, ParcelStatusHistory, Merchant, ParcelAssignment, Rider, Hub]),
+    TypeOrmModule.forFeature([Parcel, ParcelStatusHistory, Merchant, ParcelAssignment, Rider, Hub, HubUserAssignment]),
     PricingModule,
     IdempotencyModule,
     // OutboxService for transactional domain-event emission.

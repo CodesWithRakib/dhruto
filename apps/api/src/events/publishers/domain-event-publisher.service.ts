@@ -26,18 +26,30 @@ export class DomainEventPublisher {
    * Publishes a domain event within an active TypeORM transaction.
    * Atomically records the event in the outbox table and dispatches it
    * to in-memory event listeners.
+   *
+   * Phase 3 (F-OBS-01): the outbox relay resolves recipients from
+   * `payload.merchantId`, so the event metadata merchant is merged under any
+   * explicit payload keys. Explicit payload values always win; this only
+   * backfills what call sites omit and can never clobber real data.
    */
   async publish<T extends DomainEvent<unknown>>(
     manager: EntityManager,
     event: T,
   ): Promise<EventOutbox> {
     // 1. Transactional Outbox persistence
+    const rawPayload =
+      event.payload && typeof event.payload === "object"
+        ? (event.payload as Record<string, unknown>)
+        : {};
     const outboxRow = await this.outboxService.append(manager, {
       aggregateType: event.aggregateType,
       aggregateId: event.aggregateId,
       eventType: event.eventType as DomainEventType,
       actorId: event.merchantId,
-      payload: (event.payload && typeof event.payload === "object" ? event.payload : {}) as Record<string, unknown>,
+      payload: {
+        merchantId: event.merchantId ?? null,
+        ...rawPayload,
+      },
     });
 
     this.logger.debug(

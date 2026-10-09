@@ -6,8 +6,6 @@ import { GeoDataService } from "./services/geo-data.service.js";
 import { ModelRegistryService } from "./services/model-registry.service.js";
 import { GeoDatasetVersion } from "../database/entities/GeoDatasetVersion.entity.js";
 import { IntelligenceRecommendation } from "../database/entities/IntelligenceRecommendation.entity.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { UserRole } from "../database/entities/index.js";
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
@@ -34,7 +32,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
  */
 @ApiTags("Intelligence Admin")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.ADMIN)
 @Controller("admin/intelligence")
 export class IntelligenceAdminController {

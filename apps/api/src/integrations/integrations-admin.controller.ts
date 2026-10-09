@@ -12,8 +12,6 @@ import {
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { IntegrationsAdminService } from "./integrations-admin.service.js";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard.js";
-import { RolesGuard } from "../auth/guards/roles.guard.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
 import { UserRole } from "../database/entities/index.js";
@@ -43,7 +41,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
  */
 @ApiTags("Integrations")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@UseGuards(RateLimitGuard)
 @Roles(UserRole.ADMIN)
 @Controller("admin/integrations")
 export class IntegrationsAdminController {
