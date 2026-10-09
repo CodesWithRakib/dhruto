@@ -1,0 +1,62 @@
+/* ==========================================================================
+   Dhruto Help Center & FAQ Stylesheet
+   Encapsulated with `.faq-*` prefix
+   ========================================================================== */
+
+@keyframes faq-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 35px 2px rgba(16, 185, 129, 0.35);
+    border-color: rgba(16, 185, 129, 0.55);
+  }
+}
+
+.faq-glow {
+  animation: faq-pulse-glow 4s ease-in-out infinite;
+}
+
+/* Category Filter Pill */
+.faq-filter-pill {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-filter-pill:hover {
+  transform: translateY(-1px);
+}
+
+/* Accordion Animation */
+details.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+details.faq-item[open] summary svg.faq-chevron {
+  transform: rotate(180deg);
+}
+
+/* Smooth Accordion Body Transition */
+@keyframes faq-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+details.faq-item[open] .faq-answer {
+  animation: faq-expand 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Helpful rating feedback button */
+.faq-vote-btn {
+  transition: all 0.18s ease;
+}
+
+.faq-vote-btn:hover {
+  transform: scale(1.05);
+}

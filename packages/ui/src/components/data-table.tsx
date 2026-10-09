@@ -128,7 +128,7 @@ export function DataTable<TData, TValue>({
   return (
     <div
       className={cn(
-        "dhruto-animate-in w-full rounded-xl border border-border/70 bg-surface shadow-soft",
+        "dhruto-animate-in w-full rounded-2xl border border-border/80 bg-surface shadow-2xs overflow-hidden",
         className,
       )}
     >
@@ -138,14 +138,14 @@ export function DataTable<TData, TValue>({
           <div className="flex w-full flex-1 flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center">
             {onSearchChange && (
               <div className="relative w-full sm:w-80">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <input
                   type="search"
                   value={search ?? ""}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder={searchPlaceholder}
                   aria-label={searchPlaceholder}
-                  className="h-10 w-full rounded-lg border border-input bg-surface pl-9 pr-9 text-body-sm text-foreground transition-colors placeholder:text-muted-foreground hover:border-muted-foreground/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/25 [&::-webkit-search-cancel-button]:hidden"
+                  className="h-10 w-full rounded-xl border border-input/80 bg-surface pl-10 pr-9 text-sm text-foreground shadow-2xs transition-all duration-200 placeholder:text-muted-foreground hover:border-foreground/30 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15 [&::-webkit-search-cancel-button]:hidden"
                 />
                 <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
                   {isSearching && (
@@ -276,12 +276,12 @@ export function DataTable<TData, TValue>({
                   value={String(itemsPerPage)}
                   onValueChange={(val) => onLimitChange(Number(val))}
                 >
-                  <SelectTrigger className="h-7 w-[70px] border-input bg-surface px-2 text-caption focus:ring-2 focus:ring-ring/25">
+                  <SelectTrigger className="h-8 w-[72px] rounded-lg border-input/80 bg-surface px-2.5 text-xs focus:ring-4 focus:ring-primary/15">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {[5, 10, 20, 50].map((limit) => (
-                      <SelectItem key={limit} value={String(limit)} className="text-caption">
+                      <SelectItem key={limit} value={String(limit)} className="text-xs">
                         {limit}
                       </SelectItem>
                     ))}
@@ -297,12 +297,12 @@ export function DataTable<TData, TValue>({
               size="sm"
               disabled={currentPage <= 1 || isLoading}
               onClick={() => onPageChange?.(currentPage - 1)}
-              className="h-8 gap-1 px-2.5 text-caption font-medium"
+              className="h-8.5 gap-1 rounded-xl px-3 text-xs font-semibold"
             >
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
               {labels?.previous ?? "Previous"}
             </Button>
-            <span className="min-w-24 px-2 text-center text-caption font-medium tabular-nums text-foreground" aria-live="polite">
+            <span className="min-w-24 px-2 text-center text-xs font-semibold tabular-nums text-foreground" aria-live="polite">
               {fill(labels?.pageOf ?? "Page {page} of {totalPages}", {
                 page: num(currentPage),
                 totalPages: num(totalPages),
@@ -313,7 +313,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               disabled={currentPage >= totalPages || isLoading}
               onClick={() => onPageChange?.(currentPage + 1)}
-              className="h-8 gap-1 px-2.5 text-caption font-medium"
+              className="h-8.5 gap-1 rounded-xl px-3 text-xs font-semibold"
             >
               {labels?.next ?? "Next"}
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />

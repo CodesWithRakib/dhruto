@@ -94,21 +94,23 @@ function HealthCell({
   tone?: "primary" | "success" | "danger" | "info";
 }) {
   const barTone = {
-    primary: "bg-primary",
-    success: "bg-success",
-    danger: "bg-danger",
-    info: "bg-info",
+    primary: "bg-gradient-to-r from-primary to-primary-hover",
+    success: "bg-gradient-to-r from-emerald-500 to-emerald-400",
+    danger: "bg-gradient-to-r from-rose-500 to-rose-400",
+    info: "bg-gradient-to-r from-cyan-500 to-blue-500",
   }[tone];
 
   return (
-    <div className="min-w-0 p-4 sm:p-5">
-      <p className="truncate text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="min-w-0 p-5 sm:p-6 transition-colors hover:bg-muted/30">
+      <p className="truncate text-caption font-bold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1 text-h3 font-bold tabular-nums text-foreground">{value}</p>
+      <p className="mt-1 text-2xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-3xl">
+        {value}
+      </p>
       {typeof progress === "number" ? (
         <div
-          className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted"
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted/60"
           role="img"
           aria-label={`${label}: ${value}`}
         >
@@ -118,7 +120,7 @@ function HealthCell({
           />
         </div>
       ) : null}
-      {hint ? <p className="mt-2 line-clamp-2 text-caption text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="mt-2.5 line-clamp-2 text-caption text-muted-foreground leading-relaxed">{hint}</p> : null}
     </div>
   );
 }

@@ -46,7 +46,7 @@ function NavLinks({
   const pathname = usePathname();
 
   return (
-    <ul className="flex flex-col gap-0.5">
+    <ul className="flex flex-col gap-1">
       {items.map((item) => {
         const active = isActiveRoute(pathname, item.href);
         const Icon = item.icon;
@@ -57,14 +57,14 @@ function NavLinks({
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 text-body font-medium transition-colors",
+                "flex items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition-all duration-200",
                 variant === "drawer" ? "h-12" : "h-10",
                 active
-                  ? "bg-primary-soft text-primary-soft-foreground"
+                  ? "bg-primary-soft text-primary font-semibold shadow-2xs border border-primary/20"
                   : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200", active ? "text-primary scale-110" : "")} aria-hidden="true" />
               <span className="truncate">{t(item.labelKey)}</span>
             </Link>
           </li>
@@ -149,9 +149,9 @@ export function DashboardShell({
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 h-screen hidden w-64 shrink-0 border-r border-border bg-surface/50 backdrop-blur-md lg:flex lg:flex-col">
-        <div className="flex h-16 items-center border-b border-border px-5">
-          <Link href="/" aria-label="Dhruto" className="rounded-md">
+      <aside className="sticky top-0 h-screen hidden w-64 shrink-0 border-r border-border/80 bg-surface/80 backdrop-blur-xl lg:flex lg:flex-col shadow-2xs">
+        <div className="flex h-16 items-center border-b border-border/70 px-5">
+          <Link href="/" aria-label="Dhruto" className="rounded-xl transition-transform hover:scale-105">
             <Logo size="sm" />
           </Link>
         </div>
@@ -159,7 +159,7 @@ export function DashboardShell({
           {groups.map((group) => (
             <div key={group.labelKey ?? group.items[0]?.href} className="mb-4">
               {group.labelKey ? (
-                <p className="px-3 pb-1.5 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
                   {t(group.labelKey)}
                 </p>
               ) : null}
@@ -170,21 +170,21 @@ export function DashboardShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-surface/50 backdrop-blur-md px-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/80 bg-surface/80 backdrop-blur-xl px-4 sm:px-6 shadow-2xs">
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
               aria-label={t("openMenu")}
               aria-expanded={drawerOpen}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground hover:bg-surface-muted lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-foreground hover:bg-surface-muted lg:hidden transition-colors"
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </button>
             <Link href="/" aria-label="Dhruto" className="lg:hidden">
               <Logo size="sm" markOnly />
             </Link>
-            <span className="hidden truncate text-h4 text-foreground lg:block">
+            <span className="hidden truncate text-sm font-bold text-foreground lg:block">
               {t(roleConfig.labelKey)}
             </span>
           </div>
@@ -198,10 +198,10 @@ export function DashboardShell({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2.5 rounded-lg p-1.5 text-left transition-colors hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 border-l border-border pl-3 ml-1"
+                  className="flex items-center gap-2.5 rounded-xl p-1.5 text-left transition-all duration-200 hover:bg-surface-muted focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 border-l border-border/80 pl-3 ml-1"
                   aria-label={t("accountMenu")}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-emerald-600 text-xs font-bold text-white shadow-xs">
                     {(user?.name || "M").charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden flex-col text-left sm:flex">
@@ -220,7 +220,7 @@ export function DashboardShell({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56 p-1.5 rounded-xl border border-border bg-surface"
+                className="w-56 p-1.5 rounded-2xl border border-border/80 bg-popover/95 shadow-xl backdrop-blur-md"
               >
                 <div className="px-3 py-2 border-b border-border mb-1">
                   <p className="text-xs font-bold text-foreground truncate">

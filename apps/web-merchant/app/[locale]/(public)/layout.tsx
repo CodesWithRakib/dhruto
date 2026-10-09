@@ -11,6 +11,8 @@ import "@/features/services/styles/services.css";
 import "@/features/pricing/styles/pricing.css";
 import "@/features/contact/styles/contact.css";
 import "@/features/privacy/styles/privacy.css";
+import "@/features/terms/styles/terms.css";
+import "@/features/faq/styles/faq.css";
 
 /**
  * Public surface: marketing pages and public tracking.

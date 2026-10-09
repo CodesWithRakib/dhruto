@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Dhruto Terms of Service & Merchant SLA Agreement Stylesheet
+   Encapsulated with `.trm-*` prefix
+   ========================================================================== */
+
+@keyframes trm-glow-seal {
+  0%, 100% {
+    box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 45px 0px rgba(16, 185, 129, 0.45);
+    border-color: rgba(16, 185, 129, 0.65);
+  }
+}
+
+@keyframes trm-pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.5;
+  }
+}
+
+.trm-seal-glow {
+  animation: trm-glow-seal 5s ease-in-out infinite;
+}
+
+.trm-pulse {
+  animation: trm-pulse-dot 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* SLA Meter Bar */
+.trm-sla-bar {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 75%, #059669 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.trm-sla-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: trm-shimmer 3s infinite;
+}
+
+@keyframes trm-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Category filter buttons */
+.trm-filter-tab {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trm-filter-tab:hover {
+  transform: translateY(-1px);
+}
+
+/* Legal Clause Card */
+.trm-clause-card {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.trm-clause-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+}
+
+/* Sticky TOC link indicator */
+.trm-toc-active {
+  color: #10b981;
+  font-weight: 600;
+  border-left-color: #10b981;
+  background: rgba(16, 185, 129, 0.06);
+}

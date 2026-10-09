@@ -40,17 +40,17 @@ export function ShipmentPerformance({
   const metricLabel = metric === "delivered" ? t("performance.delivered") : t("performance.booked");
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="flex flex-col gap-3 border-b border-border/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <Card className="overflow-hidden rounded-3xl border-border/80 shadow-2xs">
+      <CardHeader className="flex flex-col gap-3 border-b border-border/60 px-5 py-4.5 bg-surface-muted/20 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <CardTitle className="text-h4">{t("performance.title")}</CardTitle>
-          <CardDescription className="mt-0.5">{t("performance.description")}</CardDescription>
+          <CardTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight">{t("performance.title")}</CardTitle>
+          <CardDescription className="mt-0.5 text-xs text-muted-foreground">{t("performance.description")}</CardDescription>
         </div>
 
         <div
           role="group"
           aria-label={t("performance.metricLabel")}
-          className="flex shrink-0 items-center gap-1 rounded-lg border border-border/60 bg-surface-muted/60 p-1"
+          className="flex shrink-0 items-center gap-1 rounded-xl border border-border/80 bg-surface-muted/60 p-1 backdrop-blur-sm"
         >
           {(["delivered", "booked"] as const).map((option) => (
             <button
@@ -59,9 +59,9 @@ export function ShipmentPerformance({
               onClick={() => setMetric(option)}
               aria-pressed={metric === option}
               className={cn(
-                "rounded-md px-3 py-1.5 text-caption font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                 metric === option
-                  ? "bg-surface text-foreground shadow-soft"
+                  ? "bg-surface text-foreground shadow-xs font-bold"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >

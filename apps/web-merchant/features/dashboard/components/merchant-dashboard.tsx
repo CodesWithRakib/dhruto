@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Link } from "@/lib/navigation";
 import { MERCHANT_ROUTES } from "@/config/routes";
-import { InteractiveCard } from "@/components/data-display/cards";
 import { ErrorState, EmptyState, RetryButton } from "@/components/feedback/states";
 import { useFormatters } from "@/lib/format";
 import { useGetMerchantDashboardQuery } from "../../merchants/api/merchants.api";
@@ -41,7 +40,7 @@ const EMPTY_STATS: DashboardStats = {
   totalDeliveryFees: 0,
 };
 
-/** A quick action tile built on the shared interactive card. */
+/** A quick action tile built on the shared interactive card with elevated aesthetics. */
 function QuickAction({
   href,
   icon: Icon,
@@ -58,18 +57,18 @@ function QuickAction({
   disabled?: boolean;
 }) {
   const content = (
-    <InteractiveCard className="h-full p-5">
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground">
+    <div className="h-full rounded-2xl border border-border/80 bg-card p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
-      <h3 className="mt-3 text-body-sm font-semibold text-foreground">{title}</h3>
-      <p className="mt-1 text-caption text-muted-foreground">{description}</p>
+      <h3 className="mt-4 text-sm font-bold text-foreground">{title}</h3>
+      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</p>
       {badge ? (
-        <span className="mt-3 inline-flex w-fit items-center rounded-md bg-surface-muted px-2 py-0.5 text-caption font-semibold text-muted-foreground">
+        <span className="mt-3 inline-flex w-fit items-center rounded-full bg-muted/80 px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
           {badge}
         </span>
       ) : null}
-    </InteractiveCard>
+    </div>
   );
 
   if (disabled) {
@@ -83,7 +82,7 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+      className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
     >
       {content}
     </Link>
@@ -99,45 +98,52 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
     stats.totalCodAmount > 0 ? (stats.collectedCodAmount / stats.totalCodAmount) * 100 : 0;
 
   return (
-    <Card className="overflow-hidden">
-      <div className="border-b border-border/60 px-5 py-4">
-        <h2 className="flex items-center gap-2 text-h4 font-bold text-foreground">
-          <Wallet className="h-4 w-4 text-primary" aria-hidden="true" />
-          {t("codSettlement")}
-        </h2>
-        <p className="mt-0.5 text-caption text-muted-foreground">{t("codSettlementHint")}</p>
+    <Card className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-sm">
+      <div className="border-b border-border/60 p-5 sm:p-6 pb-4">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Wallet className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span>{t("codSettlement")}</span>
+          </h2>
+          <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            T+1 Remittance
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{t("codSettlementHint")}</p>
       </div>
 
-      <div className="space-y-4 p-5">
+      <div className="space-y-5 p-5 sm:p-6">
         <div>
-          <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
             {t("codCollected")}
           </p>
-          <p className="mt-0.5 text-h2 font-extrabold tabular-nums text-foreground">
+          <p className="mt-1 text-3xl font-extrabold tabular-nums tracking-tight text-foreground">
             {bdt(stats.collectedCodAmount)}
           </p>
           <div
-            className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted"
+            className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-muted/60"
             role="img"
             aria-label={`${t("codCollected")}: ${Math.round(collectedRatio)}%`}
           >
             <div
-              className="h-full rounded-full bg-success transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700 ease-out shadow-2xs"
               style={{ width: `${Math.min(100, Math.max(0, collectedRatio))}%` }}
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-border/60 pt-3">
-          <span className="text-caption text-muted-foreground">{t("codPending")}</span>
-          <span className="font-semibold tabular-nums text-foreground">{bdt(pendingCod)}</span>
+        <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3.5 text-xs">
+          <span className="text-muted-foreground font-medium">{t("codPending")}</span>
+          <span className="font-bold tabular-nums text-foreground text-sm">{bdt(pendingCod)}</span>
         </div>
 
         <Link
           href={MERCHANT_ROUTES.finance}
-          className="inline-flex items-center gap-1 text-caption font-semibold text-primary hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
         >
-          {t("codStatement")}
+          <span>{t("codStatement")}</span>
           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </Link>
       </div>

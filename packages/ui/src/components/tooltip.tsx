@@ -44,8 +44,8 @@ export function Tooltip({ children, content, side = "top", className }: TooltipP
         role="tooltip"
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute z-50 max-w-56 whitespace-normal rounded-md border border-border/70 bg-popover px-2 py-1 text-caption font-medium text-popover-foreground shadow-soft",
-          "opacity-0 transition-opacity duration-fast ease-out group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100",
+          "pointer-events-none absolute z-50 max-w-56 whitespace-normal rounded-xl border border-border/80 bg-popover/95 px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-md backdrop-blur-md",
+          "opacity-0 transition-all duration-200 ease-out group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 scale-95 group-focus-within/tooltip:opacity-100 group-focus-within/tooltip:scale-100",
           bubblePosition,
         )}
       >

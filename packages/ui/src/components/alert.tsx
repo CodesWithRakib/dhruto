@@ -5,18 +5,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/utils.js";
 
 const alertVariants = cva(
-  "relative w-full rounded-xl border p-4 text-sm [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  "relative w-full rounded-2xl border p-4.5 text-sm shadow-2xs backdrop-blur-sm [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-2px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:h-4.5 [&>svg]:w-4.5 [&>svg]:text-foreground",
   {
     variants: {
       variant: {
-        default: "bg-surface text-foreground border-border",
+        default: "bg-surface text-foreground border-border/80",
         destructive:
-          "border-danger/30 text-danger-soft-foreground bg-danger-soft [&>svg]:text-danger",
+          "border-danger/30 text-danger-soft-foreground bg-danger-soft/80 [&>svg]:text-danger",
         success:
-          "border-success/30 text-success-soft-foreground bg-success-soft [&>svg]:text-success",
+          "border-success/30 text-success-soft-foreground bg-success-soft/80 [&>svg]:text-success",
         warning:
-          "border-warning/30 text-warning-soft-foreground bg-warning-soft [&>svg]:text-warning",
-        info: "border-info/30 text-info-soft-foreground bg-info-soft [&>svg]:text-info",
+          "border-warning/30 text-warning-soft-foreground bg-warning-soft/80 [&>svg]:text-warning",
+        info: "border-info/30 text-info-soft-foreground bg-info-soft/80 [&>svg]:text-info",
       },
     },
     defaultVariants: {
@@ -37,7 +37,7 @@ const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<H
   ({ className, ...props }, ref) => (
     <h5
       ref={ref}
-      className={cn("mb-1 font-semibold leading-none tracking-tight", className)}
+      className={cn("mb-1 font-bold leading-none tracking-tight", className)}
       {...props}
     />
   ),
@@ -48,7 +48,7 @@ const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("text-xs opacity-90 [&_p]:leading-relaxed", className)} {...props} />
+  <div ref={ref} className={cn("text-xs leading-relaxed opacity-90 [&_p]:leading-relaxed", className)} {...props} />
 ));
 AlertDescription.displayName = "AlertDescription";
 

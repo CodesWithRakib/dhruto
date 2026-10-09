@@ -82,7 +82,7 @@ export function LanguageSwitcher({
           variant={variant}
           size={size}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-md px-2.5 font-medium transition-colors hover:bg-surface-muted",
+            "inline-flex items-center gap-1.5 rounded-xl px-2.5 font-medium border border-border/60 hover:bg-surface-muted transition-all duration-200",
             className,
           )}
           aria-label={`${label}. Current language: ${activeLang.label}`}
@@ -95,7 +95,7 @@ export function LanguageSwitcher({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-36 p-1 rounded-lg border border-border bg-surface shadow-md"
+        className="w-36 p-1.5 rounded-2xl border border-border/80 bg-popover/95 shadow-xl backdrop-blur-md"
       >
         {LANGUAGES.map((lang) => {
           const isSelected = lang.code === currentLocale;
@@ -105,7 +105,7 @@ export function LanguageSwitcher({
               onSelect={() => handleLocaleChange(lang.code)}
               onClick={() => handleLocaleChange(lang.code)}
               className={cn(
-                "flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer transition-colors",
+                "flex items-center justify-between px-3 py-2 text-sm rounded-xl cursor-pointer transition-colors",
                 isSelected
                   ? "bg-primary-soft text-primary-soft-foreground font-semibold"
                   : "text-foreground hover:bg-surface-muted",
