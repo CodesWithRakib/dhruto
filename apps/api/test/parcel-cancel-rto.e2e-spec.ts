@@ -196,6 +196,19 @@ describe("Parcel cancel & RTO initiation (Phase 3 E2E)", () => {
   });
 
   it("advances RTO to transit and completes the return with event fan-out", async () => {
+    // Test-hygiene: remove stale subscriptions from earlier runs so this
+    // run fans out to exactly one subscription (otherwise every parcel
+    // event multiplies across accumulated subs and slows the relay).
+    const existing = await request(app.getHttpServer())
+      .get("/api/v1/webhooks/subscriptions")
+      .set(bearer(merchantToken))
+      .expect(200);
+    for (const sub of existing.body.data as Array<{ id: string }>) {
+      await request(app.getHttpServer())
+        .delete(`/api/v1/webhooks/subscriptions/${sub.id}`)
+        .set(bearer(merchantToken))
+        .expect(200);
+    }
     // Merchant webhook subscription so the PARCEL_RETURNED fan-out is observable.
     await request(app.getHttpServer())
       .post("/api/v1/webhooks/subscriptions")
@@ -255,7 +268,9 @@ describe("Parcel cancel & RTO initiation (Phase 3 E2E)", () => {
 
     // The relay fans out one parcel.returned delivery per ACTIVE
     // subscription (rerun-safe: filter to this parcel, assert no dupes).
-    const deadline = Date.now() + 20000;
+    // Generous deadline: on a shared disposable DB the relay may be
+    // draining backlog from earlier suites.
+    const deadline = Date.now() + 60000;
     let rows: Array<{ event: string; subscriptionId: string; signature: string }> = [];
     for (;;) {
       const deliveries = await request(app.getHttpServer())

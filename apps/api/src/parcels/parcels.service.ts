@@ -41,6 +41,7 @@ import {
 } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
+import type { BulkImportDto, BulkImportResult, BulkRowResult } from "./dto/bulk-import.dto.js";
 import { DomainEventPublisher, ParcelCreatedEvent, ParcelAssignedEvent, ParcelReturnedEvent } from "../events/index.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
@@ -1210,6 +1211,82 @@ export class ParcelsService {
       this.logger.log(`PARCEL_RETURNED_TO_MERCHANT parcel=${parcel.id} actor=${actor.id}`);
       return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
     });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Bulk import (Phase 6, Q-BULK)                                        */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * Dry-run preview for a bulk batch: per-row delivery-fee quote using the
+   * same server-side pricing as single bookings. Persists nothing; row
+   * shape/validation already enforced at the controller boundary.
+   */
+  validateBulkRows(rows: BulkImportDto["rows"]): Array<{
+    index: number;
+    ok: boolean;
+    deliveryFee?: number;
+    zone?: string;
+    message?: string;
+  }> {
+    return rows.map((row, index) => {
+      try {
+        const pricing = this.pricingService.calculate({
+          district: row.district,
+          thana: row.thana,
+          weight: row.weight,
+          codAmount: row.codAmount,
+        });
+        return { index, ok: true, deliveryFee: pricing.totalFee, zone: pricing.zone };
+      } catch (error) {
+        return {
+          index,
+          ok: false,
+          message: error instanceof Error ? error.message : "Pricing failed",
+        };
+      }
+    });
+  }
+
+  /**
+   * Imports a validated batch. Each row reuses the single-booking pipeline
+   * (validation, server pricing, atomic write, idempotency) with a derived
+   * per-row key (`${batchKey}:${index}`), so retrying the whole batch with
+   * the same batch key replays instead of duplicating. One bad row never
+   * aborts the rest; results are reported per row.
+   */
+  async importBulk(
+    dto: BulkImportDto,
+    batchKey: string,
+    user: AuthenticatedUser,
+  ): Promise<BulkImportResult> {
+    const rows: BulkRowResult[] = [];
+    for (let index = 0; index < dto.rows.length; index += 1) {
+      const row = dto.rows[index] as ParcelBooking;
+      try {
+        const created = await this.createParcel(row, {
+          user,
+          idempotencyKey: `${batchKey}:${index}`,
+        });
+        rows.push({ index, ok: true, parcelId: created.id, trackingCode: created.trackingCode });
+      } catch (error) {
+        rows.push({
+          index,
+          ok: false,
+          errorCode:
+            typeof error === "object" && error !== null && "error" in error
+              ? String((error as { error: unknown }).error)
+              : undefined,
+          message: error instanceof Error ? error.message : "Import failed",
+        });
+      }
+    }
+    return {
+      total: rows.length,
+      created: rows.filter((r) => r.ok).length,
+      failed: rows.filter((r) => !r.ok).length,
+      rows,
+    };
   }
 
   /* ------------------------------------------------------------------ */

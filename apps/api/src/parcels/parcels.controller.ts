@@ -31,6 +31,7 @@ import { ApiErrorCode, ParcelStatus } from "@dhruto/contracts";
 import { ParcelsService } from "./parcels.service.js";
 import { CreateParcelDto } from "./dto/create-parcel.dto.js";
 import { AssignRiderDto } from "./dto/assign-rider.dto.js";
+import { BulkImportDto, MAX_BULK_ROWS } from "./dto/bulk-import.dto.js";
 import { ParcelResponseDto } from "./dto/parcel-response.dto.js";
 import { ParcelListQueryDto } from "./dto/parcel-list-query.dto.js";
 import {
@@ -393,6 +394,128 @@ export class ParcelsController {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Parcel returned to merchant successfully",
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Get("bulk/template")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "CSV column template for bulk import",
+    description:
+      "Phase 6 (Q-BULK): column order and a sample row for converting CSV/XLSX files to the bulk import payload. No data is created.",
+  })
+  @ApiOkResponse({ description: "Bulk template" })
+  async bulkTemplate(@Req() req: RequestWithId) {
+    const columns = [
+      "recipientName",
+      "recipientPhone",
+      "district",
+      "thana",
+      "deliveryAddress",
+      "parcelDescription",
+      "codAmount",
+      "weight",
+    ];
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Bulk import template retrieved successfully",
+      data: {
+        columns,
+        maxRows: MAX_BULK_ROWS,
+        csvHeader: columns.join(","),
+        sample: [
+          "Rahim Uddin",
+          "01712345678",
+          "Dhaka",
+          "Mirpur",
+          "House 1, Road 1, Mirpur, Dhaka",
+          "",
+          1200,
+          1.5,
+        ].join(","),
+      },
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post("bulk/validate")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 10, windowSeconds: 60, scope: "parcel-bulk" })
+  @ApiOperation({
+    summary: "Dry-run a bulk batch (pricing preview, persists nothing)",
+    description: `Phase 6 (Q-BULK): validates up to ${MAX_BULK_ROWS} rows and quotes per-row delivery fees with server-side pricing.`,
+  })
+  @ApiOkResponse({ description: "Bulk validation preview" })
+  async validateBulk(@Body() dto: BulkImportDto, @Req() req: RequestWithId) {
+    const rows = this.parcelsService.validateBulkRows(dto.rows);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Bulk batch validated successfully",
+      data: {
+        total: rows.length,
+        quotable: rows.filter((r) => r.ok).length,
+        rows,
+      },
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post("bulk/import")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  // 20/min per authenticated merchant (not lower): writes are attributed
+  // and per-row idempotent, so brute force is meaningless; the limit only
+  // bounds batch-burst abuse. Shared-counter note: e2e must budget ≤20
+  // import calls per merchant per 60s window across reruns (see bulk spec).
+  @RateLimit({ limit: 20, windowSeconds: 60, scope: "parcel-bulk" })
+  @ApiOperation({
+    summary: "Import a bulk batch of parcels",
+    description:
+      "Phase 6 (Q-BULK): every row runs the single-booking pipeline. The batch `Idempotency-Key` (16-64 chars) derives per-row keys, so retrying a batch replays instead of duplicating. One bad row never aborts the rest.",
+  })
+  @ApiHeader({
+    name: "Idempotency-Key",
+    required: true,
+    description: "Unique batch key (16-64 chars); per-row keys derive from it",
+  })
+  @ApiCreatedResponse({ description: "Bulk import completed with per-row results" })
+  @ApiBadRequestResponse({ description: "Missing/invalid batch key or malformed payload" })
+  async importBulk(
+    @Body() dto: BulkImportDto,
+    @Headers("idempotency-key") batchKey: string | undefined,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const trimmed = batchKey?.trim() ?? "";
+    if (trimmed.length < 16 || trimmed.length > 64) {
+      throw new BadRequestException({
+        message: "Idempotency-Key batch key must be between 16 and 64 characters",
+        error: ApiErrorCode.IDEMPOTENCY_KEY_REQUIRED,
+      });
+    }
+
+    const result = await this.parcelsService.importBulk(dto, trimmed, user);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.CREATED,
+      message: `Bulk import completed: ${result.created} created, ${result.failed} failed`,
       data: result,
       meta: {
         requestId: req.requestId || "unknown",

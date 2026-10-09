@@ -64,6 +64,7 @@ import {
   type VerifyOtpResult,
 } from "@dhruto/contracts";
 import { ParcelLifecycleService } from "../parcels/lifecycle/parcel-lifecycle.service.js";
+import { toMinor } from "../common/money/money.js";
 import { PasswordService } from "../auth/services/password.service.js";
 import {
   IdempotencyClaimConflict,
@@ -108,7 +109,12 @@ const HISTORY_STATUSES: readonly ParcelStatus[] = [
 /** Reschedule window: at most 7 days into the future. */
 const RESCHEDULE_MAX_DAYS = 7;
 
-const toMinor = (amount: number): number => Math.round(Number(amount) * 100);
+/**
+ * Delivery-attempt cap (Phase 6, Q-ATTEMPT-CAP): after this many recorded
+ * failures the rider must hand the parcel back to hub operations (RTO
+ * initiation) instead of retrying forever. Tunable default: 5.
+ */
+export const MAX_DELIVERY_ATTEMPTS = 5;
 
 @Injectable()
 export class RidersService {
@@ -1058,6 +1064,17 @@ export class RidersService {
         (await manager.count(DeliveryAttempt, {
           where: { parcelId: parcel.id },
         })) + 1;
+
+      // Phase 6 (Q-ATTEMPT-CAP): stop infinite fail→retry loops. The parcel
+      // must go back to hub operations (RTO initiation) instead. The count
+      // runs inside the parcel lock, so concurrent racers serialize and only
+      // one can take the last slot.
+      if (attemptNumber > MAX_DELIVERY_ATTEMPTS) {
+        throw new ConflictException({
+          message: `Delivery attempt limit reached (${MAX_DELIVERY_ATTEMPTS}). Hand the parcel back to hub operations for return-to-origin.`,
+          error: ApiErrorCode.ATTEMPT_LIMIT_EXHAUSTED,
+        });
+      }
       const attempt = await manager.getRepository(DeliveryAttempt).save(
         manager.getRepository(DeliveryAttempt).create({
           parcelId: parcel.id,

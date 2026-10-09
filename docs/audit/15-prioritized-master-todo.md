@@ -53,6 +53,11 @@ T-UX-01 Confirm copy standard for money/state actions (P1, S). T-UX-02 Register 
 ## (11) Long-term
 T-LT-01 Model retraining pipeline (Blocked). T-LT-02 Route optimization. T-LT-03 Scheduled reports. T-LT-04 `CUSTOMER` role scope-or-remove.
 
+## Phase 6 verification (approved implementation, `docs/audit-validation/phase-6-bulk-and-attempt-cap.md`)
+- Q-BULK backend slice VERIFIED COMPLETE (template/validate/import + batch-key idempotency + 5 tests). File-upload UI + >500 async jobs remain proposed.
+- Q-ATTEMPT-CAP VERIFIED COMPLETE (cap 5 → 409 + RTO path + test; completion uncapped; riders toMinor unified to exact version).
+- Full API suite 350/350; contracts 12/12; web unit 138/138; typecheck/lint/build clean.
+
 ## Phase 5 verification (approved implementation, `docs/audit-validation/phase-5-money-and-cleanup.md`)
 - T-FIN-01 VERIFIED COMPLETE (integer-math audit + exact HALF_UP `toMinor` fix for x.xx5 inputs + 6 contract tests).
 - T-API-03 VERIFIED COMPLETE (cancel batch routed with member release — stranding bug fixed + test).

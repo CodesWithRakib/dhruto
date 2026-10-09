@@ -548,4 +548,29 @@ describe("Rider Delivery (Phase 3 E2E)", () => {
       expect(ledgers[0].count).toBe(1);
     });
   });
+
+  describe("Attempt cap (Phase 6)", () => {
+    it("rejects the sixth failure with 409 so the parcel returns to hub operations", async () => {
+      const parcel = await bookParcel(800);
+      await assignParcel(parcel.id, riderId).expect(200);
+
+      for (let attempt = 1; attempt <= 5; attempt += 1) {
+        await startAs(riderToken, parcel.id).expect(200);
+        const failed = await request(app.getHttpServer())
+          .post(`/api/v1/riders/me/deliveries/${parcel.id}/fail`)
+          .set(bearer(riderToken))
+          .send({ reason: "CUSTOMER_UNAVAILABLE" })
+          .expect(200);
+        expect(failed.body.data.attemptNumber).toBe(attempt);
+      }
+
+      await startAs(riderToken, parcel.id).expect(200);
+      const capped = await request(app.getHttpServer())
+        .post(`/api/v1/riders/me/deliveries/${parcel.id}/fail`)
+        .set(bearer(riderToken))
+        .send({ reason: "CUSTOMER_UNAVAILABLE" })
+        .expect(409);
+      expect(JSON.stringify(capped.body)).toContain("ATTEMPT_LIMIT_EXHAUSTED");
+    });
+  });
 });
