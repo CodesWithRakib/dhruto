@@ -53,6 +53,12 @@ T-UX-01 Confirm copy standard for money/state actions (P1, S). T-UX-02 Register 
 ## (11) Long-term
 T-LT-01 Model retraining pipeline (Blocked). T-LT-02 Route optimization. T-LT-03 Scheduled reports. T-LT-04 `CUSTOMER` role scope-or-remove.
 
+## Phase 7 verification (approved implementation, `docs/audit-validation/phase-7-bulk-ui-and-browser.md`)
+- Bulk dialog VERIFIED COMPLETE (CSV parser + template/validate/import hooks + list-page dialog + en/bn + 4 unit tests; Playwright bulk 2/2 in Brave).
+- Neighbor suites 7/8; 1 pre-existing failure carried as F-UI-01 (P1: "Clear filters" no-op + max-depth loop; root cause unidentified; debug reverted, scratch deleted).
+- Drive-by: `use-query-state` reset signature fix (pre-existing TS2322).
+- Web unit 142/142; web + API builds green.
+
 ## Phase 6 verification (approved implementation, `docs/audit-validation/phase-6-bulk-and-attempt-cap.md`)
 - Q-BULK backend slice VERIFIED COMPLETE (template/validate/import + batch-key idempotency + 5 tests). File-upload UI + >500 async jobs remain proposed.
 - Q-ATTEMPT-CAP VERIFIED COMPLETE (cap 5 → 409 + RTO path + test; completion uncapped; riders toMinor unified to exact version).

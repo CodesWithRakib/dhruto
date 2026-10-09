@@ -8,7 +8,7 @@ import {
   type ColumnDef,
   type DataTableLabels,
 } from "@dhruto/ui";
-import { Eye, MapPin, Package, Plus, Printer, RefreshCw, Search, SearchX, User } from "lucide-react";
+import { Eye, MapPin, Package, Plus, Printer, RefreshCw, Search, SearchX, UploadCloud, User } from "lucide-react";
 import { ParcelStatus, type ParcelListItem } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
@@ -31,6 +31,7 @@ import { ParcelFilterControls } from "./parcel-filters";
 import { ParcelSortSelect } from "./parcel-sort-select";
 import { ParcelCard } from "./parcel-card";
 import { ParcelCardSkeletonList } from "./parcel-card-skeleton";
+import { BulkImportDialog } from "./bulk-import-dialog";
 
 /**
  * Quick status lenses. Each maps to exactly one `ParcelStatus` the list
@@ -52,6 +53,7 @@ export function ParcelList() {
   const { bdt, date, time, number } = useFormatters();
   const routes = useRouteBase();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   const {
     parcels,
@@ -310,6 +312,9 @@ export function ParcelList() {
 
   return (
     <div className="w-full space-y-5">
+      {/* Mounted only when open so the dialog's RTK hooks never run on
+          plain list renders (and in provider-free unit tests). */}
+      {bulkOpen ? <BulkImportDialog open onOpenChange={setBulkOpen} /> : null}
       <PageHeader
         title={t("title")}
         description={t("description")}
@@ -322,6 +327,17 @@ export function ParcelList() {
                   {t("create")}
                 </Button>
               </Link>
+            ) : null}
+            {createHref ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBulkOpen(true)}
+                className="h-10 gap-2 text-xs"
+              >
+                <UploadCloud className="h-3.5 w-3.5" aria-hidden="true" />
+                {t("bulkImport")}
+              </Button>
             ) : null}
             <Button
               variant="outline"

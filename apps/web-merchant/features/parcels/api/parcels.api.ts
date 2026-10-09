@@ -60,6 +60,42 @@ export interface CreateParcelArgs {
   idempotencyKey: string;
 }
 
+/** Bulk import row. Server validates each row like a single booking. */
+export interface BulkBookingRow {
+  recipientName: string;
+  recipientPhone: string;
+  district: string;
+  thana: string;
+  deliveryAddress: string;
+  parcelDescription?: string;
+  codAmount: number;
+  weight: number;
+}
+
+export interface BulkRowResult {
+  index: number;
+  ok: boolean;
+  parcelId?: string;
+  trackingCode?: string;
+  errorCode?: string;
+  message?: string;
+}
+
+export interface BulkImportResult {
+  total: number;
+  created: number;
+  failed: number;
+  rows: BulkRowResult[];
+}
+
+export interface BulkPreviewRow {
+  index: number;
+  ok: boolean;
+  deliveryFee?: number;
+  zone?: string;
+  message?: string;
+}
+
 const PARCEL_TAG = "Parcel" as const;
 
 export const parcelsApi = baseApi.injectEndpoints({
@@ -126,6 +162,33 @@ export const parcelsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: PARCEL_TAG, id: "LIST" }, "Merchant"],
     }),
+
+    getBulkTemplate: builder.query<
+      ApiResponse<{ columns: string[]; maxRows: number; csvHeader: string; sample: string }>,
+      void
+    >({
+      query: () => ({ url: "/parcels/bulk/template", method: "GET" }),
+    }),
+
+    validateBulk: builder.mutation<
+      ApiResponse<{ total: number; quotable: number; rows: BulkPreviewRow[] }>,
+      { rows: BulkBookingRow[] }
+    >({
+      query: (body) => ({ url: "/parcels/bulk/validate", method: "POST", body }),
+    }),
+
+    importBulk: builder.mutation<
+      ApiResponse<BulkImportResult>,
+      { rows: BulkBookingRow[]; idempotencyKey: string }
+    >({
+      query: ({ rows, idempotencyKey }) => ({
+        url: "/parcels/bulk/import",
+        method: "POST",
+        body: { rows },
+        headers: { "Idempotency-Key": idempotencyKey },
+      }),
+      invalidatesTags: [{ type: PARCEL_TAG, id: "LIST" }, "Merchant"],
+    }),
   }),
 });
 
@@ -137,4 +200,7 @@ export const {
   useGetPublicTrackingQuery,
   useCalculatePricingMutation,
   useCreateParcelMutation,
+  useGetBulkTemplateQuery,
+  useValidateBulkMutation,
+  useImportBulkMutation,
 } = parcelsApi;

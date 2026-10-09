@@ -1,0 +1,3 @@
+recipientName,recipientPhone,district,thana,deliveryAddress,parcelDescription,codAmount,weight
+Bulk E2E One,01712340001,Dhaka,Mirpur,"House 1, Road 1, Mirpur, Dhaka",,1200,1
+Bulk E2E Two,01712340002,Dhaka,Dhanmondi,"House 2, Road 2, Dhanmondi, Dhaka",Books,800,0.5

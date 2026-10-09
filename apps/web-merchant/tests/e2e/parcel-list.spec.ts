@@ -30,8 +30,11 @@ test.describe("Journey 3 — Parcel list", () => {
     await expect(row).toBeVisible({ timeout: 20_000 });
     await expect(row).toContainText(booking.recipientName);
 
-    // Status filter is also applied by the API.
-    await page.getByLabel("Status").first().selectOption("CREATED");
+    // Status filter is also applied by the API (quick-filter toggle group).
+    await page
+      .getByRole("group", { name: /quick status filters/i })
+      .getByRole("button", { name: /^created$/i })
+      .click();
     await expect(page.getByRole("row").filter({ hasText: created.trackingCode })).toBeVisible();
 
     // No stray results for a search that cannot match.
