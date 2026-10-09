@@ -40,6 +40,7 @@ import {
 } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
+import { DomainEventPublisher, ParcelCreatedEvent, ParcelAssignedEvent } from "../events/index.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
@@ -163,6 +164,8 @@ export class ParcelsService {
     private readonly lifecycle: ParcelLifecycleService,
     private readonly trackingCodeService: TrackingCodeService,
     private readonly outboxService: OutboxService,
+    @Optional()
+    private readonly eventPublisher?: DomainEventPublisher,
     @Optional()
     private readonly intelligenceService?: IntelligenceService,
     @Optional()
@@ -367,18 +370,41 @@ export class ParcelsService {
       // Transactional domain event: stored atomically with the booking
       // so fan-out (notifications, webhooks) can never lose it. Transport
       // happens asynchronously in the outbox relay and workers.
-      await this.outboxService.append(manager, {
-        eventType: DomainEventType.PARCEL_CREATED,
-        aggregateType: "parcel",
-        aggregateId: saved.id,
-        actorId: merchant.userId,
-        payload: {
-          parcelId: saved.id,
-          trackingCode: saved.trackingCode,
-          merchantId: merchant.id,
-          recipientName: saved.recipientName,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new ParcelCreatedEvent(
+            {
+              aggregateId: saved.id,
+              merchantId: merchant.id,
+            },
+            {
+              trackingCode: saved.trackingCode,
+              recipientName: saved.recipientName,
+              recipientPhone: saved.recipientPhone,
+              district: saved.district,
+              thana: saved.thana,
+              deliveryAddress: saved.rawAddress,
+              codAmount: Number(saved.codAmount),
+              weight: Number(saved.weight),
+              deliveryFee: Number(saved.deliveryFee),
+            },
+          ),
+        );
+      } else {
+        await this.outboxService.append(manager, {
+          eventType: DomainEventType.PARCEL_CREATED,
+          aggregateType: "parcel",
+          aggregateId: saved.id,
+          actorId: merchant.userId,
+          payload: {
+            parcelId: saved.id,
+            trackingCode: saved.trackingCode,
+            merchantId: merchant.id,
+            recipientName: saved.recipientName,
+          },
+        });
+      }
 
       const response = this.toSummary(saved);
 
@@ -840,20 +866,37 @@ export class ParcelsService {
       });
       await manager.save(history);
 
-      await this.outboxService.append(manager, {
-        eventType: DomainEventType.PARCEL_ASSIGNED,
-        aggregateType: "parcel",
-        aggregateId: parcel.id,
-        actorId: UUID_REGEX.test(actor.id) ? actor.id : null,
-        payload: {
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          merchantId: parcel.merchantId,
-          recipientName: parcel.recipientName,
-          riderId: rider.id,
-          reassigned,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new ParcelAssignedEvent(
+            {
+              aggregateId: parcel.id,
+              merchantId: parcel.merchantId,
+            },
+            {
+              trackingCode: parcel.trackingCode,
+              riderId: rider.id,
+              hubId: parcel.currentHubId,
+            },
+          ),
+        );
+      } else {
+        await this.outboxService.append(manager, {
+          eventType: DomainEventType.PARCEL_ASSIGNED,
+          aggregateType: "parcel",
+          aggregateId: parcel.id,
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : null,
+          payload: {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: parcel.merchantId,
+            recipientName: parcel.recipientName,
+            riderId: rider.id,
+            reassigned,
+          },
+        });
+      }
 
       await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
 

@@ -1,14 +1,29 @@
-import { z } from "zod";
-import { createZodDto } from "nestjs-zod";
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { Transform } from "class-transformer";
 import { BANGLADESH_PHONE_REGEX } from "@dhruto/contracts";
 
-export const updateMerchantSchema = z.object({
-  businessName: z.string().min(2).max(255).optional(),
-  contactPhone: z
-    .string()
-    .regex(BANGLADESH_PHONE_REGEX, "Invalid Bangladesh mobile number")
-    .optional(),
-  pickupAddress: z.string().min(5).max(500).optional(),
-});
+export class UpdateMerchantDto {
+  @ApiPropertyOptional({ example: "Dhaka Traders" })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @MinLength(2)
+  @MaxLength(255)
+  businessName?: string;
 
-export class UpdateMerchantDto extends createZodDto(updateMerchantSchema) {}
+  @ApiPropertyOptional({ example: "01712345678" })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @Matches(BANGLADESH_PHONE_REGEX, { message: "Invalid Bangladesh mobile number" })
+  contactPhone?: string;
+
+  @ApiPropertyOptional({ example: "House 1, Road 2, Gulshan, Dhaka" })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @MinLength(5)
+  @MaxLength(500)
+  pickupAddress?: string;
+}

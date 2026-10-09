@@ -6,6 +6,7 @@ import {
   ConflictException,
   HttpStatus,
   Logger,
+  Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, DataSource, EntityManager, In, QueryFailedError } from "typeorm";
@@ -31,6 +32,16 @@ import {
   EntryDirection,
   HubUserAssignment,
 } from "../database/entities/index.js";
+import {
+  DomainEventPublisher,
+  PayoutRequestedEvent,
+  PayoutApprovedEvent,
+  PayoutCompletedEvent,
+  PayoutFailedEvent,
+  CashVerifiedEvent,
+  SettlementCreatedEvent,
+  DiscrepancyOpenedEvent,
+} from "../events/index.js";
 import { CashHandInStatus } from "../database/entities/CashLedger.entity.js";
 import {
   WalletTransactionType,
@@ -144,6 +155,8 @@ export class FinanceService {
     private readonly ledger: LedgerService,
     private readonly idempotency: IdempotencyService,
     private readonly outbox: OutboxService,
+    @Optional()
+    private readonly eventPublisher?: DomainEventPublisher,
   ) {}
 
   /* ================================================================== */
@@ -340,19 +353,33 @@ export class FinanceService {
           `Merchant ${merchantId} requested payout ${payoutCode} of ৳${toMajor(requestedMinor)} via ${dto.payoutMethod}`,
         );
 
-        await this.outbox.append(manager, {
-          eventType: DomainEventType.PAYOUT_REQUESTED,
-          aggregateType: "payout",
-          aggregateId: payout.id,
-          actorId,
-          payload: {
-            payoutId: payout.id,
-            payoutCode,
-            merchantId,
-            amountMinor: requestedMinor,
-            method: dto.payoutMethod,
-          },
-        });
+        if (this.eventPublisher) {
+          await this.eventPublisher.publish(
+            manager,
+            new PayoutRequestedEvent(
+              { aggregateId: payout.id, merchantId },
+              {
+                payoutId: payout.id,
+                amountPaisa: requestedMinor,
+                paymentMethod: dto.payoutMethod,
+              },
+            ),
+          );
+        } else {
+          await this.outbox.append(manager, {
+            eventType: DomainEventType.PAYOUT_REQUESTED,
+            aggregateType: "payout",
+            aggregateId: payout.id,
+            actorId,
+            payload: {
+              payoutId: payout.id,
+              payoutCode,
+              merchantId,
+              amountMinor: requestedMinor,
+              method: dto.payoutMethod,
+            },
+          });
+        }
 
         return toPayoutItem(payout);
       })
@@ -451,19 +478,32 @@ export class FinanceService {
       if (dto.notes?.trim()) payout.notes = dto.notes.trim();
       await manager.getRepository(PayoutRequest).save(payout);
 
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.PAYOUT_APPROVED,
-        aggregateType: "payout",
-        aggregateId: payout.id,
-        actorId: adminId,
-        payload: {
-          payoutId: payout.id,
-          payoutCode: payout.payoutCode,
-          merchantId: payout.merchantId,
-          amountMinor: toMinor(payout.amount),
-          method: payout.payoutMethod,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new PayoutApprovedEvent(
+            { aggregateId: payout.id, merchantId: payout.merchantId },
+            {
+              payoutId: payout.id,
+              amountPaisa: toMinor(payout.amount),
+            },
+          ),
+        );
+      } else {
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PAYOUT_APPROVED,
+          aggregateType: "payout",
+          aggregateId: payout.id,
+          actorId: adminId,
+          payload: {
+            payoutId: payout.id,
+            payoutCode: payout.payoutCode,
+            merchantId: payout.merchantId,
+            amountMinor: toMinor(payout.amount),
+            method: payout.payoutMethod,
+          },
+        });
+      }
 
       return toPayoutItem(payout);
     });
@@ -537,20 +577,34 @@ export class FinanceService {
           `Payout ${locked.id} (৳${toMajor(amountMinor)}) marked as COMPLETED. Ref: ${dto.transactionReference}`,
         );
 
-        await this.outbox.append(manager, {
-          eventType: DomainEventType.PAYOUT_COMPLETED,
-          aggregateType: "payout",
-          aggregateId: locked.id,
-          actorId: adminId,
-          payload: {
-            payoutId: locked.id,
-            payoutCode: locked.payoutCode,
-            merchantId: locked.merchantId,
-            amountMinor,
-            method: locked.payoutMethod,
-            transactionReference: locked.transactionReference,
-          },
-        });
+        if (this.eventPublisher) {
+          await this.eventPublisher.publish(
+            manager,
+            new PayoutCompletedEvent(
+              { aggregateId: locked.id, merchantId: locked.merchantId },
+              {
+                payoutId: locked.id,
+                amountPaisa: amountMinor,
+                transactionRef: locked.transactionReference ?? undefined,
+              },
+            ),
+          );
+        } else {
+          await this.outbox.append(manager, {
+            eventType: DomainEventType.PAYOUT_COMPLETED,
+            aggregateType: "payout",
+            aggregateId: locked.id,
+            actorId: adminId,
+            payload: {
+              payoutId: locked.id,
+              payoutCode: locked.payoutCode,
+              merchantId: locked.merchantId,
+              amountMinor,
+              method: locked.payoutMethod,
+              transactionReference: locked.transactionReference,
+            },
+          });
+        }
 
         return toPayoutItem(locked);
       });
@@ -599,21 +653,34 @@ export class FinanceService {
 
         // A rejected or failed payout is a payout failure, never a
         // completion — the old code mis-emitted PAYOUT_COMPLETED here.
-        await this.outbox.append(manager, {
-          eventType: DomainEventType.PAYOUT_FAILED,
-          aggregateType: "payout",
-          aggregateId: locked.id,
-          actorId: adminId,
-          payload: {
-            payoutId: locked.id,
-            payoutCode: locked.payoutCode,
-            merchantId: locked.merchantId,
-            amountMinor: toMinor(locked.amount),
-            method: locked.payoutMethod,
-            reason:
-              dto.status === PayoutStatus.REJECTED ? locked.rejectionReason : locked.failureReason,
-          },
-        });
+        if (this.eventPublisher) {
+          await this.eventPublisher.publish(
+            manager,
+            new PayoutFailedEvent(
+              { aggregateId: locked.id, merchantId: locked.merchantId },
+              {
+                payoutId: locked.id,
+                reason: dto.status === PayoutStatus.REJECTED ? (locked.rejectionReason ?? "Rejected") : (locked.failureReason ?? "Failed"),
+              },
+            ),
+          );
+        } else {
+          await this.outbox.append(manager, {
+            eventType: DomainEventType.PAYOUT_FAILED,
+            aggregateType: "payout",
+            aggregateId: locked.id,
+            actorId: adminId,
+            payload: {
+              payoutId: locked.id,
+              payoutCode: locked.payoutCode,
+              merchantId: locked.merchantId,
+              amountMinor: toMinor(locked.amount),
+              method: locked.payoutMethod,
+              reason:
+                dto.status === PayoutStatus.REJECTED ? locked.rejectionReason : locked.failureReason,
+            },
+          });
+        }
 
         return toPayoutItem(locked);
       });
@@ -945,51 +1012,88 @@ export class FinanceService {
       // (in-app + email), publishes webhooks and opens hub/rider alerts.
       // Direct fire-and-forget dispatch is gone — slow providers can delay
       // communication but never the settlement itself.
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.CASH_VERIFIED,
-        aggregateType: "cash_ledger",
-        aggregateId: ledger.id,
-        actorId: verifier.id,
-        payload: {
-          cashLedgerId: ledger.id,
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          merchantId: merchant.id,
-          netMinor,
-          settlementCode: settlement.settlementCode,
-        },
-      });
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.SETTLEMENT_CREATED,
-        aggregateType: "settlement",
-        aggregateId: settlement.id,
-        actorId: verifier.id,
-        payload: {
-          settlementId: settlement.id,
-          settlementCode: settlement.settlementCode,
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          merchantId: merchant.id,
-          netMinor,
-        },
-      });
-      if (discrepancyId) {
-        const riderId = ledger.riderId;
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new CashVerifiedEvent(
+            { aggregateId: ledger.id, merchantId: merchant.id },
+            {
+              handInId: ledger.id,
+              hubId: ledger.hubId,
+              verifiedAmount: netMinor,
+            },
+          ),
+        );
+        await this.eventPublisher.publish(
+          manager,
+          new SettlementCreatedEvent(
+            { aggregateId: settlement.id, merchantId: merchant.id },
+            {
+              settlementId: settlement.id,
+              totalAmountPaisa: netMinor,
+            },
+          ),
+        );
+        if (discrepancyId) {
+          await this.eventPublisher.publish(
+            manager,
+            new DiscrepancyOpenedEvent(
+              { aggregateId: discrepancyId, merchantId: merchant.id },
+              {
+                discrepancyId,
+                reason: `Mismatch: difference of ৳${toMajor(mismatchMinor)}`,
+                amountPaisa: mismatchMinor,
+              },
+            ),
+          );
+        }
+      } else {
         await this.outbox.append(manager, {
-          eventType: DomainEventType.DISCREPANCY_OPENED,
-          aggregateType: "cash_discrepancy",
-          aggregateId: discrepancyId,
+          eventType: DomainEventType.CASH_VERIFIED,
+          aggregateType: "cash_ledger",
+          aggregateId: ledger.id,
           actorId: verifier.id,
           payload: {
-            discrepancyId,
             cashLedgerId: ledger.id,
+            parcelId: parcel.id,
             trackingCode: parcel.trackingCode,
             merchantId: merchant.id,
-            riderId,
-            hubId: ledger.hubId,
-            differenceMinor: mismatchMinor,
+            netMinor,
+            settlementCode: settlement.settlementCode,
           },
         });
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.SETTLEMENT_CREATED,
+          aggregateType: "settlement",
+          aggregateId: settlement.id,
+          actorId: verifier.id,
+          payload: {
+            settlementId: settlement.id,
+            settlementCode: settlement.settlementCode,
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: merchant.id,
+            netMinor,
+          },
+        });
+        if (discrepancyId) {
+          const riderId = ledger.riderId;
+          await this.outbox.append(manager, {
+            eventType: DomainEventType.DISCREPANCY_OPENED,
+            aggregateType: "cash_discrepancy",
+            aggregateId: discrepancyId,
+            actorId: verifier.id,
+            payload: {
+              discrepancyId,
+              cashLedgerId: ledger.id,
+              trackingCode: parcel.trackingCode,
+              merchantId: merchant.id,
+              riderId,
+              hubId: ledger.hubId,
+              differenceMinor: mismatchMinor,
+            },
+          });
+        }
       }
 
       this.logger.log(

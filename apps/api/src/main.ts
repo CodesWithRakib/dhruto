@@ -1,7 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { Logger } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { cleanupOpenApiDoc } from "nestjs-zod";
 import helmet from "helmet";
 import compression from "compression";
 import { json, urlencoded } from "express";
@@ -71,7 +70,7 @@ async function bootstrap() {
     .build();
 
   const openApiDoc = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup("docs", app, cleanupOpenApiDoc(openApiDoc), {
+  SwaggerModule.setup("docs", app, openApiDoc, {
     customSiteTitle: "Dhruto API Documentation",
     swaggerOptions: {
       persistAuthorization: true,

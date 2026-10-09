@@ -1,7 +1,8 @@
 import { Module, type NestModule, type MiddlewareConsumer } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "./common/pipes/validation.pipe.js";
+import { EventsModule } from "./events/events.module.js";
 
 import { appConfig, databaseConfig, redisConfig, authConfig } from "./config/index.js";
 import { DatabaseModule } from "./database/database.module.js";
@@ -54,11 +55,12 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     IntelligenceModule,
     AnalyticsModule,
     SeederModule,
+    EventsModule,
   ],
   providers: [
     {
       provide: APP_PIPE,
-      useClass: ZodValidationPipe,
+      useClass: DhrutoValidationPipe,
     },
     {
       provide: APP_FILTER,

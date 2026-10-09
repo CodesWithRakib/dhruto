@@ -3,7 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { idempotencyKey } from "./utils/auth.js";
 
 describe("Intelligence v2 — address confirm, parcel intelligence, overrides (Phase 6 E2E)", () => {
@@ -23,7 +23,7 @@ describe("Intelligence v2 — address confirm, parcel intelligence, overrides (P
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
 
     const login = async (emailOrPhone: string): Promise<string> => {

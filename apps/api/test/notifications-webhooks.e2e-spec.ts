@@ -3,7 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { WebhookEvent, NotificationChannel } from "@dhruto/contracts";
 
 describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
@@ -19,7 +19,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
 
     // Authenticate as merchant

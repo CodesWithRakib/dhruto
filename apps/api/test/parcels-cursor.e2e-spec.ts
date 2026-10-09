@@ -3,7 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { idempotencyKey } from "./utils/auth.js";
 
 describe("Parcel cursor pagination (Phase 8)", () => {
@@ -16,7 +16,7 @@ describe("Parcel cursor pagination (Phase 8)", () => {
     }).compile();
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
     const login = await request(app.getHttpServer())
       .post("/api/v1/auth/login")

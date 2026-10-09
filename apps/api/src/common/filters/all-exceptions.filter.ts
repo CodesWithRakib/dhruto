@@ -7,7 +7,6 @@ import {
   Logger,
 } from "@nestjs/common";
 import { type Response } from "express";
-import { ZodValidationException } from "nestjs-zod";
 import { ZodError } from "zod";
 import { type RequestWithId } from "../middleware/request-id.middleware.js";
 import { type ApiValidationErrorItem } from "@dhruto/contracts";
@@ -25,32 +24,46 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
     const path = request.originalUrl || request.url || "unknown";
 
-    // 1. Zod Validation Exceptions
-    if (exception instanceof ZodValidationException) {
-      const zodError = exception.getZodError();
-      const validationErrors: ApiValidationErrorItem[] =
-        zodError instanceof ZodError
-          ? zodError.issues.map((issue) => ({
-              field: issue.path.join("."),
-              message: issue.message,
-              code: issue.code,
-            }))
-          : [];
+    // 1. NestJS HttpException (including DhrutoValidationException)
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
 
-      response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
+      let message = exception.message;
+      let errorCode = "HTTP_ERROR";
+      let errors: ApiValidationErrorItem[] | undefined = undefined;
+
+      if (typeof exceptionResponse === "object" && exceptionResponse !== null) {
+        const respObj = exceptionResponse as Record<string, unknown>;
+        if (typeof respObj["message"] === "string") {
+          message = respObj["message"];
+        } else if (Array.isArray(respObj["message"])) {
+          message = respObj["message"].join(", ");
+        }
+        if (typeof respObj["error"] === "string") {
+          errorCode = respObj["error"].toUpperCase().replace(/\s+/g, "_");
+        } else if (typeof respObj["errorCode"] === "string") {
+          errorCode = String(respObj["errorCode"]);
+        }
+        if (Array.isArray(respObj["errors"])) {
+          errors = respObj["errors"] as ApiValidationErrorItem[];
+        }
+      }
+
+      response.status(status).json({
         success: false,
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        message: "Validation failed",
-        errorCode: "VALIDATION_ERROR",
+        statusCode: status,
+        message,
+        errorCode,
         path,
         requestId,
         timestamp,
-        errors: validationErrors,
+        ...(errors ? { errors } : {}),
       });
       return;
     }
 
-    // 2. Direct ZodError
+    // 2. Direct ZodError fallback
     if (exception instanceof ZodError) {
       const validationErrors: ApiValidationErrorItem[] = exception.issues.map((issue) => ({
         field: issue.path.join("."),
@@ -67,38 +80,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         requestId,
         timestamp,
         errors: validationErrors,
-      });
-      return;
-    }
-
-    // 3. NestJS HttpException
-    if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      const exceptionResponse = exception.getResponse();
-
-      let message = exception.message;
-      let errorCode = "HTTP_ERROR";
-
-      if (typeof exceptionResponse === "object" && exceptionResponse !== null) {
-        const respObj = exceptionResponse as Record<string, unknown>;
-        if (typeof respObj["message"] === "string") {
-          message = respObj["message"];
-        } else if (Array.isArray(respObj["message"])) {
-          message = respObj["message"].join(", ");
-        }
-        if (typeof respObj["error"] === "string") {
-          errorCode = respObj["error"].toUpperCase().replace(/\s+/g, "_");
-        }
-      }
-
-      response.status(status).json({
-        success: false,
-        statusCode: status,
-        message,
-        errorCode,
-        path,
-        requestId,
-        timestamp,
       });
       return;
     }

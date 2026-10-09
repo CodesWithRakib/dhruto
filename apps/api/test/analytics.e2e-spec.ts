@@ -3,7 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 
 describe("Analytics & Operational Intelligence (Phase 7 E2E)", () => {
   let app: INestApplication;
@@ -19,7 +19,7 @@ describe("Analytics & Operational Intelligence (Phase 7 E2E)", () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
 
     const login = async (emailOrPhone: string): Promise<string> => {

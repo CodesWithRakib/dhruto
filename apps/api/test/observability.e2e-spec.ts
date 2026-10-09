@@ -3,7 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { CacheService } from "../src/common/cache/cache.service.js";
 
 describe("Scale, Optimization & Observability (Phase 8 E2E)", () => {
@@ -19,7 +19,7 @@ describe("Scale, Optimization & Observability (Phase 8 E2E)", () => {
     app.setGlobalPrefix("api/v1", {
       exclude: ["health", "health/(.*)"],
     });
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
 
     cacheService = app.get<CacheService>(CacheService);

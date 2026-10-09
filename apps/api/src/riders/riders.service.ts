@@ -73,6 +73,13 @@ import { NotificationsService } from "../notifications/notifications.service.js"
 import { RtoPredictionService } from "../intelligence/services/rto-engine.service.js";
 import { LedgerService } from "../finance/ledger/ledger.service.js";
 import { OutboxService } from "../integrations/outbox.service.js";
+import {
+  DomainEventPublisher,
+  ParcelOutForDeliveryEvent,
+  ParcelDeliveredEvent,
+  ParcelFailedEvent,
+  CashHandInSubmittedEvent,
+} from "../events/index.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
 import { UserRole } from "../database/entities/index.js";
 
@@ -134,6 +141,8 @@ export class RidersService {
     private readonly idempotency: IdempotencyService,
     private readonly ledger: LedgerService,
     private readonly outbox: OutboxService,
+    @Optional()
+    private readonly eventPublisher?: DomainEventPublisher,
     @Optional()
     private readonly notificationsService?: NotificationsService,
     @Optional()
@@ -494,20 +503,34 @@ export class RidersService {
       // asynchronously; the OTP SMS below stays synchronous (handoff path).
       // recipientPhone is included so the outbox relay can resolve the
       // customer SMS target — the OTP secret itself NEVER goes in the event.
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.PARCEL_OUT_FOR_DELIVERY,
-        aggregateType: "parcel",
-        aggregateId: parcel.id,
-        actorId: userId,
-        payload: {
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          merchantId: parcel.merchantId,
-          riderId,
-          recipientPhone: parcel.recipientPhone,
-          recipientName: parcel.recipientName,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new ParcelOutForDeliveryEvent(
+            { aggregateId: parcel.id, merchantId: parcel.merchantId },
+            {
+              trackingCode: parcel.trackingCode,
+              riderId,
+              recipientPhone: parcel.recipientPhone,
+            },
+          ),
+        );
+      } else {
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PARCEL_OUT_FOR_DELIVERY,
+          aggregateType: "parcel",
+          aggregateId: parcel.id,
+          actorId: userId,
+          payload: {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: parcel.merchantId,
+            riderId,
+            recipientPhone: parcel.recipientPhone,
+            recipientName: parcel.recipientName,
+          },
+        });
+      }
 
       const expiresAt = parcel.otpExpiresAt?.toISOString() ?? new Date().toISOString();
       // Side effects after the state change; failures only warn.
@@ -940,22 +963,36 @@ export class RidersService {
         message: "Parcel marked as delivered successfully.",
       };
 
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.PARCEL_DELIVERED,
-        aggregateType: "parcel",
-        aggregateId: parcel.id,
-        actorId: userId,
-        payload: {
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          merchantId: parcel.merchantId,
-          riderId,
-          codCollected: collectedAmount,
-          attemptId: attempt.id,
-          recipientPhone: parcel.recipientPhone,
-          recipientName: parcel.recipientName,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new ParcelDeliveredEvent(
+            { aggregateId: parcel.id, merchantId: parcel.merchantId },
+            {
+              trackingCode: parcel.trackingCode,
+              riderId,
+              codCollected: collectedAmount,
+            },
+          ),
+        );
+      } else {
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PARCEL_DELIVERED,
+          aggregateType: "parcel",
+          aggregateId: parcel.id,
+          actorId: userId,
+          payload: {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: parcel.merchantId,
+            riderId,
+            codCollected: collectedAmount,
+            attemptId: attempt.id,
+            recipientPhone: parcel.recipientPhone,
+            recipientName: parcel.recipientName,
+          },
+        });
+      }
 
       if (idempotencyKey) {
         await this.idempotency.complete(manager, {
@@ -1065,23 +1102,37 @@ export class RidersService {
 
       await manager.getRepository(Parcel).save(parcel);
 
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.PARCEL_FAILED,
-        aggregateType: "parcel",
-        aggregateId: parcel.id,
-        actorId: userId,
-        payload: {
-          parcelId: parcel.id,
-          trackingCode: parcel.trackingCode,
-          merchantId: parcel.merchantId,
-          riderId,
-          reason: dto.reason,
-          attemptId: attempt.id,
-          rescheduledFor: rescheduledFor?.toISOString() ?? null,
-          recipientPhone: parcel.recipientPhone,
-          recipientName: parcel.recipientName,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new ParcelFailedEvent(
+            { aggregateId: parcel.id, merchantId: parcel.merchantId },
+            {
+              trackingCode: parcel.trackingCode,
+              riderId,
+              reason: dto.reason,
+            },
+          ),
+        );
+      } else {
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PARCEL_FAILED,
+          aggregateType: "parcel",
+          aggregateId: parcel.id,
+          actorId: userId,
+          payload: {
+            parcelId: parcel.id,
+            trackingCode: parcel.trackingCode,
+            merchantId: parcel.merchantId,
+            riderId,
+            reason: dto.reason,
+            attemptId: attempt.id,
+            rescheduledFor: rescheduledFor?.toISOString() ?? null,
+            recipientPhone: parcel.recipientPhone,
+            recipientName: parcel.recipientName,
+          },
+        });
+      }
 
       return {
         parcelId: parcel.id,
@@ -1228,20 +1279,36 @@ export class RidersService {
         createdBy: userId,
       });
 
-      await this.outbox.append(manager, {
-        eventType: DomainEventType.CASH_HAND_IN_SUBMITTED,
-        aggregateType: "cash_handin",
-        aggregateId: batch.id,
-        actorId: userId,
-        payload: {
-          handinId: batch.id,
-          handinCode: batch.handinCode,
-          riderId,
-          hubId: rider.hubId ?? null,
-          itemCount: pendingLedgers.length,
-          totalMinor,
-        },
-      });
+      if (this.eventPublisher) {
+        await this.eventPublisher.publish(
+          manager,
+          new CashHandInSubmittedEvent(
+            { aggregateId: batch.id },
+            {
+              riderId,
+              hubId: rider.hubId ?? "",
+              totalAmount: totalMinor,
+              count: pendingLedgers.length,
+              handInId: batch.id,
+            },
+          ),
+        );
+      } else {
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.CASH_HAND_IN_SUBMITTED,
+          aggregateType: "cash_handin",
+          aggregateId: batch.id,
+          actorId: userId,
+          payload: {
+            handinId: batch.id,
+            handinCode: batch.handinCode,
+            riderId,
+            hubId: rider.hubId ?? null,
+            itemCount: pendingLedgers.length,
+            totalMinor,
+          },
+        });
+      }
 
       this.logger.log(
         `Rider ${riderId} handed in batch ${batch.handinCode} across ${pendingLedgers.length} parcels.`,

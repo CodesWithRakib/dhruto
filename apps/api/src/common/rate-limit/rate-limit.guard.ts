@@ -37,6 +37,8 @@ export class RateLimitGuard implements CanActivate {
     private readonly cacheService: CacheService,
   ) {}
 
+  private static readonly inFlight = new Map<string, RateLimitWindow>();
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const options = this.reflector.getAllAndOverride<RateLimitOptions>(RATE_LIMIT_KEY, [
       context.getHandler(),
@@ -52,18 +54,20 @@ export class RateLimitGuard implements CanActivate {
     const key = `rl:${options.scope}:${identity}`;
     const now = Date.now();
 
-    const existing = await this.cacheService.get<RateLimitWindow>(key);
-
+    let existing = RateLimitGuard.inFlight.get(key);
     if (!existing || existing.resetAt <= now) {
-      await this.cacheService.set(
-        key,
-        { count: 1, resetAt: now + options.windowSeconds * 1000 },
-        options.windowSeconds,
-      );
-      return true;
+      existing = { count: 0, resetAt: now + options.windowSeconds * 1000 };
+      RateLimitGuard.inFlight.set(key, existing);
     }
 
-    if (existing.count >= options.limit) {
+    existing.count += 1;
+    void this.cacheService.set(
+      key,
+      existing,
+      Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
+    );
+
+    if (existing.count > options.limit) {
       const retryAfter = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
       context
         .switchToHttp()
@@ -78,12 +82,6 @@ export class RateLimitGuard implements CanActivate {
       );
     }
 
-    existing.count += 1;
-    await this.cacheService.set(
-      key,
-      existing,
-      Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
-    );
     return true;
   }
 

@@ -3,7 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
-import { ZodValidationPipe } from "nestjs-zod";
+import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
 
 describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
@@ -26,7 +26,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
 
     // 1. Authenticate as merchant
