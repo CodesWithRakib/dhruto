@@ -4,7 +4,6 @@ import * as React from "react";
 import { Menu, X, ArrowRight, Sparkles, ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  Button,
   LanguageSwitcher,
   Logo,
   DropdownMenu,
@@ -75,21 +74,21 @@ export function PublicHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-200",
+        "sticky top-0 z-50 w-full transition-all duration-300",
         scrolled
-          ? "border-b border-border bg-surface/95 backdrop-blur-md shadow-sm"
-          : "border-b border-border/50 bg-surface/85 backdrop-blur-sm",
+          ? "border-b border-white/10 bg-[rgba(var(--dk-rgb),0.88)] text-white backdrop-blur-xl shadow-lg"
+          : "border-b border-white/5 bg-[var(--dk)] text-white",
       )}
     >
       <div className="dhruto-container flex h-16 sm:h-20 items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href="/" aria-label="Dhruto" className="shrink-0 transition-transform hover:scale-[1.02] active:scale-[0.98]">
-          <Logo />
+          <Logo inverted />
         </Link>
 
         {/* Desktop Navigation */}
         <nav aria-label={t("primaryLabel")} className="hidden lg:flex items-center">
-          <ul className="flex items-center gap-1.5 rounded-full border border-border bg-surface-muted/60 p-1 backdrop-blur-md shadow-inner">
+          <ul className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] p-1.5 backdrop-blur-md shadow-inner">
             {PUBLIC_LINKS.map((link) => {
               const active = isActiveRoute(pathname, link.href);
               return (
@@ -98,10 +97,10 @@ export function PublicHeader() {
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "inline-flex h-9 items-center rounded-full px-4 text-body font-medium transition-all duration-200",
+                      "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-all duration-200",
                       active
-                        ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                        : "text-muted-foreground hover:bg-surface hover:text-foreground",
+                        ? "bg-[var(--acc)] text-[var(--dk)] font-semibold shadow-sm"
+                        : "text-white/80 hover:bg-white/10 hover:text-white",
                     )}
                   >
                     {t(link.labelKey)}
@@ -115,7 +114,9 @@ export function PublicHeader() {
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeSwitcher />
-          <LanguageSwitcher currentLocale={locale} label={t("language")} />
+          <div className="text-white">
+            <LanguageSwitcher currentLocale={locale} label={t("language")} />
+          </div>
 
           {isAuthenticated ? (
             <div className="hidden sm:flex items-center">
@@ -123,38 +124,38 @@ export function PublicHeader() {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2.5 rounded-full border border-border bg-surface py-1.5 pl-2 pr-3 text-body font-medium text-foreground hover:bg-surface-muted hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 py-1.5 pl-2 pr-3 text-sm font-medium text-white hover:bg-white/10 hover:border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-all shadow-sm"
                   >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft text-primary-soft-foreground font-bold text-xs uppercase">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--acc)] text-[var(--dk)] font-bold text-xs uppercase">
                       {user?.name ? user.name[0] : (user?.role ? user.role[0] : "U")}
                     </span>
                     <span className="max-w-[120px] truncate text-xs font-semibold">
                       {user?.name || user?.role || "Account"}
                     </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    <ChevronDown className="h-3.5 w-3.5 text-white/60" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl border border-border bg-surface shadow-xl">
-                  <div className="px-3 py-2 border-b border-border mb-1">
-                    <p className="text-sm font-bold text-foreground truncate">{user?.name || "Account"}</p>
-                    {user?.email && <p className="text-xs text-muted-foreground truncate">{user.email}</p>}
-                    <span className="mt-1.5 inline-block rounded-full bg-primary-soft px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-soft-foreground">
+                <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl border border-white/15 bg-[var(--dk2)] text-white shadow-2xl">
+                  <div className="px-3 py-2 border-b border-white/10 mb-1">
+                    <p className="text-sm font-bold text-white truncate">{user?.name || "Account"}</p>
+                    {user?.email && <p className="text-xs text-white/70 truncate">{user.email}</p>}
+                    <span className="mt-1.5 inline-block rounded-full bg-[var(--acc)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--dk)]">
                       {user?.role}
                     </span>
                   </div>
 
-                  <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-2.5 py-2 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors">
+                  <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-2.5 py-2 text-xs font-medium text-white/90 hover:bg-white/10 transition-colors">
                     <Link href={home.href} className="flex items-center gap-2 w-full">
-                      <LayoutDashboard className="h-4 w-4 text-primary" />
+                      <LayoutDashboard className="h-4 w-4 text-[var(--acc)]" />
                       <span>{t("openApp")}</span>
                     </Link>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator className="my-1 bg-border" />
+                  <DropdownMenuSeparator className="my-1 bg-white/10" />
 
                   <DropdownMenuItem
                     onClick={() => void signOut()}
-                    className="cursor-pointer rounded-xl px-2.5 py-2 text-xs font-semibold text-danger hover:bg-danger-soft hover:text-danger-soft-foreground transition-colors flex items-center gap-2"
+                    className="cursor-pointer rounded-xl px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors flex items-center gap-2"
                   >
                     <LogOut className="h-4 w-4" aria-hidden="true" />
                     <span>{t("signOut")}</span>
@@ -166,15 +167,17 @@ export function PublicHeader() {
             <div className="hidden sm:flex sm:items-center sm:gap-2">
               <Link
                 href="/login"
-                className="inline-flex h-10 items-center rounded-xl px-4 text-body font-medium text-foreground/80 hover:text-foreground hover:bg-surface-muted transition-colors"
+                className="inline-flex h-10 items-center rounded-xl px-3.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
               >
                 {t("signIn")}
               </Link>
-              <Link href="/register">
-                <Button size="sm" className="h-10 px-5 rounded-xl font-semibold shadow-md shadow-primary/25 transition-all hover:shadow-lg hover:shadow-primary/40">
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5 text-primary-foreground/90" />
-                  {t("register")}
-                </Button>
+              <Link
+                href="/register"
+                className="btn-bl inline-flex h-10 items-center gap-2 rounded-xl px-4 text-xs sm:text-sm font-semibold"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                {t("register")}
+                <ArrowRight className="h-3.5 w-3.5 ar" />
               </Link>
             </div>
           )}
@@ -199,17 +202,23 @@ export function PublicHeader() {
 
       {/* Mobile Drawer */}
       {open ? (
-        <div id={panelId} className="border-t border-border/50 bg-surface/95 backdrop-blur-2xl lg:hidden shadow-2xl">
+        <div id={panelId} className="border-t border-white/10 bg-[var(--dk2)] text-white backdrop-blur-2xl lg:hidden shadow-2xl">
           <nav aria-label={t("primaryLabel")} className="dhruto-container py-4 space-y-3">
+            {/* Theme switcher row in mobile */}
+            <div className="flex items-center justify-between py-2 border-b border-white/10 text-sm font-medium">
+              <span className="text-white/80">Theme Color</span>
+              <ThemeSwitcher />
+            </div>
+
             {isAuthenticated && user && (
-              <div className="flex items-center justify-between p-3 rounded-2xl border border-border/50 bg-surface-muted/50 mb-2">
+              <div className="flex items-center justify-between p-3 rounded-2xl border border-white/10 bg-white/5 mb-2">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-primary-soft-foreground font-bold text-sm uppercase">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--acc)] text-[var(--dk)] font-bold text-sm uppercase">
                     {user?.name ? user.name[0] : (user?.role ? user.role[0] : "U")}
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground truncate">{user?.name || "User"}</p>
-                    <span className="text-[11px] font-semibold text-primary uppercase">{t(roleConfigFor(user?.role).labelKey)}</span>
+                    <p className="text-sm font-bold text-white truncate">{user?.name || "User"}</p>
+                    <span className="text-[11px] font-semibold text-[var(--acc)] uppercase">{t(roleConfigFor(user?.role).labelKey)}</span>
                   </div>
                 </div>
                 <button
@@ -218,7 +227,7 @@ export function PublicHeader() {
                     setOpen(false);
                     void signOut();
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-danger/30 text-danger-soft-foreground text-xs font-semibold hover:bg-danger-soft"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-300 text-xs font-semibold hover:bg-red-500/10"
                 >
                   <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>{t("signOut")}</span>
@@ -235,10 +244,10 @@ export function PublicHeader() {
                       href={link.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex h-12 items-center rounded-xl px-4 text-body font-medium transition-colors",
+                        "flex h-12 items-center rounded-xl px-4 text-sm font-medium transition-colors",
                         active
-                          ? "bg-primary-soft text-primary font-semibold border border-primary/20"
-                          : "text-foreground hover:bg-surface-muted",
+                          ? "bg-[var(--acc)] text-[var(--dk)] font-semibold shadow-sm"
+                          : "text-white/80 hover:bg-white/10 hover:text-white",
                       )}
                     >
                       {t(link.labelKey)}
@@ -248,18 +257,18 @@ export function PublicHeader() {
               })}
             </ul>
 
-            <div className="pt-2 sm:hidden border-t border-border/40 space-y-2">
+            <div className="pt-2 sm:hidden border-t border-white/10 space-y-2">
               <Link href={ctaHref} className="block">
-                <Button className="w-full h-11 rounded-xl font-semibold">
+                <button type="button" className="w-full h-11 rounded-xl font-semibold btn-bl flex items-center justify-center gap-2">
                   {isAuthenticated ? t("openApp") : t("signIn")}
-                  <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
-                </Button>
+                  <ArrowRight className="h-4 w-4 ml-1 ar" aria-hidden="true" />
+                </button>
               </Link>
               {!isAuthenticated && (
                 <Link href="/register" className="block">
-                  <Button variant="outline" className="w-full h-11 rounded-xl font-semibold border-primary/30 text-primary hover:bg-primary-soft">
+                  <button type="button" className="w-full h-11 rounded-xl font-semibold btn-bw flex items-center justify-center gap-2">
                     {t("register")}
-                  </Button>
+                  </button>
                 </Link>
               )}
             </div>

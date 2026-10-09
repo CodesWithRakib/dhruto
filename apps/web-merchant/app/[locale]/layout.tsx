@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_Bengali, Hind_Siliguri, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Noto_Sans_Bengali, Hind_Siliguri, Plus_Jakarta_Sans, Instrument_Serif } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -22,6 +22,15 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-plus-jakarta",
   weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+/** Editorial serif font for high-impact italic headline highlights (matching Deshbyte design). */
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -107,7 +116,7 @@ export default async function LocaleLayout({
       lang={locale}
       dir="ltr"
       suppressHydrationWarning
-      className={`${inter.variable} ${plusJakartaSans.variable} ${hindSiliguri.variable} ${notoSansBengali.variable}`}
+      className={`${inter.variable} ${plusJakartaSans.variable} ${instrumentSerif.variable} ${hindSiliguri.variable} ${notoSansBengali.variable}`}
     >
       <body
         className={`min-h-screen ${locale === "bn" ? "font-bangla" : "font-sans"} text-foreground antialiased`}

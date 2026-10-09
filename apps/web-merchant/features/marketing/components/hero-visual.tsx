@@ -1,77 +1,162 @@
+"use client";
+
 import React from "react";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { Navigation, ShieldCheck, Zap } from "lucide-react";
 
 export function HeroVisual() {
-  const t = useTranslations("Home");
   return (
-    <div className="relative mx-auto flex w-full max-w-lg lg:max-w-none items-center justify-center p-2 sm:p-4">
-      {/* Background radial glow */}
-      <div
-        className="pointer-events-none absolute -inset-4 rounded-3xl bg-gradient-to-tr from-primary/30 via-primary/10 to-transparent blur-3xl opacity-75"
-        aria-hidden="true"
-      />
-
-      {/* Main Showcase Container */}
-      <div className="relative z-10 w-full overflow-hidden rounded-3xl border border-border bg-surface/80 p-2 sm:p-3 shadow-2xl backdrop-blur-xl">
-        {/* Visual Frame */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-surface-muted/30">
-          <Image
-            src="/images/hero-logistics.jpg"
-            alt="Dhruto Intelligent Logistics Operating System"
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            priority
-            className="object-cover transition-transform duration-700 hover:scale-105"
-          />
-
-          {/* High-tech subtle bottom gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-        </div>
-
-        {/* 1. Floating Badge — Top Right: Express 45-Min */}
-        <div className="absolute -top-2 right-4 sm:-right-2 flex items-center gap-3 rounded-2xl border border-border bg-surface/95 px-3.5 py-2.5 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-500">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground border border-primary/20">
-            <Zap className="h-4 w-4" />
+    <div className="mockwrap" aria-hidden="true">
+      <div className="dashb">
+        {/* Top Header */}
+        <div className="dt">
+          <span className="dchip">
+            <i>D</i>Dhruto OS
           </span>
-          <div>
-            <p className="text-xs font-bold text-foreground leading-tight">{t("heroVisual.expressTitle")}</p>
-            <p className="text-[11px] text-muted-foreground leading-tight">{t("heroVisual.expressSubtitle")}</p>
+          <div className="dtabs hidden md:flex">
+            <b>Overview</b>
+            <span>Live Shipments</span>
+            <span>Line-Haul Radar</span>
+            <span>COD Payouts</span>
+            <span>64 Hubs</span>
+            <span>API Telemetry</span>
           </div>
-        </div>
-
-        {/* 2. Floating Card — Center Right: COD Settlement */}
-        <div className="absolute top-1/2 -right-2 sm:-right-5 -translate-y-1/2 hidden sm:flex items-center gap-3 rounded-2xl border border-border bg-surface/95 p-3 shadow-2xl backdrop-blur-xl">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-warning-soft text-warning-soft-foreground border border-warning/30">
-            <ShieldCheck className="h-5 w-5" />
-          </span>
-          <div className="text-left">
-            <p className="text-xs font-bold text-foreground leading-tight">{t("heroVisual.codAmount")}</p>
-            <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{t("heroVisual.codSubtitle")}</p>
-          </div>
-        </div>
-
-        {/* 3. Floating Telemetry Card — Bottom Left: Real-time Live Tracking */}
-        <div className="absolute -bottom-3 left-4 sm:-left-3 rounded-2xl border border-border bg-surface/95 p-3.5 shadow-2xl backdrop-blur-xl min-w-[220px]">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <Navigation className="h-3.5 w-3.5 text-primary rotate-45" />
-              <span>{t("heroVisual.code")}</span>
-            </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-semibold text-success-soft-foreground border border-success/30">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-ping" aria-hidden="true" />
-              {t("heroVisual.status")}
+          <div className="duser">
+            <i></i>
+            <span>
+              Dispatch Studio
+              <small>dispatch@dhruto.com</small>
             </span>
           </div>
+        </div>
 
-          <div className="mt-2.5 space-y-1.5">
-            <div className="flex justify-between text-[11px] text-muted-foreground font-medium">
-              <span>{t("heroVisual.route")}</span>
-              <span className="text-foreground font-semibold">{t("heroVisual.eta")}</span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
-              <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-primary to-success" />
+        {/* Body Area */}
+        <div className="dbody">
+          {/* Side Icon Rail */}
+          <div className="dside">
+            <i>📊</i>
+            <i>📦</i>
+            <i>⚡</i>
+            <i>💰</i>
+            <i>🗺️</i>
+            <i>⚙️</i>
+          </div>
+
+          {/* Main Dashboard Panel */}
+          <div className="dmain">
+            <h4>Good morning, Dispatch Team</h4>
+            <p>Nationwide 64 districts live • 99.98% Line-Haul on-time delivery SLA</p>
+
+            <div className="dgrid">
+              {/* Card 1: Revenue / COD */}
+              <div className="dc">
+                <small>Total COD Collected</small>
+                <b>৳ 48,20,000</b>
+                <span className="up">
+                  <u>↑ 38%</u>vs last month
+                </span>
+                <div className="dbtns">
+                  <span>Auto Payout</span>
+                  <span>Audit Trail</span>
+                </div>
+                <div className="dw">Network Sprints &nbsp;|&nbsp; 64 Active</div>
+                <div className="dw3">
+                  <div>
+                    Metro<b>45m</b>
+                    <em>Active</em>
+                  </div>
+                  <div>
+                    Line-Haul<b>18h</b>
+                    <em>Inter-city</em>
+                  </div>
+                  <div>
+                    COD<b>100%</b>
+                    <em>Settled</em>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: 4-Stat Grid */}
+              <div className="d4">
+                <div className="dc">
+                  <small>Active Parcels</small>
+                  <b>12.4K</b>
+                  <span className="up">
+                    <u>↑ 12%</u>Today
+                  </span>
+                </div>
+                <div className="dc">
+                  <small>Avg. Metro SLA</small>
+                  <b>45m</b>
+                  <span className="up">
+                    <u>⚡ Ultra</u>Doorstep
+                  </span>
+                </div>
+                <div className="dc">
+                  <small>Service Uptime</small>
+                  <b>99.98%</b>
+                  <span className="up">
+                    <u>↑ 0.1%</u>Radar active
+                  </span>
+                </div>
+                <div className="dc">
+                  <small>Hub Cross-docks</small>
+                  <b>64</b>
+                  <span className="up">
+                    <u>✓ 495</u>Thanas
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3: Growth & Throughput Chart */}
+              <div className="dc">
+                <small style={{ fontSize: "1.3em", color: "#111", fontWeight: 600 }}>
+                  Delivery Throughput
+                </small>
+                <small style={{ fontSize: "0.9em", color: "#888", marginTop: "0.3em" }}>
+                  Real-time parcels delivered vs settled COD
+                </small>
+                <div className="dchart">
+                  <div className="dleg">
+                    Parcels and COD Settlement
+                    <span>
+                      <i></i>Parcels<i></i>Settled
+                    </span>
+                  </div>
+                  <div className="bars" id="bars">
+                    <div>
+                      <i style={{ height: "45%" }}></i>
+                      <u style={{ height: "30%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "65%" }}></i>
+                      <u style={{ height: "48%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "55%" }}></i>
+                      <u style={{ height: "40%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "80%" }}></i>
+                      <u style={{ height: "62%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "70%" }}></i>
+                      <u style={{ height: "50%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "92%" }}></i>
+                      <u style={{ height: "75%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "85%" }}></i>
+                      <u style={{ height: "68%" }}></u>
+                    </div>
+                    <div>
+                      <i style={{ height: "98%" }}></i>
+                      <u style={{ height: "82%" }}></u>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

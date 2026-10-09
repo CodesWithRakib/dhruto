@@ -147,59 +147,179 @@
    * ------------------------------------------------------------------
    * Schema A — "Deep Forest" (dark, teal-green radial glow)
    */
-  --hero-dark-base: 196 45% 7%; /* #0A1519 — near-black navy edge */
-  --hero-dark-mid: 180 40% 11%; /* #11272A — deep teal body */
-  --hero-dark-glow: 168 55% 18%; /* #154A40 — top-center glow */
-  --hero-dark-accent: 172 66% 36%; /* #1F9A88 — teal accent / active step */
-  --hero-dark-gold: 36 45% 66%; /* #D3B07E — badges / numbered dots */
+  --hero-dark-base: 266 34% 7%; /* #120C19 — deep dark base */
+  --hero-dark-mid: 268 39% 11%; /* #1C1129 — dark violet */
+  --hero-dark-glow: 270 46% 20%; /* #341C4C — glow body */
+  --hero-dark-accent: 281 74% 86%; /* #E6C2F7 — lilac accent */
+  --hero-dark-gold: 273 53% 52%; /* #8D46C4 — vibrant purple */
   --hero-dark-foreground: 0 0% 100%;
-  --hero-dark-muted: 180 12% 72%; /* #B0C2C2 — body copy on dark */
-  --hero-dark-chip: 180 25% 16%; /* #1F3333 — pill / chip surface */
+  --hero-dark-muted: 270 12% 72%;
+  --hero-dark-chip: 268 35% 18%;
 
-  /* Schema B — "Mint Mist" (light, same hue family) */
-  --hero-light-base: 150 33% 97%; /* #F5FAF7 */
-  --hero-light-mid: 152 45% 93%; /* #E4F4EC */
-  --hero-light-glow: 160 55% 85%; /* #C6EEDD — top-center glow */
-  --hero-light-accent: 152 69% 19%; /* #0F5132 — brand primary */
-  --hero-light-gold: 36 70% 50%; /* #D98E26 — badges */
-  --hero-light-foreground: 222 47% 11%;
-  --hero-light-muted: 215 16% 40%;
+  /* Schema B — "Lavender Mist" (light) */
+  --hero-light-base: 280 33% 98%; /* #FAF8FC */
+  --hero-light-mid: 275 45% 95%; /* #F3EEF9 */
+  --hero-light-glow: 280 55% 90%; /* #E2D6F1 */
+  --hero-light-accent: 273 53% 52%; /* #8D46C4 */
+  --hero-light-gold: 273 53% 52%;
+  --hero-light-foreground: 268 35% 8%;
+  --hero-light-muted: 268 8% 44%;
   --hero-light-chip: 0 0% 100%;
+
+  /* ------------------------------------------------------------------
+   * Deshbyte Signature Variables (Default Purple Theme)
+   * ------------------------------------------------------------------ */
+  --dk: #1c1129;
+  --dk-rgb: 28, 17, 41;
+  --dk2: #120c19;
+  --dk3: #341c4c;
+  --acc: #e6c2f7;
+  --acc-rgb: 230, 194, 247;
+  --acc2: #8d46c4;
+  --acc3: #f2dcfb;
+  --ink: #8d46c4;
+  --glow-rgb: 141, 70, 196;
+  --tint: #f5ebfb;
+  --tint2: #ecd9f8;
+  --tint-ink: #4c2470;
+  --soft2: #e2d6f1;
+  --soft-bg: #faf8fc;
+  --wm: #e3d0f3;
+  --cardgrad: linear-gradient(170deg, #8d46c4, #48286a 60%, #2a1740);
+  --bg: #ffffff;
+  --soft: #f3eef9;
+  --text: #140e1c;
+  --muted-text: #6f6879;
+  --line: #e9e4ef;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ------------------------------------------------------------------
- * 10. Theme Overrides (Red Theme)
+ * 10. Theme Overrides: Purple Theme (Explicit)
  * ------------------------------------------------------------------ */
-:root[data-theme="red"] {
-  /* Brand Colors Override */
+:root[data-theme="purple"],
+:root[data-color="purple"] {
+  --primary: 273 53% 52%; /* #8D46C4 */
+  --primary-hover: 273 53% 44%;
+  --primary-foreground: 0 0% 100%;
+  --primary-soft: 282 82% 93%; /* #F2DCFB */
+  --primary-soft-foreground: 271 51% 29%; /* #4C2470 */
+  --brand-green: 281 74% 86%;
+  --brand-green-hover: 273 53% 52%;
+  --ring: 273 53% 52%;
+
+  --hero-dark-base: 266 34% 7%;
+  --hero-dark-mid: 268 39% 11%;
+  --hero-dark-glow: 270 46% 20%;
+  --hero-dark-accent: 281 74% 86%;
+  --hero-dark-gold: 273 53% 52%;
+
+  --dk: #1c1129;
+  --dk-rgb: 28, 17, 41;
+  --dk2: #120c19;
+  --dk3: #341c4c;
+  --acc: #e6c2f7;
+  --acc-rgb: 230, 194, 247;
+  --acc2: #8d46c4;
+  --acc3: #f2dcfb;
+  --ink: #8d46c4;
+  --glow-rgb: 141, 70, 196;
+  --tint: #f5ebfb;
+  --tint2: #ecd9f8;
+  --tint-ink: #4c2470;
+  --soft2: #e2d6f1;
+  --soft-bg: #faf8fc;
+  --wm: #e3d0f3;
+  --cardgrad: linear-gradient(170deg, #8d46c4, #48286a 60%, #2a1740);
+  --soft: #f3eef9;
+  --text: #140e1c;
+  --muted-text: #6f6879;
+  --line: #e9e4ef;
+}
+
+/* ------------------------------------------------------------------
+ * 11. Theme Overrides: Green Theme (Emerald / Lime)
+ * ------------------------------------------------------------------ */
+:root[data-theme="green"],
+:root[data-color="green"] {
+  --primary: 151 66% 36%; /* #1F9A5F */
+  --primary-hover: 157 77% 17%; /* #0A4D33 */
+  --primary-foreground: 0 0% 100%;
+  --primary-soft: 85 75% 87%; /* #E3F8C4 */
+  --primary-soft-foreground: 156 81% 23%; /* #0B6B45 */
+  --brand-green: 83 87% 69%; /* #BFF56A */
+  --brand-green-hover: 84 75% 60%;
+  --ring: 151 66% 36%;
+
+  --hero-dark-base: 158 72% 7%; /* #051F15 */
+  --hero-dark-mid: 159 71% 10%; /* #072A1D */
+  --hero-dark-glow: 158 68% 14%; /* #0B3A28 */
+  --hero-dark-accent: 83 87% 69%; /* #BFF56A */
+  --hero-dark-gold: 84 75% 60%; /* #A9E84A */
+
+  --dk: #072a1d;
+  --dk-rgb: 7, 42, 29;
+  --dk2: #051f15;
+  --dk3: #0b3a28;
+  --acc: #bff56a;
+  --acc-rgb: 191, 245, 106;
+  --acc2: #a9e84a;
+  --acc3: #cdfa85;
+  --ink: #0b6b45;
+  --glow-rgb: 180, 244, 84;
+  --tint: #eff8e2;
+  --tint2: #e3f8c4;
+  --tint-ink: #2c6b0f;
+  --soft2: #d6e4f3;
+  --soft-bg: #f7faf8;
+  --wm: #d3efc6;
+  --cardgrad: linear-gradient(170deg, #1f9a5f, #0a4d33 60%, #06301f);
+  --soft: #eef4fb;
+  --text: #0e1512;
+  --muted-text: #6b7772;
+  --line: #e6ebe8;
+}
+
+/* ------------------------------------------------------------------
+ * 12. Theme Overrides: Red Theme (Ruby Crimson)
+ * ------------------------------------------------------------------ */
+:root[data-theme="red"],
+:root[data-color="red"] {
   --primary: 347 77% 50%; /* #E11D48 - Crimson Red */
   --primary-hover: 347 77% 40%;
+  --primary-foreground: 0 0% 100%;
   --primary-soft: 350 84% 93%;
   --primary-soft-foreground: 347 77% 50%;
-  
   --brand-green: 347 77% 50%;
   --brand-green-hover: 347 77% 40%;
   --ring: 347 77% 50%;
-  
-  /* Hero / section background schemas override for Red */
-  /* Schema A — "Deep Ruby" (dark) */
+
   --hero-dark-base: 350 45% 7%;
   --hero-dark-mid: 345 40% 11%;
   --hero-dark-glow: 347 55% 18%;
   --hero-dark-accent: 347 77% 50%;
   --hero-dark-gold: 36 45% 66%;
-  --hero-dark-foreground: 0 0% 100%;
-  --hero-dark-muted: 345 12% 72%;
-  --hero-dark-chip: 345 25% 16%;
 
-  /* Schema B — "Ruby Mist" (light) */
-  --hero-light-base: 350 33% 97%;
-  --hero-light-mid: 345 45% 93%;
-  --hero-light-glow: 347 55% 85%;
-  --hero-light-accent: 347 77% 50%;
-  --hero-light-gold: 36 70% 50%;
-  --hero-light-foreground: 222 47% 11%;
-  --hero-light-muted: 215 16% 40%;
-  --hero-light-chip: 0 0% 100%;
+  --dk: #230811;
+  --dk-rgb: 35, 8, 17;
+  --dk2: #16040a;
+  --dk3: #3b0e1d;
+  --acc: #fecdd3;
+  --acc-rgb: 254, 205, 211;
+  --acc2: #e11d48;
+  --acc3: #ffe4e6;
+  --ink: #be123c;
+  --glow-rgb: 225, 29, 72;
+  --tint: #fff1f2;
+  --tint2: #ffe4e6;
+  --tint-ink: #881337;
+  --soft2: #fce7f3;
+  --soft-bg: #fffbfd;
+  --wm: #fecdd3;
+  --cardgrad: linear-gradient(170deg, #e11d48, #881337 60%, #4c0519);
+  --soft: #fff1f2;
+  --text: #19090e;
+  --muted-text: #705860;
+  --line: #fae0e4;
 }
 

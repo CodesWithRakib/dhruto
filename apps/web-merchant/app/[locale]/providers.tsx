@@ -14,7 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <Provider store={storeRef.current}>
-      <ThemeProvider attribute="data-theme" defaultTheme="green" themes={["green", "red"]}>
+      <ThemeProvider attribute="data-theme" defaultTheme="purple" themes={["purple", "green", "red"]}>
         {children}
         <Toaster />
       </ThemeProvider>

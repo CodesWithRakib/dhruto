@@ -1,69 +1,55 @@
+"use client";
+
 import React from "react";
-import { MapPin, Building, Truck, CheckCircle2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { ShieldCheck } from "lucide-react";
 
 export function StatsStrip() {
-  const t = useTranslations("Home");
-
-  const stats = [
-    {
-      value: t("stats.coverage"),
-      label: t("stats.coverageLabel"),
-      icon: MapPin,
-      badge: "Nationwide",
-    },
-    {
-      value: t("stats.thanas"),
-      label: t("stats.thanasLabel"),
-      icon: Building,
-      badge: "Deep Coverage",
-    },
-    {
-      value: t("stats.daily"),
-      label: t("stats.dailyLabel"),
-      icon: Truck,
-      badge: "High Capacity",
-    },
-    {
-      value: t("stats.rate"),
-      label: t("stats.rateLabel"),
-      icon: CheckCircle2,
-      badge: "Guaranteed",
-    },
-  ];
-
   return (
-    <div className="dhruto-container py-6 sm:py-8">
-      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-surface/50 p-4 sm:p-5 backdrop-blur-xl shadow-lg transition-all duration-300 hover:border-primary/50 hover:bg-surface/75 hover:-translate-y-1 hover:shadow-primary/10"
-            >
-              {/* Subtle top glow line */}
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <section className="py-12 sm:py-16 border-b border-[var(--line)] bg-[var(--soft-bg)]">
+      <div className="dhruto-container">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-12 pb-6">
+          {/* Left statement with round icon */}
+          <div className="flex items-center gap-5 max-w-md">
+            <span className="flex-none w-14 h-14 rounded-full bg-[var(--tint)] flex items-center justify-center text-[var(--dk)] shadow-sm">
+              <ShieldCheck className="h-6 w-6 text-[var(--acc2)]" />
+            </span>
+            <p className="text-lg sm:text-xl font-medium tracking-tight text-[var(--text)] leading-snug">
+              Trusted &amp; relied on by 12,000+ high-volume merchants across Bangladesh
+            </p>
+          </div>
 
-              <div className="flex items-center gap-3.5 sm:gap-4">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-md group-hover:shadow-primary/20">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <p className="truncate text-caption sm:text-body-sm font-medium text-muted-foreground">
-                    {stat.label}
-                  </p>
-                </div>
-              </div>
+          {/* Right numbers row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10">
+            <div>
+              <b className="block text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[var(--text)] tabular-nums">
+                64<sup className="text-[var(--acc2)] font-bold text-sm ml-0.5">Districts</sup>
+              </b>
+              <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Nationwide Line-Haul</span>
             </div>
-          );
-        })}
+
+            <div>
+              <b className="block text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[var(--text)] tabular-nums">
+                495<sup className="text-[var(--acc2)] font-bold text-sm ml-0.5">Thanas</sup>
+              </b>
+              <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Doorstep Reach</span>
+            </div>
+
+            <div>
+              <b className="block text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[var(--text)] tabular-nums">
+                99.4<sup className="text-[var(--acc2)] font-bold text-sm ml-0.5">%</sup>
+              </b>
+              <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">On-Time SLA</span>
+            </div>
+
+            <div>
+              <b className="block text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[var(--text)] tabular-nums">
+                24<sup className="text-[var(--acc2)] font-bold text-sm ml-0.5">/7</sup>
+              </b>
+              <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Radar Dispatch</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

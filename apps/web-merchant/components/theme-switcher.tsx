@@ -1,52 +1,54 @@
 "use client";
 
 import * as React from "react";
-import { Palette } from "lucide-react";
 import { useTheme } from "next-themes";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@dhruto/ui";
+import { cn } from "@/lib/cn";
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="h-9 w-9" />;
+    return <div className={cn("sw h-[30px] w-20 opacity-0", className)} aria-hidden="true" />;
   }
 
+  const currentTheme = theme || "purple";
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors"
-          aria-label="Toggle theme"
-        >
-          <Palette className="h-5 w-5" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40 p-1.5 rounded-xl border border-border bg-surface">
-        <DropdownMenuItem
-          onClick={() => setTheme("green")}
-          className="cursor-pointer rounded-lg px-2.5 py-2 text-sm font-medium hover:bg-surface-muted transition-colors flex items-center justify-between"
-        >
-          Deep Forest
-          {theme === "green" && <span className="h-2 w-2 rounded-full bg-[#0F5132]" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme("red")}
-          className="cursor-pointer rounded-lg px-2.5 py-2 text-sm font-medium hover:bg-surface-muted transition-colors flex items-center justify-between"
-        >
-          Ruby Red
-          {theme === "red" && <span className="h-2 w-2 rounded-full bg-[#E11D48]" />}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div
+      className={cn("sw items-center", className)}
+      role="group"
+      aria-label="Color theme"
+    >
+      <button
+        type="button"
+        data-color="purple"
+        style={{ "--a": "#e6c2f7", "--b": "#8d46c4" } as React.CSSProperties}
+        aria-label="Royal Purple theme"
+        aria-pressed={currentTheme === "purple"}
+        onClick={() => setTheme("purple")}
+        className={cn(currentTheme === "purple" && "shadow-[0_0_0_2px_var(--dk),0_0_0_3.5px_#fff]")}
+      />
+      <button
+        type="button"
+        data-color="green"
+        style={{ "--a": "#bff56a", "--b": "#1f9a5f" } as React.CSSProperties}
+        aria-label="Emerald Green theme"
+        aria-pressed={currentTheme === "green"}
+        onClick={() => setTheme("green")}
+        className={cn(currentTheme === "green" && "shadow-[0_0_0_2px_var(--dk),0_0_0_3.5px_#fff]")}
+      />
+      <button
+        type="button"
+        data-color="red"
+        style={{ "--a": "#fecdd3", "--b": "#e11d48" } as React.CSSProperties}
+        aria-label="Ruby Red theme"
+        aria-pressed={currentTheme === "red"}
+        onClick={() => setTheme("red")}
+        className={cn(currentTheme === "red" && "shadow-[0_0_0_2px_var(--dk),0_0_0_3.5px_#fff]")}
+      />
+    </div>
   );
 }

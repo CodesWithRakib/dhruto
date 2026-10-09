@@ -80,36 +80,56 @@ export function FeatureGrid({ items }: { items: FeatureItem[] }) {
   );
 }
 
-export function StepFlow({ steps }: { steps: { title: string; description: string }[] }) {
-  return (
-    <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-      {steps.map((step, index) => (
-        <li
-          key={step.title}
-          className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border/50 bg-surface/50 p-6 backdrop-blur-xl shadow-lg transition-all duration-300 hover:border-primary/50 hover:bg-surface/80 hover:-translate-y-1.5"
-        >
-          {/* Top subtle glow */}
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+const STEP_ICONS = [
+  <svg key="1" viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-[1.8]"><path d="M9 4h6v3H9z"/><path d="M9 5.5H6.5A1.5 1.5 0 0 0 5 7v12a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19V7a1.5 1.5 0 0 0-1.5-1.5H15"/><path d="M9 12h6M9 16h4"/></svg>,
+  <svg key="2" viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-[1.8]"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M9 9v11"/></svg>,
+  <svg key="3" viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-[1.8]"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg>,
+  <svg key="4" viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-[1.8]"><path d="M12 3 5 6v5.5c0 4.3 2.9 7.7 7 9.5 4.1-1.8 7-5.2 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15 10.4"/></svg>,
+  <svg key="5" viewBox="0 0 24 24" className="w-6 h-6 fill-none stroke-current stroke-[1.8]"><path d="M5 21V4M5 4h12l-2.5 4 2.5 4H5"/></svg>,
+];
 
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-mono font-bold text-sm shadow-md shadow-primary/25 group-hover:scale-105 transition-transform">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                Step {index + 1}
-              </span>
+const STEP_TAGS = ["API Manifest", "60-Min Pickup", "Cross-Dock Sort", "Doorstep Delivery", "Instant COD Payout"];
+
+export function StepFlow({ steps }: { steps: { title: string; description: string }[] }) {
+  const displaySteps = steps.slice(0, 5);
+
+  return (
+    <div className="steps relative" id="steps">
+      {/* Desktop Curved Wavy Connector */}
+      <div className="wv" aria-hidden="true">
+        <svg className="off" viewBox="0 0 1000 166" preserveAspectRatio="none">
+          <path d="M100 39C200 39 200 127 300 127S400 39 500 39 600 127 700 127 800 39 900 39" />
+        </svg>
+        <svg className="on" viewBox="0 0 1000 166" preserveAspectRatio="none">
+          <path d="M100 39C200 39 200 127 300 127S400 39 500 39 600 127 700 127 800 39 900 39" />
+        </svg>
+      </div>
+
+      {/* Mobile straight line */}
+      <span className="pline" aria-hidden="true">
+        <i />
+      </span>
+
+      {displaySteps.map((step, index) => {
+        const isEnd = index === displaySteps.length - 1;
+        const icon = STEP_ICONS[index] ?? STEP_ICONS[0];
+        const tag = STEP_TAGS[index] ?? `Step ${index + 1}`;
+
+        return (
+          <div key={step.title} className={cn("st", isEnd && "end")}>
+            <div className="nd">
+              {icon}
+              <b>{index + 1}</b>
             </div>
-            <h3 className="mt-5 text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-              {step.title}
-            </h3>
-            <p className="mt-2 text-body-sm text-muted-foreground text-pretty leading-relaxed">
-              {step.description}
-            </p>
+            <div>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+              <span className="stag">{tag}</span>
+            </div>
           </div>
-        </li>
-      ))}
-    </ol>
+        );
+      })}
+    </div>
   );
 }
 
