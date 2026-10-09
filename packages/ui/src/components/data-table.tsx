@@ -73,6 +73,8 @@ export interface DataTableProps<TData, TValue> {
    * formatter their app already uses for amounts and counts.
    */
   formatNumber?: (value: number) => string;
+  /** Explicitly suppress the bottom pagination bar (e.g. for small embedded detail lists). */
+  hidePagination?: boolean;
   className?: string;
 }
 
@@ -100,6 +102,7 @@ export function DataTable<TData, TValue>({
   actionSlot,
   labels,
   formatNumber,
+  hidePagination = false,
   className,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
@@ -259,7 +262,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination Bar */}
-      {effectiveTotalItems > 0 && (
+      {!hidePagination && effectiveTotalItems > 0 && (
         <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:px-5">
           <div className="flex flex-wrap items-center justify-center gap-2 text-caption text-muted-foreground">
             <span aria-live="polite" className="tabular-nums">

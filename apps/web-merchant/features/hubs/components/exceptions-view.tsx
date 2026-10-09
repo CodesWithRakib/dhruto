@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   Button,
-  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -70,34 +69,45 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant={statusFilter === ExceptionStatus.OPEN ? "default" : "outline"}
-          onClick={() => setStatusFilter(ExceptionStatus.OPEN)}
-          className="h-8 text-xs"
-        >
-          {ExceptionStatus.OPEN}
-        </Button>
-        <Button
-          size="sm"
-          variant={statusFilter === ExceptionStatus.RESOLVED ? "default" : "outline"}
-          onClick={() => setStatusFilter(ExceptionStatus.RESOLVED)}
-          className="h-8 text-xs"
-        >
-          {ExceptionStatus.RESOLVED}
-        </Button>
-        <Button
-          size="sm"
-          variant={statusFilter === "ALL" ? "default" : "outline"}
-          onClick={() => setStatusFilter("ALL")}
-          className="h-8 text-xs"
-        >
-          ALL ({exceptions.length})
-        </Button>
-      </div>
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="h-5 w-5 text-warning" aria-hidden="true" />
+            <h2 className="text-sm font-bold text-foreground">
+              {t("exceptions.title")}
+            </h2>
+            <span className="rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning">
+              {exceptions.length}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Button
+              size="sm"
+              variant={statusFilter === ExceptionStatus.OPEN ? "default" : "outline"}
+              onClick={() => setStatusFilter(ExceptionStatus.OPEN)}
+              className="h-8 rounded-lg text-xs"
+            >
+              {ExceptionStatus.OPEN}
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === ExceptionStatus.RESOLVED ? "default" : "outline"}
+              onClick={() => setStatusFilter(ExceptionStatus.RESOLVED)}
+              className="h-8 rounded-lg text-xs"
+            >
+              {ExceptionStatus.RESOLVED}
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === "ALL" ? "default" : "outline"}
+              onClick={() => setStatusFilter("ALL")}
+              className="h-8 rounded-lg text-xs"
+            >
+              ALL ({exceptions.length})
+            </Button>
+          </div>
+        </div>
 
-      <Card>
         <CardContent className="p-0">
           {isLoading ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
@@ -112,34 +122,25 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
               />
             </div>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border/60">
               {exceptions.map((exception) => (
-                <li key={exception.id} className="space-y-2 p-4">
+                <li key={exception.id} className="space-y-2.5 p-5 transition-colors hover:bg-muted/30">
                   <div className="flex flex-wrap items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" />
                     <span className="font-mono text-xs font-bold text-foreground">
                       {exception.type}
                     </span>
-                    <Badge
-                      variant={
-                        exception.status === ExceptionStatus.OPEN ? "destructive" : "success"
-                      }
+                    <EnumBadge
+                      namespace="ExceptionStatus"
+                      value={exception.status}
+                      tones={EXCEPTION_STATUS_TONE}
                       className="text-[10px]"
-                    >
-                      {
-                        <EnumBadge
-                          namespace="ExceptionStatus"
-                          value={exception.status}
-                          tones={EXCEPTION_STATUS_TONE}
-                        />
-                      }
-                    </Badge>
+                    />
                     <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
                       {dateTime(exception.createdAt)}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">{exception.description}</p>
-                  <p className="font-mono text-[11px] text-muted-foreground">
+                  <p className="font-mono text-[11px] font-semibold text-primary">
                     {[exception.trackingCode, exception.bagCode, exception.manifestCode]
                       .filter(Boolean)
                       .join(" · ")}
@@ -157,7 +158,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="ml-auto h-8 text-xs"
+                        className="ml-auto h-8 rounded-lg border-border/80 text-xs font-medium"
                         onClick={() => {
                           setResolvingId(exception.id);
                           setResolutionNote("");
@@ -168,7 +169,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
                     ) : null}
                   </div>
                   {exception.resolutionNote ? (
-                    <p className="rounded-lg bg-surface-muted p-2 text-[11px] text-muted-foreground">
+                    <p className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-[11px] text-muted-foreground">
                       {exception.resolutionNote}
                     </p>
                   ) : null}

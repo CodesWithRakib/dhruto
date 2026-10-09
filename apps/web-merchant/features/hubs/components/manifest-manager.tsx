@@ -10,7 +10,6 @@ import {
   CardContent,
   Button,
   Input,
-  Badge,
   Select,
   SelectContent,
   SelectItem,
@@ -141,6 +140,54 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
     }
   };
 
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<"ALL" | ManifestStatus>("ALL");
+  const [page, setPage] = React.useState(1);
+  const [limit, setLimit] = React.useState(10);
+
+  const statusCounts = React.useMemo(() => {
+    let created = 0;
+    let dispatched = 0;
+    let inTransit = 0;
+    let received = 0;
+    let reconciled = 0;
+    for (const m of manifests) {
+      if (m.status === ManifestStatus.CREATED) created++;
+      else if (m.status === ManifestStatus.DISPATCHED) dispatched++;
+      else if (m.status === ManifestStatus.IN_TRANSIT) inTransit++;
+      else if (m.status === ManifestStatus.RECEIVED) received++;
+      else if (m.status === ManifestStatus.RECONCILED) reconciled++;
+    }
+    return {
+      ALL: manifests.length,
+      [ManifestStatus.CREATED]: created,
+      [ManifestStatus.DISPATCHED]: dispatched,
+      [ManifestStatus.IN_TRANSIT]: inTransit,
+      [ManifestStatus.RECEIVED]: received,
+      [ManifestStatus.RECONCILED]: reconciled,
+    };
+  }, [manifests]);
+
+  const filteredManifests = React.useMemo(() => {
+    return manifests.filter((item) => {
+      if (statusFilter !== "ALL" && item.status !== statusFilter) return false;
+      if (!search.trim()) return true;
+      const q = search.trim().toLowerCase();
+      return (
+        item.manifestCode.toLowerCase().includes(q) ||
+        item.vehicleNumber.toLowerCase().includes(q) ||
+        (item.driverName?.toLowerCase().includes(q) ?? false) ||
+        item.originHubName.toLowerCase().includes(q) ||
+        item.destinationHubName.toLowerCase().includes(q)
+      );
+    });
+  }, [manifests, statusFilter, search]);
+
+  const pagedManifests = React.useMemo(() => {
+    const start = (page - 1) * limit;
+    return filteredManifests.slice(start, start + limit);
+  }, [filteredManifests, page, limit]);
+
   const columns: ColumnDef<ManifestListItem>[] = React.useMemo(() => [
     {
       accessorKey: "manifestCode",
@@ -173,16 +220,16 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
     {
       accessorKey: "vehicleNumber",
       header: t("manifests.vehicle"),
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.vehicleNumber}</span>,
+      cell: ({ row }) => <span className="font-mono text-xs font-semibold">{row.original.vehicleNumber}</span>,
     },
     {
       accessorKey: "bagCount",
       header: () => <div className="text-center">{t("bags.title")}</div>,
       cell: ({ row }) => (
         <div className="text-center">
-          <Badge variant="secondary" className="font-mono">
+          <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold tabular-nums">
             {row.original.bagCount}
-          </Badge>
+          </span>
         </div>
       ),
     },
@@ -191,23 +238,12 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
       header: () => <div className="text-center">{t("status")}</div>,
       cell: ({ row }) => (
         <div className="flex justify-center">
-          <Badge
-            variant={
-              row.original.status === ManifestStatus.CREATED
-                ? "secondary"
-                : row.original.status === ManifestStatus.DISPATCHED ||
-                    row.original.status === ManifestStatus.IN_TRANSIT
-                  ? "default"
-                  : "success"
-            }
+          <EnumBadge
+            namespace="ManifestStatus"
+            value={row.original.status}
+            tones={MANIFEST_STATUS_TONE}
             className="text-[10px]"
-          >
-            <EnumBadge
-              namespace="ManifestStatus"
-              value={row.original.status}
-              tones={MANIFEST_STATUS_TONE}
-            />
-          </Badge>
+          />
         </div>
       ),
     },
@@ -221,16 +257,16 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
               size="sm"
               onClick={() => handleDispatch(row.original.id)}
               disabled={isDispatching}
-              className="h-8 gap-1.5"
+              className="h-8 gap-1.5 rounded-lg text-xs"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
               {t("manifests.dispatch")}
             </Button>
           ) : null}
           <Link href={HUB_ROUTES.manifest(row.original.id)}>
-            <Button size="sm" variant="outline" className="h-8 gap-1">
+            <Button size="sm" variant="outline" className="h-8 gap-1.5 rounded-lg text-xs border-border/80">
               <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-              {t("bags.details")}
+              {t("manifests.details")}
             </Button>
           </Link>
         </div>
@@ -240,42 +276,20 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h2 className="flex items-center gap-2 text-xl font-bold">
-            <Truck className="h-6 w-6 text-primary" aria-hidden="true" />
-            {t("manifests.title")}
-          </h2>
-          <p className="text-xs text-muted-foreground">{t("manifests.subtitle")}</p>
-        </div>
-        <Button
-          onClick={() => setIsCreating((value) => !value)}
-          className="flex items-center gap-2"
-        >
-          {isCreating ? (
-            t("cancel")
-          ) : (
-            <>
-              <Plus className="h-4 w-4" aria-hidden="true" /> {t("manifests.create")}
-            </>
-          )}
-        </Button>
-      </div>
-
       {isCreating ? (
-        <Card className="border-primary/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
+        <Card className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6 shadow-2xs">
+          <CardHeader className="p-0 pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-foreground">
               <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
               {t("manifests.create")}
             </CardTitle>
-            <CardDescription>{t("manifests.subtitle")}</CardDescription>
+            <CardDescription className="text-xs">{t("manifests.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <form onSubmit={handleCreateManifest} className="space-y-5">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label htmlFor="manifest-destination" className="mb-1 block text-sm font-medium">
+                <div className="space-y-1.5">
+                  <label htmlFor="manifest-destination" className="block text-xs font-semibold text-muted-foreground">
                     {t("manifests.destination")} <span className="text-danger">*</span>
                   </label>
                   <Select
@@ -286,7 +300,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     }}
                     required
                   >
-                    <SelectTrigger id="manifest-destination" className="w-full">
+                    <SelectTrigger id="manifest-destination" className="w-full rounded-xl bg-card">
                       <SelectValue placeholder={t("manifests.destination")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -299,8 +313,8 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                   </Select>
                 </div>
 
-                <div>
-                  <label htmlFor="manifest-vehicle" className="mb-1 block text-sm font-medium">
+                <div className="space-y-1.5">
+                  <label htmlFor="manifest-vehicle" className="block text-xs font-semibold text-muted-foreground">
                     {t("manifests.vehicle")} <span className="text-danger">*</span>
                   </label>
                   <Input
@@ -309,47 +323,50 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     value={vehicleNumber}
                     onChange={(event) => setVehicleNumber(event.target.value)}
                     required
+                    className="rounded-xl bg-card font-mono uppercase"
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="manifest-driver" className="mb-1 block text-sm font-medium">
+                <div className="space-y-1.5">
+                  <label htmlFor="manifest-driver" className="block text-xs font-semibold text-muted-foreground">
                     {t("manifests.driverName")}
                   </label>
                   <Input
                     id="manifest-driver"
                     value={driverName}
                     onChange={(event) => setDriverName(event.target.value)}
+                    className="rounded-xl bg-card"
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="manifest-driver-phone" className="mb-1 block text-sm font-medium">
+                <div className="space-y-1.5">
+                  <label htmlFor="manifest-driver-phone" className="block text-xs font-semibold text-muted-foreground">
                     {t("manifests.driverPhone")}
                   </label>
                   <Input
                     id="manifest-driver-phone"
                     value={driverPhone}
                     onChange={(event) => setDriverPhone(event.target.value)}
+                    className="rounded-xl bg-card"
                   />
                 </div>
               </div>
 
-              <div className="border-t pt-2">
-                <p className="mb-2 text-sm font-semibold">
+              <div className="border-t border-border/70 pt-4">
+                <p className="mb-1 text-sm font-semibold text-foreground">
                   {t("manifests.selectBags", { count: selectedBagIds.length })}
                 </p>
-                <p className="mb-2 text-xs text-muted-foreground">
+                <p className="mb-3 text-xs text-muted-foreground">
                   {t("manifests.selectBagsHint")}
                 </p>
 
                 {availableBags.length === 0 ? (
-                  <div className="rounded-lg border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
-                    <AlertCircle className="mx-auto mb-1 h-5 w-5 text-warning" aria-hidden="true" />
+                  <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-center text-xs text-muted-foreground">
+                    <AlertCircle className="mx-auto mb-1.5 h-5 w-5 text-warning" aria-hidden="true" />
                     {t("manifests.noSealedBags")}
                   </div>
                 ) : (
-                  <div className="grid max-h-56 grid-cols-1 gap-3 overflow-y-auto rounded-lg border bg-muted/20 p-2 sm:grid-cols-2 md:grid-cols-3">
+                  <div className="grid max-h-56 grid-cols-1 gap-2.5 overflow-y-auto rounded-xl border border-border/80 bg-card/60 p-2.5 sm:grid-cols-2 md:grid-cols-3">
                     {availableBags.map((bag) => {
                       const isSelected = selectedBagIds.includes(bag.id);
                       return (
@@ -365,8 +382,8 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                           role="checkbox"
                           aria-checked={isSelected}
                           tabIndex={0}
-                          className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 text-sm transition-all ${
-                            isSelected ? "border-primary bg-primary/10" : "border-border bg-surface"
+                          className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-sm transition-all ${
+                            isSelected ? "border-primary bg-primary/10 shadow-2xs" : "border-border/80 bg-card hover:bg-muted/40"
                           }`}
                         >
                           <input
@@ -375,10 +392,10 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                             onChange={() => {}}
                             tabIndex={-1}
                             aria-hidden="true"
-                            className="mt-0.5 rounded"
+                            className="mt-0.5 rounded text-primary"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate font-mono text-xs font-semibold">
+                            <p className="truncate font-mono text-xs font-bold text-foreground">
                               {bag.bagCode}
                             </p>
                             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -392,11 +409,21 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                 )}
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
+              <div className="flex items-center justify-end gap-3 border-t border-border/60 pt-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsCreating(false)}
+                  className="rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                >
                   {t("cancel")}
                 </Button>
-                <Button type="submit" disabled={isCreatingManifest || selectedBagIds.length === 0}>
+                <Button
+                  type="submit"
+                  disabled={isCreatingManifest || selectedBagIds.length === 0}
+                  className="gap-2 rounded-xl text-xs font-semibold shadow-xs"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
                   {isCreatingManifest ? t("manifests.creating") : t("manifests.create")}
                 </Button>
               </div>
@@ -405,13 +432,69 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/15 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                <Truck className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-foreground sm:text-base">
+                  Active Dispatch Records
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {manifests.length} total manifests recorded
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => setIsCreating((value) => !value)}
+              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shadow-xs shrink-0"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {isCreating ? t("cancel") : t("manifests.create")}
+            </Button>
+          </div>
+
+          {/* Quick status filter pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            {(
+              [
+                { key: "ALL", label: `All (${statusCounts.ALL})` },
+                { key: ManifestStatus.CREATED, label: `Created (${statusCounts[ManifestStatus.CREATED]})` },
+                { key: ManifestStatus.DISPATCHED, label: `Dispatched (${statusCounts[ManifestStatus.DISPATCHED]})` },
+                { key: ManifestStatus.IN_TRANSIT, label: `In Transit (${statusCounts[ManifestStatus.IN_TRANSIT]})` },
+                { key: ManifestStatus.RECEIVED, label: `Received (${statusCounts[ManifestStatus.RECEIVED]})` },
+                { key: ManifestStatus.RECONCILED, label: `Reconciled (${statusCounts[ManifestStatus.RECONCILED]})` },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => {
+                  setStatusFilter(item.key);
+                  setPage(1);
+                }}
+                className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                  statusFilter === item.key
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <CardContent className="p-0">
           {isLoadingManifests ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
             </p>
-          ) : manifests.length === 0 ? (
+          ) : filteredManifests.length === 0 ? (
             <div className="p-6">
               <EmptyState
                 icon={Truck}
@@ -424,33 +507,42 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
               <div className="hidden md:block">
                 <DataTable
                   columns={columns}
-                  data={manifests}
-                  totalItems={manifests.length}
-                  pageCount={1}
-                  currentPage={1}
-                  itemsPerPage={manifests.length}
+                  data={pagedManifests}
+                  totalItems={filteredManifests.length}
+                  pageCount={Math.max(1, Math.ceil(filteredManifests.length / limit))}
+                  currentPage={page}
+                  itemsPerPage={limit}
+                  onPageChange={setPage}
+                  onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                  search={search}
+                  onSearchChange={(val) => {
+                    setSearch(val);
+                    setPage(1);
+                  }}
+                  searchPlaceholder="Search manifest code, vehicle, driver, route..."
                   emptyMessage={t("manifests.empty")}
+                  className="border-0 shadow-none rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border md:hidden">
-                {manifests.map((manifest) => (
-                  <li key={manifest.id} className="space-y-2 p-4">
+              <ul className="divide-y divide-border/60 md:hidden">
+                {pagedManifests.map((manifest) => (
+                  <li key={manifest.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={HUB_ROUTES.manifest(manifest.id)}
-                        className="font-mono text-xs font-bold text-primary"
+                        className="font-mono text-xs font-bold text-primary hover:underline"
                       >
                         {manifest.manifestCode}
                       </Link>
-                      <Badge variant="secondary" className="text-[10px]">
-                        {
-                          <EnumBadge
-                            namespace="ManifestStatus"
-                            value={manifest.status}
-                            tones={MANIFEST_STATUS_TONE}
-                          />
-                        }
-                      </Badge>
+                      <EnumBadge
+                        namespace="ManifestStatus"
+                        value={manifest.status}
+                        tones={MANIFEST_STATUS_TONE}
+                        className="text-[10px]"
+                      />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {manifest.originHubName} → {manifest.destinationHubName} · {manifest.bagCount}{" "}
@@ -462,15 +554,15 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                           size="sm"
                           onClick={() => handleDispatch(manifest.id)}
                           disabled={isDispatching}
-                          className="h-9 flex-1"
+                          className="h-9 flex-1 rounded-xl"
                         >
                           <Send className="h-3.5 w-3.5" aria-hidden="true" />
                           {t("manifests.dispatch")}
                         </Button>
                       ) : null}
                       <Link href={HUB_ROUTES.manifest(manifest.id)} className="flex-1">
-                        <Button size="sm" variant="outline" className="h-9 w-full">
-                          {t("bags.details")}
+                        <Button size="sm" variant="outline" className="h-9 w-full rounded-xl border-border/80">
+                          {t("manifests.details")}
                         </Button>
                       </Link>
                     </div>

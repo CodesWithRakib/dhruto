@@ -84,12 +84,12 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="border-primary/20">
-        <CardContent className="space-y-4 p-4">
-          <form onSubmit={handleLookup} className="flex gap-2">
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <CardContent className="space-y-5 p-5 sm:p-6">
+          <form onSubmit={handleLookup} className="flex flex-col sm:flex-row gap-2.5">
             <div className="relative flex-1">
               <Search
-                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -100,13 +100,13 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                 onChange={(event) => setTrackingCode(event.target.value)}
                 placeholder={t("lookup.searchPlaceholder")}
                 aria-label={t("lookup.searchLabel")}
-                className="h-12 pl-10 font-mono text-base uppercase"
+                className="h-12 rounded-xl pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground"
               />
             </div>
             <Button
               type="submit"
               disabled={isLookingUp || !trackingCode.trim()}
-              className="h-12 px-6"
+              className="h-12 rounded-xl px-7 font-semibold shadow-xs"
             >
               {isLookingUp ? t("lookup.searching") : t("lookup.search")}
             </Button>
@@ -115,12 +115,12 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
           {error ? (
             <div
               role="alert"
-              className="flex items-start gap-2 rounded-xl border border-danger bg-danger-soft p-4 text-danger"
+              className="flex items-start gap-3 rounded-xl border border-danger/30 bg-danger-soft p-4 text-danger"
             >
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm font-semibold">{t("lookup.notFound")}</p>
-                <p className="text-xs">{error}</p>
+                <p className="text-xs text-muted-foreground">{error}</p>
               </div>
             </div>
           ) : null}
@@ -128,40 +128,42 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
           {parcel ? (
             <div
               role="status"
-              className="space-y-3 rounded-xl border border-border bg-surface-muted p-4"
+              className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 p-5 shadow-2xs"
             >
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {t("lookup.searchLabel")}
                   </p>
-                  <p className="font-mono text-sm font-bold">{parcel.trackingCode}</p>
+                  <p className="mt-1 font-mono text-sm font-bold text-foreground">{parcel.trackingCode}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {t("lookup.currentStatus")}
                   </p>
-                  <StatusBadge status={parcel.status} className="mt-1" />
+                  <div className="mt-1">
+                    <StatusBadge status={parcel.status} />
+                  </div>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {t("lookup.recipient")}
                   </p>
-                  <p className="text-sm font-semibold">{parcel.recipientName}</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">{parcel.recipientName}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {t("lookup.destination")}
                   </p>
-                  <p className="text-sm">
+                  <p className="mt-1 text-sm text-foreground">
                     {[parcel.district, parcel.thana].filter(Boolean).join(", ") || "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {t("lookup.weight")}
                   </p>
-                  <p className="font-mono text-sm tabular-nums">{parcel.weightKg} kg</p>
+                  <p className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">{parcel.weightKg} kg</p>
                 </div>
               </div>
               {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
@@ -169,7 +171,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setAssignOpen(true)}
-                  className="h-11 w-full gap-1.5 sm:w-auto"
+                  className="h-10 w-full gap-2 rounded-xl sm:w-auto font-medium"
                 >
                   <UserCheck className="h-4 w-4" aria-hidden="true" />
                   {t("assignRider")}
@@ -190,11 +192,19 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
         <CardContent className="p-0">
-          <h2 className="border-b border-border px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            {t("inventoryTab")} ({inventory?.parcels.length ?? 0})
-          </h2>
+          <div className="flex items-center justify-between border-b border-border/70 bg-muted/20 px-5 py-4">
+            <div className="flex items-center gap-2.5">
+              <Package className="h-4 w-4 text-primary" aria-hidden="true" />
+              <h2 className="text-sm font-bold text-foreground">
+                {t("inventoryTab")}
+              </h2>
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                {inventory?.parcels.length ?? 0}
+              </span>
+            </div>
+          </div>
           {inventoryLoading ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
@@ -214,13 +224,14 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   currentPage={1}
                   itemsPerPage={inventory.parcels.length}
                   emptyMessage={t("dashboard.noRecentScans")}
+                  className="border-0 shadow-none rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border md:hidden">
+              <ul className="divide-y divide-border/60 md:hidden">
                 {inventory.parcels.map((item) => (
-                  <li key={item.id} className="space-y-1 p-4">
+                  <li key={item.id} className="space-y-1.5 p-4 transition-colors hover:bg-muted/30">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-xs font-bold">{item.trackingCode}</span>
+                      <span className="font-mono text-xs font-bold text-foreground">{item.trackingCode}</span>
                       <StatusBadge status={item.status} className="text-[10px]" />
                     </div>
                     <p className="text-xs text-muted-foreground">

@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   Button,
-  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -120,6 +119,49 @@ export function BagManager({ currentHubId }: BagManagerProps) {
     }
   };
 
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<"ALL" | BagStatus>("ALL");
+  const [page, setPage] = React.useState(1);
+  const [limit, setLimit] = React.useState(10);
+
+  const statusCounts = React.useMemo(() => {
+    let open = 0;
+    let sealed = 0;
+    let inTransit = 0;
+    let received = 0;
+    for (const b of bags) {
+      if (b.status === BagStatus.OPEN) open++;
+      else if (b.status === BagStatus.SEALED) sealed++;
+      else if (b.status === BagStatus.IN_TRANSIT) inTransit++;
+      else if (b.status === BagStatus.RECEIVED) received++;
+    }
+    return {
+      ALL: bags.length,
+      [BagStatus.OPEN]: open,
+      [BagStatus.SEALED]: sealed,
+      [BagStatus.IN_TRANSIT]: inTransit,
+      [BagStatus.RECEIVED]: received,
+    };
+  }, [bags]);
+
+  const filteredBags = React.useMemo(() => {
+    return bags.filter((bag) => {
+      if (statusFilter !== "ALL" && bag.status !== statusFilter) return false;
+      if (!search.trim()) return true;
+      const q = search.trim().toLowerCase();
+      return (
+        bag.bagCode.toLowerCase().includes(q) ||
+        (bag.sealTag?.toLowerCase().includes(q) ?? false) ||
+        bag.destinationHubName.toLowerCase().includes(q)
+      );
+    });
+  }, [bags, statusFilter, search]);
+
+  const pagedBags = React.useMemo(() => {
+    const start = (page - 1) * limit;
+    return filteredBags.slice(start, start + limit);
+  }, [filteredBags, page, limit]);
+
   const columns: ColumnDef<BagListItem>[] = React.useMemo(() => [
     {
       accessorKey: "bagCode",
@@ -132,9 +174,11 @@ export function BagManager({ currentHubId }: BagManagerProps) {
           >
             {row.original.bagCode}
           </Link>
-          <p className="font-mono text-[11px] text-muted-foreground">
-            {row.original.sealTag ?? ""}
-          </p>
+          {row.original.sealTag ? (
+            <p className="font-mono text-[11px] text-muted-foreground">
+              {row.original.sealTag}
+            </p>
+          ) : null}
         </div>
       ),
     },
@@ -145,26 +189,28 @@ export function BagManager({ currentHubId }: BagManagerProps) {
     },
     {
       accessorKey: "status",
-      header: t("status"),
+      header: () => <div className="text-center">{t("status")}</div>,
       cell: ({ row }) => (
-        <Badge
-          variant={
-            row.original.status === BagStatus.OPEN
-              ? "secondary"
-              : row.original.status === BagStatus.SEALED
-                ? "default"
-                : "success"
-          }
-          className="text-[10px]"
-        >
-          <EnumBadge namespace="BagStatus" value={row.original.status} tones={BAG_STATUS_TONE} />
-        </Badge>
+        <div className="flex justify-center">
+          <EnumBadge
+            namespace="BagStatus"
+            value={row.original.status}
+            tones={BAG_STATUS_TONE}
+            className="text-[10px]"
+          />
+        </div>
       ),
     },
     {
       accessorKey: "parcelCount",
-      header: () => <div className="text-right">{t("bags.parcelsInBag")}</div>,
-      cell: ({ row }) => <div className="text-right font-mono tabular-nums">{row.original.parcelCount}</div>,
+      header: () => <div className="text-center">{t("bags.parcelsInBag")}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold tabular-nums">
+            {row.original.parcelCount}
+          </span>
+        </div>
+      ),
     },
     {
       id: "actions",
@@ -176,12 +222,17 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               variant="outline"
               size="sm"
               onClick={() => openSealConfirm(row.original.id)}
-              className="h-7 text-[11px]"
+              className="h-8 gap-1 rounded-lg border-border/80 text-xs font-medium"
             >
               <Lock className="h-3 w-3" aria-hidden="true" />
               {t("bags.seal")}
             </Button>
           ) : null}
+          <Link href={HUB_ROUTES.bag(row.original.id)}>
+            <Button size="sm" variant="outline" className="h-8 rounded-lg border-border/80 text-xs font-medium">
+              {t("bags.details")}
+            </Button>
+          </Link>
         </div>
       ),
     },
@@ -189,25 +240,8 @@ export function BagManager({ currentHubId }: BagManagerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
-            <Package className="h-5 w-5 text-primary" aria-hidden="true" />
-            {t("bags.title")}
-          </h2>
-          <p className="text-xs text-muted-foreground">{t("bags.subtitle")}</p>
-        </div>
-        <Button
-          onClick={() => setIsCreating((value) => !value)}
-          className="flex items-center gap-2 text-xs"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          {isCreating ? t("cancel") : t("bags.create")}
-        </Button>
-      </div>
-
       {isCreating ? (
-        <Card className="border-primary/30 bg-primary/5 p-6">
+        <Card className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6 shadow-2xs">
           <form onSubmit={handleCreateBag} className="space-y-4">
             <h3 className="text-sm font-bold text-foreground">{t("bags.create")}</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -223,7 +257,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                   onValueChange={setDestHubId}
                   required
                 >
-                  <SelectTrigger id="bag-destination" className="w-full">
+                  <SelectTrigger id="bag-destination" className="w-full rounded-xl bg-card">
                     <SelectValue placeholder={t("bags.destination")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,21 +280,23 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder={t("bags.notesPlaceholder")}
                   maxLength={500}
-                  className="w-full rounded-lg border border-input bg-background p-2.5 text-xs outline-none"
+                  className="w-full rounded-xl border border-input bg-card p-2.5 text-xs outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex items-center justify-end gap-3 border-t border-border/60 pt-4">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setIsCreating(false)}
+                className="rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" size="sm" disabled={isCreatingBag}>
+              <Button type="submit" size="sm" disabled={isCreatingBag} className="gap-1.5 rounded-xl text-xs font-semibold shadow-xs">
+                <Plus className="h-4 w-4" aria-hidden="true" />
                 {isCreatingBag ? t("bags.creating") : t("bags.confirmCreate")}
               </Button>
             </div>
@@ -268,13 +304,68 @@ export function BagManager({ currentHubId }: BagManagerProps) {
         </Card>
       ) : null}
 
-      <Card className="border-primary/20">
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/15 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                <Package className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-foreground sm:text-base">
+                  Active Transit Bags
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {bags.length} total bags tracked at this hub
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => setIsCreating((value) => !value)}
+              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shadow-xs shrink-0"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {isCreating ? t("cancel") : t("bags.create")}
+            </Button>
+          </div>
+
+          {/* Quick status filter pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            {(
+              [
+                { key: "ALL", label: `All (${statusCounts.ALL})` },
+                { key: BagStatus.OPEN, label: `Open (${statusCounts[BagStatus.OPEN]})` },
+                { key: BagStatus.SEALED, label: `Sealed (${statusCounts[BagStatus.SEALED]})` },
+                { key: BagStatus.IN_TRANSIT, label: `In Transit (${statusCounts[BagStatus.IN_TRANSIT]})` },
+                { key: BagStatus.RECEIVED, label: `Received (${statusCounts[BagStatus.RECEIVED]})` },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => {
+                  setStatusFilter(item.key);
+                  setPage(1);
+                }}
+                className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                  statusFilter === item.key
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <CardContent className="p-0">
           {isLoading ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
             </p>
-          ) : bags.length === 0 ? (
+          ) : filteredBags.length === 0 ? (
             <div className="p-6">
               <EmptyState
                 icon={Package}
@@ -287,37 +378,43 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               <div className="hidden md:block">
                 <DataTable
                   columns={columns}
-                  data={bags}
-                  totalItems={bags.length}
-                  pageCount={1}
-                  currentPage={1}
-                  itemsPerPage={bags.length}
+                  data={pagedBags}
+                  totalItems={filteredBags.length}
+                  pageCount={Math.max(1, Math.ceil(filteredBags.length / limit))}
+                  currentPage={page}
+                  itemsPerPage={limit}
+                  onPageChange={setPage}
+                  onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                  search={search}
+                  onSearchChange={(val) => {
+                    setSearch(val);
+                    setPage(1);
+                  }}
+                  searchPlaceholder="Search bag code, seal tag, destination..."
                   emptyMessage={t("bags.empty")}
+                  className="border-0 shadow-none rounded-none"
                 />
               </div>
               {/* Mobile cards */}
-              <ul className="divide-y divide-border md:hidden">
-                {bags.map((bag) => (
-                  <li key={bag.id} className="space-y-2 p-4">
+              <ul className="divide-y divide-border/60 md:hidden">
+                {pagedBags.map((bag) => (
+                  <li key={bag.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={HUB_ROUTES.bag(bag.id)}
-                        className="font-mono text-xs font-bold text-primary"
+                        className="font-mono text-xs font-bold text-primary hover:underline"
                       >
                         {bag.bagCode}
                       </Link>
-                      <Badge
-                        variant={bag.status === BagStatus.OPEN ? "secondary" : "default"}
+                      <EnumBadge
+                        namespace="BagStatus"
+                        value={bag.status}
+                        tones={BAG_STATUS_TONE}
                         className="text-[10px]"
-                      >
-                        {
-                          <EnumBadge
-                            namespace="BagStatus"
-                            value={bag.status}
-                            tones={BAG_STATUS_TONE}
-                          />
-                        }
-                      </Badge>
+                      />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {bag.destinationHubName} · {t("bags.parcelCount", { count: bag.parcelCount })}
@@ -327,7 +424,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => openSealConfirm(bag.id)}
-                        className="h-9 w-full"
+                        className="h-9 w-full rounded-xl"
                       >
                         <Lock className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("bags.seal")}
@@ -343,12 +440,12 @@ export function BagManager({ currentHubId }: BagManagerProps) {
 
       {/* Seal confirmation — sealing freezes membership irreversibly */}
       <Dialog open={confirmSealOpen} onOpenChange={setConfirmSealOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>{t("bags.sealConfirmTitle")}</DialogTitle>
-            <DialogDescription>{t("bags.sealConfirmMessage")}</DialogDescription>
+            <DialogDescription className="text-xs">{t("bags.sealConfirmMessage")}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 py-2">
             <label htmlFor="seal-tag" className="text-xs font-semibold text-muted-foreground">
               {t("bags.sealTag")} *
             </label>
@@ -359,14 +456,14 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               onChange={(event) => setSealTagInput(event.target.value)}
               placeholder={t("bags.sealTagPlaceholder")}
               maxLength={100}
-              className="w-full rounded-lg border border-input bg-background p-2.5 font-mono text-sm outline-none"
+              className="w-full rounded-xl border border-input bg-card p-3 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setConfirmSealOpen(false)}>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" onClick={() => setConfirmSealOpen(false)} className="rounded-xl">
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleSeal} disabled={isSealing}>
+            <Button type="button" onClick={handleSeal} disabled={isSealing} className="rounded-xl shadow-xs">
               {isSealing ? t("bags.sealing") : t("confirm")}
             </Button>
           </DialogFooter>

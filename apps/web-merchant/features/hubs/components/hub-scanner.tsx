@@ -282,40 +282,47 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
     <div className="space-y-6">
       {/* Scanner mode toolbar */}
       <div
-        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-surface p-4"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card p-2.5 sm:p-3 shadow-2xs"
         role="toolbar"
         aria-label={t("scanner.title")}
       >
-        <div className="flex flex-wrap items-center gap-2">
-          {modes.map((mode) => (
-            <Button
-              key={mode.type}
-              type="button"
-              size="sm"
-              variant={scanType === mode.type ? "default" : "outline"}
-              onClick={() => setScanType(mode.type)}
-              aria-pressed={scanType === mode.type}
-              className="flex items-center gap-1.5 text-xs font-semibold"
-            >
-              <mode.icon className="h-4 w-4" aria-hidden="true" />
-              {mode.label}
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {modes.map((mode) => {
+            const isActive = scanType === mode.type;
+            return (
+              <Button
+                key={mode.type}
+                type="button"
+                size="sm"
+                variant={isActive ? "default" : "ghost"}
+                onClick={() => setScanType(mode.type)}
+                aria-pressed={isActive}
+                className={`flex items-center gap-2 rounded-xl text-xs font-semibold transition-all ${
+                  isActive
+                    ? "shadow-xs"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                }`}
+              >
+                <mode.icon className="h-4 w-4" aria-hidden="true" />
+                {mode.label}
+              </Button>
+            );
+          })}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => setSoundEnabled((value) => !value)}
             aria-pressed={soundEnabled}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 rounded-xl text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
           >
             {soundEnabled ? (
               <>
-                <Volume2 className="h-4 w-4 text-success" aria-hidden="true" />
-                <span>{t("scanner.audioOn")}</span>
+                <Volume2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                <span className="font-medium">{t("scanner.audioOn")}</span>
               </>
             ) : (
               <>
@@ -329,7 +336,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
             variant="outline"
             size="sm"
             onClick={() => (cameraState === "active" ? stopCamera() : void startCamera())}
-            className="flex items-center gap-1.5 text-xs"
+            className="flex items-center gap-2 rounded-xl text-xs border-border/80 hover:bg-muted/60"
           >
             <Camera className="h-4 w-4" aria-hidden="true" />
             {t("scanner.cameraScan")}
@@ -372,7 +379,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
 
       {/* Bag target when packing */}
       {scanType === HubScanType.BAG_PARCEL ? (
-        <Card className="border-primary/30 bg-primary/5 p-4">
+        <Card className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 shadow-2xs">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <p className="text-sm font-semibold text-foreground">{t("scanner.targetBag")}:</p>
@@ -387,7 +394,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                 value={selectedBagId}
                 onValueChange={setSelectedBagId}
               >
-                <SelectTrigger aria-label={t("scanner.targetBag")} className="w-[300px] font-mono text-xs">
+                <SelectTrigger aria-label={t("scanner.targetBag")} className="w-[300px] font-mono text-xs rounded-xl bg-card">
                   <SelectValue placeholder={t("scanner.targetBag")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -404,27 +411,27 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
       ) : null}
 
       {/* Barcode input */}
-      <Card className="border-primary/20">
-        <CardHeader className="border-b bg-muted/20 pb-3">
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-4">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold">
                 <Scan className="h-5 w-5 text-primary" aria-hidden="true" />
                 {t("scanner.title")} — {hubName}
               </CardTitle>
-              <CardDescription>{t("scanner.subtitle", { hub: hubName })}</CardDescription>
+              <CardDescription className="text-xs">{t("scanner.subtitle", { hub: hubName })}</CardDescription>
             </div>
-            <Badge variant="outline" className="font-mono text-xs">
-              {scanType}
-            </Badge>
+            <span className="inline-flex items-center rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+              {modes.find((m) => m.type === scanType)?.label ?? scanType}
+            </span>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-6">
-          <form onSubmit={handleScanSubmit} className="flex gap-2">
+        <CardContent className="space-y-4 p-5 sm:p-6">
+          <form onSubmit={handleScanSubmit} className="flex flex-col sm:flex-row gap-2.5">
             <div className="relative flex-1">
               <Scan
-                className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -438,7 +445,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                 value={barcode}
                 onChange={(event) => setBarcode(event.target.value)}
                 disabled={isLoading}
-                className="h-12 pl-10 font-mono text-base uppercase tracking-wider"
+                className="h-12 rounded-xl pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground"
                 autoFocus
               />
             </div>
@@ -446,7 +453,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
               type="submit"
               size="lg"
               disabled={isLoading || !barcode.trim()}
-              className="h-12 px-6 font-semibold"
+              className="h-12 rounded-xl px-7 font-semibold shadow-xs"
             >
               {isLoading ? t("scanner.processing") : t("scanner.processScan")}
             </Button>
@@ -515,26 +522,26 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
       </Card>
 
       {/* Session history */}
-      <Card>
-        <CardHeader className="border-b pb-3">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-4">
+          <CardTitle className="text-sm font-bold text-foreground">
             {t("scanner.history")}
           </CardTitle>
-          <CardDescription>{t("scanner.historyHint")}</CardDescription>
+          <CardDescription className="text-xs">{t("scanner.historyHint")}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {attempts.length === 0 ? (
-            <p className="p-6 text-center text-xs text-muted-foreground">
+            <p className="p-8 text-center text-xs text-muted-foreground">
               {t("scanner.emptyHistory")}
             </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border/60">
               {attempts.map((attempt) => (
                 <li
                   key={attempt.key}
-                  className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs"
+                  className="flex flex-wrap items-center gap-2.5 px-5 py-3 text-xs transition-colors hover:bg-muted/30"
                 >
-                  <span className="font-mono font-semibold text-foreground">{attempt.barcode}</span>
+                  <span className="font-mono font-bold text-foreground">{attempt.barcode}</span>
                   {attempt.result ? (
                     <Badge
                       variant={
@@ -556,7 +563,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                   <span className="block w-full truncate text-muted-foreground">
                     {attempt.result?.message ?? attempt.error}
                   </span>
-                  <span className="ml-auto font-mono tabular-nums text-muted-foreground">
+                  <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
                     {fmtTime(attempt.at)}
                   </span>
                 </li>
@@ -568,20 +575,22 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
 
       {/* Hub scan log */}
       {hubLog.length > 0 ? (
-        <Card>
-          <CardHeader className="border-b pb-3">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              {hubName}
+        <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+          <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-4">
+            <CardTitle className="text-sm font-bold text-foreground">
+              {hubName} — Scan Activity
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border/60">
               {hubLog.slice(0, 10).map((scan) => (
-                <li key={scan.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs">
-                  <span className="font-mono font-semibold text-foreground">
+                <li key={scan.id} className="flex flex-wrap items-center gap-2.5 px-5 py-3 text-xs transition-colors hover:bg-muted/30">
+                  <span className="font-mono font-bold text-foreground">
                     {scan.trackingCode ?? scan.bagCode ?? "—"}
                   </span>
-                  <span className="font-semibold text-primary">{scan.scanType}</span>
+                  <span className="rounded-md bg-muted/70 px-2 py-0.5 font-mono text-[11px] font-semibold text-primary">
+                    {scan.scanType}
+                  </span>
                   <Badge
                     variant={
                       scan.outcome === ScanOutcome.APPLIED
@@ -594,7 +603,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
                   >
                     {scan.outcome}
                   </Badge>
-                  <span className="ml-auto font-mono tabular-nums text-muted-foreground">
+                  <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
                     {fmtTime(scan.createdAt)}
                   </span>
                 </li>

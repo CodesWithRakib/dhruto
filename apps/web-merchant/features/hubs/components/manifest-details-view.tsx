@@ -14,6 +14,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DataTable,
+  ColumnDef,
 } from "@dhruto/ui";
 import { Truck, Send, PackageCheck, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { ManifestStatus } from "@dhruto/contracts";
@@ -97,6 +99,54 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
     }
   };
 
+  const bagColumns = React.useMemo<ColumnDef<NonNullable<typeof manifest>["bags"][number]>[]>(() => [
+    {
+      accessorKey: "bagCode",
+      header: "Bag",
+      cell: ({ row }) => (
+        <Link
+          href={HUB_ROUTES.bag(row.original.id)}
+          className="font-mono text-xs font-bold text-primary hover:underline"
+        >
+          {row.original.bagCode}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "parcelCount",
+      header: () => <div className="text-center">{t("bags.parcelsInBag")}</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold tabular-nums">
+            {row.original.parcelCount}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: () => <div className="text-center">{t("status")}</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <EnumBadge namespace="BagStatus" value={row.original.status} tones={BAG_STATUS_TONE} className="text-[10px]" />
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">{t("actions")}</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <Link href={HUB_ROUTES.bag(row.original.id)}>
+            <Button size="sm" variant="outline" className="h-8 rounded-lg border-border/80 text-xs font-medium">
+              {t("bags.details")}
+            </Button>
+          </Link>
+        </div>
+      ),
+    },
+  ], [t]);
+
   if (isLoading) {
     return (
       <p role="status" className="py-16 text-center text-sm text-muted-foreground">
@@ -153,11 +203,27 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       ) : null}
 
       {/* Summary */}
-      <Card>
-        <CardContent className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/70 bg-muted/15 px-5 py-3.5">
+          <div className="flex items-center gap-2">
+            <Truck className="h-4 w-4 text-primary" aria-hidden="true" />
+            <span className="text-sm font-bold text-foreground">{t("manifests.details")}</span>
+            <span className="text-muted-foreground/40 font-light">·</span>
+            <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground">
+              {manifest.manifestCode}
+            </span>
+          </div>
+          <EnumBadge
+            namespace="ManifestStatus"
+            value={manifest.status}
+            tones={MANIFEST_STATUS_TONE}
+            className="text-[10px]"
+          />
+        </div>
+        <CardContent className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
           <div>
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              {t("manifests.details")}
+              Manifest Code
             </p>
             <p className="font-mono text-sm font-bold text-foreground">{manifest.manifestCode}</p>
           </div>
@@ -165,13 +231,14 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
               {t("status")}
             </p>
-            {
+            <div className="mt-1">
               <EnumBadge
                 namespace="ManifestStatus"
                 value={manifest.status}
                 tones={MANIFEST_STATUS_TONE}
+                className="text-[11px]"
               />
-            }
+            </div>
           </div>
           <div>
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Route</p>
@@ -204,10 +271,10 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
 
       {/* Dispatch (origin, while CREATED) */}
       {manifest.status === ManifestStatus.CREATED ? (
-        <Card className="border-primary/20">
-          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="rounded-2xl border border-primary/20 bg-primary/5 shadow-xs overflow-hidden">
+          <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">{t("manifests.dispatchConfirmMessage")}</p>
-            <Button onClick={() => setDispatchConfirmOpen(true)} className="gap-1.5">
+            <Button onClick={() => setDispatchConfirmOpen(true)} className="gap-1.5 rounded-xl shadow-xs">
               <Send className="h-4 w-4" aria-hidden="true" />
               {t("manifests.dispatch")}
             </Button>
@@ -215,42 +282,76 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
         </Card>
       ) : null}
 
-      {/* Bags */}
-      <Card>
+      {/* Bags in manifest DataTable */}
+      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border/70 bg-muted/15 px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <Truck className="h-4 w-4 text-primary" aria-hidden="true" />
+            <h2 className="text-sm font-bold text-foreground">
+              {t("manifests.bagsInManifest")}
+            </h2>
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+              {manifest.bags.length}
+            </span>
+          </div>
+        </div>
         <CardContent className="p-0">
-          <h2 className="border-b border-border px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            {t("manifests.bagsInManifest")} ({manifest.bags.length})
-          </h2>
-          <ul className="divide-y divide-border">
-            {manifest.bags.map((bag) => (
-              <li key={bag.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs">
-                <Link
-                  href={HUB_ROUTES.bag(bag.id)}
-                  className="font-mono font-semibold text-primary hover:underline"
-                >
-                  {bag.bagCode}
-                </Link>
-                <span className="text-muted-foreground">
-                  {t("bags.parcelCount", { count: bag.parcelCount })}
-                </span>
-                <Badge variant="secondary" className="ml-auto text-[10px]">
-                  {<EnumBadge namespace="BagStatus" value={bag.status} tones={BAG_STATUS_TONE} />}
-                </Badge>
-              </li>
-            ))}
-          </ul>
+          {manifest.bags.length === 0 ? (
+            <div className="p-6">
+              <EmptyState icon={Truck} title={t("bags.empty")} />
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={bagColumns}
+                  data={manifest.bags}
+                  totalItems={manifest.bags.length}
+                  pageCount={1}
+                  currentPage={1}
+                  itemsPerPage={Math.max(10, manifest.bags.length)}
+                  hidePagination={manifest.bags.length <= 10}
+                  emptyMessage={t("bags.empty")}
+                  className="border-0 shadow-none rounded-none"
+                />
+              </div>
+              <ul className="divide-y divide-border/60 md:hidden">
+                {manifest.bags.map((bag) => (
+                  <li key={bag.id} className="space-y-2 p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link
+                        href={HUB_ROUTES.bag(bag.id)}
+                        className="font-mono text-xs font-bold text-primary hover:underline"
+                      >
+                        {bag.bagCode}
+                      </Link>
+                      <EnumBadge namespace="BagStatus" value={bag.status} tones={BAG_STATUS_TONE} className="text-[10px]" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t("bags.parcelCount", { count: bag.parcelCount })}
+                    </p>
+                    <Link href={HUB_ROUTES.bag(bag.id)}>
+                      <Button size="sm" variant="outline" className="h-8 w-full rounded-xl border-border/80 text-xs">
+                        {t("bags.details")}
+                      </Button>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </CardContent>
       </Card>
 
       {/* Receive (destination, while in transit) */}
       {receivable ? (
-        <Card className="border-primary/20">
-          <CardContent className="space-y-4 p-4">
+        <Card className="rounded-2xl border border-primary/20 bg-card shadow-xs overflow-hidden">
+          <CardContent className="space-y-4 p-5">
             <div>
               <h2 className="text-sm font-bold text-foreground">{t("manifests.receiveTitle")}</h2>
               <p className="text-xs text-muted-foreground">{t("manifests.receiveHint")}</p>
             </div>
-            <form onSubmit={addScannedBag} className="flex gap-2">
+            <form onSubmit={addScannedBag} className="flex gap-2.5">
               <Input
                 type="text"
                 autoComplete="off"
@@ -259,9 +360,9 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
                 onChange={(event) => setBagCodeInput(event.target.value)}
                 placeholder={t("manifests.bagCodePlaceholder")}
                 aria-label={t("manifests.scannedBags")}
-                className="h-11 font-mono uppercase"
+                className="h-12 rounded-xl font-mono uppercase"
               />
-              <Button type="submit" disabled={!bagCodeInput.trim()} className="h-11">
+              <Button type="submit" disabled={!bagCodeInput.trim()} className="h-12 rounded-xl px-6 font-semibold shadow-xs">
                 {t("manifests.addScannedBag")}
               </Button>
             </form>
@@ -296,7 +397,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
             <Button
               onClick={handleReceive}
               disabled={isReceiving}
-              className="w-full gap-1.5 sm:w-auto"
+              className="w-full gap-1.5 rounded-xl shadow-xs sm:w-auto"
             >
               <PackageCheck className="h-4 w-4" aria-hidden="true" />
               {isReceiving ? t("manifests.receiving") : t("manifests.completeReceive")}
@@ -307,47 +408,47 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
 
       {/* Reconciliation */}
       {reconciliation ? (
-        <Card>
-          <CardContent className="space-y-3 p-4">
+        <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
+          <CardContent className="space-y-4 p-5">
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
               {t("manifests.reconciliation")}
             </h2>
             <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-              <div className="rounded-lg bg-surface-muted p-3">
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {t("manifests.expected")}
                 </p>
-                <p className="font-mono text-xl font-bold tabular-nums">
+                <p className="font-mono text-xl font-bold tabular-nums text-foreground">
                   {reconciliation.expectedBagCount}
                 </p>
               </div>
-              <div className="rounded-lg bg-surface-muted p-3">
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {t("manifests.received")}
                 </p>
-                <p className="font-mono text-xl font-bold tabular-nums">
+                <p className="font-mono text-xl font-bold tabular-nums text-foreground">
                   {reconciliation.receivedBagCount}
                 </p>
               </div>
-              <div className="rounded-lg bg-surface-muted p-3">
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {t("manifests.missing")}
                 </p>
-                <p className="font-mono text-xl font-bold tabular-nums">
+                <p className="font-mono text-xl font-bold tabular-nums text-foreground">
                   {reconciliation.missingBagCodes.length}
                 </p>
               </div>
-              <div className="rounded-lg bg-surface-muted p-3">
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {t("manifests.expected")} parcels
                 </p>
-                <p className="font-mono text-xl font-bold tabular-nums">
+                <p className="font-mono text-xl font-bold tabular-nums text-foreground">
                   {reconciliation.receivedParcelCount}/{reconciliation.expectedParcelCount}
                 </p>
               </div>
             </div>
             {reconciliation.missingBagCodes.length > 0 ? (
-              <div className="rounded-lg border border-warning bg-warning-soft p-3 text-xs">
+              <div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-xs">
                 <p className="font-semibold text-warning">{t("manifests.missing")}:</p>
                 <p className="font-mono text-warning">
                   {reconciliation.missingBagCodes.join(", ")}
@@ -355,7 +456,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
               </div>
             ) : null}
             {reconciliation.missingTrackingCodes.length > 0 ? (
-              <div className="rounded-lg border border-warning bg-warning-soft p-3 text-xs">
+              <div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-xs">
                 <p className="font-semibold text-warning">{t("manifests.missing")} parcels:</p>
                 <p className="font-mono text-warning">
                   {reconciliation.missingTrackingCodes.join(", ")}

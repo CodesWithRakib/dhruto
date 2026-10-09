@@ -18,7 +18,7 @@ import {
   Warehouse,
   Wallet,
 } from "lucide-react";
-import { Button, Card, CardContent, Badge } from "@dhruto/ui";
+import { Button, Card, CardContent } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { HUB_ROUTES } from "@/config/routes";
 import { PageHeader } from "@/components/page-header";
@@ -184,7 +184,7 @@ export function HubDashboardView() {
   ];
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 pb-6">
       <PageHeader
         title={t("dashboard.title")}
         description={
@@ -193,13 +193,17 @@ export function HubDashboardView() {
             : undefined
         }
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2.5">
             <HubSelector hubs={hubs} activeHubId={activeHubId} onChange={setActiveHubId} />
-            <Button variant="outline" size="sm" onClick={handleRefresh} className="h-10">
-              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-              {t("refresh")}
-            </Button>
-          </>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30 active:scale-[0.98]"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${dashboardLoading ? "animate-spin" : ""}`} aria-hidden="true" />
+              <span>{t("refresh")}</span>
+            </button>
+          </div>
         }
       />
 
@@ -217,24 +221,28 @@ export function HubDashboardView() {
         />
       ) : null}
 
-      {/* Quick actions */}
+      {/* Quick actions - 5 columns */}
       <section aria-label={t("dashboard.quickActions")}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {quickActions.map((action) => (
             <Link
               key={action.href}
               href={action.href}
-              className="group flex items-start gap-3 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary/40"
+              className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
             >
-              <span className="rounded-lg bg-primary/10 p-2.5 text-primary">
-                <action.icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold text-foreground">{action.title}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">
+              <div className="flex items-center justify-between">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <action.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+              </div>
+              <div className="mt-3">
+                <span className="block text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                  {action.title}
+                </span>
+                <span className="mt-1 block text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
                   {action.description}
                 </span>
-              </span>
+              </div>
             </Link>
           ))}
         </div>
@@ -244,36 +252,39 @@ export function HubDashboardView() {
       <section aria-label={t("dashboard.title")}>
         {dashboardLoading || !metrics ? (
           <div
-            className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5"
+            className="grid grid-cols-2 gap-3.5 sm:gap-4 md:grid-cols-3 lg:grid-cols-5"
             role="status"
             aria-live="polite"
           >
             {Array.from({ length: 9 }).map((_, index) => (
-              <Card key={index}>
-                <CardContent className="space-y-2 p-4">
-                  <div className="h-4 w-2/3 animate-pulse rounded bg-surface-muted" />
-                  <div className="h-7 w-1/3 animate-pulse rounded bg-surface-muted" />
-                </CardContent>
+              <Card key={index} className="rounded-2xl border-border/80 bg-card p-4 sm:p-5 shadow-2xs">
+                <div className="space-y-2">
+                  <div className="h-3.5 w-2/3 animate-pulse rounded bg-surface-muted" />
+                  <div className="h-8 w-1/3 animate-pulse rounded bg-surface-muted" />
+                </div>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3.5 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
             {metricCards.map((card) => (
-              <Card key={card.label}>
-                <CardContent className="flex items-center justify-between gap-2 p-4">
+              <Card
+                key={card.label}
+                className="rounded-2xl border-border/80 bg-card p-4 sm:p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <p className="truncate text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       {card.label}
                     </p>
-                    <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
+                    <p className="mt-2 text-2xl sm:text-3xl font-extrabold tabular-nums tracking-tight text-foreground">
                       {card.value}
                     </p>
                   </div>
-                  <span className={`rounded-lg p-2.5 ${card.tone}`}>
+                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-2xs ${card.tone}`}>
                     <card.icon className="h-5 w-5" aria-hidden="true" />
                   </span>
-                </CardContent>
+                </div>
               </Card>
             ))}
           </div>
@@ -282,72 +293,80 @@ export function HubDashboardView() {
 
       {/* Exceptions needing attention */}
       {openExceptions.length > 0 ? (
-        <Card className="border-warning">
-          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] p-4.5 sm:p-5 shadow-2xs">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <span className="rounded-lg bg-warning-soft p-2 text-warning">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300 shadow-2xs">
                 <AlertTriangle className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-sm font-extrabold text-foreground">
                   {t("dashboard.exceptionsNeedAttention")} ({openExceptions.length})
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {openExceptions
-                    .slice(0, 3)
-                    .map((e) => e.type)
-                    .join(" · ")}
-                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  {openExceptions.slice(0, 4).map((e, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-800 dark:text-amber-200"
+                    >
+                      {e.type.replace(/_/g, " ")}
+                    </span>
+                  ))}
+                  {openExceptions.length > 4 ? (
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      +{openExceptions.length - 4} more
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
-            <Link href="/hub/exceptions">
-              <Button size="sm" variant="outline">
+            <Link href="/hub/exceptions" className="shrink-0">
+              <Button size="sm" variant="outline" className="h-10 gap-1.5 rounded-xl border-amber-500/30 bg-card text-xs font-bold text-amber-800 dark:text-amber-200 shadow-2xs hover:bg-amber-500/10">
                 <ClipboardList className="h-4 w-4" aria-hidden="true" />
-                {t("dashboard.reviewExceptions")}
+                <span>{t("dashboard.reviewExceptions")}</span>
               </Button>
             </Link>
-          </CardContent>
+          </div>
         </Card>
       ) : null}
 
       {/* Recent scans */}
-      <Card>
+      <Card className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-2xs">
         <CardContent className="p-0">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               {t("dashboard.recentScans")}
             </h2>
             <Link
               href={HUB_ROUTES.scanner}
-              className="text-xs font-semibold text-primary hover:underline"
+              className="text-xs font-bold text-primary hover:underline"
             >
               {t("dashboard.viewAll")}
             </Link>
           </div>
           {recentScans.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+            <p className="px-4 py-10 text-center text-xs text-muted-foreground">
               {t("dashboard.noRecentScans")}
             </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border/60">
               {recentScans.slice(0, 8).map((scan) => (
-                <li key={scan.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs">
-                  <span className="font-mono font-semibold text-foreground">
+                <li key={scan.id} className="flex flex-wrap items-center gap-3 px-5 py-3 text-xs transition-colors hover:bg-surface-muted/30">
+                  <span className="font-mono text-xs font-bold text-foreground">
                     {scan.trackingCode ?? scan.bagCode ?? "—"}
                   </span>
-                  <Badge
-                    variant={
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                       scan.outcome === "APPLIED"
-                        ? "success"
+                        ? "border border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
                         : scan.outcome === "DUPLICATE"
-                          ? "secondary"
-                          : "destructive"
-                    }
-                    className="text-[10px]"
+                          ? "border border-border bg-surface-muted text-muted-foreground"
+                          : "border border-rose-500/25 bg-rose-500/10 text-rose-700 dark:text-rose-300"
+                    }`}
                   >
-                    {scan.scanType} · {scan.outcome}
-                  </Badge>
-                  <span className="ml-auto tabular-nums text-muted-foreground">
+                    {scan.scanType.replace(/_/g, " ")} · {scan.outcome}
+                  </span>
+                  <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
                     {fmtTime(scan.createdAt)}
                   </span>
                 </li>

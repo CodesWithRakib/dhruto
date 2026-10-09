@@ -48,15 +48,15 @@ export function HubPageShell({ title, description, actions, children }: HubPageS
   }
 
   return (
-    <div className="w-full space-y-6 px-4 py-6">
+    <div className="w-full space-y-6 pb-6">
       <PageHeader
         title={typeof title === "function" ? title(activeHub) : title}
         description={typeof description === "function" ? description(activeHub) : description}
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2.5">
             <HubSelector hubs={hubs} activeHubId={activeHubId} onChange={setActiveHubId} />
             {actions}
-          </>
+          </div>
         }
       />
       {children(activeHub)}
