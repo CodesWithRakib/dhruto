@@ -5,6 +5,7 @@ import { PublicMobileBottomNav } from "@/components/layout/public-mobile-bottom-
 import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import "@/features/marketing/styles/marketing.css";
+import "@/features/tracking/styles/tracking.css";
 
 /**
  * Public surface: marketing pages and public tracking.

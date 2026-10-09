@@ -2,14 +2,31 @@
 
 import React, { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Badge, Button, Card, CardContent, CardHeader, DetailsSkeleton, Input } from "@dhruto/ui";
-import { Building2, Check, Copy, MapPin, Package, Phone, Search } from "lucide-react";
+import { Badge, Button, Card, CardContent, DetailsSkeleton, Input } from "@dhruto/ui";
+import {
+  Building2,
+  Check,
+  Copy,
+  MapPin,
+  Package,
+  Phone,
+  Search,
+  Truck,
+  Radio,
+  CheckCircle2,
+  Share2,
+  Clock,
+  ShieldCheck,
+  AlertCircle,
+  Zap,
+} from "lucide-react";
 import { useGetPublicTrackingQuery } from "@/features/parcels/api/parcels.api";
 import { usePathname, useRouter } from "@/lib/navigation";
 import { StatusBadge } from "@/components/data-display/status-badge";
 import { Timeline, TimelineItem } from "@/components/data-display/timeline";
 import { ErrorState, NotFoundState, RetryButton } from "@/components/feedback/states";
 import { useFormatters } from "@/lib/format";
+import { ParcelStatus } from "@dhruto/contracts";
 
 interface PublicTrackingViewProps {
   initialCode?: string;
@@ -21,12 +38,91 @@ interface PublicTrackingViewProps {
   showIntro?: boolean;
 }
 
+const REAL_SAMPLE_CODES = [
+  { code: "DHR-2610-00101", status: "Delivered", district: "Dhanmondi, Dhaka" },
+  { code: "DHR-2610-00107", status: "Out for Delivery", district: "Gulshan, Dhaka" },
+  { code: "DHR-2610-00113", status: "In Transit", district: "Panchlaish, Chittagong" },
+];
+
 /**
- * Public, unauthenticated shipment tracking.
- *
- * The view renders exactly what `GET /tracking/:code` returns — there is no
- * fallback/demo data, and the API deliberately omits merchant identity,
- * financials and internal ids.
+ * Calculates human-readable 5-stage progress level (1-5) from ParcelStatus.
+ */
+function getProgressLevel(status: ParcelStatus | string): number {
+  switch (status) {
+    case ParcelStatus.CREATED:
+    case ParcelStatus.PICKUP_REQUESTED:
+      return 1;
+    case ParcelStatus.PICKUP_ASSIGNED:
+    case ParcelStatus.PICKED_UP:
+    case ParcelStatus.ORIGIN_HUB_RECEIVED:
+    case ParcelStatus.BAGGED:
+      return 2;
+    case ParcelStatus.IN_TRANSIT:
+    case ParcelStatus.DESTINATION_HUB_RECEIVED:
+      return 3;
+    case ParcelStatus.ASSIGNED_TO_RIDER:
+    case ParcelStatus.OUT_FOR_DELIVERY:
+    case ParcelStatus.DELIVERY_ATTEMPTED:
+    case ParcelStatus.RESCHEDULED:
+      return 4;
+    case ParcelStatus.DELIVERED:
+    case ParcelStatus.CASH_PENDING:
+    case ParcelStatus.CASH_VERIFIED:
+      return 5;
+    case ParcelStatus.RTO_INITIATED:
+    case ParcelStatus.RETURN_IN_TRANSIT:
+    case ParcelStatus.RETURNED_TO_MERCHANT:
+    case ParcelStatus.CANCELLED:
+    case ParcelStatus.LOST:
+    case ParcelStatus.DAMAGED:
+      return 3; // Exception
+    default:
+      return 1;
+  }
+}
+
+function getStatusTheme(status: ParcelStatus | string): "delivered" | "out_for_delivery" | "transit" | "return" | "default" {
+  if (
+    status === ParcelStatus.DELIVERED ||
+    status === ParcelStatus.CASH_PENDING ||
+    status === ParcelStatus.CASH_VERIFIED
+  ) {
+    return "delivered";
+  }
+  if (status === ParcelStatus.OUT_FOR_DELIVERY || status === ParcelStatus.ASSIGNED_TO_RIDER) {
+    return "out_for_delivery";
+  }
+  if (
+    status === ParcelStatus.IN_TRANSIT ||
+    status === ParcelStatus.ORIGIN_HUB_RECEIVED ||
+    status === ParcelStatus.DESTINATION_HUB_RECEIVED ||
+    status === ParcelStatus.BAGGED
+  ) {
+    return "transit";
+  }
+  if (
+    status === ParcelStatus.RTO_INITIATED ||
+    status === ParcelStatus.RETURN_IN_TRANSIT ||
+    status === ParcelStatus.RETURNED_TO_MERCHANT ||
+    status === ParcelStatus.CANCELLED ||
+    status === ParcelStatus.LOST ||
+    status === ParcelStatus.DAMAGED
+  ) {
+    return "return";
+  }
+  return "default";
+}
+
+const MILESTONES = [
+  { step: 1, titleEn: "Order Created", titleBn: "অর্ডার তৈরি", icon: Package },
+  { step: 2, titleEn: "Hub Inbound", titleBn: "হাবে গৃহীত", icon: Building2 },
+  { step: 3, titleEn: "Line-Haul", titleBn: "ট্রানজিট", icon: Truck },
+  { step: 4, titleEn: "Out for Delivery", titleBn: "ডেলিভারিতে", icon: Radio },
+  { step: 5, titleEn: "Delivered", titleBn: "ডেলিভার্ড", icon: CheckCircle2 },
+];
+
+/**
+ * Public, unauthenticated shipment tracking cockpit.
  */
 export function PublicTrackingView({ initialCode = "", showIntro = true }: PublicTrackingViewProps) {
   const t = useTranslations("Tracking");
@@ -35,8 +131,6 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
   const pathname = usePathname();
   const { dateTime } = useFormatters();
 
-  // Stay inside the console the user is in: merchant and admin reuse this
-  // view, so searches must not leak to the public /track namespace.
   const trackBase = pathname.includes("/merchant/track")
     ? "/merchant/track"
     : pathname.includes("/admin/track")
@@ -46,8 +140,8 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
   const [inputCode, setInputCode] = useState(initialCode);
   const [activeCode, setActiveCode] = useState(initialCode.trim());
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
 
-  // Keep the query in sync when the user lands on /track/:code directly.
   useEffect(() => {
     setInputCode(initialCode);
     setActiveCode(initialCode.trim());
@@ -59,13 +153,17 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
     return () => clearTimeout(timer);
   }, [copied]);
 
+  useEffect(() => {
+    if (!shared) return;
+    const timer = setTimeout(() => setShared(false), 2000);
+    return () => clearTimeout(timer);
+  }, [shared]);
+
   const { data, isFetching, isError, error, refetch } = useGetPublicTrackingQuery(activeCode, {
     skip: activeCode.length === 0,
   });
 
   const tracking = data?.data;
-  // A 404 means "no such shipment"; any other failure is a network/server
-  // error and gets a retry action instead of a not-found message.
   const isNotFoundError =
     typeof error === "object" &&
     error !== null &&
@@ -79,8 +177,6 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
     const clean = inputCode.trim().toUpperCase();
     if (!clean) return;
     setActiveCode(clean);
-    // Replace so repeated searches don't spam the history stack; the URL
-    // still reflects the active code for sharing and back-navigation.
     router.replace(`${trackBase}/${encodeURIComponent(clean)}`);
   };
 
@@ -90,55 +186,110 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
       await navigator.clipboard.writeText(tracking.trackingCode);
       setCopied(true);
     } catch {
-      // Clipboard unavailable (permissions, insecure context) — no-op.
+      // Clipboard unavailable
     }
   };
 
-  return (
-    <div className="dhruto-container max-w-3xl py-10 sm:py-14">
-      {showIntro ? (
-      <div className="space-y-3 text-center">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-primary-soft text-primary">
-          <Package className="h-7 w-7" aria-hidden="true" />
-        </span>
-        <h1 className="text-balance text-h2 font-bold text-foreground">{t("searchTitle")}</h1>
-        <p className="mx-auto max-w-md text-pretty text-body text-muted-foreground">
-          {t("searchSubtitle")}
-        </p>
+  const handleShare = async () => {
+    if (typeof window === "undefined" || !tracking) return;
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Track Parcel ${tracking.trackingCode} — Dhruto Express`,
+          text: `Live delivery telemetry for parcel ${tracking.trackingCode}`,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // Fallback to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShared(true);
+    } catch {
+      // No-op
+    }
+  };
 
-        <form
-          onSubmit={handleSearch}
-          role="search"
-          className="mx-auto flex w-full max-w-lg flex-col gap-2 pt-3 sm:flex-row"
-        >
-          <div className="relative flex-1">
-            <Search
-              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              type="text"
-              value={inputCode}
-              onChange={(event) => setInputCode(event.target.value)}
-              placeholder={t("inputPlaceholder")}
-              aria-label={t("searchTitle")}
-              className="h-11 pl-10 font-mono uppercase"
-              required
-            />
+  const currentLevel = tracking ? getProgressLevel(tracking.status) : 1;
+  const statusTheme = tracking ? getStatusTheme(tracking.status) : "default";
+
+  return (
+    <div className="dhruto-container max-w-4xl py-6 sm:py-10">
+      {/* Search Header for Internal Dashboard Views or Standalone */}
+      {showIntro ? (
+        <div className="track-cockpit-card p-6 sm:p-9 mb-10 max-w-3xl mx-auto">
+          <div className="text-center space-y-2 mb-6">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-sm">
+              <Package className="h-7 w-7" aria-hidden="true" />
+            </span>
+            <h1 className="text-balance text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+              {t("searchTitle")}
+            </h1>
+            <p className="mx-auto max-w-md text-pretty text-sm text-muted-foreground">
+              {t("searchSubtitle")}
+            </p>
           </div>
-          <Button type="submit" disabled={isFetching} className="h-11 gap-1.5 px-6">
-            <Search className="h-4 w-4" aria-hidden="true" />
-            {t("trackBtn")}
-          </Button>
-        </form>
-      </div>
+
+          <form onSubmit={handleSearch} role="search" className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                type="text"
+                name="trackingCode"
+                value={inputCode}
+                onChange={(event) => setInputCode(event.target.value.toUpperCase())}
+                placeholder={t("inputPlaceholder")}
+                aria-label={t("searchTitle")}
+                className="h-12 pl-11 font-mono uppercase tracking-wider rounded-xl"
+                required
+              />
+            </div>
+            <Button type="submit" disabled={isFetching} className="h-12 gap-2 px-7 rounded-xl font-semibold shadow-md">
+              <Search className="h-4 w-4" aria-hidden="true" />
+              {t("trackBtn")}
+            </Button>
+          </form>
+
+          {/* Quick sample chips */}
+          <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+              <Zap className="h-3.5 w-3.5 text-primary" />
+              Real sample codes:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {REAL_SAMPLE_CODES.map((item) => (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => {
+                    setInputCode(item.code);
+                    setActiveCode(item.code);
+                    router.replace(`${trackBase}/${encodeURIComponent(item.code)}`);
+                  }}
+                  className="track-sample-chip"
+                >
+                  {item.code}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       ) : null}
 
-      <div aria-live="polite" className="py-6">
+      {/* Loading Skeleton */}
+      <div aria-live="polite">
         {isFetching && !tracking ? (
-          <DetailsSkeleton />
+          <div className="space-y-4">
+            <DetailsSkeleton />
+          </div>
         ) : showError ? (
-          <Card>
+          <Card className="border-danger/30 p-4">
             <ErrorState
               title={t("loadError")}
               description={t("loadErrorDesc")}
@@ -148,116 +299,290 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
         ) : null}
       </div>
 
+      {/* 404 Not Found State with High-Tech Cockpit */}
       {showNotFound ? (
-        <Card>
+        <div className="track-not-found-cockpit max-w-2xl mx-auto space-y-4">
+          <div className="flex items-center justify-center gap-2 text-warning font-mono text-xs font-bold uppercase tracking-wider">
+            <AlertCircle className="h-4 w-4" />
+            <span>Radar Signal Not Acquired</span>
+          </div>
+
           <NotFoundState title={t("notFound")} description={t("notFoundDesc")} />
-        </Card>
+
+          <div className="pt-4 max-w-md mx-auto border-t border-border/60">
+            <p className="text-xs text-muted-foreground mb-3 font-medium">
+              Click any active seeded shipment below to inspect real live telemetry:
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {REAL_SAMPLE_CODES.map((item) => (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => {
+                    setInputCode(item.code);
+                    setActiveCode(item.code);
+                    router.replace(`${trackBase}/${encodeURIComponent(item.code)}`);
+                  }}
+                  className="track-sample-chip"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span>{item.code}</span>
+                  <span className="text-[10px] text-muted-foreground">({item.status})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       ) : null}
 
+      {/* Live Tracking Telemetry Payload */}
       {!isFetching && tracking ? (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b border-border/70 px-6 py-4">
-              <div className="min-w-0">
-                <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t("trackingId")}
-                </p>
-                <p className="truncate font-mono text-h3 font-bold text-foreground">
-                  {tracking.trackingCode}
-                </p>
+        <div className="space-y-8">
+          {/* Dynamic Status Masthead */}
+          <div className="track-status-masthead" data-status-type={statusTheme}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/60">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="track-status-beacon text-primary" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                    {t("trackingId")}
+                  </span>
+                  <span className="text-[11px] font-mono text-muted-foreground/60 hidden sm:inline">
+                    • WAYBILL PROTOCOL
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <h2 className="font-mono text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                    {tracking.trackingCode}
+                  </h2>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => void handleCopy()}
+                    aria-label={t("copyCode")}
+                    title={t("copyCode")}
+                    className="h-8 w-8 rounded-lg hover:bg-surface"
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    )}
+                  </Button>
+                  <span className="sr-only" role="status">
+                    {copied ? t("copied") : ""}
+                  </span>
+                </div>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+
+              {/* Status Badge & Actions */}
+              <div className="flex flex-wrap items-center gap-2.5">
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => void handleCopy()}
-                  aria-label={t("copyCode")}
-                  title={t("copyCode")}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void handleShare()}
+                  className="h-9 gap-1.5 rounded-lg text-xs font-medium"
                 >
-                  {copied ? (
-                    <Check className="h-4 w-4 text-success" aria-hidden="true" />
+                  {shared ? (
+                    <Check className="h-3.5 w-3.5 text-success" />
                   ) : (
-                    <Copy className="h-4 w-4" aria-hidden="true" />
+                    <Share2 className="h-3.5 w-3.5" />
                   )}
+                  {shared ? t("copied") : "Share Link"}
                 </Button>
-                <span className="sr-only" role="status">
-                  {copied ? t("copied") : ""}
+
+                <StatusBadge status={tracking.status} withIcon className="px-3.5 py-1 text-xs font-semibold shadow-sm" />
+              </div>
+            </div>
+
+            {/* Kinetic 5-Stage Milestone Progress Bar */}
+            <div className="pt-6">
+              <div className="flex items-center justify-between mb-3 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                <span className="flex items-center gap-1.5 text-foreground font-semibold">
+                  <Radio className="h-3.5 w-3.5 text-primary animate-pulse" />
+                  Shipment Journey Milestone
                 </span>
-                <StatusBadge status={tracking.status} withIcon className="px-3 py-1" />
-              </div>
-            </CardHeader>
-
-            <CardContent className="grid gap-5 p-6 sm:grid-cols-3">
-              <div className="space-y-1">
-                <p className="text-caption font-semibold uppercase text-muted-foreground">
-                  {t("destination")}
-                </p>
-                <p className="flex items-center gap-1.5 text-body font-medium text-foreground">
-                  <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                  {tracking.recipientThana}, {tracking.recipientDistrict}
-                </p>
+                <span className="font-bold text-primary">
+                  Stage {currentLevel} of 5
+                </span>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-caption font-semibold uppercase text-muted-foreground">
-                  {t("contact")}
-                </p>
-                <p className="flex items-center gap-1.5 font-mono text-body text-muted-foreground">
-                  <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {tracking.recipientPhoneMasked}
+              <div className="relative">
+                {/* Background Track Line */}
+                <div className="absolute top-5 left-4 right-4 h-1 bg-border/80 rounded-full -z-0" />
+                {/* Active Filled Line */}
+                <div
+                  className="absolute top-5 left-4 h-1 bg-gradient-to-r from-success to-primary rounded-full transition-all duration-700 -z-0"
+                  style={{ width: `${((currentLevel - 1) / 4) * 100}%` }}
+                />
+
+                <div className="grid grid-cols-5 relative z-10">
+                  {MILESTONES.map((m) => {
+                    const Icon = m.icon;
+                    const isPassed = currentLevel > m.step;
+                    const isCurrent = currentLevel === m.step;
+                    const label = locale === "bn" ? m.titleBn : m.titleEn;
+
+                    return (
+                      <div key={m.step} className="flex flex-col items-center text-center">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-300 ${
+                            isPassed
+                              ? "bg-success/20 border-success text-success shadow-sm"
+                              : isCurrent
+                                ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30 scale-110"
+                                : "bg-surface border-border/80 text-muted-foreground"
+                          }`}
+                        >
+                          {isPassed ? (
+                            <Check className="h-4 w-4" />
+                          ) : (
+                            <Icon className="h-4 w-4" />
+                          )}
+                        </div>
+                        <span
+                          className={`mt-2 text-[11px] sm:text-xs font-semibold tracking-tight max-w-[70px] sm:max-w-none ${
+                            isCurrent
+                              ? "text-primary font-bold"
+                              : isPassed
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                          }`}
+                        >
+                          {label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Telemetry Details Bento Grid */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Destination */}
+            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+              <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>{t("destination")}</span>
+              </div>
+              <p className="text-base font-bold text-foreground">
+                {tracking.recipientThana}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {tracking.recipientDistrict} District
+              </p>
+            </div>
+
+            {/* Current Location Hub */}
+            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+              <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                <Building2 className="h-4 w-4 text-primary" />
+                <span>{t("location")}</span>
+              </div>
+              <p className="text-base font-bold text-foreground truncate">
+                {tracking.currentHubName ?? t("locationPending")}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {tracking.currentHubName ? "Active Gateway Scan" : "Awaiting Inbound"}
+              </p>
+            </div>
+
+            {/* Masked Contact */}
+            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+              <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                <Phone className="h-4 w-4 text-primary" />
+                <span>{t("contact")}</span>
+              </div>
+              <p className="font-mono text-base font-bold text-foreground">
+                {tracking.recipientPhoneMasked}
+              </p>
+              <div className="flex items-center gap-1 text-[11px] text-success font-medium mt-0.5">
+                <ShieldCheck className="h-3 w-3" />
+                <span>Masked for privacy</span>
+              </div>
+            </div>
+
+            {/* Last Updated */}
+            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+              <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
+                <Clock className="h-4 w-4 text-primary" />
+                <span>Telemetry Sync</span>
+              </div>
+              <p className="text-xs font-semibold text-foreground leading-snug">
+                {dateTime(tracking.updatedAt)}
+              </p>
+              <Badge variant="secondary" className="mt-2 text-[10px] font-mono">
+                {tracking.status}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Timeline Section */}
+          <Card className="border-border/70 shadow-soft overflow-hidden">
+            <div className="border-b border-border/70 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-foreground">
+                  {t("timeline")}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Complete immutable scan sequence for this parcel
                 </p>
               </div>
+              <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-[11px] font-semibold text-primary">
+                {tracking.timeline.length} Scans Logged
+              </span>
+            </div>
 
-              <div className="space-y-1">
-                <p className="text-caption font-semibold uppercase text-muted-foreground">
-                  {t("location")}
-                </p>
-                <p className="flex items-center gap-1.5 text-body font-medium text-foreground">
-                  <Building2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                  {tracking.currentHubName ?? t("locationPending")}
-                </p>
-              </div>
-            </CardContent>
-
-            <div className="border-t border-border px-6 py-6">
-              <h2 className="mb-6 text-caption font-bold uppercase tracking-wider text-muted-foreground">
-                {t("timeline")}
-              </h2>
-
+            <CardContent className="p-6">
               <Timeline label={t("timeline")}>
                 {tracking.timeline.map((event, index) => {
                   const label = locale === "bn" ? event.labelBn : event.labelEn;
                   const isLatest = index === tracking.timeline.length - 1;
+
                   return (
                     <TimelineItem
                       key={`${event.timestamp}-${index}`}
-                      title={label}
+                      title={
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-foreground">{label}</span>
+                          {isLatest ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                              LATEST SCAN
+                            </span>
+                          ) : null}
+                        </div>
+                      }
                       timestamp={dateTime(event.timestamp)}
                       dateTime={event.timestamp}
                       tone={isLatest ? "primary" : "neutral"}
                       current={isLatest}
                     >
                       {event.note ? (
-                        <p className="mt-1 text-body-sm text-muted-foreground">{event.note}</p>
+                        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                          {event.note}
+                        </p>
                       ) : null}
                     </TimelineItem>
                   );
                 })}
               </Timeline>
-            </div>
+            </CardContent>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-6 py-4 text-caption text-muted-foreground">
+            <div className="border-t border-border/70 bg-muted/20 px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
               <span>
                 {t("lastUpdated", {
                   date: dateTime(tracking.updatedAt),
                 })}
               </span>
-              <Badge variant="secondary">
-                {t("statusLabel", {
-                  status: tracking.status,
-                })}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <span>Verified by Dhruto Logistics Engine</span>
+              </div>
             </div>
           </Card>
         </div>
