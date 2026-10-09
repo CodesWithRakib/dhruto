@@ -1,0 +1,239 @@
+/* ==========================================================================
+   DHRUTO PRICING & FINANCIAL SETTLEMENT DESIGN SYSTEM
+   High-Precision Logistics Calculator, Volume Curve & Escrow Ledger Styling
+   ========================================================================== */
+
+@keyframes prc-shimmer-gold {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes prc-pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+@keyframes prc-glow-border {
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 25px 2px rgba(16, 185, 129, 0.3);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   PRICING HERO & FINANCIAL CANVAS
+   -------------------------------------------------------------------------- */
+
+.prc-serif {
+  font-family: var(--font-serif, "Instrument Serif", Georgia, serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.prc-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1.125rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* --------------------------------------------------------------------------
+   INTERACTIVE DIGITAL SETTLEMENT RECEIPT (COCKPIT)
+   -------------------------------------------------------------------------- */
+
+.prc-receipt {
+  position: relative;
+  background: #090d15;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  overflow: hidden;
+}
+
+.light .prc-receipt {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+.prc-receipt::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b00, #10b981, #0ea5e9);
+}
+
+.prc-receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0;
+  font-size: 0.8125rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.light .prc-receipt-row {
+  border-bottom: 1px dashed rgba(15, 23, 42, 0.08);
+}
+
+.prc-receipt-row:last-child {
+  border-bottom: none;
+}
+
+/* --------------------------------------------------------------------------
+   CUSTOM SLEEK RANGE SLIDERS
+   -------------------------------------------------------------------------- */
+
+.prc-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.light .prc-range-slider {
+  background: rgba(15, 23, 42, 0.1);
+}
+
+.prc-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ff6b00;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.prc-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #ff8533;
+}
+
+.prc-range-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ff6b00;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   MERCHANT TIER PRICING CARDS
+   -------------------------------------------------------------------------- */
+
+.prc-tier-card {
+  position: relative;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface, #ffffff);
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.light .prc-tier-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.prc-tier-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 107, 0, 0.35);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.12);
+}
+
+.dark .prc-tier-card:hover {
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5), 0 0 25px -4px rgba(255, 107, 0, 0.2);
+}
+
+.prc-tier-card.featured {
+  border: 2px solid #ff6b00;
+  background: radial-gradient(ellipse at top right, rgba(255, 107, 0, 0.08), transparent 70%), var(--surface, #ffffff);
+  box-shadow: 0 20px 40px -10px rgba(255, 107, 0, 0.18);
+}
+
+.dark .prc-tier-card.featured {
+  background: radial-gradient(ellipse at top right, rgba(255, 107, 0, 0.15), transparent 70%), #0d121c;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6), 0 0 30px -5px rgba(255, 107, 0, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   VOLUME DISCOUNT PROGRESS CURVE
+   -------------------------------------------------------------------------- */
+
+.prc-volume-track {
+  position: relative;
+  height: 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.light .prc-volume-track {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.prc-volume-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ff6b00, #10b981);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --------------------------------------------------------------------------
+   SIDE-BY-SIDE TRANSPARENCY MATRIX
+   -------------------------------------------------------------------------- */
+
+.prc-compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .prc-compare-table {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
