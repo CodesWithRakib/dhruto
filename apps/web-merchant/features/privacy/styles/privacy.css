@@ -1,0 +1,102 @@
+/* ==========================================================================
+   DHRUTO PRIVACY & DATA GOVERNANCE DESIGN SYSTEM
+   High-Security Sovereignty, PII Masking & Legal Reader Styling
+   ========================================================================== */
+
+@keyframes prv-glow-shield {
+  0%, 100% {
+    box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 35px 2px rgba(16, 185, 129, 0.4);
+    border-color: rgba(16, 185, 129, 0.6);
+  }
+}
+
+.prv-serif {
+  font-family: var(--font-serif, "Instrument Serif", Georgia, serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.prv-security-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1.125rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* --------------------------------------------------------------------------
+   INTERACTIVE PII MASKING COMPARISON CARD
+   -------------------------------------------------------------------------- */
+
+.prv-mask-card {
+  position: relative;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #090d15;
+  padding: 2rem;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  overflow: hidden;
+}
+
+.light .prv-mask-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   LEGAL CLAUSE CARD & STICKY NAV
+   -------------------------------------------------------------------------- */
+
+.prv-clause-card {
+  position: relative;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface, #ffffff);
+  padding: 2.25rem 2rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.light .prv-clause-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
+
+.prv-clause-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.08);
+}
+
+.dark .prv-clause-card:hover {
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.4), 0 0 20px -2px rgba(16, 185, 129, 0.15);
+}
+
+.prv-toc-sticky {
+  position: sticky;
+  top: 7rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface, #ffffff);
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.light .prv-toc-sticky {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+}
