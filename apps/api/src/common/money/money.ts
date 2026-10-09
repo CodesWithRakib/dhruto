@@ -14,13 +14,27 @@ export { CURRENCY_BDT, BDT_MINOR_UNITS };
 const SCALE = 2;
 const UNIT = 10 ** SCALE;
 
-/** Parses a major-unit value (number or Postgres decimal string) to minor units. */
+/**
+ * Parses a major-unit value (number or Postgres decimal string) to minor units.
+ *
+ * Phase 5 (T-FIN-01): exact decimal parsing, never binary-float multiply.
+ * `1.005 * 100` is `100.49999...` in IEEE-754, so `Math.round` undercharges
+ * half-paisa inputs by 1 poisha. String parsing applies true HALF_UP on the
+ * third decimal place (`0.1 + 0.2`-style artifacts resolve correctly too).
+ */
 export function toMinor(value: number | string): number {
-  const numeric = typeof value === "string" ? Number(value) : value;
-  if (!Number.isFinite(numeric)) {
+  const text = (typeof value === "string" ? value : String(value)).trim();
+  const match = /^([+-]?)(\d+)(?:\.(\d+))?$/.exec(text);
+  if (!match || !Number.isFinite(Number(text))) {
     throw new Error(`Invalid monetary value: ${String(value)}`);
   }
-  return Math.round(numeric * UNIT + Number.EPSILON);
+  const negative = match[1] === "-";
+  const intPart = Number.parseInt(match[2] as string, 10);
+  const frac = ((match[3] as string | undefined) ?? "").padEnd(3, "0");
+  const hundredths = Number.parseInt(frac.slice(0, 2), 10);
+  const thousandth = Number.parseInt(frac[2] as string, 10);
+  const minor = intPart * UNIT + hundredths + (thousandth >= 5 ? 1 : 0);
+  return negative ? -minor : minor;
 }
 
 /** Renders integer minor units as a major-unit string with 2 decimals. */

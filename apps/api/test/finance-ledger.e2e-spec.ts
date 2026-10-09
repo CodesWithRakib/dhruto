@@ -540,6 +540,46 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
         .expect(200);
       expect(walletAfter.body.data.balance).toBeLessThan(walletBefore.body.data.balance);
     });
+
+    it("cancels a pending batch and releases members for re-batching (T-API-03)", async () => {
+      const parcel = await deliverCod(1500);
+      await verifyLedger(parcel.cashLedgerId).expect(200);
+
+      const settlements = await request(app.getHttpServer())
+        .get("/api/v1/finance/settlements/me?limit=10")
+        .set(bearer(merchantToken))
+        .expect(200);
+      const settlement = settlements.body.data.items.find(
+        (s: { parcelId: string }) => s.parcelId === parcel.parcelId,
+      );
+      expect(settlement).toBeDefined();
+
+      const batch = await request(app.getHttpServer())
+        .post("/api/v1/admin/finance/settlements/batches")
+        .set(bearer(adminToken))
+        .send({ merchantId, settlementIds: [settlement.id] })
+        .expect(201);
+
+      const cancelled = await request(app.getHttpServer())
+        .post(`/api/v1/admin/finance/settlements/batches/${batch.body.data.id}/cancel`)
+        .set(bearer(adminToken))
+        .expect(200);
+      expect(cancelled.body.data.status).toBe("CANCELLED");
+
+      // Non-pending cancel is rejected.
+      await request(app.getHttpServer())
+        .post(`/api/v1/admin/finance/settlements/batches/${batch.body.data.id}/cancel`)
+        .set(bearer(adminToken))
+        .expect(400);
+
+      // Released member can be re-batched (would 400 while stranded).
+      const rebatch = await request(app.getHttpServer())
+        .post("/api/v1/admin/finance/settlements/batches")
+        .set(bearer(adminToken))
+        .send({ merchantId, settlementIds: [settlement.id] })
+        .expect(201);
+      expect(rebatch.body.data.status).toBe("PENDING");
+    });
   });
 
   describe("Reconciliation check and reports", () => {

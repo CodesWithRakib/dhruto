@@ -102,17 +102,6 @@ export class MerchantsService {
   }
 
   /**
-   * Retrieves the first/default merchant profile for demo fallback.
-   */
-  async getDefaultMerchant(): Promise<Merchant | null> {
-    return this.merchantRepo.findOne({
-      where: {},
-      order: { createdAt: "ASC" },
-      relations: ["user"],
-    });
-  }
-
-  /**
    * Updates merchant business profile.
    */
   async updateProfile(userId: string, dto: UpdateMerchantDto): Promise<Merchant> {

@@ -53,6 +53,12 @@ T-UX-01 Confirm copy standard for money/state actions (P1, S). T-UX-02 Register 
 ## (11) Long-term
 T-LT-01 Model retraining pipeline (Blocked). T-LT-02 Route optimization. T-LT-03 Scheduled reports. T-LT-04 `CUSTOMER` role scope-or-remove.
 
+## Phase 5 verification (approved implementation, `docs/audit-validation/phase-5-money-and-cleanup.md`)
+- T-FIN-01 VERIFIED COMPLETE (integer-math audit + exact HALF_UP `toMinor` fix for x.xx5 inputs + 6 contract tests).
+- T-API-03 VERIFIED COMPLETE (cancel batch routed with member release — stranding bug fixed + test).
+- T-INT-01 VERIFIED COMPLETE (dead `getDefaultMerchant` removed, zero callers).
+- Full API suite 344/344; web unit 138/138; typecheck/lint/build clean.
+
 ## Phase 4 verification (approved implementation, `docs/audit-validation/phase-4-rto-and-scoping.md`)
 - T-RTO-01 COMPLETE (advance/complete endpoints + first ParcelReturnedEvent + hub-scoped RTO commands + tests).
 - T-SCOPE-01 VERIFIED COMPLETE (alert list/ack hub scoping + tests; intelligence endpoint accepted-risk documented).

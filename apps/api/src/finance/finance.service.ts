@@ -1300,23 +1300,35 @@ export class FinanceService {
     return this.toBatchItem(batch);
   }
 
+  /**
+   * Phase 5 (T-API-03): cancels a PENDING settlement batch and releases its
+   * members (batchId → null) so they can be re-batched. Previously the
+   * method set CANCELLED without releasing members, stranding them outside
+   * every future batch — hence it was left unrouted until fixed.
+   */
   async cancelSettlementBatch(batchId: string): Promise<SettlementBatchItem> {
-    const batch = await this.batchRepo.findOne({ where: { id: batchId } });
-    if (!batch) {
-      throw new NotFoundException({
-        message: "Settlement batch not found",
-        error: "SETTLEMENT_NOT_FOUND",
+    return this.dataSource.transaction(async (manager) => {
+      const batch = await manager.getRepository(SettlementBatch).findOne({
+        where: { id: batchId },
+        lock: { mode: "pessimistic_write" },
       });
-    }
-    if (batch.status !== SettlementBatchStatus.PENDING) {
-      throw new BadRequestException({
-        message: `Batch is already ${batch.status}`,
-        error: "SETTLEMENT_INVALID_STATE",
-      });
-    }
-    batch.status = SettlementBatchStatus.CANCELLED;
-    await this.batchRepo.save(batch);
-    return this.toBatchItem(batch);
+      if (!batch) {
+        throw new NotFoundException({
+          message: "Settlement batch not found",
+          error: "SETTLEMENT_NOT_FOUND",
+        });
+      }
+      if (batch.status !== SettlementBatchStatus.PENDING) {
+        throw new BadRequestException({
+          message: `Batch is already ${batch.status}`,
+          error: "SETTLEMENT_INVALID_STATE",
+        });
+      }
+      batch.status = SettlementBatchStatus.CANCELLED;
+      await manager.getRepository(SettlementBatch).save(batch);
+      await manager.getRepository(Settlement).update({ batchId: batch.id }, { batchId: null });
+      return this.toBatchItem(batch);
+    });
   }
 
   async listSettlementBatches(options: {

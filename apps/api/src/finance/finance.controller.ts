@@ -509,6 +509,23 @@ export class FinanceAdminController {
     return envelope(HttpStatus.OK, "Settlement batch completed", batch, req);
   }
 
+  @Post("settlements/batches/:id/cancel")
+  @RateLimit({ limit: 30, windowSeconds: 60, scope: "settlement-batch" })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Cancel a pending settlement batch and release its members",
+    description:
+      "Phase 5 (T-API-03): only PENDING batches. Members return to the unbatched pool so they can be re-batched; completed batches are never reopened.",
+  })
+  @ApiResponse({ status: 200, description: "Batch cancelled, members released." })
+  async cancelSettlementBatch(
+    @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
+    @Req() req?: RequestWithId,
+  ) {
+    const batch = await this.financeService.cancelSettlementBatch(id);
+    return envelope(HttpStatus.OK, "Settlement batch cancelled, members released", batch, req);
+  }
+
   @Post("discrepancies/:id/resolve")
   @RateLimit({ limit: 30, windowSeconds: 60, scope: "discrepancy-resolve" })
   @HttpCode(HttpStatus.OK)
