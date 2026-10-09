@@ -81,7 +81,7 @@ export function PageHeader({
             ) : null}
           </div>
           {actions ? (
-            <div className="flex shrink-0 flex-wrap items-center gap-2 rounded-xl border border-[hsl(var(--hero-dark-foreground)/0.12)] bg-[hsl(var(--hero-dark-foreground)/0.06)] p-1.5 backdrop-blur-sm">
+            <div className="flex shrink-0 flex-wrap items-center gap-2.5">
               {actions}
             </div>
           ) : null}

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, Button, Input } from "@dhruto/ui";
-import { Search, RefreshCw, Package } from "lucide-react";
+import { Search, RefreshCw, Package, X, RotateCcw } from "lucide-react";
 import { useGetRiderTasksQuery, useStartDeliveryMutation } from "../api/riders.api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
@@ -20,15 +20,27 @@ export function RiderTasksView() {
   const [filter, setFilter] = React.useState<TaskFilter>("ALL");
   const [search, setSearch] = React.useState("");
 
-  const { data, isLoading, refetch } = useGetRiderTasksQuery();
+  const { data, isLoading, isFetching, refetch } = useGetRiderTasksQuery();
   const [startDelivery, { isLoading: isStarting }] = useStartDeliveryMutation();
 
   const tasks = data?.data ?? [];
+
+  const counts = React.useMemo(() => {
+    return {
+      ALL: tasks.length,
+      ASSIGNED_TO_RIDER: tasks.filter((t) => t.status === "ASSIGNED_TO_RIDER").length,
+      OUT_FOR_DELIVERY: tasks.filter((t) => t.status === "OUT_FOR_DELIVERY").length,
+      ATTEMPTED: tasks.filter((t) => ATTEMPTED_STATUSES.includes(t.status)).length,
+    };
+  }, [tasks]);
+
   const filtered = tasks.filter((task) => {
+    const query = search.trim().toLowerCase();
     const matchesSearch =
-      search.trim() === "" ||
-      task.trackingCode.toLowerCase().includes(search.trim().toLowerCase()) ||
-      task.recipientName.toLowerCase().includes(search.trim().toLowerCase());
+      query === "" ||
+      task.trackingCode.toLowerCase().includes(query) ||
+      task.recipientName.toLowerCase().includes(query) ||
+      task.deliveryAddress.toLowerCase().includes(query);
     const matchesFilter =
       filter === "ALL" ||
       (filter === "ATTEMPTED" ? ATTEMPTED_STATUSES.includes(task.status) : task.status === filter);
@@ -47,20 +59,20 @@ export function RiderTasksView() {
     }
   };
 
-  const filters: Array<{ key: TaskFilter; label: string }> = [
-    { key: "ALL", label: t("tasks.filterAll") },
-    { key: "ASSIGNED_TO_RIDER", label: t("tasks.filterAssigned") },
-    { key: "OUT_FOR_DELIVERY", label: t("tasks.filterInProgress") },
-    { key: "ATTEMPTED", label: t("tasks.filterAttempted") },
+  const filters: Array<{ key: TaskFilter; label: string; count: number }> = [
+    { key: "ALL", label: t("tasks.filterAll"), count: counts.ALL },
+    { key: "ASSIGNED_TO_RIDER", label: t("tasks.filterAssigned"), count: counts.ASSIGNED_TO_RIDER },
+    { key: "OUT_FOR_DELIVERY", label: t("tasks.filterInProgress"), count: counts.OUT_FOR_DELIVERY },
+    { key: "ATTEMPTED", label: t("tasks.filterAttempted"), count: counts.ATTEMPTED },
   ];
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="space-y-3 p-4">
+      <Card className="rounded-2xl border-border/80 bg-card shadow-2xs">
+        <CardContent className="space-y-3.5 p-4 sm:p-5">
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
             <Input
@@ -68,46 +80,96 @@ export function RiderTasksView() {
               onChange={(event) => setSearch(event.target.value)}
               placeholder={t("tasks.searchPlaceholder")}
               aria-label={t("tasks.searchPlaceholder")}
-              className="h-11 pl-9"
+              className="h-11 rounded-xl border-input/80 bg-surface pl-10 pr-10 text-sm shadow-2xs transition-all duration-200 placeholder:text-muted-foreground hover:border-foreground/30 focus-visible:ring-4 focus-visible:ring-primary/15"
             />
-          </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto">
-            {filters.map((entry) => (
-              <Button
-                key={entry.key}
-                size="sm"
-                variant={filter === entry.key ? "default" : "outline"}
-                onClick={() => setFilter(entry.key)}
-                className="h-9 shrink-0 text-xs"
+            {search ? (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                aria-label="Clear search"
               >
-                {entry.label}
-              </Button>
-            ))}
+                <X className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+              {filters.map((entry) => {
+                const isActive = filter === entry.key;
+                return (
+                  <button
+                    key={entry.key}
+                    type="button"
+                    onClick={() => setFilter(entry.key)}
+                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-xs font-semibold transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                        : "border border-border/80 bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                    }`}
+                  >
+                    <span>{entry.label}</span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-surface text-muted-foreground border border-border/60"
+                      }`}
+                    >
+                      {entry.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() => refetch()}
-              className="h-9 shrink-0 text-xs"
+              className="h-9 w-9 shrink-0 rounded-xl p-0 text-muted-foreground shadow-2xs hover:bg-surface-muted hover:text-foreground"
               aria-label={t("refresh")}
             >
-              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {isLoading ? (
-        <p role="status" className="py-12 text-center text-sm text-muted-foreground">
-          {t("loading")}
-        </p>
+        <div className="py-16 text-center text-sm text-muted-foreground">
+          <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-primary" />
+          <p>{t("loading")}</p>
+        </div>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={Package}
-          title={t("tasks.empty")}
-          description={t("tasks.emptyDescription")}
+          title={search || filter !== "ALL" ? "No matching delivery tasks" : t("tasks.empty")}
+          description={
+            search || filter !== "ALL"
+              ? "Try adjusting your search query or status filter to see other packages."
+              : t("tasks.emptyDescription")
+          }
+          action={
+            search || filter !== "ALL" ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearch("");
+                  setFilter("ALL");
+                }}
+                className="gap-1.5 rounded-xl text-xs font-semibold"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset filters
+              </Button>
+            ) : undefined
+          }
         />
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3.5">
           {filtered.map((task) => (
             <li key={task.id}>
               <RiderTaskCard task={task} onStartDelivery={handleStart} isStarting={isStarting} />

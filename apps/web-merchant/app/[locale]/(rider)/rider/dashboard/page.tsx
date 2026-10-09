@@ -9,9 +9,5 @@ export const metadata = {
 };
 
 export default function RiderPage() {
-  return (
-    <div className="max-w-5xl mx-auto py-6 px-4">
-      <RiderDashboard />
-    </div>
-  );
+  return <RiderDashboard />;
 }
