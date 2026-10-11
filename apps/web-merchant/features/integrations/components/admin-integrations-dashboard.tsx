@@ -10,9 +10,26 @@ import {
   Loader2,
   RefreshCw,
   RotateCcw,
+  Send,
+  Smartphone,
   XCircle,
 } from "lucide-react";
-import { Button, Badge, Card, DataTable } from "@dhruto/ui";
+import {
+  Button,
+  Badge,
+  Card,
+  DataTable,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Textarea,
+} from "@dhruto/ui";
+import { toast } from "sonner";
 import {
   useGetIntegrationOverviewQuery,
   useListIntegrationFailuresQuery,
@@ -21,6 +38,7 @@ import {
   useGetOutboxOverviewQuery,
   useReplayOutboxEventMutation,
 } from "../api/integrations.api";
+import { useTestSmsNotificationMutation } from "@/features/notifications/api/notifications.api";
 import { IntegrationFailureStatus, type IntegrationFailureItem } from "@dhruto/contracts";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { PageHeader } from "@/components/page-header";
@@ -32,6 +50,9 @@ export function AdminIntegrationsDashboard() {
   const { dateTime } = useFormatters();
   const [failurePage, setFailurePage] = React.useState(1);
   const [feedback, setFeedback] = React.useState<string | null>(null);
+  const [testSmsOpen, setTestSmsOpen] = React.useState(false);
+  const [testPhone, setTestPhone] = React.useState("");
+  const [testMessage, setTestMessage] = React.useState("Dhruto Gateway Diagnostic: SMS infrastructure ping.");
 
   const overview = useGetIntegrationOverviewQuery(undefined, {
     pollingInterval: 15000,
@@ -46,12 +67,26 @@ export function AdminIntegrationsDashboard() {
   const [replay, { isLoading: isReplaying }] = useReplayIntegrationFailureMutation();
   const [resolve, { isLoading: isResolving }] = useResolveIntegrationFailureMutation();
   const [replayOutbox, { isLoading: isReplayingOutbox }] = useReplayOutboxEventMutation();
+  const [testSms, { isLoading: isTestingSms }] = useTestSmsNotificationMutation();
 
   const data = overview.data?.data;
   const failureItems = failures.data?.data?.items ?? [];
   const failureTotal = failures.data?.data?.total ?? 0;
   const failurePages = Math.max(1, Math.ceil(failureTotal / 20));
   const outboxData = outbox.data?.data;
+
+  const handleTestSms = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testPhone.trim() || !testMessage.trim()) return;
+    try {
+      await testSms({ phone: testPhone.trim(), message: testMessage.trim() }).unwrap();
+      toast.success(t("testSmsSuccess"));
+      setTestSmsOpen(false);
+      setTestPhone("");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, t("testSmsFailed")));
+    }
+  };
 
   const handleReplay = async (id: string) => {
     setFeedback(null);
@@ -94,19 +129,30 @@ export function AdminIntegrationsDashboard() {
         title={t("title")}
         description={t("subtitle")}
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              overview.refetch();
-              failures.refetch();
-              outbox.refetch();
-            }}
-            className="h-10 gap-2 text-xs"
-          >
-            <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("refresh")}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setTestSmsOpen(true)}
+              className="h-10 gap-2 text-xs"
+            >
+              <Smartphone className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              {t("testSms")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                overview.refetch();
+                failures.refetch();
+                outbox.refetch();
+              }}
+              className="h-10 gap-2 text-xs"
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("refresh")}
+            </Button>
+          </div>
         }
       />
 
@@ -377,6 +423,69 @@ export function AdminIntegrationsDashboard() {
           </div>
         )}
       </Card>
+
+      <Dialog open={testSmsOpen} onOpenChange={setTestSmsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5 text-primary" aria-hidden="true" />
+              {t("testSmsTitle")}
+            </DialogTitle>
+            <DialogDescription>{t("testSmsDesc")}</DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleTestSms} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="test-phone">{t("testPhoneLabel")}</Label>
+              <Input
+                id="test-phone"
+                type="tel"
+                placeholder={t("testPhonePlaceholder")}
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="test-message">{t("testMessageLabel")}</Label>
+              <Textarea
+                id="test-message"
+                rows={3}
+                placeholder={t("testMessagePlaceholder")}
+                value={testMessage}
+                onChange={(e) => setTestMessage(e.target.value)}
+                required
+              />
+            </div>
+
+            <DialogFooter className="gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setTestSmsOpen(false)}
+                disabled={isTestingSms}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isTestingSms || !testPhone.trim() || !testMessage.trim()}
+                className="gap-2"
+              >
+                {isTestingSms ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                {isTestingSms ? t("testSending") : t("testSendBtn")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

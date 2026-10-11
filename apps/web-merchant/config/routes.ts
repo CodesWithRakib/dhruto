@@ -60,6 +60,8 @@ export const ADMIN_ROUTES = {
   hub: "/admin/hub",
   rider: "/admin/rider",
   analytics: "/admin/analytics",
+  integrations: "/admin/integrations",
+  intelligence: "/admin/intelligence",
   tracking: "/admin/track",
   trackShipment: (code: string) => `/admin/track/${code}`,
   settings: "/admin/settings",

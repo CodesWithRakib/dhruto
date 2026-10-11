@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@dhruto/ui";
-import { RefreshCw, AlertTriangle, CheckCircle2, Download } from "lucide-react";
+import { RefreshCw, AlertTriangle, CheckCircle2, Download, FileText } from "lucide-react";
 import { PayoutStatus, type PayoutRequestItem } from "@dhruto/contracts";
 import {
   useGetFinanceOverviewQuery,
@@ -35,6 +35,7 @@ import {
   useGetFeeReportQuery,
   newIdempotencyKey,
 } from "../api/finance.api";
+import { PayoutInvoiceDialog } from "./payout-invoice-dialog";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
 import { PageHeader } from "@/components/page-header";
@@ -55,6 +56,7 @@ export function AdminFinanceDashboard() {
   const { bdt, date: fmtDate } = useFormatters();
   const [tab, setTab] = React.useState<AdminTab>("payouts");
   const [selectedPayout, setSelectedPayout] = React.useState<PayoutRequestItem | null>(null);
+  const [viewingVoucher, setViewingVoucher] = React.useState<PayoutRequestItem | null>(null);
   const [decision, setDecision] = React.useState<"approve" | "complete" | "reject" | "fail" | null>(
     null,
   );
@@ -305,7 +307,12 @@ export function AdminFinanceDashboard() {
                       {payout.payoutMethod} · {payout.accountDetails.accountNumber} ·{" "}
                       {fmtDate(payout.createdAt)}
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
+                    {payout.transactionReference ? (
+                      <p className="font-mono text-[11px] text-primary">
+                        {t("reference")}: {payout.transactionReference}
+                      </p>
+                    ) : null}
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
                       {payout.status === "REQUESTED" ? (
                         <Button
                           size="sm"
@@ -355,6 +362,17 @@ export function AdminFinanceDashboard() {
                           }}
                         >
                           {t("payout.reject")}
+                        </Button>
+                      ) : null}
+                      {payout.status === "COMPLETED" || payout.status === "APPROVED" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 gap-1 text-xs"
+                          onClick={() => setViewingVoucher(payout)}
+                        >
+                          <FileText className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                          {t("invoice.viewReceipt")}
                         </Button>
                       ) : null}
                     </div>
@@ -704,7 +722,11 @@ export function AdminFinanceDashboard() {
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
                 maxLength={100}
+                placeholder="e.g. BEFTN-2026-981723 or bKash TrxID 9K28A7Z1"
               />
+              <p className="text-[11px] text-muted-foreground">
+                Enter bank BEFTN/RTGS reference or MFS Transaction ID for audit and merchant invoice receipts.
+              </p>
             </div>
           ) : null}
           {decision === "reject" || decision === "fail" ? (
@@ -768,6 +790,13 @@ export function AdminFinanceDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Payout Voucher Dialog */}
+      <PayoutInvoiceDialog
+        open={viewingVoucher !== null}
+        onOpenChange={(open) => !open && setViewingVoucher(null)}
+        payout={viewingVoucher}
+      />
     </div>
   );
 }

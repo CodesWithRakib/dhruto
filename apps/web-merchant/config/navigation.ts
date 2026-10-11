@@ -16,6 +16,9 @@ import {
   BarChart3,
   Truck,
   RotateCcw,
+  AlertTriangle,
+  Radio,
+  BrainCircuit,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -116,6 +119,8 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: ADMIN_ROUTES.parcels, labelKey: "parcels", icon: Package },
         { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
         { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
+        { href: ADMIN_ROUTES.integrations, labelKey: "integrations", icon: Radio },
+        { href: ADMIN_ROUTES.intelligence, labelKey: "intelligence", icon: BrainCircuit },
       ],
     },
     {
@@ -155,6 +160,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: HUB_ROUTES.parcels, labelKey: "parcels", icon: PackageSearch },
         { href: HUB_ROUTES.bags, labelKey: "bags", icon: Package },
         { href: HUB_ROUTES.manifests, labelKey: "manifests", icon: Truck },
+        { href: HUB_ROUTES.exceptions, labelKey: "exceptions", icon: AlertTriangle },
         { href: HUB_ROUTES.cash, labelKey: "cash", icon: Wallet },
       ],
     },

@@ -37,7 +37,7 @@ import { HighlightCard } from "@/components/data-display/cards";
 import { Timeline, TimelineItem } from "@/components/data-display/timeline";
 import { PARCEL_STATUS_CONFIG, statusConfig } from "@/config/status";
 import { ErrorState, RetryButton } from "@/components/feedback/states";
-import { useGetParcelByIdQuery } from "../api/parcels.api";
+import { useGetParcelByIdQuery, useGetParcelHistoryQuery } from "../api/parcels.api";
 import { ParcelIntelligencePanel } from "@/features/intelligence/components/parcel-intelligence-panel";
 import { useFormatters } from "@/lib/format";
 import { lastListUrl } from "@/lib/last-list-url";
@@ -102,8 +102,12 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const { bdt, dateTime } = useFormatters();
   const tStatus = useTranslations("ParcelStatus");
   const routes = useRouteBase();
-
   const { data, isLoading, isError, refetch } = useGetParcelByIdQuery(parcelId);
+  const { data: standaloneHistory, refetch: refetchHistory } = useGetParcelHistoryQuery(parcelId, {
+    skip: !parcelId,
+    pollingInterval: 15000,
+    skipPollingIfUnfocused: true,
+  });
 
   // Back returns to the exact list workspace (filters + page) when the user
   // arrived from it; deep links fall back to the list root.
@@ -462,41 +466,47 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
           <CardDescription>{t("statusHistoryHint")}</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          {parcel.history.length === 0 ? (
-            <p className="flex items-center gap-2 text-body-sm text-muted-foreground">
-              <AlertCircle className="h-4 w-4" aria-hidden="true" />
-              {t("noHistory")}
-            </p>
-          ) : (
-            <Timeline label={t("statusHistory")}>
-              {[...parcel.history]
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .map((entry, index) => (
-                  <TimelineItem
-                    key={entry.id}
-                    title={<StatusBadge status={entry.toStatus} />}
-                    timestamp={dateTime(entry.createdAt)}
-                    dateTime={entry.createdAt}
-                    tone={statusConfig(entry.toStatus as ParcelStatus).tone}
-                    current={index === 0}
-                  >
-                    {entry.fromStatus ? (
-                      <span className="mt-1 block text-caption text-muted-foreground">
-                        {t("fromStatus", {
-                          status: tStatus(PARCEL_STATUS_CONFIG[entry.fromStatus].labelKey),
-                        })}
-                      </span>
-                    ) : null}
-                    {entry.description ? (
-                      <p className="mt-1 text-body-sm text-muted-foreground">{entry.description}</p>
-                    ) : null}
-                    <p className="mt-1 text-caption text-muted-foreground">
-                      {t("recordedBy", { role: entry.actorRole })}
-                    </p>
-                  </TimelineItem>
-                ))}
-            </Timeline>
-          )}
+          {(() => {
+            const historyEntries = standaloneHistory?.data ?? parcel.history ?? [];
+            if (historyEntries.length === 0) {
+              return (
+                <p className="flex items-center gap-2 text-body-sm text-muted-foreground">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                  {t("noHistory")}
+                </p>
+              );
+            }
+            return (
+              <Timeline label={t("statusHistory")}>
+                {[...historyEntries]
+                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                  .map((entry, index) => (
+                    <TimelineItem
+                      key={entry.id}
+                      title={<StatusBadge status={entry.toStatus} />}
+                      timestamp={dateTime(entry.createdAt)}
+                      dateTime={entry.createdAt}
+                      tone={statusConfig(entry.toStatus as ParcelStatus).tone}
+                      current={index === 0}
+                    >
+                      {entry.fromStatus ? (
+                        <span className="mt-1 block text-caption text-muted-foreground">
+                          {t("fromStatus", {
+                            status: tStatus(PARCEL_STATUS_CONFIG[entry.fromStatus].labelKey),
+                          })}
+                        </span>
+                      ) : null}
+                      {entry.description ? (
+                        <p className="mt-1 text-body-sm text-muted-foreground">{entry.description}</p>
+                      ) : null}
+                      <p className="mt-1 text-caption text-muted-foreground">
+                        {t("recordedBy", { role: entry.actorRole })}
+                      </p>
+                    </TimelineItem>
+                  ))}
+              </Timeline>
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -505,7 +515,10 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         trackingCode={parcel.trackingCode}
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
-        onSuccess={() => void refetch()}
+        onSuccess={() => {
+          void refetch();
+          void refetchHistory();
+        }}
       />
 
       <ParcelEditDialog
@@ -517,7 +530,10 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         initialNotes={parcel.parcelDescription}
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
-        onSuccess={() => void refetch()}
+        onSuccess={() => {
+          void refetch();
+          void refetchHistory();
+        }}
       />
 
       <ParcelPickupDialog
@@ -526,7 +542,10 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         pickupAddress={parcel.pickupAddress}
         isOpen={showPickupModal}
         onClose={() => setShowPickupModal(false)}
-        onSuccess={() => void refetch()}
+        onSuccess={() => {
+          void refetch();
+          void refetchHistory();
+        }}
       />
     </div>
   );

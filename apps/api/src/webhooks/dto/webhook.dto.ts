@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   ArrayMinSize,
   IsArray,
+  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
@@ -11,6 +12,7 @@ import {
   MinLength,
 } from "class-validator";
 import {
+  WebhookEvent,
   type CreateWebhookSubscriptionDto as ICreateWebhookSubscriptionDto,
   type UpdateWebhookSubscriptionDto as IUpdateWebhookSubscriptionDto,
 } from "@dhruto/contracts";
@@ -22,10 +24,14 @@ export class CreateWebhookSubscriptionDto implements ICreateWebhookSubscriptionD
   @IsUrl({}, { message: "Must be a valid HTTP or HTTPS webhook URL" })
   url: string;
 
-  @ApiProperty({ example: ["parcel.delivered", "parcel.created"], type: [String] })
+  @ApiProperty({
+    example: [WebhookEvent.PARCEL_DELIVERED, WebhookEvent.PARCEL_CREATED],
+    enum: WebhookEvent,
+    isArray: true,
+  })
   @IsArray()
   @ArrayMinSize(1, { message: "Select at least one webhook event" })
-  @IsString({ each: true })
+  @IsEnum(WebhookEvent, { each: true, message: "Each event must be a valid WebhookEvent enum value" })
   events: string[];
 
   @ApiPropertyOptional({ example: "my-webhook-secret-key-12345" })
@@ -48,10 +54,10 @@ export class UpdateWebhookSubscriptionDto implements IUpdateWebhookSubscriptionD
   @IsUrl({}, { message: "Must be a valid HTTP or HTTPS webhook URL" })
   url?: string;
 
-  @ApiPropertyOptional({ example: ["parcel.delivered"], type: [String] })
+  @ApiPropertyOptional({ enum: WebhookEvent, isArray: true })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
+  @IsEnum(WebhookEvent, { each: true, message: "Each event must be a valid WebhookEvent enum value" })
   events?: string[];
 
   @ApiPropertyOptional({ enum: ["ACTIVE", "INACTIVE"] })

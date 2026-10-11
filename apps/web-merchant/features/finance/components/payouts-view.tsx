@@ -3,9 +3,10 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, Button } from "@dhruto/ui";
-import { History, Smartphone, Building2 } from "lucide-react";
+import { History, Smartphone, Building2, FileText } from "lucide-react";
 import { type PayoutRequestItem } from "@dhruto/contracts";
 import { useGetMyPayoutsQuery, useCancelPayoutMutation } from "../api/finance.api";
+import { PayoutInvoiceDialog } from "./payout-invoice-dialog";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -20,6 +21,7 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
   const tMethod = useTranslations("PayoutMethod");
   const { bdt, date: fmtDate } = useFormatters();
   const [cancelling, setCancelling] = React.useState<PayoutRequestItem | null>(null);
+  const [invoicePayout, setInvoicePayout] = React.useState<PayoutRequestItem | null>(null);
   const { data, isLoading, refetch } = useGetMyPayoutsQuery();
   const [cancelPayout, { isLoading: isCancelling }] = useCancelPayoutMutation();
   const payouts = data?.data ?? [];
@@ -102,8 +104,8 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
             {payout.failureReason ? (
               <p className="text-[11px] text-danger">{payout.failureReason}</p>
             ) : null}
-            {payout.status === "REQUESTED" ? (
-              <div className="pt-1">
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {payout.status === "REQUESTED" ? (
                 <Button
                   size="sm"
                   variant="outline"
@@ -112,8 +114,19 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
                 >
                   {t("cancel")}
                 </Button>
-              </div>
-            ) : null}
+              ) : null}
+              {payout.status === "COMPLETED" || payout.status === "APPROVED" ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-1.5 text-xs font-medium"
+                  onClick={() => setInvoicePayout(payout)}
+                >
+                  <FileText className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                  {t("invoice.viewReceipt")}
+                </Button>
+              ) : null}
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -132,6 +145,12 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
         cancelLabel={t("cancel")}
         loading={isCancelling}
         onConfirm={handleCancel}
+      />
+
+      <PayoutInvoiceDialog
+        open={invoicePayout !== null}
+        onOpenChange={(open) => !open && setInvoicePayout(null)}
+        payout={invoicePayout}
       />
     </div>
   );

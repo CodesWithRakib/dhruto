@@ -875,6 +875,38 @@
       "failMessage": "Reserved funds return to the merchant wallet through a reversal posting.",
       "failureReason": "Failure reason"
     },
+    "invoice": {
+      "viewInvoice": "View Invoice",
+      "viewReceipt": "Settlement Receipt",
+      "dialogTitle": "Payout Settlement Receipt",
+      "dialogSubtitle": "Official disbursement voucher issued under Dhruto Courier OS.",
+      "invoiceNumber": "Voucher No.",
+      "disbursementDate": "Disbursed Date",
+      "requestedDate": "Requested Date",
+      "billedTo": "Beneficiary / Account",
+      "paymentDetails": "Payment Channel & Account",
+      "channel": "Channel",
+      "account": "Account Number",
+      "accountHolder": "Account Holder",
+      "bankBranch": "Bank & Branch",
+      "trxReference": "Bank / MFS Transaction Reference",
+      "status": "Disbursement Status",
+      "breakdown": "Settlement Summary",
+      "description": "Description",
+      "amount": "Disbursed Amount",
+      "subtotal": "Net Disbursed",
+      "fees": "Platform Processing Fee",
+      "total": "Total Disbursed",
+      "disbursedDesc": "COD Settlement & Wallet Payout Disbursement",
+      "auditNote": "Computer-generated financial settlement voucher. Electronically audited and cleared via Dhruto Double-Entry Ledger.",
+      "print": "Print / Save PDF",
+      "copyTrx": "Copy Reference",
+      "copied": "Transaction reference copied to clipboard"
+    },
+    "schedule": {
+      "title": "Automated COD Settlement Policy",
+      "desc": "Verified cash collections are settled to your wallet daily at 23:59 BST. Instant withdrawals to bKash / Nagad are processed 24/7, and scheduled bank transfers are cleared on T+1 banking days with zero platform fee."
+    },
     "cash": {
       "title": "Hub cash desk",
       "subtitle": "Rider hand-in batches awaiting verification, counted against server totals.",
@@ -1117,7 +1149,19 @@
     "outboxTitle": "Failed outbox events",
     "outboxHint": "Domain events that exhausted relay retries. Replaying re-runs fan-out only.",
     "outboxEmpty": "No failed outbox events.",
-    "attempts": "{count} attempts"
+    "attempts": "{count} attempts",
+    "testSms": "Test SMS Gateway",
+    "testSmsTitle": "Send Diagnostic SMS",
+    "testSmsDesc": "Directly trigger the configured SMS gateway to verify outbound delivery connectivity and recipient formatting.",
+    "testPhoneLabel": "Recipient Phone",
+    "testPhonePlaceholder": "017XXXXXXXX",
+    "testMessageLabel": "Message Body",
+    "testMessagePlaceholder": "Dhruto system test notification...",
+    "testSendBtn": "Dispatch Test SMS",
+    "testSending": "Dispatching...",
+    "testSmsSuccess": "Diagnostic SMS queued and dispatched successfully.",
+    "testSmsFailed": "Failed to dispatch test SMS.",
+    "cancel": "Cancel"
   },
   "Intelligence": {
     "title": "Logistics AI & RTO Prediction Suite",
@@ -1196,6 +1240,7 @@
     "rto": "RTO",
     "returns": "Returns & RTO",
     "alerts": "Alerts",
+    "exceptions": "Exceptions",
     "settings": "Settings",
     "faq": "Help"
   },

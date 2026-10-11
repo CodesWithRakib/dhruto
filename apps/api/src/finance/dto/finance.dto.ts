@@ -97,7 +97,7 @@ export class VerifyCashLedgerDto implements IVerifyCashLedgerDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @IsPositive()
+  @Min(0, { message: "Actual amount cannot be negative" })
   actualAmount?: number;
 
   @ApiPropertyOptional({ example: "Verified full cash deposit" })

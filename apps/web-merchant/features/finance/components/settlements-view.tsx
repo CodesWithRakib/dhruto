@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, ColumnDef, DataTable } from "@dhruto/ui";
 import { type SettlementItem } from "@dhruto/contracts";
-import { ReceiptText } from "lucide-react";
+import { ReceiptText, Clock, ShieldCheck } from "lucide-react";
 import { useGetMySettlementsQuery } from "../api/finance.api";
 import { EmptyState, ErrorState, LoadingState, RetryButton } from "@/components/feedback/states";
 import { Pagination } from "@/components/pagination";
@@ -98,6 +98,29 @@ export function SettlementsView() {
 
   return (
     <div className="space-y-4">
+      {/* Automated Settlement Policy Banner */}
+      <Card className="border-border/70 bg-surface-muted/40">
+        <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5 sm:mt-0">
+              <Clock className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-bold text-foreground flex items-center gap-1.5">
+                <span>{t("schedule.title")}</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success bg-success/10 px-1.5 py-0.5 rounded-full">
+                  <ShieldCheck className="h-3 w-3" />
+                  0% Fee Guaranteed
+                </span>
+              </p>
+              <p className="text-muted-foreground mt-0.5 max-w-2xl leading-relaxed">
+                {t("schedule.desc")}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardContent className="p-0">
           {isError ? (

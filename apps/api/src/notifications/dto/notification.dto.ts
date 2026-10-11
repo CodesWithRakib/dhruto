@@ -11,12 +11,14 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   MinLength,
   ValidateNested,
 } from "class-validator";
 import { Transform, Type } from "class-transformer";
 import {
+  BANGLADESH_PHONE_REGEX,
   NotificationCategory,
   NotificationChannel,
   NotificationType,
@@ -100,8 +102,7 @@ export class TestSmsDto {
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
-  @MaxLength(20)
+  @Matches(BANGLADESH_PHONE_REGEX, { message: "Invalid Bangladesh mobile number format" })
   phone: string;
 
   @ApiProperty({ example: "Test notification message" })

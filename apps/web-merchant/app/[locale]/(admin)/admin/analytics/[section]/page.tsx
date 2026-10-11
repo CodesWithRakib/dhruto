@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import {
   AdminSectionDashboard,
   type AnalyticsSection,
@@ -26,8 +27,15 @@ export async function generateMetadata({
   params: Promise<{ section: string }>;
 }): Promise<Metadata> {
   const { section } = await params;
+  if (!TITLES[section]) {
+    return {
+      title: "Page Not Found — Admin",
+      description: "Section does not exist.",
+      robots: { index: false, follow: false },
+    };
+  }
   return {
-    title: `${TITLES[section] ?? "Analytics"} — Admin`,
+    title: `${TITLES[section]} — Admin`,
     description: "Operational analytics section.",
     robots: { index: false, follow: false },
   };
@@ -39,5 +47,8 @@ export default async function AdminAnalyticsSectionPage({
   params: Promise<{ section: string }>;
 }) {
   const { section } = await params;
+  if (!TITLES[section]) {
+    notFound();
+  }
   return <AdminSectionDashboard section={section as AnalyticsSection} />;
 }
