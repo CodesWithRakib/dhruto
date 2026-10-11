@@ -31,6 +31,8 @@ export const PUBLIC_ROUTES = {
 export const AUTH_ROUTES = {
   login: "/login",
   register: "/register",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
 } as const;
 
 export const MERCHANT_ROUTES = {
@@ -45,6 +47,7 @@ export const MERCHANT_ROUTES = {
   tracking: "/merchant/track",
   trackShipment: (code: string) => `/merchant/track/${code}`,
   webhooks: "/merchant/developer/webhooks",
+  settings: "/merchant/settings",
 } as const;
 
 export const ADMIN_ROUTES = {
@@ -58,6 +61,7 @@ export const ADMIN_ROUTES = {
   analytics: "/admin/analytics",
   tracking: "/admin/track",
   trackShipment: (code: string) => `/admin/track/${code}`,
+  settings: "/admin/settings",
 } as const;
 
 export const HUB_ROUTES = {
@@ -70,6 +74,7 @@ export const HUB_ROUTES = {
   manifest: (id: string) => `/hub/manifests/${id}`,
   exceptions: "/hub/exceptions",
   cash: "/hub/cash",
+  settings: "/hub/settings",
 } as const;
 
 export const RIDER_ROUTES = {
@@ -78,6 +83,7 @@ export const RIDER_ROUTES = {
   task: (id: string) => `/rider/tasks/${id}`,
   history: "/rider/history",
   profile: "/rider/profile",
+  settings: "/rider/settings",
 } as const;
 
 export const ROUTES = {

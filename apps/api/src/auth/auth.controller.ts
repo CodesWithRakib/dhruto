@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, HttpStatus, HttpCode, UseGuards, Req } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { AuthService } from "./services/auth.service.js";
-import { RegisterDto, LoginDto, RefreshTokenDto } from "./dto/auth.dto.js";
+import { RegisterDto, LoginDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto } from "./dto/auth.dto.js";
 import { Public } from "./decorators/public.decorator.js";
 import { CurrentUser } from "./decorators/current-user.decorator.js";
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
@@ -99,6 +99,52 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: "Logged out successfully",
       data: null,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Public()
+  @Post("forgot-password")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 10, windowSeconds: 60, scope: "auth-forgot-password" })
+  @ApiOperation({
+    summary: "Request password recovery instructions",
+    description: "Sends a password reset link to the account email if it exists.",
+  })
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: RequestWithId) {
+    const result = await this.authService.forgotPassword(dto);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: result.message,
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Public()
+  @Post("reset-password")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 10, windowSeconds: 60, scope: "auth-reset-password" })
+  @ApiOperation({
+    summary: "Reset account password with token",
+    description: "Updates account password given a valid password reset token.",
+  })
+  async resetPassword(@Body() dto: ResetPasswordDto, @Req() req: RequestWithId) {
+    const result = await this.authService.resetPassword(dto);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: result.message,
+      data: result,
       meta: {
         requestId: req.requestId || "unknown",
         timestamp: new Date().toISOString(),

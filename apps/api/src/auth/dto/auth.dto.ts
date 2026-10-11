@@ -83,3 +83,25 @@ export class RefreshTokenDto {
   @MinLength(10, { message: "Valid refresh token required" })
   refreshToken: string;
 }
+
+export class ForgotPasswordDto {
+  @ApiProperty({ example: "merchant@dhruto.com", description: "Registered account email" })
+  @IsString({ message: "Email must be a string" })
+  @IsNotEmpty({ message: "Email is required" })
+  @IsEmail({}, { message: "Invalid email address" })
+  email: string;
+}
+
+export class ResetPasswordDto {
+  @ApiProperty({ description: "Reset token received via password recovery link" })
+  @IsString({ message: "Token must be a string" })
+  @IsNotEmpty({ message: "Reset token is required" })
+  token: string;
+
+  @ApiProperty({ example: "newSecret123", minLength: 6 })
+  @IsString({ message: "Password must be a string" })
+  @IsNotEmpty({ message: "New password is required" })
+  @MinLength(6, { message: "Password must be at least 6 characters" })
+  newPassword: string;
+}
+

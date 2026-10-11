@@ -8,7 +8,7 @@ export interface JwtPayload {
   merchantId?: string | null;
   riderId?: string | null;
   hubId?: string | null;
-  type?: "access" | "refresh";
+  type?: "access" | "refresh" | "password_reset";
   iat?: number;
   exp?: number;
 }

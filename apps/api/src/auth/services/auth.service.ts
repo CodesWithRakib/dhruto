@@ -22,7 +22,7 @@ import {
 } from "../../database/entities/index.js";
 import { CustomJwtService } from "../jwt/custom-jwt.service.js";
 import { PasswordService } from "./password.service.js";
-import { RegisterDto, LoginDto } from "../dto/auth.dto.js";
+import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from "../dto/auth.dto.js";
 import { getErrorMessage } from "../../common/utils/error.util.js";
 
 /**
@@ -445,4 +445,63 @@ export class AuthService implements OnModuleInit {  private readonly logger = ne
       createdAt: user.createdAt,
     };
   }
+
+  /**
+   * Request password recovery link.
+   * Secure against enumeration attacks: always returns generic message.
+   */
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; resetToken?: string }> {
+    const user = await this.userRepo.findOne({
+      where: { email: dto.email.trim().toLowerCase() },
+    });
+
+    if (!user) {
+      this.logger.log(`Password reset requested for non-existent email: ${dto.email}`);
+      return {
+        message: "If an account exists with this email, password reset instructions have been sent.",
+      };
+    }
+
+    const resetToken = this.jwtService.createPasswordResetToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    this.logger.log(`Password reset token issued for user ${user.id} (${user.email})`);
+
+    const isDev = process.env.NODE_ENV !== "production";
+    return {
+      message: "If an account exists with this email, password reset instructions have been sent.",
+      ...(isDev ? { resetToken } : {}),
+    };
+  }
+
+  /**
+   * Complete password reset using token and new password.
+   */
+  async resetPassword(dto: ResetPasswordDto): Promise<{ success: boolean; message: string }> {
+    const payload = this.jwtService.verifyPasswordResetToken(dto.token);
+    const userId = payload.sub;
+
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException("User account not found");
+    }
+
+    const newHashedPassword = await this.passwordService.hash(dto.newPassword);
+    user.passwordHash = newHashedPassword;
+    await this.userRepo.save(user);
+
+    this.logger.log(`Password successfully reset for user ${user.id}`);
+
+    return {
+      success: true,
+      message: "Password has been successfully updated. You can now log in.",
+    };
+  }
 }
+

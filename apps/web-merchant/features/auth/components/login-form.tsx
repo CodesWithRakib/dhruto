@@ -147,7 +147,7 @@ export function LoginForm() {
             />
             <span>{t("rememberMe")}</span>
           </label>
-          <Link href="/contact" className="text-xs font-semibold text-primary hover:underline">
+          <Link href="/forgot-password" className="text-xs font-semibold text-primary hover:underline">
             {t("forgotPassword")}
           </Link>
         </div>

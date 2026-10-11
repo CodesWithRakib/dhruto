@@ -225,4 +225,33 @@ export class CustomJwtService {
     }
     return payload;
   }
+
+  /**
+   * Generates a signed password reset token with short TTL (15 minutes).
+   */
+  createPasswordResetToken(user: { id: string; email: string; role: UserRole }): string {
+    return this.sign(
+      {
+        sub: user.id,
+        email: user.email,
+        phone: "",
+        role: user.role,
+        type: "password_reset",
+      },
+      this.accessSecret,
+      "15m",
+    );
+  }
+
+  /**
+   * Verifies a password reset token.
+   */
+  verifyPasswordResetToken(token: string): JwtPayload {
+    const payload = this.verify(token, this.accessSecret);
+    if (payload.type && payload.type !== "password_reset") {
+      throw new UnauthorizedException("Invalid token type for password reset");
+    }
+    return payload;
+  }
 }
+

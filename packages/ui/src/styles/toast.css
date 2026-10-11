@@ -1,0 +1,337 @@
+/**
+ * Dhruto — Premium Sonner Toast Design System
+ * ------------------------------------------------------------------
+ * Center-positioned, clean flat surface (no gradients, no borders),
+ * refined soft elevation shadow, and precise right-aligned close button.
+ */
+
+/* ------------------------------------------------------------------
+ * 1. Toaster Container Positioning & Viewport Centering
+ * ------------------------------------------------------------------ */
+[data-sonner-toaster],
+.dhruto-toaster {
+  --offset: 20px;
+  --toast-width: 400px;
+  --toast-border-radius: 14px;
+  font-family: var(--font-sans), var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  z-index: 99999;
+}
+
+/* Perfect horizontal centering for top-center position */
+[data-sonner-toaster][data-x-position="center"],
+.dhruto-toaster[data-x-position="center"] {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+[data-sonner-toaster][data-y-position="top"],
+.dhruto-toaster[data-y-position="top"] {
+  top: var(--offset, 20px) !important;
+}
+
+/* Responsive mobile centering */
+@media (max-width: 640px) {
+  [data-sonner-toaster],
+  .dhruto-toaster {
+    --offset: 14px;
+    width: calc(100vw - 32px) !important;
+    left: 16px !important;
+    right: 16px !important;
+    transform: none !important;
+  }
+
+  [data-sonner-toast],
+  .dhruto-toast {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * 2. Toast Card Structure (No Borders, No Gradients, Pure Clean Shadow)
+ * ------------------------------------------------------------------ */
+[data-sonner-toast],
+.dhruto-toast {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 42px 12px 14px !important; /* Right padding reserves room for close button */
+  width: var(--toast-width, 400px) !important;
+  max-width: calc(100vw - 32px) !important;
+  border-radius: var(--toast-border-radius, 14px) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  user-select: none;
+  cursor: default;
+
+  /* Clean solid surface - no borders, no gradient */
+  border: none !important;
+  outline: none !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0f172a !important;
+
+  /* Soft, clean, multi-layered elevation shadow */
+  box-shadow:
+    0 10px 28px -4px rgba(15, 23, 42, 0.12),
+    0 4px 12px -2px rgba(15, 23, 42, 0.06) !important;
+
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease !important;
+}
+
+/* Remove any pseudo-element bars or accents completely */
+[data-sonner-toast]::before,
+[data-sonner-toast]::after,
+.dhruto-toast::before,
+.dhruto-toast::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Hover depth */
+[data-sonner-toast]:hover,
+.dhruto-toast:hover {
+  box-shadow:
+    0 14px 34px -4px rgba(15, 23, 42, 0.16),
+    0 6px 14px -2px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Dark theme / Themed surfaces adaptation */
+:root[data-theme="dark"] [data-sonner-toast],
+.dark [data-sonner-toast],
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
+  background: #181124 !important;
+  background-image: none !important;
+  border: none !important;
+  color: #f8fafc !important;
+  box-shadow:
+    0 14px 36px -4px rgba(0, 0, 0, 0.55),
+    0 6px 16px -2px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ------------------------------------------------------------------
+ * 3. Content Layout & Typography
+ * ------------------------------------------------------------------ */
+[data-sonner-toast] [data-content],
+.dhruto-toast [data-content] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  justify-content: center !important;
+}
+
+[data-sonner-toast] [data-title],
+.dhruto-toast-title {
+  font-size: 0.8875rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.012em !important;
+}
+
+:root[data-theme="dark"] [data-sonner-toast] [data-title],
+.dark [data-sonner-toast] [data-title],
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-title] {
+  color: #ffffff !important;
+}
+
+[data-sonner-toast] [data-description],
+.dhruto-toast-description {
+  font-size: 0.8125rem !important;
+  font-weight: 450 !important;
+  line-height: 1.4 !important;
+  color: #64748b !important;
+  word-break: break-word !important;
+}
+
+:root[data-theme="dark"] [data-sonner-toast] [data-description],
+.dark [data-sonner-toast] [data-description],
+[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-description] {
+  color: #94a3b8 !important;
+}
+
+/* ------------------------------------------------------------------
+ * 4. Status Icons (Clean Flat Shapes, No Borders, No Gradients)
+ * ------------------------------------------------------------------ */
+[data-sonner-toast] [data-icon] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+[data-sonner-toast] [data-icon] svg {
+  width: 17px !important;
+  height: 17px !important;
+  stroke-width: 2.2 !important;
+}
+
+/* Success (Clean Flat Emerald) */
+[data-sonner-toast][data-type="success"] [data-icon] {
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+}
+:root[data-theme="dark"] [data-sonner-toast][data-type="success"] [data-icon] {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+}
+
+/* Error / Destructive (Clean Flat Crimson) */
+[data-sonner-toast][data-type="error"] [data-icon] {
+  background: #fef2f2 !important;
+  color: #e11d48 !important;
+}
+:root[data-theme="dark"] [data-sonner-toast][data-type="error"] [data-icon] {
+  background: rgba(244, 63, 94, 0.2) !important;
+  color: #fb7185 !important;
+}
+
+/* Warning (Clean Flat Amber) */
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  background: #fffbeb !important;
+  color: #d97706 !important;
+}
+:root[data-theme="dark"] [data-sonner-toast][data-type="warning"] [data-icon] {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+}
+
+/* Info (Clean Flat Violet/Brand) */
+[data-sonner-toast][data-type="info"] [data-icon] {
+  background: #f5f3ff !important;
+  color: #7c3aed !important;
+}
+:root[data-theme="dark"] [data-sonner-toast][data-type="info"] [data-icon] {
+  background: rgba(124, 58, 237, 0.2) !important;
+  color: #a78bfa !important;
+}
+
+/* Loading */
+[data-sonner-toast][data-type="loading"] [data-icon] {
+  background: #f1f5f9 !important;
+  color: #3b82f6 !important;
+}
+
+/* Default / Neutral */
+[data-sonner-toast][data-type="default"] [data-icon] {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+/* ------------------------------------------------------------------
+ * 5. Close Button Alignment Fix
+ * ------------------------------------------------------------------ */
+/*
+ * Sonner injects its close button at left: 0, top: 0 with transform: translate(-35%, -35%).
+ * We explicitly override left to auto, place it at right: 12px, vertically center it at top: 50%,
+ * and apply a clean, borderless circular dismiss icon.
+ */
+[data-sonner-toast] [data-close-button],
+.dhruto-toast-close {
+  position: absolute !important;
+  left: auto !important;
+  right: 12px !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  opacity: 0.8 !important;
+  transition: all 0.18s ease !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  z-index: 10 !important;
+}
+
+[data-sonner-toast] [data-close-button] svg,
+.dhruto-toast-close svg {
+  width: 12px !important;
+  height: 12px !important;
+  stroke-width: 2.2 !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover,
+.dhruto-toast-close:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+  opacity: 1 !important;
+  transform: translateY(-50%) scale(1.08) !important;
+}
+
+[data-sonner-toast] [data-close-button]:active,
+.dhruto-toast-close:active {
+  transform: translateY(-50%) scale(0.95) !important;
+}
+
+:root[data-theme="dark"] [data-sonner-toast] [data-close-button],
+.dark [data-sonner-toast] [data-close-button] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] [data-sonner-toast] [data-close-button]:hover,
+.dark [data-sonner-toast] [data-close-button]:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+/* ------------------------------------------------------------------
+ * 6. Action & Cancel Buttons (Borderless, Flat)
+ * ------------------------------------------------------------------ */
+[data-sonner-toast] [data-button],
+.dhruto-toast-action {
+  height: 30px !important;
+  padding: 0 12px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  white-space: nowrap !important;
+}
+[data-sonner-toast] [data-button]:hover,
+.dhruto-toast-action:hover {
+  filter: brightness(1.08) !important;
+}
+
+[data-sonner-toast] [data-cancel],
+.dhruto-toast-cancel {
+  height: 30px !important;
+  padding: 0 10px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+}
+[data-sonner-toast] [data-cancel]:hover,
+.dhruto-toast-cancel:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}

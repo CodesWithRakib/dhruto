@@ -67,6 +67,26 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth", "Merchant", "Parcel"],
     }),
+    forgotPassword: builder.mutation<
+      { data: { message: string; resetToken?: string }; success: boolean; message: string },
+      { email: string }
+    >({
+      query: (body) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body,
+      }),
+    }),
+    resetPassword: builder.mutation<
+      { data: { success: boolean; message: string }; success: boolean; message: string },
+      { token: string; newPassword: string }
+    >({
+      query: (body) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body,
+      }),
+    }),
     getMe: builder.query<{ data: AuthUser; success: boolean }, void>({
       query: () => "/auth/me",
       providesTags: ["Auth"],
@@ -74,4 +94,12 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetMeQuery } = authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+  useGetMeQuery,
+} = authApi;
+
