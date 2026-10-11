@@ -1,5 +1,6 @@
 import {
   Bike,
+  Calculator,
   ClipboardList,
   FileText,
   History,
@@ -66,6 +67,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           labelKey: "createBooking",
           icon: PlusCircle,
         },
+        {
+          href: MERCHANT_ROUTES.calculator,
+          labelKey: "calculator",
+          icon: Calculator,
+        },
         // Phase 3 (T-BULK-01): bulk import has no UI/API yet — the
         // `?mode=bulk` entry promised a dead page, so it is removed from
         // the sidebar. The dashboard keeps a disabled "coming soon" card
@@ -102,6 +108,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         },
         {
           href: MERCHANT_ROUTES.webhooks,
+          labelKey: "integrations",
+          icon: Radio,
+        },
+        {
+          href: MERCHANT_ROUTES.settings,
           labelKey: "settings",
           icon: Settings,
         },

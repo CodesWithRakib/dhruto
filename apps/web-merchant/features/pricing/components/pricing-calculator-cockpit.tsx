@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import {
   ArrowRight,
   Box,
@@ -56,7 +56,23 @@ const ZONES: ZoneOption[] = [
   },
 ];
 
-export function PricingCalculatorCockpit() {
+export interface PricingCalculatorCockpitProps {
+  ctaHref?: string;
+  ctaLabel?: string;
+  ctaSubtext?: string;
+  title?: string;
+  subtitle?: string;
+  compact?: boolean;
+}
+
+export function PricingCalculatorCockpit({
+  ctaHref = "/register",
+  ctaLabel = "Book This Delivery Rate",
+  ctaSubtext = "Free merchant sign-up • No credit card or deposit needed",
+  title = "Real-Time Delivery Cost & Escrow Simulator",
+  subtitle = "Adjust destination, package weight, and cash-on-delivery amounts. Watch your itemized thermal receipt and net bank payout update instantaneously.",
+  compact = false,
+}: PricingCalculatorCockpitProps = {}) {
   const [selectedZoneId, setSelectedZoneId] = React.useState<string>("dhaka");
   const [weightKg, setWeightKg] = React.useState<number>(1.0);
   const [codAmount, setCodAmount] = React.useState<number>(3500);
@@ -74,7 +90,7 @@ export function PricingCalculatorCockpit() {
   const netMerchantPayout = Math.max(0, codAmount - totalDeductions);
 
   return (
-    <section id="calculator-cockpit" className="relative scroll-mt-24 py-24">
+    <section id="calculator-cockpit" className={`relative scroll-mt-24 ${compact ? "py-6" : "py-24"}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
@@ -82,11 +98,11 @@ export function PricingCalculatorCockpit() {
             <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
             <span>INTERACTIVE FREIGHT & ESCROW COCKPIT</span>
           </div>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Real-Time Delivery Cost & Escrow Simulator
+          <h2 className={`mt-4 font-extrabold tracking-tight text-foreground ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+            {title}
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Adjust destination, package weight, and cash-on-delivery amounts. Watch your itemized thermal receipt and net bank payout update instantaneously.
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {subtitle}
           </p>
         </div>
 
@@ -355,14 +371,14 @@ export function PricingCalculatorCockpit() {
               {/* Action Button */}
               <div className="mt-6">
                 <Link
-                  href="/register"
+                  href={ctaHref}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Book This Delivery Rate</span>
+                  <span>{ctaLabel}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <div className="mt-2.5 text-center text-[11px] text-muted-foreground">
-                  Free merchant sign-up • No credit card or deposit needed
+                  {ctaSubtext}
                 </div>
               </div>
             </div>

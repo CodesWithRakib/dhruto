@@ -19,6 +19,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useSignOut } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { PublicStatusIndicator } from "./public-status-indicator";
 
 const PUBLIC_LINKS = [
   { href: "/", labelKey: "home" },
@@ -30,6 +31,7 @@ const PUBLIC_LINKS = [
 
 /** Extra links shown only in the mobile drawer, where space is not a constraint. */
 const MOBILE_EXTRA_LINKS = [
+  { href: "/status", labelKey: "status" },
   { href: "/faq", labelKey: "faq" },
   { href: "/contact", labelKey: "support" },
 ] as const;
@@ -113,6 +115,7 @@ export function PublicHeader() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <PublicStatusIndicator />
           <ThemeSwitcher />
           <div className="text-white">
             <LanguageSwitcher currentLocale={locale} label={t("language")} />

@@ -246,6 +246,10 @@ export function PublicFooter() {
               Terms &amp; SLA
             </Link>
             <span>•</span>
+            <Link href="/status" className="hover:text-white transition-colors">
+              System Status
+            </Link>
+            <span>•</span>
             <span className="inline-flex items-center gap-1 text-[var(--acc)] font-medium">
               <ShieldCheck className="h-3.5 w-3.5" />
               Digital Commerce Act 2026

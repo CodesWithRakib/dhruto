@@ -38,6 +38,7 @@ import {
   useGetOutboxOverviewQuery,
   useReplayOutboxEventMutation,
 } from "../api/integrations.api";
+import { SystemObservabilityCard } from "@/features/observability/components/system-observability-card";
 import { useTestSmsNotificationMutation } from "@/features/notifications/api/notifications.api";
 import { IntegrationFailureStatus, type IntegrationFailureItem } from "@dhruto/contracts";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -164,6 +165,9 @@ export function AdminIntegrationsDashboard() {
           {feedback}
         </div>
       )}
+
+      {/* System Telemetry & Health Probe Cockpit */}
+      <SystemObservabilityCard />
 
       {overview.isLoading ? (
         <Card className="flex items-center justify-center gap-2 p-10 text-sm text-muted-foreground">

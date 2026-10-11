@@ -21,6 +21,7 @@ export const PUBLIC_ROUTES = {
   trackShipment: (code: string) => `/track/${code}`,
   services: "/services",
   pricing: "/pricing",
+  status: "/status",
   about: "/about",
   contact: "/contact",
   faq: "/faq",
@@ -38,6 +39,7 @@ export const AUTH_ROUTES = {
 export const MERCHANT_ROUTES = {
   dashboard: "/merchant/dashboard",
   createBooking: "/merchant/bookings/new",
+  calculator: "/merchant/calculator",
   parcels: "/merchant/parcels",
   parcel: (id: string) => `/merchant/parcels/${id}`,
   parcelLabel: (id: string) => `/merchant/parcels/${id}/label`,
@@ -48,6 +50,7 @@ export const MERCHANT_ROUTES = {
   tracking: "/merchant/track",
   trackShipment: (code: string) => `/merchant/track/${code}`,
   webhooks: "/merchant/developer/webhooks",
+  apiKeys: "/merchant/developer/api-keys",
   settings: "/merchant/settings",
 } as const;
 

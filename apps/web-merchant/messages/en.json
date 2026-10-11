@@ -1242,7 +1242,8 @@
     "alerts": "Alerts",
     "exceptions": "Exceptions",
     "settings": "Settings",
-    "faq": "Help"
+    "faq": "Help",
+    "status": "System Status"
   },
   "Footer": {
     "tagline": "Next-Gen Logistics & Courier OS",
@@ -2272,6 +2273,22 @@
     "codSummary": "Collected {collected} · pending {pending} · {rate}% rate",
     "reportsTitle": "Recent reports ({count})",
     "reportsEmpty": "No reports yet. Use Export on any section."
+  },
+  "SystemStatus": {
+    "title": "System Status & Service Health",
+    "subtitle": "Real-time telemetry, service uptime, database connectivity, and messaging queue latency across Bangladesh infrastructure.",
+    "allOperational": "All Systems Operational",
+    "degraded": "Degraded Performance",
+    "maintenance": "Under Maintenance",
+    "unreachable": "Telemetry Unreachable",
+    "latency": "Response Latency",
+    "uptime": "System Uptime",
+    "database": "PostgreSQL Primary Cluster",
+    "redis": "Redis Event & Distributed Cache",
+    "queues": "BullMQ Logistics & SMS Queue",
+    "viewStatus": "View System Status",
+    "lastChecked": "Last checked: {time}",
+    "refreshLive": "Refresh Telemetry"
   },
   "ApiErrors": {
     "fallback": "Something went wrong. Please try again.",
