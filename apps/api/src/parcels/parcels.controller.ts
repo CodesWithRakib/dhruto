@@ -32,6 +32,7 @@ import { ApiErrorCode, ParcelStatus } from "@dhruto/contracts";
 import { ParcelsService } from "./parcels.service.js";
 import { CreateParcelDto } from "./dto/create-parcel.dto.js";
 import { UpdateParcelDto } from "./dto/update-parcel.dto.js";
+import { RequestPickupDto, BatchRequestPickupDto } from "./dto/request-pickup.dto.js";
 import { AssignRiderDto } from "./dto/assign-rider.dto.js";
 import { BulkImportDto, MAX_BULK_ROWS } from "./dto/bulk-import.dto.js";
 import { ParcelResponseDto } from "./dto/parcel-response.dto.js";
@@ -338,6 +339,66 @@ export class ParcelsController {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Parcel details updated successfully",
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post("batch/request-pickup")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-pickup" })
+  @ApiOperation({
+    summary: "Request pickup for multiple parcels in CREATED status",
+    description:
+      "Operational command allowing merchants or admins to transition multiple booked parcels from CREATED to PICKUP_REQUESTED.",
+  })
+  @ApiOkResponse({ description: "Pickup requested for batch parcels" })
+  async batchRequestPickup(
+    @Body() dto: BatchRequestPickupDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.batchRequestPickup(dto.parcelIds, user, dto.notes);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Pickup requested successfully for ${result.requestedCount} parcel(s)`,
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post(":id/request-pickup")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-pickup" })
+  @ApiOperation({
+    summary: "Request pickup for a parcel in CREATED status",
+    description:
+      "Operational command allowing merchants or admins to transition a booked parcel from CREATED to PICKUP_REQUESTED. Replaying on an already requested parcel is idempotent.",
+  })
+  @ApiOkResponse({ description: "Pickup requested" })
+  @ApiNotFoundResponse({ description: "Parcel not found" })
+  async requestPickup(
+    @Param("id") id: string,
+    @Body() dto: RequestPickupDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.requestPickup(id, user, dto?.notes);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Pickup requested successfully",
       data: result,
       meta: {
         requestId: req.requestId || "unknown",

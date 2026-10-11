@@ -8,6 +8,8 @@ import type { MerchantAnalyticsSummary } from "@dhruto/contracts";
 import { cn } from "@/lib/cn";
 import { useFormatters } from "@/lib/format";
 import { KpiCard } from "@/components/data-display/kpi-card";
+import { Link } from "@/lib/navigation";
+import { MERCHANT_ROUTES } from "@/config/routes";
 import type { DashboardStats } from "@/features/merchants/api/merchants.api";
 import { pendingCodAmount } from "../lib/overview";
 
@@ -40,42 +42,52 @@ export function ShipmentKpis({
 
   return (
     <div className={gridClass}>
-      <KpiCard
-        label={t("totalBookings")}
-        value={number(stats.totalOrders)}
-        hint={t("totalBookingsHint")}
-        icon={Package}
-        tone="primary"
-        emphasis
-      />
-      <KpiCard
-        label={t("pending")}
-        value={number(stats.pendingOrders)}
-        hint={t("pendingHint")}
-        icon={Clock}
-        tone="warning"
-      />
-      <KpiCard
-        label={t("inTransit")}
-        value={number(stats.inTransitOrders)}
-        hint={t("inTransitHint")}
-        icon={Truck}
-        tone="info"
-      />
-      <KpiCard
-        label={t("delivered")}
-        value={number(stats.deliveredOrders)}
-        hint={t("deliveredHint")}
-        icon={CheckCircle2}
-        tone="success"
-      />
-      <KpiCard
-        label={t("returnsTitle")}
-        value={number(stats.returnedOrders)}
-        hint={t("returnsHint")}
-        icon={RotateCcw}
-        tone="danger"
-      />
+      <Link href={MERCHANT_ROUTES.parcels} className="block transition-transform hover:-translate-y-0.5">
+        <KpiCard
+          label={t("totalBookings")}
+          value={number(stats.totalOrders)}
+          hint={t("totalBookingsHint")}
+          icon={Package}
+          tone="primary"
+          emphasis
+        />
+      </Link>
+      <Link href={`${MERCHANT_ROUTES.parcels}?status=CREATED`} className="block transition-transform hover:-translate-y-0.5">
+        <KpiCard
+          label={t("pending")}
+          value={number(stats.pendingOrders)}
+          hint={t("pendingHint")}
+          icon={Clock}
+          tone="warning"
+        />
+      </Link>
+      <Link href={`${MERCHANT_ROUTES.parcels}?status=IN_TRANSIT`} className="block transition-transform hover:-translate-y-0.5">
+        <KpiCard
+          label={t("inTransit")}
+          value={number(stats.inTransitOrders)}
+          hint={t("inTransitHint")}
+          icon={Truck}
+          tone="info"
+        />
+      </Link>
+      <Link href={`${MERCHANT_ROUTES.parcels}?status=DELIVERED`} className="block transition-transform hover:-translate-y-0.5">
+        <KpiCard
+          label={t("delivered")}
+          value={number(stats.deliveredOrders)}
+          hint={t("deliveredHint")}
+          icon={CheckCircle2}
+          tone="success"
+        />
+      </Link>
+      <Link href={MERCHANT_ROUTES.returns} className="block transition-transform hover:-translate-y-0.5">
+        <KpiCard
+          label={t("returnsTitle")}
+          value={number(stats.returnedOrders)}
+          hint={t("returnsHint")}
+          icon={RotateCcw}
+          tone="danger"
+        />
+      </Link>
     </div>
   );
 }

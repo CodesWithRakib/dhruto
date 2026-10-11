@@ -15,6 +15,7 @@ import {
   Wallet,
   BarChart3,
   Truck,
+  RotateCcw,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -70,6 +71,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           href: MERCHANT_ROUTES.parcels,
           labelKey: "shipments",
           icon: Package,
+        },
+        {
+          href: MERCHANT_ROUTES.returns,
+          labelKey: "returns",
+          icon: RotateCcw,
         },
         {
           href: MERCHANT_ROUTES.finance,

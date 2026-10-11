@@ -43,6 +43,7 @@ import { useFormatters } from "@/lib/format";
 import { lastListUrl } from "@/lib/last-list-url";
 import { ParcelCancelDialog } from "./parcel-cancel-dialog";
 import { ParcelEditDialog } from "./parcel-edit-dialog";
+import { ParcelPickupDialog } from "./parcel-pickup-dialog";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -109,6 +110,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const [backHref, setBackHref] = React.useState(routes.parcels);
   const [showCancelModal, setShowCancelModal] = React.useState(false);
   const [showEditModal, setShowEditModal] = React.useState(false);
+  const [showPickupModal, setShowPickupModal] = React.useState(false);
   React.useEffect(() => {
     setBackHref(lastListUrl(routes.parcels, routes.parcels));
   }, [routes.parcels]);
@@ -176,6 +178,8 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
     ParcelStatus.PICKUP_REQUESTED,
   ].includes(parcel.status);
 
+  const isPickupRequestable = parcel.status === ParcelStatus.CREATED;
+
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -190,6 +194,17 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             {t("refresh")}
           </Button>
+
+          {isPickupRequestable ? (
+            <Button
+              size="sm"
+              className="gap-1.5 bg-primary text-primary-foreground shadow-sm"
+              onClick={() => setShowPickupModal(true)}
+            >
+              <Truck className="h-4 w-4" aria-hidden="true" />
+              <span>Request Pickup</span>
+            </Button>
+          ) : null}
 
           {isEditable ? (
             <Button
@@ -502,6 +517,15 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         initialNotes={parcel.parcelDescription}
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
+        onSuccess={() => void refetch()}
+      />
+
+      <ParcelPickupDialog
+        parcelId={parcel.id}
+        trackingCode={parcel.trackingCode}
+        pickupAddress={parcel.pickupAddress}
+        isOpen={showPickupModal}
+        onClose={() => setShowPickupModal(false)}
         onSuccess={() => void refetch()}
       />
     </div>

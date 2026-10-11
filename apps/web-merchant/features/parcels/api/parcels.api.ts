@@ -227,6 +227,79 @@ export const parcelsApi = baseApi.injectEndpoints({
         { type: PARCEL_TAG, id: "LIST" },
       ],
     }),
+
+    requestPickup: builder.mutation<
+      ApiResponse<{ parcelId: string; trackingCode: string; status: ParcelStatus }>,
+      { id: string; notes?: string }
+    >({
+      query: ({ id, notes }) => ({
+        url: `/parcels/${id}/request-pickup`,
+        method: "POST",
+        body: notes ? { notes } : {},
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+        "Merchant",
+      ],
+    }),
+
+    batchRequestPickup: builder.mutation<
+      ApiResponse<{ requestedCount: number; parcelIds: string[] }>,
+      { parcelIds: string[]; notes?: string }
+    >({
+      query: (body) => ({
+        url: "/parcels/batch/request-pickup",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: PARCEL_TAG, id: "LIST" }, "Merchant"],
+    }),
+
+    initiateRto: builder.mutation<
+      ApiResponse<{ parcelId: string; trackingCode: string; status: ParcelStatus }>,
+      string
+    >({
+      query: (id) => ({
+        url: `/parcels/${id}/rto`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+        "Hub",
+      ],
+    }),
+
+    advanceRto: builder.mutation<
+      ApiResponse<{ parcelId: string; trackingCode: string; status: ParcelStatus }>,
+      string
+    >({
+      query: (id) => ({
+        url: `/parcels/${id}/rto-advance`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+        "Hub",
+      ],
+    }),
+
+    completeRto: builder.mutation<
+      ApiResponse<{ parcelId: string; trackingCode: string; status: ParcelStatus }>,
+      string
+    >({
+      query: (id) => ({
+        url: `/parcels/${id}/rto-complete`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+        "Hub",
+      ],
+    }),
   }),
 });
 
@@ -243,5 +316,11 @@ export const {
   useImportBulkMutation,
   useCancelParcelMutation,
   useUpdateParcelMutation,
+  useRequestPickupMutation,
+  useBatchRequestPickupMutation,
+  useInitiateRtoMutation,
+  useAdvanceRtoMutation,
+  useCompleteRtoMutation,
 } = parcelsApi;
+
 

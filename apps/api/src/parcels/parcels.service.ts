@@ -1027,6 +1027,81 @@ export class ParcelsService {
   }
 
   /**
+   * Requests rider pickup for a booked parcel (CREATED -> PICKUP_REQUESTED).
+   * Merchants request pickup for their own parcels; admins can request for any.
+   * If already PICKUP_REQUESTED, replays cleanly (idempotent).
+   */
+  async requestPickup(
+    idOrCode: string,
+    actor: AuthenticatedUser,
+    notes?: string,
+  ): Promise<{ parcelId: string; trackingCode: string; status: ParcelStatus }> {
+    const scope = await this.resolveScope(actor);
+    return this.dataSource.transaction(async (manager) => {
+      const parcel = await manager.getRepository(Parcel).findOne({
+        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+      });
+      if (!parcel) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      this.assertOwnership(parcel, scope);
+
+      if (parcel.status === ParcelStatus.PICKUP_REQUESTED) {
+        return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+      }
+
+      const fromStatus = parcel.status;
+      this.lifecycle.assertTransition(fromStatus, ParcelStatus.PICKUP_REQUESTED);
+      parcel.status = ParcelStatus.PICKUP_REQUESTED;
+      if (notes?.trim()) {
+        parcel.parcelDescription = parcel.parcelDescription
+          ? `${parcel.parcelDescription} | Pickup notes: ${notes.trim()}`
+          : `Pickup notes: ${notes.trim()}`;
+      }
+      await manager.save(parcel);
+
+      await manager.save(
+        manager.create(ParcelStatusHistory, {
+          parcelId: parcel.id,
+          fromStatus,
+          toStatus: ParcelStatus.PICKUP_REQUESTED,
+          eventType: "STATUS_CHANGED",
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
+          actorRole: actor.role,
+          description: notes ? `Pickup requested: ${notes}` : "Pickup requested by merchant",
+        }),
+      );
+
+      await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
+      this.logger.log(`PARCEL_PICKUP_REQUESTED parcel=${parcel.id} actor=${actor.id}`);
+      return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+    });
+  }
+
+  /**
+   * Batch requests rider pickup for multiple parcels in CREATED status.
+   */
+  async batchRequestPickup(
+    parcelIds: string[],
+    actor: AuthenticatedUser,
+    notes?: string,
+  ): Promise<{ requestedCount: number; parcelIds: string[] }> {
+    const results: string[] = [];
+    for (const id of parcelIds) {
+      try {
+        await this.requestPickup(id, actor, notes);
+        results.push(id);
+      } catch (err) {
+        this.logger.warn(`BATCH_PICKUP_ITEM_FAILED id=${id} reason=${(err as Error).message}`);
+      }
+    }
+    return { requestedCount: results.length, parcelIds: results };
+  }
+
+  /**
    * Opens a return-to-origin case from a failed delivery
    * (`DELIVERY_ATTEMPTED → RTO_INITIATED`). Hub managers and admins only;
    * merchants watch progress through parcel status. Repeat initiation is a

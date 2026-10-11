@@ -41,6 +41,7 @@ export const MERCHANT_ROUTES = {
   parcels: "/merchant/parcels",
   parcel: (id: string) => `/merchant/parcels/${id}`,
   parcelLabel: (id: string) => `/merchant/parcels/${id}/label`,
+  returns: "/merchant/returns",
   finance: "/merchant/finance",
   intelligence: "/merchant/intelligence",
   analytics: "/merchant/analytics",
