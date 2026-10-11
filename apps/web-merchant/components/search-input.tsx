@@ -44,6 +44,17 @@ export function DebouncedSearchInput({
   const [text, setText] = React.useState(value);
   const debounced = useDebouncedValue(text, debounceMs);
   const firstRender = React.useRef(true);
+  // Last text this field emitted upward. An external reset changes `value`
+  // without touching `text`/`debounced`, so the next effect run still sees
+  // the old trio agreeing with each other — without this ref the field would
+  // re-emit the cleared text (Phase 12: proven single resurrection at +67ms
+  // that re-dirtied the URL via the parent commit effect). Emitting only
+  // never-emitted settled text is correct by construction: genuine typing
+  // always produces text the parent hasn't seen, so it still emits; a
+  // post-reset echo always repeats the last emission, so it never does.
+  // Ref mutation + idempotent emit make this StrictMode-safe (double-run
+  // emits the same value twice; the parent bails out on identical state).
+  const lastEmitted = React.useRef(value);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // `/` focuses search from anywhere except an editable field. Scoped to
@@ -77,10 +88,18 @@ export function DebouncedSearchInput({
   React.useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
+      lastEmitted.current = value;
       return;
     }
-    if (debounced !== value) onChange(debounced);
-  }, [debounced, value, onChange]);
+    // Propagate ONLY settled text the parent hasn't seen: `debounced === text`
+    // rejects stale post-reset debounce (it never agrees with the cleared
+    // field), and `text !== lastEmitted` rejects same-commit echoes where an
+    // external reset arrives while text/debounced still hold the old value.
+    if (debounced === text && text !== value && text !== lastEmitted.current) {
+      lastEmitted.current = text;
+      onChange(debounced);
+    }
+  }, [debounced, text, value, onChange]);
 
   const generatedId = React.useId();
   const inputId = id ?? generatedId;

@@ -176,17 +176,43 @@ export function useParcelsList() {
 
   // Commit settled text to the URL. `set` drops `page`/`cursor`, so every
   // filter change returns to the first page instead of an empty tail page.
+  //
+  // Phase 8 (F-UI-01): commit ONLY what the field currently holds — the
+  // debounced value must match the live field text. After a reset (or any
+  // external URL change), a stale in-flight debounce must never resurrect
+  // cleared params; previously it re-added them, the adopt effect pulled
+  // them back into the fields, and the cycle repeated until React threw
+  // "Maximum update depth exceeded", leaving filters visibly stuck. The
+  // guard compares current state (not a consumable flag), so StrictMode
+  // double-invocation and re-runs are harmless no-ops.
   useEffect(() => {
     const next: Record<string, string | null> = {};
-    if (debouncedSearch.trim() !== urlFilters.search) next.search = debouncedSearch.trim() || null;
-    if (debouncedDistrict.trim() !== urlFilters.district)
+    if (
+      debouncedSearch.trim() === search.trim() &&
+      debouncedSearch.trim() !== urlFilters.search
+    ) {
+      next.search = debouncedSearch.trim() || null;
+    }
+    if (
+      debouncedDistrict.trim() === district.trim() &&
+      debouncedDistrict.trim() !== urlFilters.district
+    ) {
       next.district = debouncedDistrict.trim() || null;
-    if (debouncedThana.trim() !== urlFilters.thana) next.thana = debouncedThana.trim() || null;
+    }
+    if (
+      debouncedThana.trim() === thana.trim() &&
+      debouncedThana.trim() !== urlFilters.thana
+    ) {
+      next.thana = debouncedThana.trim() || null;
+    }
     if (Object.keys(next).length > 0) query.set(next);
   }, [
     debouncedSearch,
     debouncedDistrict,
     debouncedThana,
+    search,
+    district,
+    thana,
     urlFilters.search,
     urlFilters.district,
     urlFilters.thana,

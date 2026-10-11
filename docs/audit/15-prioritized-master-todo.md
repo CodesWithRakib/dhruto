@@ -53,6 +53,36 @@ T-UX-01 Confirm copy standard for money/state actions (P1, S). T-UX-02 Register 
 ## (11) Long-term
 T-LT-01 Model retraining pipeline (Blocked). T-LT-02 Route optimization. T-LT-03 Scheduled reports. T-LT-04 `CUSTOMER` role scope-or-remove.
 
+## Phase 12 verification (EXECUTED — `docs/audit-validation/phase-12-execution-evidence.md`)
+- Limiter specs 2/2 green (multi-instance 60+10 exact; redis-down memory-fallback 60+1).
+- Brave parcel-list 5/5 green — after fixing the real second defect found live: input↔hook ring oscillator (355 emits/12s → max-depth) via stale upward re-emission; fixed with never-emitted-settled-text gate (`lastEmitted` ref) in `DebouncedSearchInput`. Phase 8 guard held throughout (0 commit writes).
+- EXPLAIN Q1–Q3 recorded (sub-ms at seed scale; cursor Sort confirms composite candidate AT SCALE only — no blind DDL; T-QRY-06 open pending scaled dataset).
+- Scrape live (all 10 families, real values); backup/restore drill green (fixed `$Host` crash in both scripts; SHA-256 pass; counts 63/10/11 identical; no pending migrations); load harness all-ok, 0 throttled (rotation proven), parcel-list p95 328ms → verdict honestly NOT MET on dev box.
+- Servers killed, scratch DB dropped. Behavior changes: input emission gate + `$DbHost` rename only.
+
+## Phase 11 verification (code-complete, owner-run execution pending — `docs/audit-validation/phase-11-api04-and-evidence-checklists.md`)
+- T-API-04 CLOSED: rider scoping fixed (dead `void riderId` removed, threefold scoping argument recorded — route + profile gate + single-row response, zero behavior change); `analytics-exports` binding verified by read (registered + processor + sync fallback); `system/*` prefix deliberately unchanged (frontend health card needs prefixed `/api/v1/system/metrics` — "fixing" the exclude would 404 it).
+- T-QRY-06 checklist ready: exact Q1/Q2/Q3 `EXPLAIN (ANALYZE, BUFFERS)` queries derived from `listParcels` implementation + candidate cursor composite DDL as proposal (needs Q2 evidence first). Run PENDING.
+- T-OPS-02 checklist ready: metric names verified by read + drop-in scrape config + 2 alert rules. Run PENDING.
+- No typecheck/lint/build/test/query executed per owner instruction.
+
+## Phase 10 verification (code-complete, owner-run execution pending — `docs/audit-validation/phase-10-verification-kit-and-hardening.md`)
+- Owner-run kit NEW (`scripts/phase9-verify.ps1`): fresh `dhruto_phase9` DB + 2 API instances + Brave parcel-list + multi-instance spec, self-cleaning. Run PENDING.
+- Load harness hardened: 3-account token rotation (single identity used to measure the limiter, not the endpoints — exact budgets verified per controller); `throttled` counting + p95<300ms reference verdict; overview/parse counts 200→150 (budget-derived). Run PENDING; T-QRY-06 `EXPLAIN` still open.
+- Redis-down drill spec NEW (`rate-limit-redis-down.e2e-spec.ts`): dead-loopback boot → `memory-fallback` asserted → 61 lookups, 60×404 + 1×429. Run PENDING. Backup/restore + prometheus-scrape checklists recorded (scripts + endpoint already exist). Run PENDING.
+- Bulk-async DECIDED: chunked client batches now (zero server change, replay-safe keys); `bulk-import` BullMQ queue later, gated on transport proof + T-API-04; sync 500 cap stays.
+- No app runtime code changed; no typecheck/lint/build/test executed per owner instruction.
+
+## Phase 9 verification (code-complete, owner-run execution pending — `docs/audit-validation/phase-9-parcel-history-and-limiter.md`)
+- Parcel-list history/deep-link spec +3 (details→Back preserves filters; share-link cold-load adopts search+status; reload preserves filters). No app change (Phase 8 guard already covers these flows). Brave run PENDING.
+- Multi-instance limiter spec NEW (`rate-limit-multi-instance.e2e-spec.ts`): 2 Nest instances, 70 tracking lookups split across both under one identity → exactly 60 pass (all 404, side-effect-free) + 10 × 429. Run PENDING (needs seeded DB + shared Redis).
+- `dhruto_phase9` disposable DB refreshed (drop/create + 10/10 migrations + seed, 37 parcels) as the clean slate for both runs. No typecheck/lint/build/test executed in this phase per owner instruction.
+
+## Phase 8 verification (implementation complete, browser re-verification pending owner test pass — `docs/audit-validation/phase-8-filter-loop-repair.md`)
+- F-UI-01 root-caused (stale-debounce resurrection + adopt/commit cycle, StrictMode-amplified) and fixed by construction in the commit effect; jsdom regression test green (clean URL + typing still commits).
+- Stale `<select>` selector in `parcel-list.spec.ts` updated to toggle-group UI.
+- Typecheck/lint clean. Full parcel-list Brave journey re-run pending.
+
 ## Phase 7 verification (approved implementation, `docs/audit-validation/phase-7-bulk-ui-and-browser.md`)
 - Bulk dialog VERIFIED COMPLETE (CSV parser + template/validate/import hooks + list-page dialog + en/bn + 4 unit tests; Playwright bulk 2/2 in Brave).
 - Neighbor suites 7/8; 1 pre-existing failure carried as F-UI-01 (P1: "Clear filters" no-op + max-depth loop; root cause unidentified; debug reverted, scratch deleted).

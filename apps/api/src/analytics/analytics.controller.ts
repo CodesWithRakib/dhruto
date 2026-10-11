@@ -535,9 +535,11 @@ export class AnalyticsController {
   ) {
     const range = this.rangeOf(query);
     const riderId = await this.riderIdFor(user);
+    // Rider scope holds threefold: the route is RIDER-only, riderIdFor 404s
+    // for callers without a rider profile, and only the caller's own row is
+    // ever returned (Phase 11, T-API-04 — verified, no cross-rider leak).
     const riders = await this.metrics.riderStats(range, undefined, 200);
     const mine = riders.find((r) => r.riderId === riderId) ?? null;
-    void riderId;
     return envelope(
       HttpStatus.OK,
       "Own rider analytics retrieved successfully",

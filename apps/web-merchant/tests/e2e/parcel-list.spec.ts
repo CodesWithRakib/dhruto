@@ -73,4 +73,119 @@ test.describe("Journey 3 — Parcel list", () => {
     await page.goto("/en/merchant/parcels");
     await expect(page.getByText(/showing/i).first()).toBeVisible({ timeout: 20_000 });
   });
+
+  // Phase 9 — history + deep-link coverage for the Phase 8 filter-state fix.
+  // Filter commits use router.replace (one history entry per filter set, never
+  // per keystroke), so the supported back-flow is list → details → Back with
+  // the list URL intact — not stepping through individual keystrokes.
+  test("going back from details preserves the filtered list", async ({ page, request }) => {
+    await loginAsMerchant(page);
+    const token = await readAccessToken(page);
+
+    const booking = makeBookingFixture("BACK");
+    const created = await createParcelViaApi(request, token, booking);
+
+    await page.goto("/en/merchant/parcels");
+    await expect(page.getByRole("heading", { name: /my parcels/i })).toBeVisible();
+
+    await page
+      .getByRole("searchbox", { name: /search by tracking id/i })
+      .fill(booking.recipientName);
+    const row = page.getByRole("row").filter({ hasText: created.trackingCode });
+    await expect(row).toBeVisible({ timeout: 20_000 });
+    await expect(page).toHaveURL(/search=/, { timeout: 20_000 });
+
+    await row.getByRole("link", { name: /view/i }).click();
+    await expect(page).toHaveURL(new RegExp(`/en/merchant/parcels/${created.id}`));
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/en\/merchant\/parcels\?.*search=/);
+    await expect(
+      page.getByRole("searchbox", { name: /search by tracking id/i }),
+    ).toHaveValue(booking.recipientName);
+    await expect(page.getByRole("row").filter({ hasText: created.trackingCode })).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test("a shared list URL adopts search + status filters on first load", async ({
+    page,
+    context,
+    request,
+  }) => {
+    await loginAsMerchant(page);
+    const token = await readAccessToken(page);
+
+    const booking = makeBookingFixture("SHARE");
+    const created = await createParcelViaApi(request, token, booking);
+
+    await page.goto("/en/merchant/parcels");
+    await expect(page.getByRole("heading", { name: /my parcels/i })).toBeVisible();
+
+    await page
+      .getByRole("searchbox", { name: /search by tracking id/i })
+      .fill(booking.recipientName);
+    await page
+      .getByRole("group", { name: /quick status filters/i })
+      .getByRole("button", { name: /^created$/i })
+      .click();
+    const row = page.getByRole("row").filter({ hasText: created.trackingCode });
+    await expect(row).toBeVisible({ timeout: 20_000 });
+    await expect(page).toHaveURL(/search=/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/status=CREATED/);
+    const sharedUrl = page.url();
+
+    // Fresh page, cold load: filters must come from the URL alone (adopt
+    // effect), with no prior field state to debounce from.
+    const fresh = await context.newPage();
+    await fresh.goto(sharedUrl);
+    await expect(
+      fresh.getByRole("searchbox", { name: /search by tracking id/i }),
+    ).toHaveValue(booking.recipientName);
+    await expect(
+      fresh
+        .getByRole("group", { name: /quick status filters/i })
+        .getByRole("button", { name: /^created$/i }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      fresh.getByRole("row").filter({ hasText: created.trackingCode }),
+    ).toBeVisible({ timeout: 20_000 });
+    await fresh.close();
+  });
+
+  test("reloading the list preserves search + status filters", async ({ page, request }) => {
+    await loginAsMerchant(page);
+    const token = await readAccessToken(page);
+
+    const booking = makeBookingFixture("RELOAD");
+    const created = await createParcelViaApi(request, token, booking);
+
+    await page.goto("/en/merchant/parcels");
+    await expect(page.getByRole("heading", { name: /my parcels/i })).toBeVisible();
+
+    await page
+      .getByRole("searchbox", { name: /search by tracking id/i })
+      .fill(booking.recipientName);
+    await page
+      .getByRole("group", { name: /quick status filters/i })
+      .getByRole("button", { name: /^created$/i })
+      .click();
+    await expect(page.getByRole("row").filter({ hasText: created.trackingCode })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page).toHaveURL(/search=/, { timeout: 20_000 });
+
+    await page.reload();
+    await expect(
+      page.getByRole("searchbox", { name: /search by tracking id/i }),
+    ).toHaveValue(booking.recipientName);
+    await expect(
+      page
+        .getByRole("group", { name: /quick status filters/i })
+        .getByRole("button", { name: /^created$/i }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("row").filter({ hasText: created.trackingCode })).toBeVisible({
+      timeout: 20_000,
+    });
+  });
 });

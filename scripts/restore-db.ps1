@@ -8,12 +8,14 @@
 param(
   [string]$BackupFile,
   [string]$Database = $env:DB_NAME,
-  [string]$Host = $env:DB_HOST,
+  [string]$DbHost = $env:DB_HOST,
   [string]$User = $env:DB_USERNAME
 )
 
 if (-not $Database) { $Database = "dhruto" }
-if (-not $Host) { $Host = "localhost" }
+# NOTE (Phase 12): the parameter was `$Host`, which collides with PowerShell's
+# read-only automatic `$Host` variable and aborted the script on pwsh 7+.
+if (-not $DbHost) { $DbHost = "localhost" }
 if (-not $User) { $User = "postgres" }
 
 Write-Host "=================================================" -ForegroundColor Cyan
@@ -55,7 +57,7 @@ $psqlCmd = Get-Command "psql" -ErrorAction SilentlyContinue
 
 if ($psqlCmd) {
   Write-Host "Executing database restore via psql..." -ForegroundColor Yellow
-  & psql -h $Host -U $User -d $Database -f $BackupFile
+  & psql -h $DbHost -U $User -d $Database -f $BackupFile
   Write-Host "Database restore complete!" -ForegroundColor Green
 } else {
   Write-Host "psql tool not in PATH. Verification drill validated file integrity and syntax successfully." -ForegroundColor Green
