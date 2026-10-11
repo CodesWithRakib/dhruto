@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Building2,
   Clock,
+  Edit3,
   MapPin,
   Package,
   Printer,
@@ -16,6 +17,7 @@ import {
   Truck,
   User,
   Wallet,
+  XCircle,
 } from "lucide-react";
 import {
   Badge,
@@ -39,6 +41,8 @@ import { useGetParcelByIdQuery } from "../api/parcels.api";
 import { ParcelIntelligencePanel } from "@/features/intelligence/components/parcel-intelligence-panel";
 import { useFormatters } from "@/lib/format";
 import { lastListUrl } from "@/lib/last-list-url";
+import { ParcelCancelDialog } from "./parcel-cancel-dialog";
+import { ParcelEditDialog } from "./parcel-edit-dialog";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -103,6 +107,8 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   // Back returns to the exact list workspace (filters + page) when the user
   // arrived from it; deep links fall back to the list root.
   const [backHref, setBackHref] = React.useState(routes.parcels);
+  const [showCancelModal, setShowCancelModal] = React.useState(false);
+  const [showEditModal, setShowEditModal] = React.useState(false);
   React.useEffect(() => {
     setBackHref(lastListUrl(routes.parcels, routes.parcels));
   }, [routes.parcels]);
@@ -159,6 +165,17 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
   const progress = milestones.length > 1 ? ((currentStep - 1) / (milestones.length - 1)) * 100 : 0;
   const intelligence = parcel.addressIntelligence;
 
+  const isCancellable = [
+    ParcelStatus.CREATED,
+    ParcelStatus.PICKUP_REQUESTED,
+    ParcelStatus.PICKUP_ASSIGNED,
+  ].includes(parcel.status);
+
+  const isEditable = [
+    ParcelStatus.CREATED,
+    ParcelStatus.PICKUP_REQUESTED,
+  ].includes(parcel.status);
+
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -168,11 +185,36 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
             {t("back")}
           </Button>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void refetch()}>
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             {t("refresh")}
           </Button>
+
+          {isEditable ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setShowEditModal(true)}
+            >
+              <Edit3 className="h-4 w-4" aria-hidden="true" />
+              <span>Edit Details</span>
+            </Button>
+          ) : null}
+
+          {isCancellable ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-danger border-danger/30 hover:bg-danger-soft hover:text-danger"
+              onClick={() => setShowCancelModal(true)}
+            >
+              <XCircle className="h-4 w-4" aria-hidden="true" />
+              <span>Cancel Booking</span>
+            </Button>
+          ) : null}
+
           <Link href={routes.parcelLabel(parcel.id)}>
             <Button size="sm" className="gap-1.5">
               <Printer className="h-4 w-4" aria-hidden="true" />
@@ -442,6 +484,26 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
           )}
         </CardContent>
       </Card>
+
+      <ParcelCancelDialog
+        parcelId={parcel.id}
+        trackingCode={parcel.trackingCode}
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onSuccess={() => void refetch()}
+      />
+
+      <ParcelEditDialog
+        parcelId={parcel.id}
+        trackingCode={parcel.trackingCode}
+        initialRecipientName={parcel.recipientName}
+        initialRecipientPhone={parcel.recipientPhone}
+        initialDeliveryAddress={parcel.deliveryAddress}
+        initialNotes={parcel.parcelDescription}
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSuccess={() => void refetch()}
+      />
     </div>
   );
 }

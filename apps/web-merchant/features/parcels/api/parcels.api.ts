@@ -189,6 +189,44 @@ export const parcelsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: PARCEL_TAG, id: "LIST" }, "Merchant"],
     }),
+
+    cancelParcel: builder.mutation<
+      ApiResponse<{ parcelId: string; trackingCode: string; status: ParcelStatus }>,
+      string
+    >({
+      query: (id) => ({
+        url: `/parcels/${id}/cancel`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+        "Merchant",
+      ],
+    }),
+
+    updateParcel: builder.mutation<
+      ApiResponse<ParcelDetailsResponse>,
+      {
+        id: string;
+        data: {
+          recipientName?: string;
+          recipientPhone?: string;
+          deliveryAddress?: string;
+          notes?: string;
+        };
+      }
+    >({
+      query: ({ id, data }) => ({
+        url: `/parcels/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -203,4 +241,7 @@ export const {
   useGetBulkTemplateQuery,
   useValidateBulkMutation,
   useImportBulkMutation,
+  useCancelParcelMutation,
+  useUpdateParcelMutation,
 } = parcelsApi;
+

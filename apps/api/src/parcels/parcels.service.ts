@@ -42,6 +42,7 @@ import {
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
 import type { BulkImportDto, BulkImportResult, BulkRowResult } from "./dto/bulk-import.dto.js";
+import { UpdateParcelDto } from "./dto/update-parcel.dto.js";
 import { DomainEventPublisher, ParcelCreatedEvent, ParcelAssignedEvent, ParcelReturnedEvent } from "../events/index.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
@@ -979,6 +980,49 @@ export class ParcelsService {
       await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
       this.logger.log(`PARCEL_CANCELLED parcel=${parcel.id} actor=${actor.id}`);
       return { parcelId: parcel.id, trackingCode: parcel.trackingCode, status: parcel.status };
+    });
+  }
+
+  /**
+   * Updates parcel delivery details inside the pre-pickup window
+   * (`CREATED | PICKUP_REQUESTED`).
+   * Merchants update their own parcels; admins can update any.
+   */
+  async updateParcel(
+    idOrCode: string,
+    dto: UpdateParcelDto,
+    actor: AuthenticatedUser,
+  ): Promise<Parcel> {
+    const scope = await this.resolveScope(actor);
+    return this.dataSource.transaction(async (manager) => {
+      const parcel = await manager.getRepository(Parcel).findOne({
+        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+      });
+      if (!parcel) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      this.assertOwnership(parcel, scope);
+
+      const editableStatuses = [ParcelStatus.CREATED, ParcelStatus.PICKUP_REQUESTED];
+      if (!editableStatuses.includes(parcel.status)) {
+        throw new ConflictException({
+          message: `Parcel cannot be edited in ${parcel.status} status. Editing is only permitted prior to pickup.`,
+          error: ApiErrorCode.INVALID_STATUS_TRANSITION,
+        });
+      }
+
+      if (dto.recipientName !== undefined) parcel.recipientName = dto.recipientName;
+      if (dto.recipientPhone !== undefined) parcel.recipientPhone = dto.recipientPhone;
+      if (dto.deliveryAddress !== undefined) parcel.rawAddress = dto.deliveryAddress;
+      if (dto.notes !== undefined) parcel.parcelDescription = dto.notes?.trim() || null;
+
+      const saved = await manager.save(parcel);
+      await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
+      this.logger.log(`PARCEL_UPDATED parcel=${parcel.id} actor=${actor.id}`);
+      return saved;
     });
   }
 

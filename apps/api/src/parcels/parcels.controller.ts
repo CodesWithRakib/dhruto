@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -30,6 +31,7 @@ import {
 import { ApiErrorCode, ParcelStatus } from "@dhruto/contracts";
 import { ParcelsService } from "./parcels.service.js";
 import { CreateParcelDto } from "./dto/create-parcel.dto.js";
+import { UpdateParcelDto } from "./dto/update-parcel.dto.js";
 import { AssignRiderDto } from "./dto/assign-rider.dto.js";
 import { BulkImportDto, MAX_BULK_ROWS } from "./dto/bulk-import.dto.js";
 import { ParcelResponseDto } from "./dto/parcel-response.dto.js";
@@ -304,6 +306,38 @@ export class ParcelsController {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Parcel cancelled successfully",
+      data: result,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Patch(":id")
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-update" })
+  @ApiOperation({
+    summary: "Update parcel recipient and delivery details pre-pickup",
+    description:
+      "Allowed only while parcel is in CREATED or PICKUP_REQUESTED status. Merchants can edit their own parcels; admins can edit any.",
+  })
+  @ApiOkResponse({ description: "Parcel updated successfully" })
+  @ApiNotFoundResponse({ description: "Parcel not found" })
+  @ApiConflictResponse({ description: "Parcel cannot be edited in its current status" })
+  async updateParcel(
+    @Param("id") id: string,
+    @Body() dto: UpdateParcelDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const result = await this.parcelsService.updateParcel(id, dto, user);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Parcel details updated successfully",
       data: result,
       meta: {
         requestId: req.requestId || "unknown",
