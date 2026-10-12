@@ -5,20 +5,25 @@ import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   ArrowDownToLine,
+  ArrowRight,
   ArrowUpFromLine,
-  Inbox,
-  Package,
-  PackageOpen,
-  PackageCheck,
-  ScanLine,
-  Truck,
+  ChevronDown,
+  ChevronUp,
   ClipboardList,
   Hourglass,
+  Inbox,
+  Layers,
+  Package,
+  PackageCheck,
+  PackageOpen,
   RefreshCw,
-  Warehouse,
+  ScanLine,
+  ShieldCheck,
+  Truck,
   Wallet,
+  Warehouse,
 } from "lucide-react";
-import { Button, Card, CardContent } from "@dhruto/ui";
+import { Badge, Button, Card, CardContent } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { HUB_ROUTES } from "@/config/routes";
 import { PageHeader } from "@/components/page-header";
@@ -33,12 +38,15 @@ import { useFormatters } from "@/lib/format";
  * Hub operations dashboard.
  *
  * Every number is a live aggregate from `GET /hubs/:id/dashboard` — no
- * placeholder metrics. Quick actions route to the dedicated operational
- * surfaces (scanner, lookup, bags, manifests).
+ * placeholder metrics. Includes interactive 5-stage Hub Operations Pipeline
+ * and Shift SOP guidance.
  */
 export function HubDashboardView() {
   const t = useTranslations("Hub");
   const { time: fmtTime } = useFormatters();
+  const [showSop, setShowSop] = React.useState(true);
+  const [activeSopTab, setActiveSopTab] = React.useState<"morning" | "midday" | "evening">("morning");
+
   const {
     hubs,
     activeHub,
@@ -183,6 +191,54 @@ export function HubDashboardView() {
     },
   ];
 
+  const pipelineStages = [
+    {
+      step: 1,
+      title: "1. Inbound Scans",
+      subtitle: `${metrics?.inboundToday ?? 0} packages received today`,
+      icon: ArrowDownToLine,
+      color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+      actionHref: HUB_ROUTES.scanner,
+      actionText: "Scan Inbound",
+    },
+    {
+      step: 2,
+      title: "2. Sorting & Bags",
+      subtitle: `${metrics?.openBags ?? 0} open · ${metrics?.sealedBags ?? 0} sealed`,
+      icon: PackageOpen,
+      color: "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200",
+      actionHref: HUB_ROUTES.bags,
+      actionText: "Manage Bags",
+    },
+    {
+      step: 3,
+      title: "3. Linehaul Manifests",
+      subtitle: `${metrics?.pendingManifests ?? 0} pending · ${metrics?.dispatchedManifests ?? 0} dispatched`,
+      icon: Truck,
+      color: "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+      actionHref: HUB_ROUTES.manifests,
+      actionText: "Manifests",
+    },
+    {
+      step: 4,
+      title: "4. Last-Mile Inventory",
+      subtitle: `${metrics?.parcelsAtHub ?? 0} parcels currently at hub`,
+      icon: Package,
+      color: "border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300",
+      actionHref: HUB_ROUTES.parcels,
+      actionText: "Floor Inventory",
+    },
+    {
+      step: 5,
+      title: "5. Cash Desk & Audit",
+      subtitle: `${metrics?.openExceptions ?? 0} exceptions · Cash hand-in`,
+      icon: Wallet,
+      color: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+      actionHref: HUB_ROUTES.cash,
+      actionText: "Cash Desk",
+    },
+  ];
+
   return (
     <div className="w-full space-y-6 pb-6">
       <PageHeader
@@ -220,6 +276,193 @@ export function HubDashboardView() {
           }
         />
       ) : null}
+
+      {/* Hub Operational Pipeline Overview */}
+      <section aria-label="Hub Operational Pipeline" className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-soft text-primary">
+              <Layers className="h-4 w-4" />
+            </span>
+            <h2 className="text-sm font-extrabold tracking-tight text-foreground">
+              Hub Operations Pipeline
+            </h2>
+            <Badge variant="primary-soft" className="text-[10px] uppercase font-bold">Live Flow</Badge>
+          </div>
+          <Link href="/workflow" className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
+            <span>System Guide</span>
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {pipelineStages.map((stage) => {
+            const Icon = stage.icon;
+            return (
+              <div
+                key={stage.step}
+                className="group relative flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className={`flex h-9 w-9 items-center justify-center rounded-xl border shadow-2xs ${stage.color}`}>
+                      <Icon className="h-4.5 w-4.5" />
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Stage {stage.step}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-xs font-bold text-foreground">
+                    {stage.title}
+                  </h3>
+                  <p className="mt-1 text-[11px] text-muted-foreground line-clamp-1">
+                    {stage.subtitle}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-border/60">
+                  <Link href={stage.actionHref} className="block">
+                    <Button variant="outline" size="sm" className="h-8 w-full text-[11px] font-bold justify-between px-2.5 rounded-lg group-hover:border-primary/40 group-hover:text-primary">
+                      <span>{stage.actionText}</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Hub Operating SOP & Guidelines (Collapsible Card) */}
+      <Card className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-2xs overflow-hidden">
+        <CardContent className="p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs">
+                <ShieldCheck className="h-5 w-5" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-foreground">
+                    Hub Standard Operating Procedures (SOP)
+                  </h3>
+                  <Badge variant="primary-soft" className="text-[10px] font-bold">Operator Handbook</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Official shift protocol for high-throughput scanning, bag sealing, and COD handover.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowSop(!showSop)}
+              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-center rounded-xl border border-border bg-surface px-3 text-xs font-bold text-foreground shadow-2xs hover:bg-surface-muted transition-colors"
+            >
+              <span>{showSop ? "Collapse SOP" : "View SOP Guide"}</span>
+              {showSop ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+
+          {showSop ? (
+            <div className="mt-4 border-t border-border/70 pt-4 space-y-3.5">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "morning", label: "Morning Shift (07:00 - 11:00)", badge: "Inbound & Runsheet" },
+                  { id: "midday", label: "Mid-day Shift (11:00 - 16:00)", badge: "Sorting & Bagging" },
+                  { id: "evening", label: "Evening Shift (16:00 - 21:00)", badge: "Cash Desk & Manifests" },
+                ].map((shift) => (
+                  <button
+                    key={shift.id}
+                    type="button"
+                    onClick={() => setActiveSopTab(shift.id as any)}
+                    className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                      activeSopTab === shift.id
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "border border-border bg-surface text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span>{shift.label}</span>
+                    <span className={`text-[10px] rounded px-1.5 py-0.2 ${activeSopTab === shift.id ? "bg-white/20 text-white" : "bg-surface-muted text-muted-foreground"}`}>
+                      {shift.badge}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {activeSopTab === "morning" && (
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 pt-1">
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 1 · Linehaul Arrival</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Inspect inbound vehicle seals, verify manifest ID against incoming linehaul truck, and mark manifest received.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 2 · High-Speed Inbound Scan</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Use barcode scanner in Continuous Inbound mode. Every parcel status immediately transitions to <code className="text-primary font-bold">AT_HUB</code>.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 3 · Rider Dispatch Runsheet</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Sort packages by delivery zone and assign to on-duty delivery riders for morning last-mile attempt.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeSopTab === "midday" && (
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 pt-1">
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 1 · Bin Sorting</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Direct parcels into dedicated destination bins (Chittagong, Sylhet, Rajshahi, Khulna, etc.).
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 2 · Bag Consolidation</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Open a new bag for the destination hub, scan parcels into the bag, and audit package weights.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 3 · Tamper-Evident Seal</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Affix serialized security seal tag, enter the seal tag number, and transition bag status to <code className="text-primary font-bold">SEALED</code>.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeSopTab === "evening" && (
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 pt-1">
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 1 · Rider Cash Hand-In</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Collect and count COD cash from returning riders at the Cash Desk. Confirm counted amount against system expected total.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 2 · Discrepancy Logging</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      If counted cash differs, system automatically opens a formal discrepancy ticket with audit notes for finance review.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-border/60 bg-surface/70 p-3">
+                    <span className="font-mono text-xs font-bold text-primary block">Step 3 · Night Linehaul Dispatch</span>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Bundle sealed bags into an outbound Manifest, assign vehicle number and driver phone, and mark <code className="text-primary font-bold">DISPATCHED</code>.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
       {/* Quick actions - 5 columns */}
       <section aria-label={t("dashboard.quickActions")}>
@@ -293,7 +536,7 @@ export function HubDashboardView() {
 
       {/* Exceptions needing attention */}
       {openExceptions.length > 0 ? (
-        <Card className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] p-4.5 sm:p-5 shadow-2xs">
+        <Card className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.04] p-5 shadow-2xs">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300 shadow-2xs">

@@ -27,6 +27,7 @@ export const PUBLIC_ROUTES = {
   faq: "/faq",
   privacy: "/privacy",
   terms: "/terms",
+  workflow: "/workflow",
 } as const;
 
 export const AUTH_ROUTES = {
@@ -92,6 +93,14 @@ export const RIDER_ROUTES = {
   settings: "/rider/settings",
 } as const;
 
+export const CUSTOMER_ROUTES = {
+  dashboard: "/customer/dashboard",
+  tracking: "/customer/track",
+  trackShipment: (code: string) => `/customer/track/${code}`,
+  history: "/customer/history",
+  settings: "/customer/settings",
+} as const;
+
 export const ROUTES = {
   public: PUBLIC_ROUTES,
   auth: AUTH_ROUTES,
@@ -99,6 +108,7 @@ export const ROUTES = {
   admin: ADMIN_ROUTES,
   hub: HUB_ROUTES,
   rider: RIDER_ROUTES,
+  customer: CUSTOMER_ROUTES,
 } as const;
 
 /**
@@ -106,7 +116,7 @@ export const ROUTES = {
  * guard and by `robots.ts`. Backend authorization remains authoritative —
  * this is defence in depth and UX only.
  */
-export const PROTECTED_PREFIXES: string[] = ["/merchant", "/admin", "/hub", "/rider"];
+export const PROTECTED_PREFIXES: string[] = ["/merchant", "/admin", "/hub", "/rider", "/customer"];
 
 /** Public routes that are indexable by search engines. */
 export const INDEXABLE_ROUTES: {

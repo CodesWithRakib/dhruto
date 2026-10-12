@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button } from "@dhruto/ui";
+import { Card, CardContent, Button, Badge } from "@dhruto/ui";
 import {
   Bike,
   Package,
@@ -15,6 +15,14 @@ import {
   Power,
   Phone,
   Copy,
+  ClipboardList,
+  History,
+  User,
+  Settings,
+  ArrowRight,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   useGetRiderDashboardQuery,
@@ -37,6 +45,7 @@ import { useFormatters } from "@/lib/format";
 export function RiderDashboard() {
   const t = useTranslations("Rider");
   const { bdt } = useFormatters();
+  const [showSop, setShowSop] = React.useState(true);
   const { data: dashboardData, isLoading, isError, refetch } = useGetRiderDashboardQuery();
   const { data: tasksData, isFetching: isFetchingTasks, refetch: refetchTasks } = useGetRiderTasksQuery();
   const [setDuty, { isLoading: isTogglingDuty }] = useSetDutyMutation();
@@ -101,6 +110,14 @@ export function RiderDashboard() {
   }
 
   const onDuty = dashboard.duty === RiderDutyStatus.ON_DUTY;
+  const totalTasks =
+    dashboard.counts.assigned +
+    dashboard.counts.inProgress +
+    dashboard.counts.deliveredToday +
+    dashboard.counts.failedToday;
+  const completedTasks = dashboard.counts.deliveredToday;
+  const completionPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
   const metricCards = [
     {
       label: t("dashboard.assigned"),
@@ -133,6 +150,37 @@ export function RiderDashboard() {
       toneBg: "bg-danger-soft",
       toneBorder: "border-danger/20",
       toneText: "text-danger-soft-foreground",
+    },
+  ];
+
+  const quickNav = [
+    {
+      title: "Delivery Runsheet",
+      subtitle: `${dashboard.counts.assigned + dashboard.counts.inProgress} tasks active`,
+      href: RIDER_ROUTES.tasks,
+      icon: ClipboardList,
+      badge: `${dashboard.counts.inProgress} In-Flight`,
+    },
+    {
+      title: "Delivery History",
+      subtitle: `${dashboard.counts.deliveredToday} completed today`,
+      href: RIDER_ROUTES.history,
+      icon: History,
+      badge: "Settled",
+    },
+    {
+      title: "Rider Profile",
+      subtitle: `${dashboard.riderCode} · Hub ${dashboard.hubName}`,
+      href: RIDER_ROUTES.profile,
+      icon: User,
+      badge: "Fleet ID",
+    },
+    {
+      title: "Shift Settings",
+      subtitle: "Duty, vehicle & notification toggles",
+      href: RIDER_ROUTES.settings,
+      icon: Settings,
+      badge: "Config",
     },
   ];
 
@@ -182,6 +230,50 @@ export function RiderDashboard() {
         }
       />
 
+      {/* Daily Runsheet Completion Tracker */}
+      <Card className="rounded-2xl border border-primary/25 bg-gradient-to-r from-primary/[0.08] via-card to-card p-5 shadow-2xs">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Bike className="h-4 w-4" />
+              </span>
+              <h2 className="text-sm font-extrabold text-foreground">
+                Today's Delivery Runsheet
+              </h2>
+              <Badge variant="primary-soft" className="text-[10px] font-bold">
+                {completionPercent}% Completed
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {completedTasks} of {totalTasks} packages delivered · {dashboard.counts.inProgress} currently out for delivery
+            </p>
+          </div>
+
+          <Link href={RIDER_ROUTES.tasks}>
+            <Button size="sm" className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold shadow-xs">
+              <ClipboardList className="h-3.5 w-3.5" />
+              <span>Open Runsheet</span>
+            </Button>
+          </Link>
+        </div>
+
+        {/* Visual Progress Bar */}
+        <div className="mt-4 space-y-1.5">
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500"
+              style={{ width: `${Math.max(completionPercent, 4)}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+            <span>Dispatched from Hub</span>
+            <span className="font-bold text-foreground">{completedTasks} / {totalTasks} Parcels Done</span>
+            <span>Close Shift</span>
+          </div>
+        </div>
+      </Card>
+
       {/* Live metrics */}
       <div className="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
         {metricCards.map((card) => (
@@ -220,7 +312,7 @@ export function RiderDashboard() {
                 {bdt(dashboard.codToCollect)}
               </p>
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Pending collection from current delivery run
+                Pending cash collection from current runsheet leg
               </p>
             </div>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-warning/25 bg-warning-soft text-warning-soft-foreground shadow-2xs">
@@ -239,7 +331,7 @@ export function RiderDashboard() {
                 {dashboard.parcelsInHand}
               </p>
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Packages currently dispatched to you for delivery
+                Packages currently dispatched with you on the road
               </p>
             </div>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs">
@@ -248,6 +340,120 @@ export function RiderDashboard() {
           </div>
         </Card>
       </div>
+
+      {/* Quick Navigation Cards */}
+      <section aria-label="Rider Quick Navigation">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {quickNav.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                      {item.badge}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
+                    {item.subtitle}
+                  </p>
+                </div>
+                <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-primary">
+                  <span>View Details</span>
+                  <ArrowRight className="h-3 w-3" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Doorstep Delivery & Safety SOP Handbook */}
+      <Card className="rounded-2xl border border-primary/20 bg-card shadow-2xs overflow-hidden">
+        <CardContent className="p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs">
+                <ShieldCheck className="h-5 w-5" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-foreground">
+                    Doorstep Delivery & Cash Protocol
+                  </h3>
+                  <Badge variant="primary-soft" className="text-[10px] font-bold">Rider Safety SOP</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  4 mandatory steps for every delivery handoff and cash collection.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowSop(!showSop)}
+              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-center rounded-xl border border-border bg-surface px-3 text-xs font-bold text-foreground shadow-2xs hover:bg-surface-muted transition-colors"
+            >
+              <span>{showSop ? "Collapse SOP" : "View SOP Guide"}</span>
+              {showSop ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+
+          {showSop ? (
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 border-t border-border/70 pt-4">
+              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 font-bold text-xs">1</span>
+                  <span className="text-xs font-bold text-foreground">GPS Navigation</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Open Google Maps / Waze directly from the task card to reach the customer address accurately.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs">2</span>
+                  <span className="text-xs font-bold text-foreground">6-Digit OTP Handshake</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Request the 6-digit verification code from the customer before unboxing or handing over the package.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 font-bold text-xs">3</span>
+                  <span className="text-xs font-bold text-foreground">Exact COD Collection</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Collect the exact cash amount shown on screen. Confirm physical cash or digital payment before marking done.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/10 text-purple-600 font-bold text-xs">4</span>
+                  <span className="text-xs font-bold text-foreground">Hub Cash Hand-In</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  At the end of your shift, hand in all collected cash at the Hub Cash Desk to settle your daily ledger.
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
       {/* Next delivery CTA */}
       {nextTask ? (

@@ -18,6 +18,7 @@ export interface RouteBase {
   parcelLabel: (id: string) => string;
   /** Omitted when the role cannot create bookings from this surface. */
   createBooking?: string;
+  returns?: string;
 }
 
 export const MERCHANT_ROUTE_BASE: RouteBase = {
@@ -26,6 +27,7 @@ export const MERCHANT_ROUTE_BASE: RouteBase = {
   parcel: MERCHANT_ROUTES.parcel,
   parcelLabel: MERCHANT_ROUTES.parcelLabel,
   createBooking: MERCHANT_ROUTES.createBooking,
+  returns: MERCHANT_ROUTES.returns,
 };
 
 export const ADMIN_ROUTE_BASE: RouteBase = {

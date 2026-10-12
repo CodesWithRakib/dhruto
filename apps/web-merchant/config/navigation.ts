@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Package,
   PackageSearch,
-  PlusCircle,
   ScanLine,
   Search,
   Settings,
@@ -22,7 +21,7 @@ import {
   BrainCircuit,
   type LucideIcon,
 } from "lucide-react";
-import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
+import { ADMIN_ROUTES, CUSTOMER_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
 import type { AppRole } from "./roles";
 
 /**
@@ -56,26 +55,13 @@ const TRACKING_ITEM: NavItem = {
 export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
   MERCHANT: [
     {
+      labelKey: "groupOperations",
       items: [
         {
           href: MERCHANT_ROUTES.dashboard,
           labelKey: "overview",
           icon: LayoutDashboard,
         },
-        {
-          href: MERCHANT_ROUTES.createBooking,
-          labelKey: "createBooking",
-          icon: PlusCircle,
-        },
-        {
-          href: MERCHANT_ROUTES.calculator,
-          labelKey: "calculator",
-          icon: Calculator,
-        },
-        // Phase 3 (T-BULK-01): bulk import has no UI/API yet — the
-        // `?mode=bulk` entry promised a dead page, so it is removed from
-        // the sidebar. The dashboard keeps a disabled "coming soon" card
-        // until bulk is specified (Q-BULK).
         {
           href: MERCHANT_ROUTES.parcels,
           labelKey: "shipments",
@@ -86,6 +72,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           labelKey: "returns",
           icon: RotateCcw,
         },
+      ],
+    },
+    {
+      labelKey: "groupFinance",
+      items: [
         {
           href: MERCHANT_ROUTES.finance,
           labelKey: "financials",
@@ -101,10 +92,15 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           labelKey: "reports",
           icon: FileText,
         },
+      ],
+    },
+    {
+      labelKey: "groupTools",
+      items: [
         {
-          href: MERCHANT_ROUTES.tracking,
-          labelKey: "tracking",
-          icon: Search,
+          href: MERCHANT_ROUTES.calculator,
+          labelKey: "calculator",
+          icon: Calculator,
         },
         {
           href: MERCHANT_ROUTES.webhooks,
@@ -169,8 +165,18 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: HUB_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
         { href: HUB_ROUTES.scanner, labelKey: "scanner", icon: ScanLine },
         { href: HUB_ROUTES.parcels, labelKey: "parcels", icon: PackageSearch },
+      ],
+    },
+    {
+      labelKey: "groupDispatch",
+      items: [
         { href: HUB_ROUTES.bags, labelKey: "bags", icon: Package },
         { href: HUB_ROUTES.manifests, labelKey: "manifests", icon: Truck },
+      ],
+    },
+    {
+      labelKey: "groupAudit",
+      items: [
         { href: HUB_ROUTES.exceptions, labelKey: "exceptions", icon: AlertTriangle },
         { href: HUB_ROUTES.cash, labelKey: "cash", icon: Wallet },
       ],
@@ -182,12 +188,23 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
   ],
   RIDER: [
     {
-      labelKey: "groupOverview",
+      labelKey: "groupActiveShift",
       items: [
         { href: RIDER_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
         { href: RIDER_ROUTES.tasks, labelKey: "tasks", icon: ClipboardList },
+      ],
+    },
+    {
+      labelKey: "groupPerformance",
+      items: [
         { href: RIDER_ROUTES.history, labelKey: "history", icon: History },
+      ],
+    },
+    {
+      labelKey: "groupAccount",
+      items: [
         { href: RIDER_ROUTES.profile, labelKey: "profile", icon: User },
+        { href: RIDER_ROUTES.settings, labelKey: "settings", icon: Settings },
       ],
     },
     {
@@ -197,8 +214,34 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
   ],
   CUSTOMER: [
     {
-      labelKey: "groupNetwork",
-      items: [TRACKING_ITEM],
+      labelKey: "groupOverview",
+      items: [
+        {
+          href: CUSTOMER_ROUTES.dashboard,
+          labelKey: "customerDashboard",
+          icon: LayoutDashboard,
+        },
+        {
+          href: CUSTOMER_ROUTES.tracking,
+          labelKey: "customerTracking",
+          icon: Search,
+        },
+        {
+          href: CUSTOMER_ROUTES.history,
+          labelKey: "customerHistory",
+          icon: History,
+        },
+      ],
+    },
+    {
+      labelKey: "groupTools",
+      items: [
+        {
+          href: CUSTOMER_ROUTES.settings,
+          labelKey: "customerSettings",
+          icon: Settings,
+        },
+      ],
     },
   ],
 };
@@ -211,13 +254,18 @@ const BOTTOM_HREFS: Record<AppRole, string[]> = {
   MERCHANT: [
     MERCHANT_ROUTES.dashboard,
     MERCHANT_ROUTES.parcels,
-    MERCHANT_ROUTES.createBooking,
     MERCHANT_ROUTES.finance,
+    MERCHANT_ROUTES.settings,
   ],
   ADMIN: [ADMIN_ROUTES.dashboard, ADMIN_ROUTES.parcels, ADMIN_ROUTES.finance, ADMIN_ROUTES.hub],
   HUB_MANAGER: [HUB_ROUTES.dashboard, HUB_ROUTES.scanner, HUB_ROUTES.bags, HUB_ROUTES.manifests],
   RIDER: [RIDER_ROUTES.dashboard, RIDER_ROUTES.tasks, RIDER_ROUTES.history, RIDER_ROUTES.profile],
-  CUSTOMER: [],
+  CUSTOMER: [
+    CUSTOMER_ROUTES.dashboard,
+    CUSTOMER_ROUTES.tracking,
+    CUSTOMER_ROUTES.history,
+    CUSTOMER_ROUTES.settings,
+  ],
 };
 
 function allItems(role: AppRole): NavItem[] {

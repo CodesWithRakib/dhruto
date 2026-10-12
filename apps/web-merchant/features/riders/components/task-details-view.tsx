@@ -405,7 +405,9 @@ export function TaskDetailsView({ parcelId }: TaskDetailsViewProps) {
                     <h3 className="text-sm font-extrabold text-foreground">
                       {t("details.otpSectionTitle")}
                     </h3>
-                    <p className="text-xs text-muted-foreground">{t("details.otpHint")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ask customer for their 6-digit verification code from their Dhruto tracking dashboard or SMS.
+                    </p>
                   </div>
                 </div>
 
@@ -518,6 +520,31 @@ export function TaskDetailsView({ parcelId }: TaskDetailsViewProps) {
                       className="h-12 rounded-xl border-input/80 bg-surface pl-8 font-mono text-lg font-black shadow-2xs"
                       required
                     />
+                  </div>
+
+                  {/* Quick tender amount buttons */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] font-medium text-muted-foreground">Quick set:</span>
+                    <button
+                      type="button"
+                      onClick={() => setCollectedAmount(task.codAmount)}
+                      className="rounded-lg border border-primary/30 bg-primary-soft px-2.5 py-1 font-mono text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      Exact {bdt(task.codAmount)}
+                    </button>
+                    {[500, 1000, 2000, 5000]
+                      .filter((amt) => amt >= task.codAmount && amt !== task.codAmount)
+                      .slice(0, 3)
+                      .map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setCollectedAmount(amt)}
+                          className="rounded-lg border border-border bg-surface px-2 py-1 font-mono text-xs text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
+                        >
+                          ৳{amt}
+                        </button>
+                      ))}
                   </div>
                   <p className={`flex items-center gap-1.5 text-xs ${codMatches ? "text-emerald-700 dark:text-emerald-300 font-semibold" : "text-amber-700 dark:text-amber-300 font-semibold"}`}>
                     {codMatches ? (

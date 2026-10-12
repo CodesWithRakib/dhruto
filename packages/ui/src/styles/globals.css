@@ -122,8 +122,14 @@
     /* Re-map semantic tokens so nested components adapt automatically */
     --foreground: var(--hero-dark-foreground);
     --muted-foreground: var(--hero-dark-muted);
+    --surface: var(--hero-dark-chip);
+    --surface-muted: var(--hero-dark-mid);
+    --surface-hover: var(--hero-dark-glow);
+    --card: var(--hero-dark-chip);
+    --card-foreground: var(--hero-dark-foreground);
+    --border: 281 74% 86% / 0.2;
     --primary: var(--hero-dark-accent);
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: var(--hero-dark-base);
   }
 
   /* Section backgrounds — Schema B (light) */

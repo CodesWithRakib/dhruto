@@ -157,6 +157,11 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/workflow" className="hover:text-[var(--acc)] transition-colors font-medium text-[var(--acc)]">
+                  Operations Guide
+                </Link>
+              </li>
+              <li>
                 <Link href="/about" className="hover:text-[var(--acc)] transition-colors">
                   {t("about")}
                 </Link>

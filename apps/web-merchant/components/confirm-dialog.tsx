@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, TriangleAlert } from "lucide-react";
+import { Loader2, TriangleAlert, Info } from "lucide-react";
 import {
   Button,
   Dialog,
@@ -26,10 +26,10 @@ export interface ConfirmDialogProps {
 }
 
 /**
- * Shared destructive-action confirmation built on shadcn Dialog.
+ * Shared destructive/confirmation modal built on shadcn Dialog.
  * Replaces native `confirm()`: accessible, localized, prevents duplicate
  * submits (button disables while `loading`), and surfaces async errors via
- * the caller's toast. Mobile: full-width sheet-like content.
+ * the caller's toast. Mobile: full-width action buttons.
  */
 export function ConfirmDialog({
   open,
@@ -67,22 +67,34 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5 text-h3">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 sm:p-7 shadow-2xl rounded-3xl border border-border/80">
+        <DialogHeader className="gap-3">
+          <div className="flex items-start gap-3.5">
             {tone === "danger" ? (
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-danger-soft text-danger-soft-foreground">
-                <TriangleAlert className="h-4 w-4" aria-hidden="true" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-danger-soft border border-danger/20 text-danger shadow-2xs">
+                <TriangleAlert className="h-5 w-5" aria-hidden="true" />
               </span>
-            ) : null}
-            {title}
-          </DialogTitle>
-          {description ? <DialogDescription className="pt-1">{description}</DialogDescription> : null}
+            ) : (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft border border-primary/20 text-primary shadow-2xs">
+                <Info className="h-5 w-5" aria-hidden="true" />
+              </span>
+            )}
+            <div className="space-y-1">
+              <DialogTitle className="text-lg font-bold tracking-tight text-foreground leading-snug">
+                {title}
+              </DialogTitle>
+              {description ? (
+                <DialogDescription className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  {description}
+                </DialogDescription>
+              ) : null}
+            </div>
+          </div>
         </DialogHeader>
         {error ? (
           <p
             role="alert"
-            className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
+            className="rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-xs font-medium text-danger-soft-foreground"
           >
             {error}
           </p>
@@ -91,7 +103,7 @@ export function ConfirmDialog({
           <Button
             ref={cancelRef}
             variant="outline"
-            size="sm"
+            className="w-full sm:w-auto h-10 px-5 text-xs font-semibold"
             onClick={() => onOpenChange(false)}
             disabled={loading}
           >
@@ -99,7 +111,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             variant={tone === "danger" ? "destructive" : "default"}
-            size="sm"
+            className="w-full sm:w-auto h-10 px-5 text-xs font-semibold shadow-xs"
             onClick={handleConfirm}
             disabled={loading}
           >

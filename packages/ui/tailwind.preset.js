@@ -171,6 +171,7 @@ module.exports = {
       },
 
       spacing: {
+        "4.5": "1.125rem",
         "safe-bottom": "env(safe-area-inset-bottom)",
       },
     },

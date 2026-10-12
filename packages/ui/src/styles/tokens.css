@@ -323,3 +323,52 @@
   --line: #fae0e4;
 }
 
+/* ------------------------------------------------------------------
+ * 13. Dark Mode Universal System
+ * ------------------------------------------------------------------ */
+.dark,
+[data-theme="dark"] {
+  --background: 222 47% 8%; /* #0B0F17 — luxury deep canvas */
+  --foreground: 210 40% 98%; /* #F8FAFC — high-contrast crisp text */
+
+  --surface: 222 47% 11%; /* #0F172A — elegant card background */
+  --surface-muted: 217 33% 14%;
+  --surface-elevated: 217 33% 16%;
+  --surface-hover: 217 33% 18%;
+  --surface-selected: 152 60% 15%;
+
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 222 47% 12%;
+  --popover-foreground: 210 40% 98%;
+
+  --text-primary: 210 40% 98%;
+  --text-secondary: 215 20% 75%;
+  --text-muted: 215 16% 60%;
+  --text-inverse: 222 47% 11%;
+
+  --secondary: 217 33% 16%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217 33% 16%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 217 33% 18%;
+  --accent-foreground: 210 40% 98%;
+
+  --border: 217 33% 20%;
+  --input: 217 33% 22%;
+  --ring: 152 69% 45%;
+  --overlay: 0 0% 0%;
+
+  --shadow-soft: 0 1px 3px hsl(0 0% 0% / 0.45);
+  --shadow-lift: 0 10px 30px -10px hsl(0 0% 0% / 0.7);
+  --skeleton: 217 33% 18%;
+
+  --bg: #0b0f17;
+  --text: #f8fafc;
+  --muted-text: #94a3b8;
+  --line: #1e293b;
+}
+

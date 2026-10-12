@@ -1,4 +1,4 @@
-import { ADMIN_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
+import { ADMIN_ROUTES, CUSTOMER_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, RIDER_ROUTES } from "./routes";
 
 /**
  * Dhruto — Centralized role configuration.
@@ -15,7 +15,7 @@ export type AppRole = "ADMIN" | "MERCHANT" | "HUB_MANAGER" | "RIDER" | "CUSTOMER
 export const ALL_ROLES: AppRole[] = ["ADMIN", "MERCHANT", "HUB_MANAGER", "RIDER", "CUSTOMER"];
 
 /** A top-level surface of the application, matching the route groups. */
-export type AppSection = "public" | "auth" | "merchant" | "admin" | "hub" | "rider";
+export type AppSection = "public" | "auth" | "merchant" | "admin" | "hub" | "rider" | "customer";
 
 export interface RoleConfig {
   role: AppRole;
@@ -61,9 +61,9 @@ export const ROLE_CONFIG: Record<AppRole, RoleConfig> = {
   CUSTOMER: {
     role: "CUSTOMER",
     labelKey: "roleCustomer",
-    section: "public",
-    home: PUBLIC_ROUTES.tracking,
-    sections: ["public"],
+    section: "customer",
+    home: CUSTOMER_ROUTES.dashboard,
+    sections: ["public", "customer"],
   },
 };
 

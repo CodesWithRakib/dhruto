@@ -8,7 +8,7 @@ import {
   type ColumnDef,
   type DataTableLabels,
 } from "@dhruto/ui";
-import { Eye, MapPin, Package, Plus, Printer, RefreshCw, Search, SearchX, UploadCloud, User } from "lucide-react";
+import { Eye, MapPin, Package, Plus, Printer, RefreshCw, RotateCcw, Search, SearchX, UploadCloud, User } from "lucide-react";
 import { ParcelStatus, type ParcelListItem } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
@@ -338,6 +338,18 @@ export function ParcelList() {
                 <UploadCloud className="h-3.5 w-3.5" aria-hidden="true" />
                 {t("bulkImport")}
               </Button>
+            ) : null}
+            {routes.returns ? (
+              <Link href={routes.returns}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 gap-2 text-xs"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Returns Hub</span>
+                </Button>
+              </Link>
             ) : null}
             <Button
               variant="outline"

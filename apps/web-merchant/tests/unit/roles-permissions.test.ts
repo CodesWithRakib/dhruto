@@ -20,6 +20,7 @@ describe("role isolation", () => {
     expect(homeForRole("ADMIN").href).toContain("/admin/");
     expect(homeForRole("HUB_MANAGER").href).toContain("/hub/");
     expect(homeForRole("RIDER").href).toContain("/rider/");
+    expect(homeForRole("CUSTOMER").href).toContain("/customer/");
   });
 
   it("keeps merchants out of admin/hub/rider sections", () => {

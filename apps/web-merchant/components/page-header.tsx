@@ -81,7 +81,7 @@ export function PageHeader({
             ) : null}
           </div>
           {actions ? (
-            <div className="flex shrink-0 flex-wrap items-center gap-2.5">
+            <div className="flex shrink-0 flex-wrap items-center gap-2.5 [&_button[class*='border-border']]:border-white/25 [&_button[class*='border-border']]:bg-white/10 [&_button[class*='border-border']]:text-white [&_button[class*='border-border']]:hover:bg-white/20">
               {actions}
             </div>
           ) : null}

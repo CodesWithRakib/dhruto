@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { CalendarDays, CheckCircle2, Plus, Search } from "lucide-react";
+import { CalendarDays, CheckCircle2, Compass, Plus, Search } from "lucide-react";
 import { Button } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { useAppSelector } from "@/store/hooks";
@@ -65,16 +65,22 @@ export function DashboardHeader({
         </div>
 
         {/* Quick action triggers */}
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
+        <div className="flex shrink-0 flex-wrap items-center gap-2.5">
+          <Link href="/workflow">
+            <Button variant="secondary" className="gap-2 shadow-2xs hover:shadow-xs text-xs font-semibold">
+              <Compass className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+              <span>Operations Guide</span>
+            </Button>
+          </Link>
           <Link href={MERCHANT_ROUTES.tracking}>
-            <Button variant="outline" className="gap-2 shadow-2xs hover:shadow-xs">
-              <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Button variant="outline" className="gap-2 shadow-2xs hover:shadow-xs text-xs font-semibold">
+              <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
               <span>{t("trackParcel")}</span>
             </Button>
           </Link>
           <Link href={MERCHANT_ROUTES.createBooking}>
-            <Button className="gap-2 shadow-sm hover:shadow-md hover:shadow-primary/20">
-              <Plus className="h-4 w-4" aria-hidden="true" />
+            <Button className="gap-2 shadow-sm hover:shadow-md hover:shadow-primary/20 text-xs font-semibold">
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{t("bookNew")}</span>
             </Button>
           </Link>

@@ -31,7 +31,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
 /** Dashboard sections that render inside this shell. */
-type DashboardSection = Extract<AppSection, "merchant" | "admin" | "hub" | "rider">;
+type DashboardSection = Extract<AppSection, "merchant" | "admin" | "hub" | "rider" | "customer">;
 
 function NavLinks({
   items,
