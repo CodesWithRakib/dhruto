@@ -259,12 +259,11 @@ export function MerchantDashboard({ today }: { today: string }) {
             description={t("createSingleDesc")}
           />
           <QuickAction
-            href={`${MERCHANT_ROUTES.createBooking}?mode=bulk`}
+            href={`${MERCHANT_ROUTES.parcels}?action=bulk`}
             icon={UploadCloud}
             title={t("bulkUpload")}
             description={t("bulkUploadDesc")}
-            badge={t("futureFeature")}
-            disabled
+            badge="CSV / Excel"
           />
           <QuickAction
             href={MERCHANT_ROUTES.parcels}

@@ -54,7 +54,7 @@ export function useQueryState(): QueryStateApi {
 
   const set = React.useCallback(
     (patch: Record<string, QueryParamValue>, opts?: { resetPageKeys?: string[] }): void => {
-      const next = new URLSearchParams(live.current.searchParams.toString());
+      const next = new URLSearchParams(live.current.searchParams?.toString() ?? "");
       for (const [key, value] of Object.entries(patch)) {
         next.delete(key);
         if (value === null || value === undefined || value === "") continue;
@@ -75,7 +75,7 @@ export function useQueryState(): QueryStateApi {
 
   const remove = React.useCallback(
     (...keys: string[]): void => {
-      const next = new URLSearchParams(live.current.searchParams.toString());
+      const next = new URLSearchParams(live.current.searchParams?.toString() ?? "");
       for (const key of keys) next.delete(key);
       apply(next);
     },
@@ -84,14 +84,17 @@ export function useQueryState(): QueryStateApi {
 
   const reset = React.useCallback(
     (keys: string[]): void => {
-      const next = new URLSearchParams(live.current.searchParams.toString());
+      const next = new URLSearchParams(live.current.searchParams?.toString() ?? "");
       for (const key of keys) next.delete(key);
       apply(next);
     },
     [apply],
   );
 
-  const raw = React.useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
+  const raw = React.useMemo(
+    () => new URLSearchParams(searchParams?.toString() ?? ""),
+    [searchParams],
+  );
 
   return React.useMemo<QueryStateApi>(
     () => ({

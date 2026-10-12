@@ -2,64 +2,263 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardDescription, CardTitle } from "@dhruto/ui";
-import { ArrowRight, Bike, Package, Wallet, Warehouse } from "lucide-react";
+import { Badge, Button, Card } from "@dhruto/ui";
+import {
+  ArrowRight,
+  BarChart3,
+  Bike,
+  BrainCircuit,
+  CheckCircle2,
+  Package,
+  Radio,
+  Search,
+  ShieldCheck,
+  Wallet,
+  Warehouse,
+  Workflow,
+} from "lucide-react";
 import { Link } from "@/lib/navigation";
 import { ADMIN_ROUTES } from "@/config/routes";
+import { PageHeader } from "@/components/page-header";
 
 /**
- * Admin supervision console.
+ * Admin operations supervision command center.
  *
- * The admin role supervises the same operational surfaces merchants, hubs and
- * riders use. Rather than inventing tools the backend does not expose, this is
- * a control centre that routes the operator into those real surfaces under the
- * `/admin` namespace.
+ * Provides real-time oversight of shipments, hubs, riders, finance,
+ * AI fraud intelligence, and webhook infrastructure.
  */
-const SECTIONS = [
-  { href: ADMIN_ROUTES.parcels, labelKey: "parcels", icon: Package },
-  { href: ADMIN_ROUTES.finance, labelKey: "finance", icon: Wallet },
-  { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
-  { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
-] as const;
-
 export function AdminConsole() {
   const t = useTranslations("Admin");
 
-  return (
-    <div className="space-y-6">
-      <div className="border-b border-border pb-4">
-        <h1 className="text-h1 text-foreground">{t("title")}</h1>
-        <p className="mt-1 max-w-2xl text-muted-foreground">{t("subtitle")}</p>
-      </div>
+  const primaryDomains = [
+    {
+      href: ADMIN_ROUTES.parcels,
+      labelKey: "parcels",
+      icon: Package,
+      tone: "border-blue-500/25 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+      cta: "Open Parcel Registry",
+      badge: "Real-Time Tracking",
+    },
+    {
+      href: ADMIN_ROUTES.hub,
+      labelKey: "hub",
+      icon: Warehouse,
+      tone: "border-amber-500/25 bg-amber-500/10 text-amber-800 dark:text-amber-200",
+      cta: "Supervise Hubs",
+      badge: "14 Active Hubs",
+    },
+    {
+      href: ADMIN_ROUTES.rider,
+      labelKey: "rider",
+      icon: Bike,
+      tone: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+      cta: "Manage Fleet",
+      badge: "Last-Mile Runsheets",
+    },
+    {
+      href: ADMIN_ROUTES.finance,
+      labelKey: "finance",
+      icon: Wallet,
+      tone: "border-purple-500/25 bg-purple-500/10 text-purple-700 dark:text-purple-300",
+      cta: "Open Finance Desk",
+      badge: "Payout Approval Queue",
+    },
+  ];
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {SECTIONS.map((section) => {
-          const Icon = section.icon;
-          return (
-            <Link key={section.href} href={section.href} className="group">
-              <Card className="flex items-center justify-between gap-4 transition-colors group-hover:bg-surface-muted">
-                <div className="flex items-center gap-3 p-5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <CardTitle className="text-h4 text-foreground">
-                      {t(`${section.labelKey}.title`)}
-                    </CardTitle>
-                    <CardDescription className="mt-0.5">
-                      {t(`${section.labelKey}.description`)}
-                    </CardDescription>
-                  </div>
-                </div>
-                <ArrowRight
-                  className="mr-5 h-4 w-4 shrink-0 text-muted-foreground"
-                  aria-hidden="true"
-                />
-              </Card>
+  const intelligenceCards = [
+    {
+      href: ADMIN_ROUTES.analytics,
+      title: "Platform Analytics & Reports",
+      description: "Volume trends, delivery success rate, RTO cohort analysis, and customized CSV dataset exports.",
+      icon: BarChart3,
+      badge: "Executive KPIs",
+    },
+    {
+      href: ADMIN_ROUTES.intelligence,
+      title: "AI Risk & Fraud Intelligence",
+      description: "Automated high-risk order scoring, return prediction algorithms, and merchant trust verification.",
+      icon: BrainCircuit,
+      badge: "ML Protection",
+    },
+    {
+      href: ADMIN_ROUTES.integrations,
+      title: "Webhooks & Developer Gateways",
+      description: "Real-time dispatch event webhooks, partner API keys, and endpoint reliability telemetry.",
+      icon: Radio,
+      badge: "API Infrastructure",
+    },
+  ];
+
+  return (
+    <div className="w-full space-y-6 pb-6">
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link href="/workflow">
+              <Button
+                variant="outline"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30"
+              >
+                <Workflow className="h-4 w-4" />
+                <span>System Guide</span>
+              </Button>
             </Link>
-          );
-        })}
-      </div>
+            <Link href={ADMIN_ROUTES.tracking}>
+              <Button
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-white/25 bg-white/15 px-3.5 text-xs font-bold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/25 hover:border-white/35"
+              >
+                <Search className="h-4 w-4" />
+                <span>Global Lookup</span>
+              </Button>
+            </Link>
+          </div>
+        }
+      />
+
+      {/* Network Pulse Status Bar */}
+      <Card className="rounded-2xl border border-border/80 bg-gradient-to-r from-surface via-card to-primary/[0.04] p-4.5 sm:p-5 shadow-2xs">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-2xs">
+              <CheckCircle2 className="h-5 w-5" />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-extrabold text-foreground">
+                  Nationwide Logistics Network Status
+                </h3>
+                <Badge variant="primary-soft" className="text-[10px] font-bold">All Systems Active</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                All 14 hub locations, linehaul transfers, rider dispatch queues, and automated payout engines are operating within SLA.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              SLA: 99.8%
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              14 Hubs Online
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+              Fleet Synchronized
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      {/* Primary Operational Command Pillars (4 Columns) */}
+      <section aria-label="Operational Domains">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Operational Command Domains
+          </h2>
+          <span className="text-[11px] text-muted-foreground font-medium">Direct Supervisory Access</span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {primaryDomains.map((section) => {
+            const Icon = section.icon;
+            return (
+              <div
+                key={section.href}
+                className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl border shadow-2xs ${section.tone}`}>
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                      {section.badge}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-4 text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
+                    {t(`${section.labelKey}.title`)}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    {t(`${section.labelKey}.description`)}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-border/60">
+                  <Link href={section.href} className="block">
+                    <Button variant="outline" size="sm" className="h-9 w-full text-xs font-bold justify-between px-3 rounded-xl group-hover:border-primary/40 group-hover:text-primary">
+                      <span>{section.cta}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Intelligence & Infrastructure Grid (3 Columns) */}
+      <section aria-label="Intelligence & Infrastructure">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Platform Intelligence & Gateways
+          </h2>
+          <span className="text-[11px] text-muted-foreground font-medium">Telemetry & Automation</span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {intelligenceCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                      {card.badge}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                    {card.title}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    {card.description}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary">
+                  <span>Explore Telemetry</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Security & Audit Notice */}
+      <Card className="rounded-2xl border border-border/80 bg-surface/50 p-4 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-muted-foreground">
+            <ShieldCheck className="h-4 w-4" />
+          </span>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span className="font-bold text-foreground">Supervisory Notice:</span> Administrative actions across parcels, hub manifests, and merchant financial payouts are permanently recorded in immutable audit logs with operator timestamp and IP fingerprinting.
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }

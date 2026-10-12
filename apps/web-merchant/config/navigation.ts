@@ -126,25 +126,20 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: ADMIN_ROUTES.parcels, labelKey: "parcels", icon: Package },
         { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
         { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
-        { href: ADMIN_ROUTES.integrations, labelKey: "integrations", icon: Radio },
-        { href: ADMIN_ROUTES.intelligence, labelKey: "intelligence", icon: BrainCircuit },
       ],
     },
     {
       labelKey: "groupFinance",
       items: [
         { href: ADMIN_ROUTES.finance, labelKey: "finance", icon: Wallet },
-        { href: ADMIN_ROUTES.analytics, labelKey: "analytics", icon: BarChart3 },
       ],
     },
     {
-      labelKey: "groupAnalytics",
+      labelKey: "groupIntelligence",
       items: [
-        { href: `${ADMIN_ROUTES.analytics}/parcels`, labelKey: "parcels", icon: PackageSearch },
-        { href: `${ADMIN_ROUTES.analytics}/rto`, labelKey: "rto", icon: History },
-        { href: `${ADMIN_ROUTES.analytics}/cod`, labelKey: "financials", icon: Wallet },
-        { href: `${ADMIN_ROUTES.analytics}/alerts`, labelKey: "alerts", icon: ClipboardList },
-        { href: `${ADMIN_ROUTES.analytics}/reports`, labelKey: "reports", icon: FileText },
+        { href: ADMIN_ROUTES.analytics, labelKey: "analytics", icon: BarChart3 },
+        { href: ADMIN_ROUTES.intelligence, labelKey: "intelligence", icon: BrainCircuit },
+        { href: ADMIN_ROUTES.integrations, labelKey: "integrations", icon: Radio },
       ],
     },
     {

@@ -26,6 +26,7 @@ import { EmptyState, ErrorState, RetryButton } from "@/components/feedback/state
 import { cn } from "@/lib/cn";
 import { useFormatters } from "@/lib/format";
 import { rememberListUrl } from "@/lib/last-list-url";
+import { useQueryState } from "@/hooks/use-query-state";
 import { useParcelsList, type ParcelListFilters } from "../hooks/use-parcels-list";
 import { ParcelFilterControls } from "./parcel-filters";
 import { ParcelSortSelect } from "./parcel-sort-select";
@@ -52,8 +53,11 @@ export function ParcelList() {
   const tTable = useTranslations("DataTable");
   const { bdt, date, time, number } = useFormatters();
   const routes = useRouteBase();
+  const query = useQueryState();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(
+    () => query.getString("action") === "bulk" || query.getString("mode") === "bulk",
+  );
 
   const {
     parcels,
