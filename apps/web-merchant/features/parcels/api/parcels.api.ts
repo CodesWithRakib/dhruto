@@ -309,6 +309,7 @@ export const {
   useGetParcelHistoryQuery,
   useGetShippingLabelQuery,
   useGetPublicTrackingQuery,
+  useLazyGetPublicTrackingQuery,
   useCalculatePricingMutation,
   useCreateParcelMutation,
   useGetBulkTemplateQuery,

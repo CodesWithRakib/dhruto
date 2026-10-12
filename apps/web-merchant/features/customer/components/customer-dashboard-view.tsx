@@ -3,9 +3,11 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
+  ArrowRight,
   Bike,
   Building2,
   Calendar,
+  Check,
   CheckCircle2,
   Clock,
   Copy,
@@ -13,13 +15,15 @@ import {
   EyeOff,
   FileCheck,
   MapPin,
+  MessageSquare,
   Package,
   Phone,
+  RefreshCw,
   Search,
   ShieldCheck,
   Sparkles,
   Truck,
-  ArrowRight,
+  X,
 } from "lucide-react";
 import { Badge, Button, Card, CardContent } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
@@ -27,101 +31,108 @@ import { CUSTOMER_ROUTES } from "@/config/routes";
 import { useAppSelector } from "@/store/hooks";
 import { RescheduleModal } from "./reschedule-modal";
 import { PodModal } from "./pod-modal";
+import {
+  useCustomerDeliveries,
+  type CustomerDelivery,
+} from "../hooks/use-customer-deliveries";
+import { ParcelStatus } from "@dhruto/contracts";
 import { toast } from "sonner";
 
-interface CustomerDelivery {
-  id: string;
-  trackingCode: string;
-  merchantName: string;
-  destination: string;
-  status: "OUT_FOR_DELIVERY" | "IN_TRANSIT" | "DELIVERED" | "PICKED_UP";
-  statusLabel: string;
-  eta: string;
-  codAmount: number;
-  isPaid: boolean;
-  itemsDescription: string;
-  riderName?: string;
-  riderPhone?: string;
-  otp?: string;
-  deliveredAt?: string;
+/**
+ * Calculates current progress step (1-5) and percentage for active delivery
+ */
+function getProgressStep(status: ParcelStatus | string): { step: number; percentage: number; label: string } {
+  switch (status) {
+    case ParcelStatus.CREATED:
+    case "BOOKED":
+      return { step: 1, percentage: 20, label: "Booking Confirmed" };
+    case ParcelStatus.PICKUP_REQUESTED:
+    case ParcelStatus.PICKUP_ASSIGNED:
+    case ParcelStatus.PICKED_UP:
+      return { step: 2, percentage: 40, label: "Picked Up from Merchant" };
+    case ParcelStatus.ORIGIN_HUB_RECEIVED:
+    case ParcelStatus.BAGGED:
+    case ParcelStatus.IN_TRANSIT:
+    case "IN_TRANSIT":
+    case ParcelStatus.DESTINATION_HUB_RECEIVED:
+      return { step: 3, percentage: 65, label: "In Hub Transit" };
+    case ParcelStatus.ASSIGNED_TO_RIDER:
+    case ParcelStatus.OUT_FOR_DELIVERY:
+    case "OUT_FOR_DELIVERY":
+    case ParcelStatus.RESCHEDULED:
+    case ParcelStatus.DELIVERY_ATTEMPTED:
+      return { step: 4, percentage: 85, label: "Out for Delivery" };
+    case ParcelStatus.DELIVERED:
+    case "DELIVERED":
+      return { step: 5, percentage: 100, label: "Delivered" };
+    default:
+      return { step: 2, percentage: 40, label: "Processing" };
+  }
 }
 
-const MOCK_CUSTOMER_DELIVERIES: CustomerDelivery[] = [
-  {
-    id: "del-1",
-    trackingCode: "DHR-2610-00107",
-    merchantName: "Aarong Fashion Store",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    status: "OUT_FOR_DELIVERY",
-    statusLabel: "Out for Delivery",
-    eta: "Today by 04:30 PM",
-    codAmount: 1850,
-    isPaid: false,
-    itemsDescription: "Silk Kurti & Accessories (1.2 kg)",
-    riderName: "Kamrul Hasan",
-    riderPhone: "+8801712398745",
-    otp: "582419",
-  },
-  {
-    id: "del-2",
-    trackingCode: "DHR-2610-00113",
-    merchantName: "Apex Footwear Official",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    status: "IN_TRANSIT",
-    statusLabel: "In Hub Transit",
-    eta: "Tomorrow by 02:00 PM",
-    codAmount: 0,
-    isPaid: true,
-    itemsDescription: "Leather Formal Shoes (Size 42)",
-  },
-  {
-    id: "del-3",
-    trackingCode: "DHR-2610-00101",
-    merchantName: "Shajgoj Beauty Hub",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    status: "DELIVERED",
-    statusLabel: "Delivered",
-    eta: "Yesterday at 03:15 PM",
-    codAmount: 920,
-    isPaid: true,
-    itemsDescription: "Skincare Essentials Pack (0.8 kg)",
-    riderName: "Rakibul Islam",
-    riderPhone: "+8801819876543",
-    deliveredAt: "Yesterday, Oct 11 at 03:15 PM",
-  },
+const SAMPLE_TRACKING_CODES = [
+  "DHR-2610-00107",
+  "DHR-2610-00108",
+  "DHR-2610-00113",
+  "DHR-2610-00111",
+  "DHR-2610-00101",
 ];
 
 export function CustomerDashboardView() {
   const t = useTranslations("Customer");
   const authUser = useAppSelector((s) => s.auth.user);
 
+  const {
+    deliveries,
+    activeShipment,
+    activeTrackingCode,
+    setActiveTrackingCode,
+    isRefreshing,
+    incomingCount,
+    arrivingTodayCount,
+    deliveredCount,
+    totalCodDue,
+    primaryLocation,
+    addDeliveryByTrackingCode,
+    refreshAllDeliveries,
+    rescheduleDelivery,
+    markAsDelivered,
+    removeDelivery,
+  } = useCustomerDeliveries();
+
+  // Search & Filters
   const [activeFilter, setActiveFilter] = React.useState<"ALL" | "ACTIVE" | "DELIVERED">("ALL");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [showOtp, setShowOtp] = React.useState(true);
 
+  // New Parcel Quick Connect Form
+  const [newCodeInput, setNewCodeInput] = React.useState("");
+  const [isAddingCode, setIsAddingCode] = React.useState(false);
+
   // Modals state
   const [rescheduleOpen, setRescheduleOpen] = React.useState(false);
-  const [activeTrackingForModal, setActiveTrackingForModal] = React.useState("DHR-2610-00107");
+  const [activeTrackingForModal, setActiveTrackingForModal] = React.useState<string>("");
   const [podOpen, setPodOpen] = React.useState(false);
-  const [selectedPodParcel, setSelectedPodParcel] = React.useState<(typeof MOCK_CUSTOMER_DELIVERIES)[0] | null>(null);
+  const [selectedPodParcel, setSelectedPodParcel] = React.useState<CustomerDelivery | null>(null);
 
-  const activeShipment = MOCK_CUSTOMER_DELIVERIES.find(
-    (d) => d.status === "OUT_FOR_DELIVERY" || d.status === "IN_TRANSIT"
-  );
-
-  const filteredDeliveries = MOCK_CUSTOMER_DELIVERIES.filter((item) => {
-    if (activeFilter === "ACTIVE" && item.status === "DELIVERED") return false;
-    if (activeFilter === "DELIVERED" && item.status !== "DELIVERED") return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        item.trackingCode.toLowerCase().includes(q) ||
-        item.merchantName.toLowerCase().includes(q) ||
-        item.itemsDescription.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  // Filtered deliveries list
+  const filteredDeliveries = React.useMemo(() => {
+    return deliveries.filter((item) => {
+      if (activeFilter === "ACTIVE" && item.status === ParcelStatus.DELIVERED) return false;
+      if (activeFilter === "DELIVERED" && item.status !== ParcelStatus.DELIVERED) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          item.trackingCode.toLowerCase().includes(q) ||
+          item.merchantName.toLowerCase().includes(q) ||
+          item.itemsDescription.toLowerCase().includes(q) ||
+          item.destination.toLowerCase().includes(q) ||
+          (item.riderName && item.riderName.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+  }, [deliveries, activeFilter, searchQuery]);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -138,27 +149,44 @@ export function CustomerDashboardView() {
     setRescheduleOpen(true);
   };
 
+  const handleAddTrackingCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newCodeInput.trim()) return;
+    setIsAddingCode(true);
+    const ok = await addDeliveryByTrackingCode(newCodeInput);
+    if (ok) {
+      setNewCodeInput("");
+    }
+    setIsAddingCode(false);
+  };
+
+  const currentStep = activeShipment ? getProgressStep(activeShipment.status) : null;
+
   return (
     <div className="space-y-6">
-      {/* Modals */}
+      {/* Reschedule Modal */}
       <RescheduleModal
         open={rescheduleOpen}
         onOpenChange={setRescheduleOpen}
-        trackingCode={activeTrackingForModal}
+        trackingCode={activeTrackingForModal || activeShipment?.trackingCode || ""}
         currentAddress={activeShipment?.destination}
+        onRescheduleSuccess={(details) => {
+          rescheduleDelivery(activeTrackingForModal || activeShipment?.trackingCode || "", details);
+        }}
       />
 
+      {/* Proof of Delivery (POD) Modal */}
       {selectedPodParcel ? (
         <PodModal
           open={podOpen}
           onOpenChange={setPodOpen}
           parcel={{
             trackingCode: selectedPodParcel.trackingCode,
-            recipientName: authUser?.name || "Customer",
-            recipientPhone: authUser?.phone || "+8801700000000",
+            recipientName: authUser?.name || "Verified Customer",
+            recipientPhone: authUser?.phone || "+8801700000005",
             deliveryAddress: selectedPodParcel.destination,
-            deliveredAt: selectedPodParcel.deliveredAt || "Delivered",
-            riderName: selectedPodParcel.riderName || "Dhruto Rider",
+            deliveredAt: selectedPodParcel.deliveredAt || "Today",
+            riderName: selectedPodParcel.riderName || "Dhruto Express Rider",
             merchantName: selectedPodParcel.merchantName,
             codAmount: selectedPodParcel.codAmount,
             description: selectedPodParcel.itemsDescription,
@@ -166,7 +194,7 @@ export function CustomerDashboardView() {
         />
       ) : null}
 
-      {/* Welcome Banner */}
+      {/* Dynamic Welcome & Live Pulse Banner */}
       <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-surface via-surface-muted/50 to-primary-soft/30 p-6 sm:p-8 shadow-soft">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1.5">
@@ -176,11 +204,11 @@ export function CustomerDashboardView() {
                 {t("verifiedRecipientBadge")}
               </span>
               <span className="text-xs text-muted-foreground font-mono">
-                {authUser?.phone || "+88017********"}
+                {authUser?.phone || "+8801700000005"}
               </span>
             </div>
             <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-              {t("greeting", { name: authUser?.name || "Valued Customer" })}
+              {t("greeting", { name: authUser?.name || "Mahmudur Rahman" })}
             </h1>
             <p className="text-xs text-muted-foreground sm:text-sm">
               {t("portalSubtitle")}
@@ -188,24 +216,28 @@ export function CustomerDashboardView() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:self-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refreshAllDeliveries()}
+              disabled={isRefreshing}
+              className="h-10 text-xs font-semibold gap-1.5"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
+              {isRefreshing ? "Syncing..." : "Sync Live Status"}
+            </Button>
             <Link href={CUSTOMER_ROUTES.tracking}>
-              <Button variant="outline" className="h-10 text-xs font-semibold gap-1.5">
+              <Button variant="secondary" className="h-10 text-xs font-semibold gap-1.5">
                 <Search className="h-3.5 w-3.5" />
                 {t("trackAnyParcel")}
-              </Button>
-            </Link>
-            <Link href={CUSTOMER_ROUTES.settings}>
-              <Button variant="secondary" className="h-10 text-xs font-semibold gap-1.5">
-                <MapPin className="h-3.5 w-3.5" />
-                {t("manageAddresses")}
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
+        {/* Dynamic Real-Time Stats Grid */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs">
+          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-primary/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statIncoming")}</span>
               <span className="relative flex h-2 w-2">
@@ -213,36 +245,95 @@ export function CustomerDashboardView() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
             </div>
-            <div className="mt-2 text-2xl font-black text-foreground">2</div>
-            <span className="text-[11px] text-primary font-medium">1 arriving today</span>
+            <div className="mt-2 text-2xl font-black text-foreground">{incomingCount}</div>
+            <span className="text-[11px] text-primary font-medium">
+              {arrivingTodayCount > 0 ? `${arrivingTodayCount} arriving today` : "Scheduled in transit"}
+            </span>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs">
+          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-success/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statDelivered")}</span>
               <CheckCircle2 className="h-4 w-4 text-success" />
             </div>
-            <div className="mt-2 text-2xl font-black text-foreground">14</div>
-            <span className="text-[11px] text-muted-foreground">Past 30 days</span>
+            <div className="mt-2 text-2xl font-black text-foreground">{deliveredCount}</div>
+            <span className="text-[11px] text-muted-foreground">Doorstep handoffs logged</span>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs">
+          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-warning/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statCodDue")}</span>
               <Clock className="h-4 w-4 text-warning" />
             </div>
-            <div className="mt-2 text-2xl font-black text-foreground">৳1,850</div>
-            <span className="text-[11px] text-muted-foreground">Cash ready for rider</span>
+            <div className="mt-2 text-2xl font-black text-foreground">
+              ৳{totalCodDue.toLocaleString()}
+            </div>
+            <span className="text-[11px] text-muted-foreground">Cash ready for delivery rider</span>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs">
+          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-primary/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statAddress")}</span>
               <MapPin className="h-4 w-4 text-primary" />
             </div>
-            <div className="mt-2 text-2xl font-black text-foreground">Banani</div>
-            <span className="text-[11px] text-muted-foreground">Primary Delivery Point</span>
+            <div className="mt-2 text-2xl font-black text-foreground truncate">{primaryLocation}</div>
+            <span className="text-[11px] text-muted-foreground">Primary Destination</span>
           </div>
+        </div>
+      </div>
+
+      {/* Dynamic Instant Track & Connect Shipment Bar */}
+      <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-2xs">
+        <form onSubmit={handleAddTrackingCode} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Package className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={newCodeInput}
+              onChange={(e) => setNewCodeInput(e.target.value)}
+              placeholder="Connect any tracking code (e.g. DHR-2610-00108)..."
+              className="h-10 w-full rounded-xl border border-border/80 bg-surface pl-10 pr-3 text-xs font-mono font-medium text-foreground placeholder:font-sans placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={isAddingCode || !newCodeInput.trim()}
+            className="h-10 shrink-0 text-xs font-semibold gap-1.5"
+          >
+            {isAddingCode ? (
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            Track & Add to Dashboard
+          </Button>
+        </form>
+
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="text-[11px] font-semibold">Quick Sample Shipments:</span>
+          {SAMPLE_TRACKING_CODES.map((code) => {
+            const isTracked = deliveries.some((d) => d.trackingCode === code);
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => {
+                  if (isTracked) {
+                    setActiveTrackingCode(code);
+                  } else {
+                    addDeliveryByTrackingCode(code);
+                  }
+                }}
+                className={`rounded-lg px-2 py-0.5 font-mono text-[11px] transition-all ${
+                  isTracked
+                    ? "bg-primary-soft text-primary font-bold hover:bg-primary/20"
+                    : "bg-surface-muted text-muted-foreground hover:bg-surface-muted/80 border border-border/60"
+                }`}
+              >
+                {code} {isTracked && activeTrackingCode === code ? "★" : ""}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -256,16 +347,23 @@ export function CustomerDashboardView() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-600" />
               </span>
               <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                {t("activeShipmentArriving")}
+                {activeShipment.status === ParcelStatus.DELIVERED
+                  ? "Completed Delivery Record"
+                  : t("activeShipmentArriving")}
               </span>
               <span className="text-xs text-muted-foreground">•</span>
-              <span className="font-mono text-xs font-bold text-foreground">
+              <span className="font-mono text-xs font-extrabold text-foreground">
                 {activeShipment.trackingCode}
               </span>
             </div>
-            <Badge variant="outline" className="border-primary/30 bg-surface text-primary font-bold">
-              {activeShipment.eta}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-primary/30 bg-surface text-primary font-bold">
+                {activeShipment.eta}
+              </Badge>
+              <Badge variant="primary-soft" className="font-semibold">
+                {activeShipment.statusLabel}
+              </Badge>
+            </div>
           </div>
 
           <CardContent className="p-5 sm:p-7 space-y-6">
@@ -275,7 +373,10 @@ export function CustomerDashboardView() {
                 <div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     <Building2 className="h-3.5 w-3.5" />
-                    <span>{t("shippedFrom")}: <strong className="text-foreground">{activeShipment.merchantName}</strong></span>
+                    <span>
+                      {t("shippedFrom")}:{" "}
+                      <strong className="text-foreground">{activeShipment.merchantName}</strong>
+                    </span>
                   </div>
                   <h3 className="mt-1 text-lg font-extrabold text-foreground">
                     {activeShipment.itemsDescription}
@@ -284,35 +385,83 @@ export function CustomerDashboardView() {
                     <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
                     <span className="truncate">{activeShipment.destination}</span>
                   </p>
+
+                  {/* Rider Note if Rescheduled */}
+                  {activeShipment.deliveryNote ? (
+                    <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-200">
+                      <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                      <div>
+                        <span className="font-bold">Customer Instruction:</span> {activeShipment.deliveryNote}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
-                {/* Progress Stepper */}
+                {/* Dynamic Progress Stepper */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
                     <span>{t("liveDeliveryProgress")}</span>
-                    <span className="text-primary font-bold">Step 4 of 5</span>
+                    <span className="text-primary font-bold">
+                      Step {currentStep?.step ?? 3} of 5 ({currentStep?.label})
+                    </span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500" />
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500"
+                      style={{ width: `${currentStep?.percentage ?? 60}%` }}
+                    />
                   </div>
-                  <div className="grid grid-cols-4 pt-1 text-[11px] text-muted-foreground">
-                    <span className="text-foreground font-semibold">Booked</span>
-                    <span className="text-foreground font-semibold">Picked Up</span>
-                    <span className="text-foreground font-semibold">Hub Transit</span>
-                    <span className="text-primary font-bold text-right sm:text-left">Out for Delivery</span>
+                  <div className="grid grid-cols-5 pt-1 text-[10px] text-muted-foreground text-center">
+                    <span className={currentStep && currentStep.step >= 1 ? "text-foreground font-bold" : ""}>
+                      Booked
+                    </span>
+                    <span className={currentStep && currentStep.step >= 2 ? "text-foreground font-bold" : ""}>
+                      Picked Up
+                    </span>
+                    <span className={currentStep && currentStep.step >= 3 ? "text-foreground font-bold" : ""}>
+                      Hub Transit
+                    </span>
+                    <span className={currentStep && currentStep.step >= 4 ? "text-primary font-extrabold" : ""}>
+                      Out for Delivery
+                    </span>
+                    <span className={currentStep && currentStep.step >= 5 ? "text-emerald-600 font-extrabold" : ""}>
+                      Delivered
+                    </span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2.5 pt-2">
-                  <Button
-                    onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
-                    variant="outline"
-                    className="h-10 text-xs font-semibold gap-1.5"
-                  >
-                    <Calendar className="h-3.5 w-3.5" />
-                    {t("rescheduleOrInstructions")}
-                  </Button>
+                  {activeShipment.status !== ParcelStatus.DELIVERED ? (
+                    <>
+                      <Button
+                        onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
+                        variant="outline"
+                        className="h-10 text-xs font-semibold gap-1.5"
+                      >
+                        <Calendar className="h-3.5 w-3.5" />
+                        {t("rescheduleOrInstructions")}
+                      </Button>
+                      <Button
+                        onClick={() => markAsDelivered(activeShipment.trackingCode)}
+                        variant="soft"
+                        className="h-10 text-xs font-semibold gap-1.5"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                        Confirm Received
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={() => handleOpenPod(activeShipment)}
+                      variant="outline"
+                      className="h-10 text-xs font-semibold gap-1.5"
+                    >
+                      <FileCheck className="h-3.5 w-3.5" />
+                      View Proof of Delivery (POD)
+                    </Button>
+                  )}
+
                   <Link href={`${CUSTOMER_ROUTES.tracking}/${activeShipment.trackingCode}`}>
                     <Button variant="secondary" className="h-10 text-xs font-semibold gap-1.5">
                       <Truck className="h-3.5 w-3.5" />
@@ -350,7 +499,7 @@ export function CustomerDashboardView() {
                         type="button"
                         variant="soft"
                         size="sm"
-                        onClick={() => handleCopy(activeShipment.otp!, "Delivery OTP")}
+                        onClick={() => handleCopy(activeShipment.otp, "Delivery OTP")}
                         className="h-8 gap-1 text-xs font-semibold"
                       >
                         <Copy className="h-3 w-3" />
@@ -403,8 +552,10 @@ export function CustomerDashboardView() {
                 <div className="flex items-center justify-between rounded-xl border border-border/70 bg-surface p-3 text-xs">
                   <span className="text-muted-foreground font-medium">{t("codPayment")}:</span>
                   <span className="font-bold text-foreground">
-                    {activeShipment.codAmount > 0 ? (
-                      <span className="text-primary font-black">৳{activeShipment.codAmount.toLocaleString()} (Cash on Delivery)</span>
+                    {activeShipment.codAmount > 0 && !activeShipment.isPaid ? (
+                      <span className="text-primary font-black">
+                        ৳{activeShipment.codAmount.toLocaleString()} (Cash on Delivery)
+                      </span>
                     ) : (
                       <span className="text-success font-semibold">Paid in Advance</span>
                     )}
@@ -421,9 +572,9 @@ export function CustomerDashboardView() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             {[
-              { id: "ALL", label: t("filterAll") },
-              { id: "ACTIVE", label: t("filterActive") },
-              { id: "DELIVERED", label: t("filterDelivered") },
+              { id: "ALL", label: `${t("filterAll")} (${deliveries.length})` },
+              { id: "ACTIVE", label: `${t("filterActive")} (${incomingCount})` },
+              { id: "DELIVERED", label: `${t("filterDelivered")} (${deliveredCount})` },
             ].map((f) => (
               <button
                 key={f.id}
@@ -446,7 +597,7 @@ export function CustomerDashboardView() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by code, store, item..."
+              placeholder="Filter by code, merchant, item..."
               className="h-9 w-full rounded-xl border border-border/80 bg-surface pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -454,94 +605,146 @@ export function CustomerDashboardView() {
 
         {/* Deliveries List */}
         <div className="space-y-3">
-          {filteredDeliveries.map((delivery) => {
-            const isDelivered = delivery.status === "DELIVERED";
-            return (
-              <div
-                key={delivery.id}
-                className="group relative flex flex-col justify-between gap-4 rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-2xs transition-all hover:border-primary/40 hover:shadow-soft sm:flex-row sm:items-center"
-              >
-                <div className="flex items-start gap-3.5">
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold shadow-2xs ${
-                      isDelivered
-                        ? "bg-success-soft text-success border border-success/20"
-                        : "bg-primary-soft text-primary border border-primary/20"
-                    }`}
-                  >
-                    {isDelivered ? <CheckCircle2 className="h-5 w-5" /> : <Package className="h-5 w-5" />}
+          {filteredDeliveries.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
+              No deliveries match your current search or filter criteria.
+            </div>
+          ) : (
+            filteredDeliveries.map((delivery) => {
+              const isDelivered = delivery.status === ParcelStatus.DELIVERED;
+              const isSpotlighted = delivery.trackingCode === activeShipment?.trackingCode;
+
+              return (
+                <div
+                  key={delivery.id}
+                  className={`group relative flex flex-col justify-between gap-4 rounded-2xl border bg-surface p-4 sm:p-5 shadow-2xs transition-all hover:border-primary/50 hover:shadow-soft sm:flex-row sm:items-center ${
+                    isSpotlighted
+                      ? "border-primary/50 bg-primary-soft/10 ring-1 ring-primary/30"
+                      : "border-border/80"
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTrackingCode(delivery.trackingCode)}
+                      title="Pin to spotlight"
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold shadow-2xs transition-transform group-hover:scale-105 ${
+                        isDelivered
+                          ? "bg-success-soft text-success border border-success/20"
+                          : "bg-primary-soft text-primary border border-primary/20"
+                      }`}
+                    >
+                      {isDelivered ? <CheckCircle2 className="h-5 w-5" /> : <Package className="h-5 w-5" />}
+                    </button>
+
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs font-extrabold text-foreground">
+                          {delivery.trackingCode}
+                        </span>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs font-bold text-foreground">
+                          {delivery.merchantName}
+                        </span>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                            isDelivered
+                              ? "bg-success-soft text-success-soft-foreground"
+                              : "bg-primary-soft text-primary-soft-foreground"
+                          }`}
+                        >
+                          {delivery.statusLabel}
+                        </span>
+                        {isSpotlighted ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-extrabold text-primary">
+                            ★ Active
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {delivery.itemsDescription}
+                      </p>
+
+                      {delivery.deliveryNote ? (
+                        <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          Note: {delivery.deliveryNote}
+                        </p>
+                      ) : null}
+
+                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-muted-foreground">
+                        <span>{isDelivered ? delivery.deliveredAt || "Delivered" : delivery.eta}</span>
+                        <span>•</span>
+                        <span>
+                          COD:{" "}
+                          <strong className="text-foreground">
+                            {delivery.codAmount > 0 && !delivery.isPaid
+                              ? `৳${delivery.codAmount}`
+                              : "Prepaid"}
+                          </strong>
+                        </span>
+                        <span>•</span>
+                        <span className="truncate max-w-[200px]">{delivery.destination}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-extrabold text-foreground">
-                        {delivery.trackingCode}
-                      </span>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <span className="text-xs font-bold text-foreground">
-                        {delivery.merchantName}
-                      </span>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                          isDelivered
-                            ? "bg-success-soft text-success-soft-foreground"
-                            : "bg-primary-soft text-primary-soft-foreground"
-                        }`}
+                  <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">
+                    {!isSpotlighted ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setActiveTrackingCode(delivery.trackingCode)}
+                        className="h-9 text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
-                        {delivery.statusLabel}
-                      </span>
-                    </div>
+                        Spotlight
+                      </Button>
+                    ) : null}
 
-                    <p className="text-xs text-muted-foreground font-medium">
-                      {delivery.itemsDescription}
-                    </p>
+                    {isDelivered ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenPod(delivery)}
+                        className="h-9 gap-1.5 text-xs font-semibold"
+                      >
+                        <FileCheck className="h-3.5 w-3.5" />
+                        View POD
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenReschedule(delivery.trackingCode)}
+                        className="h-9 gap-1.5 text-xs font-semibold"
+                      >
+                        <Calendar className="h-3.5 w-3.5" />
+                        Reschedule
+                      </Button>
+                    )}
 
-                    <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-muted-foreground">
-                      <span>{isDelivered ? delivery.deliveredAt : delivery.eta}</span>
-                      <span>•</span>
-                      <span>
-                        COD:{" "}
-                        <strong className="text-foreground">
-                          {delivery.codAmount > 0 ? `৳${delivery.codAmount}` : "Prepaid"}
-                        </strong>
-                      </span>
-                    </div>
+                    <Link href={`${CUSTOMER_ROUTES.tracking}/${delivery.trackingCode}`}>
+                      <Button size="sm" variant="secondary" className="h-9 gap-1 text-xs font-semibold">
+                        Track
+                        <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => removeDelivery(delivery.trackingCode)}
+                      title="Remove from tracked list"
+                      className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg"
+                      aria-label="Remove delivery"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">
-                  {isDelivered ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenPod(delivery)}
-                      className="h-9 gap-1.5 text-xs font-semibold"
-                    >
-                      <FileCheck className="h-3.5 w-3.5" />
-                      View POD
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenReschedule(delivery.trackingCode)}
-                      className="h-9 gap-1.5 text-xs font-semibold"
-                    >
-                      <Calendar className="h-3.5 w-3.5" />
-                      Reschedule
-                    </Button>
-                  )}
-
-                  <Link href={`${CUSTOMER_ROUTES.tracking}/${delivery.trackingCode}`}>
-                    <Button size="sm" variant="secondary" className="h-9 gap-1 text-xs font-semibold">
-                      Track
-                      <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

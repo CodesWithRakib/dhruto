@@ -19,6 +19,12 @@ export interface RescheduleModalProps {
   onOpenChange: (open: boolean) => void;
   trackingCode: string;
   currentAddress?: string;
+  onRescheduleSuccess?: (details: {
+    dateChoice: "today" | "tomorrow" | "dayAfter";
+    slotLabel: string;
+    instruction: string;
+    customNote: string;
+  }) => void;
 }
 
 const PRESET_INSTRUCTIONS = [
@@ -39,6 +45,7 @@ export function RescheduleModal({
   onOpenChange,
   trackingCode,
   currentAddress,
+  onRescheduleSuccess,
 }: RescheduleModalProps) {
   const t = useTranslations("Customer");
 
@@ -53,7 +60,19 @@ export function RescheduleModal({
     setIsSubmitting(true);
 
     // Simulate saving delivery preferences
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const slotObj = TIME_SLOTS.find((s) => s.id === selectedSlot);
+    const combinedInstruction = customNote.trim()
+      ? `${selectedInstruction} (${customNote.trim()})`
+      : selectedInstruction;
+
+    onRescheduleSuccess?.({
+      dateChoice,
+      slotLabel: slotObj?.label ?? selectedSlot,
+      instruction: combinedInstruction,
+      customNote,
+    });
 
     setIsSubmitting(false);
     toast.success(

@@ -56,16 +56,22 @@ graph TD
 - **Page Centralization**:
   - Keep primary entry points clean; move sub-workflows (e.g. New Booking, Batch Actions) to top action bars in the Shipments view.
 
-### Milestone 3: Dedicated Customer Experience Portal
+### Milestone 3: Dedicated Customer Experience Portal [FULLY DYNAMIC & LIVE CONNECTED]
 - **Routing & RBAC Configuration**:
-  - Add `CUSTOMER_ROUTES` to [`config/routes.ts`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/config/routes.ts) (`/customer/dashboard`, `/customer/track`, `/customer/history`, `/customer/settings`).
-  - Add `customer` to `AppSection` and configure `ROLE_CONFIG.CUSTOMER` in [`config/roles.ts`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/config/roles.ts).
-  - Add `NAV_BY_ROLE.CUSTOMER` and `BOTTOM_HREFS.CUSTOMER` in [`config/navigation.ts`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/config/navigation.ts).
-- **Customer Pages & Components** (`apps/web-merchant/app/[locale]/(customer)/customer/`):
-  - **Dashboard**: Active Deliveries card, Live Status Timeline, Rider Contact & Map preview, Secure Delivery OTP card.
-  - **Reschedule & Instructions Modal**: Allow recipient to choose preferred delivery date/time and special instructions (e.g., "Leave at security", "Call on arrival").
-  - **History**: Completed shipments with digital proof of delivery.
-  - **Settings**: Primary address, phone number, and SMS/WhatsApp notifications.
+  - Configured `CUSTOMER_ROUTES` (`/customer/dashboard`, `/customer/track`, `/customer/history`, `/customer/settings`).
+  - Added `customer` to `AppSection` and configured `ROLE_CONFIG.CUSTOMER` in [`config/roles.ts`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/config/roles.ts).
+  - Added `NAV_BY_ROLE.CUSTOMER` and `BOTTOM_HREFS.CUSTOMER` in [`config/navigation.ts`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/config/navigation.ts).
+- **Dynamic State Engine (`useCustomerDeliveries`)** ([`use-customer-deliveries.ts`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/features/customer/hooks/use-customer-deliveries.ts)):
+  - **Live Network Telemetry**: Connected `useLazyGetPublicTrackingQuery` to allow instant on-demand tracking of any real tracking code (`DHR-...`) across Bangladesh.
+  - **Instant Connect & Pin Bar**: Customers can type or click any tracking code to fetch real live timeline events, status, destination, and pin it to their active deliveries.
+  - **Live Status Re-sync**: One-click "Sync Live Status" button checks current network status for all active deliveries simultaneously.
+  - **Dynamic Metrics**: Zero static numbers; incoming count, arriving today, delivered count, COD due, and primary location are computed dynamically in real time.
+  - **Spotlight Switching**: Clicking any shipment card pins it to the hero spotlight card with live 5-stage progress stepper and OTP.
+  - **Dynamic Reschedule Flow**: [`RescheduleModal`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/features/customer/components/reschedule-modal.tsx) updates ETA, attaches customer instructions for the rider, and persists locally.
+  - **Digital POD Receipts**: Completed orders display digital Proof of Delivery via [`PodModal`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/features/customer/components/pod-modal.tsx).
+- **Dynamic Customer History & Settings**:
+  - [`CustomerHistoryView`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/features/customer/components/customer-history-view.tsx): Displays all delivered shipments dynamically with search and POD generation.
+  - [`CustomerSettingsView`](file:///c:/Sofof_tech_2026/dhruto/apps/web-merchant/features/customer/components/customer-settings-view.tsx): Interactive Add Delivery Address modal, set default, remove address, and notification alert switches with localStorage persistence.
 
 ### Milestone 4: Merchant Flow Perfection [COMPLETED]
 - **Sidebar & Operations IA Consolidation**:

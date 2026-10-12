@@ -7,17 +7,30 @@ import {
   Building,
   Check,
   Home,
+  MapPin,
   MessageSquare,
   Plus,
   Shield,
   Smartphone,
+  Trash2,
 } from "lucide-react";
-import { Button, Card, CardContent, Switch } from "@dhruto/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Switch,
+} from "@dhruto/ui";
 import { PageHeader } from "@/components/page-header";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 
-interface Address {
+export interface CustomerAddress {
   id: string;
   tag: "Home" | "Office" | "Other";
   recipientName: string;
@@ -28,12 +41,15 @@ interface Address {
   isDefault: boolean;
 }
 
-const INITIAL_ADDRESSES: Address[] = [
+const STORAGE_KEY_ADDRESSES = "dhruto_customer_addresses_v1";
+const STORAGE_KEY_NOTIFS = "dhruto_customer_notifs_v1";
+
+const DEFAULT_ADDRESSES: CustomerAddress[] = [
   {
     id: "addr-1",
     tag: "Home",
-    recipientName: "Customer Account",
-    phone: "+8801712345678",
+    recipientName: "Mahmudur Rahman",
+    phone: "01700000005",
     address: "House 42, Road 11, Block D, Banani",
     thana: "Banani",
     district: "Dhaka",
@@ -42,8 +58,8 @@ const INITIAL_ADDRESSES: Address[] = [
   {
     id: "addr-2",
     tag: "Office",
-    recipientName: "Customer Account",
-    phone: "+8801712345678",
+    recipientName: "Mahmudur Rahman",
+    phone: "01700000005",
     address: "Level 8, Concord Tower, Gulshan-1",
     thana: "Gulshan",
     district: "Dhaka",
@@ -55,24 +71,118 @@ export function CustomerSettingsView() {
   const t = useTranslations("Customer");
   const authUser = useAppSelector((s) => s.auth.user);
 
-  const [addresses, setAddresses] = React.useState<Address[]>(INITIAL_ADDRESSES);
+  const [addresses, setAddresses] = React.useState<CustomerAddress[]>(DEFAULT_ADDRESSES);
 
   // Notification toggles
   const [smsOtp, setSmsOtp] = React.useState(true);
   const [whatsappUpdates, setWhatsappUpdates] = React.useState(true);
   const [deliveryEmails, setDeliveryEmails] = React.useState(true);
 
+  // Add Address Modal
+  const [addModalOpen, setAddModalOpen] = React.useState(false);
+  const [newTag, setNewTag] = React.useState<"Home" | "Office" | "Other">("Home");
+  const [newAddressText, setNewAddressText] = React.useState("");
+  const [newThana, setNewThana] = React.useState("");
+  const [newDistrict, setNewDistrict] = React.useState("Dhaka");
+  const [newPhone, setNewPhone] = React.useState("");
+  const [newSetDefault, setNewSetDefault] = React.useState(false);
+
+  // Load from localStorage
+  React.useEffect(() => {
+    try {
+      const savedAddrs = localStorage.getItem(STORAGE_KEY_ADDRESSES);
+      if (savedAddrs) {
+        const parsed = JSON.parse(savedAddrs) as CustomerAddress[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAddresses(parsed);
+        }
+      }
+
+      const savedNotifs = localStorage.getItem(STORAGE_KEY_NOTIFS);
+      if (savedNotifs) {
+        const parsed = JSON.parse(savedNotifs);
+        if (typeof parsed.smsOtp === "boolean") setSmsOtp(parsed.smsOtp);
+        if (typeof parsed.whatsappUpdates === "boolean") setWhatsappUpdates(parsed.whatsappUpdates);
+        if (typeof parsed.deliveryEmails === "boolean") setDeliveryEmails(parsed.deliveryEmails);
+      }
+    } catch {
+      // Storage unavailable
+    }
+  }, []);
+
+  const saveAddresses = (list: CustomerAddress[]) => {
+    setAddresses(list);
+    try {
+      localStorage.setItem(STORAGE_KEY_ADDRESSES, JSON.stringify(list));
+    } catch {
+      // Storage unavailable
+    }
+  };
+
   const handleSetDefault = (id: string) => {
-    setAddresses((prev) =>
-      prev.map((a) => ({
-        ...a,
-        isDefault: a.id === id,
-      }))
-    );
+    const updated = addresses.map((a) => ({
+      ...a,
+      isDefault: a.id === id,
+    }));
+    saveAddresses(updated);
     toast.success("Default delivery address updated.");
   };
 
+  const handleDeleteAddress = (id: string) => {
+    if (addresses.length <= 1) {
+      toast.error("You must maintain at least one delivery address.");
+      return;
+    }
+    const updated = addresses.filter((a) => a.id !== id);
+    if (!updated.some((a) => a.isDefault) && updated.length > 0 && updated[0]) {
+      updated[0].isDefault = true;
+    }
+    saveAddresses(updated);
+    toast.info("Delivery address removed.");
+  };
+
+  const handleAddAddressSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAddressText.trim() || !newThana.trim()) {
+      toast.error("Please fill in address and thana.");
+      return;
+    }
+
+    const newAddr: CustomerAddress = {
+      id: `addr-${Date.now()}`,
+      tag: newTag,
+      recipientName: authUser?.name || "Customer",
+      phone: newPhone.trim() || authUser?.phone || "+8801700000005",
+      address: newAddressText.trim(),
+      thana: newThana.trim(),
+      district: newDistrict.trim() || "Dhaka",
+      isDefault: newSetDefault || addresses.length === 0,
+    };
+
+    let updated = [...addresses];
+    if (newAddr.isDefault) {
+      updated = updated.map((a) => ({ ...a, isDefault: false }));
+    }
+    updated.push(newAddr);
+
+    saveAddresses(updated);
+    toast.success("New delivery address added.");
+    setAddModalOpen(false);
+    setNewAddressText("");
+    setNewThana("");
+    setNewPhone("");
+    setNewSetDefault(false);
+  };
+
   const handleSavePreferences = () => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY_NOTIFS,
+        JSON.stringify({ smsOtp, whatsappUpdates, deliveryEmails })
+      );
+    } catch {
+      // Storage unavailable
+    }
     toast.success("Delivery alert preferences saved.");
   };
 
@@ -83,18 +193,144 @@ export function CustomerSettingsView() {
         description={t("settingsPageSubtitle")}
       />
 
+      {/* Add Address Modal Dialog */}
+      <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 rounded-3xl border border-border/80 shadow-2xl">
+          <form onSubmit={handleAddAddressSubmit} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-foreground">
+                Add Delivery Address
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Enter your doorstep delivery coordinates for swift parcel handoffs.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-[11px] font-bold uppercase text-muted-foreground">
+                  Address Type
+                </label>
+                <div className="mt-1 flex gap-2">
+                  {(["Home", "Office", "Other"] as const).map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setNewTag(tag)}
+                      className={`flex-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
+                        newTag === tag
+                          ? "bg-primary text-primary-foreground shadow-2xs"
+                          : "bg-surface text-muted-foreground border border-border hover:bg-surface-muted"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase text-muted-foreground">
+                  Street Address & House / Flat No.
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newAddressText}
+                  onChange={(e) => setNewAddressText(e.target.value)}
+                  placeholder="e.g. House 14, Road 5, Block B"
+                  className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-muted-foreground">
+                    Thana / Upazila
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newThana}
+                    onChange={(e) => setNewThana(e.target.value)}
+                    placeholder="e.g. Dhanmondi"
+                    className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase text-muted-foreground">
+                    District
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newDistrict}
+                    onChange={(e) => setNewDistrict(e.target.value)}
+                    placeholder="e.g. Dhaka"
+                    className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase text-muted-foreground">
+                  Contact Phone for Rider
+                </label>
+                <input
+                  type="text"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  placeholder="e.g. 01700000005"
+                  className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="setDef"
+                  checked={newSetDefault}
+                  onChange={(e) => setNewSetDefault(e.target.checked)}
+                  className="rounded border-border text-primary focus:ring-primary"
+                />
+                <label htmlFor="setDef" className="text-xs font-medium text-foreground cursor-pointer">
+                  Set as my primary default delivery address
+                </label>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setAddModalOpen(false)}
+                className="h-9 text-xs"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="h-9 text-xs font-semibold">
+                Save Address
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Column: Saved Addresses */}
         <div className="space-y-4 lg:col-span-7">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-foreground">Saved Delivery Addresses</h2>
-              <p className="text-xs text-muted-foreground">Addresses riders deliver your orders to</p>
+              <p className="text-xs text-muted-foreground">
+                Managed destinations for rider doorstep dispatch
+              </p>
             </div>
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.info("Address addition dialog opened.")}
+              onClick={() => setAddModalOpen(true)}
               className="h-9 gap-1.5 text-xs font-semibold"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -116,7 +352,13 @@ export function CustomerSettingsView() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary-soft text-primary">
-                        {addr.tag === "Home" ? <Home className="h-3.5 w-3.5" /> : <Building className="h-3.5 w-3.5" />}
+                        {addr.tag === "Home" ? (
+                          <Home className="h-3.5 w-3.5" />
+                        ) : addr.tag === "Office" ? (
+                          <Building className="h-3.5 w-3.5" />
+                        ) : (
+                          <MapPin className="h-3.5 w-3.5" />
+                        )}
                       </span>
                       <span className="text-xs font-extrabold text-foreground">{addr.tag}</span>
                       {addr.isDefault ? (
@@ -132,21 +374,35 @@ export function CustomerSettingsView() {
                     </p>
                   </div>
 
-                  {!addr.isDefault ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleSetDefault(addr.id)}
-                      className="h-8 self-end sm:self-center text-xs font-semibold"
-                    >
-                      Make Default
-                    </Button>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs font-bold text-primary self-end sm:self-center">
-                      <Check className="h-3.5 w-3.5" />
-                      Primary Address
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 self-end sm:self-center">
+                    {!addr.isDefault ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSetDefault(addr.id)}
+                        className="h-8 text-xs font-semibold"
+                      >
+                        Make Default
+                      </Button>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs font-bold text-primary">
+                        <Check className="h-3.5 w-3.5" />
+                        Primary
+                      </span>
+                    )}
+
+                    {addresses.length > 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAddress(addr.id)}
+                        title="Delete address"
+                        className="p-1.5 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                        aria-label="Delete address"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    ) : null}
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -232,11 +488,11 @@ export function CustomerSettingsView() {
               <div className="space-y-2.5 pt-1 text-xs">
                 <div className="flex justify-between py-1 border-b border-border/60">
                   <span className="text-muted-foreground">Recipient Name</span>
-                  <span className="font-bold text-foreground">{authUser?.name || "Customer"}</span>
+                  <span className="font-bold text-foreground">{authUser?.name || "Mahmudur Rahman"}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-border/60">
                   <span className="text-muted-foreground">Registered Phone</span>
-                  <span className="font-mono font-bold text-foreground">{authUser?.phone || "+8801700000000"}</span>
+                  <span className="font-mono font-bold text-foreground">{authUser?.phone || "+8801700000005"}</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-muted-foreground">Role</span>

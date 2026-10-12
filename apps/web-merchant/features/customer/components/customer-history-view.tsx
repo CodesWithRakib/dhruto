@@ -2,88 +2,48 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, FileCheck, Search, Calendar } from "lucide-react";
+import { CheckCircle2, FileCheck, Search, Calendar, ArrowRight } from "lucide-react";
 import { Button, Card, CardContent } from "@dhruto/ui";
 import { PageHeader } from "@/components/page-header";
 import { PodModal } from "./pod-modal";
-
-interface HistoryItem {
-  id: string;
-  trackingCode: string;
-  merchantName: string;
-  destination: string;
-  deliveredAt: string;
-  riderName: string;
-  codAmount: number;
-  description: string;
-  status: "DELIVERED" | "RETURNED";
-}
-
-const MOCK_HISTORY: HistoryItem[] = [
-  {
-    id: "hist-1",
-    trackingCode: "DHR-2610-00101",
-    merchantName: "Shajgoj Beauty Hub",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    deliveredAt: "Oct 11, 2026 at 03:15 PM",
-    riderName: "Rakibul Islam",
-    codAmount: 920,
-    description: "Skincare Essentials Pack (0.8 kg)",
-    status: "DELIVERED",
-  },
-  {
-    id: "hist-2",
-    trackingCode: "DHR-2609-00892",
-    merchantName: "Daraz Mall Official",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    deliveredAt: "Sep 28, 2026 at 11:40 AM",
-    riderName: "Kamrul Hasan",
-    codAmount: 2450,
-    description: "Wireless Earbuds with ANC Case",
-    status: "DELIVERED",
-  },
-  {
-    id: "hist-3",
-    trackingCode: "DHR-2609-00755",
-    merchantName: "Chaldal Grocery Express",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    deliveredAt: "Sep 15, 2026 at 06:10 PM",
-    riderName: "Sohanur Rahman",
-    codAmount: 1100,
-    description: "Kitchen Essentials & Spices Box",
-    status: "DELIVERED",
-  },
-  {
-    id: "hist-4",
-    trackingCode: "DHR-2608-00412",
-    merchantName: "Yellow Lifestyle Brand",
-    destination: "House 42, Road 11, Block D, Banani, Dhaka",
-    deliveredAt: "Aug 22, 2026 at 01:25 PM",
-    riderName: "Rakibul Islam",
-    codAmount: 3200,
-    description: "Cotton Polo Shirts (Pack of 3)",
-    status: "DELIVERED",
-  },
-];
+import { useCustomerDeliveries, type CustomerDelivery } from "../hooks/use-customer-deliveries";
+import { ParcelStatus } from "@dhruto/contracts";
+import { Link } from "@/lib/navigation";
+import { CUSTOMER_ROUTES } from "@/config/routes";
+import { useAppSelector } from "@/store/hooks";
 
 export function CustomerHistoryView() {
   const t = useTranslations("Customer");
+  const authUser = useAppSelector((s) => s.auth.user);
+  const { deliveries } = useCustomerDeliveries();
 
   const [search, setSearch] = React.useState("");
-  const [selectedPod, setSelectedPod] = React.useState<HistoryItem | null>(null);
+  const [selectedPod, setSelectedPod] = React.useState<CustomerDelivery | null>(null);
   const [podOpen, setPodOpen] = React.useState(false);
 
-  const filteredHistory = MOCK_HISTORY.filter((item) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      item.trackingCode.toLowerCase().includes(q) ||
-      item.merchantName.toLowerCase().includes(q) ||
-      item.description.toLowerCase().includes(q)
+  // Delivered or returned orders
+  const historyList = React.useMemo(() => {
+    return deliveries.filter(
+      (d) =>
+        d.status === ParcelStatus.DELIVERED ||
+        d.status === ParcelStatus.RETURNED_TO_MERCHANT ||
+        d.status === "DELIVERED"
     );
-  });
+  }, [deliveries]);
 
-  const handleOpenPod = (item: HistoryItem) => {
+  const filteredHistory = React.useMemo(() => {
+    if (!search.trim()) return historyList;
+    const q = search.toLowerCase();
+    return historyList.filter(
+      (item) =>
+        item.trackingCode.toLowerCase().includes(q) ||
+        item.merchantName.toLowerCase().includes(q) ||
+        item.itemsDescription.toLowerCase().includes(q) ||
+        item.destination.toLowerCase().includes(q)
+    );
+  }, [historyList, search]);
+
+  const handleOpenPod = (item: CustomerDelivery) => {
     setSelectedPod(item);
     setPodOpen(true);
   };
@@ -101,21 +61,21 @@ export function CustomerHistoryView() {
           onOpenChange={setPodOpen}
           parcel={{
             trackingCode: selectedPod.trackingCode,
-            recipientName: "Customer",
-            recipientPhone: "+8801700000000",
+            recipientName: authUser?.name || "Verified Customer",
+            recipientPhone: authUser?.phone || "+8801700000005",
             deliveryAddress: selectedPod.destination,
-            deliveredAt: selectedPod.deliveredAt,
-            riderName: selectedPod.riderName,
+            deliveredAt: selectedPod.deliveredAt || "Completed",
+            riderName: selectedPod.riderName || "Dhruto Express Rider",
             merchantName: selectedPod.merchantName,
             codAmount: selectedPod.codAmount,
-            description: selectedPod.description,
+            description: selectedPod.itemsDescription,
           }}
         />
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs text-muted-foreground font-semibold">
-          Showing <strong className="text-foreground">{filteredHistory.length}</strong> completed shipments
+        <div className="text-xs font-semibold text-muted-foreground">
+          Showing <span className="font-bold text-foreground">{filteredHistory.length}</span> completed doorstep deliveries
         </div>
 
         <div className="relative w-full sm:w-72">
@@ -124,68 +84,84 @@ export function CustomerHistoryView() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search past deliveries..."
+            placeholder="Search completed shipments..."
             className="h-9 w-full rounded-xl border border-border/80 bg-surface pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
 
-      <div className="space-y-3">
-        {filteredHistory.map((item) => (
-          <Card key={item.id} className="border border-border/80 bg-surface shadow-2xs hover:shadow-soft transition-all">
-            <CardContent className="p-4 sm:p-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <div className="flex items-start gap-3.5">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-success-soft text-success border border-success/20">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-black text-foreground">
-                      {item.trackingCode}
+      {filteredHistory.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border p-12 text-center text-xs text-muted-foreground">
+          No completed shipment records match your search query.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          {filteredHistory.map((item) => (
+            <Card
+              key={item.id}
+              className="border border-border/80 bg-surface shadow-2xs transition-all hover:border-primary/40 hover:shadow-soft"
+            >
+              <CardContent className="p-4 sm:p-5 space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-success-soft text-success">
+                      <CheckCircle2 className="h-4 w-4" />
                     </span>
-                    <span className="text-xs text-muted-foreground">•</span>
-                    <span className="text-xs font-bold text-foreground">
-                      {item.merchantName}
-                    </span>
-                    <span className="inline-flex items-center rounded-full bg-success-soft px-2.5 py-0.5 text-[10px] font-bold text-success-soft-foreground">
-                      Delivered
-                    </span>
+                    <div>
+                      <span className="font-mono text-xs font-bold text-foreground block">
+                        {item.trackingCode}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {item.merchantName}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground font-medium">
-                    {item.description}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {item.deliveredAt}
-                    </span>
-                    <span>•</span>
-                    <span>
-                      Rider: <strong className="text-foreground">{item.riderName}</strong>
-                    </span>
-                    <span>•</span>
-                    <span>
-                      Paid: <strong className="text-foreground">৳{item.codAmount.toLocaleString()}</strong>
-                    </span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOpenPod(item)}
-                  className="h-9 gap-1.5 text-xs font-semibold"
-                >
-                  <FileCheck className="h-3.5 w-3.5" />
-                  View POD
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  <span className="inline-flex items-center rounded-full bg-success-soft px-2.5 py-0.5 text-[10px] font-bold text-success-soft-foreground">
+                    Delivered
+                  </span>
+                </div>
+
+                <div className="rounded-xl bg-surface-muted/50 p-2.5 text-xs">
+                  <p className="font-medium text-foreground">{item.itemsDescription}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground truncate">
+                    {item.destination}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-primary" />
+                    <span>{item.deliveredAt || "Completed"}</span>
+                  </div>
+
+                  <div className="font-semibold text-foreground">
+                    COD: {item.codAmount > 0 ? `৳${item.codAmount}` : "Prepaid"}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenPod(item)}
+                    className="h-8 gap-1.5 text-xs font-semibold"
+                  >
+                    <FileCheck className="h-3.5 w-3.5" />
+                    POD Receipt
+                  </Button>
+                  <Link href={`${CUSTOMER_ROUTES.tracking}/${item.trackingCode}`}>
+                    <Button variant="secondary" size="sm" className="h-8 gap-1 text-xs font-semibold">
+                      Timeline
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
