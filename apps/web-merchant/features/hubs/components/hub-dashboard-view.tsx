@@ -33,6 +33,7 @@ import { HubSelector } from "./hub-selector";
 import { useGetHubDashboardQuery, useGetExceptionsQuery } from "../api/hubs.api";
 import { ExceptionStatus } from "@dhruto/contracts";
 import { useFormatters } from "@/lib/format";
+import { HubIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 /**
  * Hub operations dashboard.
@@ -240,7 +241,8 @@ export function HubDashboardView() {
   ];
 
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <HubIllustrationBg opacity={0.35} />
       <PageHeader
         title={t("dashboard.title")}
         description={
@@ -251,14 +253,15 @@ export function HubDashboardView() {
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
             <HubSelector hubs={hubs} activeHubId={activeHubId} onChange={setActiveHubId} />
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleRefresh}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30 active:scale-[0.98]"
+              className="gap-1.5"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${dashboardLoading ? "animate-spin" : ""}`} aria-hidden="true" />
               <span>{t("refresh")}</span>
-            </button>
+            </Button>
           </div>
         }
       />
@@ -301,11 +304,11 @@ export function HubDashboardView() {
             return (
               <div
                 key={stage.step}
-                className="group relative flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group relative flex flex-col justify-between rounded-2xl bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className={`flex h-9 w-9 items-center justify-center rounded-xl border shadow-2xs ${stage.color}`}>
+                    <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${stage.color}`}>
                       <Icon className="h-4.5 w-4.5" />
                     </span>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -335,11 +338,11 @@ export function HubDashboardView() {
       </section>
 
       {/* Hub Operating SOP & Guidelines (Collapsible Card) */}
-      <Card className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-card to-card shadow-2xs overflow-hidden">
+      <Card className="rounded-2xl bg-surface-elevated overflow-hidden">
         <CardContent className="p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
@@ -355,14 +358,15 @@ export function HubDashboardView() {
               </div>
             </div>
 
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowSop(!showSop)}
-              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-center rounded-xl border border-border bg-surface px-3 text-xs font-bold text-foreground shadow-2xs hover:bg-surface-muted transition-colors"
+              className="gap-1.5 self-start sm:self-center"
             >
               <span>{showSop ? "Collapse SOP" : "View SOP Guide"}</span>
               {showSop ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-            </button>
+            </Button>
           </div>
 
           {showSop ? (

@@ -7,12 +7,12 @@ import { cn } from "@/lib/cn";
 export type KpiTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger";
 
 const TONE_SURFACE: Record<KpiTone, string> = {
-  neutral: "bg-surface-muted/80 text-muted-foreground border border-border/60",
-  primary: "bg-primary-soft/80 text-primary-soft-foreground border border-primary/25",
-  info: "bg-info-soft/80 text-info-soft-foreground border border-info/25",
-  success: "bg-success-soft/80 text-success-soft-foreground border border-success/25",
-  warning: "bg-warning-soft/80 text-warning-soft-foreground border border-warning/25",
-  danger: "bg-danger-soft/80 text-danger-soft-foreground border border-danger/25",
+  neutral: "bg-surface-muted text-muted-foreground",
+  primary: "bg-primary-soft text-primary-soft-foreground",
+  info: "bg-info-soft text-info-soft-foreground",
+  success: "bg-success-soft text-success-soft-foreground",
+  warning: "bg-warning-soft text-warning-soft-foreground",
+  danger: "bg-danger-soft text-danger-soft-foreground",
 };
 
 export interface KpiCardProps {
@@ -45,10 +45,10 @@ export function KpiCard({
   return (
     <Card
       className={cn(
-        "dhruto-animate-in rounded-2xl transition-all duration-200 hover:-translate-y-1 hover:shadow-md",
+        "dhruto-animate-in rounded-2xl transition-all duration-200 hover:-translate-y-0.5",
         emphasis
-          ? "border-primary/30 bg-primary-soft/30 shadow-xs"
-          : "border-border/80 bg-surface shadow-xs",
+          ? "bg-primary-soft/40 hover:bg-primary-soft/60"
+          : "bg-card hover:bg-surface-muted/60",
         className,
       )}
     >

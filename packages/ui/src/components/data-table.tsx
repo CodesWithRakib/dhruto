@@ -11,6 +11,7 @@ import {
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table.js";
 import { Button } from "./button.js";
+import { Input } from "./input.js";
 import { Search, X, Loader2, AlertCircle, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js";
 import { cn } from "../lib/utils.js";
@@ -131,24 +132,24 @@ export function DataTable<TData, TValue>({
   return (
     <div
       className={cn(
-        "dhruto-animate-in w-full rounded-2xl border border-border/80 bg-surface shadow-2xs overflow-hidden",
+        "dhruto-animate-in w-full rounded-2xl bg-surface-elevated overflow-hidden",
         className,
       )}
     >
       {/* Top Filters & Actions Toolbar */}
       {hasToolbar && (
-        <div className="flex flex-col gap-3 border-b border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex flex-col gap-3 border-b border-surface-muted/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex w-full flex-1 flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center">
             {onSearchChange && (
               <div className="relative w-full sm:w-80">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                <input
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" aria-hidden="true" />
+                <Input
                   type="search"
                   value={search ?? ""}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder={searchPlaceholder}
                   aria-label={searchPlaceholder}
-                  className="h-10 w-full rounded-xl border border-input/80 bg-surface pl-10 pr-9 text-sm text-foreground shadow-2xs transition-all duration-200 placeholder:text-muted-foreground hover:border-foreground/30 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15 [&::-webkit-search-cancel-button]:hidden"
+                  className="pl-10 pr-9 [&::-webkit-search-cancel-button]:hidden"
                 />
                 <div className="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
                   {isSearching && (
@@ -183,13 +184,13 @@ export function DataTable<TData, TValue>({
       <div className="overflow-hidden bg-surface sm:rounded-b-none">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="dhruto-table-header border-b border-border/70">
+            <TableHeader className="bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 border-0">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="border-b-0 hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="whitespace-nowrap px-4 py-3 text-caption font-semibold uppercase tracking-wider text-muted-foreground"
+                      className="whitespace-nowrap px-4 py-3 text-caption font-bold uppercase tracking-wider text-slate-100 dark:text-slate-100"
                     >
                       {header.isPlaceholder
                         ? null

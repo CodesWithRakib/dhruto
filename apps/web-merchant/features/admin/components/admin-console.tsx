@@ -20,6 +20,7 @@ import {
 import { Link } from "@/lib/navigation";
 import { ADMIN_ROUTES } from "@/config/routes";
 import { PageHeader } from "@/components/page-header";
+import { AdminIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 /**
  * Admin operations supervision command center.
@@ -90,7 +91,8 @@ export function AdminConsole() {
   ];
 
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <AdminIllustrationBg opacity={0.35} />
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -99,7 +101,7 @@ export function AdminConsole() {
             <Link href="/workflow">
               <Button
                 variant="outline"
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/30"
+                className="gap-1.5"
               >
                 <Workflow className="h-4 w-4" />
                 <span>System Guide</span>
@@ -107,7 +109,7 @@ export function AdminConsole() {
             </Link>
             <Link href={ADMIN_ROUTES.tracking}>
               <Button
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-white/25 bg-white/15 px-3.5 text-xs font-bold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/25 hover:border-white/35"
+                className="gap-1.5"
               >
                 <Search className="h-4 w-4" />
                 <span>Global Lookup</span>
@@ -118,7 +120,7 @@ export function AdminConsole() {
       />
 
       {/* Network Pulse Status Bar */}
-      <Card className="rounded-2xl border border-border/80 bg-gradient-to-r from-surface via-card to-primary/[0.04] p-4.5 sm:p-5 shadow-2xs">
+      <Card className="rounded-2xl bg-surface-elevated p-4.5 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-2xs">
@@ -169,7 +171,7 @@ export function AdminConsole() {
             return (
               <div
                 key={section.href}
-                className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="group flex flex-col justify-between rounded-2xl bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -219,11 +221,11 @@ export function AdminConsole() {
               <Link
                 key={card.href}
                 href={card.href}
-                className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="group flex flex-col justify-between rounded-2xl bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       <Icon className="h-5 w-5" />
                     </span>
                     <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
@@ -249,7 +251,7 @@ export function AdminConsole() {
       </section>
 
       {/* Security & Audit Notice */}
-      <Card className="rounded-2xl border border-border/80 bg-surface/50 p-4 shadow-2xs">
+      <Card className="rounded-2xl bg-surface-muted/60 p-4">
         <div className="flex items-center gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-muted-foreground">
             <ShieldCheck className="h-4 w-4" />

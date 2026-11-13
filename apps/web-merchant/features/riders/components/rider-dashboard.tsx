@@ -37,6 +37,7 @@ import { getApiErrorMessage } from "@/lib/api-error";
 import { RiderDutyStatus } from "@dhruto/contracts";
 import { toast } from "sonner";
 import { useFormatters } from "@/lib/format";
+import { RiderIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 /**
  * Rider dashboard: live task counts, COD still to collect and the next
@@ -185,7 +186,8 @@ export function RiderDashboard() {
   ];
 
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <RiderIllustrationBg opacity={0.35} />
       <PageHeader
         title={t("dashboard.title")}
         description={t("dashboard.subtitle", {
@@ -196,7 +198,7 @@ export function RiderDashboard() {
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
             {onDuty ? (
-              <span className="inline-flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/20 px-3.5 py-2 text-xs font-bold text-emerald-200 shadow-xs backdrop-blur-md">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/20 px-3.5 py-2 text-xs font-bold text-emerald-200">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
@@ -204,34 +206,35 @@ export function RiderDashboard() {
                 {t("onDuty")}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white/80 shadow-xs backdrop-blur-md">
-                <span className="h-2 w-2 rounded-full bg-white/40" />
+              <span className="inline-flex items-center gap-2 rounded-xl bg-surface-muted px-3.5 py-2 text-xs font-bold text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/40" />
                 {t("offDuty")}
               </span>
             )}
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleDutyToggle}
               disabled={isTogglingDuty}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-white/25 bg-white/15 px-3.5 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-white/25 active:scale-[0.98] disabled:opacity-50"
+              className="gap-1.5"
             >
               <Power className="h-3.5 w-3.5" aria-hidden="true" />
-              {onDuty ? t("goOffDuty") : t("goOnDuty")}
-            </button>
-            <button
-              type="button"
+              <span>{onDuty ? t("goOffDuty") : t("goOnDuty")}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleRefresh}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-white/25 active:scale-[0.98]"
               aria-label={t("refresh")}
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isFetchingTasks ? "animate-spin" : ""}`} aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         }
       />
 
       {/* Daily Runsheet Completion Tracker */}
-      <Card className="rounded-2xl border border-primary/25 bg-gradient-to-r from-primary/[0.08] via-card to-card p-5 shadow-2xs">
+      <Card className="rounded-2xl bg-surface-elevated p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">

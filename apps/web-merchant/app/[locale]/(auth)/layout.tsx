@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Link } from "@/lib/navigation";
 import { Logo } from "@dhruto/ui";
 import { ShieldCheck, Zap, MapPin } from "lucide-react";
+import { AuthIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 const FEATURES = [
   { icon: ShieldCheck, title: "Safe & Secure", sub: "Your parcel, our priority" },
@@ -16,7 +17,7 @@ const FEATURES = [
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-8 lg:py-12">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8 lg:py-12">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
@@ -24,7 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         Skip to content
       </a>
 
-      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-lift lg:grid-cols-2">
+      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-3xl bg-surface-elevated lg:grid-cols-2">
         {/* Brand panel */}
         <aside className="dhruto-hero-dark relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
           <div className="relative z-10 space-y-6">
@@ -86,18 +87,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           id="main-content"
           className="relative flex items-center justify-center overflow-hidden px-6 py-12 sm:px-12"
         >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full border-[24px] border-primary/10"
-          />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-20 -right-20 h-48 w-48 rounded-full bg-primary/10"
-          />
+          {/* Domain-specific illustration background for Auth */}
+          <AuthIllustrationBg opacity={0.35} />
+
           <div className="relative z-10 w-full max-w-md">
             <div className="mb-6 lg:hidden">
               <Link href="/" aria-label="Dhruto" className="inline-block rounded-md">
-                <Logo inverted />
+                <Logo />
               </Link>
             </div>
             {children}

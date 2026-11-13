@@ -286,3 +286,39 @@ export function CustomerIllustrationBg({ className, opacity = 0.4, ...props }: I
     </div>
   );
 }
+
+/**
+ * 6. Admin Command Topology
+ * Interconnected central neural network matrix, telemetry arcs, and global dispatch constellation.
+ */
+export function AdminIllustrationBg({ className, opacity = 0.35, ...props }: IllustrationBgProps) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn("pointer-events-none absolute inset-0 overflow-hidden select-none", className)}
+      style={{ opacity }}
+      {...props}
+    >
+      <svg
+        className="absolute -top-28 -right-28 h-[650px] w-[650px] text-indigo-500/15 sm:h-[800px] sm:w-[800px]"
+        viewBox="0 0 800 800"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="550" cy="250" r="120" stroke="currentColor" strokeWidth="1.5" strokeDasharray="8 8" strokeOpacity="0.3" />
+        <circle cx="550" cy="250" r="220" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.2" />
+        <circle cx="550" cy="250" r="320" stroke="currentColor" strokeWidth="1" strokeDasharray="12 8" strokeOpacity="0.15" />
+
+        {/* Command Matrix Orbitals */}
+        <ellipse cx="550" cy="250" rx="280" ry="90" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" transform="rotate(-25 550 250)" />
+        <ellipse cx="550" cy="250" rx="280" ry="90" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2" transform="rotate(35 550 250)" />
+
+        {/* Telemetry Core Points */}
+        <circle cx="550" cy="250" r="10" fill="currentColor" fillOpacity="0.7" />
+        <circle cx="420" cy="180" r="6" fill="currentColor" fillOpacity="0.5" />
+        <circle cx="680" cy="320" r="7" fill="currentColor" fillOpacity="0.6" />
+        <circle cx="480" cy="380" r="5" fill="currentColor" fillOpacity="0.4" />
+      </svg>
+    </div>
+  );
+}

@@ -7,7 +7,6 @@ import {
   Bike,
   Building2,
   Calendar,
-  Check,
   CheckCircle2,
   Clock,
   Copy,
@@ -25,7 +24,7 @@ import {
   Truck,
   X,
 } from "lucide-react";
-import { Badge, Button, Card, CardContent } from "@dhruto/ui";
+import { Badge, Button, Card, CardContent, Input } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { CUSTOMER_ROUTES } from "@/config/routes";
 import { useAppSelector } from "@/store/hooks";
@@ -37,6 +36,7 @@ import {
 } from "../hooks/use-customer-deliveries";
 import { ParcelStatus } from "@dhruto/contracts";
 import { toast } from "sonner";
+import { CustomerIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 /**
  * Calculates current progress step (1-5) and percentage for active delivery
@@ -96,7 +96,6 @@ export function CustomerDashboardView() {
     addDeliveryByTrackingCode,
     refreshAllDeliveries,
     rescheduleDelivery,
-    markAsDelivered,
     removeDelivery,
   } = useCustomerDeliveries();
 
@@ -163,7 +162,8 @@ export function CustomerDashboardView() {
   const currentStep = activeShipment ? getProgressStep(activeShipment.status) : null;
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
+      <CustomerIllustrationBg opacity={0.35} />
       {/* Reschedule Modal */}
       <RescheduleModal
         open={rescheduleOpen}
@@ -195,7 +195,7 @@ export function CustomerDashboardView() {
       ) : null}
 
       {/* Dynamic Welcome & Live Pulse Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-surface via-surface-muted/50 to-primary-soft/30 p-6 sm:p-8 shadow-soft">
+      <div className="relative overflow-hidden rounded-3xl bg-surface-elevated p-6 sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -237,7 +237,7 @@ export function CustomerDashboardView() {
 
         {/* Dynamic Real-Time Stats Grid */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-primary/40">
+          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statIncoming")}</span>
               <span className="relative flex h-2 w-2">
@@ -251,7 +251,7 @@ export function CustomerDashboardView() {
             </span>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-success/40">
+          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statDelivered")}</span>
               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -260,7 +260,7 @@ export function CustomerDashboardView() {
             <span className="text-[11px] text-muted-foreground">Doorstep handoffs logged</span>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-warning/40">
+          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statCodDue")}</span>
               <Clock className="h-4 w-4 text-warning" />
@@ -271,7 +271,7 @@ export function CustomerDashboardView() {
             <span className="text-[11px] text-muted-foreground">Cash ready for delivery rider</span>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface/90 p-4 shadow-2xs transition-all hover:border-primary/40">
+          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statAddress")}</span>
               <MapPin className="h-4 w-4 text-primary" />
@@ -283,16 +283,16 @@ export function CustomerDashboardView() {
       </div>
 
       {/* Dynamic Instant Track & Connect Shipment Bar */}
-      <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-2xs">
+      <div className="rounded-2xl bg-surface-elevated p-4 sm:p-5">
         <form onSubmit={handleAddTrackingCode} className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Package className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
+            <Package className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+            <Input
               type="text"
               value={newCodeInput}
               onChange={(e) => setNewCodeInput(e.target.value)}
               placeholder="Connect any tracking code (e.g. DHR-2610-00108)..."
-              className="h-10 w-full rounded-xl border border-border/80 bg-surface pl-10 pr-3 text-xs font-mono font-medium text-foreground placeholder:font-sans placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="pl-10 font-mono text-xs"
             />
           </div>
           <Button
@@ -339,8 +339,8 @@ export function CustomerDashboardView() {
 
       {/* Active Delivery Spotlight Card */}
       {activeShipment ? (
-        <Card className="overflow-hidden border border-primary/30 bg-surface shadow-md">
-          <div className="border-b border-primary/20 bg-primary-soft/40 px-5 py-3.5 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+        <Card className="overflow-hidden rounded-3xl bg-surface-elevated">
+          <div className="bg-primary-soft/40 px-5 py-3.5 sm:px-6 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />

@@ -28,6 +28,7 @@ import { ShipmentKpis, DeliveryHealth } from "./shipment-overview";
 import { NeedsAttention } from "./needs-attention";
 import { RecentShipments, type ShipmentRow } from "./recent-shipments";
 import { ShipmentPerformance } from "./shipment-performance";
+import { MerchantIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 const EMPTY_STATS: DashboardStats = {
   totalOrders: 0,
@@ -57,8 +58,8 @@ function QuickAction({
   disabled?: boolean;
 }) {
   const content = (
-    <div className="h-full rounded-2xl border border-border/80 bg-card p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary">
+    <div className="h-full rounded-2xl bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:bg-surface-muted/60">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
       <h3 className="mt-4 text-sm font-bold text-foreground">{title}</h3>
@@ -98,8 +99,8 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
     stats.totalCodAmount > 0 ? (stats.collectedCodAmount / stats.totalCodAmount) * 100 : 0;
 
   return (
-    <Card className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-sm">
-      <div className="border-b border-border/60 p-5 sm:p-6 pb-4">
+    <Card className="overflow-hidden rounded-3xl bg-card">
+      <div className="border-b border-surface-muted/60 p-5 sm:p-6 pb-4">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -178,7 +179,8 @@ export function MerchantDashboard({ today }: { today: string }) {
   const showEmpty = !isLoading && !isError && !hasOverviewData(stats);
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
+      <MerchantIllustrationBg opacity={0.3} />
       <DashboardHeader today={today} businessName={merchant?.businessName} />
 
       {isError ? (
