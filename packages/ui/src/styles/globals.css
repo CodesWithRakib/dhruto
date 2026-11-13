@@ -167,28 +167,21 @@
   /* Premium product surfaces — contrast over borders/shadows. */
   .dhruto-surface {
     background: hsl(var(--surface));
-    border: 1px solid hsl(var(--border) / 0.7);
+    border: none;
   }
   .dhruto-surface-elevated {
-    background: hsl(var(--surface));
-    border: 1px solid hsl(var(--border) / 0.6);
-    box-shadow: var(--shadow-soft);
+    background: hsl(var(--surface-elevated));
+    border: none;
+    box-shadow: none;
   }
   .dhruto-surface-lift {
-    box-shadow: var(--shadow-lift);
+    box-shadow: none;
   }
 
-  /* Subtle entrance — respects prefers-reduced-motion via the global guard. */
-  .dhruto-animate-in {
-    animation: dhruto-fade-slide var(--duration-base) var(--ease-out) both;
-  }
-  .dhruto-animate-in-slow {
-    animation: dhruto-fade-slide var(--duration-slow) var(--ease-out) both;
-  }
-
-  /* Table polish shared by every DataTable instance. */
+  /* Table polish shared by every DataTable instance — deep header background */
   .dhruto-table-header {
-    background: hsl(var(--surface-muted) / 0.7);
+    background: #0f172a;
+    color: #f8fafc;
   }
 
   /* Skeleton shimmer — single tone driven by --skeleton. */

@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useAppSelector } from "../../../store/hooks";
 import { useRouter } from "@/lib/navigation";
-import { AUTH_ROUTES } from "@/config/routes";
-import { MerchantAnalyticsDashboard } from "../../../features/analytics/components/merchant-analytics-dashboard";
-import { AdminOverviewDashboard } from "../../../features/analytics/components/admin-overview-dashboard";
+import { AUTH_ROUTES, MERCHANT_ROUTES, ADMIN_ROUTES } from "@/config/routes";
 
 /**
- * Role-aware analytics entry: merchants see their tenant-isolated dashboard,
- * staff see the platform overview. Unauthenticated users are redirected to login.
+ * Role-aware analytics entry: redirects users to their designated
+ * shelled dashboard (/merchant/analytics or /admin/analytics).
  */
 export default function AnalyticsPage() {
   const router = useRouter();
@@ -18,11 +16,15 @@ export default function AnalyticsPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       router.replace(AUTH_ROUTES.login);
+      return;
     }
-  }, [isAuthenticated, router]);
+    if (user?.role === "MERCHANT") {
+      router.replace(MERCHANT_ROUTES.analytics);
+    } else {
+      router.replace(ADMIN_ROUTES.analytics);
+    }
+  }, [isAuthenticated, user?.role, router]);
 
-  if (!isAuthenticated) return null;
-
-  if (user?.role === "MERCHANT") return <MerchantAnalyticsDashboard />;
-  return <AdminOverviewDashboard />;
+  return null;
 }
+

@@ -87,7 +87,7 @@ export function CustomerSettingsView() {
   const [newPhone, setNewPhone] = React.useState("");
   const [newSetDefault, setNewSetDefault] = React.useState(false);
 
-  // Load from localStorage
+  // Load from localStorage or sync with authenticated customer
   React.useEffect(() => {
     try {
       const savedAddrs = localStorage.getItem(STORAGE_KEY_ADDRESSES);
@@ -96,6 +96,14 @@ export function CustomerSettingsView() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           setAddresses(parsed);
         }
+      } else if (authUser?.name || authUser?.phone) {
+        setAddresses((prev) =>
+          prev.map((a) => ({
+            ...a,
+            recipientName: authUser.name || a.recipientName,
+            phone: authUser.phone || a.phone,
+          }))
+        );
       }
 
       const savedNotifs = localStorage.getItem(STORAGE_KEY_NOTIFS);

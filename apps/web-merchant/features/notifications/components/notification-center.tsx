@@ -35,11 +35,11 @@ function resolveRoute(metadata: Record<string, unknown> | undefined): string | n
   if (typeof route !== "string" || route.length === 0) return null;
   // Only allow known in-app destinations — never open redirects or externals.
   if (
-    route.startsWith("/merchant/parcels/") ||
-    route.startsWith("/merchant/finance") ||
-    route.startsWith("/rider/tasks/") ||
-    route.startsWith("/rider/profile") ||
-    route.startsWith("/hub/cash") ||
+    route.startsWith("/merchant/") ||
+    route.startsWith("/admin/") ||
+    route.startsWith("/hub/") ||
+    route.startsWith("/rider/") ||
+    route.startsWith("/customer/") ||
     route === "/merchant/parcels" ||
     route === "/merchant/finance"
   ) {

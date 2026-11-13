@@ -433,24 +433,14 @@ export function CustomerDashboardView() {
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2.5 pt-2">
                   {activeShipment.status !== ParcelStatus.DELIVERED ? (
-                    <>
-                      <Button
-                        onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
-                        variant="outline"
-                        className="h-10 text-xs font-semibold gap-1.5"
-                      >
-                        <Calendar className="h-3.5 w-3.5" />
-                        {t("rescheduleOrInstructions")}
-                      </Button>
-                      <Button
-                        onClick={() => markAsDelivered(activeShipment.trackingCode)}
-                        variant="soft"
-                        className="h-10 text-xs font-semibold gap-1.5"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                        Confirm Received
-                      </Button>
-                    </>
+                    <Button
+                      onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
+                      variant="outline"
+                      className="h-10 text-xs font-semibold gap-1.5"
+                    >
+                      <Calendar className="h-3.5 w-3.5" />
+                      {t("rescheduleOrInstructions")}
+                    </Button>
                   ) : (
                     <Button
                       onClick={() => handleOpenPod(activeShipment)}
