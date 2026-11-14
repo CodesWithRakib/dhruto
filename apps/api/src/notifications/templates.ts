@@ -102,15 +102,22 @@ export function renderParcelAssigned(vars: ParcelCreatedVars): RenderedTemplate 
   };
 }
 
-export function renderParcelOutForDelivery(vars: ParcelOutForDeliveryVars): RenderedTemplate {
+export function renderParcelOutForDelivery(
+  vars: ParcelOutForDeliveryVars & { otp?: string; codAmount?: number; riderPhone?: string },
+): RenderedTemplate {
+  const otpPart = vars.otp ? ` Delivery OTP: ${vars.otp}.` : " Share your delivery OTP with the rider.";
+  const codPart =
+    vars.codAmount !== undefined && vars.codAmount > 0 ? ` COD to pay: ৳${vars.codAmount.toLocaleString("en-US")}.` : "";
+  const riderPart = vars.riderPhone ? ` Rider: ${vars.riderPhone}.` : "";
+
   return {
     en: {
       title: "Out for delivery",
-      body: `Dhruto: parcel ${vars.trackingCode} is out for delivery. Share your OTP with the rider to receive it.`,
+      body: `Dhruto Express: Parcel ${vars.trackingCode} is out for delivery.${otpPart}${codPart}${riderPart}`.trim(),
     },
     bn: {
       title: "ডেলিভারির পথে",
-      body: `Dhruto: পার্সেল ${vars.trackingCode} ডেলিভারির পথে। গ্রহণের জন্য আপনার OTP রাইডারকে দিন।`,
+      body: `Dhruto: পার্সেল ${vars.trackingCode} ডেলিভারির পথে।${vars.otp ? ` ডেলিভারি OTP: ${vars.otp}।` : " রাইডারকে OTP দিন।"}${vars.codAmount ? ` COD: ৳${vars.codAmount.toLocaleString("en-US")}।` : ""}`.trim(),
     },
   };
 }

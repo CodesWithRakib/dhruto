@@ -359,7 +359,12 @@ function renderTemplate(key: TemplateKey, payload: Payload): RenderedTemplate {
         recipientName: str(payload.recipientName),
       });
     case "parcel_out_for_delivery":
-      return renderParcelOutForDelivery({ trackingCode: str(payload.trackingCode) });
+      return renderParcelOutForDelivery({
+        trackingCode: str(payload.trackingCode),
+        otp: typeof payload.otp === "string" ? payload.otp : undefined,
+        codAmount: typeof payload.codAmount === "number" ? payload.codAmount : undefined,
+        riderPhone: typeof payload.riderPhone === "string" ? payload.riderPhone : undefined,
+      });
     case "parcel_delivered":
       return renderParcelDelivered({
         trackingCode: str(payload.trackingCode),
