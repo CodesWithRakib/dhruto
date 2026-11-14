@@ -72,11 +72,10 @@ function getProgressStep(status: ParcelStatus | string): { step: number; percent
 
 const SAMPLE_TRACKING_CODES = [
   "DHR-20261114-NNN27T",
-  "DHR-2610-00107",
-  "DHR-2610-00108",
-  "DHR-2610-00113",
-  "DHR-2610-00111",
+  "DHR-20261113-K25WQ5",
   "DHR-2610-00101",
+  "DHR-2610-00102",
+  "DHR-2610-00107",
 ];
 
 export function CustomerDashboardView() {
@@ -240,7 +239,7 @@ export function CustomerDashboardView() {
 
         {/* Dynamic Real-Time Stats Grid */}
         <div className="mt-6 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-primary/40 hover:bg-background hover:shadow-soft">
+          <div className="rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-4 shadow-xs transition-all hover:border-primary/50 hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statIncoming")}</span>
               <span className="relative flex h-2 w-2">
@@ -254,7 +253,7 @@ export function CustomerDashboardView() {
             </span>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-success/40 hover:bg-background hover:shadow-soft">
+          <div className="rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-4 shadow-xs transition-all hover:border-success/50 hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statDelivered")}</span>
               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -263,7 +262,7 @@ export function CustomerDashboardView() {
             <span className="text-[11px] text-muted-foreground">Doorstep handoffs logged</span>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-warning/40 hover:bg-background hover:shadow-soft">
+          <div className="rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-4 shadow-xs transition-all hover:border-warning/50 hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statCodDue")}</span>
               <Clock className="h-4 w-4 text-warning" />
@@ -274,7 +273,7 @@ export function CustomerDashboardView() {
             <span className="text-[11px] text-muted-foreground">Cash ready for delivery rider</span>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-primary/40 hover:bg-background hover:shadow-soft">
+          <div className="rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-4 shadow-xs transition-all hover:border-primary/50 hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statAddress")}</span>
               <MapPin className="h-4 w-4 text-primary" />
@@ -286,7 +285,7 @@ export function CustomerDashboardView() {
       </div>
 
       {/* Dynamic Instant Track & Connect Shipment Bar */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs">
+      <div className="rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-5 shadow-xs">
         <form onSubmit={handleAddTrackingCode} className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Package className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
@@ -295,7 +294,7 @@ export function CustomerDashboardView() {
               value={newCodeInput}
               onChange={(e) => setNewCodeInput(e.target.value)}
               placeholder="Connect any tracking code (e.g. DHR-20261114-NNN27T)..."
-              className="pl-10 font-mono text-xs bg-background rounded-xl border-border/60"
+              className="pl-10 font-mono text-xs bg-muted/40 dark:bg-background rounded-xl border-border/70 focus:bg-background"
             />
           </div>
           <Button
@@ -401,14 +400,14 @@ export function CustomerDashboardView() {
                 </div>
 
                 {/* Dynamic Progress Stepper */}
-                <div className="space-y-2">
+                <div className="rounded-2xl border border-border/70 bg-muted/40 p-4 space-y-3">
                   <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
                     <span>{t("liveDeliveryProgress")}</span>
                     <span className="text-primary font-bold">
                       Step {currentStep?.step ?? 3} of 5 ({currentStep?.label})
                     </span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-muted border border-border/40">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500"
                       style={{ width: `${currentStep?.percentage ?? 60}%` }}
@@ -439,7 +438,7 @@ export function CustomerDashboardView() {
                     <Button
                       onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
                       variant="outline"
-                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted shadow-2xs"
+                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/70 bg-card hover:bg-surface-muted shadow-2xs"
                     >
                       <Calendar className="h-3.5 w-3.5" />
                       {t("rescheduleOrInstructions")}
@@ -448,7 +447,7 @@ export function CustomerDashboardView() {
                     <Button
                       onClick={() => handleOpenPod(activeShipment)}
                       variant="outline"
-                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted shadow-2xs"
+                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/70 bg-card hover:bg-surface-muted shadow-2xs"
                     >
                       <FileCheck className="h-3.5 w-3.5" />
                       View Proof of Delivery (POD)
@@ -465,10 +464,10 @@ export function CustomerDashboardView() {
               </div>
 
               {/* Right Column: Secure OTP & Assigned Rider */}
-              <div className="flex flex-col gap-3.5 rounded-2xl border border-border/50 bg-surface-muted/30 p-4.5 sm:p-5 lg:col-span-5">
+              <div className="flex flex-col gap-3.5 rounded-2xl border border-border/70 bg-muted/40 p-4.5 sm:p-5 lg:col-span-5">
                 {/* Secure OTP Card */}
                 {activeShipment.otp ? (
-                  <div className="space-y-2 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-4 shadow-2xs">
+                  <div className="space-y-2 rounded-2xl border border-primary/30 bg-card dark:bg-card/90 p-4 shadow-xs">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5 text-primary" />
@@ -508,7 +507,7 @@ export function CustomerDashboardView() {
 
                 {/* Assigned Rider Contact */}
                 {activeShipment.riderName ? (
-                  <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background p-3.5 shadow-2xs">
+                  <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-3.5 shadow-xs">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold shadow-2xs">
                         <Bike className="h-5 w-5" />
@@ -542,7 +541,7 @@ export function CustomerDashboardView() {
                 ) : null}
 
                 {/* COD Cash Amount */}
-                <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background p-3.5 text-xs shadow-2xs">
+                <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-3.5 text-xs shadow-xs">
                   <span className="text-muted-foreground font-medium">{t("codPayment")}:</span>
                   <span className="font-bold text-foreground">
                     {activeShipment.codAmount > 0 && !activeShipment.isPaid ? (
@@ -612,8 +611,8 @@ export function CustomerDashboardView() {
                   key={delivery.id}
                   className={`group relative flex flex-col justify-between gap-4 rounded-2xl border p-5 transition-all sm:flex-row sm:items-center ${
                     isSpotlighted
-                      ? "border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-card ring-1 ring-primary/20 shadow-soft"
-                      : "border-border/60 bg-card shadow-2xs hover:border-border hover:bg-surface-muted/30 hover:shadow-soft"
+                      ? "border-primary/50 bg-primary-soft/20 dark:bg-primary-soft/10 ring-1 ring-primary/25 shadow-soft"
+                      : "border-border/70 bg-card dark:bg-card/90 shadow-xs hover:border-primary/40 hover:shadow-soft"
                   }`}
                 >
                   <div className="flex items-start gap-3.5">

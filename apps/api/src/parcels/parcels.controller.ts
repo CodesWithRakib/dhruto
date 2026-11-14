@@ -137,6 +137,7 @@ export class ParcelsController {
   @ApiOkResponse({ description: "Paginated parcel list", type: ParcelResponseDto, isArray: true })
   @ApiUnauthorizedResponse({ description: "Missing or invalid access token" })
   @ApiTooManyRequestsResponse({ description: "Rate limit exceeded" })
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN, UserRole.CUSTOMER)
   async listParcels(
     @Query() query: ParcelListQueryDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -169,6 +170,7 @@ export class ParcelsController {
   @ApiOkResponse({ description: "Parcel details", type: ParcelDetailsResponseDto })
   @ApiNotFoundResponse({ description: "Parcel not found or not owned by caller" })
   @ApiUnauthorizedResponse({ description: "Missing or invalid access token" })
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN, UserRole.CUSTOMER)
   async getParcelById(
     @Param("id") id: string,
     @CurrentUser() user: AuthenticatedUser,

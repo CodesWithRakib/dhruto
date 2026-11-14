@@ -20,17 +20,16 @@ export function CustomerTrackingView({ initialCode }: CustomerTrackingViewProps)
     <div className="space-y-6">
       {initialCode ? (
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="w-fit gap-2 rounded-xl text-muted-foreground hover:text-foreground"
-          >
-            <Link href={CUSTOMER_ROUTES.dashboard}>
+          <Link href={CUSTOMER_ROUTES.dashboard}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit gap-2 rounded-xl border-border/70 bg-card hover:bg-surface-muted shadow-2xs font-semibold text-xs"
+            >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>{t("backToDashboard")}</span>
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       ) : (
         <PageHeader

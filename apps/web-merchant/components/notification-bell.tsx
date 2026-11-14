@@ -25,8 +25,11 @@ import {
 import { NotificationChannel, NotificationType } from "@dhruto/contracts";
 import { getApiErrorMessage } from "../lib/api-error";
 import { formatDate } from "@/lib/format";
+import { useAppSelector } from "@/store/hooks";
 
 export function NotificationBell() {
+  const authUser = useAppSelector((s) => s.auth.user);
+  const isCustomer = authUser?.role === "CUSTOMER";
   const [isOpen, setIsOpen] = useState(false);
   const [showSmsModal, setShowSmsModal] = useState(false);
   const [testPhone, setTestPhone] = useState("01712345678");
@@ -198,14 +201,16 @@ export function NotificationBell() {
                   Mark all read
                 </button>
               )}
-              <button
-                onClick={() => setShowSmsModal(true)}
-                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border rounded px-1.5 py-0.5 hover:bg-muted"
-                title="Send test SMS"
-              >
-                <Smartphone className="h-3 w-3 text-info" aria-hidden="true" />
-                Test SMS
-              </button>
+              {!isCustomer && (
+                <button
+                  onClick={() => setShowSmsModal(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border rounded px-1.5 py-0.5 hover:bg-muted"
+                  title="Send test SMS"
+                >
+                  <Smartphone className="h-3 w-3 text-info" aria-hidden="true" />
+                  Test SMS
+                </button>
+              )}
             </div>
           </div>
 

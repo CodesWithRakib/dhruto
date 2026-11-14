@@ -123,6 +123,8 @@ export interface ParcelAccessScope {
   /** `undefined` means unscoped (platform admin). */
   merchantId?: string;
   isAdmin: boolean;
+  isCustomer?: boolean;
+  customerPhone?: string;
 }
 
 export interface ParcelPaginationMeta {
@@ -190,6 +192,9 @@ export class ParcelsService {
     if (user.role === UserRole.ADMIN) {
       return { userId: user.id, isAdmin: true };
     }
+    if (user.role === UserRole.CUSTOMER) {
+      return { userId: user.id, isAdmin: false, isCustomer: true, customerPhone: user.phone };
+    }
     const merchant = await this.requireMerchant(user);
     return { userId: user.id, isAdmin: false, merchantId: merchant.id };
   }
@@ -212,10 +217,20 @@ export class ParcelsService {
    * Rejects cross-tenant access. A parcel owned by another merchant is reported
    * as not-found so the endpoint does not confirm its existence.
    */
-  private assertOwnership(parcel: Parcel, scope: ParcelAccessScope): void {    if (scope.isAdmin || !scope.merchantId) {
+  private assertOwnership(parcel: Parcel, scope: ParcelAccessScope): void {
+    if (scope.isAdmin) {
       return;
     }
-    if (parcel.merchantId !== scope.merchantId) {
+    if (scope.isCustomer) {
+      if (parcel.recipientPhone !== scope.customerPhone) {
+        throw new NotFoundException({
+          message: "Parcel not found",
+          error: ApiErrorCode.PARCEL_NOT_FOUND,
+        });
+      }
+      return;
+    }
+    if (!scope.merchantId || parcel.merchantId !== scope.merchantId) {
       this.logger.warn(
         `SECURITY_UNAUTHORIZED_PARCEL_ACCESS actor=${scope.userId} merchant=${scope.merchantId} parcel=${parcel.id}`,
       );
@@ -500,7 +515,11 @@ export class ParcelsService {
   async listParcels(query: ParcelListQuery, scope: ParcelAccessScope): Promise<ParcelListResult> {
     const qb = this.parcelRepo.createQueryBuilder("parcel");
 
-    if (scope.merchantId) {
+    if (scope.isCustomer) {
+      qb.andWhere("parcel.recipientPhone = :phone", {
+        phone: scope.customerPhone,
+      });
+    } else if (scope.merchantId) {
       qb.andWhere("parcel.merchantId = :merchantId", {
         merchantId: scope.merchantId,
       });

@@ -48,7 +48,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
 @ApiTags("Notifications")
 @ApiBearerAuth("JWT-auth")
 @UseGuards(RateLimitGuard)
-@Roles(UserRole.MERCHANT, UserRole.RIDER, UserRole.HUB_MANAGER, UserRole.ADMIN)
+@Roles(UserRole.MERCHANT, UserRole.RIDER, UserRole.HUB_MANAGER, UserRole.ADMIN, UserRole.CUSTOMER)
 @Controller("notifications")
 export class NotificationsController {
   constructor(

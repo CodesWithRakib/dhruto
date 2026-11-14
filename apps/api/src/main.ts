@@ -86,4 +86,12 @@ async function bootstrap() {
   logger.log(`========================================================`);
 }
 
+process.on("unhandledRejection", (reason) => {
+  Logger.error("Unhandled Rejection in background process:", reason as any, "ProcessMonitor");
+});
+
+process.on("uncaughtException", (error) => {
+  Logger.error("Uncaught Exception in process:", error?.stack || error?.message || error, "ProcessMonitor");
+});
+
 void bootstrap();
