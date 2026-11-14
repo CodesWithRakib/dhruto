@@ -90,22 +90,22 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
   }
 
   return (
-    <Card className="space-y-4 p-4 sm:p-5">
+    <div className="space-y-4 rounded-2xl border border-border/50 bg-surface-muted/30 p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
-        <h3 className="text-sm font-semibold">{t("title")}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
         <span className="ml-auto text-[11px] text-muted-foreground">
           {t("versions", { model: intel.rto.modelVersion })}
         </span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-border p-3">
+        <div className="rounded-xl border border-border/50 bg-background/80 p-3.5 shadow-2xs">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
             {t("address")}
           </div>
-          <p className="mt-1 text-sm font-medium">
+          <p className="mt-1 text-sm font-medium text-foreground">
             {intel.address.structuredAddress.district ?? "—"}
             {intel.address.structuredAddress.thana
               ? ` · ${intel.address.structuredAddress.thana}`
@@ -116,21 +116,21 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
             {intel.address.hasConflict ? ` · ${t("conflict")}` : ""}
           </p>
         </div>
-        <div className="rounded-lg border border-border p-3">
+        <div className="rounded-xl border border-border/50 bg-background/80 p-3.5 shadow-2xs">
           <p className="text-xs text-muted-foreground">{t("deliveryRisk")}</p>
           <div className="mt-1 flex items-center gap-2">
             <LevelBadge level={intel.risk.level} />
-            <span className="font-mono text-sm font-semibold">{intel.risk.riskScore}</span>
+            <span className="font-mono text-sm font-semibold text-foreground">{intel.risk.riskScore}</span>
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {t("scoreScale", { version: intel.risk.scoringVersion })}
           </p>
         </div>
-        <div className="rounded-lg border border-border p-3">
+        <div className="rounded-xl border border-border/50 bg-background/80 p-3.5 shadow-2xs">
           <p className="text-xs text-muted-foreground">{t("rtoRisk")}</p>
           <div className="mt-1 flex items-center gap-2">
             <LevelBadge level={intel.rto.level} />
-            <span className="font-mono text-sm font-semibold">{intel.rto.score}</span>
+            <span className="font-mono text-sm font-semibold text-foreground">{intel.rto.score}</span>
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground">{t("heuristicNote")}</p>
         </div>
@@ -138,7 +138,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
 
       {intel.risk.reasons.length > 0 && (
         <div>
-          <p className="mb-1.5 text-xs font-medium">{t("why")}</p>
+          <p className="mb-1.5 text-xs font-medium text-foreground">{t("why")}</p>
           <ul className="space-y-1">
             {intel.risk.reasons.map((r) => (
               <li key={r.code} className="flex items-start gap-1.5 text-xs text-muted-foreground">
@@ -155,31 +155,34 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
 
       {intel.recommendations.filter((r) => r.status === "ACTIVE").length > 0 && (
         <div>
-          <p className="mb-1.5 text-xs font-medium">{t("recommended")}</p>
-          <div className="space-y-2">
+          <p className="mb-1.5 text-xs font-medium text-foreground">{t("recommended")}</p>
+          <div className="space-y-2.5">
             {intel.recommendations
               .filter((r) => r.status === "ACTIVE")
               .map((rec) => (
-                <div key={rec.id} className="rounded-lg border border-border p-3">
-                  <p className="text-sm font-medium">{t(`action_${rec.action}`)}</p>
+                <div
+                  key={rec.id}
+                  className="rounded-xl border border-border/60 bg-background p-4 shadow-2xs transition-all hover:border-primary/30"
+                >
+                  <p className="text-sm font-semibold text-foreground">{t(`action_${rec.action}`)}</p>
                   {rec.reasons.length > 0 && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">{rec.reasons[0]?.detail}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{rec.reasons[0]?.detail}</p>
                   )}
                   {overrideId === rec.id ? (
-                    <div className="mt-2 space-y-2">
+                    <div className="mt-3 space-y-2">
                       <input
                         type="text"
                         value={overrideReason}
                         onChange={(e) => setOverrideReason(e.target.value)}
                         placeholder={t("overrideReasonPlaceholder")}
                         aria-label={t("overrideReasonPlaceholder")}
-                        className="h-9 w-full rounded-lg border border-input bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="h-9 w-full rounded-xl border border-border/60 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 text-[11px]"
+                          className="h-8 rounded-lg px-3 text-xs font-medium"
                           disabled={isOverriding}
                           onClick={() => handleOverride(rec.id, "PROCEED")}
                         >
@@ -188,7 +191,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 text-[11px]"
+                          className="h-8 rounded-lg px-3 text-xs font-medium"
                           disabled={isOverriding}
                           onClick={() => handleOverride(rec.id, "HOLD")}
                         >
@@ -197,7 +200,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 text-[11px]"
+                          className="h-8 rounded-lg px-3 text-xs font-medium text-muted-foreground"
                           onClick={() => {
                             setOverrideId(null);
                             setOverrideReason("");
@@ -208,11 +211,11 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-[11px]"
+                        className="h-8 rounded-lg px-3 text-xs font-medium hover:bg-surface-muted"
                         onClick={() => accept(rec.id).then(() => refetch())}
                       >
                         {t("accept")}
@@ -220,7 +223,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-[11px]"
+                        className="h-8 rounded-lg px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
                         onClick={() => dismiss(rec.id).then(() => refetch())}
                       >
                         {t("dismiss")}
@@ -228,7 +231,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-[11px]"
+                        className="h-8 rounded-lg px-3 text-xs font-medium text-primary hover:bg-primary/10"
                         onClick={() => setOverrideId(rec.id)}
                       >
                         {t("override")}
@@ -244,11 +247,11 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
       {feedback && (
         <div
           role="alert"
-          className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
+          className="rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-xs text-danger-soft-foreground"
         >
           {feedback}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

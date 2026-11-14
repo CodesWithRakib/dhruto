@@ -44,6 +44,7 @@ import { lastListUrl } from "@/lib/last-list-url";
 import { ParcelCancelDialog } from "./parcel-cancel-dialog";
 import { ParcelEditDialog } from "./parcel-edit-dialog";
 import { ParcelPickupDialog } from "./parcel-pickup-dialog";
+import { cn } from "@/lib/cn";
 
 interface ParcelDetailsViewProps {
   parcelId: string;
@@ -177,10 +178,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
     ParcelStatus.PICKUP_ASSIGNED,
   ].includes(parcel.status);
 
-  const isEditable = [
-    ParcelStatus.CREATED,
-    ParcelStatus.PICKUP_REQUESTED,
-  ].includes(parcel.status);
+  const isEditable = [ParcelStatus.CREATED, ParcelStatus.PICKUP_REQUESTED].includes(parcel.status);
 
   const isPickupRequestable = parcel.status === ParcelStatus.CREATED;
 
@@ -243,8 +241,8 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-3 border-b border-border sm:flex-row sm:items-center sm:justify-between">
+      <Card className="rounded-2xl border border-border/60 shadow-soft">
+        <CardHeader className="flex flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between sm:pb-3">
           <div>
             <span className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
               {t("trackingCode")}
@@ -260,7 +258,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         </CardHeader>
 
         {/* Progress track */}
-        <CardContent className="border-b border-border/70 py-6">
+        <CardContent className="py-4 sm:py-6">
           <ol
             className="relative mx-auto flex max-w-2xl justify-between"
             aria-label={t("orderStatus")}
@@ -291,20 +289,25 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
                 >
                   <span
                     aria-hidden="true"
-                    className={
+                    className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-full text-caption font-bold transition-all duration-200",
                       isPassed
-                        ? "flex h-7 w-7 items-center justify-center rounded-full bg-primary text-caption font-bold text-primary-foreground"
-                        : "flex h-7 w-7 items-center justify-center rounded-full bg-surface-muted text-caption font-bold text-muted-foreground"
-                    }
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "bg-surface-muted text-muted-foreground",
+                      isCurrent && "ring-4 ring-primary/25 scale-105",
+                    )}
                   >
                     {step}
                   </span>
                   <span
-                    className={
-                      isPassed
-                        ? "mt-2 max-w-full px-1 text-center text-caption font-medium text-foreground"
-                        : "mt-2 max-w-full px-1 text-center text-caption text-muted-foreground"
-                    }
+                    className={cn(
+                      "mt-2 max-w-full px-1 text-center text-caption transition-colors",
+                      isCurrent
+                        ? "font-bold text-primary"
+                        : isPassed
+                          ? "font-medium text-foreground"
+                          : "text-muted-foreground",
+                    )}
                   >
                     {tStatus(milestone.labelKey)}
                   </span>
@@ -314,14 +317,14 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
           </ol>
         </CardContent>
 
-        <CardContent className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-6 pt-2 sm:pt-4 md:grid-cols-2">
           {/* Recipient */}
           <section className="space-y-3">
             <h3 className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground">
               <User className="h-4 w-4 text-primary" aria-hidden="true" />
               {t("recipientInfo")}
             </h3>
-            <div className="space-y-3 rounded-md border border-border bg-surface-muted p-4 text-body-sm">
+            <div className="space-y-3 rounded-2xl border border-border/50 bg-surface-muted/40 p-5 text-body-sm transition-colors">
               <div>
                 <span className="text-caption text-muted-foreground">{t("recipientName")}</span>
                 <p className="font-semibold text-foreground">{parcel.recipientName}</p>
@@ -348,14 +351,14 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
               <Wallet className="h-4 w-4 text-primary" aria-hidden="true" />
               {t("financialSummary")}
             </h3>
-            <div className="space-y-3 rounded-md border border-border bg-surface-muted p-4 text-body-sm">
+            <div className="space-y-3 rounded-2xl border border-border/50 bg-surface-muted/40 p-5 text-body-sm transition-colors">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t("codCollection")}</span>
                 <span className="font-bold tabular-nums text-foreground">
                   {bdt(parcel.codAmount)}
                 </span>
               </div>
-              <div className="flex items-center justify-between border-b border-border/70 pb-2 text-caption text-muted-foreground">
+              <div className="flex items-center justify-between border-b border-border/40 pb-2.5 text-caption text-muted-foreground">
                 <span>{t("deliveryFee")}</span>
                 <span className="tabular-nums">− {bdt(parcel.deliveryFee)}</span>
               </div>
@@ -385,38 +388,44 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
               {t("operations")}
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
-                <Building2 className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
-                <div>
+              <div className="flex items-center gap-3.5 rounded-2xl border border-border/50 bg-surface-muted/40 p-4 sm:p-5 transition-colors">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Building2 className="h-6 w-6" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
                   <span className="text-caption text-muted-foreground">{t("currentHub")}</span>
-                  <p className="font-medium text-foreground">
+                  <p className="font-medium text-foreground truncate">
                     {parcel.currentHubName ?? t("awaitingHub")}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
-                <Truck className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
-                <div>
+              <div className="flex items-center gap-3.5 rounded-2xl border border-border/50 bg-surface-muted/40 p-4 sm:p-5 transition-colors">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Truck className="h-6 w-6" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
                   <span className="text-caption text-muted-foreground">{t("assignedRider")}</span>
-                  <p className="font-medium text-foreground">
+                  <p className="font-medium text-foreground truncate">
                     {parcel.currentRiderName ?? t("notAssigned")}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-md border border-border bg-surface-muted p-4">
-                <Package className="h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
-                <div>
+              <div className="flex items-center gap-3.5 rounded-2xl border border-border/50 bg-surface-muted/40 p-4 sm:p-5 transition-colors">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Package className="h-6 w-6" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
                   <span className="text-caption text-muted-foreground">
                     {t("parcelDescription")}
                   </span>
-                  <p className="font-medium text-foreground">
+                  <p className="font-medium text-foreground truncate">
                     {parcel.parcelDescription || t("noDescription")}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-md border border-border bg-surface-muted p-4 text-body-sm">
+            <div className="rounded-2xl border border-border/50 bg-surface-muted/40 p-5 text-body-sm">
               <p className="text-caption text-muted-foreground">{t("merchant")}</p>
               <p className="font-semibold text-foreground">{parcel.merchantName}</p>
               <p className="mt-1 text-caption text-muted-foreground">{t("pickupAddress")}</p>
@@ -424,7 +433,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
             </div>
 
             {intelligence.confidenceScore !== null || intelligence.riskTier !== null ? (
-              <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface-muted p-4 text-caption">
+              <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/50 bg-surface-muted/40 p-4 sm:p-5 text-caption">
                 <span className="flex items-center gap-1.5 font-semibold text-foreground">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                   {t("addressIntelligence")}
@@ -449,28 +458,34 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         </CardContent>
       </Card>
 
-      <HighlightCard tone={nextStep.tone}>
-        <p className="flex items-start gap-2.5 text-body-sm">
-          <ArrowRight className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>
-            <span className="block text-caption font-semibold uppercase tracking-wider opacity-80">
+      <HighlightCard tone={nextStep.tone} className="p-4 sm:p-5">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div>
+            <span className="block text-caption font-bold uppercase tracking-wider text-muted-foreground">
               {t("whatsNext")}
             </span>
-            <span className="mt-0.5 block font-medium text-foreground">{nextStep.body}</span>
-          </span>
-        </p>
+            <p className="mt-0.5 text-body-sm font-semibold text-foreground">{nextStep.body}</p>
+          </div>
+        </div>
       </HighlightCard>
 
       {/* History */}
-      <Card>
-        <CardHeader className="border-b border-border pb-3">
-          <CardTitle className="flex items-center gap-2 text-body font-bold">
-            <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
-            {t("statusHistory")}
+      <Card className="rounded-2xl border border-border/60 shadow-soft">
+        <CardHeader className="pb-3 pt-6 px-6">
+          <CardTitle className="flex items-center gap-2 text-body font-bold text-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Clock className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <span>{t("statusHistory")}</span>
           </CardTitle>
-          <CardDescription>{t("statusHistoryHint")}</CardDescription>
+          <CardDescription className="text-caption text-muted-foreground mt-1">
+            {t("statusHistoryHint")}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-2 px-6 pb-6">
           {(() => {
             const historyEntries = standaloneHistory?.data ?? parcel.history ?? [];
             if (historyEntries.length === 0) {
@@ -502,7 +517,9 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
                         </span>
                       ) : null}
                       {entry.description ? (
-                        <p className="mt-1 text-body-sm text-muted-foreground">{entry.description}</p>
+                        <p className="mt-1 text-body-sm text-muted-foreground">
+                          {entry.description}
+                        </p>
                       ) : null}
                       <p className="mt-1 text-caption text-muted-foreground">
                         {t("recordedBy", { role: entry.actorRole })}

@@ -35,14 +35,14 @@ export function HighlightCard({
   className?: string;
 }) {
   const tones = {
-    primary: "border-primary/25 bg-primary-soft/40",
-    info: "border-info/25 bg-info-soft/40",
-    success: "border-success/25 bg-success-soft/40",
-    warning: "border-warning/25 bg-warning-soft/40",
-    danger: "border-danger/25 bg-danger-soft/40",
+    primary: "border-primary/20 bg-gradient-to-r from-primary-soft/50 via-primary-soft/20 to-transparent",
+    info: "border-info/20 bg-gradient-to-r from-info-soft/50 via-info-soft/20 to-transparent",
+    success: "border-success/20 bg-gradient-to-r from-success-soft/50 via-success-soft/20 to-transparent",
+    warning: "border-warning/20 bg-gradient-to-r from-warning-soft/50 via-warning-soft/20 to-transparent",
+    danger: "border-danger/20 bg-gradient-to-r from-danger-soft/50 via-danger-soft/20 to-transparent",
   } as const;
   return (
-    <div className={cn("rounded-xl border p-4 sm:p-5", tones[tone], className)}>
+    <div className={cn("rounded-2xl border p-4 sm:p-5 shadow-2xs transition-colors", tones[tone], className)}>
       {children}
     </div>
   );

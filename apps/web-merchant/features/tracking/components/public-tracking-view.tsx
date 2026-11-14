@@ -340,7 +340,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
         <div className="space-y-8">
           {/* Dynamic Status Masthead */}
           <div className="track-status-masthead" data-status-type={statusTheme}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/60">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="track-status-beacon text-primary" />
@@ -398,7 +398,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
             </div>
 
             {/* Kinetic 5-Stage Milestone Progress Bar */}
-            <div className="pt-6">
+            <div className="pt-2 sm:pt-3">
               <div className="flex items-center justify-between mb-4 text-xs font-mono uppercase tracking-wider text-muted-foreground">
                 <span className="flex items-center gap-2 text-foreground font-semibold">
                   <Radio className="h-4 w-4 text-primary animate-pulse" />
