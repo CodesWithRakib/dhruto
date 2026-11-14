@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { CalendarRange } from "lucide-react";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@dhruto/ui";
 import { ParcelStatus } from "@dhruto/contracts";
 import { PARCEL_STATUS_CONFIG } from "@/config/status";
+import { getAllDistricts, getThanasForDistrict } from "@/lib/data/bangladesh-locations";
 import { buildDateRange, type DateRangePreset } from "../lib/date-range";
 import type { ParcelListFilters } from "../hooks/use-parcels-list";
 
@@ -63,6 +64,29 @@ export function ParcelFilterControls({
   const id = (name: string) => `${idPrefix}-${name}`;
   const hasDateRange = Boolean(filters.from || filters.to);
 
+  const allDistricts = useMemo(() => getAllDistricts(), []);
+  const availableThanas = useMemo(() => {
+    return filters.district ? getThanasForDistrict(filters.district) : [];
+  }, [filters.district]);
+
+  const handleDistrictChange = (value: string) => {
+    const newDistrict = value === "all" ? "" : value;
+    updateFilter("district", newDistrict);
+    if (filters.thana) {
+      const validThanas = getThanasForDistrict(newDistrict);
+      const stillValid = validThanas.some(
+        (t) => t.name.toLowerCase() === filters.thana.toLowerCase() || t.nameBn === filters.thana,
+      );
+      if (!stillValid) {
+        updateFilter("thana", "");
+      }
+    }
+  };
+
+  const handleThanaChange = (value: string) => {
+    updateFilter("thana", value === "all" ? "" : value);
+  };
+
   return (
     <div className="space-y-4">
       <div className={stacked ? "space-y-4" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-5"}>
@@ -94,24 +118,49 @@ export function ParcelFilterControls({
           <Label htmlFor={id("district")} className="text-caption text-muted-foreground">
             {t("filterDistrict")}
           </Label>
-          <Input
-            id={id("district")}
-            value={filters.district}
-            onChange={(event) => updateFilter("district", event.target.value)}
-            placeholder={t("filterDistrictPlaceholder")}
-          />
+          <Select
+            value={filters.district || "all"}
+            onValueChange={handleDistrictChange}
+          >
+            <SelectTrigger id={id("district")} className="w-full">
+              <SelectValue placeholder={t("allDistricts")} />
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              <SelectItem value="all">{t("allDistricts")}</SelectItem>
+              {allDistricts.map((d) => (
+                <SelectItem key={d.name} value={d.name}>
+                  {d.name} ({d.nameBn})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor={id("thana")} className="text-caption text-muted-foreground">
             {t("filterThana")}
           </Label>
-          <Input
-            id={id("thana")}
-            value={filters.thana}
-            onChange={(event) => updateFilter("thana", event.target.value)}
-            placeholder={t("filterThanaPlaceholder")}
-          />
+          <Select
+            value={filters.thana || "all"}
+            disabled={!filters.district}
+            onValueChange={handleThanaChange}
+          >
+            <SelectTrigger id={id("thana")} className="w-full">
+              <SelectValue
+                placeholder={
+                  filters.district ? t("allThanas") : t("selectDistrictFirst")
+                }
+              />
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              <SelectItem value="all">{t("allThanas")}</SelectItem>
+              {availableThanas.map((th) => (
+                <SelectItem key={th.name} value={th.name}>
+                  {th.name} ({th.nameBn})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">
