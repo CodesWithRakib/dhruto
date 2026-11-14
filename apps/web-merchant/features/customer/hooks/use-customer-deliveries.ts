@@ -35,6 +35,21 @@ const STORAGE_KEY = "dhruto_customer_deliveries_v2";
  */
 const INITIAL_DELIVERIES: CustomerDelivery[] = [
   {
+    id: "del-nnn27t",
+    trackingCode: "DHR-20261114-NNN27T",
+    merchantName: "Dhruto Express Parcel",
+    destination: "Zindabazar, Sylhet",
+    district: "Sylhet",
+    thana: "Zindabazar",
+    status: ParcelStatus.ORIGIN_HUB_RECEIVED,
+    statusLabel: "Received at Origin Hub",
+    eta: "In 1-2 Business Days",
+    codAmount: 3500,
+    isPaid: false,
+    itemsDescription: "Live Inspection Shipment (2.5 kg)",
+    otp: "719302",
+  },
+  {
     id: "del-107",
     trackingCode: "DHR-2610-00107",
     merchantName: "Aarong Fashion Store",
@@ -219,27 +234,6 @@ export function useCustomerDeliveries() {
 
   const [triggerFetchTracking] = useLazyGetPublicTrackingQuery();
 
-  // Load persisted state from localStorage on client mount
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as CustomerDelivery[];
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setDeliveries(parsed);
-          const firstActive = parsed.find(
-            (d) => d.status === ParcelStatus.OUT_FOR_DELIVERY || d.status !== ParcelStatus.DELIVERED
-          );
-          if (firstActive) {
-            setActiveTrackingCode(firstActive.trackingCode);
-          }
-        }
-      }
-    } catch {
-      // Fallback to initial seed deliveries
-    }
-  }, []);
-
   // Sync state to localStorage whenever deliveries change
   const saveDeliveries = React.useCallback((next: CustomerDelivery[]) => {
     setDeliveries(next);
@@ -248,6 +242,90 @@ export function useCustomerDeliveries() {
     } catch {
       // Storage unavailable or full
     }
+  }, []);
+
+  /**
+   * Re-sync deliveries against live API telemetry
+   */
+  const refreshAllDeliveries = React.useCallback(
+    async (targetList?: CustomerDelivery[], silent = false) => {
+      if (!silent) setIsRefreshing(true);
+      let updatedCount = 0;
+
+      const listToRefresh = targetList && targetList.length > 0 ? targetList : deliveries;
+
+      try {
+        const updatedList = await Promise.all(
+          listToRefresh.map(async (delivery) => {
+            try {
+              const res = await triggerFetchTracking(delivery.trackingCode).unwrap();
+              if (res.data) {
+                updatedCount++;
+                const isDelivered = res.data.status === ParcelStatus.DELIVERED;
+                return {
+                  ...delivery,
+                  status: res.data.status,
+                  statusLabel: formatStatusLabel(res.data.status),
+                  district: res.data.recipientDistrict ?? delivery.district,
+                  thana: res.data.recipientThana ?? delivery.thana,
+                  destination:
+                    res.data.recipientThana && res.data.recipientDistrict
+                      ? `${res.data.recipientThana}, ${res.data.recipientDistrict}`
+                      : delivery.destination,
+                  timeline: res.data.timeline,
+                  updatedAt: res.data.updatedAt,
+                  eta: isDelivered ? "Delivered" : delivery.eta,
+                  isPaid: isDelivered ? true : delivery.isPaid,
+                };
+              }
+            } catch {
+              // Keep existing if fetch fails
+            }
+            return delivery;
+          })
+        );
+
+        saveDeliveries(updatedList);
+        if (!silent) {
+          toast.success(`Live telemetry synced for ${updatedCount} deliveries.`);
+        }
+      } finally {
+        if (!silent) setIsRefreshing(false);
+      }
+    },
+    [deliveries, saveDeliveries, triggerFetchTracking]
+  );
+
+  // Load persisted state from localStorage on client mount & auto-sync live database
+  React.useEffect(() => {
+    let initialList = INITIAL_DELIVERIES;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as CustomerDelivery[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingCodes = new Set(parsed.map((p) => p.trackingCode.toUpperCase()));
+          const missingInitial = INITIAL_DELIVERIES.filter(
+            (init) => !existingCodes.has(init.trackingCode.toUpperCase())
+          );
+          initialList = [...parsed, ...missingInitial];
+        }
+      }
+    } catch {
+      // Fallback to initial seed deliveries
+    }
+
+    setDeliveries(initialList);
+    const firstActive = initialList.find(
+      (d) => d.status === ParcelStatus.OUT_FOR_DELIVERY || d.status !== ParcelStatus.DELIVERED
+    );
+    if (firstActive) {
+      setActiveTrackingCode(firstActive.trackingCode);
+    }
+
+    // Auto-sync live database status for all shipments in background
+    void refreshAllDeliveries(initialList, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Currently spotlighted active delivery
@@ -357,41 +435,6 @@ export function useCustomerDeliveries() {
     [deliveries, saveDeliveries, triggerFetchTracking]
   );
 
-  /**
-   * Re-sync all deliveries against live API telemetry
-   */
-  const refreshAllDeliveries = React.useCallback(async () => {
-    setIsRefreshing(true);
-    let updatedCount = 0;
-
-    try {
-      const updatedList = await Promise.all(
-        deliveries.map(async (delivery) => {
-          try {
-            const res = await triggerFetchTracking(delivery.trackingCode).unwrap();
-            if (res.data) {
-              updatedCount++;
-              return {
-                ...delivery,
-                status: res.data.status,
-                statusLabel: formatStatusLabel(res.data.status),
-                timeline: res.data.timeline,
-                updatedAt: res.data.updatedAt,
-              };
-            }
-          } catch {
-            // Keep existing if fetch fails
-          }
-          return delivery;
-        })
-      );
-
-      saveDeliveries(updatedList);
-      toast.success(`Live telemetry synced for ${updatedCount} deliveries.`);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [deliveries, saveDeliveries, triggerFetchTracking]);
 
   /**
    * Reschedule delivery time and attach custom rider instructions

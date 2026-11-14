@@ -2341,7 +2341,9 @@
     "historyPageTitle": "Delivery History",
     "historyPageSubtitle": "All delivered and completed packages received by your account.",
     "settingsPageTitle": "Customer Delivery Settings",
-    "settingsPageSubtitle": "Manage your primary delivery destinations, phone number, and SMS alerts."
+    "settingsPageSubtitle": "Manage your primary delivery destinations, phone number, and SMS alerts.",
+    "backToDashboard": "Back to deliveries",
+    "defaultRecipientName": "Valued Customer"
   },
   "ApiErrors": {
     "fallback": "Something went wrong. Please try again.",

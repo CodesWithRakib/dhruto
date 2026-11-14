@@ -36,9 +36,11 @@ interface PublicTrackingViewProps {
    * default intro.
    */
   showIntro?: boolean;
+  className?: string;
 }
 
 const REAL_SAMPLE_CODES = [
+  { code: "DHR-20261114-NNN27T", status: "Hub Inbound", district: "Zindabazar, Sylhet" },
   { code: "DHR-2610-00101", status: "Delivered", district: "Dhanmondi, Dhaka" },
   { code: "DHR-2610-00107", status: "Out for Delivery", district: "Gulshan, Dhaka" },
   { code: "DHR-2610-00113", status: "In Transit", district: "Panchlaish, Chittagong" },
@@ -124,18 +126,20 @@ const MILESTONES = [
 /**
  * Public, unauthenticated shipment tracking cockpit.
  */
-export function PublicTrackingView({ initialCode = "", showIntro = true }: PublicTrackingViewProps) {
+export function PublicTrackingView({ initialCode = "", showIntro = true, className }: PublicTrackingViewProps) {
   const t = useTranslations("Tracking");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const { dateTime } = useFormatters();
 
-  const trackBase = pathname.includes("/merchant/track")
-    ? "/merchant/track"
-    : pathname.includes("/admin/track")
-      ? "/admin/track"
-      : "/track";
+  const trackBase = pathname.includes("/customer/track")
+    ? "/customer/track"
+    : pathname.includes("/merchant/track")
+      ? "/merchant/track"
+      : pathname.includes("/admin/track")
+        ? "/admin/track"
+        : "/track";
 
   const [inputCode, setInputCode] = useState(initialCode);
   const [activeCode, setActiveCode] = useState(initialCode.trim());
@@ -217,7 +221,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
   const statusTheme = tracking ? getStatusTheme(tracking.status) : "default";
 
   return (
-    <div className="dhruto-container max-w-4xl py-6 sm:py-10">
+    <div className={className ?? "dhruto-container max-w-4xl py-6 sm:py-10"}>
       {/* Search Header for Internal Dashboard Views or Standalone */}
       {showIntro ? (
         <div className="track-cockpit-card p-6 sm:p-9 mb-10 max-w-3xl mx-auto">
@@ -472,7 +476,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
           {/* Telemetry Details Bento Grid */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Destination */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+            <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
               <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary" />
                 <span>{t("destination")}</span>
@@ -486,7 +490,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
             </div>
 
             {/* Current Location Hub */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+            <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
               <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                 <Building2 className="h-4 w-4 text-primary" />
                 <span>{t("location")}</span>
@@ -500,7 +504,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
             </div>
 
             {/* Masked Contact */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+            <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
               <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                 <Phone className="h-4 w-4 text-primary" />
                 <span>{t("contact")}</span>
@@ -515,7 +519,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
             </div>
 
             {/* Last Updated */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-soft">
+            <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
               <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                 <Clock className="h-4 w-4 text-primary" />
                 <span>Telemetry Sync</span>
@@ -530,8 +534,8 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
           </div>
 
           {/* Timeline Section */}
-          <Card className="border-border/70 shadow-soft overflow-hidden">
-            <div className="border-b border-border/70 px-6 py-4 flex items-center justify-between">
+          <Card className="rounded-2xl border border-border/60 shadow-soft overflow-hidden bg-card">
+            <div className="border-b border-border/60 px-6 py-4.5 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-foreground">
                   {t("timeline")}
@@ -592,7 +596,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
               </Timeline>
             </CardContent>
 
-            <div className="border-t border-border/70 bg-muted/20 px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="border-t border-border/60 bg-surface-muted/30 px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
               <span>
                 {t("lastUpdated", {
                   date: dateTime(tracking.updatedAt),

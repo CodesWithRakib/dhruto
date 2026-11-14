@@ -71,6 +71,7 @@ function getProgressStep(status: ParcelStatus | string): { step: number; percent
 }
 
 const SAMPLE_TRACKING_CODES = [
+  "DHR-20261114-NNN27T",
   "DHR-2610-00107",
   "DHR-2610-00108",
   "DHR-2610-00113",
@@ -195,7 +196,7 @@ export function CustomerDashboardView() {
       ) : null}
 
       {/* Dynamic Welcome & Live Pulse Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-surface-elevated p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-surface to-surface-muted/30 p-6 sm:p-8 shadow-soft">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -203,12 +204,14 @@ export function CustomerDashboardView() {
                 <Sparkles className="h-3.5 w-3.5" />
                 {t("verifiedRecipientBadge")}
               </span>
-              <span className="text-xs text-muted-foreground font-mono">
-                {authUser?.phone || "+8801700000005"}
-              </span>
+              {authUser?.phone ? (
+                <span className="text-xs text-muted-foreground font-mono">
+                  {authUser.phone}
+                </span>
+              ) : null}
             </div>
             <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-              {t("greeting", { name: authUser?.name || "Mahmudur Rahman" })}
+              {t("greeting", { name: authUser?.name || t("defaultRecipientName") || "Customer" })}
             </h1>
             <p className="text-xs text-muted-foreground sm:text-sm">
               {t("portalSubtitle")}
@@ -221,13 +224,13 @@ export function CustomerDashboardView() {
               size="sm"
               onClick={() => refreshAllDeliveries()}
               disabled={isRefreshing}
-              className="h-10 text-xs font-semibold gap-1.5"
+              className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-background"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
               {isRefreshing ? "Syncing..." : "Sync Live Status"}
             </Button>
             <Link href={CUSTOMER_ROUTES.tracking}>
-              <Button variant="secondary" className="h-10 text-xs font-semibold gap-1.5">
+              <Button variant="secondary" className="h-10 text-xs font-semibold gap-1.5 rounded-xl shadow-xs">
                 <Search className="h-3.5 w-3.5" />
                 {t("trackAnyParcel")}
               </Button>
@@ -236,8 +239,8 @@ export function CustomerDashboardView() {
         </div>
 
         {/* Dynamic Real-Time Stats Grid */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
+        <div className="mt-6 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-primary/40 hover:bg-background hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statIncoming")}</span>
               <span className="relative flex h-2 w-2">
@@ -251,7 +254,7 @@ export function CustomerDashboardView() {
             </span>
           </div>
 
-          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
+          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-success/40 hover:bg-background hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statDelivered")}</span>
               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -260,7 +263,7 @@ export function CustomerDashboardView() {
             <span className="text-[11px] text-muted-foreground">Doorstep handoffs logged</span>
           </div>
 
-          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
+          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-warning/40 hover:bg-background hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statCodDue")}</span>
               <Clock className="h-4 w-4 text-warning" />
@@ -271,7 +274,7 @@ export function CustomerDashboardView() {
             <span className="text-[11px] text-muted-foreground">Cash ready for delivery rider</span>
           </div>
 
-          <div className="rounded-2xl bg-card p-4 transition-all hover:bg-surface-muted/60">
+          <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-2xs transition-all hover:border-primary/40 hover:bg-background hover:shadow-soft">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">{t("statAddress")}</span>
               <MapPin className="h-4 w-4 text-primary" />
@@ -283,7 +286,7 @@ export function CustomerDashboardView() {
       </div>
 
       {/* Dynamic Instant Track & Connect Shipment Bar */}
-      <div className="rounded-2xl bg-surface-elevated p-4 sm:p-5">
+      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs">
         <form onSubmit={handleAddTrackingCode} className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Package className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
@@ -291,14 +294,14 @@ export function CustomerDashboardView() {
               type="text"
               value={newCodeInput}
               onChange={(e) => setNewCodeInput(e.target.value)}
-              placeholder="Connect any tracking code (e.g. DHR-2610-00108)..."
-              className="pl-10 font-mono text-xs"
+              placeholder="Connect any tracking code (e.g. DHR-20261114-NNN27T)..."
+              className="pl-10 font-mono text-xs bg-background rounded-xl border-border/60"
             />
           </div>
           <Button
             type="submit"
             disabled={isAddingCode || !newCodeInput.trim()}
-            className="h-10 shrink-0 text-xs font-semibold gap-1.5"
+            className="h-10 shrink-0 text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
           >
             {isAddingCode ? (
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -309,7 +312,7 @@ export function CustomerDashboardView() {
           </Button>
         </form>
 
-        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="mt-3.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           <span className="text-[11px] font-semibold">Quick Sample Shipments:</span>
           {SAMPLE_TRACKING_CODES.map((code) => {
             const isTracked = deliveries.some((d) => d.trackingCode === code);
@@ -324,10 +327,10 @@ export function CustomerDashboardView() {
                     addDeliveryByTrackingCode(code);
                   }
                 }}
-                className={`rounded-lg px-2 py-0.5 font-mono text-[11px] transition-all ${
+                className={`rounded-lg px-2.5 py-1 font-mono text-xs transition-all border ${
                   isTracked
-                    ? "bg-primary-soft text-primary font-bold hover:bg-primary/20"
-                    : "bg-surface-muted text-muted-foreground hover:bg-surface-muted/80 border border-border/60"
+                    ? "bg-primary-soft text-primary font-bold border-primary/30 hover:bg-primary/20"
+                    : "bg-surface-muted/60 text-muted-foreground border-border/60 hover:border-border hover:bg-surface-muted hover:text-foreground"
                 }`}
               >
                 {code} {isTracked && activeTrackingCode === code ? "★" : ""}
@@ -339,8 +342,8 @@ export function CustomerDashboardView() {
 
       {/* Active Delivery Spotlight Card */}
       {activeShipment ? (
-        <div className="overflow-hidden rounded-3xl bg-surface-elevated">
-          <div className="bg-primary-soft/40 px-5 py-3.5 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+        <div className="overflow-hidden rounded-3xl border border-primary/25 bg-card shadow-soft ring-1 ring-primary/10">
+          <div className="border-b border-primary/20 bg-gradient-to-r from-primary-soft/60 via-primary-soft/30 to-card px-5 py-4 sm:px-7 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
@@ -357,10 +360,10 @@ export function CustomerDashboardView() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-0 bg-surface-muted text-primary font-bold">
+              <Badge variant="outline" className="border border-border/60 bg-background/80 text-foreground font-bold shadow-2xs">
                 {activeShipment.eta}
               </Badge>
-              <Badge variant="primary-soft" className="font-semibold border-0">
+              <Badge variant="primary-soft" className="font-semibold border border-primary/30 shadow-2xs">
                 {activeShipment.statusLabel}
               </Badge>
             </div>
@@ -388,7 +391,7 @@ export function CustomerDashboardView() {
 
                   {/* Rider Note if Rescheduled */}
                   {activeShipment.deliveryNote ? (
-                    <div className="mt-3 flex items-start gap-2 rounded-2xl bg-amber-500/10 p-3.5 text-xs text-amber-800 dark:text-amber-200">
+                    <div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs text-amber-800 dark:text-amber-200">
                       <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                       <div>
                         <span className="font-bold">Customer Instruction:</span> {activeShipment.deliveryNote}
@@ -435,8 +438,8 @@ export function CustomerDashboardView() {
                   {activeShipment.status !== ParcelStatus.DELIVERED ? (
                     <Button
                       onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
-                      variant="ghost"
-                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl bg-surface-muted/60 hover:bg-surface-muted"
+                      variant="outline"
+                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted shadow-2xs"
                     >
                       <Calendar className="h-3.5 w-3.5" />
                       {t("rescheduleOrInstructions")}
@@ -444,8 +447,8 @@ export function CustomerDashboardView() {
                   ) : (
                     <Button
                       onClick={() => handleOpenPod(activeShipment)}
-                      variant="ghost"
-                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl bg-surface-muted/60 hover:bg-surface-muted"
+                      variant="outline"
+                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted shadow-2xs"
                     >
                       <FileCheck className="h-3.5 w-3.5" />
                       View Proof of Delivery (POD)
@@ -453,7 +456,7 @@ export function CustomerDashboardView() {
                   )}
 
                   <Link href={`${CUSTOMER_ROUTES.tracking}/${activeShipment.trackingCode}`}>
-                    <Button variant="ghost" className="h-10 text-xs font-semibold gap-1.5 rounded-xl bg-primary-soft text-primary hover:bg-primary/20">
+                    <Button variant="default" className="h-10 text-xs font-semibold gap-1.5 rounded-xl shadow-xs">
                       <Truck className="h-3.5 w-3.5" />
                       {t("viewFullTimeline")}
                     </Button>
@@ -462,10 +465,10 @@ export function CustomerDashboardView() {
               </div>
 
               {/* Right Column: Secure OTP & Assigned Rider */}
-              <div className="flex flex-col gap-4 rounded-3xl bg-surface-muted/40 p-5 lg:col-span-5">
+              <div className="flex flex-col gap-3.5 rounded-2xl border border-border/50 bg-surface-muted/30 p-4.5 sm:p-5 lg:col-span-5">
                 {/* Secure OTP Card */}
                 {activeShipment.otp ? (
-                  <div className="space-y-2 rounded-2xl bg-surface-elevated p-4">
+                  <div className="space-y-2 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-4 shadow-2xs">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5 text-primary" />
@@ -505,9 +508,9 @@ export function CustomerDashboardView() {
 
                 {/* Assigned Rider Contact */}
                 {activeShipment.riderName ? (
-                  <div className="flex items-center justify-between rounded-2xl bg-surface-elevated p-3.5">
+                  <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background p-3.5 shadow-2xs">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold shadow-2xs">
                         <Bike className="h-5 w-5" />
                       </div>
                       <div>
@@ -539,7 +542,7 @@ export function CustomerDashboardView() {
                 ) : null}
 
                 {/* COD Cash Amount */}
-                <div className="flex items-center justify-between rounded-2xl bg-surface-elevated p-3 text-xs">
+                <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background p-3.5 text-xs shadow-2xs">
                   <span className="text-muted-foreground font-medium">{t("codPayment")}:</span>
                   <span className="font-bold text-foreground">
                     {activeShipment.codAmount > 0 && !activeShipment.isPaid ? (
@@ -560,7 +563,7 @@ export function CustomerDashboardView() {
       {/* Deliveries Feed & Search */}
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
             {[
               { id: "ALL", label: `${t("filterAll")} (${deliveries.length})` },
               { id: "ACTIVE", label: `${t("filterActive")} (${incomingCount})` },
@@ -570,10 +573,10 @@ export function CustomerDashboardView() {
                 key={f.id}
                 type="button"
                 onClick={() => setActiveFilter(f.id as typeof activeFilter)}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+                className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all border ${
                   activeFilter === f.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-surface-elevated text-muted-foreground hover:bg-surface-muted"
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-card text-muted-foreground border-border/60 hover:bg-surface-muted hover:text-foreground"
                 }`}
               >
                 {f.label}
@@ -588,7 +591,7 @@ export function CustomerDashboardView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by code, merchant, item..."
-              className="h-10 w-full rounded-2xl border-0 bg-surface-muted/60 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
+              className="h-10 w-full rounded-2xl border border-border/60 bg-card pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-2xs transition-all"
             />
           </div>
         </div>
@@ -596,7 +599,7 @@ export function CustomerDashboardView() {
         {/* Deliveries List */}
         <div className="space-y-3">
           {filteredDeliveries.length === 0 ? (
-            <div className="rounded-3xl bg-surface-elevated p-8 text-center text-xs text-muted-foreground">
+            <div className="rounded-2xl border border-border/60 bg-card p-8 text-center text-xs text-muted-foreground shadow-2xs">
               No deliveries match your current search or filter criteria.
             </div>
           ) : (
@@ -607,10 +610,10 @@ export function CustomerDashboardView() {
               return (
                 <div
                   key={delivery.id}
-                  className={`group relative flex flex-col justify-between gap-4 rounded-3xl bg-surface-elevated p-5 transition-all hover:bg-surface-muted/60 sm:flex-row sm:items-center ${
+                  className={`group relative flex flex-col justify-between gap-4 rounded-2xl border p-5 transition-all sm:flex-row sm:items-center ${
                     isSpotlighted
-                      ? "bg-primary/10"
-                      : ""
+                      ? "border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-card ring-1 ring-primary/20 shadow-soft"
+                      : "border-border/60 bg-card shadow-2xs hover:border-border hover:bg-surface-muted/30 hover:shadow-soft"
                   }`}
                 >
                   <div className="flex items-start gap-3.5">
@@ -618,10 +621,10 @@ export function CustomerDashboardView() {
                       type="button"
                       onClick={() => setActiveTrackingCode(delivery.trackingCode)}
                       title="Pin to spotlight"
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold transition-transform group-hover:scale-105 ${
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold transition-transform group-hover:scale-105 border ${
                         isDelivered
-                          ? "bg-success-soft text-success"
-                          : "bg-primary-soft text-primary"
+                          ? "bg-success-soft text-success border-success/20"
+                          : "bg-primary-soft text-primary border-primary/20"
                       }`}
                     >
                       {isDelivered ? <CheckCircle2 className="h-5 w-5" /> : <Package className="h-5 w-5" />}
@@ -694,20 +697,20 @@ export function CustomerDashboardView() {
 
                     {isDelivered ? (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleOpenPod(delivery)}
-                        className="h-9 gap-1.5 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
+                        className="h-9 gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted text-xs font-semibold shadow-2xs"
                       >
                         <FileCheck className="h-3.5 w-3.5" />
                         View POD
                       </Button>
                     ) : (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleOpenReschedule(delivery.trackingCode)}
-                        className="h-9 gap-1.5 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
+                        className="h-9 gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted text-xs font-semibold shadow-2xs"
                       >
                         <Calendar className="h-3.5 w-3.5" />
                         Reschedule
