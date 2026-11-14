@@ -37,7 +37,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, redisConfig, authConfig],
-      envFilePath: [".env.local", ".env"],
+      envFilePath: [".env.local", ".env", "apps/api/.env", "apps/api/.env.local"],
     }),
     DatabaseModule,
     QueuesModule,
