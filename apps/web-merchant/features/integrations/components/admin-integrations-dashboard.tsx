@@ -17,7 +17,6 @@ import {
 import {
   Button,
   Badge,
-  Card,
   DataTable,
   Dialog,
   DialogContent,
@@ -125,7 +124,7 @@ export function AdminIntegrationsDashboard() {
   const failureRows: IntegrationFailureItem[] = failureItems;
 
   return (
-    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative w-full space-y-6">
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -160,7 +159,7 @@ export function AdminIntegrationsDashboard() {
       {feedback && (
         <div
           role="alert"
-          className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground"
+          className="rounded-2xl bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground"
         >
           {feedback}
         </div>
@@ -170,53 +169,53 @@ export function AdminIntegrationsDashboard() {
       <SystemObservabilityCard />
 
       {overview.isLoading ? (
-        <Card className="flex items-center justify-center gap-2 p-10 text-sm text-muted-foreground">
+        <div className="flex items-center justify-center gap-2 p-10 text-sm text-muted-foreground rounded-3xl bg-surface-elevated">
           <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
           {t("loading")}
-        </Card>
+        </div>
       ) : overview.isError || !data ? (
-        <Card className="space-y-3 p-6 text-center">
+        <div className="space-y-3 p-6 text-center rounded-3xl bg-surface-elevated">
           <XCircle className="mx-auto h-8 w-8 text-danger" aria-hidden="true" />
           <p className="text-sm font-medium">{t("loadErrorTitle")}</p>
           <p className="text-xs text-muted-foreground">{t("loadErrorDescription")}</p>
           <Button variant="outline" size="sm" onClick={() => overview.refetch()}>
             {t("retry")}
           </Button>
-        </Card>
+        </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Inbox className="h-4 w-4" aria-hidden="true" />
+          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-3xl bg-surface-elevated p-5 space-y-1">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                <Inbox className="h-4 w-4 text-primary" aria-hidden="true" />
                 {t("deadLetter")}
               </div>
-              <p className="mt-1 text-2xl font-bold">{data.deadLetterCount}</p>
+              <p className="text-2xl font-black text-foreground tabular-nums">{data.deadLetterCount}</p>
               <p className="text-[11px] text-muted-foreground">{t("deadLetterHint")}</p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <div className="rounded-3xl bg-surface-elevated p-5 space-y-1">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" />
                 {t("webhookFailureRate")}
               </div>
-              <p className="mt-1 text-2xl font-bold">
+              <p className="text-2xl font-black text-foreground tabular-nums">
                 {(data.webhookFailureRate24h * 100).toFixed(1)}%
               </p>
               <p className="text-[11px] text-muted-foreground">{t("last24h")}</p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Activity className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <div className="rounded-3xl bg-surface-elevated p-5 space-y-1">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                <Activity className="h-4 w-4 text-info" aria-hidden="true" />
                 {t("outboxPending")}
               </div>
-              <p className="mt-1 text-2xl font-bold">{data.outbox.pending}</p>
+              <p className="text-2xl font-black text-foreground tabular-nums">{data.outbox.pending}</p>
               <p className="text-[11px] text-muted-foreground">
                 {t("outboxFailed", { count: data.outbox.failed })}
               </p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <div className="rounded-3xl bg-surface-elevated p-5 space-y-1">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
                 {t("providers")}
               </div>
               <div className="mt-2 flex gap-2">
@@ -228,24 +227,24 @@ export function AdminIntegrationsDashboard() {
                 </Badge>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">{t("providersHint")}</p>
-            </Card>
+            </div>
           </div>
 
-          <Card className="p-4">
-            <h3 className="mb-3 text-sm font-semibold">{t("queuesTitle")}</h3>
+          <div className="rounded-3xl bg-surface-elevated p-6">
+            <h3 className="mb-4 text-base font-bold text-foreground">{t("queuesTitle")}</h3>
             {data.queues.length === 0 ? (
               <p className="text-xs text-muted-foreground">{t("queuesEmpty")}</p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {data.queues.map((q) => (
-                  <div key={q.name} className="rounded-lg border border-border p-3">
+                  <div key={q.name} className="rounded-2xl bg-surface-muted/60 p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{q.name}</span>
+                      <span className="text-sm font-bold text-foreground">{q.name}</span>
                       <Badge variant={q.reachable ? "default" : "secondary"}>
                         {q.reachable ? t("reachable") : t("unreachable")}
                       </Badge>
                     </div>
-                    <dl className="mt-2 grid grid-cols-5 gap-1 text-center text-[11px]">
+                    <dl className="mt-3 grid grid-cols-5 gap-1 text-center text-[11px]">
                       {(
                         [
                           ["waiting", q.waiting],
@@ -257,7 +256,7 @@ export function AdminIntegrationsDashboard() {
                       ).map(([k, v]) => (
                         <div key={k}>
                           <dt className="text-muted-foreground">{t(`queue_${k}`)}</dt>
-                          <dd className="text-sm font-semibold">{v}</dd>
+                          <dd className="text-sm font-bold tabular-nums text-foreground">{v}</dd>
                         </div>
                       ))}
                     </dl>
@@ -265,16 +264,16 @@ export function AdminIntegrationsDashboard() {
                 ))}
               </div>
             )}
-          </Card>
+          </div>
         </>
       )}
 
-      <Card className="p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">
+      <div className="rounded-3xl bg-surface-elevated p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-base font-bold text-foreground">
             {t("dlqTitle")} ({failureTotal})
           </h3>
-          <span className="text-[11px] text-muted-foreground">{t("dlqHint")}</span>
+          <span className="text-xs text-muted-foreground">{t("dlqHint")}</span>
         </div>
         {failures.isLoading ? (
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
@@ -284,7 +283,7 @@ export function AdminIntegrationsDashboard() {
         ) : failureRows.length === 0 ? (
           <div className="py-10 text-center">
             <CheckCircle2 className="mx-auto h-8 w-8 text-success opacity-60" aria-hidden="true" />
-            <p className="mt-2 text-sm font-medium">{t("dlqEmpty")}</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">{t("dlqEmpty")}</p>
             <p className="text-xs text-muted-foreground">{t("dlqEmptyHint")}</p>
           </div>
         ) : (
@@ -385,11 +384,11 @@ export function AdminIntegrationsDashboard() {
             )}
           </>
         )}
-      </Card>
+      </div>
 
-      <Card className="p-4">
-        <h3 className="mb-1 text-sm font-semibold">{t("outboxTitle")}</h3>
-        <p className="mb-3 text-[11px] text-muted-foreground">{t("outboxHint")}</p>
+      <div className="rounded-3xl bg-surface-elevated p-6">
+        <h3 className="mb-1 text-base font-bold text-foreground">{t("outboxTitle")}</h3>
+        <p className="mb-3 text-xs text-muted-foreground">{t("outboxHint")}</p>
         {outbox.isLoading ? (
           <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
@@ -402,7 +401,7 @@ export function AdminIntegrationsDashboard() {
             {outboxData.failed.map((row) => (
               <div
                 key={row.id}
-                className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-2.5 text-xs"
+                className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-muted/60 p-3 text-xs"
               >
                 <Badge variant="secondary">{row.eventType}</Badge>
                 <span className="font-mono text-[11px] text-muted-foreground">{row.eventId}</span>
@@ -426,10 +425,10 @@ export function AdminIntegrationsDashboard() {
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
       <Dialog open={testSmsOpen} onOpenChange={setTestSmsOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-3xl bg-surface-elevated border-0 shadow-2xl p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone className="h-5 w-5 text-primary" aria-hidden="true" />

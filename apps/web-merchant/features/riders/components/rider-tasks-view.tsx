@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, Button, Input } from "@dhruto/ui";
+import { Button, Input } from "@dhruto/ui";
 import { Search, RefreshCw, Package, X, RotateCcw } from "lucide-react";
 import { useGetRiderTasksQuery, useStartDeliveryMutation } from "../api/riders.api";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -68,74 +68,72 @@ export function RiderTasksView() {
 
   return (
     <div className="space-y-4">
-      <Card className="rounded-2xl border-border/80 bg-card shadow-2xs">
-        <CardContent className="space-y-3.5 p-4 sm:p-5">
-          <div className="relative">
-            <Search
-              className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={t("tasks.searchPlaceholder")}
-              aria-label={t("tasks.searchPlaceholder")}
-              className="h-11 rounded-xl border-input/80 bg-surface pl-10 pr-10 text-sm shadow-2xs transition-all duration-200 placeholder:text-muted-foreground hover:border-foreground/30 focus-visible:ring-4 focus-visible:ring-primary/15"
-            />
-            {search ? (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            ) : null}
-          </div>
+      <div className="rounded-3xl bg-surface-elevated p-5 space-y-3.5">
+        <div className="relative">
+          <Search
+            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={t("tasks.searchPlaceholder")}
+            aria-label={t("tasks.searchPlaceholder")}
+            className="h-11 rounded-2xl border-0 bg-surface-muted/60 pl-10 pr-10 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary"
+          />
+          {search ? (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-              {filters.map((entry) => {
-                const isActive = filter === entry.key;
-                return (
-                  <button
-                    key={entry.key}
-                    type="button"
-                    onClick={() => setFilter(entry.key)}
-                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-xs font-semibold transition-all duration-200 ${
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            {filters.map((entry) => {
+              const isActive = filter === entry.key;
+              return (
+                <button
+                  key={entry.key}
+                  type="button"
+                  onClick={() => setFilter(entry.key)}
+                  className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-xs font-semibold transition-all duration-200 ${
+                    isActive
+                      ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                      : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                  }`}
+                >
+                  <span>{entry.label}</span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
                       isActive
-                        ? "bg-primary text-primary-foreground font-bold shadow-xs"
-                        : "border border-border/80 bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                        ? "bg-white/20 text-white"
+                        : "bg-surface-muted text-muted-foreground"
                     }`}
                   >
-                    <span>{entry.label}</span>
-                    <span
-                      className={`inline-flex items-center rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-surface text-muted-foreground border border-border/60"
-                      }`}
-                    >
-                      {entry.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => refetch()}
-              className="h-9 w-9 shrink-0 rounded-xl p-0 text-muted-foreground shadow-2xs hover:bg-surface-muted hover:text-foreground"
-              aria-label={t("refresh")}
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
-            </Button>
+                    {entry.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </CardContent>
-      </Card>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => refetch()}
+            className="h-9 w-9 shrink-0 rounded-xl bg-surface-muted/60 p-0 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+            aria-label={t("refresh")}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+          </Button>
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="py-16 text-center text-sm text-muted-foreground">

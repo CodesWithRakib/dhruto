@@ -14,7 +14,7 @@ import {
   Clock,
   Radio,
 } from "lucide-react";
-import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from "@dhruto/ui";
+import { Button, Badge } from "@dhruto/ui";
 import { useGetSystemMetricsQuery } from "@/features/observability/api/observability.api";
 import { cn } from "@/lib/cn";
 
@@ -40,7 +40,7 @@ export default function PublicStatusPage() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-10">
         {/* Hero Banner */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Radio className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
             <span>DHRUTO REAL-TIME INFRASTRUCTURE PROBE</span>
           </div>
@@ -53,14 +53,14 @@ export default function PublicStatusPage() {
         </div>
 
         {/* Big Overall Status Card */}
-        <Card
+        <div
           className={cn(
-            "p-6 sm:p-8 rounded-3xl border shadow-xl transition-all",
+            "p-6 sm:p-8 rounded-3xl transition-all",
             isHealthy
-              ? "border-emerald-500/30 bg-emerald-500/[0.04]"
+              ? "bg-emerald-500/10 text-emerald-950 dark:text-emerald-100"
               : isDegraded
-                ? "border-amber-500/30 bg-amber-500/[0.04]"
-                : "border-rose-500/30 bg-rose-500/[0.04]",
+                ? "bg-amber-500/10 text-amber-950 dark:text-amber-100"
+                : "bg-rose-500/10 text-rose-950 dark:text-rose-100",
           )}
         >
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -69,10 +69,10 @@ export default function PublicStatusPage() {
                 className={cn(
                   "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl",
                   isHealthy
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                     : isDegraded
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                      ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                      : "bg-rose-500/20 text-rose-600 dark:text-rose-400",
                 )}
               >
                 {isHealthy ? (
@@ -104,18 +104,18 @@ export default function PublicStatusPage() {
               size="sm"
               onClick={() => void refetch()}
               disabled={isLoading}
-              className="gap-2 h-10 px-4 rounded-xl text-xs font-semibold"
+              className="gap-2 h-10 px-4 rounded-xl text-xs font-semibold border-0 bg-background/80 hover:bg-background"
             >
               <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
               <span>{t("refreshLive")}</span>
             </Button>
           </div>
-        </Card>
+        </div>
 
         {/* Live Metrics Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Database */}
-          <Card className="p-5 space-y-2 rounded-2xl border-border/80">
+          <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 <Database className="h-4 w-4 text-primary" />
@@ -133,10 +133,10 @@ export default function PublicStatusPage() {
                 ? `Pool: ${metrics.database.clientPool.active} active / ${metrics.database.clientPool.total} conn`
                 : "PgPool streaming replica connection"}
             </p>
-          </Card>
+          </div>
 
           {/* Redis Cache */}
-          <Card className="p-5 space-y-2 rounded-2xl border-border/80">
+          <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 <Zap className="h-4 w-4 text-emerald-500" />
@@ -152,10 +152,10 @@ export default function PublicStatusPage() {
             <p className="text-xs text-muted-foreground">
               Driver: {metrics?.cache.driver ?? "redis"} • Outbox relay
             </p>
-          </Card>
+          </div>
 
           {/* Queue Latency */}
-          <Card className="p-5 space-y-2 rounded-2xl border-border/80">
+          <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 <Layers className="h-4 w-4 text-cyan-500" />
@@ -171,16 +171,16 @@ export default function PublicStatusPage() {
             <p className="text-xs text-muted-foreground">
               {metrics?.queue.active ?? 0} active • {metrics?.queue.completed ?? 0} completed
             </p>
-          </Card>
+          </div>
 
           {/* System Uptime */}
-          <Card className="p-5 space-y-2 rounded-2xl border-border/80">
+          <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 <Clock className="h-4 w-4 text-amber-500" />
                 {t("uptime")}
               </span>
-              <Badge variant="outline" className="border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-mono">
+              <Badge variant="outline" className="border-0 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-mono">
                 99.98% SLA
               </Badge>
             </div>
@@ -190,19 +190,19 @@ export default function PublicStatusPage() {
             <p className="text-xs text-muted-foreground">
               Heap: {metrics?.memory.heapUsedMb ?? 64} MB / {metrics?.memory.heapTotalMb ?? 128} MB
             </p>
-          </Card>
+          </div>
         </div>
 
         {/* Detailed Service Health Matrix */}
-        <Card className="rounded-3xl border-border/80 p-6 sm:p-8 space-y-6">
-          <CardHeader className="p-0">
-            <CardTitle className="text-xl">Component Health & SLA Commitments</CardTitle>
-            <CardDescription>
+        <div className="rounded-3xl bg-surface-elevated p-6 sm:p-8 space-y-6">
+          <div>
+            <h3 className="text-xl font-bold text-foreground">Component Health & SLA Commitments</h3>
+            <p className="text-xs text-muted-foreground mt-1">
               Continuous heartbeat monitoring across core courier operations, financial settlement gateways, and communications.
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </div>
 
-          <CardContent className="p-0 divide-y divide-border/60">
+          <div className="divide-y divide-border/20">
             {[
               {
                 name: "Merchant Portal & API Gateway",
@@ -252,11 +252,11 @@ export default function PublicStatusPage() {
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Trust & Guarantee Box */}
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2">
+        <div className="rounded-3xl bg-primary/5 p-6 text-center space-y-2">
           <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
             <ShieldCheck className="h-5 w-5" />
             <span>99.9% Uptime Commitment</span>

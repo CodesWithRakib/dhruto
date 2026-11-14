@@ -17,6 +17,7 @@ import { Button } from "@dhruto/ui";
 import { PageHeader } from "@/components/page-header";
 import { useQueryState } from "@/hooks/use-query-state";
 import { WalletTransactionType } from "@dhruto/contracts";
+import { MerchantIllustrationBg } from "@/components/visual/illustration-backgrounds";
 
 type MerchantTab = "statement" | "payouts" | "settlements";
 
@@ -81,7 +82,10 @@ export function FinanceDashboard() {
   ];
 
   return (
-    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative w-full space-y-6">
+      {/* Contextual Illustration Background */}
+      <MerchantIllustrationBg opacity={0.3} />
+
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -90,10 +94,10 @@ export function FinanceDashboard() {
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            className="h-10 gap-2 text-xs"
+            className="h-10 gap-2 text-xs font-bold"
           >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("refresh")}
+            <span>{t("refresh")}</span>
           </Button>
         }
       />
@@ -104,48 +108,51 @@ export function FinanceDashboard() {
         onRequestPayout={() => setIsPayoutModalOpen(true)}
       />
 
+      {/* Modern Pill Navigation */}
       <div
-        className="flex w-fit max-w-full snap-x items-center gap-1 overflow-x-auto rounded-xl border border-border/70 bg-surface-muted p-1"
+        className="flex w-fit max-w-full snap-x items-center gap-1.5 overflow-x-auto rounded-2xl bg-surface-elevated p-1.5"
         role="tablist"
         aria-label={t("title")}
       >
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            role="tab"
-            id={`finance-tab-${tab.key}`}
-            aria-selected={activeTab === tab.key}
-            aria-controls="finance-tabpanel"
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex shrink-0 snap-start items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all duration-fast ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 ${
-              activeTab === tab.key
-                ? "bg-primary text-primary-foreground shadow-soft"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <tab.icon className="h-4 w-4" aria-hidden="true" />
-            <span>{tab.label}</span>
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              role="tab"
+              id={`finance-tab-${tab.key}`}
+              aria-selected={isActive}
+              aria-controls="finance-tabpanel"
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex shrink-0 snap-start items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 ${
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+              }`}
+            >
+              <tab.icon className="h-4 w-4" aria-hidden="true" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div role="tabpanel" id="finance-tabpanel" aria-labelledby={`finance-tab-${activeTab}`}>
-      {activeTab === "statement" && (
-        <TransactionsTable
-          transactions={transactions}
-          isLoading={isTxLoading}
-          page={page}
-          onPageChange={setPage}
-          hasMore={transactions.length === PAGE_SIZE}
-          typeFilter={typeFilter}
-          onTypeFilterChange={handleTypeFilterChange}
-        />
-      )}
+        {activeTab === "statement" && (
+          <TransactionsTable
+            transactions={transactions}
+            isLoading={isTxLoading}
+            page={page}
+            onPageChange={setPage}
+            hasMore={transactions.length === PAGE_SIZE}
+            typeFilter={typeFilter}
+            onTypeFilterChange={handleTypeFilterChange}
+          />
+        )}
 
-      {activeTab === "payouts" && <PayoutsView onChanged={handleRefresh} />}
+        {activeTab === "payouts" && <PayoutsView onChanged={handleRefresh} />}
 
-      {activeTab === "settlements" && <SettlementsView />}
-
+        {activeTab === "settlements" && <SettlementsView />}
       </div>
 
       <PayoutRequestModal

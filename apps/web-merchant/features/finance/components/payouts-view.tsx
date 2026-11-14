@@ -2,7 +2,15 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, Button } from "@dhruto/ui";
+import {
+  Button,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@dhruto/ui";
 import { History, Smartphone, Building2, FileText } from "lucide-react";
 import { type PayoutRequestItem } from "@dhruto/contracts";
 import { useGetMyPayoutsQuery, useCancelPayoutMutation } from "../api/finance.api";
@@ -60,76 +68,102 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
   }
 
   return (
-    <div className="space-y-3">
-      {payouts.map((payout) => (
-        <Card key={payout.id}>
-          <CardContent className="space-y-2 p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                {payout.payoutMethod === "BANK_TRANSFER" ? (
-                  <Building2 className="h-4 w-4 text-primary" aria-hidden="true" />
-                ) : (
-                  <Smartphone className="h-4 w-4 text-primary" aria-hidden="true" />
-                )}
-                {tMethod(payout.payoutMethod)}
-              </span>
-              <span className="font-mono text-[11px] text-muted-foreground">
-                {payout.payoutCode}
-              </span>
-              <span className="ml-auto font-mono text-sm font-bold tabular-nums">
-                {bdt(Number(payout.amount))}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-mono">
-                {t("payout.destination")}: {payout.accountDetails.accountNumber}
-              </span>
-              <span>{fmtDate(payout.createdAt)}</span>
-              <span className="ml-auto">
-                <EnumBadge
-                  namespace="PayoutStatus"
-                  value={payout.status}
-                  tones={PAYOUT_STATUS_TONE}
-                />
-              </span>
-            </div>
-            {payout.transactionReference ? (
-              <p className="font-mono text-[11px] text-primary">
-                {t("reference")}: {payout.transactionReference}
-              </p>
-            ) : null}
-            {payout.rejectionReason ? (
-              <p className="text-[11px] text-danger">{payout.rejectionReason}</p>
-            ) : null}
-            {payout.failureReason ? (
-              <p className="text-[11px] text-danger">{payout.failureReason}</p>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {payout.status === "REQUESTED" ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs"
-                  onClick={() => setCancelling(payout)}
-                >
-                  {t("cancel")}
-                </Button>
-              ) : null}
-              {payout.status === "COMPLETED" || payout.status === "APPROVED" ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 gap-1.5 text-xs font-medium"
-                  onClick={() => setInvoicePayout(payout)}
-                >
-                  <FileText className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                  {t("invoice.viewReceipt")}
-                </Button>
-              ) : null}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-4">
+      {/* Responsive Table for desktop & tablet */}
+      <div className="overflow-hidden rounded-3xl bg-surface-elevated p-2">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-900 dark:bg-slate-950">
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableHead className="rounded-l-2xl font-semibold text-slate-100">{t("payout.payoutCode")}</TableHead>
+                <TableHead className="font-semibold text-slate-100">{t("date")}</TableHead>
+                <TableHead className="font-semibold text-slate-100">{t("payout.destination")}</TableHead>
+                <TableHead className="font-semibold text-slate-100">{t("reference")}</TableHead>
+                <TableHead className="text-right font-semibold text-slate-100">{t("statement.net")}</TableHead>
+                <TableHead className="text-center font-semibold text-slate-100">{t("status")}</TableHead>
+                <TableHead className="rounded-r-2xl text-right font-semibold text-slate-100">{t("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {payouts.map((payout) => (
+                <TableRow key={payout.id} className="border-0 hover:bg-surface-muted/40 transition-colors">
+                  <TableCell className="font-mono text-xs font-bold text-foreground">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1 rounded-lg bg-surface-muted">
+                        {payout.payoutMethod === "BANK_TRANSFER" ? (
+                          <Building2 className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                        ) : (
+                          <Smartphone className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span>{payout.payoutCode}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                    {fmtDate(payout.createdAt)}
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    <div className="space-y-0.5">
+                      <p className="font-medium text-foreground">{tMethod(payout.payoutMethod)}</p>
+                      <p className="font-mono text-[11px] text-muted-foreground">
+                        {payout.accountDetails.accountNumber}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs">
+                    {payout.transactionReference ? (
+                      <span className="font-semibold text-primary">{payout.transactionReference}</span>
+                    ) : (
+                      <span className="text-muted-foreground italic text-[11px]">—</span>
+                    )}
+                    {payout.rejectionReason && (
+                      <p className="text-[11px] text-danger">{payout.rejectionReason}</p>
+                    )}
+                    {payout.failureReason && (
+                      <p className="text-[11px] text-danger">{payout.failureReason}</p>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs font-bold tabular-nums text-foreground">
+                    {bdt(Number(payout.amount))}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <EnumBadge
+                      namespace="PayoutStatus"
+                      value={payout.status}
+                      tones={PAYOUT_STATUS_TONE}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {payout.status === "REQUESTED" ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 rounded-xl bg-danger-soft text-danger hover:bg-danger-soft/80 text-xs font-medium"
+                          onClick={() => setCancelling(payout)}
+                        >
+                          {t("cancel")}
+                        </Button>
+                      ) : null}
+                      {payout.status === "COMPLETED" || payout.status === "APPROVED" ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 gap-1.5 rounded-xl bg-surface-muted text-xs font-medium hover:bg-surface-muted/80"
+                          onClick={() => setInvoicePayout(payout)}
+                        >
+                          <FileText className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                          {t("invoice.viewReceipt")}
+                        </Button>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
       <ConfirmDialog
         open={cancelling !== null}

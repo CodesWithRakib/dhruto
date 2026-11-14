@@ -15,11 +15,6 @@ import {
 } from "lucide-react";
 import {
   Button,
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
   Form,
   FormControl,
   FormDescription,
@@ -36,6 +31,7 @@ import { useParcelPricing } from "../hooks/use-parcel-pricing";
 import { PricingSummary } from "./booking/pricing-summary";
 import { BookingSuccess } from "./booking/booking-success";
 import { SmartAddressFill } from "./booking/smart-address-fill";
+import { DistrictSelect, ThanaSelect } from "@/components/location/district-thana-picker";
 
 /** Section wrapper: one heading + one grouped set of fields. */
 function Section({
@@ -52,10 +48,12 @@ function Section({
   return (
     <fieldset className="space-y-4 border-0 p-0">
       <legend className="sr-only">{title}</legend>
-      <div className="flex items-start gap-2 border-b border-border/70 pb-3">
-        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+      <div className="flex items-start gap-2.5 pb-2">
+        <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
         <div>
-          <p className="text-body-sm font-semibold text-foreground">{title}</p>
+          <p className="text-body-sm font-bold text-foreground">{title}</p>
           <p className="text-caption text-muted-foreground">{description}</p>
         </div>
       </div>
@@ -103,13 +101,14 @@ export function BookingForm() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Card>
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-2">
-            <Package className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+      <div className="rounded-3xl bg-surface-elevated p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2">
+          <div className="flex items-start gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary shrink-0 mt-0.5">
+              <Package className="h-5 w-5" aria-hidden="true" />
+            </span>
             <div>
-              <CardTitle>{t("title")}</CardTitle>
-              {/* Outside the Form context: a plain paragraph, not <FormDescription>. */}
+              <h2 className="text-lg font-bold text-foreground">{t("title")}</h2>
               <p className="text-body-sm text-muted-foreground">{t("description")}</p>
             </div>
           </div>
@@ -119,12 +118,13 @@ export function BookingForm() {
             size="sm"
             aria-expanded={showSmartFill}
             onClick={() => setShowSmartFill((open) => !open)}
+            className="rounded-xl"
           >
             {showSmartFill ? t("smartFillHide") : t("smartFillToggle")}
           </Button>
-        </CardHeader>
+        </div>
 
-        <CardContent className="space-y-6">
+        <div className="space-y-6">
           {showSmartFill ? <SmartAddressFill onApply={handleApplyParsedAddress} /> : null}
 
           {displayedError ? (
@@ -158,6 +158,7 @@ export function BookingForm() {
                             autoComplete="name"
                             placeholder={t("recipientNamePlaceholder")}
                             disabled={isLoading}
+                            className="rounded-2xl border-0 bg-surface-muted/60"
                             {...field}
                           />
                         </FormControl>
@@ -179,6 +180,7 @@ export function BookingForm() {
                             autoComplete="tel"
                             placeholder={t("recipientPhonePlaceholder")}
                             disabled={isLoading}
+                            className="rounded-2xl border-0 bg-surface-muted/60"
                             {...field}
                           />
                         </FormControl>
@@ -203,10 +205,14 @@ export function BookingForm() {
                       <FormItem>
                         <FormLabel>{t("district")}</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder={t("districtPlaceholder")}
+                          <DistrictSelect
+                            value={field.value}
+                            onChange={(newDist) => {
+                              field.onChange(newDist);
+                            }}
                             disabled={isLoading}
-                            {...field}
+                            placeholder={t("districtPlaceholder")}
+                            error={!!form.formState.errors.district}
                           />
                         </FormControl>
                         <FormMessage />
@@ -221,10 +227,13 @@ export function BookingForm() {
                       <FormItem>
                         <FormLabel>{t("thana")}</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder={t("thanaPlaceholder")}
+                          <ThanaSelect
+                            districtName={district}
+                            value={field.value}
+                            onChange={field.onChange}
                             disabled={isLoading}
-                            {...field}
+                            placeholder={t("thanaPlaceholder")}
+                            error={!!form.formState.errors.thana}
                           />
                         </FormControl>
                         <FormMessage />
@@ -244,6 +253,7 @@ export function BookingForm() {
                           autoComplete="street-address"
                           placeholder={t("addressPlaceholder")}
                           disabled={isLoading}
+                          className="rounded-2xl border-0 bg-surface-muted/60"
                           {...field}
                         />
                       </FormControl>
@@ -337,27 +347,27 @@ export function BookingForm() {
               />
             </form>
           </Form>
-        </CardContent>
 
-        <CardFooter className="flex flex-col-reverse gap-2 border-t border-border sm:flex-row sm:justify-end">
-          <Button type="button" variant="outline" onClick={() => form.reset()} disabled={isLoading}>
-            {t("reset")}
-          </Button>
-          <Button type="submit" form="parcel-booking-form" disabled={isLoading} className="gap-2">
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                {t("confirming")}
-              </>
-            ) : (
-              <>
-                {t("confirm")}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </>
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
+          <div className="flex flex-col-reverse gap-3 rounded-2xl bg-surface-muted/30 p-4 sm:flex-row sm:items-center sm:justify-end">
+            <Button type="button" variant="outline" onClick={() => form.reset()} disabled={isLoading} className="rounded-xl">
+              {t("reset")}
+            </Button>
+            <Button type="submit" form="parcel-booking-form" disabled={isLoading} className="gap-2 rounded-xl">
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  {t("confirming")}
+                </>
+              ) : (
+                <>
+                  {t("confirm")}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <p className="mt-3 flex items-center justify-center gap-1.5 text-caption text-muted-foreground">
         <Phone className="h-3 w-3" aria-hidden="true" />

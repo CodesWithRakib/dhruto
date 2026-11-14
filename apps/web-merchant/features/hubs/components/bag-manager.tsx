@@ -3,8 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardContent,
   Button,
   Dialog,
   DialogContent,
@@ -219,17 +217,17 @@ export function BagManager({ currentHubId }: BagManagerProps) {
         <div className="flex items-center justify-end gap-1.5">
           {row.original.status === BagStatus.OPEN ? (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => openSealConfirm(row.original.id)}
-              className="h-8 gap-1 rounded-lg border-border/80 text-xs font-medium"
+              className="h-8 gap-1 rounded-xl bg-surface-muted/60 text-xs font-medium hover:bg-surface-muted"
             >
               <Lock className="h-3 w-3" aria-hidden="true" />
               {t("bags.seal")}
             </Button>
           ) : null}
           <Link href={HUB_ROUTES.bag(row.original.id)}>
-            <Button size="sm" variant="outline" className="h-8 rounded-lg border-border/80 text-xs font-medium">
+            <Button size="sm" variant="ghost" className="h-8 rounded-xl bg-surface-muted/60 text-xs font-medium hover:bg-surface-muted">
               {t("bags.details")}
             </Button>
           </Link>
@@ -241,7 +239,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
   return (
     <div className="space-y-6">
       {isCreating ? (
-        <Card className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6 shadow-2xs">
+        <div className="rounded-3xl bg-primary/5 p-5 sm:p-6">
           <form onSubmit={handleCreateBag} className="space-y-4">
             <h3 className="text-sm font-bold text-foreground">{t("bags.create")}</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -257,10 +255,10 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                   onValueChange={setDestHubId}
                   required
                 >
-                  <SelectTrigger id="bag-destination" className="w-full rounded-xl bg-card">
+                  <SelectTrigger id="bag-destination" className="w-full rounded-2xl border-0 bg-surface-muted/60 focus:bg-background">
                     <SelectValue placeholder={t("bags.destination")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-2xl border-0 bg-surface-elevated shadow-xl">
                     {destinations.map((hub) => (
                       <SelectItem key={hub.id} value={hub.id}>
                         {hub.name} ({hub.code})
@@ -280,12 +278,12 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder={t("bags.notesPlaceholder")}
                   maxLength={500}
-                  className="w-full rounded-xl border border-input bg-card p-2.5 text-xs outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-2xl border-0 bg-surface-muted/60 p-3 text-xs outline-none focus:bg-background"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-border/60 pt-4">
+            <div className="flex items-center justify-end gap-3 pt-4">
               <Button
                 type="button"
                 variant="ghost"
@@ -295,20 +293,20 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" size="sm" disabled={isCreatingBag} className="gap-1.5 rounded-xl text-xs font-semibold shadow-xs">
+              <Button type="submit" size="sm" disabled={isCreatingBag} className="gap-1.5 rounded-xl text-xs font-semibold">
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 {isCreatingBag ? t("bags.creating") : t("bags.confirmCreate")}
               </Button>
             </div>
           </form>
-        </Card>
+        </div>
       ) : null}
 
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/15 p-4 sm:p-5">
+      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
+        <div className="flex flex-col gap-3 p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2 text-primary">
+              <div className="rounded-2xl bg-primary/10 p-2.5 text-primary">
                 <Package className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
@@ -323,7 +321,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
             <Button
               size="sm"
               onClick={() => setIsCreating((value) => !value)}
-              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shadow-xs shrink-0"
+              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shrink-0"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               {isCreating ? t("cancel") : t("bags.create")}
@@ -348,10 +346,10 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                   setStatusFilter(item.key);
                   setPage(1);
                 }}
-                className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   statusFilter === item.key
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                 }`}
               >
                 {item.label}
@@ -360,7 +358,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
           </div>
         </div>
 
-        <CardContent className="p-0">
+        <div>
           {isLoading ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
@@ -399,9 +397,9 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                 />
               </div>
               {/* Mobile cards */}
-              <ul className="divide-y divide-border/60 md:hidden">
+              <ul className="divide-y divide-border/20 md:hidden">
                 {pagedBags.map((bag) => (
-                  <li key={bag.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
+                  <li key={bag.id} className="space-y-2 p-4 transition-colors hover:bg-surface-muted/30">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={HUB_ROUTES.bag(bag.id)}
@@ -421,10 +419,10 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                     </p>
                     {bag.status === BagStatus.OPEN ? (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => openSealConfirm(bag.id)}
-                        className="h-9 w-full rounded-xl"
+                        className="h-9 w-full rounded-xl bg-surface-muted/60"
                       >
                         <Lock className="h-3.5 w-3.5" aria-hidden="true" />
                         {t("bags.seal")}
@@ -435,15 +433,15 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               </ul>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Seal confirmation — sealing freezes membership irreversibly */}
       <Dialog open={confirmSealOpen} onOpenChange={setConfirmSealOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
+        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle>{t("bags.sealConfirmTitle")}</DialogTitle>
-            <DialogDescription className="text-xs">{t("bags.sealConfirmMessage")}</DialogDescription>
+            <DialogDescription className="text-xs text-muted-foreground">{t("bags.sealConfirmMessage")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5 py-2">
             <label htmlFor="seal-tag" className="text-xs font-semibold text-muted-foreground">
@@ -456,14 +454,14 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               onChange={(event) => setSealTagInput(event.target.value)}
               placeholder={t("bags.sealTagPlaceholder")}
               maxLength={100}
-              className="w-full rounded-xl border border-input bg-card p-3 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-2xl border-0 bg-surface-muted/60 p-3.5 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder:text-muted-foreground outline-none focus:bg-background"
             />
           </div>
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={() => setConfirmSealOpen(false)} className="rounded-xl">
+            <Button type="button" variant="ghost" onClick={() => setConfirmSealOpen(false)} className="rounded-xl">
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleSeal} disabled={isSealing} className="rounded-xl shadow-xs">
+            <Button type="button" onClick={handleSeal} disabled={isSealing} className="rounded-xl">
               {isSealing ? t("bags.sealing") : t("confirm")}
             </Button>
           </DialogFooter>

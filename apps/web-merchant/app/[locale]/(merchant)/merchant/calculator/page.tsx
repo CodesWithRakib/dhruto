@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function MerchantCalculatorPage() {
   return (
-    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative w-full space-y-6">
       <PricingCalculatorCockpit
         compact
         ctaHref={MERCHANT_ROUTES.createBooking}

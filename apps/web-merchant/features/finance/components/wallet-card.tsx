@@ -23,35 +23,35 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <div className="flex flex-col justify-between rounded-2xl border border-success bg-success-soft p-6">
+      <div className="flex flex-col justify-between rounded-3xl bg-success-soft/50 p-6 sm:p-7">
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 rounded-full border border-success bg-surface px-3 py-1 text-xs font-semibold text-success">
+            <div className="flex items-center gap-2 rounded-full bg-surface px-3 py-1 text-xs font-bold text-success shadow-2xs">
               <Zap className="h-3.5 w-3.5 text-success" aria-hidden="true" />
               <span>{t("availableBalance")}</span>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-success bg-surface">
-              <Wallet className="h-5 w-5 text-success" aria-hidden="true" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-surface text-success shadow-2xs">
+              <Wallet className="h-5 w-5" aria-hidden="true" />
             </div>
           </div>
 
-          <p className="text-sm font-medium text-success">{t("availableBalance")}</p>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
+          <p className="text-xs font-bold uppercase tracking-wider text-success/90">{t("availableBalance")}</p>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-4xl font-black tabular-nums tracking-tight text-foreground sm:text-5xl">
               {bdt(isLoading ? "…" : balance)}
             </span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-success">
+            <span className="text-xs font-bold uppercase tracking-wider text-success">
               {currency}
             </span>
           </div>
 
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-success">
-            <ShieldCheck className="h-3.5 w-3.5 text-success" aria-hidden="true" />
-            {t("subtitle")}
+          <p className="mt-2.5 flex items-center gap-1.5 text-xs font-medium text-success">
+            <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>{t("subtitle")}</span>
           </p>
         </div>
 
-        <div className="mt-6 border-t border-success pt-5">
+        <div className="mt-6 border-t border-success/20 pt-5">
           <Button
             id="open-payout-modal-btn"
             onClick={onRequestPayout}
@@ -59,50 +59,49 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
             className="flex w-full items-center justify-center gap-2 py-3 font-bold"
           >
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-            {t("requestPayout")}
+            <span>{t("requestPayout")}</span>
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-2">
-        <div className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-6">
+        <div className="flex flex-col justify-between rounded-3xl bg-surface-elevated p-6 sm:p-7">
           <div className="flex items-center justify-between">
-            <span className="rounded-full border border-warning bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning">
+            <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-bold text-warning-soft-foreground">
               {t("pendingSettlement")}
             </span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-warning bg-warning-soft">
-              <Clock className="h-5 w-5 text-warning" aria-hidden="true" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-warning-soft text-warning">
+              <Clock className="h-5 w-5" aria-hidden="true" />
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-sm font-medium text-muted-foreground">{t("pendingSettlement")}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("pendingSettlement")}</p>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tabular-nums text-foreground sm:text-4xl">
+              <span className="text-3xl font-black tabular-nums text-foreground sm:text-4xl">
                 {bdt(isLoading ? "…" : pending)}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-6">
+        <div className="flex flex-col justify-between rounded-3xl bg-surface-elevated p-6 sm:p-7">
           <div className="flex items-center justify-between">
-            <span className="rounded-full border border-primary bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary-soft-foreground">
               {t("lifetimeWithdrawn")}
             </span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary bg-primary-soft">
-              <ArrowUpRight className="h-5 w-5 text-primary" aria-hidden="true" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+              <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-sm font-medium text-muted-foreground">{t("lifetimeWithdrawn")}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("lifetimeWithdrawn")}</p>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-3xl font-bold tabular-nums text-foreground sm:text-4xl">
+              <span className="text-3xl font-black tabular-nums text-foreground sm:text-4xl">
                 {bdt(isLoading ? "…" : withdrawn)}
               </span>
             </div>
-            <p className="mt-2 text-xs font-medium text-muted-foreground">{t("payout.minimum")}</p>
           </div>
         </div>
       </div>

@@ -3,8 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardContent,
   Button,
   Dialog,
   DialogContent,
@@ -69,8 +67,8 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/15 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
+        <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="h-5 w-5 text-warning" aria-hidden="true" />
             <h2 className="text-sm font-bold text-foreground">
@@ -83,32 +81,32 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
           <div className="flex items-center gap-1.5">
             <Button
               size="sm"
-              variant={statusFilter === ExceptionStatus.OPEN ? "default" : "outline"}
+              variant={statusFilter === ExceptionStatus.OPEN ? "default" : "ghost"}
               onClick={() => setStatusFilter(ExceptionStatus.OPEN)}
-              className="h-8 rounded-lg text-xs"
+              className="h-8 rounded-full text-xs"
             >
               {ExceptionStatus.OPEN}
             </Button>
             <Button
               size="sm"
-              variant={statusFilter === ExceptionStatus.RESOLVED ? "default" : "outline"}
+              variant={statusFilter === ExceptionStatus.RESOLVED ? "default" : "ghost"}
               onClick={() => setStatusFilter(ExceptionStatus.RESOLVED)}
-              className="h-8 rounded-lg text-xs"
+              className="h-8 rounded-full text-xs"
             >
               {ExceptionStatus.RESOLVED}
             </Button>
             <Button
               size="sm"
-              variant={statusFilter === "ALL" ? "default" : "outline"}
+              variant={statusFilter === "ALL" ? "default" : "ghost"}
               onClick={() => setStatusFilter("ALL")}
-              className="h-8 rounded-lg text-xs"
+              className="h-8 rounded-full text-xs"
             >
               ALL ({exceptions.length})
             </Button>
           </div>
         </div>
 
-        <CardContent className="p-0">
+        <div>
           {isLoading ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
@@ -122,9 +120,9 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
               />
             </div>
           ) : (
-            <ul className="divide-y divide-border/60">
+            <ul className="divide-y divide-border/20">
               {exceptions.map((exception) => (
-                <li key={exception.id} className="space-y-2.5 p-5 transition-colors hover:bg-muted/30">
+                <li key={exception.id} className="space-y-2.5 p-5 transition-colors hover:bg-surface-muted/30">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs font-bold text-foreground">
                       {exception.type}
@@ -157,8 +155,8 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
                     {exception.status === ExceptionStatus.OPEN ? (
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="ml-auto h-8 rounded-lg border-border/80 text-xs font-medium"
+                        variant="ghost"
+                        className="ml-auto h-8 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
                         onClick={() => {
                           setResolvingId(exception.id);
                           setResolutionNote("");
@@ -169,7 +167,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
                     ) : null}
                   </div>
                   {exception.resolutionNote ? (
-                    <p className="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-[11px] text-muted-foreground">
+                    <p className="rounded-2xl bg-surface-muted/40 p-3 text-[11px] text-muted-foreground">
                       {exception.resolutionNote}
                     </p>
                   ) : null}
@@ -177,16 +175,16 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
               ))}
             </ul>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog open={resolvingId !== null} onOpenChange={(open) => !open && setResolvingId(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle>{t("exceptions.resolve")}</DialogTitle>
-            <DialogDescription>{t("exceptions.resolutionNote")}</DialogDescription>
+            <DialogDescription className="text-xs text-muted-foreground">{t("exceptions.resolutionNote")}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 py-2">
             <label
               htmlFor="resolution-note"
               className="text-xs font-semibold text-muted-foreground"
@@ -200,14 +198,14 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
               placeholder={t("exceptions.resolutionNotePlaceholder")}
               maxLength={500}
               rows={3}
-              className="w-full rounded-lg border border-input bg-background p-2.5 text-sm outline-none"
+              className="w-full rounded-2xl border-0 bg-surface-muted/60 p-3.5 text-sm outline-none focus:bg-background"
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setResolvingId(null)}>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => setResolvingId(null)} className="rounded-xl">
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleResolve} disabled={isResolving}>
+            <Button type="button" onClick={handleResolve} disabled={isResolving} className="rounded-xl">
               {isResolving ? t("exceptions.resolving") : t("confirm")}
             </Button>
           </DialogFooter>

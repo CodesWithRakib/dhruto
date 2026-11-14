@@ -118,9 +118,9 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4 backdrop-blur-sm">
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-6 sm:p-8">
-        <div className="flex items-center justify-between border-b border-border pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-surface-elevated p-6 sm:p-8 shadow-2xl">
+        <div className="flex items-center justify-between pb-4">
           <div>
             <h3 className="text-xl font-bold tracking-tight text-foreground">
               {t("payoutModalTitle")}
@@ -132,7 +132,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
           </div>
           <button
             onClick={onClose}
-            className="rounded-xl p-2 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+            className="rounded-xl p-2 text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
             aria-label={t("close")}
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -142,7 +142,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
         {errorMsg && (
           <div
             role="alert"
-            className="mt-4 flex items-center gap-2 rounded-2xl border border-danger bg-danger-soft p-3.5 text-xs text-danger"
+            className="mt-4 flex items-center gap-2 rounded-2xl bg-danger-soft p-3.5 text-xs text-danger"
           >
             <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>{errorMsg}</span>
@@ -152,7 +152,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
         {successMsg && (
           <div
             role="status"
-            className="mt-4 flex items-center gap-2 rounded-2xl border border-success bg-success-soft p-3.5 text-xs text-success"
+            className="mt-4 flex items-center gap-2 rounded-2xl bg-success-soft p-3.5 text-xs text-success"
           >
             <CheckCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="font-mono">{successMsg}</span>
@@ -166,26 +166,29 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 {t("selectMethod")}
               </Label>
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {METHODS.map(({ method: value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setMethod(value)}
-                    aria-pressed={method === value}
-                    className={`flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center transition-all ${
-                      method === value
-                        ? "border-primary bg-primary-soft font-bold text-primary"
-                        : "border-border bg-surface-muted text-muted-foreground hover:border-border"
-                    }`}
-                  >
-                    {value === PayoutMethod.BANK_TRANSFER ? (
-                      <Building2 className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <Smartphone className="h-4 w-4" aria-hidden="true" />
-                    )}
-                    <span className="text-xs">{label}</span>
-                  </button>
-                ))}
+                {METHODS.map(({ method: value, label }) => {
+                  const isSelected = method === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setMethod(value)}
+                      aria-pressed={isSelected}
+                      className={`flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition-all ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                          : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                      }`}
+                    >
+                      {value === PayoutMethod.BANK_TRANSFER ? (
+                        <Building2 className="h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <Smartphone className="h-4 w-4" aria-hidden="true" />
+                      )}
+                      <span className="text-xs">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -203,27 +206,30 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 placeholder="017XXXXXXXX"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-                className="mt-1.5"
+                className="mt-1.5 border-0 bg-surface-muted/60 focus-visible:ring-1"
               />
             </div>
 
             {method !== PayoutMethod.BANK_TRANSFER && (
               <div className="flex items-center gap-2">
-                {(["PERSONAL", "MERCHANT"] as const).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setAccountType(value)}
-                    aria-pressed={accountType === value}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-                      accountType === value
-                        ? "border border-success bg-success-soft text-success"
-                        : "border border-border bg-surface-muted text-muted-foreground"
-                    }`}
-                  >
-                    {value === "PERSONAL" ? "Personal" : "Merchant"}
-                  </button>
-                ))}
+                {(["PERSONAL", "MERCHANT"] as const).map((value) => {
+                  const isCurrent = accountType === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAccountType(value)}
+                      aria-pressed={isCurrent}
+                      className={`rounded-xl px-3 py-1 text-xs font-semibold transition-colors ${
+                        isCurrent
+                          ? "bg-success-soft text-success"
+                          : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted"
+                      }`}
+                    >
+                      {value === "PERSONAL" ? "Personal" : "Merchant"}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
@@ -238,7 +244,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                     type="text"
                     value={accountHolderName}
                     onChange={(e) => setAccountHolderName(e.target.value)}
-                    className="mt-1 text-xs"
+                    className="mt-1 text-xs border-0 bg-surface-muted/60"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -251,7 +257,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                       type="text"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      className="mt-1 text-xs"
+                      className="mt-1 text-xs border-0 bg-surface-muted/60"
                     />
                   </div>
                   <div>
@@ -263,7 +269,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                       type="text"
                       value={branchName}
                       onChange={(e) => setBranchName(e.target.value)}
-                      className="mt-1 text-xs"
+                      className="mt-1 text-xs border-0 bg-surface-muted/60"
                     />
                   </div>
                 </div>
@@ -302,7 +308,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="pl-9 text-lg font-bold"
+                  className="border-0 bg-surface-muted/60 pl-9 text-lg font-bold"
                 />
               </div>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
@@ -312,7 +318,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                     type="button"
                     onClick={() => handleQuickAmount(val)}
                     disabled={val > availableBalance}
-                    className="rounded-xl border border-border bg-surface-muted px-2.5 py-1 text-xs font-medium text-foreground transition-colors disabled:opacity-40"
+                    className="rounded-xl bg-surface-muted/60 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface-muted disabled:opacity-40"
                   >
                     +{bdt(val)}
                   </button>
@@ -321,7 +327,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   type="button"
                   onClick={() => handleQuickAmount(availableBalance)}
                   disabled={availableBalance < 100}
-                  className="rounded-xl border border-success bg-success-soft px-2.5 py-1 text-xs font-semibold text-success transition-colors"
+                  className="rounded-xl bg-success-soft px-3 py-1.5 text-xs font-semibold text-success transition-colors hover:bg-success-soft/80"
                 >
                   Max ({bdt(availableBalance)})
                 </button>
@@ -329,13 +335,13 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
             </div>
 
             <div className="flex items-center gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={onClose} className="w-1/3">
+              <Button type="button" variant="ghost" onClick={onClose} className="w-1/3 rounded-xl bg-surface-muted/60 hover:bg-surface-muted">
                 {t("cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={isOverBalance || numAmount < 100}
-                className="w-2/3 gap-2 font-bold"
+                className="w-2/3 gap-2 rounded-xl font-bold"
               >
                 <span>{t("payout.reviewTitle")}</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -346,7 +352,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
           <div className="mt-5 space-y-4">
             <h4 className="text-sm font-bold text-foreground">{t("payout.reviewTitle")}</h4>
             <p className="text-xs text-muted-foreground">{t("payout.reviewMessage")}</p>
-            <dl className="space-y-2 rounded-xl bg-surface-muted p-4 text-sm">
+            <dl className="space-y-2 rounded-2xl bg-surface-muted/70 p-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">{t("payout.requestedAmount")}</dt>
                 <dd className="font-mono font-bold tabular-nums">{bdt(numAmount)}</dd>
@@ -359,7 +365,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 <dt className="text-muted-foreground">{t("payout.destination")}</dt>
                 <dd className="font-mono">{accountNumber.trim()}</dd>
               </div>
-              <div className="flex justify-between border-t border-border pt-2">
+              <div className="flex justify-between pt-2">
                 <dt className="text-muted-foreground">{t("payout.netPayout")}</dt>
                 <dd className="font-mono font-bold tabular-nums text-success">{bdt(numAmount)}</dd>
               </div>
@@ -367,9 +373,9 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
             <div className="flex items-center gap-3">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={() => setReviewing(false)}
-                className="w-1/3"
+                className="w-1/3 rounded-xl bg-surface-muted/60 hover:bg-surface-muted"
               >
                 {t("cancel")}
               </Button>
@@ -377,7 +383,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 type="button"
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="w-2/3 gap-2 font-bold"
+                className="w-2/3 gap-2 rounded-xl font-bold"
               >
                 {isLoading ? (
                   <>

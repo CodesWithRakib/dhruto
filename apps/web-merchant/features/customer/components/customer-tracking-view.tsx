@@ -18,7 +18,7 @@ export function CustomerTrackingView({ initialCode }: CustomerTrackingViewProps)
         title={t("trackingPageTitle")}
         description={t("trackingPageSubtitle")}
       />
-      <div className="rounded-3xl border border-border/80 bg-surface p-4 sm:p-6 shadow-soft">
+      <div className="rounded-3xl bg-surface-elevated p-4 sm:p-6">
         <PublicTrackingView initialCode={initialCode} showIntro={false} />
       </div>
     </div>

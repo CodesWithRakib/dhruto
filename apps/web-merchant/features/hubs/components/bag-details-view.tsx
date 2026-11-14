@@ -3,8 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardContent,
   Button,
   Input,
   Dialog,
@@ -145,7 +143,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       {bag.status === BagStatus.SEALED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success"
+          className="flex items-center gap-2 rounded-2xl bg-success-soft px-4 py-3 text-xs font-semibold text-success"
         >
           <Lock className="h-4 w-4" aria-hidden="true" />
           {t("bags.sealedBanner")}
@@ -154,7 +152,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       {bag.status === BagStatus.IN_TRANSIT ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-xl border border-info bg-info-soft px-4 py-3 text-xs font-semibold text-info"
+          className="flex items-center gap-2 rounded-2xl bg-info-soft px-4 py-3 text-xs font-semibold text-info"
         >
           <Truck className="h-4 w-4" aria-hidden="true" />
           {t("bags.inTransitBanner")}
@@ -163,7 +161,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       {bag.status === BagStatus.RECEIVED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-xl border border-success bg-success-soft px-4 py-3 text-xs font-semibold text-success"
+          className="flex items-center gap-2 rounded-2xl bg-success-soft px-4 py-3 text-xs font-semibold text-success"
         >
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {t("bags.receivedBanner")}
@@ -171,19 +169,19 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       ) : null}
 
       {/* Summary */}
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/70 bg-muted/15 px-5 py-3.5">
+      <div className="rounded-3xl bg-surface-elevated overflow-hidden p-5 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Package className="h-4 w-4 text-primary" aria-hidden="true" />
             <span className="text-sm font-bold text-foreground">{t("bags.details")}</span>
             <span className="text-muted-foreground/40 font-light">·</span>
-            <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground">
+            <span className="rounded-lg bg-surface-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground">
               {bag.bagCode}
             </span>
           </div>
           <EnumBadge namespace="BagStatus" value={bag.status} tones={BAG_STATUS_TONE} className="text-[10px]" />
         </div>
-        <CardContent className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 pt-2">
           <div>
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
               Bag Code
@@ -248,63 +246,61 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
               <p className="text-sm text-muted-foreground">—</p>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Parcel intake while OPEN */}
       {isOpen ? (
-        <Card className="rounded-2xl border border-primary/20 bg-primary/5 shadow-xs overflow-hidden">
-          <CardContent className="space-y-4 p-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-foreground">{t("bags.addParcel")}</h3>
-                <p className="text-xs text-muted-foreground">{t("bags.addParcelPlaceholder")}</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setConfirmSealOpen(true)}
-                className="gap-1.5 rounded-xl border-border/80 text-xs font-semibold"
-              >
-                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("bags.seal")}
-              </Button>
+        <div className="rounded-3xl bg-primary/5 p-5 sm:p-6 space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">{t("bags.addParcel")}</h3>
+              <p className="text-xs text-muted-foreground">{t("bags.addParcelPlaceholder")}</p>
             </div>
-            <form onSubmit={handleAddParcel} className="flex gap-2.5">
-              <div className="relative flex-1">
-                <Scan
-                  className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  autoComplete="off"
-                  autoCapitalize="characters"
-                  value={trackingInput}
-                  onChange={(event) => setTrackingInput(event.target.value)}
-                  placeholder={t("bags.addParcelPlaceholder")}
-                  aria-label={t("bags.addParcel")}
-                  disabled={isAdding}
-                  className="h-12 rounded-xl pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground"
-                  autoFocus
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={isAdding || !trackingInput.trim()}
-                className="h-12 rounded-xl px-7 font-semibold shadow-xs"
-              >
-                {isAdding ? t("bags.adding") : t("bags.addParcel")}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setConfirmSealOpen(true)}
+              className="gap-1.5 rounded-xl bg-surface-elevated text-xs font-semibold hover:bg-surface-muted"
+            >
+              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("bags.seal")}
+            </Button>
+          </div>
+          <form onSubmit={handleAddParcel} className="flex gap-2.5">
+            <div className="relative flex-1">
+              <Scan
+                className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                ref={inputRef}
+                type="text"
+                autoComplete="off"
+                autoCapitalize="characters"
+                value={trackingInput}
+                onChange={(event) => setTrackingInput(event.target.value)}
+                placeholder={t("bags.addParcelPlaceholder")}
+                aria-label={t("bags.addParcel")}
+                disabled={isAdding}
+                className="h-12 rounded-2xl border-0 bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
+                autoFocus
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={isAdding || !trackingInput.trim()}
+              className="h-12 rounded-2xl px-7 font-semibold"
+            >
+              {isAdding ? t("bags.adding") : t("bags.addParcel")}
+            </Button>
+          </form>
+        </div>
       ) : null}
 
       {/* Membership */}
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/70 bg-muted/15 px-5 py-4">
+      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
+        <div className="flex items-center justify-between p-5 sm:p-6">
           <div className="flex items-center gap-2.5">
             <Package className="h-4 w-4 text-primary" aria-hidden="true" />
             <h2 className="text-sm font-bold text-foreground">
@@ -315,7 +311,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
             </span>
           </div>
         </div>
-        <CardContent className="p-0">
+        <div>
           {bag.parcels.length === 0 ? (
             <div className="p-6">
               <EmptyState icon={Package} title={t("bags.noParcels")} />
@@ -335,7 +331,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
                   className="border-0 shadow-none rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border/60 md:hidden">
+              <ul className="divide-y divide-border/20 md:hidden">
                 {bag.parcels.map((parcel) => (
                   <li key={parcel.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-xs">
                     <div>
@@ -353,16 +349,16 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
               </ul>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog open={confirmSealOpen} onOpenChange={setConfirmSealOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle>{t("bags.sealConfirmTitle")}</DialogTitle>
-            <DialogDescription>{t("bags.sealConfirmMessage")}</DialogDescription>
+            <DialogDescription className="text-xs text-muted-foreground">{t("bags.sealConfirmMessage")}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 py-2">
             <label htmlFor="bag-seal-tag" className="text-xs font-semibold text-muted-foreground">
               {t("bags.sealTag")} *
             </label>
@@ -373,14 +369,14 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
               onChange={(event) => setSealTagInput(event.target.value)}
               placeholder={t("bags.sealTagPlaceholder")}
               maxLength={100}
-              className="w-full rounded-lg border border-input bg-background p-2.5 font-mono text-sm outline-none"
+              className="w-full rounded-2xl border-0 bg-surface-muted/60 p-3.5 font-mono text-sm uppercase outline-none focus:bg-background"
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setConfirmSealOpen(false)}>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => setConfirmSealOpen(false)} className="rounded-xl">
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleSeal} disabled={isSealing}>
+            <Button type="button" onClick={handleSeal} disabled={isSealing} className="rounded-xl">
               {isSealing ? t("bags.sealing") : t("confirm")}
             </Button>
           </DialogFooter>

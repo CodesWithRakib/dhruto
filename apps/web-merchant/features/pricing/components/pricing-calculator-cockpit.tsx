@@ -7,10 +7,12 @@ import {
   Box,
   Calculator,
   Clock,
+  MapPin,
   Minus,
   Plus,
   Scale,
 } from "lucide-react";
+import { DistrictSelect, ThanaSelect } from "@/components/location/district-thana-picker";
 
 interface ZoneOption {
   id: string;
@@ -63,6 +65,7 @@ export interface PricingCalculatorCockpitProps {
   title?: string;
   subtitle?: string;
   compact?: boolean;
+  headingTag?: "h1" | "h2";
 }
 
 export function PricingCalculatorCockpit({
@@ -72,11 +75,37 @@ export function PricingCalculatorCockpit({
   title = "Real-Time Delivery Cost & Escrow Simulator",
   subtitle = "Adjust destination, package weight, and cash-on-delivery amounts. Watch your itemized thermal receipt and net bank payout update instantaneously.",
   compact = false,
+  headingTag = "h1",
 }: PricingCalculatorCockpitProps = {}) {
   const [selectedZoneId, setSelectedZoneId] = React.useState<string>("dhaka");
+  const [calcDistrict, setCalcDistrict] = React.useState<string>("Dhaka");
+  const [calcThana, setCalcThana] = React.useState<string>("");
   const [weightKg, setWeightKg] = React.useState<number>(1.0);
   const [codAmount, setCodAmount] = React.useState<number>(3500);
   const [isFragileBox, setIsFragileBox] = React.useState<boolean>(false);
+
+  // Sync selectedZoneId whenever district or thana changes
+  React.useEffect(() => {
+    if (!calcDistrict) return;
+    const dNorm = calcDistrict.trim().toLowerCase();
+    const SUBURB_DISTRICTS = ["gazipur", "narayanganj", "munshiganj", "manikganj", "narsingdi"];
+    const DIVISIONAL_DISTRICTS = ["chattogram", "sylhet", "rajshahi", "khulna", "barishal", "rangpur", "mymensingh"];
+
+    if (dNorm === "dhaka") {
+      const tNorm = calcThana.trim().toLowerCase();
+      if (["savar", "dhamrai", "keraniganj", "nawabganj", "dohar"].includes(tNorm)) {
+        setSelectedZoneId("suburbs");
+      } else {
+        setSelectedZoneId("dhaka");
+      }
+    } else if (SUBURB_DISTRICTS.includes(dNorm)) {
+      setSelectedZoneId("suburbs");
+    } else if (DIVISIONAL_DISTRICTS.includes(dNorm)) {
+      setSelectedZoneId("divisional");
+    } else {
+      setSelectedZoneId("remote");
+    }
+  }, [calcDistrict, calcThana]);
 
   const selectedZone = ZONES.find((z) => z.id === selectedZoneId) ?? ZONES[0]!;
 
@@ -98,9 +127,15 @@ export function PricingCalculatorCockpit({
             <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
             <span>INTERACTIVE FREIGHT & ESCROW COCKPIT</span>
           </div>
-          <h2 className={`mt-4 font-extrabold tracking-tight text-foreground ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
-            {title}
-          </h2>
+          {headingTag === "h2" ? (
+            <h2 className={`mt-4 font-extrabold tracking-tight text-foreground ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+              {title}
+            </h2>
+          ) : (
+            <h1 className={`mt-4 font-extrabold tracking-tight text-foreground ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+              {title}
+            </h1>
+          )}
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
             {subtitle}
           </p>
@@ -109,13 +144,47 @@ export function PricingCalculatorCockpit({
         {/* Cockpit Grid */}
         <div className="mt-16 grid items-start gap-8 lg:grid-cols-12">
           {/* Left Controls Card (7 cols) */}
-          <div className="rounded-3xl border border-border/80 bg-surface p-6 sm:p-8 shadow-xl lg:col-span-7">
+          <div className="rounded-3xl bg-surface-elevated p-6 sm:p-8 lg:col-span-7">
             {/* 1. Destination Zone Selection */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                1. Select Delivery Destination
-              </label>
-              <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  1. Select Delivery Destination (64 Districts)
+                </label>
+                {calcDistrict && (
+                  <span className="text-[11px] font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-md font-semibold self-start sm:self-auto">
+                    Mapped: {selectedZone.name}
+                  </span>
+                )}
+              </div>
+
+              {/* Dynamic District & Thana Cascaded Picker */}
+              <div className="mb-3.5 rounded-2xl bg-surface-muted/40 p-3 sm:p-3.5 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                  <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                  <span>Choose District & Thana for exact rate calculation:</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <DistrictSelect
+                    value={calcDistrict}
+                    onChange={(d) => {
+                      setCalcDistrict(d);
+                      setCalcThana("");
+                    }}
+                    placeholder="Search district..."
+                    className="h-9 text-xs bg-background/80"
+                  />
+                  <ThanaSelect
+                    districtName={calcDistrict}
+                    value={calcThana}
+                    onChange={setCalcThana}
+                    placeholder="Search thana..."
+                    className="h-9 text-xs bg-background/80"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2.5 sm:grid-cols-2">
                 {ZONES.map((zone) => {
                   const isSelected = selectedZoneId === zone.id;
                   return (
@@ -123,29 +192,29 @@ export function PricingCalculatorCockpit({
                       key={zone.id}
                       type="button"
                       onClick={() => setSelectedZoneId(zone.id)}
-                      className={`relative flex flex-col items-start rounded-2xl border p-4 text-left transition-all duration-200 ${
+                      className={`relative flex flex-col items-start rounded-2xl p-4 text-left transition-all duration-200 ${
                         isSelected
-                          ? "border-primary bg-primary/10 shadow-sm"
-                          : "border-border/70 bg-muted/20 hover:border-border hover:bg-muted/40"
+                          ? "bg-primary text-primary-foreground shadow-xs"
+                          : "bg-surface-muted/60 text-foreground hover:bg-surface-muted"
                       }`}
                     >
                       <div className="flex w-full items-center justify-between">
-                        <span className="text-sm font-bold text-foreground">
+                        <span className={`text-sm font-bold ${isSelected ? "text-primary-foreground" : "text-foreground"}`}>
                           {zone.name}
                         </span>
                         <span
-                          className={`rounded-md px-2 py-0.5 font-mono text-xs font-bold ${
-                            isSelected ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                          className={`rounded-lg px-2.5 py-0.5 font-mono text-xs font-bold ${
+                            isSelected ? "bg-white/20 text-white" : "bg-surface-muted text-foreground"
                           }`}
                         >
                           ৳{zone.baseRate}
                         </span>
                       </div>
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5 text-primary" />
+                      <div className={`mt-2 flex items-center gap-1.5 text-xs ${isSelected ? "text-primary-foreground/90" : "text-muted-foreground"}`}>
+                        <Clock className="h-3.5 w-3.5" />
                         <span>{zone.sla}</span>
                       </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground/80">
+                      <div className={`mt-1 text-[11px] ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground/80"}`}>
                         {zone.highlight}
                       </div>
                     </button>
@@ -155,7 +224,7 @@ export function PricingCalculatorCockpit({
             </div>
 
             {/* 2. Parcel Billable Weight Slider */}
-            <div className="mt-8 border-t border-border/60 pt-6">
+            <div className="mt-8 pt-6 border-t border-surface-muted">
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -167,17 +236,17 @@ export function PricingCalculatorCockpit({
                   <button
                     type="button"
                     onClick={() => setWeightKg((w) => Math.max(0.5, Number((w - 0.5).toFixed(1))))}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted/40 text-foreground transition hover:bg-muted"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-surface-muted/80 text-foreground transition hover:bg-surface-muted"
                   >
                     <Minus className="h-3.5 w-3.5" />
                   </button>
-                  <div className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-sm font-bold text-primary">
+                  <div className="rounded-xl bg-primary/10 px-3 py-1 font-mono text-sm font-bold text-primary">
                     {weightKg.toFixed(1)} kg
                   </div>
                   <button
                     type="button"
                     onClick={() => setWeightKg((w) => Math.min(10.0, Number((w + 0.5).toFixed(1))))}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted/40 text-foreground transition hover:bg-muted"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-surface-muted/80 text-foreground transition hover:bg-surface-muted"
                   >
                     <Plus className="h-3.5 w-3.5" />
                   </button>
@@ -204,18 +273,18 @@ export function PricingCalculatorCockpit({
               </div>
 
               {extraKg > 0 && (
-                <div className="mt-3 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs text-muted-foreground">
+                <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3.5 py-2 text-xs text-foreground">
                   <Scale className="h-3.5 w-3.5 text-primary" />
                   <span>
                     +{extraKg} kg over 1kg @ ৳{selectedZone.perKg}/kg ={" "}
-                    <strong className="text-foreground">৳{extraWeightFee} extra weight fee</strong>
+                    <strong className="text-primary font-bold">৳{extraWeightFee} extra weight fee</strong>
                   </span>
                 </div>
               )}
             </div>
 
             {/* 3. Cash-on-Delivery (COD) Amount Slider */}
-            <div className="mt-8 border-t border-border/60 pt-6">
+            <div className="mt-8 pt-6 border-t border-surface-muted">
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -227,17 +296,17 @@ export function PricingCalculatorCockpit({
                   <button
                     type="button"
                     onClick={() => setCodAmount((a) => Math.max(0, a - 500))}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted/40 text-foreground transition hover:bg-muted"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-surface-muted/80 text-foreground transition hover:bg-surface-muted"
                   >
                     <Minus className="h-3.5 w-3.5" />
                   </button>
-                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  <div className="rounded-xl bg-emerald-500/10 px-3 py-1 font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
                     ৳{codAmount.toLocaleString()}
                   </div>
                   <button
                     type="button"
                     onClick={() => setCodAmount((a) => Math.min(25000, a + 500))}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted/40 text-foreground transition hover:bg-muted"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-surface-muted/80 text-foreground transition hover:bg-surface-muted"
                   >
                     <Plus className="h-3.5 w-3.5" />
                   </button>
@@ -265,8 +334,8 @@ export function PricingCalculatorCockpit({
             </div>
 
             {/* 4. Packaging & Fragile Add-on Option */}
-            <div className="mt-8 border-t border-border/60 pt-6">
-              <label className="flex items-center justify-between rounded-2xl border border-border/70 bg-muted/20 p-3.5 cursor-pointer transition hover:bg-muted/40">
+            <div className="mt-8 pt-6 border-t border-surface-muted">
+              <label className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-4 cursor-pointer transition hover:bg-surface-muted">
                 <div className="flex items-center gap-3">
                   <Box className="h-5 w-5 text-primary" />
                   <div>
@@ -284,7 +353,7 @@ export function PricingCalculatorCockpit({
                     type="checkbox"
                     checked={isFragileBox}
                     onChange={(e) => setIsFragileBox(e.target.checked)}
-                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    className="h-4 w-4 rounded text-primary focus:ring-primary"
                   />
                 </div>
               </label>

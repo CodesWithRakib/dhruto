@@ -16,8 +16,6 @@ import {
 } from "lucide-react";
 import {
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -29,6 +27,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
+import { DistrictSelect, ThanaSelect } from "@/components/location/district-thana-picker";
 
 export interface CustomerAddress {
   id: string;
@@ -203,7 +202,7 @@ export function CustomerSettingsView() {
 
       {/* Add Address Modal Dialog */}
       <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 rounded-3xl border border-border/80 shadow-2xl">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 rounded-3xl border-0 bg-surface-elevated shadow-2xl">
           <form onSubmit={handleAddAddressSubmit} className="space-y-4">
             <DialogHeader>
               <DialogTitle className="text-lg font-bold text-foreground">
@@ -225,10 +224,10 @@ export function CustomerSettingsView() {
                       key={tag}
                       type="button"
                       onClick={() => setNewTag(tag)}
-                      className={`flex-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
+                      className={`flex-1 rounded-2xl py-2 text-xs font-bold transition-all ${
                         newTag === tag
-                          ? "bg-primary text-primary-foreground shadow-2xs"
-                          : "bg-surface text-muted-foreground border border-border hover:bg-surface-muted"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted"
                       }`}
                     >
                       {tag}
@@ -247,35 +246,34 @@ export function CustomerSettingsView() {
                   value={newAddressText}
                   onChange={(e) => setNewAddressText(e.target.value)}
                   placeholder="e.g. House 14, Road 5, Block B"
-                  className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  className="mt-1 h-10 w-full rounded-2xl border-0 bg-surface-muted/60 px-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-muted-foreground">
-                    Thana / Upazila
+                  <label className="text-[11px] font-bold uppercase text-muted-foreground block mb-1">
+                    District
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={newThana}
-                    onChange={(e) => setNewThana(e.target.value)}
-                    placeholder="e.g. Dhanmondi"
-                    className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  <DistrictSelect
+                    value={newDistrict}
+                    onChange={(val) => {
+                      setNewDistrict(val);
+                    }}
+                    placeholder="Select or type district"
+                    className="h-10 text-xs"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-muted-foreground">
-                    District
+                  <label className="text-[11px] font-bold uppercase text-muted-foreground block mb-1">
+                    Thana / Upazila
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={newDistrict}
-                    onChange={(e) => setNewDistrict(e.target.value)}
-                    placeholder="e.g. Dhaka"
-                    className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  <ThanaSelect
+                    districtName={newDistrict}
+                    value={newThana}
+                    onChange={setNewThana}
+                    placeholder="Select or type thana"
+                    className="h-10 text-xs"
                   />
                 </div>
               </div>
@@ -289,7 +287,7 @@ export function CustomerSettingsView() {
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="e.g. 01700000005"
-                  className="mt-1 h-9 w-full rounded-xl border border-border bg-surface px-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  className="mt-1 h-10 w-full rounded-2xl border-0 bg-surface-muted/60 px-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
                 />
               </div>
 
@@ -299,7 +297,7 @@ export function CustomerSettingsView() {
                   id="setDef"
                   checked={newSetDefault}
                   onChange={(e) => setNewSetDefault(e.target.checked)}
-                  className="rounded border-border text-primary focus:ring-primary"
+                  className="rounded text-primary focus:ring-primary"
                 />
                 <label htmlFor="setDef" className="text-xs font-medium text-foreground cursor-pointer">
                   Set as my primary default delivery address
@@ -310,14 +308,14 @@ export function CustomerSettingsView() {
             <DialogFooter className="gap-2 pt-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setAddModalOpen(false)}
-                className="h-9 text-xs"
+                className="h-9 rounded-xl text-xs"
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" className="h-9 text-xs font-semibold">
+              <Button type="submit" size="sm" className="h-9 rounded-xl text-xs font-semibold">
                 Save Address
               </Button>
             </DialogFooter>
@@ -337,9 +335,9 @@ export function CustomerSettingsView() {
             </div>
             <Button
               size="sm"
-              variant="outline"
+              variant="ghost"
               onClick={() => setAddModalOpen(true)}
-              className="h-9 gap-1.5 text-xs font-semibold"
+              className="h-9 gap-1.5 rounded-xl bg-surface-elevated text-xs font-semibold hover:bg-surface-muted"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Address
@@ -348,18 +346,18 @@ export function CustomerSettingsView() {
 
           <div className="space-y-3">
             {addresses.map((addr) => (
-              <Card
+              <div
                 key={addr.id}
-                className={`border transition-all ${
+                className={`rounded-3xl p-5 transition-all ${
                   addr.isDefault
-                    ? "border-primary/40 bg-surface shadow-xs"
-                    : "border-border/80 bg-surface/80"
+                    ? "bg-surface-elevated"
+                    : "bg-surface-elevated/70"
                 }`}
               >
-                <CardContent className="p-4 sm:p-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary-soft text-primary">
                         {addr.tag === "Home" ? (
                           <Home className="h-3.5 w-3.5" />
                         ) : addr.tag === "Office" ? (
@@ -370,7 +368,7 @@ export function CustomerSettingsView() {
                       </span>
                       <span className="text-xs font-extrabold text-foreground">{addr.tag}</span>
                       {addr.isDefault ? (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
                           Default
                         </span>
                       ) : null}
@@ -385,10 +383,10 @@ export function CustomerSettingsView() {
                   <div className="flex items-center gap-2 self-end sm:self-center">
                     {!addr.isDefault ? (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleSetDefault(addr.id)}
-                        className="h-8 text-xs font-semibold"
+                        className="h-8 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
                       >
                         Make Default
                       </Button>
@@ -411,8 +409,8 @@ export function CustomerSettingsView() {
                       </button>
                     ) : null}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -420,95 +418,91 @@ export function CustomerSettingsView() {
         {/* Right Column: Notification Preferences & Security */}
         <div className="space-y-6 lg:col-span-5">
           {/* Notification Card */}
-          <Card className="border border-border/80 bg-surface shadow-2xs">
-            <CardContent className="p-5 sm:p-6 space-y-5">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <Bell className="h-4.5 w-4.5" />
-                </span>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">Delivery Notifications</h3>
-                  <p className="text-[11px] text-muted-foreground">Manage how you receive OTP and tracking alerts</p>
+          <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+                <Bell className="h-4.5 w-4.5" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Delivery Notifications</h3>
+                <p className="text-[11px] text-muted-foreground">Manage how you receive OTP and tracking alerts</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-1">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5 pr-4">
+                  <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
+                    SMS OTP & Handoff Alerts
+                  </span>
+                  <p className="text-[11px] text-muted-foreground">
+                    Receive instant SMS when rider is en route and with delivery OTP.
+                  </p>
                 </div>
+                <Switch checked={smsOtp} onCheckedChange={setSmsOtp} />
               </div>
 
-              <div className="space-y-4 pt-1">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 pr-4">
-                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
-                      SMS OTP & Handoff Alerts
-                    </span>
-                    <p className="text-[11px] text-muted-foreground">
-                      Receive instant SMS when rider is en route and with delivery OTP.
-                    </p>
-                  </div>
-                  <Switch checked={smsOtp} onCheckedChange={setSmsOtp} />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5 pr-4">
+                  <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                    WhatsApp Live Tracking
+                  </span>
+                  <p className="text-[11px] text-muted-foreground">
+                    Get real-time map link and rider status updates via WhatsApp.
+                  </p>
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 pr-4">
-                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                      WhatsApp Live Tracking
-                    </span>
-                    <p className="text-[11px] text-muted-foreground">
-                      Get real-time map link and rider status updates via WhatsApp.
-                    </p>
-                  </div>
-                  <Switch checked={whatsappUpdates} onCheckedChange={setWhatsappUpdates} />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 pr-4">
-                    <span className="text-xs font-semibold text-foreground">Email Digital POD Receipts</span>
-                    <p className="text-[11px] text-muted-foreground">
-                      Receive completed delivery proof and invoices to your email.
-                    </p>
-                  </div>
-                  <Switch checked={deliveryEmails} onCheckedChange={setDeliveryEmails} />
-                </div>
+                <Switch checked={whatsappUpdates} onCheckedChange={setWhatsappUpdates} />
               </div>
 
-              <Button
-                size="sm"
-                className="w-full h-9 text-xs font-semibold"
-                onClick={handleSavePreferences}
-              >
-                Save Notification Settings
-              </Button>
-            </CardContent>
-          </Card>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5 pr-4">
+                  <span className="text-xs font-semibold text-foreground">Email Digital POD Receipts</span>
+                  <p className="text-[11px] text-muted-foreground">
+                    Receive completed delivery proof and invoices to your email.
+                  </p>
+                </div>
+                <Switch checked={deliveryEmails} onCheckedChange={setDeliveryEmails} />
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              className="w-full h-10 rounded-2xl text-xs font-semibold"
+              onClick={handleSavePreferences}
+            >
+              Save Notification Settings
+            </Button>
+          </div>
 
           {/* Account Profile Card */}
-          <Card className="border border-border/80 bg-surface shadow-2xs">
-            <CardContent className="p-5 sm:p-6 space-y-4">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <Shield className="h-4.5 w-4.5" />
-                </span>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">Account & Security</h3>
-                  <p className="text-[11px] text-muted-foreground">Verified recipient profile</p>
-                </div>
+          <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-4">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+                <Shield className="h-4.5 w-4.5" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Account & Security</h3>
+                <p className="text-[11px] text-muted-foreground">Verified recipient profile</p>
               </div>
+            </div>
 
-              <div className="space-y-2.5 pt-1 text-xs">
-                <div className="flex justify-between py-1 border-b border-border/60">
-                  <span className="text-muted-foreground">Recipient Name</span>
-                  <span className="font-bold text-foreground">{authUser?.name || "Mahmudur Rahman"}</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-border/60">
-                  <span className="text-muted-foreground">Registered Phone</span>
-                  <span className="font-mono font-bold text-foreground">{authUser?.phone || "+8801700000005"}</span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-muted-foreground">Role</span>
-                  <span className="font-semibold text-primary">Verified Customer</span>
-                </div>
+            <div className="space-y-2.5 pt-1 text-xs">
+              <div className="flex justify-between py-1.5 px-3 rounded-xl bg-surface-muted/40">
+                <span className="text-muted-foreground">Recipient Name</span>
+                <span className="font-bold text-foreground">{authUser?.name || "Mahmudur Rahman"}</span>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex justify-between py-1.5 px-3 rounded-xl bg-surface-muted/40">
+                <span className="text-muted-foreground">Registered Phone</span>
+                <span className="font-mono font-bold text-foreground">{authUser?.phone || "+8801700000005"}</span>
+              </div>
+              <div className="flex justify-between py-1.5 px-3 rounded-xl bg-surface-muted/40">
+                <span className="text-muted-foreground">Role</span>
+                <span className="font-semibold text-primary">Verified Customer</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

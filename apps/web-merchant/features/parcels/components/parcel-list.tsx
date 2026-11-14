@@ -431,7 +431,7 @@ export function ParcelList() {
       <ActiveFilters filters={chips} onRemove={handleRemoveFilter} onClearAll={resetFilters} />
 
       {/* Desktop filters */}
-      <div className="hidden rounded-md border border-border bg-surface p-4 lg:block">
+      <div className="hidden rounded-3xl bg-surface-elevated p-5 lg:block">
         <ParcelFilterControls
           idPrefix="desktop"
           filters={filters}
@@ -474,7 +474,7 @@ export function ParcelList() {
 
       {/* States */}
       {isError ? (
-        <div className="rounded-md border border-border bg-surface">
+        <div className="rounded-3xl bg-surface-elevated p-4">
           <ErrorState
             title={t("loadErrorTitle")}
             description={t("loadErrorDescription")}
@@ -490,7 +490,7 @@ export function ParcelList() {
           </div>
         </>
       ) : hasNoResults ? (
-        <div className="rounded-md border border-border bg-surface">
+        <div className="rounded-3xl bg-surface-elevated p-6">
           {hasActiveFilters ? (
             <EmptyState
               icon={SearchX}

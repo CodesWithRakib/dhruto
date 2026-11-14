@@ -15,11 +15,9 @@ import {
 } from "lucide-react";
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   Input,
 } from "@dhruto/ui";
+import { KpiCard } from "@/components/data-display/kpi-card";
 import { ParcelStatus } from "@dhruto/contracts";
 import { useGetParcelsQuery } from "../api/parcels.api";
 import { StatusBadge } from "@/components/data-display/status-badge";
@@ -124,136 +122,87 @@ export function ReturnsListView() {
       </div>
 
       {/* KPI Stats Strip */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                In-Return Transit
-              </span>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 text-warning">
-                <Truck className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {stats.active}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {stats.initiated} initiated · {stats.inTransit} moving
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Returned to Merchant
-              </span>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 text-success">
-                <PackageCheck className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {stats.completed}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Restocked at origin warehouse
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Total Returns
-              </span>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-danger/10 text-danger">
-                <RotateCcw className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {stats.active + stats.completed}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Cumulative RTO cases
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Recoverable Value
-              </span>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <AlertTriangle className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {bdt(stats.totalCod)}
-            </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Product value returned
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+        <KpiCard
+          label="In-Return Transit"
+          value={stats.active}
+          hint={`${stats.initiated} initiated · ${stats.inTransit} moving`}
+          icon={Truck}
+          className="rounded-3xl"
+        />
+        <KpiCard
+          label="Returned to Merchant"
+          value={stats.completed}
+          hint="Restocked at origin warehouse"
+          icon={PackageCheck}
+          className="rounded-3xl"
+        />
+        <KpiCard
+          label="Total Returns"
+          value={stats.active + stats.completed}
+          hint="Cumulative RTO cases"
+          icon={RotateCcw}
+          className="rounded-3xl"
+        />
+        <KpiCard
+          label="Recoverable Value"
+          value={bdt(stats.totalCod)}
+          hint="Product value returned"
+          icon={AlertTriangle}
+          className="rounded-3xl"
+        />
       </div>
 
       {/* Filter and Lens Toolbar */}
-      <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
-        <CardHeader className="p-4 pb-2 sm:p-5 sm:pb-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {/* Status Lens Pills */}
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                { id: "ALL", label: "All Returns" },
-                { id: ParcelStatus.RTO_INITIATED, label: "Initiated" },
-                { id: ParcelStatus.RETURN_IN_TRANSIT, label: "In Return Transit" },
-                { id: ParcelStatus.RETURNED_TO_MERCHANT, label: "Restocked / Received" },
-              ].map((tab) => {
-                const isSelected = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as "ALL" | ParcelStatus)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search code, phone, recipient..."
-                className="h-8 pl-8 text-xs"
-              />
-            </div>
+      <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Status Lens Pills */}
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { id: "ALL", label: "All Returns" },
+              { id: ParcelStatus.RTO_INITIATED, label: "Initiated" },
+              { id: ParcelStatus.RETURN_IN_TRANSIT, label: "In Return Transit" },
+              { id: ParcelStatus.RETURNED_TO_MERCHANT, label: "Restocked / Received" },
+            ].map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as "ALL" | ParcelStatus)}
+                  className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
-        </CardHeader>
 
-        <CardContent className="p-4 pt-2 sm:p-5 sm:pt-2">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search code, phone, recipient..."
+              className="h-9 border-0 bg-surface-muted/60 pl-9 text-xs rounded-xl"
+            />
+          </div>
+        </div>
+
+        <div>
           {isLoading ? (
             <div className="space-y-3 py-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 w-full animate-pulse rounded-lg bg-muted/60" />
+                <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-surface-muted/60" />
               ))}
             </div>
           ) : returnParcels.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success-soft text-success">
                 <PackageCheck className="h-6 w-6" />
               </div>
               <h3 className="mt-3 text-sm font-semibold text-foreground">
@@ -266,24 +215,24 @@ export function ReturnsListView() {
               </p>
               {search && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setSearch("")}
-                  className="mt-4 text-xs"
+                  className="mt-4 rounded-xl bg-surface-muted/60 text-xs hover:bg-surface-muted"
                 >
                   Clear Search
                 </Button>
               )}
             </div>
           ) : (
-            <div className="divide-y divide-border/60">
+            <div className="space-y-2.5">
               {returnParcels.map((parcel) => (
                 <div
                   key={parcel.id}
-                  className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between hover:bg-muted/20 px-2 rounded-lg transition-colors"
+                  className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between bg-surface-muted/40 hover:bg-surface-muted/70 rounded-2xl transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-muted-foreground">
                       <RotateCcw className="h-4 w-4" />
                     </div>
 
@@ -291,14 +240,14 @@ export function ReturnsListView() {
                       <div className="flex flex-wrap items-center gap-2">
                         <Link
                           href={routes.parcel(parcel.id)}
-                          className="font-mono text-xs font-semibold text-foreground hover:underline hover:text-primary"
+                          className="font-mono text-xs font-bold text-foreground hover:underline hover:text-primary"
                         >
                           {parcel.trackingCode}
                         </Link>
                         <button
                           type="button"
                           onClick={() => handleCopy(parcel.trackingCode)}
-                          className="text-muted-foreground hover:text-foreground"
+                          className="text-muted-foreground hover:text-foreground transition-colors"
                           title="Copy code"
                         >
                           {copiedCode === parcel.trackingCode ? (
@@ -324,9 +273,9 @@ export function ReturnsListView() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                     <div className="text-right">
-                      <p className="text-xs font-semibold text-foreground">
+                      <p className="text-xs font-bold text-foreground">
                         {bdt(parcel.codAmount)}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
@@ -336,7 +285,7 @@ export function ReturnsListView() {
 
                     <div className="flex items-center gap-1.5">
                       <Link href={routes.parcel(parcel.id)}>
-                        <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                        <Button variant="ghost" size="sm" className="h-8 rounded-xl bg-surface-muted hover:bg-surface-muted/80 text-xs font-semibold gap-1.5">
                           Details
                           <ArrowRight className="h-3 w-3" />
                         </Button>
@@ -347,8 +296,8 @@ export function ReturnsListView() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

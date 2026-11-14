@@ -3,11 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
   Button,
   Input,
   Select,
@@ -257,14 +252,14 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
               size="sm"
               onClick={() => handleDispatch(row.original.id)}
               disabled={isDispatching}
-              className="h-8 gap-1.5 rounded-lg text-xs"
+              className="h-8 gap-1.5 rounded-xl text-xs font-semibold"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
               {t("manifests.dispatch")}
             </Button>
           ) : null}
           <Link href={HUB_ROUTES.manifest(row.original.id)}>
-            <Button size="sm" variant="outline" className="h-8 gap-1.5 rounded-lg text-xs border-border/80">
+            <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-xl text-xs bg-surface-muted/60 font-semibold hover:bg-surface-muted">
               <FileText className="h-3.5 w-3.5" aria-hidden="true" />
               {t("manifests.details")}
             </Button>
@@ -277,15 +272,15 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
   return (
     <div className="space-y-6">
       {isCreating ? (
-        <Card className="rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6 shadow-2xs">
-          <CardHeader className="p-0 pb-4">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-foreground">
+        <div className="rounded-3xl bg-primary/5 p-5 sm:p-6 space-y-5">
+          <div>
+            <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold text-foreground">
               <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
               {t("manifests.create")}
-            </CardTitle>
-            <CardDescription className="text-xs">{t("manifests.subtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
+            </h3>
+            <p className="text-xs text-muted-foreground">{t("manifests.subtitle")}</p>
+          </div>
+          <div>
             <form onSubmit={handleCreateManifest} className="space-y-5">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
@@ -300,10 +295,10 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     }}
                     required
                   >
-                    <SelectTrigger id="manifest-destination" className="w-full rounded-xl bg-card">
+                    <SelectTrigger id="manifest-destination" className="w-full rounded-2xl border-0 bg-surface-muted/60 focus:bg-background">
                       <SelectValue placeholder={t("manifests.destination")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl border-0 bg-surface-elevated shadow-xl">
                       {destinations.map((hub) => (
                         <SelectItem key={hub.id} value={hub.id}>
                           {hub.name} ({hub.code})
@@ -323,7 +318,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     value={vehicleNumber}
                     onChange={(event) => setVehicleNumber(event.target.value)}
                     required
-                    className="rounded-xl bg-card font-mono uppercase"
+                    className="rounded-2xl border-0 bg-surface-muted/60 font-mono uppercase focus:bg-background"
                   />
                 </div>
 
@@ -335,7 +330,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     id="manifest-driver"
                     value={driverName}
                     onChange={(event) => setDriverName(event.target.value)}
-                    className="rounded-xl bg-card"
+                    className="rounded-2xl border-0 bg-surface-muted/60 focus:bg-background"
                   />
                 </div>
 
@@ -347,12 +342,12 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     id="manifest-driver-phone"
                     value={driverPhone}
                     onChange={(event) => setDriverPhone(event.target.value)}
-                    className="rounded-xl bg-card"
+                    className="rounded-2xl border-0 bg-surface-muted/60 focus:bg-background"
                   />
                 </div>
               </div>
 
-              <div className="border-t border-border/70 pt-4">
+              <div className="pt-2">
                 <p className="mb-1 text-sm font-semibold text-foreground">
                   {t("manifests.selectBags", { count: selectedBagIds.length })}
                 </p>
@@ -361,12 +356,12 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                 </p>
 
                 {availableBags.length === 0 ? (
-                  <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-center text-xs text-muted-foreground">
+                  <div className="rounded-2xl bg-warning/10 p-4 text-center text-xs text-muted-foreground">
                     <AlertCircle className="mx-auto mb-1.5 h-5 w-5 text-warning" aria-hidden="true" />
                     {t("manifests.noSealedBags")}
                   </div>
                 ) : (
-                  <div className="grid max-h-56 grid-cols-1 gap-2.5 overflow-y-auto rounded-xl border border-border/80 bg-card/60 p-2.5 sm:grid-cols-2 md:grid-cols-3">
+                  <div className="grid max-h-56 grid-cols-1 gap-2.5 overflow-y-auto rounded-2xl bg-surface-muted/30 p-3 sm:grid-cols-2 md:grid-cols-3">
                     {availableBags.map((bag) => {
                       const isSelected = selectedBagIds.includes(bag.id);
                       return (
@@ -382,8 +377,8 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                           role="checkbox"
                           aria-checked={isSelected}
                           tabIndex={0}
-                          className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-sm transition-all ${
-                            isSelected ? "border-primary bg-primary/10 shadow-2xs" : "border-border/80 bg-card hover:bg-muted/40"
+                          className={`flex cursor-pointer items-start gap-2.5 rounded-2xl p-3 text-sm transition-all ${
+                            isSelected ? "bg-primary/10 text-primary" : "bg-surface-elevated hover:bg-surface-muted/60"
                           }`}
                         >
                           <input
@@ -409,7 +404,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-border/60 pt-4">
+              <div className="flex items-center justify-end gap-3 pt-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -421,22 +416,22 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                 <Button
                   type="submit"
                   disabled={isCreatingManifest || selectedBagIds.length === 0}
-                  className="gap-2 rounded-xl text-xs font-semibold shadow-xs"
+                  className="gap-2 rounded-xl text-xs font-semibold"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                   {isCreatingManifest ? t("manifests.creating") : t("manifests.create")}
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/15 p-4 sm:p-5">
+      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
+        <div className="flex flex-col gap-3 p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2 text-primary">
+              <div className="rounded-2xl bg-primary/10 p-2.5 text-primary">
                 <Truck className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
@@ -451,7 +446,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
             <Button
               size="sm"
               onClick={() => setIsCreating((value) => !value)}
-              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shadow-xs shrink-0"
+              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shrink-0"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               {isCreating ? t("cancel") : t("manifests.create")}
@@ -477,10 +472,10 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                   setStatusFilter(item.key);
                   setPage(1);
                 }}
-                className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   statusFilter === item.key
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                 }`}
               >
                 {item.label}
@@ -489,7 +484,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
           </div>
         </div>
 
-        <CardContent className="p-0">
+        <div>
           {isLoadingManifests ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
@@ -527,9 +522,9 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                   className="border-0 shadow-none rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border/60 md:hidden">
+              <ul className="divide-y divide-border/20 md:hidden">
                 {pagedManifests.map((manifest) => (
-                  <li key={manifest.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
+                  <li key={manifest.id} className="space-y-2 p-4 transition-colors hover:bg-surface-muted/30">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={HUB_ROUTES.manifest(manifest.id)}
@@ -561,7 +556,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                         </Button>
                       ) : null}
                       <Link href={HUB_ROUTES.manifest(manifest.id)} className="flex-1">
-                        <Button size="sm" variant="outline" className="h-9 w-full rounded-xl border-border/80">
+                        <Button size="sm" variant="ghost" className="h-9 w-full rounded-xl bg-surface-muted/60 text-xs font-semibold">
                           {t("manifests.details")}
                         </Button>
                       </Link>
@@ -571,8 +566,8 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
               </ul>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

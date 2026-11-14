@@ -24,7 +24,7 @@ import {
   Truck,
   X,
 } from "lucide-react";
-import { Badge, Button, Card, CardContent, Input } from "@dhruto/ui";
+import { Badge, Button, Input } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { CUSTOMER_ROUTES } from "@/config/routes";
 import { useAppSelector } from "@/store/hooks";
@@ -339,7 +339,7 @@ export function CustomerDashboardView() {
 
       {/* Active Delivery Spotlight Card */}
       {activeShipment ? (
-        <Card className="overflow-hidden rounded-3xl bg-surface-elevated">
+        <div className="overflow-hidden rounded-3xl bg-surface-elevated">
           <div className="bg-primary-soft/40 px-5 py-3.5 sm:px-6 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
@@ -357,16 +357,16 @@ export function CustomerDashboardView() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-primary/30 bg-surface text-primary font-bold">
+              <Badge variant="outline" className="border-0 bg-surface-muted text-primary font-bold">
                 {activeShipment.eta}
               </Badge>
-              <Badge variant="primary-soft" className="font-semibold">
+              <Badge variant="primary-soft" className="font-semibold border-0">
                 {activeShipment.statusLabel}
               </Badge>
             </div>
           </div>
 
-          <CardContent className="p-5 sm:p-7 space-y-6">
+          <div className="p-5 sm:p-7 space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
               {/* Left Column: Shipment info & Stepper */}
               <div className="space-y-6 lg:col-span-7">
@@ -388,7 +388,7 @@ export function CustomerDashboardView() {
 
                   {/* Rider Note if Rescheduled */}
                   {activeShipment.deliveryNote ? (
-                    <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-200">
+                    <div className="mt-3 flex items-start gap-2 rounded-2xl bg-amber-500/10 p-3.5 text-xs text-amber-800 dark:text-amber-200">
                       <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                       <div>
                         <span className="font-bold">Customer Instruction:</span> {activeShipment.deliveryNote}
@@ -405,7 +405,7 @@ export function CustomerDashboardView() {
                       Step {currentStep?.step ?? 3} of 5 ({currentStep?.label})
                     </span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500"
                       style={{ width: `${currentStep?.percentage ?? 60}%` }}
@@ -435,8 +435,8 @@ export function CustomerDashboardView() {
                   {activeShipment.status !== ParcelStatus.DELIVERED ? (
                     <Button
                       onClick={() => handleOpenReschedule(activeShipment.trackingCode)}
-                      variant="outline"
-                      className="h-10 text-xs font-semibold gap-1.5"
+                      variant="ghost"
+                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl bg-surface-muted/60 hover:bg-surface-muted"
                     >
                       <Calendar className="h-3.5 w-3.5" />
                       {t("rescheduleOrInstructions")}
@@ -444,8 +444,8 @@ export function CustomerDashboardView() {
                   ) : (
                     <Button
                       onClick={() => handleOpenPod(activeShipment)}
-                      variant="outline"
-                      className="h-10 text-xs font-semibold gap-1.5"
+                      variant="ghost"
+                      className="h-10 text-xs font-semibold gap-1.5 rounded-xl bg-surface-muted/60 hover:bg-surface-muted"
                     >
                       <FileCheck className="h-3.5 w-3.5" />
                       View Proof of Delivery (POD)
@@ -453,7 +453,7 @@ export function CustomerDashboardView() {
                   )}
 
                   <Link href={`${CUSTOMER_ROUTES.tracking}/${activeShipment.trackingCode}`}>
-                    <Button variant="secondary" className="h-10 text-xs font-semibold gap-1.5">
+                    <Button variant="ghost" className="h-10 text-xs font-semibold gap-1.5 rounded-xl bg-primary-soft text-primary hover:bg-primary/20">
                       <Truck className="h-3.5 w-3.5" />
                       {t("viewFullTimeline")}
                     </Button>
@@ -462,10 +462,10 @@ export function CustomerDashboardView() {
               </div>
 
               {/* Right Column: Secure OTP & Assigned Rider */}
-              <div className="flex flex-col gap-4 rounded-2xl border border-border/80 bg-surface-muted/40 p-5 lg:col-span-5">
+              <div className="flex flex-col gap-4 rounded-3xl bg-surface-muted/40 p-5 lg:col-span-5">
                 {/* Secure OTP Card */}
                 {activeShipment.otp ? (
-                  <div className="space-y-2 rounded-xl border border-primary/25 bg-surface p-4 shadow-2xs">
+                  <div className="space-y-2 rounded-2xl bg-surface-elevated p-4">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5 text-primary" />
@@ -490,7 +490,7 @@ export function CustomerDashboardView() {
                         variant="soft"
                         size="sm"
                         onClick={() => handleCopy(activeShipment.otp, "Delivery OTP")}
-                        className="h-8 gap-1 text-xs font-semibold"
+                        className="h-8 gap-1 text-xs font-semibold rounded-xl"
                       >
                         <Copy className="h-3 w-3" />
                         Copy
@@ -505,9 +505,9 @@ export function CustomerDashboardView() {
 
                 {/* Assigned Rider Contact */}
                 {activeShipment.riderName ? (
-                  <div className="flex items-center justify-between rounded-xl border border-border/70 bg-surface p-3.5">
+                  <div className="flex items-center justify-between rounded-2xl bg-surface-elevated p-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold shadow-xs">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
                         <Bike className="h-5 w-5" />
                       </div>
                       <div>
@@ -526,9 +526,9 @@ export function CustomerDashboardView() {
                     {activeShipment.riderPhone ? (
                       <a href={`tel:${activeShipment.riderPhone}`}>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className="h-9 gap-1 text-xs font-semibold border-primary/30 text-primary hover:bg-primary-soft"
+                          className="h-9 gap-1 text-xs font-semibold rounded-xl bg-primary-soft text-primary hover:bg-primary/20"
                         >
                           <Phone className="h-3.5 w-3.5" />
                           Call
@@ -539,7 +539,7 @@ export function CustomerDashboardView() {
                 ) : null}
 
                 {/* COD Cash Amount */}
-                <div className="flex items-center justify-between rounded-xl border border-border/70 bg-surface p-3 text-xs">
+                <div className="flex items-center justify-between rounded-2xl bg-surface-elevated p-3 text-xs">
                   <span className="text-muted-foreground font-medium">{t("codPayment")}:</span>
                   <span className="font-bold text-foreground">
                     {activeShipment.codAmount > 0 && !activeShipment.isPaid ? (
@@ -553,8 +553,8 @@ export function CustomerDashboardView() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
       {/* Deliveries Feed & Search */}
@@ -570,10 +570,10 @@ export function CustomerDashboardView() {
                 key={f.id}
                 type="button"
                 onClick={() => setActiveFilter(f.id as typeof activeFilter)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
                   activeFilter === f.id
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-surface text-muted-foreground hover:bg-surface-muted border border-border/80"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface-elevated text-muted-foreground hover:bg-surface-muted"
                 }`}
               >
                 {f.label}
@@ -588,7 +588,7 @@ export function CustomerDashboardView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by code, merchant, item..."
-              className="h-9 w-full rounded-xl border border-border/80 bg-surface pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-10 w-full rounded-2xl border-0 bg-surface-muted/60 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
             />
           </div>
         </div>
@@ -596,7 +596,7 @@ export function CustomerDashboardView() {
         {/* Deliveries List */}
         <div className="space-y-3">
           {filteredDeliveries.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
+            <div className="rounded-3xl bg-surface-elevated p-8 text-center text-xs text-muted-foreground">
               No deliveries match your current search or filter criteria.
             </div>
           ) : (
@@ -607,10 +607,10 @@ export function CustomerDashboardView() {
               return (
                 <div
                   key={delivery.id}
-                  className={`group relative flex flex-col justify-between gap-4 rounded-2xl border bg-surface p-4 sm:p-5 shadow-2xs transition-all hover:border-primary/50 hover:shadow-soft sm:flex-row sm:items-center ${
+                  className={`group relative flex flex-col justify-between gap-4 rounded-3xl bg-surface-elevated p-5 transition-all hover:bg-surface-muted/60 sm:flex-row sm:items-center ${
                     isSpotlighted
-                      ? "border-primary/50 bg-primary-soft/10 ring-1 ring-primary/30"
-                      : "border-border/80"
+                      ? "bg-primary/10"
+                      : ""
                   }`}
                 >
                   <div className="flex items-start gap-3.5">
@@ -618,10 +618,10 @@ export function CustomerDashboardView() {
                       type="button"
                       onClick={() => setActiveTrackingCode(delivery.trackingCode)}
                       title="Pin to spotlight"
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold shadow-2xs transition-transform group-hover:scale-105 ${
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold transition-transform group-hover:scale-105 ${
                         isDelivered
-                          ? "bg-success-soft text-success border border-success/20"
-                          : "bg-primary-soft text-primary border border-primary/20"
+                          ? "bg-success-soft text-success"
+                          : "bg-primary-soft text-primary"
                       }`}
                     >
                       {isDelivered ? <CheckCircle2 className="h-5 w-5" /> : <Package className="h-5 w-5" />}
@@ -686,7 +686,7 @@ export function CustomerDashboardView() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setActiveTrackingCode(delivery.trackingCode)}
-                        className="h-9 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                        className="h-9 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
                         Spotlight
                       </Button>
@@ -694,20 +694,20 @@ export function CustomerDashboardView() {
 
                     {isDelivered ? (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleOpenPod(delivery)}
-                        className="h-9 gap-1.5 text-xs font-semibold"
+                        className="h-9 gap-1.5 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
                       >
                         <FileCheck className="h-3.5 w-3.5" />
                         View POD
                       </Button>
                     ) : (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleOpenReschedule(delivery.trackingCode)}
-                        className="h-9 gap-1.5 text-xs font-semibold"
+                        className="h-9 gap-1.5 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
                       >
                         <Calendar className="h-3.5 w-3.5" />
                         Reschedule
@@ -715,7 +715,7 @@ export function CustomerDashboardView() {
                     )}
 
                     <Link href={`${CUSTOMER_ROUTES.tracking}/${delivery.trackingCode}`}>
-                      <Button size="sm" variant="secondary" className="h-9 gap-1 text-xs font-semibold">
+                      <Button size="sm" variant="ghost" className="h-9 gap-1 rounded-xl bg-primary-soft text-primary text-xs font-semibold hover:bg-primary/20">
                         Track
                         <ArrowRight className="h-3 w-3" />
                       </Button>
@@ -725,7 +725,7 @@ export function CustomerDashboardView() {
                       type="button"
                       onClick={() => removeDelivery(delivery.trackingCode)}
                       title="Remove from tracked list"
-                      className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg"
+                      className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-xl hover:bg-surface-muted/60"
                       aria-label="Remove delivery"
                     >
                       <X className="h-3.5 w-3.5" />

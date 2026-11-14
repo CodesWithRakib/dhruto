@@ -29,7 +29,7 @@ export function ParcelCard({ parcel }: ParcelCardProps) {
   const routes = useRouteBase();
 
   return (
-    <li className="rounded-xl border border-border bg-surface p-4 transition-colors duration-fast hover:border-muted-foreground/30 focus-within:border-primary/40">
+    <li className="rounded-2xl bg-surface-elevated p-4 transition-colors duration-fast hover:bg-surface-muted/60">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-1">
           <Link
@@ -67,7 +67,7 @@ export function ParcelCard({ parcel }: ParcelCardProps) {
         </div>
       </dl>
 
-      <div className="mt-3 flex items-end justify-between gap-3 border-t border-border pt-3">
+      <div className="mt-3 flex items-end justify-between gap-3 border-t border-surface-muted pt-3">
         <div>
           <span className="text-caption text-muted-foreground">{t("cod")}</span>
           <p className="font-semibold tabular-nums text-foreground">{bdt(parcel.codAmount)}</p>
@@ -88,9 +88,9 @@ export function ParcelCard({ parcel }: ParcelCardProps) {
       <div className="mt-3 flex items-center gap-2">
         <Link href={routes.parcel(parcel.id)} className="flex-1">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="w-full gap-1.5"
+            className="w-full gap-1.5 rounded-xl bg-surface-muted hover:bg-surface-muted/80 text-xs font-semibold"
             aria-label={`${t("viewDetails")} ${parcel.trackingCode}`}
           >
             <Eye className="h-3.5 w-3.5" aria-hidden="true" />

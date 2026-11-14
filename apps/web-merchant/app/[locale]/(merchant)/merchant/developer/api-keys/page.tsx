@@ -16,7 +16,7 @@ import {
   Radio,
   Lock,
 } from "lucide-react";
-import { Button, Card, Badge } from "@dhruto/ui";
+import { Button, Badge } from "@dhruto/ui";
 import { PageHeader } from "@/components/page-header";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Link } from "@/lib/navigation";
@@ -117,7 +117,7 @@ print(response.json())`,
   };
 
   return (
-    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative w-full space-y-6">
       <PageHeader
         title="Developer API Keys & REST Integration"
         description="Manage your programmatic merchant credentials, view REST API endpoints, and integrate Dhruto directly into your e-commerce platform or ERP."
@@ -134,7 +134,7 @@ print(response.json())`,
       />
 
       {/* Credentials Card */}
-      <Card className="p-6 sm:p-8 space-y-6 rounded-3xl border-border/80 shadow-soft">
+      <div className="p-6 sm:p-8 space-y-6 rounded-3xl bg-surface-elevated">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
@@ -158,7 +158,7 @@ print(response.json())`,
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Client ID
             </label>
-            <div className="flex items-center justify-between rounded-xl border border-border bg-surface-muted p-3">
+            <div className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-3.5">
               <span className="font-mono text-sm text-foreground">{merchantClientId}</span>
               <Button
                 variant="ghost"
@@ -190,7 +190,7 @@ print(response.json())`,
                 <span>{showSecret ? "Hide Secret" : "Reveal Secret"}</span>
               </button>
             </div>
-            <div className="flex items-center justify-between rounded-xl border border-border bg-surface-muted p-3">
+            <div className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-3.5">
               <span className="font-mono text-sm text-foreground">
                 {showSecret ? apiKeySecret : "••••••••••••••••••••••••••••••••"}
               </span>
@@ -222,16 +222,16 @@ print(response.json())`,
         </div>
 
         {/* Security Alert Banner */}
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-xs text-muted-foreground">
+        <div className="flex items-start gap-3 rounded-2xl bg-amber-500/10 p-4 text-xs text-foreground">
           <Lock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
           <p>
             <strong>Keep your API Secret secure:</strong> Never expose this key in public client-side JavaScript, mobile app code, or public GitHub repositories. If you believe your key has leaked, regenerate it immediately.
           </p>
         </div>
-      </Card>
+      </div>
 
       {/* Code Snippets & Quickstart */}
-      <Card className="p-6 sm:p-8 space-y-6 rounded-3xl border-border/80 shadow-soft">
+      <div className="p-6 sm:p-8 space-y-6 rounded-3xl bg-surface-elevated">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-500">
@@ -246,15 +246,15 @@ print(response.json())`,
           </div>
 
           {/* Language Switcher Buttons */}
-          <div className="flex items-center rounded-xl border border-border p-1 bg-surface-muted">
+          <div className="flex items-center rounded-2xl p-1 bg-surface-muted/60">
             {(["curl", "node", "python"] as const).map((lang) => (
               <button
                 key={lang}
                 type="button"
                 onClick={() => setActiveCodeLang(lang)}
-                className={`rounded-lg px-3 py-1 text-xs font-semibold uppercase transition-all ${
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold uppercase transition-all ${
                   activeCodeLang === lang
-                    ? "bg-primary text-white shadow-sm"
+                    ? "bg-primary text-white shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -265,12 +265,12 @@ print(response.json())`,
         </div>
 
         {/* Code Box */}
-        <div className="relative rounded-2xl border border-border bg-slate-950 p-4 font-mono text-xs text-slate-200 overflow-x-auto">
+        <div className="relative rounded-2xl bg-slate-950 p-5 font-mono text-xs text-slate-200 overflow-x-auto">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => copyToClipboard(codeSnippets[activeCodeLang], "Code snippet")}
-            className="absolute top-3 right-3 h-7 gap-1 px-2.5 text-[11px] bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
+            className="absolute top-3 right-3 h-8 gap-1.5 px-3 text-[11px] bg-slate-900 text-slate-300 hover:text-white rounded-xl"
           >
             {copiedKey === "Code snippet" ? (
               <Check className="h-3 w-3 text-emerald-400" />
@@ -284,7 +284,7 @@ print(response.json())`,
 
         {/* Quick Links */}
         <div className="grid gap-4 sm:grid-cols-3 pt-2">
-          <div className="rounded-2xl border border-border/80 bg-surface-muted p-4 space-y-1.5">
+          <div className="rounded-2xl bg-surface-muted/60 p-5 space-y-1.5">
             <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <Code2 className="h-4 w-4 text-primary" />
               Interactive Swagger Docs
@@ -302,7 +302,7 @@ print(response.json())`,
             </a>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface-muted p-4 space-y-1.5">
+          <div className="rounded-2xl bg-surface-muted/60 p-5 space-y-1.5">
             <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <Radio className="h-4 w-4 text-emerald-500" />
               Webhook Subscriptions
@@ -318,7 +318,7 @@ print(response.json())`,
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-border/80 bg-surface-muted p-4 space-y-1.5">
+          <div className="rounded-2xl bg-surface-muted/60 p-5 space-y-1.5">
             <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-cyan-500" />
               Escrow & Rate Limits
@@ -334,7 +334,7 @@ print(response.json())`,
             </Link>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Secret Rotation Confirmation Dialog */}
       <ConfirmDialog

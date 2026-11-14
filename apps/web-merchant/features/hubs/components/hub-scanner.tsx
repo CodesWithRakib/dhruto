@@ -3,14 +3,8 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
   Button,
   Input,
-  Badge,
   Select,
   SelectContent,
   SelectItem,
@@ -282,7 +276,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
     <div className="space-y-6">
       {/* Scanner mode toolbar */}
       <div
-        className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card p-2.5 sm:p-3 shadow-2xs"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-surface-elevated p-2 sm:p-2.5"
         role="toolbar"
         aria-label={t("scanner.title")}
       >
@@ -290,22 +284,20 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
           {modes.map((mode) => {
             const isActive = scanType === mode.type;
             return (
-              <Button
+              <button
                 key={mode.type}
                 type="button"
-                size="sm"
-                variant={isActive ? "default" : "ghost"}
                 onClick={() => setScanType(mode.type)}
                 aria-pressed={isActive}
-                className={`flex items-center gap-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                   isActive
-                    ? "shadow-xs"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
                 }`}
               >
                 <mode.icon className="h-4 w-4" aria-hidden="true" />
                 {mode.label}
-              </Button>
+              </button>
             );
           })}
         </div>
@@ -317,12 +309,12 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
             size="sm"
             onClick={() => setSoundEnabled((value) => !value)}
             aria-pressed={soundEnabled}
-            className="flex items-center gap-2 rounded-xl text-xs text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+            className="flex items-center gap-2 rounded-xl text-xs text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           >
             {soundEnabled ? (
               <>
                 <Volume2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                <span className="font-medium">{t("scanner.audioOn")}</span>
+                <span className="font-semibold">{t("scanner.audioOn")}</span>
               </>
             ) : (
               <>
@@ -333,10 +325,10 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
           </Button>
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => (cameraState === "active" ? stopCamera() : void startCamera())}
-            className="flex items-center gap-2 rounded-xl text-xs border-border/80 hover:bg-muted/60"
+            className="flex items-center gap-2 rounded-xl text-xs bg-surface-muted/60 hover:bg-surface-muted"
           >
             <Camera className="h-4 w-4" aria-hidden="true" />
             {t("scanner.cameraScan")}
@@ -347,7 +339,7 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
       {cameraState === "unsupported" || cameraState === "unavailable" ? (
         <p
           role="status"
-          className="rounded-xl border border-border bg-surface-muted px-4 py-3 text-xs text-muted-foreground"
+          className="rounded-2xl bg-surface-muted px-4 py-3 text-xs text-muted-foreground"
         >
           {t("scanner.cameraUnsupported")}
         </p>
@@ -355,46 +347,44 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
       {cameraState === "denied" ? (
         <p
           role="alert"
-          className="rounded-xl border border-danger bg-danger-soft px-4 py-3 text-xs text-danger-soft-foreground"
+          className="rounded-2xl bg-danger-soft px-4 py-3 text-xs text-danger"
         >
           {t("scanner.cameraDenied")}
         </p>
       ) : null}
       {cameraState === "active" ? (
-        <Card>
-          <CardContent className="space-y-2 p-4">
-            <video
-              ref={videoRef}
-              playsInline
-              muted
-              aria-label={t("scanner.cameraScan")}
-              className="aspect-video w-full rounded-lg bg-background object-cover"
-            />
-            <Button type="button" variant="outline" size="sm" onClick={stopCamera}>
-              {t("close")}
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="rounded-3xl bg-surface-elevated p-4 space-y-2">
+          <video
+            ref={videoRef}
+            playsInline
+            muted
+            aria-label={t("scanner.cameraScan")}
+            className="aspect-video w-full rounded-2xl bg-black object-cover"
+          />
+          <Button type="button" variant="ghost" size="sm" onClick={stopCamera} className="rounded-xl bg-surface-muted">
+            {t("close")}
+          </Button>
+        </div>
       ) : null}
 
       {/* Bag target when packing */}
       {scanType === HubScanType.BAG_PARCEL ? (
-        <Card className="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 shadow-2xs">
+        <div className="rounded-3xl bg-surface-elevated p-5">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
-              <p className="text-sm font-semibold text-foreground">{t("scanner.targetBag")}:</p>
+              <p className="text-sm font-bold text-foreground">{t("scanner.targetBag")}:</p>
               <p className="text-xs text-muted-foreground">{t("scanner.targetBagHint")}</p>
             </div>
             {openBags.length === 0 ? (
-              <Badge variant="destructive" className="w-fit text-xs">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-danger-soft text-danger">
                 {t("scanner.noOpenBags")}
-              </Badge>
+              </span>
             ) : (
               <Select
                 value={selectedBagId}
                 onValueChange={setSelectedBagId}
               >
-                <SelectTrigger aria-label={t("scanner.targetBag")} className="w-[300px] font-mono text-xs rounded-xl bg-card">
+                <SelectTrigger aria-label={t("scanner.targetBag")} className="w-[300px] font-mono text-xs rounded-xl border-0 bg-surface-muted/60">
                   <SelectValue placeholder={t("scanner.targetBag")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -407,210 +397,176 @@ export function HubScanner({ hubId, hubName }: HubScannerProps) {
               </Select>
             )}
           </div>
-        </Card>
+        </div>
       ) : null}
 
       {/* Barcode input */}
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-4">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold">
-                <Scan className="h-5 w-5 text-primary" aria-hidden="true" />
-                {t("scanner.title")} — {hubName}
-              </CardTitle>
-              <CardDescription className="text-xs">{t("scanner.subtitle", { hub: hubName })}</CardDescription>
-            </div>
-            <span className="inline-flex items-center rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-              {modes.find((m) => m.type === scanType)?.label ?? scanType}
-            </span>
+      <div className="rounded-3xl bg-surface-elevated p-6 space-y-5">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold text-foreground">
+              <Scan className="h-5 w-5 text-primary" aria-hidden="true" />
+              {t("scanner.title")} — {hubName}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("scanner.subtitle", { hub: hubName })}</p>
           </div>
-        </CardHeader>
+          <span className="inline-flex items-center rounded-xl bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+            {modes.find((m) => m.type === scanType)?.label ?? scanType}
+          </span>
+        </div>
 
-        <CardContent className="space-y-4 p-5 sm:p-6">
-          <form onSubmit={handleScanSubmit} className="flex flex-col sm:flex-row gap-2.5">
-            <div className="relative flex-1">
-              <Scan
-                className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+        <form onSubmit={handleScanSubmit} className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Scan
+              className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <Input
+              ref={inputRef}
+              id="hub-scanner-input"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="characters"
+              placeholder={t("scanner.barcodePlaceholder")}
+              aria-label={t("scanner.barcodeLabel")}
+              value={barcode}
+              onChange={(event) => setBarcode(event.target.value)}
+              disabled={isLoading}
+              className="h-12 rounded-2xl border-0 bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground"
+              autoFocus
+            />
+          </div>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={isLoading || !barcode.trim()}
+            className="h-12 rounded-2xl px-8 font-bold shadow-xs"
+          >
+            {isLoading ? t("scanner.processing") : t("scanner.processScan")}
+          </Button>
+        </form>
+
+        {/* Last result: icon + text, never color alone */}
+        {lastAttempt?.result ? (
+          <div
+            role="status"
+            className={
+              lastAttempt.result.outcome === ScanOutcome.APPLIED
+                ? "flex items-start gap-3 rounded-2xl bg-success-soft p-4 text-success"
+                : "flex items-start gap-3 rounded-2xl bg-warning-soft p-4 text-warning"
+            }
+          >
+            {lastAttempt.result.outcome === ScanOutcome.APPLIED ? (
+              <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" aria-hidden="true" />
+            ) : (
+              <AlertTriangle
+                className="mt-0.5 h-6 w-6 shrink-0 text-warning"
                 aria-hidden="true"
               />
-              <Input
-                ref={inputRef}
-                id="hub-scanner-input"
-                type="text"
-                autoComplete="off"
-                autoCapitalize="characters"
-                placeholder={t("scanner.barcodePlaceholder")}
-                aria-label={t("scanner.barcodeLabel")}
-                value={barcode}
-                onChange={(event) => setBarcode(event.target.value)}
-                disabled={isLoading}
-                className="h-12 rounded-xl pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground"
-                autoFocus
-              />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              disabled={isLoading || !barcode.trim()}
-              className="h-12 rounded-xl px-7 font-semibold shadow-xs"
-            >
-              {isLoading ? t("scanner.processing") : t("scanner.processScan")}
-            </Button>
-          </form>
-
-          {/* Last result: icon + text, never color alone */}
-          {lastAttempt?.result ? (
-            <div
-              role="status"
-              className={
-                lastAttempt.result.outcome === ScanOutcome.APPLIED
-                  ? "flex items-start gap-3 rounded-xl border border-success bg-success-soft p-4 text-success"
-                  : "flex items-start gap-3 rounded-xl border border-warning bg-warning-soft p-4 text-warning"
-              }
-            >
-              {lastAttempt.result.outcome === ScanOutcome.APPLIED ? (
-                <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" aria-hidden="true" />
-              ) : (
-                <AlertTriangle
-                  className="mt-0.5 h-6 w-6 shrink-0 text-warning"
-                  aria-hidden="true"
-                />
-              )}
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-mono text-sm font-bold">{lastAttempt.result.barcode}</p>
-                  <Badge
-                    variant={
-                      lastAttempt.result.outcome === ScanOutcome.APPLIED ? "success" : "secondary"
-                    }
-                    className="text-xs"
-                  >
-                    {lastAttempt.result.outcome === ScanOutcome.APPLIED
-                      ? lastAttempt.result.currentStatus
-                      : t("scanner.duplicateTitle")}
-                  </Badge>
-                </div>
-                <p className="text-xs">{lastAttempt.result.message}</p>
-                {lastAttempt.result.reasonCode ? (
-                  <p className="font-mono text-[11px]">({lastAttempt.result.reasonCode})</p>
-                ) : null}
+            )}
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-mono text-sm font-bold">{lastAttempt.result.barcode}</p>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-white/20">
+                  {lastAttempt.result.outcome === ScanOutcome.APPLIED
+                    ? lastAttempt.result.currentStatus
+                    : t("scanner.duplicateTitle")}
+                </span>
               </div>
+              <p className="text-xs font-medium">{lastAttempt.result.message}</p>
+              {lastAttempt.result.reasonCode ? (
+                <p className="font-mono text-[11px]">({lastAttempt.result.reasonCode})</p>
+              ) : null}
             </div>
-          ) : null}
-          {lastAttempt?.error ? (
-            <div
-              role="alert"
-              className="flex items-start gap-3 rounded-xl border border-danger bg-danger-soft p-4 text-danger"
-            >
-              <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-danger" aria-hidden="true" />
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-mono text-sm font-bold">{lastAttempt.barcode}</p>
-                  <Badge variant="destructive" className="text-xs">
-                    {t("scanner.errorTitle")}
-                  </Badge>
-                </div>
-                <p className="text-xs">{lastAttempt.error}</p>
-                <Link href={HUB_ROUTES.parcels} className="text-xs font-semibold underline">
-                  {t("scanner.lookupFallback")}
-                </Link>
+          </div>
+        ) : null}
+        {lastAttempt?.error ? (
+          <div
+            role="alert"
+            className="flex items-start gap-3 rounded-2xl bg-danger-soft p-4 text-danger"
+          >
+            <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-danger" aria-hidden="true" />
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-mono text-sm font-bold">{lastAttempt.barcode}</p>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-danger-soft text-danger">
+                  {t("scanner.errorTitle")}
+                </span>
               </div>
+              <p className="text-xs font-medium">{lastAttempt.error}</p>
+              <Link href={HUB_ROUTES.parcels} className="text-xs font-semibold underline">
+                {t("scanner.lookupFallback")}
+              </Link>
             </div>
-          ) : null}
-        </CardContent>
-      </Card>
+          </div>
+        ) : null}
+      </div>
 
       {/* Session history */}
-      <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-        <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-4">
-          <CardTitle className="text-sm font-bold text-foreground">
+      <div className="rounded-3xl bg-surface-elevated p-6 space-y-4">
+        <div>
+          <h3 className="text-base font-bold text-foreground">
             {t("scanner.history")}
-          </CardTitle>
-          <CardDescription className="text-xs">{t("scanner.historyHint")}</CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("scanner.historyHint")}</p>
+        </div>
+        <div>
           {attempts.length === 0 ? (
-            <p className="p-8 text-center text-xs text-muted-foreground">
+            <p className="py-6 text-center text-xs text-muted-foreground">
               {t("scanner.emptyHistory")}
             </p>
           ) : (
-            <ul className="divide-y divide-border/60">
+            <div className="space-y-2">
               {attempts.map((attempt) => (
-                <li
+                <div
                   key={attempt.key}
-                  className="flex flex-wrap items-center gap-2.5 px-5 py-3 text-xs transition-colors hover:bg-muted/30"
+                  className="flex flex-wrap items-center gap-2.5 rounded-2xl bg-surface-muted/50 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/80"
                 >
                   <span className="font-mono font-bold text-foreground">{attempt.barcode}</span>
                   {attempt.result ? (
-                    <Badge
-                      variant={
-                        attempt.result.outcome === ScanOutcome.APPLIED
-                          ? "success"
-                          : attempt.result.outcome === ScanOutcome.DUPLICATE
-                            ? "secondary"
-                            : "destructive"
-                      }
-                      className="text-[10px]"
-                    >
-                      {attempt.result.scanType} · {attempt.result.outcome}
-                    </Badge>
-                  ) : (
-                    <Badge variant="destructive" className="text-[10px]">
-                      {t("scanner.errorTitle")}
-                    </Badge>
-                  )}
-                  <span className="block w-full truncate text-muted-foreground">
-                    {attempt.result?.message ?? attempt.error}
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success-soft text-success">
+                      {attempt.result.outcome}
+                    </span>
+                  ) : null}
+                  <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+                    {attempt.at}
                   </span>
-                  <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
-                    {fmtTime(attempt.at)}
-                  </span>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Hub scan log */}
       {hubLog.length > 0 ? (
-        <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-          <CardHeader className="border-b border-border/70 bg-muted/20 px-5 py-4">
-            <CardTitle className="text-sm font-bold text-foreground">
+        <div className="rounded-3xl bg-surface-elevated p-6 space-y-4">
+          <div>
+            <h3 className="text-base font-bold text-foreground">
               {hubName} — Scan Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y divide-border/60">
+            </h3>
+          </div>
+          <div>
+            <div className="space-y-2">
               {hubLog.slice(0, 10).map((scan) => (
-                <li key={scan.id} className="flex flex-wrap items-center gap-2.5 px-5 py-3 text-xs transition-colors hover:bg-muted/30">
+                <div key={scan.id} className="flex flex-wrap items-center gap-2.5 rounded-2xl bg-surface-muted/50 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/80">
                   <span className="font-mono font-bold text-foreground">
                     {scan.trackingCode ?? scan.bagCode ?? "—"}
                   </span>
-                  <span className="rounded-md bg-muted/70 px-2 py-0.5 font-mono text-[11px] font-semibold text-primary">
+                  <span className="rounded-md bg-surface-muted px-2 py-0.5 font-mono text-[11px] font-semibold text-primary">
                     {scan.scanType}
                   </span>
-                  <Badge
-                    variant={
-                      scan.outcome === ScanOutcome.APPLIED
-                        ? "success"
-                        : scan.outcome === ScanOutcome.DUPLICATE
-                          ? "secondary"
-                          : "destructive"
-                    }
-                    className="text-[10px]"
-                  >
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success-soft text-success">
                     {scan.outcome}
-                  </Badge>
+                  </span>
                   <span className="ml-auto font-mono text-[11px] tabular-nums text-muted-foreground">
                     {fmtTime(scan.createdAt)}
                   </span>
-                </li>
+                </div>
               ))}
-            </ul>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

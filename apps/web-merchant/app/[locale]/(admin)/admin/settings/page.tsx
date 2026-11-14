@@ -3,14 +3,6 @@
 import React from "react";
 import { PageHeader } from "@/components/page-header";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Badge,
-} from "@dhruto/ui";
-import {
   Server,
   Layers,
   Wallet,
@@ -37,70 +29,70 @@ export default function AdminSettingsPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Administrator Profile Card */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border border-border/80 shadow-soft">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
+          <div className="rounded-3xl bg-surface-elevated p-6 sm:p-8 space-y-6">
+            <div className="pb-1">
+              <h3 className="text-base font-bold flex items-center gap-2 text-foreground">
                 <UserCheck className="h-4 w-4 text-primary" />
                 Administrator Identity
-              </CardTitle>
-              <CardDescription className="text-xs">
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
                 Your authenticated account has elevated privileges across the Dhruto operating network.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 rounded-xl border border-border/60 bg-surface-muted/40 p-4">
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 rounded-2xl bg-surface-muted/60 p-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xs">
                   <ShieldCheck className="h-7 w-7" />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <p className="text-base font-bold text-foreground">{authUser?.name || "System Admin"}</p>
-                    <Badge variant="outline" className="border-primary/30 bg-primary-soft text-primary-soft-foreground text-[10px]">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
                       {authUser?.role || "ADMIN"}
-                    </Badge>
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground">{authUser?.email}</p>
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-border/60 p-4">
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="rounded-2xl bg-surface-muted/60 p-4 space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Privilege Level
                   </p>
-                  <p className="mt-1 text-sm font-bold text-foreground">Global Supervisor</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="text-sm font-bold text-foreground">Global Supervisor</p>
+                  <p className="text-xs text-muted-foreground">
                     Unrestricted access to all hubs, merchants, ledgers, and rider fleets.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-border/60 p-4">
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="rounded-2xl bg-surface-muted/60 p-4 space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Session Security
                   </p>
-                  <p className="mt-1 text-sm font-bold text-emerald-600">Active & Verified</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Active & Verified</p>
+                  <p className="text-xs text-muted-foreground">
                     JWT Session with HttpOnly refresh cookies & RBAC authorization.
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Administration Links */}
         <div className="space-y-6">
-          <Card className="border border-border/80 shadow-soft">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Server className="h-4 w-4 text-primary" />
-                System Surfaces
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+          <div className="rounded-3xl bg-surface-elevated p-6 space-y-4">
+            <h3 className="text-base font-bold flex items-center gap-2 text-foreground">
+              <Server className="h-4 w-4 text-primary" />
+              System Surfaces
+            </h3>
+
+            <div className="space-y-2">
               <Link
                 href="/admin/integrations"
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
               >
                 <div className="flex items-center gap-2.5">
                   <Layers className="h-4 w-4 text-primary" />
@@ -111,7 +103,7 @@ export default function AdminSettingsPage() {
 
               <Link
                 href={ADMIN_ROUTES.finance}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
               >
                 <div className="flex items-center gap-2.5">
                   <Wallet className="h-4 w-4 text-primary" />
@@ -122,7 +114,7 @@ export default function AdminSettingsPage() {
 
               <Link
                 href={ADMIN_ROUTES.rider}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
               >
                 <div className="flex items-center gap-2.5">
                   <Bike className="h-4 w-4 text-primary" />
@@ -133,7 +125,7 @@ export default function AdminSettingsPage() {
 
               <Link
                 href={ADMIN_ROUTES.hub}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
               >
                 <div className="flex items-center gap-2.5">
                   <Warehouse className="h-4 w-4 text-primary" />
@@ -141,8 +133,8 @@ export default function AdminSettingsPage() {
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

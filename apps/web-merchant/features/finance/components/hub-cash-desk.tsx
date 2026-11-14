@@ -3,8 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardContent,
   Button,
   Input,
   Badge,
@@ -17,6 +15,7 @@ import {
   DataTable,
   ColumnDef,
 } from "@dhruto/ui";
+import { KpiCard } from "@/components/data-display/kpi-card";
 import { CheckCircle2, AlertTriangle, Coins, RefreshCw } from "lucide-react";
 import {
   type PendingReconciliationItem,
@@ -387,31 +386,20 @@ export function HubCashDesk() {
 
       {summaryCards.length > 0 ? (
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-          {summaryCards.map((card) => {
-            const IconComponent = card.icon;
-            return (
-              <Card key={card.label} className="rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:shadow-sm">
-                <CardContent className="flex items-center justify-between gap-3 p-5 sm:p-6">
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      {card.label}
-                    </p>
-                    <p className="text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums text-foreground">
-                      {card.value}
-                    </p>
-                  </div>
-                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-border/40 ${card.iconBg} ${card.iconColor}`}>
-                    <IconComponent className="h-6 w-6" aria-hidden="true" />
-                  </span>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {summaryCards.map((card) => (
+            <KpiCard
+              key={card.label}
+              label={card.label}
+              value={card.value}
+              icon={card.icon}
+              className="rounded-3xl"
+            />
+          ))}
         </div>
       ) : null}
 
       <div
-        className="flex w-fit flex-wrap items-center gap-1.5 rounded-xl border border-border/80 bg-card/60 p-1.5 shadow-2xs"
+        className="flex w-fit flex-wrap items-center gap-1.5 rounded-2xl bg-surface-elevated p-1.5"
         role="tablist"
       >
         {(
@@ -429,10 +417,10 @@ export function HubCashDesk() {
             role="tab"
             aria-selected={tab === entry.key}
             onClick={() => setTab(entry.key)}
-            className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
+            className={`rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
               tab === entry.key
                 ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
             {entry.label}
@@ -441,8 +429,8 @@ export function HubCashDesk() {
       </div>
 
       {tab === "pending" ? (
-        <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-          <CardContent className="p-0">
+        <div className="rounded-3xl bg-surface-elevated p-4">
+          <div>
             {isLoading ? (
               <p role="status" className="p-8 text-center text-xs text-muted-foreground">
                 {t("loading")}
@@ -507,13 +495,13 @@ export function HubCashDesk() {
                 </ul>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
       {tab === "batches" ? (
-        <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-          <CardContent className="p-0">
+        <div className="rounded-3xl bg-surface-elevated p-4">
+          <div>
             {filteredBatches.length === 0 ? (
               <div className="p-6">
                 <EmptyState icon={Coins} title={t("cash.emptyBatches")} />
@@ -543,9 +531,9 @@ export function HubCashDesk() {
                     className="border-0 shadow-none rounded-none"
                   />
                 </div>
-                <ul className="divide-y divide-border/60 md:hidden">
+                <div className="space-y-2 md:hidden">
                   {pagedBatches.map((batch) => (
-                    <li key={batch.id} className="space-y-1.5 p-4 transition-colors hover:bg-muted/30">
+                    <div key={batch.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-xs font-bold text-foreground">
                           {batch.handinCode}
@@ -563,18 +551,18 @@ export function HubCashDesk() {
                       <p className="text-xs text-muted-foreground">
                         {batch.riderName ?? batch.riderId} · {batch.hubName ?? ""}
                       </p>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
       {tab === "discrepancies" ? (
-        <Card className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden">
-          <CardContent className="p-0">
+        <div className="rounded-3xl bg-surface-elevated p-4">
+          <div>
             {filteredDiscrepancies.length === 0 ? (
               <div className="p-6">
                 <EmptyState
@@ -608,9 +596,9 @@ export function HubCashDesk() {
                     className="border-0 shadow-none rounded-none"
                   />
                 </div>
-                <ul className="divide-y divide-border/60 md:hidden">
+                <div className="space-y-2 md:hidden">
                   {pagedDiscrepancies.map((item) => (
-                    <li key={item.id} className="space-y-1.5 p-4 transition-colors hover:bg-muted/30">
+                    <div key={item.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" aria-hidden="true" />
                         <span className="font-mono text-xs font-bold text-foreground">
@@ -633,24 +621,24 @@ export function HubCashDesk() {
                       <p className="text-xs text-muted-foreground">
                         {item.trackingCode ?? item.reason ?? "Discrepancy"} · Expected {bdt(item.expectedMinor / 100)} · Verified {bdt(item.actualMinor / 100)}
                       </p>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
       <Dialog open={verifying !== null} onOpenChange={(open) => !open && setVerifying(null)}>
-        <DialogContent className="max-w-md rounded-2xl">
+        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle>{t("cash.verifyTitle")}</DialogTitle>
             <DialogDescription className="text-xs">{t("cash.verifyMessage")}</DialogDescription>
           </DialogHeader>
           {verifying ? (
             <div className="space-y-4 py-1">
-              <dl className="space-y-2 rounded-xl border border-border/80 bg-muted/30 p-4 font-mono text-sm">
+              <dl className="space-y-2 rounded-2xl bg-surface-muted/60 p-4 font-mono text-sm">
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{verifying.trackingCode}</dt>
                   <dd className="font-bold tabular-nums text-foreground">{bdt(verifying.amount)}</dd>
@@ -675,7 +663,7 @@ export function HubCashDesk() {
                   min={0}
                   value={countedAmount}
                   onChange={(event) => setCountedAmount(event.target.value)}
-                  className="h-12 rounded-xl font-mono text-lg"
+                  className="h-12 rounded-xl border-0 bg-surface-muted/60 font-mono text-lg"
                   required
                 />
               </div>
@@ -691,16 +679,16 @@ export function HubCashDesk() {
                   value={verifyNotes}
                   onChange={(event) => setVerifyNotes(event.target.value)}
                   maxLength={500}
-                  className="rounded-xl"
+                  className="rounded-xl border-0 bg-surface-muted/60"
                 />
               </div>
             </div>
           ) : null}
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={() => setVerifying(null)} className="rounded-xl">
+            <Button type="button" variant="ghost" onClick={() => setVerifying(null)} className="rounded-xl bg-surface-muted/60 hover:bg-surface-muted">
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleVerify} disabled={isVerifying} className="rounded-xl shadow-xs">
+            <Button type="button" onClick={handleVerify} disabled={isVerifying} className="rounded-xl font-bold shadow-xs">
               {t("confirm")}
             </Button>
           </DialogFooter>

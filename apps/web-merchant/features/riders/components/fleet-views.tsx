@@ -3,8 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardContent,
   Button,
   Badge,
   Dialog,
@@ -88,12 +86,12 @@ export function AssignRiderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
         <DialogHeader>
           <DialogTitle>{t("fleet.assignRider")}</DialogTitle>
-          <DialogDescription className="font-mono">{trackingCode}</DialogDescription>
+          <DialogDescription className="font-mono text-xs text-muted-foreground">{trackingCode}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleAssign} className="space-y-4">
+        <form onSubmit={handleAssign} className="space-y-4 pt-2">
           <div className="space-y-1.5">
             <label htmlFor="assign-rider" className="text-xs font-semibold text-muted-foreground">
               {t("fleet.selectRider")} *
@@ -103,12 +101,12 @@ export function AssignRiderDialog({
               onValueChange={setRiderId}
               required
             >
-              <SelectTrigger id="assign-rider" className="w-full">
+              <SelectTrigger id="assign-rider" className="w-full h-11 rounded-2xl border-0 bg-surface-muted/60 focus:bg-background">
                 <SelectValue placeholder={t("fleet.selectRider")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-2xl border-0 bg-surface-elevated shadow-xl">
                 {riders.map((rider) => (
-                  <SelectItem key={rider.id} value={rider.id}>
+                  <SelectItem key={rider.id} value={rider.id} className="rounded-xl">
                     {rider.name} ({rider.riderCode}) ·{" "}
                     {t("fleet.activeTasks", { count: rider.activeTaskCount })}
                   </SelectItem>
@@ -116,11 +114,11 @@ export function AssignRiderDialog({
               </SelectContent>
             </Select>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl">
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading || !riderId}>
+            <Button type="submit" disabled={isLoading || !riderId} className="rounded-xl">
               {isLoading ? t("fleet.assigning") : t("fleet.confirmAssign")}
             </Button>
           </DialogFooter>
@@ -183,8 +181,8 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
         <div className="flex items-center justify-end">
           <Button
             size="sm"
-            variant="outline"
-            className="h-8 text-xs"
+            variant="ghost"
+            className="h-8 rounded-xl bg-surface-muted/60 text-xs font-semibold hover:bg-surface-muted"
             onClick={() => setSelectedRider(row.original)}
           >
             {t("tasks.openDetails")}
@@ -197,8 +195,8 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
   return (
     <div className="space-y-4">
       <PageHeader title={t("fleet.title")} description={t("fleet.subtitle")} />
-      <Card>
-        <CardContent className="p-0">
+      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
+        <div>
           {isLoading ? (
             <p role="status" className="p-8 text-center text-xs text-muted-foreground">
               {t("loading")}
@@ -218,11 +216,12 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                   currentPage={1}
                   itemsPerPage={riders.length}
                   emptyMessage={t("dashboard.noTasks")}
+                  className="border-0 shadow-none rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border md:hidden">
+              <ul className="divide-y divide-border/20 md:hidden">
                 {riders.map((rider) => (
-                  <li key={rider.id} className="space-y-1 p-4">
+                  <li key={rider.id} className="space-y-2 p-4">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-bold text-foreground">
                         {rider.name}{" "}
@@ -232,7 +231,7 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                       </p>
                       <Badge
                         variant={rider.duty === "ON_DUTY" ? "success" : "secondary"}
-                        className="text-[10px]"
+                        className="text-[10px] rounded-lg border-0"
                       >
                         {rider.status}
                       </Badge>
@@ -242,8 +241,8 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                     </p>
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="h-9 w-full"
+                      variant="ghost"
+                      className="h-9 w-full rounded-xl bg-surface-muted/60 text-xs font-semibold"
                       onClick={() => setSelectedRider(rider)}
                     >
                       {t("tasks.openDetails")}
@@ -253,14 +252,14 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
               </ul>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog
         open={selectedRider !== null}
         onOpenChange={(open) => !open && setSelectedRider(null)}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
           {selectedRider ? (
             <FleetRiderDetails riderId={selectedRider.id} onChanged={() => refetch()} />
           ) : null}

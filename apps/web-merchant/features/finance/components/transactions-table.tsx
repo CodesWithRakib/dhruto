@@ -6,10 +6,6 @@ import { type WalletTransactionItem, WalletTransactionType } from "@dhruto/contr
 import { ExternalLink, ChevronLeft, ChevronRight, ReceiptText } from "lucide-react";
 import { Link } from "@/lib/navigation";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   DataTable,
   Button,
   type ColumnDef,
@@ -133,65 +129,74 @@ export function TransactionsTable({
 
   return (
     <div className="w-full space-y-4">
-      <Card className="border-border shadow-sm">
-        <CardHeader className="flex flex-col justify-between gap-4 border-b border-border sm:flex-row sm:items-center">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
-              <ReceiptText className="h-5 w-5 text-primary" aria-hidden="true" />
-              {t("statement.title")}
-            </CardTitle>
-            <CardDescription className="mt-1 text-xs text-muted-foreground">
-              {t("subtitle")}
-            </CardDescription>
-          </div>
-        </CardHeader>
-      </Card>
+      <div className="flex flex-col justify-between gap-4 rounded-3xl bg-surface-elevated p-5 sm:flex-row sm:items-center">
+        <div>
+          <h3 className="flex items-center gap-2 text-lg font-bold text-foreground">
+            <ReceiptText className="h-5 w-5 text-primary" aria-hidden="true" />
+            {t("statement.title")}
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t("subtitle")}
+          </p>
+        </div>
+      </div>
 
-      <DataTable
-        columns={columns}
-        data={transactions}
-        isLoading={isLoading}
-        emptyMessage={t("statement.empty")}
-        filterSlot={
-          <div
-            className="flex flex-wrap items-center gap-1.5"
-            role="group"
-            aria-label={t("status")}
-          >
-            {filters.map((tab) => (
-              <Button
-                key={tab.id}
-                type="button"
-                size="sm"
-                variant={typeFilter === tab.id ? "default" : "outline"}
-                aria-pressed={typeFilter === tab.id}
-                onClick={() => onTypeFilterChange(tab.id)}
-                className="h-8 rounded-md px-3 text-xs font-semibold"
-              >
-                {tab.label}
-              </Button>
-            ))}
-          </div>
-        }
-      />
-      <div className="flex items-center justify-between">
+      <div className="rounded-3xl bg-surface-elevated p-4">
+        <DataTable
+          columns={columns}
+          data={transactions}
+          isLoading={isLoading}
+          emptyMessage={t("statement.empty")}
+          filterSlot={
+            <div
+              className="flex flex-wrap items-center gap-1.5"
+              role="group"
+              aria-label={t("status")}
+            >
+              {filters.map((tab) => {
+                const isActive = typeFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => onTypeFilterChange(tab.id)}
+                    className={`h-8 rounded-xl px-3.5 text-xs font-semibold transition-colors ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          }
+        />
+      </div>
+      <div className="flex items-center justify-between pt-2">
         <Button
           size="sm"
-          variant="outline"
+          variant="ghost"
           disabled={page <= 1 || isLoading}
           onClick={() => onPageChange(Math.max(1, page - 1))}
-          className="h-9 gap-1 text-xs"
+          className="h-9 gap-1.5 rounded-xl bg-surface-elevated px-4 text-xs font-medium text-foreground hover:bg-surface-muted"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-          {page}
+          {t("previous", { defaultValue: "Previous" })}
         </Button>
+        <div className="rounded-xl bg-surface-elevated px-3 py-1 font-mono text-xs font-bold text-foreground">
+          {page}
+        </div>
         <Button
           size="sm"
-          variant="outline"
+          variant="ghost"
           disabled={!hasMore || isLoading}
           onClick={() => onPageChange(page + 1)}
-          className="h-9 gap-1 text-xs"
+          className="h-9 gap-1.5 rounded-xl bg-surface-elevated px-4 text-xs font-medium text-foreground hover:bg-surface-muted"
         >
+          {t("next", { defaultValue: "Next" })}
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>

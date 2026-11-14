@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, ColumnDef, DataTable } from "@dhruto/ui";
+import { ColumnDef, DataTable } from "@dhruto/ui";
 import { type SettlementItem } from "@dhruto/contracts";
 import { ReceiptText, Clock, ShieldCheck } from "lucide-react";
 import { useGetMySettlementsQuery } from "../api/finance.api";
@@ -99,100 +99,96 @@ export function SettlementsView() {
   return (
     <div className="space-y-4">
       {/* Automated Settlement Policy Banner */}
-      <Card className="border-border/70 bg-surface-muted/40">
-        <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5 sm:mt-0">
-              <Clock className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="font-bold text-foreground flex items-center gap-1.5">
-                <span>{t("schedule.title")}</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success bg-success/10 px-1.5 py-0.5 rounded-full">
-                  <ShieldCheck className="h-3 w-3" />
-                  0% Fee Guaranteed
-                </span>
-              </p>
-              <p className="text-muted-foreground mt-0.5 max-w-2xl leading-relaxed">
-                {t("schedule.desc")}
-              </p>
-            </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-3xl bg-surface-elevated p-5 text-xs">
+        <div className="flex items-start gap-3">
+          <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0 mt-0.5 sm:mt-0">
+            <Clock className="h-4 w-4" aria-hidden="true" />
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <p className="font-bold text-foreground flex items-center gap-1.5">
+              <span>{t("schedule.title")}</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success bg-success-soft px-2 py-0.5 rounded-full">
+                <ShieldCheck className="h-3 w-3" />
+                0% Fee Guaranteed
+              </span>
+            </p>
+            <p className="text-muted-foreground mt-0.5 max-w-2xl leading-relaxed">
+              {t("schedule.desc")}
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {isError ? (
-            <ErrorState
-              title={tStates("loadErrorTitle")}
-              description={tStates("loadErrorDescription")}
-              action={<RetryButton label={tStates("retry")} onRetry={() => void refetch()} />}
+      <div className="rounded-3xl bg-surface-elevated p-4">
+        {isError ? (
+          <ErrorState
+            title={tStates("loadErrorTitle")}
+            description={tStates("loadErrorDescription")}
+            action={<RetryButton label={tStates("retry")} onRetry={() => void refetch()} />}
+          />
+        ) : isLoading ? (
+          <LoadingState title={t("loading")} />
+        ) : items.length === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              icon={ReceiptText}
+              title={t("settlements.empty")}
+              description={t("settlements.emptyDescription")}
             />
-          ) : isLoading ? (
-            <LoadingState title={t("loading")} />
-          ) : items.length === 0 ? (
-            <div className="p-6">
-              <EmptyState
-                icon={ReceiptText}
-                title={t("settlements.empty")}
-                description={t("settlements.emptyDescription")}
+          </div>
+        ) : (
+          <>
+            <div className="hidden md:block">
+              <DataTable
+                columns={columns}
+                data={items}
+                totalItems={total}
+                pageCount={pageCount}
+                currentPage={page}
+                itemsPerPage={PAGE_SIZE}
+                onPageChange={setPage}
+                isLoading={isLoading && items.length === 0}
+                emptyMessage={t("settlements.empty")}
               />
             </div>
-          ) : (
-            <>
-              <div className="hidden md:block">
-                <DataTable
-                  columns={columns}
-                  data={items}
-                  totalItems={total}
-                  pageCount={pageCount}
-                  currentPage={page}
-                  itemsPerPage={PAGE_SIZE}
-                  onPageChange={setPage}
-                  isLoading={isLoading && items.length === 0}
-                  emptyMessage={t("settlements.empty")}
-                />
-              </div>
 
-              {/* Mobile: a table would be unusable here, so records become cards. */}
-              <ul className="divide-y divide-border md:hidden">
-                {items.map((settlement) => (
-                  <li key={settlement.id} className="space-y-1 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-xs font-bold text-primary">
-                        {settlement.settlementCode}
-                      </span>
-                      <EnumBadge
-                        namespace="SettlementStatus"
-                        value={settlement.status}
-                        tones={SETTLEMENT_STATUS_TONE}
-                      />
-                    </div>
-                    <p className="font-mono text-[11px] text-muted-foreground">
-                      {settlement.trackingCode}
-                    </p>
-                    <p className="text-xs tabular-nums">
-                      {bdt(settlement.grossMinor / 100)} − {bdt(settlement.feeMinor / 100)} ={" "}
-                      <span className="font-bold text-success">
-                        {bdt(settlement.netMinor / 100)}
-                      </span>
-                    </p>
-                  </li>
-                ))}
-              </ul>
+            {/* Mobile list */}
+            <div className="space-y-2 md:hidden">
+              {items.map((settlement) => (
+                <div key={settlement.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-mono text-xs font-bold text-primary">
+                      {settlement.settlementCode}
+                    </span>
+                    <EnumBadge
+                      namespace="SettlementStatus"
+                      value={settlement.status}
+                      tones={SETTLEMENT_STATUS_TONE}
+                    />
+                  </div>
+                  <p className="font-mono text-[11px] text-muted-foreground">
+                    {settlement.trackingCode}
+                  </p>
+                  <p className="text-xs tabular-nums text-foreground">
+                    {bdt(settlement.grossMinor / 100)} − {bdt(settlement.feeMinor / 100)} ={" "}
+                    <span className="font-bold text-success">
+                      {bdt(settlement.netMinor / 100)}
+                    </span>
+                  </p>
+                </div>
+              ))}
+            </div>
 
-              <Pagination
-                className="border-t border-border px-4 py-3 md:hidden"
-                page={page}
-                totalPages={pageCount}
-                onPageChange={setPage}
-                disabled={isLoading}
-              />
-            </>
-          )}
-        </CardContent>
-      </Card>
+            <Pagination
+              className="mt-4 px-2 md:hidden"
+              page={page}
+              totalPages={pageCount}
+              onPageChange={setPage}
+              disabled={isLoading}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

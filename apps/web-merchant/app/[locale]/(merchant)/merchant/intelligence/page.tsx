@@ -31,7 +31,7 @@ export default function IntelligencePage() {
   return (
     <div className="w-full space-y-8">
       {/* Hero Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b pb-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-soft text-warning-soft-foreground text-xs font-semibold mb-2">
             <Sparkles className="h-3.5 w-3.5" />
@@ -48,7 +48,7 @@ export default function IntelligencePage() {
 
         <div className="flex items-center gap-2">
           <Link href={MERCHANT_ROUTES.createBooking}>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 rounded-xl font-bold">
               <Zap className="h-4 w-4" />
               Book With AI Auto-Fill
             </Button>
@@ -56,10 +56,10 @@ export default function IntelligencePage() {
         </div>
       </div>
 
-      {/* KPI Highlight Strip (live from GET /intelligence/health) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+      {/* KPI Highlight Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
             <span>District Coverage</span>
             <MapPin className="h-4 w-4 text-success" />
           </div>
@@ -69,8 +69,8 @@ export default function IntelligencePage() {
           <p className="text-xs text-muted-foreground">All Bangladesh divisions & hubs</p>
         </div>
 
-        <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
             <span>Upazila Lexicon</span>
             <Cpu className="h-4 w-4 text-info" />
           </div>
@@ -80,8 +80,8 @@ export default function IntelligencePage() {
           <p className="text-xs text-muted-foreground">With postal code matching</p>
         </div>
 
-        <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
             <span>Scoring Model</span>
             <TrendingDown className="h-4 w-4 text-primary" />
           </div>
@@ -91,8 +91,8 @@ export default function IntelligencePage() {
           <p className="text-xs text-muted-foreground">Explainable rule baseline, ML-ready</p>
         </div>
 
-        <div className="p-4 rounded-xl border border-border bg-surface space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
             <span>Geo Dataset</span>
             <CheckCircle2 className="h-4 w-4 text-warning" />
           </div>
@@ -104,14 +104,14 @@ export default function IntelligencePage() {
       </div>
 
       {/* Main Suite Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b pb-3">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-surface-elevated p-1.5 w-fit">
         <button
           type="button"
           onClick={() => setActiveTab("queue")}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "queue"
               ? "bg-primary text-primary-foreground shadow-xs"
-              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+              : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
           <ListFilter className="h-3.5 w-3.5" />
@@ -121,10 +121,10 @@ export default function IntelligencePage() {
         <button
           type="button"
           onClick={() => setActiveTab("address")}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "address"
               ? "bg-primary text-primary-foreground shadow-xs"
-              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+              : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
           <MapPin className="h-3.5 w-3.5" />
@@ -134,10 +134,10 @@ export default function IntelligencePage() {
         <button
           type="button"
           onClick={() => setActiveTab("risk")}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "risk"
               ? "bg-primary text-primary-foreground shadow-xs"
-              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+              : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
           <TrendingDown className="h-3.5 w-3.5" />
@@ -147,10 +147,10 @@ export default function IntelligencePage() {
         <button
           type="button"
           onClick={() => setActiveTab("both")}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "both"
               ? "bg-primary text-primary-foreground shadow-xs"
-              : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+              : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />

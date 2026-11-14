@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardContent, Button, Badge } from "@dhruto/ui";
+import { Button, Badge } from "@dhruto/ui";
 import {
   Bike,
   Package,
@@ -234,17 +234,17 @@ export function RiderDashboard() {
       />
 
       {/* Daily Runsheet Completion Tracker */}
-      <Card className="rounded-2xl bg-surface-elevated p-5">
+      <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <Bike className="h-4 w-4" />
               </span>
               <h2 className="text-sm font-extrabold text-foreground">
                 Today's Delivery Runsheet
               </h2>
-              <Badge variant="primary-soft" className="text-[10px] font-bold">
+              <Badge variant="primary-soft" className="text-[10px] font-bold border-0">
                 {completionPercent}% Completed
               </Badge>
             </div>
@@ -254,7 +254,7 @@ export function RiderDashboard() {
           </div>
 
           <Link href={RIDER_ROUTES.tasks}>
-            <Button size="sm" className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold shadow-xs">
+            <Button size="sm" className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold">
               <ClipboardList className="h-3.5 w-3.5" />
               <span>Open Runsheet</span>
             </Button>
@@ -275,14 +275,14 @@ export function RiderDashboard() {
             <span>Close Shift</span>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Live metrics */}
       <div className="grid grid-cols-2 gap-3.5 sm:gap-4 lg:grid-cols-4">
         {metricCards.map((card) => (
-          <Card
+          <div
             key={card.label}
-            className="rounded-2xl border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="rounded-3xl bg-surface-elevated p-5 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -294,18 +294,18 @@ export function RiderDashboard() {
                 </p>
               </div>
               <span
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border shadow-2xs ${card.toneBg} ${card.toneBorder} ${card.toneText}`}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${card.toneBg} ${card.toneText}`}
               >
                 <card.icon className="h-5 w-5" aria-hidden="true" />
               </span>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
       {/* COD + Parcels in hand */}
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
-        <Card className="rounded-2xl border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+        <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -318,13 +318,13 @@ export function RiderDashboard() {
                 Pending cash collection from current runsheet leg
               </p>
             </div>
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-warning/25 bg-warning-soft text-warning-soft-foreground shadow-2xs">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-warning-soft text-warning-soft-foreground">
               <Wallet className="h-6 w-6" aria-hidden="true" />
             </span>
           </div>
-        </Card>
+        </div>
 
-        <Card className="rounded-2xl border-border/80 bg-card p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+        <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -337,11 +337,11 @@ export function RiderDashboard() {
                 Packages currently dispatched with you on the road
               </p>
             </div>
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
               <Bike className="h-6 w-6" aria-hidden="true" />
             </span>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Quick Navigation Cards */}
@@ -353,14 +353,14 @@ export function RiderDashboard() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-4 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="group flex flex-col justify-between rounded-3xl bg-surface-elevated p-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-muted/60"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                    <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
                       {item.badge}
                     </span>
                   </div>
@@ -382,11 +382,11 @@ export function RiderDashboard() {
       </section>
 
       {/* Doorstep Delivery & Safety SOP Handbook */}
-      <Card className="rounded-2xl border border-primary/20 bg-card shadow-2xs overflow-hidden">
-        <CardContent className="p-5">
+      <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 overflow-hidden">
+        <div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-soft text-primary shadow-2xs">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
@@ -394,7 +394,7 @@ export function RiderDashboard() {
                   <h3 className="text-sm font-extrabold text-foreground">
                     Doorstep Delivery & Cash Protocol
                   </h3>
-                  <Badge variant="primary-soft" className="text-[10px] font-bold">Rider Safety SOP</Badge>
+                  <Badge variant="primary-soft" className="text-[10px] font-bold border-0">Rider Safety SOP</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   4 mandatory steps for every delivery handoff and cash collection.
@@ -405,7 +405,7 @@ export function RiderDashboard() {
             <button
               type="button"
               onClick={() => setShowSop(!showSop)}
-              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-center rounded-xl border border-border bg-surface px-3 text-xs font-bold text-foreground shadow-2xs hover:bg-surface-muted transition-colors"
+              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-center rounded-xl bg-surface-muted/60 px-3 text-xs font-bold text-foreground hover:bg-surface-muted transition-colors"
             >
               <span>{showSop ? "Collapse SOP" : "View SOP Guide"}</span>
               {showSop ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
@@ -413,8 +413,8 @@ export function RiderDashboard() {
           </div>
 
           {showSop ? (
-            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 border-t border-border/70 pt-4">
-              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 border-t border-border/20 pt-4">
+              <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 font-bold text-xs">1</span>
                   <span className="text-xs font-bold text-foreground">GPS Navigation</span>
@@ -424,7 +424,7 @@ export function RiderDashboard() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+              <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs">2</span>
                   <span className="text-xs font-bold text-foreground">6-Digit OTP Handshake</span>
@@ -434,7 +434,7 @@ export function RiderDashboard() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+              <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 font-bold text-xs">3</span>
                   <span className="text-xs font-bold text-foreground">Exact COD Collection</span>
@@ -444,7 +444,7 @@ export function RiderDashboard() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-surface/70 p-3.5 space-y-1">
+              <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/10 text-purple-600 font-bold text-xs">4</span>
                   <span className="text-xs font-bold text-foreground">Hub Cash Hand-In</span>
@@ -455,20 +455,20 @@ export function RiderDashboard() {
               </div>
             </div>
           ) : null}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Next delivery CTA */}
       {nextTask ? (
-        <Card className="overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-r from-primary/[0.06] via-card to-primary/[0.02] p-5 shadow-sm transition-all duration-200 hover:shadow-md">
+        <div className="overflow-hidden rounded-3xl bg-primary/10 p-5 sm:p-6 transition-all duration-200">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-4">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/25 bg-primary-soft text-primary shadow-xs">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-primary">
                 <Package className="h-6 w-6" aria-hidden="true" />
               </span>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-primary/25 bg-primary-soft px-2.5 py-0.5 font-mono text-xs font-bold text-primary">
+                  <span className="inline-flex items-center gap-1 rounded-xl bg-primary/20 px-2.5 py-0.5 font-mono text-xs font-bold text-primary">
                     {nextTask.trackingCode}
                     <button
                       type="button"
@@ -479,7 +479,7 @@ export function RiderDashboard() {
                       <Copy className="h-3 w-3" />
                     </button>
                   </span>
-                  <span className="inline-flex items-center rounded-full border border-border/80 bg-surface px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                  <span className="inline-flex items-center rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
                     {nextTask.status === "OUT_FOR_DELIVERY" ? "Out for Delivery" : "Assigned"}
                   </span>
                 </div>
@@ -504,14 +504,14 @@ export function RiderDashboard() {
               {nextTask.recipientPhone && (
                 <a
                   href={`tel:${nextTask.recipientPhone}`}
-                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-surface px-3.5 text-xs font-bold text-foreground shadow-2xs transition-colors hover:bg-surface-muted"
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-surface-elevated px-4 text-xs font-bold text-foreground transition-colors hover:bg-surface-muted"
                 >
                   <Phone className="h-4 w-4 text-success" aria-hidden="true" />
                   <span className="hidden sm:inline">{t("tasks.callCustomer")}</span>
                 </a>
               )}
               <Link href={RIDER_ROUTES.task(nextTask.id)} className="w-full sm:w-auto">
-                <Button className="h-11 w-full gap-2 rounded-xl px-5 text-sm font-bold shadow-md hover:shadow-primary/25 sm:w-auto">
+                <Button className="h-11 w-full gap-2 rounded-2xl px-5 text-sm font-bold sm:w-auto">
                   <Play className="h-4 w-4" aria-hidden="true" />
                   {nextTask.status === "OUT_FOR_DELIVERY"
                     ? t("details.attemptDelivery")
@@ -520,7 +520,7 @@ export function RiderDashboard() {
               </Link>
             </div>
           </div>
-        </Card>
+        </div>
       ) : (
         <EmptyState
           icon={CheckCircle2}

@@ -82,18 +82,18 @@ export function PricingTransparencyMatrix() {
         </div>
 
         {/* Comparison Table */}
-        <div className="mt-16 overflow-hidden rounded-3xl border border-border/80 bg-surface shadow-xl">
+        <div className="mt-16 overflow-hidden rounded-3xl bg-surface-elevated">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[680px] border-collapse text-left">
               <thead>
-                <tr className="border-b border-border/70 bg-muted/40">
-                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <tr className="bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 border-0">
+                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-slate-100 dark:text-slate-100">
                     Capability & Billing Term
                   </th>
-                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-primary bg-primary/10">
+                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-primary-soft bg-slate-800/80 dark:bg-slate-900">
                     Dhruto Express
                   </th>
-                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-slate-300 dark:text-slate-300">
                     Legacy Courier Market
                   </th>
                 </tr>

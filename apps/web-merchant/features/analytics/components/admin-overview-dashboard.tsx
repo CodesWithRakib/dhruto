@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/lib/navigation";
 import { Loader2, TriangleAlert } from "lucide-react";
-import { Button, Card, TrendLineChart, GroupedBarChart } from "@dhruto/ui";
+import { Button, TrendLineChart, GroupedBarChart } from "@dhruto/ui";
 import { useGetAnalyticsOverviewQuery, useListAlertsQuery } from "../api/analytics.api";
 import { MetricCard } from "./metric-card";
 import {
@@ -42,7 +42,7 @@ export function AdminOverviewDashboard() {
   const data = overview.data?.data;
 
   return (
-    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="relative w-full space-y-6">
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -74,13 +74,13 @@ export function AdminOverviewDashboard() {
       {overview.isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
-            <Card key={i} className="flex h-28 items-center justify-center text-muted-foreground">
+            <div key={i} className="flex h-28 items-center justify-center rounded-3xl bg-surface-elevated text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-            </Card>
+            </div>
           ))}
         </div>
       ) : overview.isError || !data ? (
-        <Card className="space-y-2 p-6 text-center">
+        <div className="space-y-2 p-6 text-center rounded-3xl bg-surface-elevated">
           <p className="text-sm font-medium">{t("loadErrorTitle")}</p>
           <p className="text-xs text-muted-foreground">
             {overview.error ? getApiErrorMessage(overview.error, "") : t("loadErrorDescription")}
@@ -88,10 +88,10 @@ export function AdminOverviewDashboard() {
           <Button variant="outline" size="sm" onClick={() => overview.refetch()}>
             {t("retry")}
           </Button>
-        </Card>
+        </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard label={t("kpiParcels")} kpi={data.kpis.totalParcels} />
             <MetricCard
               label={t("kpiSuccess")}
@@ -131,63 +131,63 @@ export function AdminOverviewDashboard() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="p-4">
+            <div className="rounded-3xl bg-surface-elevated p-6">
               <TrendLineChart
                 title={t("volumeTrend")}
                 data={data.trends.map((p) => ({ label: p.bucket, value: p.booked }))}
                 emptyMessage={t("emptyTrends")}
               />
-            </Card>
-            <Card className="p-4">
+            </div>
+            <div className="rounded-3xl bg-surface-elevated p-6">
               <TrendLineChart
                 title={t("codTrend")}
                 data={data.trends.map((p) => ({ label: p.bucket, value: p.codCollected }))}
                 formatValue={(v) => `৳${Math.round(v).toLocaleString()}`}
                 emptyMessage={t("emptyTrends")}
               />
-            </Card>
+            </div>
           </div>
           <p className="text-[11px] text-muted-foreground">{data.generatedAtNote}</p>
         </>
       )}
 
-      <Card className="p-4">
-        <div className="mb-2 flex items-center gap-2">
+      <div className="rounded-3xl bg-surface-elevated p-6">
+        <div className="mb-3 flex items-center gap-2">
           <TriangleAlert className="h-4 w-4 text-warning" aria-hidden="true" />
-          <h3 className="text-sm font-semibold">
+          <h3 className="text-sm font-bold text-foreground">
             {t("openAlerts", { count: alerts.data?.data?.length ?? 0 })}
           </h3>
         </div>
         {!alerts.data?.data?.length ? (
           <p className="py-2 text-center text-xs text-muted-foreground">{t("noAlerts")}</p>
         ) : (
-          <ul className="space-y-1.5">
+          <ul className="space-y-2">
             {alerts.data.data.slice(0, 5).map((a) => (
               <li
                 key={a.id}
-                className="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs"
+                className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface-muted/60 px-4 py-3 text-xs"
               >
-                <span className="font-mono font-medium">{a.alertKey}</span>
+                <span className="font-mono font-bold text-foreground">{a.alertKey}</span>
                 <span className="text-muted-foreground">
                   {a.severity} · {a.metricValue} vs {a.threshold}
                 </span>
-                <span className="ml-auto text-[11px] text-muted-foreground">
+                <span className="ml-auto text-[11px] text-muted-foreground font-mono">
                   {dateTime(a.triggeredAt)}
                 </span>
               </li>
             ))}
           </ul>
         )}
-      </Card>
+      </div>
 
-      <Card className="p-4">
+      <div className="rounded-3xl bg-surface-elevated p-6">
         <GroupedBarChart
           title={t("deliveredTrend")}
           data={(data?.trends ?? []).map((p) => ({ label: p.bucket, value: p.delivered }))}
           tone="success"
           emptyMessage={t("emptyTrends")}
         />
-      </Card>
+      </div>
     </div>
   );
 }
