@@ -191,6 +191,34 @@ export class ParcelsController {
     };
   }
 
+  @Get(":id/delivery-otp")
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-otp" })
+  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: "Get unique delivery OTP for parcel recipient",
+    description: "Returns the unique 6-digit delivery OTP for the authenticated recipient.",
+  })
+  async getDeliveryOtp(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const data = await this.parcelsService.getParcelDeliveryOtp(id, scope);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Delivery OTP retrieved successfully",
+      data,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
   @Get(":id/history")
   @HttpCode(HttpStatus.OK)
   @RateLimit({ limit: 180, windowSeconds: 60, scope: "parcel-history" })

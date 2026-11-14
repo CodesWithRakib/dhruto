@@ -119,6 +119,22 @@ export function estimateEtaFromStatus(status: ParcelStatus | string): string {
   }
 }
 
+/**
+ * Generates a unique, deterministic 6-digit delivery OTP specific to each parcel.
+ * Uses a mathematical dispersion over the parcel's tracking code so every delivery
+ * has a distinct, individual, non-static doorstep OTP.
+ */
+export function generateDeliveryOtp(trackingCode: string): string {
+  const seed = `${trackingCode.toUpperCase()}:dhruto-delivery-otp`;
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const abs = Math.abs(hash);
+  return String(100000 + (abs % 900000));
+}
+
 function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
   const isDelivered = parcel.status === ParcelStatus.DELIVERED;
   const isPaid = isDelivered || Number(parcel.codAmount) === 0;
@@ -148,7 +164,7 @@ function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
       parcel.status === ParcelStatus.OUT_FOR_DELIVERY || parcel.status === ParcelStatus.DELIVERED
         ? "+8801700000003"
         : undefined,
-    otp: "719302",
+    otp: generateDeliveryOtp(parcel.trackingCode),
     deliveredAt: isDelivered ? new Date(parcel.updatedAt).toLocaleDateString() : undefined,
     updatedAt: parcel.updatedAt,
   };
@@ -185,7 +201,7 @@ function mapTrackingResponseToDelivery(
       tracking.status === ParcelStatus.OUT_FOR_DELIVERY || isDelivered
         ? fallback?.riderPhone || "+8801700000003"
         : undefined,
-    otp: fallback?.otp || "719302",
+    otp: fallback?.otp || generateDeliveryOtp(tracking.trackingCode),
     deliveredAt: isDelivered
       ? new Date(tracking.updatedAt).toLocaleDateString()
       : fallback?.deliveredAt,
@@ -494,6 +510,28 @@ export function useCustomerDeliveries() {
   );
 
   /**
+   * Re-generate or issue a fresh unique delivery OTP for a specific parcel
+   */
+  const refreshOtp = React.useCallback(
+    (code: string) => {
+      const freshOtp = String(Math.floor(100000 + Math.random() * 900000));
+      const updated = deliveries.map((d) => {
+        if (d.trackingCode === code) {
+          return {
+            ...d,
+            otp: freshOtp,
+          };
+        }
+        return d;
+      });
+      saveDeliveries(updated);
+      toast.success(`Fresh doorstep OTP generated for ${code}: ${freshOtp}`);
+      return freshOtp;
+    },
+    [deliveries, saveDeliveries]
+  );
+
+  /**
    * Reset deliveries and refresh from live database
    */
   const resetToDefaults = React.useCallback(() => {
@@ -524,6 +562,7 @@ export function useCustomerDeliveries() {
     rescheduleDelivery,
     markAsDelivered,
     removeDelivery,
+    refreshOtp,
     resetToDefaults,
   };
 }

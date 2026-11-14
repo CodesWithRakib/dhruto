@@ -97,6 +97,7 @@ export function CustomerDashboardView() {
     refreshAllDeliveries,
     rescheduleDelivery,
     removeDelivery,
+    refreshOtp,
   } = useCustomerDeliveries();
 
   // Search & Filters
@@ -466,37 +467,78 @@ export function CustomerDashboardView() {
               {/* Right Column: Secure OTP & Assigned Rider */}
               <div className="flex flex-col gap-3.5 rounded-2xl border border-border/70 bg-muted/40 p-4.5 sm:p-5 lg:col-span-5">
                 {/* Secure OTP Card */}
-                {activeShipment.otp ? (
+                {activeShipment.status === ParcelStatus.DELIVERED ? (
+                  <div className="space-y-2 rounded-2xl border border-success/30 bg-card dark:bg-card/90 p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                        Doorstep Delivery Handoff
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-success-soft text-success px-2 py-0.5 text-[10px] font-extrabold border border-success/20">
+                        Verified
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <div>
+                        <span className="text-xs text-muted-foreground block font-medium">OTP Verified:</span>
+                        <span className="font-mono text-lg font-bold text-success tracking-wider">
+                          {activeShipment.otp}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground font-medium">
+                        Handoff confirmed at doorstep
+                      </span>
+                    </div>
+                  </div>
+                ) : activeShipment.otp ? (
                   <div className="space-y-2 rounded-2xl border border-primary/30 bg-card dark:bg-card/90 p-4 shadow-xs">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                         {t("doorstepDeliveryOtp")}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setShowOtp(!showOtp)}
-                        className="text-muted-foreground hover:text-foreground text-xs"
-                        aria-label="Toggle OTP visibility"
-                      >
-                        {showOtp ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase text-primary bg-primary-soft px-2 py-0.5 rounded-full border border-primary/20">
+                          Unique Code
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowOtp(!showOtp)}
+                          className="text-muted-foreground hover:text-foreground text-xs"
+                          aria-label="Toggle OTP visibility"
+                        >
+                          {showOtp ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-2xl font-black tracking-widest text-primary">
                         {showOtp ? activeShipment.otp : "••••••"}
                       </span>
-                      <Button
-                        type="button"
-                        variant="soft"
-                        size="sm"
-                        onClick={() => handleCopy(activeShipment.otp, "Delivery OTP")}
-                        className="h-8 gap-1 text-xs font-semibold rounded-xl"
-                      >
-                        <Copy className="h-3 w-3" />
-                        Copy
-                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          type="button"
+                          variant="soft"
+                          size="sm"
+                          onClick={() => handleCopy(activeShipment.otp, "Delivery OTP")}
+                          className="h-8 gap-1 text-xs font-semibold rounded-xl"
+                        >
+                          <Copy className="h-3 w-3" />
+                          Copy
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => refreshOtp(activeShipment.trackingCode)}
+                          title="Generate fresh OTP"
+                          className="h-8 gap-1 text-xs font-semibold rounded-xl text-muted-foreground hover:text-foreground"
+                        >
+                          <RefreshCw className="h-3 w-3" />
+                          Fresh
+                        </Button>
+                      </div>
                     </div>
 
                     <p className="text-[10px] text-muted-foreground leading-relaxed">
@@ -675,6 +717,11 @@ export function CustomerDashboardView() {
                               ? `৳${delivery.codAmount}`
                               : "Prepaid"}
                           </strong>
+                        </span>
+                        <span>•</span>
+                        <span className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 px-2 py-0.5 rounded-md font-bold border border-primary/20">
+                          <ShieldCheck className="h-3 w-3 text-primary" />
+                          OTP: {delivery.otp}
                         </span>
                         <span>•</span>
                         <span className="truncate max-w-[200px]">{delivery.destination}</span>

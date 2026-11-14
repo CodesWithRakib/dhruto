@@ -18,6 +18,7 @@ import { PricingModule } from "../pricing/pricing.module.js";
 import { IdempotencyModule } from "../common/idempotency/idempotency.module.js";
 import { IntegrationsModule } from "../integrations/integrations.module.js";
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
+import { PasswordService } from "../auth/services/password.service.js";
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
     IntegrationsModule,
   ],
   controllers: [ParcelsController, TrackingController],
-  providers: [ParcelsService, ParcelLifecycleService, TrackingCodeService, RateLimitGuard],
+  providers: [ParcelsService, ParcelLifecycleService, TrackingCodeService, RateLimitGuard, PasswordService],
   // ParcelLifecycleService is exported so the hub module routes its status
   // changes through the same centralized state machine (docs/08-STATE-MACHINE.md).
   exports: [ParcelsService, ParcelLifecycleService],

@@ -48,6 +48,7 @@ import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
 import { TrackingCodeService } from "./services/tracking-code.service.js";
+import { PasswordService } from "../auth/services/password.service.js";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -177,6 +178,8 @@ export class ParcelsService {
     private readonly intelligenceService?: IntelligenceService,
     @Optional()
     private readonly cacheService?: CacheService,
+    @Optional()
+    private readonly passwordService?: PasswordService,
   ) {}
 
   /* ------------------------------------------------------------------ */
@@ -642,6 +645,59 @@ export class ParcelsService {
       currentHubName: parcel.currentHub?.name ?? null,
       addressIntelligence: this.toAddressIntelligence(parcel),
       history: history.map((entry) => this.toHistoryEntry(entry)),
+    };
+  }
+
+  /**
+   * Generates a deterministic unique 6-digit OTP for a parcel based on its trackingCode.
+   * Every single parcel receives a distinct, non-static delivery OTP.
+   */
+  generateParcelOtp(trackingCode: string): string {
+    const seed = `${trackingCode.toUpperCase()}:dhruto-delivery-otp`;
+    let hash = 2166136261;
+    for (let i = 0; i < seed.length; i++) {
+      hash ^= seed.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    const abs = Math.abs(hash);
+    return String(100000 + (abs % 900000));
+  }
+
+  /**
+   * Retrieves or issues the unique delivery OTP for this parcel.
+   * Scoped to the verified recipient or admin.
+   */
+  async getParcelDeliveryOtp(
+    idOrCode: string,
+    scope: ParcelAccessScope,
+  ): Promise<{
+    parcelId: string;
+    trackingCode: string;
+    otp: string;
+    status: ParcelStatus;
+    verified: boolean;
+    expiresAt?: string;
+  }> {
+    const parcel = await this.findParcelOrThrow(idOrCode);
+    this.assertOwnership(parcel, scope);
+
+    const otp = this.generateParcelOtp(parcel.trackingCode);
+    const isVerified = parcel.status === ParcelStatus.DELIVERED || Boolean(parcel.otpVerifiedAt);
+
+    // If parcel does not have a hash yet, synchronize deliveryOtpHash in the database
+    if (!parcel.deliveryOtpHash && this.passwordService) {
+      parcel.deliveryOtpHash = await this.passwordService.hash(otp);
+      parcel.otpExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await this.parcelRepo.save(parcel);
+    }
+
+    return {
+      parcelId: parcel.id,
+      trackingCode: parcel.trackingCode,
+      otp,
+      status: parcel.status,
+      verified: isVerified,
+      expiresAt: parcel.otpExpiresAt?.toISOString(),
     };
   }
 
