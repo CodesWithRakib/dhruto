@@ -45,7 +45,7 @@ export class BulkSmsBdProvider implements SmsProvider {
 
   constructor(config: Partial<BulkSmsBdConfig> = {}) {
     this.apiKey = config.apiKey || process.env.BULKSMSBD_API_KEY || "";
-    this.senderId = config.senderId || process.env.BULKSMSBD_SENDER_ID || "Dhruto";
+    this.senderId = config.senderId || process.env.BULKSMSBD_SENDER_ID || "8809617644472";
     this.endpoint = config.endpoint || process.env.BULKSMSBD_URL || "https://bulksmsbd.net/api/smsapi";
     this.enabled = config.enabled ?? (process.env.SMS_ENABLED === "true");
     this.timeoutMs = config.timeoutMs ?? 8000;
@@ -160,19 +160,38 @@ export class BulkSmsBdProvider implements SmsProvider {
         };
       }
 
-      // Map BulkSMSBD error codes
-      // 1002: Sender Id Not Found | 1007: Balance Insufficient | 1003: Invalid API Key
-      const errorMessage = json.error_message || `BulkSMSBD error (code ${json.response_code || response.status})`;
+      // Official BulkSMSBD Response & Error Dictionary
+      const BULKSMSBD_MESSAGES: Record<number, string> = {
+        1001: "Invalid mobile number format",
+        1002: "Sender ID not correct or disabled in BulkSMSBD",
+        1003: "Missing required fields (api_key, senderid, number, or message)",
+        1005: "BulkSMSBD internal server error",
+        1006: "BulkSMSBD balance validity not available",
+        1007: "BulkSMSBD balance insufficient",
+        1011: "BulkSMSBD user ID not found",
+        1012: "Masking SMS must be sent in Bengali",
+        1013: "Sender ID gateway not found for this API key",
+        1015: "Sender ID has not found any valid gateway",
+        1031: "Your BulkSMSBD account is not verified",
+        1032: "IP not whitelisted in BulkSMSBD",
+      };
+
+      const code = json.response_code;
+      const errorMessage =
+        json.error_message ||
+        (code ? BULKSMSBD_MESSAGES[code] : undefined) ||
+        `BulkSMSBD error (code ${code || response.status})`;
+
       let errorCode: ProviderErrorCode = PROVIDER_ERROR_CODES.UNKNOWN_PROVIDER_ERROR;
       let errorKind = ProviderErrorKind.TRANSIENT;
 
-      if (json.response_code === 1007) {
+      if (code === 1007) {
         errorCode = PROVIDER_ERROR_CODES.RATE_LIMITED;
         errorKind = ProviderErrorKind.TRANSIENT;
-      } else if (json.response_code === 1002 || json.response_code === 1003) {
+      } else if (code === 1002 || code === 1003 || code === 1011 || code === 1031 || code === 1032) {
         errorCode = PROVIDER_ERROR_CODES.AUTHENTICATION_FAILED;
         errorKind = ProviderErrorKind.PERMANENT;
-      } else if (json.response_code === 1005 || json.response_code === 1006) {
+      } else if (code === 1001 || code === 1012) {
         errorCode = PROVIDER_ERROR_CODES.INVALID_RECIPIENT;
         errorKind = ProviderErrorKind.PERMANENT;
       }
@@ -205,6 +224,31 @@ export class BulkSmsBdProvider implements SmsProvider {
       };
     } finally {
       clearTimeout(timeout);
+    }
+  }
+
+  /**
+   * Retrieves remaining SMS credit balance from BulkSMSBD API.
+   * API: http://bulksmsbd.net/api/getBalanceApi?api_key=...
+   */
+  async getBalance(): Promise<{ balance: number; raw: string }> {
+    if (!this.apiKey) {
+      return { balance: 0, raw: "No API key configured" };
+    }
+    try {
+      const res = await fetch(`http://bulksmsbd.net/api/getBalanceApi?api_key=${encodeURIComponent(this.apiKey)}`);
+      const text = await res.text();
+      let balance = 0;
+      try {
+        const parsed = JSON.parse(text);
+        balance = Number(parsed.balance ?? parsed.credit ?? 0);
+      } catch {
+        balance = parseFloat(text.replace(/[^\d.]/g, "")) || 0;
+      }
+      return { balance, raw: text };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return { balance: 0, raw: msg };
     }
   }
 }
