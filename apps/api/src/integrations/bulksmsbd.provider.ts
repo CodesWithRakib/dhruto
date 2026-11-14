@@ -121,9 +121,10 @@ export class BulkSmsBdProvider implements SmsProvider {
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
+      const isUnicode = /[\u0980-\u09FF]/.test(finalMessage);
       const params = new URLSearchParams({
         api_key: this.apiKey,
-        type: "text",
+        type: isUnicode ? "unicode" : "text",
         number: finalRecipient,
         senderid: this.senderId,
         message: finalMessage,

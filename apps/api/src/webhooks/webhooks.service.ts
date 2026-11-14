@@ -9,7 +9,8 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
-import { Repository, EntityManager, QueryFailedError } from "typeorm";
+import { Repository, EntityManager, QueryFailedError, Brackets } from "typeorm";
+import { buildPaginationMeta, type PaginationMeta } from "../common/utils/pagination.util.js";
 import { randomBytes, createHmac } from "crypto";
 import { getErrorMessage } from "../common/utils/error.util.js";
 import {
@@ -145,15 +146,43 @@ export class WebhooksService {
   }
 
   /**
-   * Lists webhook subscriptions for merchant with masked secrets.
+   * Lists webhook subscriptions for merchant with masked secrets, pagination and search.
    */
-  async listSubscriptions(merchantId: string): Promise<WebhookSubscriptionItem[]> {
-    const subs = await this.subscriptionRepo.find({
-      where: { merchantId },
-      order: { createdAt: "DESC" },
-    });
+  async listSubscriptions(
+    merchantId: string,
+    options: {
+      page?: number;
+      limit?: number;
+      search?: string;
+    } = {},
+  ): Promise<{ items: WebhookSubscriptionItem[]; pagination: PaginationMeta }> {
+    const page = Math.max(1, Number(options.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(options.limit) || 20));
 
-    return subs.map((s) => toSubscriptionItem(s, maskSecret(s.secret)));
+    const qb = this.subscriptionRepo
+      .createQueryBuilder("sub")
+      .where("sub.merchantId = :merchantId", { merchantId });
+
+    if (options.search && options.search.trim()) {
+      const term = `%${options.search.trim()}%`;
+      qb.andWhere(
+        new Brackets((b) => {
+          b.where("sub.url ILIKE :term", { term }).orWhere(
+            "sub.description ILIKE :term",
+            { term },
+          );
+        }),
+      );
+    }
+
+    qb.orderBy("sub.createdAt", "DESC");
+    const skip = (page - 1) * limit;
+    const [subs, total] = await qb.skip(skip).take(limit).getManyAndCount();
+
+    return {
+      items: subs.map((s) => toSubscriptionItem(s, maskSecret(s.secret))),
+      pagination: buildPaginationMeta(page, limit, total),
+    };
   }
 
   /**

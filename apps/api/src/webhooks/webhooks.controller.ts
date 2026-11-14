@@ -27,7 +27,13 @@ import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 import { MerchantsService } from "../merchants/merchants.service.js";
 import { WebhookDeliveryStatus } from "@dhruto/contracts";
 
-function envelope(statusCode: number, message: string, data: unknown, req?: RequestWithId) {
+function envelope(
+  statusCode: number,
+  message: string,
+  data: unknown,
+  req?: RequestWithId,
+  extraMeta?: Record<string, unknown>,
+) {
   return {
     success: true,
     statusCode,
@@ -36,6 +42,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
     meta: {
       requestId: req?.requestId || "unknown",
       timestamp: new Date().toISOString(),
+      ...extraMeta,
     },
   };
 }
@@ -73,15 +80,29 @@ export class WebhooksController {
     summary: "List webhook subscriptions (secrets masked)",
     description: "Full secrets are returned only once, on create/rotate responses.",
   })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
   @ApiResponse({ status: 200, description: "Subscriptions." })
-  async listSubscriptions(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
+  async listSubscriptions(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Req() req?: RequestWithId,
+  ) {
     const merchantId = await this.resolveMerchantId(user);
-    const subscriptions = await this.webhooksService.listSubscriptions(merchantId);
+    const result = await this.webhooksService.listSubscriptions(merchantId, {
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
     return envelope(
       HttpStatus.OK,
       "Webhook subscriptions retrieved successfully",
-      subscriptions,
+      result.items,
       req,
+      { ...result.pagination },
     );
   }
 

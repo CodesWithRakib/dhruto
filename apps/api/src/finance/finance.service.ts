@@ -9,7 +9,8 @@ import {
   Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, DataSource, EntityManager, In, QueryFailedError } from "typeorm";
+import { Repository, DataSource, EntityManager, In, QueryFailedError, Brackets } from "typeorm";
+import { buildPaginationMeta, type PaginationMeta } from "../common/utils/pagination.util.js";
 import {
   Wallet,
   WalletTransaction,
@@ -405,14 +406,46 @@ export class FinanceService {
       });
   }
 
-  /** Merchant payout history, newest first. */
-  async getMerchantPayouts(merchantId: string): Promise<PayoutRequestItem[]> {
-    const payouts = await this.payoutRepo.find({
-      where: { merchantId },
-      order: { createdAt: "DESC" },
-      take: 200,
-    });
-    return payouts.map(toPayoutItem);
+  /** Merchant payout history, newest first with pagination and search. */
+  async getMerchantPayouts(
+    merchantId: string,
+    options: {
+      page?: number;
+      limit?: number;
+      status?: PayoutStatus;
+      search?: string;
+    } = {},
+  ): Promise<{ items: PayoutRequestItem[]; pagination: PaginationMeta }> {
+    const page = Math.max(1, Number(options.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(options.limit) || 20));
+
+    const qb = this.payoutRepo
+      .createQueryBuilder("payout")
+      .where("payout.merchantId = :merchantId", { merchantId });
+
+    if (options.status) {
+      qb.andWhere("payout.status = :status", { status: options.status });
+    }
+
+    if (options.search && options.search.trim()) {
+      const term = `%${options.search.trim()}%`;
+      qb.andWhere(
+        new Brackets((b) => {
+          b.where("payout.payoutCode ILIKE :term", { term })
+            .orWhere("payout.accountNumber ILIKE :term", { term })
+            .orWhere("payout.accountTitle ILIKE :term", { term });
+        }),
+      );
+    }
+
+    qb.orderBy("payout.createdAt", "DESC");
+    const skip = (page - 1) * limit;
+    const [payouts, total] = await qb.skip(skip).take(limit).getManyAndCount();
+
+    return {
+      items: payouts.map(toPayoutItem),
+      pagination: buildPaginationMeta(page, limit, total),
+    };
   }
 
   /** Single payout owned by the merchant. */
@@ -1334,21 +1367,34 @@ export class FinanceService {
   async listSettlementBatches(options: {
     merchantId?: string;
     status?: SettlementBatchStatus;
+    search?: string;
     page?: number;
     limit?: number;
-  }) {
-    const page = Math.max(1, options.page ?? 1);
-    const limit = Math.min(200, Math.max(1, options.limit ?? 50));
-    const [rows, total] = await this.batchRepo.findAndCount({
-      where: {
-        ...(options.merchantId ? { merchantId: options.merchantId } : {}),
-        ...(options.status ? { status: options.status } : {}),
-      },
-      order: { createdAt: "DESC" },
-      take: limit,
-      skip: (page - 1) * limit,
-    });
-    return { items: rows.map((b) => this.toBatchItem(b)), total, page, limit };
+  }): Promise<{ items: SettlementBatchItem[]; pagination: PaginationMeta }> {
+    const page = Math.max(1, Number(options.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(options.limit) || 20));
+
+    const qb = this.batchRepo.createQueryBuilder("batch");
+
+    if (options.merchantId) {
+      qb.andWhere("batch.merchantId = :merchantId", { merchantId: options.merchantId });
+    }
+    if (options.status) {
+      qb.andWhere("batch.status = :status", { status: options.status });
+    }
+    if (options.search && options.search.trim()) {
+      const term = `%${options.search.trim()}%`;
+      qb.andWhere("batch.batchCode ILIKE :term", { term });
+    }
+
+    qb.orderBy("batch.createdAt", "DESC");
+    const skip = (page - 1) * limit;
+    const [rows, total] = await qb.skip(skip).take(limit).getManyAndCount();
+
+    return {
+      items: rows.map((b) => this.toBatchItem(b)),
+      pagination: buildPaginationMeta(page, limit, total),
+    };
   }
 
   /* ================================================================== */

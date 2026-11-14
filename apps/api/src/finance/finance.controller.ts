@@ -49,7 +49,13 @@ import {
   WalletTransactionType,
 } from "@dhruto/contracts";
 
-function envelope(statusCode: number, message: string, data: unknown, req?: RequestWithId) {
+function envelope(
+  statusCode: number,
+  message: string,
+  data: unknown,
+  req?: RequestWithId,
+  extraMeta?: Record<string, unknown>,
+) {
   return {
     success: true,
     statusCode,
@@ -58,6 +64,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
     meta: {
       requestId: req?.requestId || "unknown",
       timestamp: new Date().toISOString(),
+      ...extraMeta,
     },
   };
 }
@@ -174,11 +181,29 @@ export class FinanceController {
   @Get("payouts/me")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Get merchant payout withdrawal history" })
+  @ApiQuery({ name: "status", required: false, enum: PayoutStatus })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
   @ApiResponse({ status: 200, description: "Payout history." })
-  async getMyPayouts(@CurrentUser() user: AuthenticatedUser, @Req() req?: RequestWithId) {
+  async getMyPayouts(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query("status") status?: PayoutStatus,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Req() req?: RequestWithId,
+  ) {
     const merchantId = await requireMerchant(this.merchantsService, user);
-    const payouts = await this.financeService.getMerchantPayouts(merchantId);
-    return envelope(HttpStatus.OK, "Payouts retrieved successfully", payouts, req);
+    const result = await this.financeService.getMerchantPayouts(merchantId, {
+      status,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    return envelope(HttpStatus.OK, "Payouts retrieved successfully", result.items, req, {
+      ...result.pagination,
+    });
   }
 
   @Get("payouts/:id")
@@ -238,6 +263,35 @@ export class FinanceController {
       limit: limit ? Number(limit) : undefined,
     });
     return envelope(HttpStatus.OK, "Settlements retrieved successfully", settlements, req);
+  }
+
+  @Get("settlements/batches")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Settlement batches" })
+  @ApiQuery({ name: "merchantId", required: false })
+  @ApiQuery({ name: "status", required: false, enum: SettlementBatchStatus })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiResponse({ status: 200, description: "Batch page." })
+  async listSettlementBatches(
+    @Query("merchantId") merchantId?: string,
+    @Query("status") status?: SettlementBatchStatus,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Req() req?: RequestWithId,
+  ) {
+    const result = await this.financeService.listSettlementBatches({
+      merchantId,
+      status,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    return envelope(HttpStatus.OK, "Settlement batches retrieved successfully", result.items, req, {
+      ...result.pagination,
+    });
   }
 
   @Get("settlements/:id")
@@ -479,21 +533,6 @@ export class FinanceAdminController {
   ) {
     const batch = await this.financeService.createSettlementBatch(user.id, dto);
     return envelope(HttpStatus.CREATED, "Settlement batch created", batch, req);
-  }
-
-  @Get("settlements/batches")
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Settlement batches" })
-  @ApiQuery({ name: "merchantId", required: false })
-  @ApiQuery({ name: "status", required: false, enum: SettlementBatchStatus })
-  @ApiResponse({ status: 200, description: "Batch page." })
-  async listSettlementBatches(
-    @Query("merchantId") merchantId?: string,
-    @Query("status") status?: SettlementBatchStatus,
-    @Req() req?: RequestWithId,
-  ) {
-    const result = await this.financeService.listSettlementBatches({ merchantId, status });
-    return envelope(HttpStatus.OK, "Settlement batches retrieved successfully", result, req);
   }
 
   @Post("settlements/batches/:id/complete")

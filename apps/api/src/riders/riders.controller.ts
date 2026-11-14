@@ -32,13 +32,19 @@ import {
 } from "./dto/rider-delivery.dto.js";
 import { Roles } from "../auth/decorators/roles.decorator.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
-import { UserRole, ParcelStatus } from "../database/entities/index.js";
+import { UserRole, ParcelStatus, RiderStatus } from "../database/entities/index.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
 import { type RequestWithId } from "../common/middleware/request-id.middleware.js";
 import { RateLimitGuard } from "../common/rate-limit/rate-limit.guard.js";
 import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 
-function envelope(statusCode: number, message: string, data: unknown, req?: RequestWithId) {
+function envelope(
+  statusCode: number,
+  message: string,
+  data: unknown,
+  req?: RequestWithId,
+  extraMeta?: Record<string, unknown>,
+) {
   return {
     success: true,
     statusCode,
@@ -47,6 +53,7 @@ function envelope(statusCode: number, message: string, data: unknown, req?: Requ
     meta: {
       requestId: req?.requestId || "unknown",
       timestamp: new Date().toISOString(),
+      ...extraMeta,
     },
   };
 }
@@ -400,14 +407,30 @@ export class RiderAdminController {
       "Supports the hub assignment workflow: rider code, hub, status, active tasks and today's deliveries.",
   })
   @ApiQuery({ name: "hubId", required: false, description: "Filter to one hub" })
+  @ApiQuery({ name: "status", required: false, enum: RiderStatus })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
   @ApiResponse({ status: 200, description: "Rider list." })
   async listRiders(
     @CurrentUser() user: AuthenticatedUser,
     @Query("hubId") hubId?: string,
+    @Query("status") status?: RiderStatus,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
     @Req() req?: RequestWithId,
   ) {
-    const riders = await this.ridersService.listRiders(user, { hubId });
-    return envelope(HttpStatus.OK, "Riders retrieved successfully", riders, req);
+    const result = await this.ridersService.listRiders(user, {
+      hubId,
+      status,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    return envelope(HttpStatus.OK, "Riders retrieved successfully", result.items, req, {
+      ...result.pagination,
+    });
   }
 
   @Get(":id")

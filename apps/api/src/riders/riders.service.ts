@@ -17,8 +17,10 @@ import {
   DataSource,
   EntityManager,
   MoreThanOrEqual,
+  Brackets,
   type FindOptionsWhere,
 } from "typeorm";
+import { buildPaginationMeta, type PaginationMeta } from "../common/utils/pagination.util.js";
 import {
   Parcel,
   ParcelStatus,
@@ -1470,18 +1472,51 @@ export class RidersService {
    */
   async listRiders(
     actor: AuthenticatedUser,
-    options: { hubId?: string } = {},
-  ): Promise<RiderListItem[]> {
+    options: {
+      hubId?: string;
+      search?: string;
+      status?: RiderStatus;
+      page?: number;
+      limit?: number;
+    } = {},
+  ): Promise<{ items: RiderListItem[]; pagination: PaginationMeta }> {
     const hubIds = await this.visibleRiderHubIds(actor, options.hubId);
-    if (hubIds.length === 0) return [];
+    const page = Math.max(1, Number(options.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(options.limit) || 20));
 
-    const riders = await this.riderRepo.find({
-      where: { hubId: In(hubIds) },
-      relations: ["hub"],
-      order: { createdAt: "ASC" },
-      take: 200,
-    });
-    if (riders.length === 0) return [];
+    if (hubIds.length === 0) {
+      return { items: [], pagination: buildPaginationMeta(page, limit, 0) };
+    }
+
+    const qb = this.riderRepo
+      .createQueryBuilder("rider")
+      .leftJoinAndSelect("rider.hub", "hub")
+      .leftJoinAndSelect("rider.user", "user")
+      .where("rider.hubId IN (:...hubIds)", { hubIds });
+
+    if (options.status) {
+      qb.andWhere("rider.status = :status", { status: options.status });
+    }
+
+    if (options.search && options.search.trim()) {
+      const term = `%${options.search.trim()}%`;
+      qb.andWhere(
+        new Brackets((b) => {
+          b.where("rider.riderCode ILIKE :term", { term })
+            .orWhere("user.name ILIKE :term", { term })
+            .orWhere("user.phone LIKE :term", { term })
+            .orWhere("hub.name ILIKE :term", { term });
+        }),
+      );
+    }
+
+    qb.orderBy("rider.createdAt", "DESC");
+    const skip = (page - 1) * limit;
+    const [riders, total] = await qb.skip(skip).take(limit).getManyAndCount();
+
+    if (riders.length === 0) {
+      return { items: [], pagination: buildPaginationMeta(page, limit, total) };
+    }
 
     const riderIds = riders.map((rider) => rider.id);
     const [activeTasks, deliveredToday] = await Promise.all([
@@ -1506,22 +1541,11 @@ export class RidersService {
     const activeByRider = new Map(activeTasks.map((row) => [row.riderId, Number(row.count)]));
     const deliveredByRider = new Map(deliveredToday.map((row) => [row.riderId, Number(row.count)]));
 
-    const userIds = [...new Set(riders.map((rider) => rider.userId))];
-    const users = await this.dataSource.getRepository("users" as never).find({
-      where: { id: In(userIds) },
-    });
-    const userById = new Map(
-      (users as unknown as Array<{ id: string; name: string; phone: string }>).map((u) => [
-        u.id,
-        u,
-      ]),
-    );
-
-    return riders.map((rider) => ({
+    const items: RiderListItem[] = riders.map((rider) => ({
       id: rider.id,
       riderCode: rider.riderCode ?? "",
-      name: userById.get(rider.userId)?.name ?? "",
-      phone: userById.get(rider.userId)?.phone ?? "",
+      name: rider.user?.name ?? "",
+      phone: rider.user?.phone ?? "",
       hubCode: rider.hub?.code ?? "",
       hubName: rider.hub?.name ?? "",
       status: rider.status,
@@ -1529,6 +1553,11 @@ export class RidersService {
       activeTaskCount: activeByRider.get(rider.id) ?? 0,
       deliveredTodayCount: deliveredByRider.get(rider.id) ?? 0,
     }));
+
+    return {
+      items,
+      pagination: buildPaginationMeta(page, limit, total),
+    };
   }
 
   /** Rider detail with active tasks and the assignment audit trail. */

@@ -37,6 +37,8 @@ import {
 import { ParcelStatus } from "@dhruto/contracts";
 import { toast } from "sonner";
 import { CustomerIllustrationBg } from "@/components/visual/illustration-backgrounds";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { Pagination } from "@/components/pagination";
 
 /**
  * Calculates current progress step (1-5) and percentage for active delivery
@@ -103,7 +105,17 @@ export function CustomerDashboardView() {
   // Search & Filters
   const [activeFilter, setActiveFilter] = React.useState<"ALL" | "ACTIVE" | "DELIVERED">("ALL");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const debouncedSearch = useDebouncedValue(searchQuery, 350);
   const [showOtp, setShowOtp] = React.useState(true);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+
+  // Automatically reset to page 1 whenever debounced search query or active filter changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, activeFilter]);
 
   // New Parcel Quick Connect Form
   const [newCodeInput, setNewCodeInput] = React.useState("");
@@ -115,13 +127,13 @@ export function CustomerDashboardView() {
   const [podOpen, setPodOpen] = React.useState(false);
   const [selectedPodParcel, setSelectedPodParcel] = React.useState<CustomerDelivery | null>(null);
 
-  // Filtered deliveries list
+  // Filtered deliveries list with debounced search
   const filteredDeliveries = React.useMemo(() => {
     return deliveries.filter((item) => {
       if (activeFilter === "ACTIVE" && item.status === ParcelStatus.DELIVERED) return false;
       if (activeFilter === "DELIVERED" && item.status !== ParcelStatus.DELIVERED) return false;
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+      if (debouncedSearch.trim()) {
+        const q = debouncedSearch.toLowerCase();
         return (
           item.trackingCode.toLowerCase().includes(q) ||
           item.merchantName.toLowerCase().includes(q) ||
@@ -132,7 +144,13 @@ export function CustomerDashboardView() {
       }
       return true;
     });
-  }, [deliveries, activeFilter, searchQuery]);
+  }, [deliveries, activeFilter, debouncedSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredDeliveries.length / pageSize));
+  const paginatedDeliveries = React.useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredDeliveries.slice(start, start + pageSize);
+  }, [filteredDeliveries, currentPage, pageSize]);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -644,7 +662,7 @@ export function CustomerDashboardView() {
               No deliveries match your current search or filter criteria.
             </div>
           ) : (
-            filteredDeliveries.map((delivery) => {
+            paginatedDeliveries.map((delivery) => {
               const isDelivered = delivery.status === ParcelStatus.DELIVERED;
               const isSpotlighted = delivery.trackingCode === activeShipment?.trackingCode;
 
@@ -794,6 +812,24 @@ export function CustomerDashboardView() {
             })
           )}
         </div>
+
+        {/* Centralized Pagination */}
+        {filteredDeliveries.length > 0 && (
+          <div className="pt-2 rounded-2xl border border-border/60 bg-card p-2 shadow-2xs">
+            <Pagination
+              page={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredDeliveries.length}
+              limit={pageSize}
+              onPageChange={setCurrentPage}
+              onLimitChange={(newLimit) => {
+                setPageSize(newLimit);
+                setCurrentPage(1);
+              }}
+              showFirstLast={true}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

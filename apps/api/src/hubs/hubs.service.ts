@@ -7,7 +7,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DataSource, EntityManager, In, MoreThanOrEqual, Repository } from "typeorm";
+import { Brackets, DataSource, EntityManager, In, MoreThanOrEqual, Repository } from "typeorm";
+import {
+  buildPaginationMeta,
+  encodeCursor,
+  decodeCursor,
+  type PaginationMeta,
+  type CursorPaginationMeta,
+} from "../common/utils/pagination.util.js";
 import { randomUUID } from "node:crypto";
 import {
   ApiErrorCode,
@@ -218,7 +225,7 @@ export class HubsService {
         expectedInboundManifests,
         openExceptions,
       },
-      recentScans,
+      recentScans: recentScans.items,
     };
   }
 
@@ -677,25 +684,55 @@ export class HubsService {
     }
   }
 
-  /** Scan history for a hub, newest first. */
+  /** Scan history for a hub, newest first with cursor pagination support. */
   async listScans(
     user: AuthenticatedUser,
     hubIdOrCode: string,
-    options: { limit?: number; scanType?: HubScanType; outcome?: ScanOutcome } = {},
-  ): Promise<ParcelScanItem[]> {
+    options: { limit?: number; scanType?: HubScanType; outcome?: ScanOutcome; cursor?: string } = {},
+  ): Promise<{ items: ParcelScanItem[]; meta: CursorPaginationMeta }> {
     const hub = await this.authz.assertHubAccess(user, hubIdOrCode, HubPermission.VIEW, {
       requireActive: false,
     });
 
-    const scans = await this.scanRepo.find({
-      where: {
-        hubId: hub.id,
-        ...(options.scanType ? { scanType: options.scanType } : {}),
-        ...(options.outcome ? { outcome: options.outcome } : {}),
-      },
-      order: { createdAt: "DESC" },
-      take: Math.min(options.limit ?? 50, 200),
-    });
+    const limit = Math.min(Math.max(1, options.limit ?? 50), 100);
+    const qb = this.scanRepo
+      .createQueryBuilder("scan")
+      .where("scan.hubId = :hubId", { hubId: hub.id });
+
+    if (options.scanType) {
+      qb.andWhere("scan.scanType = :scanType", { scanType: options.scanType });
+    }
+    if (options.outcome) {
+      qb.andWhere("scan.outcome = :outcome", { outcome: options.outcome });
+    }
+
+    const decoded = decodeCursor(options.cursor);
+    if (decoded) {
+      qb.andWhere(
+        new Brackets((inner) => {
+          inner.where("scan.createdAt < :cursorAt", { cursorAt: decoded.createdAt }).orWhere(
+            new Brackets((same) => {
+              same
+                .where("scan.createdAt = :cursorAt", { cursorAt: decoded.createdAt })
+                .andWhere("scan.id < :cursorId", { cursorId: decoded.id });
+            }),
+          );
+        }),
+      );
+    }
+
+    qb.orderBy("scan.createdAt", "DESC").addOrderBy("scan.id", "DESC");
+    qb.take(limit + 1);
+
+    const rows = await qb.getMany();
+    const hasMore = rows.length > limit;
+    const scans = hasMore ? rows.slice(0, limit) : rows;
+
+    let nextCursor: string | null = null;
+    const last = scans[scans.length - 1];
+    if (hasMore && last) {
+      nextCursor = encodeCursor(last.createdAt, last.id);
+    }
 
     const codes = scans.map((scan) => scan.parcelId).filter((id): id is string => id !== null);
     const bagIds = scans.map((scan) => scan.bagId).filter((id): id is string => id !== null);
@@ -728,7 +765,7 @@ export class HubsService {
     const bagById = new Map(bags.map((b) => [b.id, b.bagCode]));
     const operatorById = new Map(operators.map((o) => [o.id, o.name]));
 
-    return scans.map((scan) => ({
+    const items: ParcelScanItem[] = scans.map((scan) => ({
       id: scan.id,
       trackingCode: scan.parcelId ? (parcelById.get(scan.parcelId) ?? null) : null,
       bagCode: scan.bagId ? (bagById.get(scan.bagId) ?? null) : null,
@@ -741,6 +778,15 @@ export class HubsService {
       notes: scan.notes,
       createdAt: scan.createdAt.toISOString(),
     }));
+
+    return {
+      items,
+      meta: {
+        nextCursor,
+        hasMore,
+        limit,
+      },
+    };
   }
 
   /** Operator parcel lookup by tracking code. Never exposes merchant pricing. */
@@ -810,14 +856,41 @@ export class HubsService {
 
   async listBags(
     user: AuthenticatedUser,
-    hubIdOrCode: string | undefined,
-    status?: BagStatus,
-  ): Promise<BagListItem[]> {
-    const hubIds = await this.authorizedHubIdsOrThrow(user, hubIdOrCode);
+    hubIdOrOptions?:
+      | string
+      | {
+          hubId?: string;
+          status?: BagStatus;
+          search?: string;
+          page?: number;
+          limit?: number;
+        },
+    legacyStatus?: BagStatus,
+  ): Promise<{ items: BagListItem[]; pagination: PaginationMeta }> {
+    let hubId: string | undefined;
+    let status: BagStatus | undefined;
+    let search: string | undefined;
+    let page = 1;
+    let limit = 20;
 
-    if (hubIds.length === 0) return [];
+    if (typeof hubIdOrOptions === "string" || hubIdOrOptions === undefined) {
+      hubId = hubIdOrOptions;
+      status = legacyStatus;
+    } else {
+      hubId = hubIdOrOptions.hubId;
+      status = hubIdOrOptions.status ?? legacyStatus;
+      search = hubIdOrOptions.search;
+      if (hubIdOrOptions.page) page = Math.max(1, Number(hubIdOrOptions.page) || 1);
+      if (hubIdOrOptions.limit)
+        limit = Math.min(100, Math.max(1, Number(hubIdOrOptions.limit) || 20));
+    }
 
-    const bags = await this.bagRepo
+    const hubIds = await this.authorizedHubIdsOrThrow(user, hubId);
+    if (hubIds.length === 0) {
+      return { items: [], pagination: buildPaginationMeta(page, limit, 0) };
+    }
+
+    const qb = this.bagRepo
       .createQueryBuilder("bag")
       .leftJoinAndSelect("bag.originHub", "originHub")
       .leftJoinAndSelect("bag.destinationHub", "destinationHub")
@@ -825,13 +898,32 @@ export class HubsService {
       .leftJoinAndSelect("bagParcels.parcel", "parcel")
       .where("(bag.origin_hub_id IN (:...hubIds) OR bag.destination_hub_id IN (:...hubIds))", {
         hubIds,
-      })
-      .andWhere(status ? "bag.status = :status" : "1=1", status ? { status } : {})
-      .orderBy("bag.createdAt", "DESC")
-      .take(200)
-      .getMany();
+      });
 
-    return bags.map((bag) => this.toBagListItem(bag));
+    if (status) {
+      qb.andWhere("bag.status = :status", { status });
+    }
+
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(
+        new Brackets((b) => {
+          b.where("bag.bagCode ILIKE :term", { term })
+            .orWhere("bag.sealTag ILIKE :term", { term })
+            .orWhere("originHub.name ILIKE :term", { term })
+            .orWhere("destinationHub.name ILIKE :term", { term });
+        }),
+      );
+    }
+
+    qb.orderBy("bag.createdAt", "DESC");
+    const skip = (page - 1) * limit;
+    const [bags, total] = await qb.skip(skip).take(limit).getManyAndCount();
+
+    return {
+      items: bags.map((bag) => this.toBagListItem(bag)),
+      pagination: buildPaginationMeta(page, limit, total),
+    };
   }
 
   async getBag(user: AuthenticatedUser, bagId: string): Promise<BagDetails> {
@@ -1187,12 +1279,39 @@ export class HubsService {
 
   async listManifests(
     user: AuthenticatedUser,
-    hubIdOrCode: string | undefined,
-  ): Promise<ManifestListItem[]> {
-    const hubIds = await this.authorizedHubIdsOrThrow(user, hubIdOrCode);
-    if (hubIds.length === 0) return [];
+    hubIdOrOptions?:
+      | string
+      | {
+          hubId?: string;
+          status?: ManifestStatus;
+          search?: string;
+          page?: number;
+          limit?: number;
+        },
+  ): Promise<{ items: ManifestListItem[]; pagination: PaginationMeta }> {
+    let hubId: string | undefined;
+    let status: ManifestStatus | undefined;
+    let search: string | undefined;
+    let page = 1;
+    let limit = 20;
 
-    const manifests = await this.manifestRepo
+    if (typeof hubIdOrOptions === "string" || hubIdOrOptions === undefined) {
+      hubId = hubIdOrOptions;
+    } else {
+      hubId = hubIdOrOptions.hubId;
+      status = hubIdOrOptions.status;
+      search = hubIdOrOptions.search;
+      if (hubIdOrOptions.page) page = Math.max(1, Number(hubIdOrOptions.page) || 1);
+      if (hubIdOrOptions.limit)
+        limit = Math.min(100, Math.max(1, Number(hubIdOrOptions.limit) || 20));
+    }
+
+    const hubIds = await this.authorizedHubIdsOrThrow(user, hubId);
+    if (hubIds.length === 0) {
+      return { items: [], pagination: buildPaginationMeta(page, limit, 0) };
+    }
+
+    const qb = this.manifestRepo
       .createQueryBuilder("manifest")
       .leftJoinAndSelect("manifest.originHub", "originHub")
       .leftJoinAndSelect("manifest.destinationHub", "destinationHub")
@@ -1201,18 +1320,38 @@ export class HubsService {
       .where(
         "(manifest.origin_hub_id IN (:...hubIds) OR manifest.destination_hub_id IN (:...hubIds))",
         { hubIds },
-      )
-      .orderBy("manifest.createdAt", "DESC")
-      .take(200)
-      .getMany();
+      );
+
+    if (status) {
+      qb.andWhere("manifest.status = :status", { status });
+    }
+
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(
+        new Brackets((b) => {
+          b.where("manifest.manifestCode ILIKE :term", { term })
+            .orWhere("manifest.vehicleNumber ILIKE :term", { term })
+            .orWhere("originHub.name ILIKE :term", { term })
+            .orWhere("destinationHub.name ILIKE :term", { term });
+        }),
+      );
+    }
+
+    qb.orderBy("manifest.createdAt", "DESC");
+    const skip = (page - 1) * limit;
+    const [manifests, total] = await qb.skip(skip).take(limit).getManyAndCount();
 
     const parcelCounts = await this.countParcelsPerManifest(
       manifests.map((manifest) => manifest.id),
     );
 
-    return manifests.map((manifest) =>
-      this.toManifestListItem(manifest, parcelCounts.get(manifest.id) ?? 0),
-    );
+    return {
+      items: manifests.map((manifest) =>
+        this.toManifestListItem(manifest, parcelCounts.get(manifest.id) ?? 0),
+      ),
+      pagination: buildPaginationMeta(page, limit, total),
+    };
   }
 
   async getManifest(user: AuthenticatedUser, manifestId: string): Promise<ManifestDetails> {

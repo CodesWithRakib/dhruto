@@ -19,7 +19,13 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { BagStatus, ExceptionStatus, HubScanType, ScanOutcome } from "@dhruto/contracts";
+import {
+  BagStatus,
+  ExceptionStatus,
+  HubScanType,
+  ManifestStatus,
+  ScanOutcome,
+} from "@dhruto/contracts";
 import { HubsService } from "./hubs.service.js";
 import {
   AddParcelToBagDto,
@@ -173,23 +179,27 @@ export class HubsController {
   @ApiQuery({ name: "scanType", required: false, enum: HubScanType })
   @ApiQuery({ name: "outcome", required: false, enum: ScanOutcome })
   @ApiQuery({ name: "limit", required: false, type: Number })
+  @ApiQuery({ name: "cursor", required: false, type: String })
   async listScans(
     @Param("id") id: string,
     @CurrentUser() user: AuthenticatedUser | null,
     @Query("scanType") scanType?: HubScanType,
     @Query("outcome") outcome?: ScanOutcome,
     @Query("limit") limit?: string,
+    @Query("cursor") cursor?: string,
   ) {
-    const scans = await this.hubsService.listScans(this.actor(user), id, {
+    const result = await this.hubsService.listScans(this.actor(user), id, {
       scanType,
       outcome,
       limit: limit ? Number(limit) : undefined,
+      cursor,
     });
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Scans retrieved successfully",
-      data: scans,
+      data: result.items,
+      meta: result.meta,
     };
   }
 
@@ -244,17 +254,30 @@ export class HubsController {
   })
   @ApiQuery({ name: "hubId", required: false })
   @ApiQuery({ name: "status", required: false, enum: BagStatus })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
   async listBags(
     @CurrentUser() user: AuthenticatedUser | null,
     @Query("hubId") hubId?: string,
     @Query("status") status?: BagStatus,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
   ) {
-    const bags = await this.hubsService.listBags(this.actor(user), hubId, status);
+    const result = await this.hubsService.listBags(this.actor(user), {
+      hubId,
+      status,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Bags retrieved successfully",
-      data: bags,
+      data: result.items,
+      meta: result.pagination,
     };
   }
 
@@ -346,13 +369,31 @@ export class HubsController {
   @Get("hubs/:id/manifests")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Manifests originating from or destined for a hub" })
-  async listManifests(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser | null) {
-    const manifests = await this.hubsService.listManifests(this.actor(user), id);
+  @ApiQuery({ name: "status", required: false, enum: ManifestStatus })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
+  async listManifests(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser | null,
+    @Query("status") status?: ManifestStatus,
+    @Query("search") search?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+  ) {
+    const result = await this.hubsService.listManifests(this.actor(user), {
+      hubId: id,
+      status,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Manifests retrieved successfully",
-      data: manifests,
+      data: result.items,
+      meta: result.pagination,
     };
   }
 

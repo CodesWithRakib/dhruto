@@ -10,9 +10,8 @@ export interface RedisConfig {
 
 function resolveRedisUrl(): string | undefined {
   const explicitUrl = process.env.REDIS_URL;
-  // If explicitly set and not localhost default, use it directly
-  if (explicitUrl && !explicitUrl.includes("localhost") && !explicitUrl.includes("127.0.0.1")) {
-    return explicitUrl;
+  if (explicitUrl && explicitUrl.trim()) {
+    return explicitUrl.trim();
   }
 
   // If Upstash credentials are provided, construct the standard TLS TCP rediss:// URL
@@ -24,7 +23,7 @@ function resolveRedisUrl(): string | undefined {
     return `rediss://default:${token}@${rawHost}:6379`;
   }
 
-  return explicitUrl || undefined;
+  return undefined;
 }
 
 export const redisConfig = registerAs<RedisConfig>("redis", () => {
