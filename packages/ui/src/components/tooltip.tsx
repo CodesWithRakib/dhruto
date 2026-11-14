@@ -1,5 +1,31 @@
-import type * as React from "react";
+"use client";
+
+import * as React from "react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "../lib/utils.js";
+
+const TooltipProvider = TooltipPrimitive.Provider;
+const TooltipRoot = TooltipPrimitive.Root;
+const TooltipTrigger = TooltipPrimitive.Trigger;
+const TooltipPortal = TooltipPrimitive.Portal;
+
+const TooltipContent = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
+>(({ className, sideOffset = 6, ...props }, ref) => (
+  <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 overflow-hidden rounded-xl border border-border/80 bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-lg animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        className,
+      )}
+      {...props}
+    />
+  </TooltipPrimitive.Portal>
+));
+TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
 export interface TooltipProps {
   /** Visible trigger — must be focusable or contain focusable content for keyboard users. */
@@ -9,48 +35,34 @@ export interface TooltipProps {
   /** Visual placement of the bubble. Defaults to top. */
   side?: "top" | "bottom" | "left" | "right";
   className?: string;
+  delayDuration?: number;
 }
 
-/**
- * Dhruto — zero-dependency tooltip for icon buttons, truncated text and
- * technical metadata.
- *
- * - Sighted mouse users get a CSS bubble on hover/focus-within.
- * - Keyboard and screen-reader users rely on the trigger's own `aria-label`,
- *   so ALWAYS label icon-only triggers; the tooltip is an enhancement, never
- *   the only source of meaning.
- * - Never put essential information only in a tooltip — if it should always
- *   be visible, render it as text instead.
- */
-export function Tooltip({ children, content, side = "top", className }: TooltipProps) {
-  const bubblePosition =
-    side === "bottom"
-      ? "left-1/2 top-full -translate-x-1/2 translate-y-2"
-      : side === "left"
-        ? "right-full top-1/2 -translate-y-1/2 -translate-x-2"
-        : side === "right"
-          ? "left-full top-1/2 -translate-y-1/2 translate-x-2"
-          : "bottom-full left-1/2 -translate-x-1/2 -translate-y-2";
+export function Tooltip({
+  children,
+  content,
+  side = "top",
+  className,
+  delayDuration = 200,
+}: TooltipProps) {
+  if (!content) return <>{children}</>;
 
   return (
-    <span
-      className={cn(
-        "group/tooltip relative inline-flex max-w-full items-center",
-        className,
-      )}
-    >
-      {children}
-      <span
-        role="tooltip"
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute z-50 max-w-56 whitespace-normal rounded-xl border border-border/80 bg-popover/95 px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-md backdrop-blur-md",
-          "opacity-0 transition-all duration-200 ease-out group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 scale-95 group-focus-within/tooltip:opacity-100 group-focus-within/tooltip:scale-100",
-          bubblePosition,
-        )}
-      >
-        {content}
-      </span>
-    </span>
+    <TooltipProvider delayDuration={delayDuration}>
+      <TooltipRoot>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent side={side} className={className}>
+          {content}
+        </TooltipContent>
+      </TooltipRoot>
+    </TooltipProvider>
   );
 }
+
+export {
+  TooltipRoot,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+  TooltipPortal,
+};

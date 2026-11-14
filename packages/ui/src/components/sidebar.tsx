@@ -213,7 +213,7 @@ export const Sidebar = React.forwardRef<
         />
         <aside
           className={cn(
-            "fixed inset-y-0 z-20 hidden h-svh transition-[left,right,width] ease-linear duration-200 lg:flex flex-col",
+            "fixed inset-y-0 z-20 hidden h-svh transition-[left,right,width] ease-linear duration-200 lg:flex flex-col overflow-x-hidden",
             side === "left"
               ? "left-0"
               : "right-0",
@@ -227,7 +227,7 @@ export const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:border group-data-[variant=floating]:border-border group-data-[variant=floating]:shadow-md"
+            className="flex h-full w-full flex-col bg-sidebar overflow-x-hidden group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:border group-data-[variant=floating]:border-border group-data-[variant=floating]:shadow-md"
           >
             {children}
           </div>
@@ -296,7 +296,10 @@ export const SidebarHeader = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="header"
-    className={cn("flex flex-col gap-2 p-3", className)}
+    className={cn(
+      "flex flex-col gap-2 p-3 overflow-hidden group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:items-center",
+      className,
+    )}
     {...props}
   />
 ));
@@ -309,7 +312,7 @@ export const SidebarFooter = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="footer"
-    className={cn("flex flex-col gap-2 p-3 mt-auto", className)}
+    className={cn("flex flex-col gap-2 p-3 mt-auto group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:items-center", className)}
     {...props}
   />
 ));
@@ -323,7 +326,7 @@ export const SidebarContent = React.forwardRef<
     ref={ref}
     data-sidebar="content"
     className={cn(
-      "flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 scrollbar-thin",
+      "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden p-2 scrollbar-thin",
       className,
     )}
     {...props}
@@ -403,7 +406,7 @@ export const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-xl p-2 text-left text-sm font-medium outline-none transition-all duration-200 hover:bg-surface-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/20 disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-xl p-2 text-left text-sm font-medium outline-none transition-all duration-200 hover:bg-surface-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/20 disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {

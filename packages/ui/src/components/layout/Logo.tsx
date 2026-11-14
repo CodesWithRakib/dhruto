@@ -1,3 +1,4 @@
+import * as React from "react";
 import { cn } from "../../lib/utils.js";
 
 export interface LogoProps {
@@ -20,6 +21,14 @@ export function Logo({
   inverted = false,
   className,
 }: LogoProps) {
+  const rawId = React.useId();
+  const id = rawId.replace(/[^a-zA-Z0-9-_]/g, "");
+  const emblemGradId = `dhrutoEmblemGrad_${id}`;
+  const wingGradId = `dhrutoWingGrad_${id}`;
+  const voltGradId = `dhrutoVoltGrad_${id}`;
+  const amberGradId = `dhrutoAmberGrad_${id}`;
+  const textGradId = `dhrutoTextGrad_${id}`;
+
   // Dimension ratios
   const height = size === "sm" ? 36 : size === "default" ? 44 : 54;
   const width = markOnly
@@ -42,30 +51,30 @@ export function Logo({
         aria-label="Dhruto Express"
       >
         <defs>
-          <linearGradient id="dhrutoEmblemGradComp" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={emblemGradId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0f172a" />
             <stop offset="50%" stopColor="#1e1b4b" />
             <stop offset="100%" stopColor="#31104b" />
           </linearGradient>
 
-          <linearGradient id="dhrutoWingGradComp" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={wingGradId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#38bdf8" />
             <stop offset="50%" stopColor="#818cf8" />
             <stop offset="100%" stopColor="#c084fc" />
           </linearGradient>
 
-          <linearGradient id="dhrutoVoltGradComp" x1="0%" y1="100%" x2="100%" y2="0%">
+          <linearGradient id={voltGradId} x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#10b981" />
             <stop offset="50%" stopColor="#06b6d4" />
             <stop offset="100%" stopColor="#38bdf8" />
           </linearGradient>
 
-          <linearGradient id="dhrutoAmberGradComp" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={amberGradId} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#fbbf24" />
             <stop offset="100%" stopColor="#f59e0b" />
           </linearGradient>
 
-          <linearGradient id="dhrutoTextGradComp" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={textGradId} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#8b5cf6" />
             <stop offset="50%" stopColor="#06b6d4" />
             <stop offset="100%" stopColor="#10b981" />
@@ -74,7 +83,7 @@ export function Logo({
 
         {/* 1. Aerodynamic Velocity Squircle Mark */}
         <g>
-          <rect width="120" height="120" rx="34" fill="url(#dhrutoEmblemGradComp)" />
+          <rect width="120" height="120" rx="34" fill={`url(#${emblemGradId})`} />
           <rect
             x="2.5"
             y="2.5"
@@ -98,14 +107,14 @@ export function Logo({
           {/* Outer Speed Wing (Aerodynamic D curve) */}
           <path
             d="M42 26 C68 26, 98 42, 102 62 C106 82, 84 96, 56 96 C48 96, 42 94, 38 90 L48 78 C52 80, 56 81, 60 81 C76 81, 88 72, 86 61 C84 50, 68 41, 48 41 L36 41 L42 26 Z"
-            fill="url(#dhrutoWingGradComp)"
+            fill={`url(#${wingGradId})`}
           />
 
           {/* Inner Supersonic Courier Arrow */}
-          <path d="M48 34 L78 58 L54 62 L68 88 L34 56 L54 52 Z" fill="url(#dhrutoVoltGradComp)" />
+          <path d="M48 34 L78 58 L54 62 L68 88 L34 56 L54 52 Z" fill={`url(#${voltGradId})`} />
 
           {/* Parcel Core */}
-          <polygon points="76,46 90,56 78,66 64,56" fill="url(#dhrutoAmberGradComp)" />
+          <polygon points="76,46 90,56 78,66 64,56" fill={`url(#${amberGradId})`} />
           <circle cx="88" cy="38" r="4.5" fill="#38bdf8" />
           <circle cx="88" cy="38" r="2" fill="#ffffff" />
         </g>
@@ -122,7 +131,7 @@ export function Logo({
               letterSpacing="-2"
               className={inverted ? "fill-white" : "fill-foreground"}
             >
-              Dhruto<tspan fill="url(#dhrutoTextGradComp)" fontWeight="900" letterSpacing="-1.2">Express</tspan>
+              Dhruto<tspan fill={`url(#${textGradId})`} fontWeight="900" letterSpacing="-1.2">Express</tspan>
             </text>
 
             <g transform="translate(2, 84)">

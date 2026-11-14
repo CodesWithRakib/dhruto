@@ -17,7 +17,6 @@ import {
   SidebarTrigger,
   SidebarHeader,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
@@ -93,7 +92,7 @@ function SidebarNavItems({
                           href={item.href}
                           onClick={handleItemClick}
                           aria-current={active ? "page" : undefined}
-                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200"
+                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
                         >
                           <Icon
                             className={cn(
@@ -102,7 +101,7 @@ function SidebarNavItems({
                             )}
                             aria-hidden="true"
                           />
-                          <span className="truncate">{label}</span>
+                          <span className="truncate group-data-[collapsible=icon]:hidden">{label}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -186,7 +185,7 @@ export function DashboardShell({
             <Link
               href="/"
               aria-label="Dhruto"
-              className="flex items-center gap-2 overflow-hidden rounded-xl transition-transform hover:scale-105"
+              className="flex items-center gap-2 overflow-hidden rounded-xl transition-transform hover:scale-105 group-data-[collapsible=icon]:justify-center"
             >
               <div className="group-data-[collapsible=icon]:hidden">
                 <Logo size="sm" />
@@ -200,21 +199,6 @@ export function DashboardShell({
           <SidebarContent className="p-2">
             <SidebarNavItems groups={groups} />
           </SidebarContent>
-
-          <SidebarFooter className="p-2">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip={t("signOut")}
-                  onClick={() => setShowLogoutModal(true)}
-                  className="text-danger hover:bg-danger-soft hover:text-danger-soft-foreground"
-                >
-                  <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="truncate">{t("signOut")}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
 
           {/* Interactive hover/drag rail on edge for click-to-toggle */}
           <SidebarRail />

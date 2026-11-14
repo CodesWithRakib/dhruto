@@ -23,89 +23,89 @@ module.exports = {
     },
     extend: {
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        background: "hsl(var(--background) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
 
         surface: {
-          DEFAULT: "hsl(var(--surface))",
-          muted: "hsl(var(--surface-muted))",
-          elevated: "hsl(var(--surface-elevated))",
-          hover: "hsl(var(--surface-hover))",
-          selected: "hsl(var(--surface-selected))",
+          DEFAULT: "hsl(var(--surface) / <alpha-value>)",
+          muted: "hsl(var(--surface-muted) / <alpha-value>)",
+          elevated: "hsl(var(--surface-elevated) / <alpha-value>)",
+          hover: "hsl(var(--surface-hover) / <alpha-value>)",
+          selected: "hsl(var(--surface-selected) / <alpha-value>)",
         },
 
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
         overlay: "hsl(var(--overlay) / 0.5)",
 
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "hsl(var(--card) / <alpha-value>)",
+          foreground: "hsl(var(--card-foreground) / <alpha-value>)",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "hsl(var(--popover) / <alpha-value>)",
+          foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
         },
 
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          hover: "hsl(var(--primary-hover))",
-          foreground: "hsl(var(--primary-foreground))",
-          soft: "hsl(var(--primary-soft))",
-          "soft-foreground": "hsl(var(--primary-soft-foreground))",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          hover: "hsl(var(--primary-hover) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
+          soft: "hsl(var(--primary-soft) / <alpha-value>)",
+          "soft-foreground": "hsl(var(--primary-soft-foreground) / <alpha-value>)",
         },
 
         brand: {
-          DEFAULT: "hsl(var(--brand-green))",
-          hover: "hsl(var(--brand-green-hover))",
-          soft: "hsl(var(--primary-soft))",
+          DEFAULT: "hsl(var(--brand-green) / <alpha-value>)",
+          hover: "hsl(var(--brand-green-hover) / <alpha-value>)",
+          soft: "hsl(var(--primary-soft) / <alpha-value>)",
         },
 
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
         },
 
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
 
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
         },
 
         success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-          soft: "hsl(var(--success-soft))",
-          "soft-foreground": "hsl(var(--success-soft-foreground))",
+          DEFAULT: "hsl(var(--success) / <alpha-value>)",
+          foreground: "hsl(var(--success-foreground) / <alpha-value>)",
+          soft: "hsl(var(--success-soft) / <alpha-value>)",
+          "soft-foreground": "hsl(var(--success-soft-foreground) / <alpha-value>)",
         },
         warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-          soft: "hsl(var(--warning-soft))",
-          "soft-foreground": "hsl(var(--warning-soft-foreground))",
+          DEFAULT: "hsl(var(--warning) / <alpha-value>)",
+          foreground: "hsl(var(--warning-foreground) / <alpha-value>)",
+          soft: "hsl(var(--warning-soft) / <alpha-value>)",
+          "soft-foreground": "hsl(var(--warning-soft-foreground) / <alpha-value>)",
         },
         danger: {
-          DEFAULT: "hsl(var(--danger))",
-          foreground: "hsl(var(--danger-foreground))",
-          soft: "hsl(var(--danger-soft))",
-          "soft-foreground": "hsl(var(--danger-soft-foreground))",
+          DEFAULT: "hsl(var(--danger) / <alpha-value>)",
+          foreground: "hsl(var(--danger-foreground) / <alpha-value>)",
+          soft: "hsl(var(--danger-soft) / <alpha-value>)",
+          "soft-foreground": "hsl(var(--danger-soft-foreground) / <alpha-value>)",
         },
         info: {
-          DEFAULT: "hsl(var(--info))",
-          foreground: "hsl(var(--info-foreground))",
-          soft: "hsl(var(--info-soft))",
-          "soft-foreground": "hsl(var(--info-soft-foreground))",
+          DEFAULT: "hsl(var(--info) / <alpha-value>)",
+          foreground: "hsl(var(--info-foreground) / <alpha-value>)",
+          soft: "hsl(var(--info-soft) / <alpha-value>)",
+          "soft-foreground": "hsl(var(--info-soft-foreground) / <alpha-value>)",
         },
 
         /* shadcn compatibility alias — prefer `danger` in new code. */
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
         },
       },
 
