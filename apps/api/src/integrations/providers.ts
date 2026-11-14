@@ -268,13 +268,24 @@ export class HttpEmailProvider implements EmailProvider {
   }
 }
 
+import { BulkSmsBdProvider } from "./bulksmsbd.provider.js";
+export { BulkSmsBdProvider };
+
 export function createSmsProvider(): SmsProvider {
-  const endpoint = process.env.SMS_PROVIDER_URL?.trim();
-  const apiKey = process.env.SMS_PROVIDER_KEY?.trim();
-  if (endpoint && apiKey) {
-    return new HttpSmsProvider(endpoint, apiKey);
+  // If legacy generic HTTP SMS endpoint is explicitly set
+  const legacyEndpoint = process.env.SMS_PROVIDER_URL?.trim();
+  const legacyApiKey = process.env.SMS_PROVIDER_KEY?.trim();
+  if (legacyEndpoint && legacyApiKey && !process.env.BULKSMSBD_API_KEY) {
+    return new HttpSmsProvider(legacyEndpoint, legacyApiKey);
   }
-  return new LogSmsProvider();
+
+  // BulkSMSBD Provider (Bangladesh Standard)
+  return new BulkSmsBdProvider({
+    apiKey: process.env.BULKSMSBD_API_KEY || legacyApiKey || "",
+    senderId: process.env.BULKSMSBD_SENDER_ID || "Dhruto",
+    endpoint: process.env.BULKSMSBD_URL || "https://bulksmsbd.net/api/smsapi",
+    enabled: process.env.SMS_ENABLED === "true",
+  });
 }
 
 export function createEmailProvider(): EmailProvider {

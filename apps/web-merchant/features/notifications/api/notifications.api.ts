@@ -78,6 +78,18 @@ export const notificationsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Notification"],
     }),
+
+    testInAppNotification: builder.mutation<
+      ApiResponse<NotificationItem>,
+      { title?: string; message?: string }
+    >({
+      query: (payload) => ({
+        url: "/notifications/test-inapp",
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Notification"],
+    }),
   }),
 });
 
@@ -89,4 +101,5 @@ export const {
   useGetNotificationPreferencesQuery,
   useUpdateNotificationPreferencesMutation,
   useTestSmsNotificationMutation,
+  useTestInAppNotificationMutation,
 } = notificationsApi;

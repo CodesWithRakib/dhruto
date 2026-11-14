@@ -789,6 +789,24 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     }
     const notificationId: string = identifier.id;
 
+    if (isInApp) {
+      this.notifications.notifyRealtime({
+        id: notificationId,
+        merchantId: recipient.merchantId,
+        userId: recipient.userId,
+        channel,
+        type: target.type,
+        title: text.title,
+        message: text.body,
+        status: NotificationStatus.SENT,
+        metadata: {
+          eventId: row.eventId,
+          eventType: row.eventType,
+          ...(recipient.route ? { route: recipient.route } : {}),
+        },
+      });
+    }
+
     if (channel !== NotificationChannel.IN_APP) {
       if (this.notificationsQueue) {
         await enqueueOrInline(

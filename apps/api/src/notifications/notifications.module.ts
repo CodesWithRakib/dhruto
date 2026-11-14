@@ -11,6 +11,7 @@ import {
 import { NotificationsService } from "./notifications.service.js";
 import { NotificationsController } from "./notifications.controller.js";
 import { NotificationsProcessor } from "./notifications.processor.js";
+import { NotificationsGateway } from "./gateways/notifications.gateway.js";
 import { SmsService } from "./services/sms.service.js";
 import { EmailService } from "./services/email.service.js";
 import { MerchantsModule } from "../merchants/merchants.module.js";
@@ -37,6 +38,7 @@ import { createEmailProvider, createSmsProvider } from "../integrations/provider
   providers: [
     NotificationsService,
     NotificationsProcessor,
+    NotificationsGateway,
     SmsService,
     EmailService,
     // Provider abstraction: HTTP transports when configured via env,
@@ -45,6 +47,6 @@ import { createEmailProvider, createSmsProvider } from "../integrations/provider
     { provide: "SMS_PROVIDER", useFactory: () => createSmsProvider() },
     { provide: "EMAIL_PROVIDER", useFactory: () => createEmailProvider() },
   ],
-  exports: [NotificationsService, SmsService, EmailService],
+  exports: [NotificationsService, NotificationsGateway, SmsService, EmailService],
 })
 export class NotificationsModule {}

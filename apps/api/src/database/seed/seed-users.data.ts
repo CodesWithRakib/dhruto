@@ -23,7 +23,7 @@ export const SEED_USERS: SeedUserData[] = [
   {
     name: "Rahim Uddin (Rahim Enterprise)",
     email: "merchant@dhruto.com",
-    phone: "01700000002",
+    phone: "01767476724",
     role: UserRole.MERCHANT,
     status: UserStatus.ACTIVE,
     notes: "Primary merchant selling consumer goods and apparel",
@@ -90,7 +90,7 @@ export const SEED_USERS: SeedUserData[] = [
   {
     name: "Mahmudur Rahman",
     email: "customer@dhruto.com",
-    phone: "01700000005",
+    phone: "01952879249",
     role: UserRole.CUSTOMER,
     status: UserStatus.ACTIVE,
     notes: "Verified retail customer in Gulshan, Dhaka",

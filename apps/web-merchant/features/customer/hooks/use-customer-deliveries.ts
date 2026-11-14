@@ -544,6 +544,7 @@ export function useCustomerDeliveries() {
         toast.success(`Fresh doorstep OTP generated for ${code}: ${freshOtp}`);
         return freshOtp;
       }
+      return freshOtp;
     },
     [deliveries, triggerRefreshOtpMutation, saveDeliveries]
   );

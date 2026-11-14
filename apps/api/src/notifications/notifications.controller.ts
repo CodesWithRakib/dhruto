@@ -198,4 +198,26 @@ export class NotificationsController {
 
     return envelope(HttpStatus.OK, "Test SMS dispatched successfully", notification, req);
   }
+
+  @Post("test-inapp")
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 20, windowSeconds: 60, scope: "notification-test" })
+  @ApiOperation({ summary: "Dispatch test in-app notification to verify real-time socket & audio chime" })
+  async testInApp(
+    @Body() dto: { title?: string; message?: string },
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req?: RequestWithId,
+  ) {
+    const scope = await this.resolveScope(user);
+    const notification = await this.notificationsService.createNotification({
+      merchantId: scope.merchantId,
+      userId: scope.userId,
+      channel: NotificationChannel.IN_APP,
+      type: NotificationType.SYSTEM,
+      title: dto.title || "Real-Time Notification",
+      message: dto.message || "This is a real-time notification with audio chime alert!",
+    });
+
+    return envelope(HttpStatus.OK, "In-app notification dispatched successfully", notification, req);
+  }
 }

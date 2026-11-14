@@ -33,6 +33,7 @@ import {
 import { getErrorMessage } from "../common/utils/error.util.js";
 import type { EmailProvider, SmsProvider } from "../integrations/providers.js";
 import { enqueueOrInline } from "../integrations/queue-helper.js";
+import { NotificationsGateway } from "./gateways/notifications.gateway.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -57,11 +58,29 @@ export class NotificationsService {
     @Optional() @Inject("SMS_PROVIDER") private readonly smsProvider?: SmsProvider,
     @Optional() @Inject("EMAIL_PROVIDER") private readonly emailProvider?: EmailProvider,
     @Optional() @InjectQueue("notifications") private readonly notificationsQueue?: Queue,
+    @Optional() private readonly gateway?: NotificationsGateway,
   ) {}
 
   /**
+   * Helper to emit realtime unread counts to connected sockets.
+   */
+  async emitUnreadCount(scope: { merchantId?: string; userId?: string }): Promise<void> {
+    try {
+      const count = await this.getUnreadCount(scope);
+      if (scope.userId) {
+        this.gateway?.emitToUser(scope.userId, "notification:unread_count", { unreadCount: count });
+      }
+      if (scope.merchantId) {
+        this.gateway?.emitToMerchant(scope.merchantId, "notification:unread_count", { unreadCount: count });
+      }
+    } catch {
+      // Non-critical background push
+    }
+  }
+
+  /**
    * Creates a notification record. SMS/EMAIL rows start PENDING for worker
-   * transport; IN_APP rows complete immediately (no provider involved).
+   * transport; IN_APP rows complete immediately and emit real-time push.
    */
   async createNotification(dto: CreateNotificationDto): Promise<Notification> {
     const channel = dto.channel;
@@ -87,7 +106,44 @@ export class NotificationsService {
       `NOTIFICATION_CREATED id=${notification.id} channel=${channel} type=${dto.type} recipient=${dto.recipientTarget || dto.merchantId || dto.userId || "-"}`,
     );
 
+    // Push real-time WebSocket notification if in-app
+    if (inApp) {
+      this.notifyRealtime(this.toItem(notification));
+    }
+
     return notification;
+  }
+
+  /**
+   * Broadcasts a notification immediately over real-time WebSockets to connected user/merchant.
+   */
+  notifyRealtime(item: NotificationItem | {
+    id: string;
+    userId?: string | null;
+    merchantId?: string | null;
+    channel: NotificationChannel;
+    type: NotificationType;
+    title: string;
+    message: string;
+    status: NotificationStatus;
+    metadata?: Record<string, unknown> | null;
+    createdAt?: string;
+  }): void {
+    const formatted = {
+      ...item,
+      merchantId: item.merchantId || undefined,
+      userId: item.userId || undefined,
+      metadata: item.metadata || undefined,
+      createdAt: item.createdAt || new Date().toISOString(),
+    };
+    if (item.userId) {
+      this.gateway?.emitToUser(item.userId, "notification:new", formatted);
+      void this.emitUnreadCount({ userId: item.userId });
+    }
+    if (item.merchantId) {
+      this.gateway?.emitToMerchant(item.merchantId, "notification:new", formatted);
+      void this.emitUnreadCount({ merchantId: item.merchantId });
+    }
   }
 
   /**
@@ -302,7 +358,14 @@ export class NotificationsService {
 
     notification.status = NotificationStatus.READ;
     notification.readAt = new Date();
-    return this.notificationRepo.save(notification);
+    const saved = await this.notificationRepo.save(notification);
+    void this.emitUnreadCount(
+      scope || {
+        merchantId: notification.merchantId || undefined,
+        userId: notification.userId || undefined,
+      },
+    );
+    return saved;
   }
 
   /**
@@ -325,6 +388,7 @@ export class NotificationsService {
       return { updatedCount: 0 };
     }
     const result = await query.execute();
+    void this.emitUnreadCount(scope);
     return { updatedCount: result.affected || 0 };
   }
 

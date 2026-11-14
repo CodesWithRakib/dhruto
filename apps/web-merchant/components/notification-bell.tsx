@@ -13,6 +13,9 @@ import {
   Loader2,
   X,
   Info,
+  Sparkles,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { Badge, Button } from "@dhruto/ui";
 import {
@@ -21,11 +24,14 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
   useTestSmsNotificationMutation,
+  useTestInAppNotificationMutation,
 } from "../features/notifications/api/notifications.api";
 import { NotificationChannel, NotificationType } from "@dhruto/contracts";
 import { getApiErrorMessage } from "../lib/api-error";
 import { formatDate } from "@/lib/format";
 import { useAppSelector } from "@/store/hooks";
+import { useNotificationSocket } from "../features/notifications/hooks/use-notification-socket";
+import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
 
 export function NotificationBell() {
   const authUser = useAppSelector((s) => s.auth.user);
@@ -53,6 +59,30 @@ export function NotificationBell() {
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllNotificationsAsReadMutation();
   const [testSms, { isLoading: isSendingSms }] = useTestSmsNotificationMutation();
+  const [testInApp, { isLoading: isSendingInApp }] = useTestInAppNotificationMutation();
+
+  const { isConnected } = useNotificationSocket();
+  const [soundActive, setSoundActive] = useState(isSoundEnabled());
+
+  const handleToggleSound = () => {
+    const next = !soundActive;
+    setSoundActive(next);
+    setSoundEnabled(next);
+    if (next) {
+      playNotificationSound(true);
+    }
+  };
+
+  const handleTestInApp = async () => {
+    try {
+      await testInApp({
+        title: "Real-Time Test Alert",
+        message: "Your real-time socket and sound chime notification is working!",
+      }).unwrap();
+    } catch {
+      playNotificationSound(true);
+    }
+  };
 
   const unreadCount = countData?.data?.unreadCount || 0;
   const rawData = notifsData?.data as
@@ -181,34 +211,67 @@ export function NotificationBell() {
       {isOpen && (
         <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-card text-card-foreground sm:w-96">
           {/* Header */}
-          <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/30">
+          <div className="px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2 bg-muted/30">
             <div className="flex items-center gap-2">
               <h4 className="font-semibold text-sm">Notifications</h4>
               {unreadCount > 0 && (
-                <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4">
+                <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 font-bold">
                   {unreadCount} new
                 </Badge>
               )}
+              <span
+                className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
+                  isConnected
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    : "bg-muted text-muted-foreground border-border"
+                }`}
+                title={isConnected ? "Real-time WebSocket connected" : "Connecting..."}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"}`} />
+                {isConnected ? "Live" : "Offline"}
+              </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleToggleSound}
+                className={`p-1.5 rounded-lg border text-xs transition-colors ${
+                  soundActive
+                    ? "text-primary border-primary/30 bg-primary/10 hover:bg-primary/20"
+                    : "text-muted-foreground border-border bg-muted/40 hover:bg-muted"
+                }`}
+                title={soundActive ? "Notification sound enabled (click to mute)" : "Notification sound muted (click to unmute)"}
+              >
+                {soundActive ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                type="button"
+                onClick={handleTestInApp}
+                disabled={isSendingInApp}
+                className="text-xs text-primary hover:text-primary-foreground hover:bg-primary border border-primary/25 rounded-lg px-2 py-1 transition-all flex items-center gap-1 font-medium shadow-2xs"
+                title="Test real-time alert sound & toast"
+              >
+                <Sparkles className="h-3 w-3" />
+                Test Sound
+              </button>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
                   disabled={isMarkingAll}
-                  className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border border-border/70 rounded-lg px-2 py-1 hover:bg-muted disabled:opacity-50 transition-colors"
                 >
                   <CheckCheck className="h-3.5 w-3.5" />
-                  Mark all read
+                  Read all
                 </button>
               )}
               {!isCustomer && (
                 <button
                   onClick={() => setShowSmsModal(true)}
-                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border rounded px-1.5 py-0.5 hover:bg-muted"
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border border-border/70 rounded-lg px-2 py-1 hover:bg-muted transition-colors"
                   title="Send test SMS"
                 >
                   <Smartphone className="h-3 w-3 text-info" aria-hidden="true" />
-                  Test SMS
+                  SMS
                 </button>
               )}
             </div>
