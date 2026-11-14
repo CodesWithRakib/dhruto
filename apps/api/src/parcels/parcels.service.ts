@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import {
   ConflictException,
   ForbiddenException,
@@ -609,7 +610,7 @@ export class ParcelsService {
     }
 
     return {
-      items: items.map((row) => this.toSummary(row)),
+      items: items.map((row) => this.toSummary(row, scope)),
       pagination: {
         page,
         limit,
@@ -637,7 +638,7 @@ export class ParcelsService {
     });
 
     return {
-      ...this.toSummary(parcel),
+      ...this.toSummary(parcel, scope),
       merchantId: parcel.merchantId,
       merchantName: parcel.merchant?.businessName ?? "Dhruto Merchant",
       pickupAddress: parcel.merchant?.pickupAddress ?? "",
@@ -681,13 +682,18 @@ export class ParcelsService {
     const parcel = await this.findParcelOrThrow(idOrCode);
     this.assertOwnership(parcel, scope);
 
-    const otp = this.generateParcelOtp(parcel.trackingCode);
     const isVerified = parcel.status === ParcelStatus.DELIVERED || Boolean(parcel.otpVerifiedAt);
+    let otp = parcel.deliveryOtpCode;
 
-    // If parcel does not have a hash yet, synchronize deliveryOtpHash in the database
-    if (!parcel.deliveryOtpHash && this.passwordService) {
-      parcel.deliveryOtpHash = await this.passwordService.hash(otp);
-      parcel.otpExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // If OTP is not yet persisted in plaintext, issue or sync it now
+    if (!otp) {
+      otp = String(randomInt(100000, 1000000));
+      parcel.deliveryOtpCode = otp;
+      if (this.passwordService) {
+        parcel.deliveryOtpHash = await this.passwordService.hash(otp);
+      }
+      parcel.otpExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      parcel.otpAttempts = 0;
       await this.parcelRepo.save(parcel);
     }
 
@@ -697,6 +703,45 @@ export class ParcelsService {
       otp,
       status: parcel.status,
       verified: isVerified,
+      expiresAt: parcel.otpExpiresAt?.toISOString(),
+    };
+  }
+
+  /**
+   * Generates a fresh unique 6-digit delivery OTP and synchronizes the bcrypt hash
+   * in the database so verification by the rider succeeds immediately.
+   */
+  async refreshParcelDeliveryOtp(
+    idOrCode: string,
+    scope: ParcelAccessScope,
+  ): Promise<{
+    parcelId: string;
+    trackingCode: string;
+    otp: string;
+    status: ParcelStatus;
+    verified: boolean;
+    expiresAt?: string;
+  }> {
+    const parcel = await this.findParcelOrThrow(idOrCode);
+    this.assertOwnership(parcel, scope);
+
+    const otp = String(randomInt(100000, 1000000));
+    parcel.deliveryOtpCode = otp;
+    if (this.passwordService) {
+      parcel.deliveryOtpHash = await this.passwordService.hash(otp);
+    }
+    parcel.otpExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    parcel.otpAttempts = 0;
+    parcel.otpRequestCount = (parcel.otpRequestCount || 0) + 1;
+    parcel.lastOtpRequestedAt = new Date();
+    await this.parcelRepo.save(parcel);
+
+    return {
+      parcelId: parcel.id,
+      trackingCode: parcel.trackingCode,
+      otp,
+      status: parcel.status,
+      verified: false,
       expiresAt: parcel.otpExpiresAt?.toISOString(),
     };
   }
@@ -1540,7 +1585,7 @@ export class ParcelsService {
     };
   }
 
-  private toSummary(parcel: Parcel): ParcelSummary {
+  private toSummary(parcel: Parcel, scope?: ParcelAccessScope): ParcelSummary {
     const legacy = this.readLegacyAddress(parcel);
     return {
       id: parcel.id,
@@ -1555,6 +1600,10 @@ export class ParcelsService {
       weight: Number(parcel.weight),
       deliveryFee: Number(parcel.deliveryFee),
       status: parcel.status,
+      deliveryOtp:
+        scope?.isCustomer || scope?.isAdmin
+          ? (parcel.deliveryOtpCode ?? undefined)
+          : undefined,
       createdAt: parcel.createdAt.toISOString(),
       updatedAt: parcel.updatedAt.toISOString(),
     };

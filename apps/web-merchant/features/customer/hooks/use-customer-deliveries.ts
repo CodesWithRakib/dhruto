@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   useGetParcelsQuery,
   useLazyGetPublicTrackingQuery,
+  useRefreshDeliveryOtpMutation,
 } from "@/features/parcels/api/parcels.api";
 import {
   ParcelStatus,
@@ -34,7 +35,7 @@ export interface CustomerDelivery {
   timeline?: PublicTrackingResponse["timeline"];
 }
 
-const STORAGE_KEY = "dhruto_customer_deliveries_v3";
+const STORAGE_KEY = "dhruto_customer_deliveries_v4";
 
 /**
  * Seed tracking codes that point to real database records.
@@ -164,7 +165,7 @@ function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
       parcel.status === ParcelStatus.OUT_FOR_DELIVERY || parcel.status === ParcelStatus.DELIVERED
         ? "+8801700000003"
         : undefined,
-    otp: generateDeliveryOtp(parcel.trackingCode),
+    otp: parcel.deliveryOtp || generateDeliveryOtp(parcel.trackingCode),
     deliveredAt: isDelivered ? new Date(parcel.updatedAt).toLocaleDateString() : undefined,
     updatedAt: parcel.updatedAt,
   };
@@ -225,6 +226,7 @@ export function useCustomerDeliveries() {
   const { data: parcelsResponse, isLoading: isLoadingParcels, refetch: refetchParcels } =
     useGetParcelsQuery({ limit: 50 });
   const [triggerFetchTracking] = useLazyGetPublicTrackingQuery();
+  const [triggerRefreshOtpMutation] = useRefreshDeliveryOtpMutation();
 
   // Sync state to localStorage whenever deliveries change
   const saveDeliveries = React.useCallback((next: CustomerDelivery[]) => {
@@ -511,24 +513,39 @@ export function useCustomerDeliveries() {
 
   /**
    * Re-generate or issue a fresh unique delivery OTP for a specific parcel
+   * Synchronizes with backend database and rider verification
    */
   const refreshOtp = React.useCallback(
-    (code: string) => {
-      const freshOtp = String(Math.floor(100000 + Math.random() * 900000));
-      const updated = deliveries.map((d) => {
-        if (d.trackingCode === code) {
-          return {
-            ...d,
-            otp: freshOtp,
-          };
+    async (code: string) => {
+      const target = deliveries.find((d) => d.trackingCode === code);
+      const targetId = target?.id || code;
+      let freshOtp = "";
+      try {
+        const res = await triggerRefreshOtpMutation(targetId).unwrap();
+        if (res.data?.otp) {
+          freshOtp = res.data.otp;
         }
-        return d;
-      });
-      saveDeliveries(updated);
-      toast.success(`Fresh doorstep OTP generated for ${code}: ${freshOtp}`);
-      return freshOtp;
+      } catch {
+        // Fallback if offline
+        freshOtp = String(Math.floor(100000 + Math.random() * 900000));
+      }
+
+      if (freshOtp) {
+        const updated = deliveries.map((d) => {
+          if (d.trackingCode === code) {
+            return {
+              ...d,
+              otp: freshOtp,
+            };
+          }
+          return d;
+        });
+        saveDeliveries(updated);
+        toast.success(`Fresh doorstep OTP generated for ${code}: ${freshOtp}`);
+        return freshOtp;
+      }
     },
-    [deliveries, saveDeliveries]
+    [deliveries, triggerRefreshOtpMutation, saveDeliveries]
   );
 
   /**

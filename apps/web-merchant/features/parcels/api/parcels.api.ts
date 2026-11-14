@@ -300,6 +300,46 @@ export const parcelsApi = baseApi.injectEndpoints({
         "Hub",
       ],
     }),
+
+    getDeliveryOtp: builder.query<
+      ApiResponse<{
+        parcelId: string;
+        trackingCode: string;
+        otp: string;
+        status: ParcelStatus;
+        verified: boolean;
+        expiresAt?: string;
+      }>,
+      string
+    >({
+      query: (id) => ({
+        url: `/parcels/${id}/delivery-otp`,
+        method: "GET",
+      }),
+      providesTags: (_res, _err, id) => [{ type: PARCEL_TAG, id: `OTP-${id}` }],
+    }),
+
+    refreshDeliveryOtp: builder.mutation<
+      ApiResponse<{
+        parcelId: string;
+        trackingCode: string;
+        otp: string;
+        status: ParcelStatus;
+        verified: boolean;
+        expiresAt?: string;
+      }>,
+      string
+    >({
+      query: (id) => ({
+        url: `/parcels/${id}/delivery-otp/refresh`,
+        method: "POST",
+      }),
+      invalidatesTags: (_res, _err, id) => [
+        { type: PARCEL_TAG, id: `OTP-${id}` },
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -310,6 +350,9 @@ export const {
   useGetShippingLabelQuery,
   useGetPublicTrackingQuery,
   useLazyGetPublicTrackingQuery,
+  useGetDeliveryOtpQuery,
+  useLazyGetDeliveryOtpQuery,
+  useRefreshDeliveryOtpMutation,
   useCalculatePricingMutation,
   useCreateParcelMutation,
   useGetBulkTemplateQuery,

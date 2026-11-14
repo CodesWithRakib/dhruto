@@ -127,6 +127,7 @@ export const parcelSummarySchema = z.object({
   weight: z.number(),
   deliveryFee: z.number(),
   status: z.nativeEnum(ParcelStatus),
+  deliveryOtp: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

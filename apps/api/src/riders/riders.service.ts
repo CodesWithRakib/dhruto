@@ -1674,6 +1674,7 @@ export class RidersService {
     const otp = String(randomInt(100000, 1000000));
     const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000);
     parcel.deliveryOtpHash = await this.passwordService.hash(otp);
+    parcel.deliveryOtpCode = otp;
     parcel.otpExpiresAt = expiresAt;
     parcel.otpAttempts = 0;
     parcel.otpVerifiedAt = null;

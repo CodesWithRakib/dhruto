@@ -219,6 +219,34 @@ export class ParcelsController {
     };
   }
 
+  @Post(":id/delivery-otp/refresh")
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 15, windowSeconds: 60, scope: "parcel-otp-refresh" })
+  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: "Generate fresh delivery OTP for parcel recipient",
+    description: "Generates and returns a fresh 6-digit delivery OTP for the authenticated recipient and synchronizes bcrypt hash in DB.",
+  })
+  async refreshDeliveryOtp(
+    @Param("id") id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const data = await this.parcelsService.refreshParcelDeliveryOtp(id, scope);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Delivery OTP refreshed successfully",
+      data,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
   @Get(":id/history")
   @HttpCode(HttpStatus.OK)
   @RateLimit({ limit: 180, windowSeconds: 60, scope: "parcel-history" })

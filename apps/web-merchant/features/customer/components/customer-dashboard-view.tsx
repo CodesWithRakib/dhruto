@@ -719,10 +719,19 @@ export function CustomerDashboardView() {
                           </strong>
                         </span>
                         <span>•</span>
-                        <span className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 px-2 py-0.5 rounded-md font-bold border border-primary/20">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopy(delivery.otp, `Delivery OTP for ${delivery.trackingCode}`);
+                          }}
+                          title="Click to copy delivery OTP"
+                          className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 hover:bg-primary-soft hover:border-primary/40 px-2 py-0.5 rounded-md font-bold border border-primary/20 transition-all cursor-pointer shadow-2xs group/otp"
+                        >
                           <ShieldCheck className="h-3 w-3 text-primary" />
-                          OTP: {delivery.otp}
-                        </span>
+                          <span>OTP: {delivery.otp}</span>
+                          <Copy className="h-2.5 w-2.5 ml-0.5 opacity-70 group-hover/otp:opacity-100 transition-opacity" />
+                        </button>
                         <span>•</span>
                         <span className="truncate max-w-[200px]">{delivery.destination}</span>
                       </div>

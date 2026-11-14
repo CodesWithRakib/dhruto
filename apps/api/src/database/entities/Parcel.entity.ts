@@ -88,6 +88,12 @@ export class Parcel extends BaseEntity {
   @Column({ name: "delivery_otp_hash", type: "varchar", length: 255, nullable: true })
   deliveryOtpHash: string | null;
 
+  /**
+   * Active plaintext delivery OTP code. Provided only to the authenticated recipient for doorstep handoff.
+   */
+  @Column({ name: "delivery_otp_code", type: "varchar", length: 10, nullable: true })
+  deliveryOtpCode: string | null;
+
   @Column({ name: "otp_expires_at", type: "timestamptz", nullable: true })
   otpExpiresAt: Date | null;
 
