@@ -266,14 +266,19 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
             aria-label={t("orderStatus")}
           >
             <div
-              className="absolute left-0 top-3.5 h-0.5 w-full bg-surface-muted"
+              className="absolute top-3.5 -translate-y-1/2 h-0.5"
+              style={{
+                left: `${100 / (milestones.length * 2)}%`,
+                right: `${100 / (milestones.length * 2)}%`,
+              }}
               aria-hidden="true"
-            />
-            <div
-              className="absolute left-0 top-3.5 h-0.5 bg-primary transition-all duration-base ease-out"
-              style={{ width: `${progress}%` }}
-              aria-hidden="true"
-            />
+            >
+              <div className="h-full w-full bg-surface-muted rounded-full" />
+              <div
+                className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-base ease-out"
+                style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
+              />
+            </div>
             {milestones.map((milestone, index) => {
               const step = index + 1;
               const isPassed = currentStep >= step;

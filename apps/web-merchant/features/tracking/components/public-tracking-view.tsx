@@ -399,24 +399,32 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
 
             {/* Kinetic 5-Stage Milestone Progress Bar */}
             <div className="pt-6">
-              <div className="flex items-center justify-between mb-3 text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                <span className="flex items-center gap-1.5 text-foreground font-semibold">
-                  <Radio className="h-3.5 w-3.5 text-primary animate-pulse" />
+              <div className="flex items-center justify-between mb-4 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                <span className="flex items-center gap-2 text-foreground font-semibold">
+                  <Radio className="h-4 w-4 text-primary animate-pulse" />
                   Shipment Journey Milestone
                 </span>
-                <span className="font-bold text-primary">
+                <span className="font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">
                   Stage {currentLevel} of 5
                 </span>
               </div>
 
-              <div className="relative">
-                {/* Background Track Line */}
-                <div className="absolute top-5 left-4 right-4 h-1 bg-border/80 rounded-full -z-0" />
-                {/* Active Filled Line */}
+              <div className="relative py-2">
+                {/* Milestone Track Container - perfectly spans between column 1 center (10%) and column 5 center (90%) */}
                 <div
-                  className="absolute top-5 left-4 h-1 bg-gradient-to-r from-success to-primary rounded-full transition-all duration-700 -z-0"
-                  style={{ width: `${((currentLevel - 1) / 4) * 100}%` }}
-                />
+                  aria-hidden="true"
+                  className="absolute top-7 -translate-y-1/2 left-[10%] right-[10%] h-1 pointer-events-none"
+                >
+                  {/* Background Track Line */}
+                  <div className="h-full w-full bg-border/70 rounded-full" />
+                  {/* Active Filled Line */}
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-primary to-primary rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, ((currentLevel - 1) / 4) * 100))}%`,
+                    }}
+                  />
+                </div>
 
                 <div className="grid grid-cols-5 relative z-10">
                   {MILESTONES.map((m) => {
@@ -426,29 +434,29 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
                     const label = locale === "bn" ? m.titleBn : m.titleEn;
 
                     return (
-                      <div key={m.step} className="flex flex-col items-center text-center">
+                      <div key={m.step} className="flex flex-col items-center text-center px-1">
                         <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-300 ${
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-all duration-300 ${
                             isPassed
-                              ? "bg-success/20 border-success text-success shadow-sm"
+                              ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
                               : isCurrent
-                                ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30 scale-110"
-                                : "bg-surface border-border/80 text-muted-foreground"
+                                ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30 scale-110 ring-4 ring-primary/25"
+                                : "bg-surface border-border text-muted-foreground/60"
                           }`}
                         >
                           {isPassed ? (
-                            <Check className="h-4 w-4" />
+                            <Check className="h-4 w-4 stroke-[3]" />
                           ) : (
-                            <Icon className="h-4 w-4" />
+                            <Icon className={`h-4 w-4 ${isCurrent ? "animate-pulse stroke-[2.2]" : "stroke-[1.7]"}`} />
                           )}
                         </div>
                         <span
-                          className={`mt-2 text-[11px] sm:text-xs font-semibold tracking-tight max-w-[70px] sm:max-w-none ${
+                          className={`mt-2.5 text-[11px] sm:text-xs tracking-tight transition-colors ${
                             isCurrent
                               ? "text-primary font-bold"
                               : isPassed
-                                ? "text-foreground"
-                                : "text-muted-foreground"
+                                ? "text-foreground font-semibold"
+                                : "text-muted-foreground/80 font-medium"
                           }`}
                         >
                           {label}
@@ -559,7 +567,18 @@ export function PublicTrackingView({ initialCode = "", showIntro = true }: Publi
                       }
                       timestamp={dateTime(event.timestamp)}
                       dateTime={event.timestamp}
-                      tone={isLatest ? "primary" : "neutral"}
+                      tone={
+                        isLatest
+                          ? "primary"
+                          : event.status === ParcelStatus.DELIVERY_ATTEMPTED ||
+                              event.status === ParcelStatus.RESCHEDULED
+                            ? "warning"
+                            : event.status === ParcelStatus.CANCELLED ||
+                                event.status === ParcelStatus.LOST ||
+                                event.status === ParcelStatus.DAMAGED
+                              ? "danger"
+                              : "success"
+                      }
                       current={isLatest}
                     >
                       {event.note ? (
