@@ -2,28 +2,16 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Button,
-  DataTable,
-  type ColumnDef,
-  type DataTableLabels,
-} from "@dhruto/ui";
-import { Eye, MapPin, Package, Plus, Printer, RefreshCw, RotateCcw, Search, SearchX, UploadCloud, User } from "lucide-react";
-import { ParcelStatus, type ParcelListItem } from "@dhruto/contracts";
-import { Link } from "@/lib/navigation";
+import { DataTable, type DataTableLabels } from "@dhruto/ui";
+import { ParcelStatus } from "@dhruto/contracts";
 import { useRouteBase } from "@/config/route-base";
 import { statusConfig } from "@/config/status";
-import { StatusBadge } from "@/components/data-display/status-badge";
-import { CopyButton } from "@/components/data-display/copy-button";
 import { ActiveFilters, type ActiveFilter } from "@/components/active-filters";
 import { FilterButton } from "@/components/filters/filter-button";
 import { FilterSheet } from "@/components/filters/filter-sheet";
 import { FilterTabs } from "@/components/filter-tabs";
 import { DebouncedSearchInput } from "@/components/search-input";
-import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
-import { EmptyState, ErrorState, RetryButton } from "@/components/feedback/states";
-import { cn } from "@/lib/cn";
 import { useFormatters } from "@/lib/format";
 import { rememberListUrl } from "@/lib/last-list-url";
 import { useQueryState } from "@/hooks/use-query-state";
@@ -33,11 +21,10 @@ import { ParcelSortSelect } from "./parcel-sort-select";
 import { ParcelCard } from "./parcel-card";
 import { ParcelCardSkeletonList } from "./parcel-card-skeleton";
 import { BulkImportDialog } from "./bulk-import-dialog";
+import { buildParcelListColumns } from "./list/parcel-list-columns";
+import { ParcelListHeader } from "./list/parcel-list-header";
+import { ParcelListEmptyStates } from "./list/parcel-list-empty-states";
 
-/**
- * Quick status lenses. Each maps to exactly one `ParcelStatus` the list
- * endpoint filters on — no client-side grouping, no invented buckets.
- */
 const QUICK_TABS: ReadonlyArray<{ value: ParcelStatus | ""; labelKey: string }> = [
   { value: "", labelKey: "all" },
   { value: ParcelStatus.CREATED, labelKey: "filterCreated" },
@@ -86,123 +73,11 @@ export function ParcelList() {
   const hasActiveFilters = activeFilterCount > 0;
   const hasNoResults = !isLoading && !isError && parcels.length === 0;
 
-  const columns: ColumnDef<ParcelListItem>[] = useMemo(
-    () => [
-      {
-        accessorKey: "trackingCode",
-        header: t("tracking"),
-        cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            <Link
-              href={routes.parcel(row.original.id)}
-              className="font-mono text-body-sm font-semibold text-primary hover:underline"
-            >
-              {row.original.trackingCode}
-            </Link>
-            <CopyButton
-              value={row.original.trackingCode}
-              label={t("copyTrackingCode")}
-              copiedLabel={t("trackingCopied")}
-              errorLabel={t("copyFailed")}
-            />
-          </div>
-        ),
-      },
-      {
-        accessorKey: "recipientName",
-        header: t("recipient"),
-        cell: ({ row }) => (
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 font-medium text-foreground">
-              <User className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="truncate">{row.original.recipientName}</span>
-            </p>
-            <p className="mt-0.5 font-mono text-caption text-muted-foreground">
-              {row.original.recipientPhone}
-            </p>
-          </div>
-        ),
-      },
-      {
-        id: "destination",
-        header: t("address"),
-        cell: ({ row }) => (
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 font-medium text-foreground">
-              <MapPin className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="truncate">
-                {row.original.thana}, {row.original.district}
-              </span>
-            </p>
-            <p
-              className="mt-0.5 max-w-[220px] truncate text-caption text-muted-foreground"
-              title={row.original.deliveryAddress}
-            >
-              {row.original.deliveryAddress}
-            </p>
-          </div>
-        ),
-      },
-      {
-        accessorKey: "codAmount",
-        header: t("cod"),
-        cell: ({ row }) => (
-          <div>
-            <p className="font-semibold tabular-nums text-foreground">
-              {bdt(row.original.codAmount)}
-            </p>
-            <p className="mt-0.5 text-caption text-muted-foreground">
-              {t("fee")} {bdt(row.original.deliveryFee)}
-            </p>
-          </div>
-        ),
-      },
-      {
-        accessorKey: "status",
-        header: t("status"),
-        cell: ({ row }) => <StatusBadge status={row.original.status} withIcon />,
-      },
-      {
-        accessorKey: "createdAt",
-        header: t("date"),
-        cell: ({ row }) => (
-          <div className="text-caption text-muted-foreground">
-            <span className="block whitespace-nowrap">{date(row.original.createdAt)}</span>
-            <span className="block whitespace-nowrap">{time(row.original.createdAt)}</span>
-          </div>
-        ),
-      },
-      {
-        id: "actions",
-        header: () => <span className="block text-right">{t("actions")}</span>,
-        cell: ({ row }) => (
-          <div className="flex items-center justify-end gap-1">
-            <Link
-              href={routes.parcelLabel(row.original.id)}
-              aria-label={t("printLabel")}
-              title={t("printLabel")}
-            >
-              <Button variant="ghost" size="icon-sm" aria-label={t("printLabel")}>
-                <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-              </Button>
-            </Link>
-            <Link
-              href={routes.parcel(row.original.id)}
-              aria-label={`${t("view")} ${row.original.trackingCode}`}
-            >
-              <Button variant="outline" size="sm" className="gap-1">
-                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("view")}
-              </Button>
-            </Link>
-          </div>
-        ),
-      },
-    ],
+  const columns = useMemo(
+    () => buildParcelListColumns({ t, bdt, date, time, routes }),
     [bdt, date, time, t, routes],
   );
 
-  /** Translated chrome for the shared table (pagination, empty, error). */
   const tableLabels: DataTableLabels = useMemo(
     () => ({
       emptyMessage: t("emptyTitle"),
@@ -219,11 +94,6 @@ export function ParcelList() {
     [t, tTable],
   );
 
-  /**
-   * Quick tabs plus, when the active status is not one of them (picked from the
-   * full status list or a shared URL), a pill for it — so the selected lens is
-   * always visible instead of every tab reading as unselected.
-   */
   const quickTabOptions = useMemo(() => {
     const options = QUICK_TABS.map((tab) => ({ value: tab.value, label: t(tab.labelKey) }));
     if (filters.status && !QUICK_TABS.some((tab) => tab.value === filters.status)) {
@@ -235,7 +105,6 @@ export function ParcelList() {
     return options;
   }, [filters.status, t, tStatus]);
 
-  /** Chips mirror the URL, so clearing one only removes that filter. */
   const chips: ActiveFilter[] = useMemo(() => {
     const active: ActiveFilter[] = [];
     if (filters.search.trim()) {
@@ -249,11 +118,7 @@ export function ParcelList() {
       });
     }
     if (filters.district.trim()) {
-      active.push({
-        key: "district",
-        label: t("filterDistrict"),
-        display: filters.district.trim(),
-      });
+      active.push({ key: "district", label: t("filterDistrict"), display: filters.district.trim() });
     }
     if (filters.thana.trim()) {
       active.push({ key: "thana", label: t("filterThana"), display: filters.thana.trim() });
@@ -269,7 +134,6 @@ export function ParcelList() {
 
   const handleRemoveFilter = useCallback(
     (key: string) => {
-      // Every list filter is optional, so "" clears exactly one of them.
       updateFilter(key as keyof ParcelListFilters, "" as ParcelListFilters[keyof ParcelListFilters]);
     },
     [updateFilter],
@@ -277,13 +141,11 @@ export function ParcelList() {
 
   const handleLimitChange = useCallback(
     (nextLimit: number) => {
-      // setLimit already returns to page 1 in a single navigation.
       setLimit(nextLimit);
     },
     [setLimit],
   );
 
-  // Remember this workspace so details → Back restores filters and page.
   const listBase = routes.parcels;
   React.useEffect(() => {
     rememberListUrl(listBase);
@@ -293,101 +155,43 @@ export function ParcelList() {
     void refetch();
   }, [refetch]);
 
-  // Skeleton whenever the first page is still in flight — including while a
-  // refetch has emptied the visible set — so the table never flashes its own
-  // "no records" row above the page-level empty state.
   const isTableLoading = isLoading || (isFetching && parcels.length === 0);
 
   const table = (
-    <DataTable
-      columns={columns}
-      data={parcels}
-      isLoading={isTableLoading}
-      totalItems={totalItems}
-      pageCount={totalPages}
-      currentPage={page}
-      itemsPerPage={limit}
-      onPageChange={setPage}
-      onLimitChange={handleLimitChange}
-      labels={tableLabels}
-      formatNumber={number}
-    />
+    <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 shadow-sm backdrop-blur-md">
+      <DataTable
+        columns={columns}
+        data={parcels}
+        isLoading={isTableLoading}
+        totalItems={totalItems}
+        pageCount={totalPages}
+        currentPage={page}
+        itemsPerPage={limit}
+        onPageChange={setPage}
+        onLimitChange={handleLimitChange}
+        labels={tableLabels}
+        formatNumber={number}
+      />
+    </div>
   );
 
   return (
     <div className="w-full space-y-5">
-      {/* Mounted only when open so the dialog's RTK hooks never run on
-          plain list renders (and in provider-free unit tests). */}
       {bulkOpen ? <BulkImportDialog open onOpenChange={setBulkOpen} /> : null}
-      <PageHeader
-        title={t("title")}
-        description={t("description")}
-        actions={
-          <>
-            {createHref ? (
-              <Link href={createHref}>
-                <Button size="sm" className="h-10 gap-2 text-xs">
-                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                  {t("create")}
-                </Button>
-              </Link>
-            ) : null}
-            {createHref ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBulkOpen(true)}
-                className="h-10 gap-2 text-xs"
-              >
-                <UploadCloud className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("bulkImport")}
-              </Button>
-            ) : null}
-            {routes.returns ? (
-              <Link href={routes.returns}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-10 gap-2 text-xs"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Returns Hub</span>
-                </Button>
-              </Link>
-            ) : null}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isFetching}
-              className="h-10 gap-2 text-xs"
-            >
-              <RefreshCw
-                className={cn("h-3.5 w-3.5", isFetching && "animate-spin")}
-                aria-hidden="true"
-              />
-              {t("refresh")}
-            </Button>
-          </>
-        }
+
+      <ParcelListHeader
+        t={t}
+        createHref={createHref}
+        returnsHref={routes.returns}
+        onBulkOpen={() => setBulkOpen(true)}
+        onRefresh={handleRefresh}
+        isFetching={isFetching}
+        totalItems={totalItems}
+        activeFilterCount={activeFilterCount}
+        formatNumber={number}
       />
 
-      {/* Result context: how many shipments the current view contains. */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <p className="text-body-sm text-muted-foreground" aria-live="polite">
-          <span className="text-h4 font-bold tabular-nums text-foreground">
-            {number(totalItems)}
-          </span>{" "}
-          {t("countShipments")}
-        </p>
-        {hasActiveFilters ? (
-          <span className="text-caption text-muted-foreground">
-            · {t("countFiltered", { count: activeFilterCount })}
-          </span>
-        ) : null}
-      </div>
-
-      {/* Quick status lenses — single status values the API understands. */}
+      {/* Quick status lenses */}
       <FilterTabs
         value={filters.status}
         onValueChange={(value) =>
@@ -400,7 +204,6 @@ export function ParcelList() {
       {/* Search + sort + mobile filter trigger */}
       <div className="space-y-2">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {/* The hook debounces the URL write, so the field reports every keystroke. */}
           <DebouncedSearchInput
             className="flex-1 sm:max-w-md"
             debounceMs={0}
@@ -431,7 +234,7 @@ export function ParcelList() {
       <ActiveFilters filters={chips} onRemove={handleRemoveFilter} onClearAll={resetFilters} />
 
       {/* Desktop filters */}
-      <div className="hidden rounded-3xl bg-surface-elevated p-5 lg:block">
+      <div className="hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-5 shadow-sm backdrop-blur-md lg:block">
         <ParcelFilterControls
           idPrefix="desktop"
           filters={filters}
@@ -472,76 +275,28 @@ export function ParcelList() {
         />
       </FilterSheet>
 
-      {/* States */}
-      {isError ? (
-        <div className="rounded-3xl bg-surface-elevated p-4">
-          <ErrorState
-            title={t("loadErrorTitle")}
-            description={t("loadErrorDescription")}
-            action={<RetryButton label={t("retry")} onRetry={handleRefresh} />}
-          />
-        </div>
+      {/* Main Content States */}
+      {isError || hasNoResults ? (
+        <ParcelListEmptyStates
+          t={t}
+          isError={isError}
+          hasActiveFilters={hasActiveFilters}
+          searchQuery={filters.search}
+          createHref={createHref}
+          onRefresh={handleRefresh}
+          onClearSearch={() => updateFilter("search", "")}
+          onResetFilters={resetFilters}
+        />
       ) : isLoading ? (
-        // Skeletons mirror the real table/cards so nothing shifts on arrival.
         <>
           <div className="hidden lg:block">{table}</div>
           <div className="lg:hidden">
             <ParcelCardSkeletonList />
           </div>
         </>
-      ) : hasNoResults ? (
-        <div className="rounded-3xl bg-surface-elevated p-6">
-          {hasActiveFilters ? (
-            <EmptyState
-              icon={SearchX}
-              title={t("noResultsTitle")}
-              description={t("noResultsHint")}
-              action={
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  {filters.search.trim() ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => updateFilter("search", "")}
-                    >
-                      <Search className="h-3.5 w-3.5" aria-hidden="true" />
-                      {t("clearSearch")}
-                    </Button>
-                  ) : null}
-                  <Button variant="outline" size="sm" onClick={resetFilters}>
-                    {t("clearFilters")}
-                  </Button>
-                </div>
-              }
-            />
-          ) : (
-            <EmptyState
-              icon={Package}
-              title={t("emptyTitle")}
-              description={t("emptyDescription")}
-              action={
-                <div className="flex flex-col items-center gap-2">
-                  {createHref ? (
-                    <Link href={createHref}>
-                      <Button size="sm" className="gap-1.5">
-                        <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                        {t("create")}
-                      </Button>
-                    </Link>
-                  ) : null}
-                  <p className="text-caption text-muted-foreground">{t("emptyHint")}</p>
-                </div>
-              }
-            />
-          )}
-        </div>
       ) : (
         <>
-          {/* Desktop table */}
           <div className="hidden lg:block">{table}</div>
-
-          {/* Mobile cards: purpose-built for small screens, never a scrolled table */}
           <div className="lg:hidden">
             <ul className="space-y-3">
               {parcels.map((parcel) => (
@@ -549,8 +304,6 @@ export function ParcelList() {
               ))}
             </ul>
           </div>
-
-          {/* Mobile pager: shared control, cursor-safe when the total is unknown */}
           <Pagination
             className="lg:hidden"
             page={page}
