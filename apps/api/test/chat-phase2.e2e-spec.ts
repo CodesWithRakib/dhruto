@@ -8,6 +8,9 @@ vi.hoisted(() => {
   if (url) {
     process.env.DATABASE_URL = url;
     process.env.OUTBOX_POLL_MS = "600000"; // relay is driven manually for determinism
+    // Keep the realtime module (Phase 3) off the developer Redis when a
+    // disposable one is provided.
+    if (process.env.CHAT_TEST_REDIS_URL) process.env.REDIS_URL = process.env.CHAT_TEST_REDIS_URL;
   }
 });
 

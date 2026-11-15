@@ -211,10 +211,13 @@ export class ChatInteractionService {
         requestId: ctx.requestId,
         metadata: { sequence: message.sequence },
       });
-      await this.events.append(manager, ctx, DomainEventType.CHAT_MESSAGE_PINNED, conversationId, {
-        messageId,
-        byUserId: actor.userId,
-      });
+      await this.events.append(
+        manager,
+        ctx,
+        DomainEventType.CHAT_MESSAGE_PINNED,
+        conversationId,
+        { messageId, byUserId: actor.userId },
+      );
     });
     return this.listPins(ctx, conversationId);
   }
@@ -240,10 +243,13 @@ export class ChatInteractionService {
         targetId: messageId,
         requestId: ctx.requestId,
       });
-      await this.events.append(manager, ctx, DomainEventType.CHAT_MESSAGE_UNPINNED, conversationId, {
-        messageId,
-        byUserId: actor.userId,
-      });
+      await this.events.append(
+        manager,
+        ctx,
+        DomainEventType.CHAT_MESSAGE_UNPINNED,
+        conversationId,
+        { messageId, byUserId: actor.userId },
+      );
     });
     return this.listPins(ctx, conversationId);
   }

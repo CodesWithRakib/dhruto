@@ -122,3 +122,30 @@ The UPDATE's row lock serializes senders in one conversation; the unique index i
 ## ADR-021 — DIRECT/GROUP are internal-only
 
 **Decision.** Merchants and customers communicate only through scoped types (PARCEL_DELIVERY, SUPPORT_TICKET, MERCHANT_DESK). This prevents cold-messaging arbitrary users by id. Internal DIRECT/GROUP members must share a hub with a non-admin adder.
+
+---
+
+# Phase 3 additions
+
+## ADR-022 — Dedicated `/chat` namespace beside the legacy guard
+
+**Decision.** Realtime chat runs in its own Socket.IO namespace with events that never use the reserved `chat:` prefix. The S-1 guard stays on `/` unchanged.
+**Why.** `socket.use` guards are per socket, so the namespaces are isolated by construction. The legacy rejection cannot block legitimate traffic, and the old pathway cannot be revived.
+
+## ADR-023 — Durable events go to per-user rooms of currently eligible participants
+
+**Decision.** The outbox fan-out recomputes recipients per event (ACTIVE membership ∩ live eligibility) and emits to `u:<userId>` rooms. Conversation rooms carry only ephemeral traffic and are re-authorized periodically.
+**Consequences.** Removal, reassignment and unassignment stop durable delivery immediately. Each event costs about 6 indexed queries.
+
+## ADR-024 — Redis pub/sub adapter; durability stays in PostgreSQL
+
+**Decision.** Use `@socket.io/redis-adapter` on the existing Redis deployment, with probe-gated fan-out (outbox retry while Redis is unhealthy) and REST `afterSequence` gap-fill for recovery. Delivery is at-least-once and best-effort, deduped by `eventId`.
+**Rejected.** The streams adapter with connection-state recovery: it duplicates the sequence-based recovery we already have and adds Redis storage.
+
+## ADR-025 — Messages are sent over REST; sockets receive
+
+**Decision.** There is no socket "send message" event. Idempotency, rate limits and attachment validation stay on the Phase 2 REST path. Sockets carry delivery, typing, presence and cursor updates (cursor updates reuse the same service).
+
+## ADR-026 — Ephemeral state never touches PostgreSQL
+
+**Decision.** Presence lives in Redis sorted sets (multi-device, TTL-expired, atomic transitions). Typing lives in per-socket memory with a TTL and throttle. There are no heartbeat or typing writes to the database and no new migration.

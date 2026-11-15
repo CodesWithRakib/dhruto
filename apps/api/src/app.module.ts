@@ -21,6 +21,7 @@ import { IntegrationsModule } from "./integrations/integrations.module.js";
 import { IntelligenceModule } from "./intelligence/intelligence.module.js";
 import { AnalyticsModule } from "./analytics/analytics.module.js";
 import { ChatModule } from "./chat/chat.module.js";
+import { ChatRealtimeModule } from "./chat/realtime/chat-realtime.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 import { SeederModule } from "./database/seed/seeder.module.js";
 
@@ -58,6 +59,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     IntelligenceModule,
     AnalyticsModule,
     ChatModule,
+    ChatRealtimeModule,
     SeederModule,
     EventsModule,
   ],

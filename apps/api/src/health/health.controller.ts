@@ -13,6 +13,7 @@ import { CacheService } from "../common/cache/cache.service.js";
 import { Public } from "../auth/decorators/public.decorator.js";
 import { TelemetryService } from "../common/interceptors/telemetry.interceptor.js";
 import { queueCounts } from "../integrations/queue-helper.js";
+import { ChatRealtimeMetricsService } from "../chat/realtime/chat-realtime-metrics.service.js";
 
 @ApiTags("Health & Observability")
 @Public()
@@ -24,6 +25,7 @@ export class HealthController {
     private readonly telemetryService: TelemetryService,
     @Optional() @InjectQueue("notifications") private readonly notificationsQueue?: Queue,
     @Optional() @InjectQueue("webhooks") private readonly webhooksQueue?: Queue,
+    @Optional() private readonly realtime?: ChatRealtimeMetricsService,
   ) {}
 
   @Get()
@@ -78,7 +80,10 @@ export class HealthController {
     const db = await this.pingDatabase();
     const cache = this.cacheService.getHealth();
 
-    const ready = db.connected && cache.connected;
+    // Realtime is part of readiness: when Redis is required (production by
+    // default) an instance with broken cross-instance fan-out is not ready.
+    const realtime = this.realtime?.health();
+    const ready = db.connected && cache.connected && (realtime?.ready ?? true);
     if (!ready) res.status(HttpStatus.SERVICE_UNAVAILABLE);
 
     return {
@@ -90,8 +95,34 @@ export class HealthController {
         cache: cache.status,
         cacheDriver: cache.driver,
         cacheLatencyMs: cache.latencyMs,
+        realtime: realtime
+          ? {
+              ready: realtime.ready,
+              redisRequired: realtime.redisRequired,
+              distribution: realtime.redis.distribution,
+              redisHealthy: realtime.redis.healthy,
+              connections: realtime.connections.current,
+            }
+          : null,
       },
     };
+  }
+
+  @Get("realtime")
+  @ApiOperation({
+    summary: "Realtime chat engine status (gateway, Redis distribution, presence, counters)",
+  })
+  realtimeStatus(@Res({ passthrough: true }) res: Response) {
+    const health = this.realtime?.health();
+    if (!health) {
+      res.status(HttpStatus.SERVICE_UNAVAILABLE);
+      return { status: "unavailable" };
+    }
+    if (!health.ready) res.status(HttpStatus.SERVICE_UNAVAILABLE);
+    // Never report "ready" while cross-instance distribution is broken, even
+    // when Redis is optional (single-instance tolerance => "degraded").
+    const degraded = health.redis.distribution === "redis" && !health.redis.healthy;
+    return { status: !health.ready ? "not_ready" : degraded ? "degraded" : "ready", ...health };
   }
 
   @Get("metrics")

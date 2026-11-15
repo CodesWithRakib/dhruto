@@ -29,7 +29,7 @@ describe("phase 2 exports", () => {
 
   it("chat domain events follow the versioned naming convention", () => {
     const chatEvents = Object.values(DomainEventType).filter((e) => e.startsWith("chat."));
-    expect(chatEvents.length).toBe(12);
+    expect(chatEvents.length).toBe(14); // 12 (Phase 2) + pinned/unpinned (Phase 3)
     for (const e of chatEvents) expect(e).toMatch(/^chat\.[a-z_]+\.v1$/);
   });
 
