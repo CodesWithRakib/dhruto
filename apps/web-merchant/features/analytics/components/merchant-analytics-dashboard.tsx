@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/lib/navigation";
-import { Button, Card, TrendLineChart } from "@dhruto/ui";
+import { Button, TrendLineChart } from "@dhruto/ui";
 import {
   useGetAnalyticsOverviewQuery,
   useGetDeliveryAnalyticsQuery,
@@ -23,13 +23,12 @@ import {
 import { ExportButton } from "./export-button";
 import { PageHeader } from "@/components/page-header";
 import { useFormatters } from "@/lib/format";
-
-const taka = (v: number): string => `৳${Math.round(v).toLocaleString()}`;
+import { RefreshCw, TrendingUp, AlertTriangle, Wallet, FileText, Truck } from "lucide-react";
 
 /** Merchant analytics: own data only, mobile-first stacked cards. */
 export function MerchantAnalyticsDashboard() {
   const t = useTranslations("MerchantAnalytics");
-  const { dateTime } = useFormatters();
+  const { dateTime, bdt } = useFormatters();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [filter, setFilter] = React.useState<FilterState>(() => filterFromSearch(searchParams));
@@ -58,7 +57,7 @@ export function MerchantAnalyticsDashboard() {
   const deliveryData = delivery.data?.data;
 
   return (
-    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6">
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -70,8 +69,15 @@ export function MerchantAnalyticsDashboard() {
               from={apiParams.from}
               to={apiParams.to}
             />
-            <Button variant="outline" size="sm" onClick={refresh} className="h-8 text-xs">
-              {t("refresh")}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refresh}
+              disabled={overview.isFetching}
+              className="h-10 gap-2 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${overview.isFetching ? "animate-spin text-primary" : ""}`} />
+              <span>{t("refresh")}</span>
             </Button>
           </div>
         }
@@ -80,14 +86,17 @@ export function MerchantAnalyticsDashboard() {
       <FilterBar value={filter} onChange={applyFilter} />
 
       {overview.isLoading ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">{t("loading")}</p>
+        <div className="space-y-4 py-12 text-center">
+          <div className="inline-flex h-10 w-10 animate-spin items-center justify-center rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-body-sm text-muted-foreground font-medium">{t("loading")}</p>
+        </div>
       ) : overview.isError || !data ? (
-        <Card className="space-y-2 p-6 text-center">
-          <p className="text-sm font-medium">{t("loadErrorTitle")}</p>
-          <Button variant="outline" size="sm" onClick={refresh}>
+        <div className="rounded-3xl border border-destructive/20 bg-surface-elevated/90 p-8 text-center space-y-3 shadow-sm backdrop-blur-md">
+          <p className="text-body font-bold text-foreground">{t("loadErrorTitle")}</p>
+          <Button variant="outline" size="sm" onClick={refresh} className="rounded-xl border-border/80">
             {t("retry")}
           </Button>
-        </Card>
+        </div>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -103,83 +112,119 @@ export function MerchantAnalyticsDashboard() {
               format={(v) => `${v}%`}
               invertTrend
             />
-            <MetricCard label={t("kpiCod")} kpi={data.kpis.codCollected} format={taka} />
+            <MetricCard label={t("kpiCod")} kpi={data.kpis.codCollected} format={(v) => bdt(v)} />
           </div>
 
-          <Card className="p-4">
+          {/* Volume Trend Bento Card */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 shadow-sm backdrop-blur-md space-y-4">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            <div className="flex items-center gap-2.5 pb-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <TrendingUp className="h-4 w-4" />
+              </span>
+              <h3 className="text-body font-bold text-foreground tracking-tight">{t("volumeTrend")}</h3>
+            </div>
             <TrendLineChart
               title={t("volumeTrend")}
               data={data.trends.map((p) => ({ label: p.bucket, value: p.booked }))}
               emptyMessage={t("emptyTrends")}
             />
-          </Card>
+          </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="space-y-2 p-4">
-              <h3 className="text-sm font-semibold">{t("deliveryTitle")}</h3>
-              <p className="text-xs text-muted-foreground">
+            {/* Delivery Performance Bento Card */}
+            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-3">
+              <div className="flex items-center gap-2.5 pb-1">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                  <Truck className="h-4 w-4" />
+                </span>
+                <h3 className="text-body font-bold text-foreground">{t("deliveryTitle")}</h3>
+              </div>
+              <p className="text-body-sm text-muted-foreground font-medium">
                 {t("deliverySummary", {
                   p50: deliveryData?.latency.p50 ?? "—",
                   first: deliveryData?.firstAttemptSuccess ?? "—",
                 })}
               </p>
-            </Card>
-            <Card className="space-y-2 p-4">
-              <h3 className="text-sm font-semibold">{t("rtoTitle")}</h3>
-              <p className="text-xs text-muted-foreground">
+            </div>
+
+            {/* RTO Deep Dive Bento Card */}
+            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-3">
+              <div className="flex items-center gap-2.5 pb-1">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-xs">
+                  <AlertTriangle className="h-4 w-4" />
+                </span>
+                <h3 className="text-body font-bold text-foreground">{t("rtoTitle")}</h3>
+              </div>
+              <p className="text-body-sm text-muted-foreground font-medium">
                 {t("rtoSummary", {
                   count: rtoData?.rtoCount ?? 0,
                   rate: rtoData?.rtoRate.value ?? "—",
                 })}
               </p>
-              {(rtoData?.byReason ?? []).slice(0, 3).map((r) => (
-                <p key={r.reason} className="text-xs">
-                  <span className="font-mono">{r.reason}</span>
-                  <span className="text-muted-foreground">
-                    {" "}
-                    · {r.count} ({r.percentage}%)
-                  </span>
-                </p>
-              ))}
-            </Card>
+              <div className="space-y-1.5 pt-1">
+                {(rtoData?.byReason ?? []).slice(0, 3).map((r) => (
+                  <div key={r.reason} className="flex items-center justify-between text-caption rounded-xl bg-surface-muted/50 px-3 py-1.5">
+                    <span className="font-mono font-medium text-foreground">{r.reason}</span>
+                    <span className="text-muted-foreground font-semibold">
+                      {r.count} ({r.percentage}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <Card className="space-y-2 p-4">
-            <h3 className="text-sm font-semibold">{t("codTitle")}</h3>
-            <p className="text-xs text-muted-foreground">
+          {/* COD Settlement Analytics Card */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-3">
+            <div className="flex items-center gap-2.5 pb-1">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <Wallet className="h-4 w-4" />
+              </span>
+              <h3 className="text-body font-bold text-foreground">{t("codTitle")}</h3>
+            </div>
+            <p className="text-body-sm text-muted-foreground font-medium">
               {t("codSummary", {
-                collected: codData ? taka(codData.collected) : "—",
-                pending: codData ? taka(codData.pending) : "—",
+                collected: codData ? bdt(codData.collected) : "—",
+                pending: codData ? bdt(codData.pending) : "—",
                 rate: codData?.collectionRate ?? "—",
               })}
             </p>
-          </Card>
+          </div>
 
-          <Card className="p-4">
-            <h3 className="mb-2 text-sm font-semibold">
-              {t("reportsTitle", { count: reports.data?.data?.length ?? 0 })}
-            </h3>
+          {/* Generated Reports History Card */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-4">
+            <div className="flex items-center gap-2.5 pb-1">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <FileText className="h-4 w-4" />
+              </span>
+              <h3 className="text-body font-bold text-foreground">
+                {t("reportsTitle", { count: reports.data?.data?.length ?? 0 })}
+              </h3>
+            </div>
             {(reports.data?.data ?? []).length === 0 ? (
-              <p className="text-xs text-muted-foreground">{t("reportsEmpty")}</p>
+              <p className="text-caption text-muted-foreground font-medium">{t("reportsEmpty")}</p>
             ) : (
-              <ul className="space-y-1.5">
+              <ul className="space-y-2">
                 {(reports.data?.data ?? []).slice(0, 5).map((r) => (
-                  <li key={r.id} className="flex items-center gap-2 text-xs">
-                    <span className="font-mono font-medium uppercase">
-                      {r.dataset} · {r.format}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {r.status}
-                      {r.rowCount !== null ? ` · ${r.rowCount}` : ""}
-                    </span>
-                    <span className="ml-auto text-[11px] text-muted-foreground">
+                  <li key={r.id} className="flex items-center justify-between rounded-xl bg-surface-muted/40 p-3 text-caption hover:bg-surface-muted/70 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold uppercase text-foreground">
+                        {r.dataset} · {r.format}
+                      </span>
+                      <span className="text-muted-foreground">
+                        ({r.status}
+                        {r.rowCount !== null ? ` · ${r.rowCount} rows` : ""})
+                      </span>
+                    </div>
+                    <span className="text-muted-foreground font-mono">
                       {dateTime(r.createdAt)}
                     </span>
                   </li>
                 ))}
               </ul>
             )}
-          </Card>
+          </div>
         </>
       )}
     </div>
