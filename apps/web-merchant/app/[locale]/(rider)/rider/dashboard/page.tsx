@@ -1,5 +1,6 @@
 import React from "react";
 import { RiderDashboard } from "@/features/riders/components/rider-dashboard";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata = {
   robots: { index: false, follow: false },
@@ -9,5 +10,10 @@ export const metadata = {
 };
 
 export default function RiderPage() {
-  return <RiderDashboard />;
+  return (
+    <div className="relative min-h-screen">
+      <DashboardCanvasBg />
+      <RiderDashboard />
+    </div>
+  );
 }
