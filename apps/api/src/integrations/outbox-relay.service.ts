@@ -339,6 +339,21 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
     },
   ],
   [DomainEventType.DISCREPANCY_RESOLVED]: [],
+  // Communication platform events: durable, relay-processable, no notification
+  // fan-out yet. Phase 3 adds a realtime (socket) target here; chat in-app/SMS
+  // notifications are a later phase. Payloads carry ids only (no content).
+  [DomainEventType.CHAT_CONVERSATION_CREATED]: [],
+  [DomainEventType.CHAT_PARTICIPANT_ADDED]: [],
+  [DomainEventType.CHAT_PARTICIPANT_REMOVED]: [],
+  [DomainEventType.CHAT_MESSAGE_CREATED]: [],
+  [DomainEventType.CHAT_MESSAGE_EDITED]: [],
+  [DomainEventType.CHAT_MESSAGE_DELETED]: [],
+  [DomainEventType.CHAT_MESSAGE_REACTED]: [],
+  [DomainEventType.CHAT_MESSAGE_READ]: [],
+  [DomainEventType.CHAT_MESSAGE_DELIVERED]: [],
+  [DomainEventType.CHAT_CONVERSATION_ARCHIVED]: [],
+  [DomainEventType.CHAT_CONVERSATION_CLOSED]: [],
+  [DomainEventType.CHAT_CONVERSATION_STATUS_CHANGED]: [],
 };
 
 const str = (value: unknown, fallback = ""): string =>

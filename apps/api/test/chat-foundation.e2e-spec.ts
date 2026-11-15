@@ -607,6 +607,8 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
     it("removes only chat objects, preserves existing data, and can be re-applied", async () => {
       const [{ count: usersBefore }] = await ds.query(`SELECT count(*)::int AS count FROM "users"`);
 
+      // Revert Phase 2 (indexes) then Phase 1 (tables), newest first.
+      await ds.undoLastMigration({ transaction: "each" });
       await ds.undoLastMigration({ transaction: "each" });
 
       const chatTables = await ds.query(
@@ -631,7 +633,10 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
       expect(preserved).toHaveLength(3);
 
       const reapplied = await ds.runMigrations({ transaction: "each" });
-      expect(reapplied.map((m) => m.name)).toEqual(["CommunicationPhase1Foundation1700000000010"]);
+      expect(reapplied.map((m) => m.name)).toEqual([
+        "CommunicationPhase1Foundation1700000000010",
+        "CommunicationPhase2Backend1700000000011",
+      ]);
     });
   });
 });

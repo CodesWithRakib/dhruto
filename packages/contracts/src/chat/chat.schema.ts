@@ -362,6 +362,17 @@ export interface ChatMessagePage {
   hasMore: boolean;
   /** Pass as `beforeSequence` to load older messages; null at the beginning. */
   nextBeforeSequence: ChatSequence | null;
+  /** Highest sequence on this page; pass as `afterSequence` to gap-fill forward. */
+  nextAfterSequence: ChatSequence | null;
+  /** Display info for every distinct sender on the page (no N+1 lookups). */
+  senders: ChatPageSender[];
+}
+
+/** Sender display info carried by history pages. */
+export interface ChatPageSender {
+  userId: string;
+  displayName: string;
+  platformRole: string;
 }
 
 /** Another participant as seen by conversation members. No phone/email. */

@@ -31,6 +31,7 @@ import { User, UserRole } from "./User.entity.js";
 @Index("IDX_chat_audit_logs_actor_created", ["actorUserId", "createdAt"], {
   where: `"actor_user_id" IS NOT NULL`,
 })
+@Index("IDX_chat_audit_logs_created", ["createdAt", "id"])
 @Check(
   "CHK_chat_audit_logs_admin_reason",
   `"action" NOT IN ('ADMIN_CONVERSATION_VIEWED', 'ADMIN_INTERVENTION') OR ("reason" IS NOT NULL AND char_length(btrim("reason")) > 0)`,

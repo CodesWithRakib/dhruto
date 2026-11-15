@@ -91,3 +91,34 @@ The UPDATE's row lock serializes senders in one conversation; the unique index i
 ## ADR-015 — Delete rules favour history preservation
 
 **Decision.** Everything referencing a conversation, user, parcel, hub, or merchant uses `ON DELETE RESTRICT`, so purges must be explicit jobs. Pure message dependents (reactions, edits, pins) `CASCADE` with their message. Replies `SET NULL`. Attachments and reports `RESTRICT`, because storage cleanup and moderation evidence must be handled deliberately. Application code never hard-deletes users, parcels, hubs, or merchants today, so this blocks no existing flow.
+
+---
+
+# Phase 2 additions
+
+## ADR-016 — Live eligibility on every request
+
+**Decision.** Conversation access requires an ACTIVE membership **and** eligibility re-evaluated from database facts on each request (parcel's current rider/hub, merchant ownership, active hub assignments, account status). JWT claims are used for identity only.
+**Consequences.** Reassignment and unassignment revoke access immediately without background jobs. Each request costs about 3–5 small indexed queries.
+
+## ADR-017 — Chat validates with the shared zod contracts
+
+**Decision.** Chat routes validate with `ZodValidationPipe` and the strict `@dhruto/contracts` schemas instead of class-validator DTOs. Errors keep the platform's `422 VALIDATION_ERROR` shape.
+**Consequences.** There is one schema source for API and web, and unknown keys are rejected rather than stripped. This deviates from the rest of the API, which uses class-validator.
+
+## ADR-018 — Staff path = permission + reason + audit, on the same routes
+
+**Decision.** Mutating routes accept a participant path (capability) or a staff path (scoped `ChatPermission` + `reason`). Staff content reads live under `/chat/admin/*` with a mandatory reason. Every staff action writes `chat_audit_logs` in the same transaction.
+
+## ADR-019 — Deleted content is retained for moderation
+
+**Decision.** Soft delete clears visible content and metadata, and copies the last content into `chat_message_edits` (moderator-only). A sender therefore cannot destroy report evidence.
+**Consequences.** A retention and purge policy is required before go-live.
+
+## ADR-020 — Chat events are registered with empty fan-out
+
+**Decision.** All `chat.*.v1` events have `FANOUT` entries of `[]` and `EVENT_TEMPLATES` entries of `null`, so the relay marks them PUBLISHED. Payloads carry ids only. Phase 3 adds a realtime target that reloads authoritative rows.
+
+## ADR-021 — DIRECT/GROUP are internal-only
+
+**Decision.** Merchants and customers communicate only through scoped types (PARCEL_DELIVERY, SUPPORT_TICKET, MERCHANT_DESK). This prevents cold-messaging arbitrary users by id. Internal DIRECT/GROUP members must share a hub with a non-admin adder.

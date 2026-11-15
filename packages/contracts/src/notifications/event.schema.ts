@@ -28,6 +28,20 @@ export enum DomainEventType {
   PAYOUT_FAILED = "payout.failed.v1",
   DISCREPANCY_OPENED = "discrepancy.opened.v1",
   DISCREPANCY_RESOLVED = "discrepancy.resolved.v1",
+  // Communication platform (Phase 2). Payloads carry ids only — never message
+  // content — and have no notification fan-out yet (see outbox-relay FANOUT).
+  CHAT_CONVERSATION_CREATED = "chat.conversation_created.v1",
+  CHAT_PARTICIPANT_ADDED = "chat.participant_added.v1",
+  CHAT_PARTICIPANT_REMOVED = "chat.participant_removed.v1",
+  CHAT_MESSAGE_CREATED = "chat.message_created.v1",
+  CHAT_MESSAGE_EDITED = "chat.message_edited.v1",
+  CHAT_MESSAGE_DELETED = "chat.message_deleted.v1",
+  CHAT_MESSAGE_REACTED = "chat.message_reacted.v1",
+  CHAT_MESSAGE_READ = "chat.message_read.v1",
+  CHAT_MESSAGE_DELIVERED = "chat.message_delivered.v1",
+  CHAT_CONVERSATION_ARCHIVED = "chat.conversation_archived.v1",
+  CHAT_CONVERSATION_CLOSED = "chat.conversation_closed.v1",
+  CHAT_CONVERSATION_STATUS_CHANGED = "chat.conversation_status_changed.v1",
 }
 
 export const domainEventSchema = z.object({

@@ -25,6 +25,13 @@ import { User } from "./User.entity.js";
 @Index("IDX_chat_conversations_parcel_type", ["parcelId", "type"], {
   where: `"parcel_id" IS NOT NULL`,
 })
+@Index("IDX_chat_conversations_created", ["createdAt", "id"])
+@Index("IDX_chat_conversations_merchant_created", ["merchantId", "createdAt"], {
+  where: `"merchant_id" IS NOT NULL`,
+})
+@Index("IDX_chat_conversations_hub_created", ["hubId", "createdAt"], {
+  where: `"hub_id" IS NOT NULL`,
+})
 @Index("UQ_chat_conversations_parcel_delivery", ["parcelId"], {
   unique: true,
   where: `"type" = 'PARCEL_DELIVERY'`,

@@ -3,9 +3,6 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
 } from "@nestjs/websockets";
 import { Logger } from "@nestjs/common";
 import { Server, Socket } from "socket.io";
@@ -19,14 +16,14 @@ export interface AuthenticatedSocket extends Socket {
 }
 
 /**
- * Real-Time Notifications & Messaging WebSocket Gateway.
+ * Real-Time Notifications WebSocket Gateway.
  * -------------------------------------------------------------
  * Provides instantaneous real-time push notifications across all user roles
  * (MERCHANT, RIDER, HUB_MANAGER, ADMIN, CUSTOMER).
  *
- * Extensible for Future Chatting:
- * Includes built-in room routing, private messaging channels, and typing indicators
- * ready for upcoming Rider-Customer and Merchant-Support live chat features.
+ * Rooms are joined only server-side, from the verified access token
+ * (user / role / merchant / hub / rider). Clients cannot join rooms and this
+ * gateway carries no chat traffic (see "Legacy chat containment" below).
  */
 @WebSocketGateway({
   cors: {
@@ -50,6 +47,8 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
    * dedicated user, merchant, hub, and role rooms.
    */
   async handleConnection(client: AuthenticatedSocket) {
+    // Installed before any await so no event can slip through during auth.
+    this.installLegacyChatGuard(client);
     try {
       const rawToken =
         client.handshake.auth?.token ||
@@ -153,96 +152,41 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   /* ================================================================== */
-  /* Future Chatting & Live Messaging Channels                         */
+  /* Legacy chat containment (communication Phase 2, finding S-1)       */
   /* ================================================================== */
 
   /**
-   * Allows users/riders to join a dedicated chat session (e.g. order-specific chat).
+   * The former placeholder `chat:join` / `chat:leave` / `chat:message` /
+   * `chat:typing` handlers let any authenticated client join an arbitrary
+   * `chat:<roomId>` room and broadcast unpersisted messages. They have been
+   * removed: this gateway now exposes NO client-to-server chat events, and no
+   * code path joins a socket to a `chat:*` room.
+   *
+   * As defence in depth, any client event in the reserved `chat:` namespace is
+   * dropped, logged, and answered with an `exception` event. The packet is
+   * deliberately NOT passed to `next(err)`: socket.io re-emits middleware
+   * errors as a server-side `error` event, which would throw (and could crash
+   * the process) when no listener is attached — turning the guard itself into
+   * a denial-of-service vector. The authorized chat gateway is Phase 3.
    */
-  @SubscribeMessage("chat:join")
-  async handleChatJoin(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { roomId: string },
-  ) {
-    const user = client.data.user;
-    if (!user || !data.roomId) return { success: false, error: "Unauthorized or invalid roomId" };
+  static readonly LEGACY_CHAT_EVENT_PREFIX = "chat:";
 
-    await client.join(`chat:${data.roomId}`);
-    this.logger.log(`CHAT_ROOM_JOINED user=${user.sub} room=${data.roomId}`);
-
-    client.to(`chat:${data.roomId}`).emit("chat:user_joined", {
-      userId: user.sub,
-      role: user.role,
-      roomId: data.roomId,
-      timestamp: new Date().toISOString(),
-    });
-
-    return { success: true, roomId: data.roomId };
-  }
-
-  /**
-   * Leaves a chat room.
-   */
-  @SubscribeMessage("chat:leave")
-  async handleChatLeave(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { roomId: string },
-  ) {
-    const user = client.data.user;
-    if (!user || !data.roomId) return { success: false };
-
-    await client.leave(`chat:${data.roomId}`);
-    client.to(`chat:${data.roomId}`).emit("chat:user_left", {
-      userId: user.sub,
-      roomId: data.roomId,
-    });
-
-    return { success: true };
-  }
-
-  /**
-   * Dispatches a message inside a chat room (ready for live chatting).
-   */
-  @SubscribeMessage("chat:message")
-  handleChatMessage(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { roomId: string; content: string; metadata?: Record<string, unknown> },
-  ) {
-    const user = client.data.user;
-    if (!user || !data.roomId || !data.content?.trim()) {
-      return { success: false, error: "Invalid message payload" };
-    }
-
-    const messagePayload = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      roomId: data.roomId,
-      senderId: user.sub,
-      senderRole: user.role,
-      content: data.content.trim(),
-      metadata: data.metadata || null,
-      timestamp: new Date().toISOString(),
-    };
-
-    // Broadcast to everyone in the room
-    this.server.to(`chat:${data.roomId}`).emit("chat:message", messagePayload);
-    return { success: true, message: messagePayload };
-  }
-
-  /**
-   * Relays typing indicator in a chat room.
-   */
-  @SubscribeMessage("chat:typing")
-  handleChatTyping(
-    @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { roomId: string; isTyping: boolean },
-  ) {
-    const user = client.data.user;
-    if (!user || !data.roomId) return;
-
-    client.to(`chat:${data.roomId}`).emit("chat:typing", {
-      userId: user.sub,
-      role: user.role,
-      isTyping: Boolean(data.isTyping),
+  private installLegacyChatGuard(client: AuthenticatedSocket): void {
+    client.use(([event], next) => {
+      if (
+        typeof event === "string" &&
+        event.startsWith(NotificationsGateway.LEGACY_CHAT_EVENT_PREFIX)
+      ) {
+        this.logger.warn(
+          `LEGACY_CHAT_EVENT_REJECTED client=${client.id} user=${client.data.user?.sub ?? "anonymous"} event=${event.slice(0, 64)}`,
+        );
+        client.emit("exception", {
+          status: "error",
+          message: "Chat events are not supported on this channel",
+        });
+        return; // drop the packet: never reaches any handler, never joins a room
+      }
+      next();
     });
   }
 }

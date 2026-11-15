@@ -25,9 +25,10 @@ describe("notification templates (bilingual, strictly typed)", () => {
     expect(new Set(TEMPLATE_KEYS).size).toBe(14);
   });
 
-  it("maps every domain event except DISCREPANCY_RESOLVED", () => {
+  it("maps every domain event except DISCREPANCY_RESOLVED and chat events", () => {
     for (const event of Object.values(DomainEventType)) {
-      if (event === DomainEventType.DISCREPANCY_RESOLVED) {
+      // Chat events (communication Phase 2) intentionally render no template.
+      if (event === DomainEventType.DISCREPANCY_RESOLVED || event.startsWith("chat.")) {
         expect(EVENT_TEMPLATES[event]).toBeNull();
       } else {
         expect(EVENT_TEMPLATES[event]).not.toBeNull();

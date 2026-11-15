@@ -70,6 +70,19 @@ export const EVENT_TEMPLATES: Readonly<Record<DomainEventType, TemplateKey | nul
   [DomainEventType.PAYOUT_FAILED]: "payout_failed",
   [DomainEventType.DISCREPANCY_OPENED]: "discrepancy_opened",
   [DomainEventType.DISCREPANCY_RESOLVED]: null,
+  // Chat events never render notification templates (see outbox-relay FANOUT).
+  [DomainEventType.CHAT_CONVERSATION_CREATED]: null,
+  [DomainEventType.CHAT_PARTICIPANT_ADDED]: null,
+  [DomainEventType.CHAT_PARTICIPANT_REMOVED]: null,
+  [DomainEventType.CHAT_MESSAGE_CREATED]: null,
+  [DomainEventType.CHAT_MESSAGE_EDITED]: null,
+  [DomainEventType.CHAT_MESSAGE_DELETED]: null,
+  [DomainEventType.CHAT_MESSAGE_REACTED]: null,
+  [DomainEventType.CHAT_MESSAGE_READ]: null,
+  [DomainEventType.CHAT_MESSAGE_DELIVERED]: null,
+  [DomainEventType.CHAT_CONVERSATION_ARCHIVED]: null,
+  [DomainEventType.CHAT_CONVERSATION_CLOSED]: null,
+  [DomainEventType.CHAT_CONVERSATION_STATUS_CHANGED]: null,
 };
 
 function taka(minor: number): string {

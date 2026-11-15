@@ -139,6 +139,12 @@ export enum ChatAuditAction {
   INTERNAL_NOTE_CREATED = "INTERNAL_NOTE_CREATED",
   INTERNAL_NOTE_DELETED = "INTERNAL_NOTE_DELETED",
   ATTACHMENT_REJECTED = "ATTACHMENT_REJECTED",
+  /** Staff listed conversations platform-wide (metadata only). Phase 2. */
+  ADMIN_CONVERSATIONS_LISTED = "ADMIN_CONVERSATIONS_LISTED",
+  /** Staff exported a page of conversation history. Phase 2. */
+  ADMIN_CONVERSATION_EXPORTED = "ADMIN_CONVERSATION_EXPORTED",
+  /** Staff read the chat audit log. Phase 2. */
+  AUDIT_LOG_VIEWED = "AUDIT_LOG_VIEWED",
 }
 
 /**
@@ -161,4 +167,10 @@ export enum ChatPermission {
   REPORT_REVIEW = "chat.report.review",
   /** Read the chat audit log. */
   AUDIT_VIEW = "chat.audit.view",
+  /** Read restricted (INTERNAL_SUPERVISOR) conversations via the staff path. */
+  CONVERSATION_VIEW_RESTRICTED = "chat.conversation.view_restricted",
+  /** Add/remove participants in conversations the actor does not moderate. */
+  PARTICIPANT_MANAGE = "chat.participant.manage",
+  /** Export conversation history (paged, always audited). */
+  CONVERSATION_EXPORT = "chat.conversation.export",
 }
