@@ -149,3 +149,21 @@ The UPDATE's row lock serializes senders in one conversation; the unique index i
 ## ADR-026 — Ephemeral state never touches PostgreSQL
 
 **Decision.** Presence lives in Redis sorted sets (multi-device, TTL-expired, atomic transitions). Typing lives in per-socket memory with a TTL and throttle. There are no heartbeat or typing writes to the database and no new migration.
+
+# Phase 4 additions
+
+## ADR-027 — The messenger lives in the `messages` layout
+
+**Decision.** Each role's `messages/layout.tsx` renders the messenger; the list and thread pages return `null` and only drive the URL. `DashboardShell` keys `<main>` with one key for all `/…/messages/*` paths.
+**Why.** App Router layouts persist across child segment changes, so switching conversations keeps one socket, one set of listeners and warm caches, while refresh, back/forward and deep links still restore the selected conversation.
+
+## ADR-028 — A dedicated timeline slice beside RTK Query
+
+**Decision.** Server caches (inbox, detail, pins, search) stay in RTK Query; the per-conversation message timeline lives in a Redux slice keyed by `clientMessageId ?? id`.
+**Why.** The timeline merges REST pages, socket events and optimistic sends with sequence ordering, terminal deletes, `eventId` dedupe and gap-aware recovery — rules an endpoint cache cannot express cleanly. Bounded by an LRU of 8 conversations.
+**Rejected.** A second state library; patching `getMessages` caches per page argument.
+
+## ADR-029 — Native `content-visibility` instead of list virtualization
+
+**Decision.** Message rows use `content-visibility: auto` with an intrinsic size; history pages are 50 messages and the timeline is bounded.
+**Why.** Keeps browser scroll anchoring, find-in-page and screen-reader order intact without a new dependency. Revisit if very long sessions show measurable cost.

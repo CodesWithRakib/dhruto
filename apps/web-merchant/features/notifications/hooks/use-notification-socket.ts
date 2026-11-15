@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { notificationsApi } from "../api/notifications.api";
 import { playNotificationSound } from "@/lib/sound";
+import { apiSocketOrigin } from "@/lib/api/socket-origin";
 
 let sharedSocket: Socket | null = null;
 let activeConnectionCount = 0;
@@ -23,31 +24,19 @@ export interface RealtimeNotificationPayload {
   createdAt: string;
 }
 
-export interface ChatMessagePayload {
-  id: string;
-  roomId: string;
-  senderId: string;
-  senderRole: string;
-  content: string;
-  metadata?: Record<string, unknown> | null;
-  timestamp: string;
-}
-
 export interface UseNotificationSocketReturn {
   isConnected: boolean;
   latestNotification: RealtimeNotificationPayload | null;
-  joinChatRoom: (roomId: string) => void;
-  leaveChatRoom: (roomId: string) => void;
-  sendChatMessage: (roomId: string, content: string, metadata?: Record<string, unknown>) => void;
-  sendChatTyping: (roomId: string, isTyping: boolean) => void;
 }
 
 /**
- * Enterprise Real-Time Socket Connection Hook.
+ * Real-time notification socket (default "/" namespace).
  * -------------------------------------------------------------
- * Automatically authenticates via JWT, receives instant notifications,
- * plays harmonic notification sound chime, invalidates caches, and
- * exposes room/chat messaging primitives for future features.
+ * Authenticates via JWT, receives instant notifications, plays the chime and
+ * invalidates the notification cache. It carries NO chat traffic: the legacy
+ * `chat:*` helpers were removed (the server rejects those events — finding
+ * S-1). Chat uses the dedicated `/chat` namespace client in
+ * `features/chat/realtime/chat-socket-client.ts`.
  */
 export function useNotificationSocket(): UseNotificationSocketReturn {
   const dispatch = useAppDispatch();
@@ -56,7 +45,6 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
 
   const [isConnected, setIsConnected] = useState(false);
   const [latestNotification, setLatestNotification] = useState<RealtimeNotificationPayload | null>(null);
-  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -68,15 +56,7 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
-    // Extract base origin (e.g. http://localhost:4000)
-    let socketOrigin = "http://localhost:4000";
-    try {
-      const parsed = new URL(apiUrl);
-      socketOrigin = `${parsed.protocol}//${parsed.host}`;
-    } catch {
-      // Default localhost:4000
-    }
+    const socketOrigin = apiSocketOrigin();
 
     if (!sharedSocket || sharedSocket.disconnected) {
       sharedSocket = io(socketOrigin, {
@@ -89,7 +69,6 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
     }
 
     const socket = sharedSocket;
-    socketRef.current = socket;
     activeConnectionCount++;
 
     const onConnect = () => {
@@ -143,43 +122,8 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
     };
   }, [token, dispatch]);
 
-  /* ================================================================== */
-  /* Future Chat & Room Primitives                                      */
-  /* ================================================================== */
-
-  const joinChatRoom = useCallback((roomId: string) => {
-    if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit("chat:join", { roomId });
-    }
-  }, []);
-
-  const leaveChatRoom = useCallback((roomId: string) => {
-    if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit("chat:leave", { roomId });
-    }
-  }, []);
-
-  const sendChatMessage = useCallback(
-    (roomId: string, content: string, metadata?: Record<string, unknown>) => {
-      if (socketRef.current && socketRef.current.connected) {
-        socketRef.current.emit("chat:message", { roomId, content, metadata });
-      }
-    },
-    [],
-  );
-
-  const sendChatTyping = useCallback((roomId: string, isTyping: boolean) => {
-    if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit("chat:typing", { roomId, isTyping });
-    }
-  }, []);
-
   return {
     isConnected,
     latestNotification,
-    joinChatRoom,
-    leaveChatRoom,
-    sendChatMessage,
-    sendChatTyping,
   };
 }

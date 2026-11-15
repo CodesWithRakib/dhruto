@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Radio,
   BrainCircuit,
+  MessagesSquare,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, CUSTOMER_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -71,6 +72,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           href: MERCHANT_ROUTES.returns,
           labelKey: "returns",
           icon: RotateCcw,
+        },
+        {
+          href: MERCHANT_ROUTES.messages,
+          labelKey: "messages",
+          icon: MessagesSquare,
         },
       ],
     },
@@ -126,6 +132,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: ADMIN_ROUTES.parcels, labelKey: "parcels", icon: Package },
         { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
         { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
+        { href: ADMIN_ROUTES.messages, labelKey: "messages", icon: MessagesSquare },
       ],
     },
     {
@@ -160,6 +167,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: HUB_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
         { href: HUB_ROUTES.scanner, labelKey: "scanner", icon: ScanLine },
         { href: HUB_ROUTES.parcels, labelKey: "parcels", icon: PackageSearch },
+        { href: HUB_ROUTES.messages, labelKey: "messages", icon: MessagesSquare },
       ],
     },
     {
@@ -187,6 +195,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
       items: [
         { href: RIDER_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
         { href: RIDER_ROUTES.tasks, labelKey: "tasks", icon: ClipboardList },
+        { href: RIDER_ROUTES.messages, labelKey: "messages", icon: MessagesSquare },
       ],
     },
     {
@@ -225,6 +234,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           href: CUSTOMER_ROUTES.history,
           labelKey: "customerHistory",
           icon: History,
+        },
+        {
+          href: CUSTOMER_ROUTES.messages,
+          labelKey: "messages",
+          icon: MessagesSquare,
         },
       ],
     },

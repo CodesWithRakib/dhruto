@@ -53,6 +53,8 @@ export const MERCHANT_ROUTES = {
   webhooks: "/merchant/developer/webhooks",
   apiKeys: "/merchant/developer/api-keys",
   settings: "/merchant/settings",
+  messages: "/merchant/messages",
+  messageThread: (id: string) => `/merchant/messages/${id}`,
 } as const;
 
 export const ADMIN_ROUTES = {
@@ -69,6 +71,8 @@ export const ADMIN_ROUTES = {
   tracking: "/admin/track",
   trackShipment: (code: string) => `/admin/track/${code}`,
   settings: "/admin/settings",
+  messages: "/admin/messages",
+  messageThread: (id: string) => `/admin/messages/${id}`,
 } as const;
 
 export const HUB_ROUTES = {
@@ -82,6 +86,8 @@ export const HUB_ROUTES = {
   exceptions: "/hub/exceptions",
   cash: "/hub/cash",
   settings: "/hub/settings",
+  messages: "/hub/messages",
+  messageThread: (id: string) => `/hub/messages/${id}`,
 } as const;
 
 export const RIDER_ROUTES = {
@@ -91,6 +97,8 @@ export const RIDER_ROUTES = {
   history: "/rider/history",
   profile: "/rider/profile",
   settings: "/rider/settings",
+  messages: "/rider/messages",
+  messageThread: (id: string) => `/rider/messages/${id}`,
 } as const;
 
 export const CUSTOMER_ROUTES = {
@@ -99,6 +107,8 @@ export const CUSTOMER_ROUTES = {
   trackShipment: (code: string) => `/customer/track/${code}`,
   history: "/customer/history",
   settings: "/customer/settings",
+  messages: "/customer/messages",
+  messageThread: (id: string) => `/customer/messages/${id}`,
 } as const;
 
 export const ROUTES = {

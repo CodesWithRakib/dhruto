@@ -2,11 +2,15 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { baseApi } from "../lib/api/base-api";
 import authReducer from "./auth.slice";
+import chatTimelineReducer from "../features/chat/state/chat-timeline.slice";
+import chatEphemeralReducer from "../features/chat/state/chat-ephemeral.slice";
 
 export const makeStore = () =>
   configureStore({
     reducer: {
       auth: authReducer,
+      chatTimeline: chatTimelineReducer,
+      chatEphemeral: chatEphemeralReducer,
       [baseApi.reducerPath]: baseApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),

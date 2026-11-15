@@ -132,6 +132,10 @@ export function DashboardShell({
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  // `main` is keyed by route to restart its entrance animation. Messenger
+  // routes share one key so its persistent layout (socket, caches) survives
+  // switching conversations: /x/messages and /x/messages/<id> -> /x/messages.
+  const mainKey = pathname.replace(/^(\/[^/]+\/messages)(\/.*)?$/, "$1");
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { signOut } = useSignOut();
 
@@ -301,7 +305,7 @@ export function DashboardShell({
 
           <main
             id="main-content"
-            key={pathname}
+            key={mainKey}
             className={cn(
               "flex-1 px-4 py-6 sm:px-6 lg:px-8",
               showBottomNav ? "pb-28 lg:pb-6" : undefined,
