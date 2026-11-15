@@ -48,3 +48,14 @@ export * from "./IntelligenceFeedback.entity.js";
 export * from "./ScoringModel.entity.js";
 export * from "./AnalyticsAlert.entity.js";
 export * from "./ReportExport.entity.js";
+// Communication platform (Phase 1 foundation)
+export * from "./ChatConversation.entity.js";
+export * from "./ChatParticipant.entity.js";
+export * from "./ChatMessage.entity.js";
+export * from "./ChatAttachment.entity.js";
+export * from "./ChatMessageReaction.entity.js";
+export * from "./ChatMessageEdit.entity.js";
+export * from "./ChatPin.entity.js";
+export * from "./ChatReport.entity.js";
+export * from "./ChatInternalNote.entity.js";
+export * from "./ChatAuditLog.entity.js";
