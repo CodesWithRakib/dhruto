@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PageHeader } from "@/components/page-header";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import {
   Server,
   Layers,
@@ -20,7 +21,8 @@ export default function AdminSettingsPage() {
   const authUser = useAppSelector((s) => s.auth.user);
 
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <DashboardCanvasBg />
       <PageHeader
         title="Admin Console & Settings"
         description="System administration, role privileges, and platform-wide configurations."
