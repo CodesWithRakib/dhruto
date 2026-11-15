@@ -4,8 +4,6 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
   Button,
-  Badge,
-  Input,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -15,7 +13,7 @@ import {
   DataTable,
   ColumnDef,
 } from "@dhruto/ui";
-import { Truck, Send, PackageCheck, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { Truck, Send, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { ManifestStatus } from "@dhruto/contracts";
 import {
   useGetManifestByIdQuery,
@@ -28,7 +26,10 @@ import { HUB_ROUTES } from "@/config/routes";
 import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
 import { EnumBadge } from "@/components/data-display/enum-badge";
-import { MANIFEST_STATUS_TONE, BAG_STATUS_TONE } from "@/config/status";
+import { BAG_STATUS_TONE } from "@/config/status";
+import { ManifestSummaryCard } from "./manifests/manifest-summary-card";
+import { ManifestReceiveCard } from "./manifests/manifest-receive-card";
+import { ManifestReconciliationCard } from "./manifests/manifest-reconciliation-card";
 
 interface ManifestDetailsViewProps {
   manifestId: string;
@@ -36,8 +37,7 @@ interface ManifestDetailsViewProps {
 
 /**
  * Manifest details: dispatch (origin, confirmed) and receive (destination,
- * reconciled bag by bag). An unexpected bag is rejected, never absorbed;
- * missing bags block completion unless a partial receipt is explicit.
+ * reconciled bag by bag).
  */
 export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
   const t = useTranslations("Hub");
@@ -175,7 +175,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       manifest.status === ManifestStatus.IN_TRANSIT ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl bg-info-soft px-4 py-3 text-xs font-semibold text-info"
+          className="flex items-center gap-2 rounded-2xl border border-sky-500/30 bg-info-soft px-4 py-3 text-xs font-semibold text-info shadow-xs"
         >
           <Truck className="h-4 w-4" aria-hidden="true" />
           {t("manifests.dispatchedBanner")}
@@ -184,7 +184,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       {manifest.status === ManifestStatus.RECEIVED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl bg-success-soft px-4 py-3 text-xs font-semibold text-success"
+          className="flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-success-soft px-4 py-3 text-xs font-semibold text-success shadow-xs"
         >
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {t("manifests.receivedBanner")}
@@ -193,85 +193,24 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       {manifest.status === ManifestStatus.RECONCILED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl bg-warning-soft px-4 py-3 text-xs font-semibold text-warning"
+          className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-warning-soft px-4 py-3 text-xs font-semibold text-warning shadow-xs"
         >
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           {t("manifests.reconciledBanner")}
         </p>
       ) : null}
 
-      {/* Summary */}
-      <div className="rounded-3xl bg-surface-elevated overflow-hidden p-5 sm:p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Truck className="h-4 w-4 text-primary" aria-hidden="true" />
-            <span className="text-sm font-bold text-foreground">{t("manifests.details")}</span>
-            <span className="text-muted-foreground/40 font-light">·</span>
-            <span className="rounded-lg bg-surface-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground">
-              {manifest.manifestCode}
-            </span>
-          </div>
-          <EnumBadge
-            namespace="ManifestStatus"
-            value={manifest.status}
-            tones={MANIFEST_STATUS_TONE}
-            className="text-[10px]"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 pt-2">
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              Manifest Code
-            </p>
-            <p className="font-mono text-sm font-bold text-foreground">{manifest.manifestCode}</p>
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              {t("status")}
-            </p>
-            <div className="mt-1">
-              <EnumBadge
-                namespace="ManifestStatus"
-                value={manifest.status}
-                tones={MANIFEST_STATUS_TONE}
-                className="text-[11px]"
-              />
-            </div>
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Route</p>
-            <p className="text-sm font-semibold text-foreground">
-              {manifest.originHubName} → {manifest.destinationHubName}
-            </p>
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              {t("manifests.vehicle")}
-            </p>
-            <p className="font-mono text-sm text-foreground">{manifest.vehicleNumber}</p>
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              {t("manifests.bagsInManifest")}
-            </p>
-            <p className="font-mono text-sm font-bold tabular-nums text-foreground">
-              {manifest.bagCount} · {t("manifests.parcelCount", { count: manifest.parcelCount })}
-            </p>
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              {t("manifests.driverName")}
-            </p>
-            <p className="text-sm text-foreground">{manifest.driverName ?? "—"}</p>
-          </div>
-        </div>
-      </div>
+      {/* Summary telemetry card */}
+      <ManifestSummaryCard manifest={manifest} />
 
-      {/* Dispatch (origin, while CREATED) */}
+      {/* Dispatch action card (while CREATED) */}
       {manifest.status === ManifestStatus.CREATED ? (
-        <div className="rounded-3xl bg-primary/5 p-5 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-md p-5 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-sm">
           <p className="text-sm text-muted-foreground">{t("manifests.dispatchConfirmMessage")}</p>
-          <Button onClick={() => setDispatchConfirmOpen(true)} className="gap-1.5 rounded-xl font-semibold">
+          <Button
+            onClick={() => setDispatchConfirmOpen(true)}
+            className="gap-1.5 rounded-xl font-semibold shadow-xs"
+          >
             <Send className="h-4 w-4" aria-hidden="true" />
             {t("manifests.dispatch")}
           </Button>
@@ -279,14 +218,20 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       ) : null}
 
       {/* Bags in manifest DataTable */}
-      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
-        <div className="flex items-center justify-between p-5 sm:p-6">
+      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
+        {/* Specular top highlight */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+          aria-hidden="true"
+        />
+
+        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border/40">
           <div className="flex items-center gap-2.5">
             <Truck className="h-4 w-4 text-primary" aria-hidden="true" />
             <h2 className="text-sm font-bold text-foreground">
               {t("manifests.bagsInManifest")}
             </h2>
-            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
               {manifest.bags.length}
             </span>
           </div>
@@ -339,137 +284,50 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
         </div>
       </div>
 
-      {/* Receive (destination, while in transit) */}
+      {/* Receiving card (destination, while in transit) */}
       {receivable ? (
-        <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-4">
-          <div>
-            <h2 className="text-sm font-bold text-foreground">{t("manifests.receiveTitle")}</h2>
-            <p className="text-xs text-muted-foreground">{t("manifests.receiveHint")}</p>
-          </div>
-          <form onSubmit={addScannedBag} className="flex gap-2.5">
-            <Input
-              type="text"
-              autoComplete="off"
-              autoCapitalize="characters"
-              value={bagCodeInput}
-              onChange={(event) => setBagCodeInput(event.target.value)}
-              placeholder={t("manifests.bagCodePlaceholder")}
-              aria-label={t("manifests.scannedBags")}
-              className="h-12 rounded-2xl border-0 bg-surface-muted/60 font-mono uppercase focus:bg-background"
-            />
-            <Button type="submit" disabled={!bagCodeInput.trim()} className="h-12 rounded-2xl px-6 font-semibold">
-              {t("manifests.addScannedBag")}
-            </Button>
-          </form>
-          {scannedBagCodes.length > 0 ? (
-            <ul className="flex flex-wrap gap-2">
-              {scannedBagCodes.map((code) => (
-                <li key={code}>
-                  <Badge variant="default" className="gap-1 font-mono text-[11px] rounded-lg">
-                    {code}
-                    <button
-                      type="button"
-                      onClick={() => removeScannedBag(code)}
-                      aria-label={`${t("close")} ${code}`}
-                      className="ml-1 rounded-full hover:opacity-70"
-                    >
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <label className="flex cursor-pointer items-start gap-2 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
-              checked={allowPartial}
-              onChange={(event) => setAllowPartial(event.target.checked)}
-              className="mt-0.5 rounded text-primary"
-            />
-            {t("manifests.allowPartial")}
-          </label>
-          <Button
-            onClick={handleReceive}
-            disabled={isReceiving}
-            className="w-full gap-1.5 rounded-2xl sm:w-auto font-semibold"
-          >
-            <PackageCheck className="h-4 w-4" aria-hidden="true" />
-            {isReceiving ? t("manifests.receiving") : t("manifests.completeReceive")}
-          </Button>
-        </div>
+        <ManifestReceiveCard
+          bagCodeInput={bagCodeInput}
+          setBagCodeInput={setBagCodeInput}
+          scannedBagCodes={scannedBagCodes}
+          onAddBag={addScannedBag}
+          onRemoveBag={removeScannedBag}
+          allowPartial={allowPartial}
+          setAllowPartial={setAllowPartial}
+          onReceive={handleReceive}
+          isReceiving={isReceiving}
+        />
       ) : null}
 
-      {/* Reconciliation */}
+      {/* Reconciliation card */}
       {reconciliation ? (
-        <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            {t("manifests.reconciliation")}
-          </h2>
-          <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-            <div className="rounded-2xl bg-surface-muted/40 p-4">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {t("manifests.expected")}
-              </p>
-              <p className="font-mono text-xl font-bold tabular-nums text-foreground">
-                {reconciliation.expectedBagCount}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-surface-muted/40 p-4">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {t("manifests.received")}
-              </p>
-              <p className="font-mono text-xl font-bold tabular-nums text-foreground">
-                {reconciliation.receivedBagCount}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-surface-muted/40 p-4">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {t("manifests.missing")}
-              </p>
-              <p className="font-mono text-xl font-bold tabular-nums text-foreground">
-                {reconciliation.missingBagCodes.length}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-surface-muted/40 p-4">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {t("manifests.expected")} parcels
-              </p>
-              <p className="font-mono text-xl font-bold tabular-nums text-foreground">
-                {reconciliation.receivedParcelCount}/{reconciliation.expectedParcelCount}
-              </p>
-            </div>
-          </div>
-          {reconciliation.missingBagCodes.length > 0 ? (
-            <div className="rounded-2xl bg-warning-soft p-3.5 text-xs">
-              <p className="font-semibold text-warning">{t("manifests.missing")}:</p>
-              <p className="font-mono text-warning">
-                {reconciliation.missingBagCodes.join(", ")}
-              </p>
-            </div>
-          ) : null}
-          {reconciliation.missingTrackingCodes.length > 0 ? (
-            <div className="rounded-2xl bg-warning-soft p-3.5 text-xs">
-              <p className="font-semibold text-warning">{t("manifests.missing")} parcels:</p>
-              <p className="font-mono text-warning">
-                {reconciliation.missingTrackingCodes.join(", ")}
-              </p>
-            </div>
-          ) : null}
-        </div>
+        <ManifestReconciliationCard reconciliation={reconciliation} />
       ) : null}
 
+      {/* Dispatch confirmation dialog */}
       <Dialog open={dispatchConfirmOpen} onOpenChange={setDispatchConfirmOpen}>
-        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
+        <DialogContent className="max-w-md rounded-3xl border border-border/60 bg-surface-elevated p-6 shadow-2xl">
           <DialogHeader>
             <DialogTitle>{t("manifests.dispatchConfirmTitle")}</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">{t("manifests.dispatchConfirmMessage")}</DialogDescription>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
+              {t("manifests.dispatchConfirmMessage")}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button type="button" variant="ghost" onClick={() => setDispatchConfirmOpen(false)} className="rounded-xl">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setDispatchConfirmOpen(false)}
+              className="rounded-xl"
+            >
               {t("cancel")}
             </Button>
-            <Button type="button" onClick={handleDispatch} disabled={isDispatching} className="rounded-xl">
+            <Button
+              type="button"
+              onClick={handleDispatch}
+              disabled={isDispatching}
+              className="rounded-xl font-semibold"
+            >
               {isDispatching ? t("manifests.dispatching") : t("confirm")}
             </Button>
           </DialogFooter>
