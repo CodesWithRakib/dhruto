@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardSkeleton } from "@dhruto/ui";
+import { CardSkeleton } from "@dhruto/ui";
 import { ArrowRight, Clock, RotateCcw, Wallet, type LucideIcon } from "lucide-react";
 import { Link } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
@@ -71,13 +71,18 @@ export function NeedsAttention({
   }
 
   return (
-    <Card className="overflow-hidden rounded-3xl border-warning/40 shadow-2xs">
-      <div className="flex items-start gap-3.5 border-b border-warning/20 bg-warning-soft/40 px-5 py-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-soft text-warning-soft-foreground border border-warning/30 shadow-2xs">
+    <div className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
+      {/* Top Specular Accent Line */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+
+      <div className="flex items-start gap-3.5 border-b border-amber-500/20 bg-amber-500/10 px-5 py-4 sm:px-6">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-xs">
           <Clock className="h-5 w-5" aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-base font-bold text-foreground tracking-tight">{t("attention.title")}</h2>
+          <h2 className="text-base font-bold text-foreground tracking-tight">
+            {t("attention.title")}
+          </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">{t("attention.description")}</p>
         </div>
       </div>
@@ -131,6 +136,6 @@ export function NeedsAttention({
           );
         })}
       </ul>
-    </Card>
+    </div>
   );
 }

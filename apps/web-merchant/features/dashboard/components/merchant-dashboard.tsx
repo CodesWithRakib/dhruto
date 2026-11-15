@@ -28,7 +28,7 @@ import { ShipmentKpis, DeliveryHealth } from "./shipment-overview";
 import { NeedsAttention } from "./needs-attention";
 import { RecentShipments, type ShipmentRow } from "./recent-shipments";
 import { ShipmentPerformance } from "./shipment-performance";
-import { MerchantIllustrationBg } from "@/components/visual/illustration-backgrounds";
+import { DashboardCanvasBg } from "./dashboard-canvas-bg";
 
 const EMPTY_STATS: DashboardStats = {
   totalOrders: 0,
@@ -41,7 +41,7 @@ const EMPTY_STATS: DashboardStats = {
   totalDeliveryFees: 0,
 };
 
-/** A quick action tile built on the shared interactive card with elevated aesthetics. */
+/** A kinetic quick action tile inspired by the Home bento grid. */
 function QuickAction({
   href,
   icon: Icon,
@@ -58,14 +58,24 @@ function QuickAction({
   disabled?: boolean;
 }) {
   const content = (
-    <div className="h-full rounded-2xl bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:bg-surface-muted/60">
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <h3 className="mt-4 text-sm font-bold text-foreground">{title}</h3>
-      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</p>
+    <div className="group relative h-full overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 p-6 backdrop-blur-md shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5">
+      {/* Top Specular Line */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+      <div className="flex items-center justify-between">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground shadow-xs">
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <ArrowRight className="h-4 w-4 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
+      </div>
+
+      <h3 className="mt-4 text-sm font-bold text-foreground transition-colors group-hover:text-primary">
+        {title}
+      </h3>
+      <p className="mt-1 text-xs text-muted-foreground leading-relaxed font-normal">{description}</p>
+
       {badge ? (
-        <span className="mt-3 inline-flex w-fit items-center rounded-full bg-muted/80 px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+        <span className="mt-3.5 inline-flex w-fit items-center rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
           {badge}
         </span>
       ) : null}
@@ -83,14 +93,14 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      className="rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
     >
       {content}
     </Link>
   );
 }
 
-/** COD collected vs pending, with a collection progress bar. */
+/** Executive Fintech COD & Settlement Card with gradient mesh & neon glow. */
 function CodSummaryCard({ stats }: { stats: DashboardStats }) {
   const t = useTranslations("Index");
   const { bdt } = useFormatters();
@@ -99,56 +109,82 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
     stats.totalCodAmount > 0 ? (stats.collectedCodAmount / stats.totalCodAmount) * 100 : 0;
 
   return (
-    <Card className="overflow-hidden rounded-3xl bg-card">
-      <div className="border-b border-surface-muted/60 p-5 sm:p-6 pb-4">
-        <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-base font-bold text-foreground sm:text-lg">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Wallet className="h-4 w-4" aria-hidden="true" />
-            </span>
-            <span>{t("codSettlement")}</span>
-          </h2>
-          <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-            T+1 Remittance
+    <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-[#072a1d] via-[#051f15] to-[#0a3f2b] p-6 text-white shadow-2xl">
+      {/* Decorative Atmospheric Bloom */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-emerald-400/20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-cyan-400/15 blur-3xl"
+      />
+
+      {/* Card Header */}
+      <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-400/20 text-emerald-300 ring-1 ring-emerald-400/30 shadow-xs">
+            <Wallet className="h-4 w-4" aria-hidden="true" />
           </span>
+          <div>
+            <h2 className="text-base font-bold text-white tracking-tight">
+              {t("codSettlement")}
+            </h2>
+            <p className="text-[11px] text-white/60">{t("codSettlementHint")}</p>
+          </div>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{t("codSettlementHint")}</p>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-3 py-0.5 text-[10px] font-bold text-emerald-300 backdrop-blur-md">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          T+1 Remittance
+        </span>
       </div>
 
-      <div className="space-y-5 p-5 sm:p-6">
+      {/* Metrics Section */}
+      <div className="relative z-10 mt-5 space-y-5">
         <div>
-          <p className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
-            {t("codCollected")}
-          </p>
-          <p className="mt-1 text-3xl font-extrabold tabular-nums tracking-tight text-foreground">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+              {t("codCollected")}
+            </p>
+            <span className="text-[11px] font-semibold text-white/80">
+              {Math.round(collectedRatio)}% Collected
+            </span>
+          </div>
+          <p className="mt-1 text-3xl sm:text-4xl font-extrabold tabular-nums tracking-tight text-white">
             {bdt(stats.collectedCodAmount)}
           </p>
+          
+          {/* Neon Gradient Progress Bar */}
           <div
-            className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-muted/60"
+            className="mt-3.5 h-2.5 w-full overflow-hidden rounded-full bg-black/40 p-0.5 border border-white/10"
             role="img"
             aria-label={`${t("codCollected")}: ${Math.round(collectedRatio)}%`}
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700 ease-out shadow-2xs"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 transition-all duration-700 ease-out shadow-[0_0_12px_rgba(16,185,129,0.7)]"
               style={{ width: `${Math.min(100, Math.max(0, collectedRatio))}%` }}
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3.5 text-xs">
-          <span className="text-muted-foreground font-medium">{t("codPending")}</span>
-          <span className="font-bold tabular-nums text-foreground text-sm">{bdt(pendingCod)}</span>
+        {/* Pending COD Glass Container */}
+        <div className="flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md text-xs">
+          <span className="text-white/70 font-medium">{t("codPending")}</span>
+          <span className="font-bold tabular-nums text-emerald-300 text-sm sm:text-base">
+            {bdt(pendingCod)}
+          </span>
         </div>
 
+        {/* Action Link */}
         <Link
           href={MERCHANT_ROUTES.finance}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+          className="group inline-flex items-center gap-2 text-xs font-bold text-emerald-300 hover:text-emerald-200 transition-colors"
         >
           <span>{t("codStatement")}</span>
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
         </Link>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -180,7 +216,7 @@ export function MerchantDashboard({ today }: { today: string }) {
 
   return (
     <div className="relative space-y-6">
-      <MerchantIllustrationBg opacity={0.3} />
+      <DashboardCanvasBg />
       <DashboardHeader today={today} businessName={merchant?.businessName} />
 
       {isError ? (

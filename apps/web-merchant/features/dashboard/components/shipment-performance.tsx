@@ -2,7 +2,14 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, ChartSkeleton, TrendLineChart } from "@dhruto/ui";
+import {
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  ChartSkeleton,
+  TrendLineChart,
+} from "@dhruto/ui";
 import { RefreshCw } from "lucide-react";
 import type { MerchantAnalyticsSummary } from "@dhruto/contracts";
 import { cn } from "@/lib/cn";
@@ -40,11 +47,18 @@ export function ShipmentPerformance({
   const metricLabel = metric === "delivered" ? t("performance.delivered") : t("performance.booked");
 
   return (
-    <Card className="overflow-hidden rounded-3xl border-border/80 shadow-2xs">
-      <CardHeader className="flex flex-col gap-3 border-b border-border/60 px-5 py-4.5 bg-surface-muted/20 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <div className="relative overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
+      {/* Top Specular Accent Line */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+
+      <CardHeader className="flex flex-col gap-3 border-b border-border/60 px-5 py-4.5 bg-surface-muted/30 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
         <div className="min-w-0">
-          <CardTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight">{t("performance.title")}</CardTitle>
-          <CardDescription className="mt-0.5 text-xs text-muted-foreground">{t("performance.description")}</CardDescription>
+          <CardTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+            {t("performance.title")}
+          </CardTitle>
+          <CardDescription className="mt-0.5 text-xs text-muted-foreground">
+            {t("performance.description")}
+          </CardDescription>
         </div>
 
         <div
@@ -120,6 +134,6 @@ export function ShipmentPerformance({
           </>
         )}
       </CardContent>
-    </Card>
+    </div>
   );
 }

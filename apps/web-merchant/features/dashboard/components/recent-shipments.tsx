@@ -3,7 +3,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import {
-  Card,
   CardContent,
   CardHeader,
   CardTitle,
@@ -56,8 +55,11 @@ export function RecentShipments({
   const { bdt, dateTime } = useFormatters();
 
   return (
-    <Card className="overflow-hidden rounded-3xl border-border/80 shadow-2xs">
-      <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border/60 px-5 py-4.5 bg-surface-muted/20">
+    <div className="relative overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
+      {/* Top Specular Accent Line */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
+      <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border/60 px-5 py-4.5 bg-surface-muted/30 dark:bg-white/5 sm:px-6">
         <div className="min-w-0">
           <CardTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight">{t("recentOrders")}</CardTitle>
           <CardDescription className="mt-0.5 text-xs text-muted-foreground">{t("recentOrdersSubtitle")}</CardDescription>
@@ -169,6 +171,6 @@ export function RecentShipments({
           </ul>
         )}
       </CardContent>
-    </Card>
+    </div>
   );
 }
