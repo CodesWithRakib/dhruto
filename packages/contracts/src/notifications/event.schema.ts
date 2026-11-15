@@ -42,6 +42,9 @@ export enum DomainEventType {
   CHAT_CONVERSATION_ARCHIVED = "chat.conversation_archived.v1",
   CHAT_CONVERSATION_CLOSED = "chat.conversation_closed.v1",
   CHAT_CONVERSATION_STATUS_CHANGED = "chat.conversation_status_changed.v1",
+  // Communication Phase 3 (realtime pin updates).
+  CHAT_MESSAGE_PINNED = "chat.message_pinned.v1",
+  CHAT_MESSAGE_UNPINNED = "chat.message_unpinned.v1",
 }
 
 export const domainEventSchema = z.object({

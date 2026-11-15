@@ -65,6 +65,6 @@ export const CHAT_ENTITIES = [
     ChatSearchService,
     ChatAdminService,
   ],
-  exports: [TypeOrmModule, ChatAuthorizationService],
+  exports: [TypeOrmModule, ChatAuthorizationService, ChatCursorService, ChatMessageReaderService],
 })
 export class ChatModule {}

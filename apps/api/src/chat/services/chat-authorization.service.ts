@@ -308,6 +308,62 @@ export class ChatAuthorizationService {
   }
 
   /**
+   * Users who may receive realtime events for a conversation right now:
+   * ACTIVE participants that are also currently eligible (fixed query count:
+   * conversation + participants + 4 scope queries + parcel). Used by the
+   * realtime fan-out, so content never reaches a reassigned or removed user.
+   */
+  async eligibleRecipientIds(conversationId: string, manager?: EntityManager): Promise<string[]> {
+    const em = this.em(manager);
+    const conversation = await em
+      .getRepository(ChatConversation)
+      .findOne({ where: { id: conversationId } });
+    if (!conversation) return [];
+    const participants = await em.getRepository(ChatParticipant).find({
+      where: { conversationId, status: ChatParticipantStatus.ACTIVE },
+      select: ["userId"],
+    });
+    const [scopes, parcel] = await Promise.all([
+      this.loadScopesForUsers(
+        participants.map((p) => p.userId),
+        manager,
+      ),
+      this.loadParcelScope(conversation.parcelId, manager),
+    ]);
+    return [...scopes.values()]
+      .filter((scope) => isEligibleParticipant(scope, conversation, parcel))
+      .map((scope) => scope.userId);
+  }
+
+  /**
+   * Of `conversationIds`, those `userId` may still access (ACTIVE membership +
+   * live eligibility). Batched for periodic socket-room revalidation.
+   */
+  async accessibleConversationIds(
+    userId: string,
+    conversationIds: readonly string[],
+  ): Promise<Set<string>> {
+    const ids = [...new Set(conversationIds)];
+    if (ids.length === 0) return new Set();
+    const [scopes, memberships, conversations] = await Promise.all([
+      this.loadScopesForUsers([userId]),
+      this.dataSource.getRepository(ChatParticipant).find({
+        where: { userId, conversationId: In(ids), status: ChatParticipantStatus.ACTIVE },
+        select: ["conversationId"],
+      }),
+      this.dataSource.getRepository(ChatConversation).find({ where: { id: In(ids) } }),
+    ]);
+    const actor = scopes.get(userId);
+    if (!actor) return new Set();
+    const member = new Set(memberships.map((m) => m.conversationId));
+    const eligible = await this.filterEligible(
+      actor,
+      conversations.filter((c) => member.has(c.id)),
+    );
+    return new Set(eligible.map((c) => c.id));
+  }
+
+  /**
    * Validates users being added to a conversation (by `actor`): each must be
    * an ACTIVE account, eligible for the conversation's scope, not the actor,
    * and — for DIRECT / GROUP / INTERNAL_SUPERVISOR — share a hub with a

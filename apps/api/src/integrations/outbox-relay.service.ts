@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from "@nestjs/common";
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from "@nestjs/common";
 import { InjectQueue } from "@nestjs/bullmq";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Queue } from "bullmq";
@@ -48,6 +48,7 @@ import {
   type TemplateKey,
 } from "../notifications/templates.js";
 import { getErrorMessage } from "../common/utils/error.util.js";
+import { REALTIME_FANOUT_HANDLER, type RealtimeFanoutHandler } from "./realtime-fanout.port.js";
 
 type Payload = Record<string, unknown>;
 
@@ -84,6 +85,13 @@ interface HubInAppTarget extends BaseTarget {
   route: (payload: Payload) => string;
 }
 
+/** Realtime (Socket.IO) delivery of chat events — see realtime-fanout.port.ts. */
+interface ChatRealtimeTarget {
+  kind: "chat-realtime";
+}
+
+const CHAT_REALTIME: ChatRealtimeTarget = { kind: "chat-realtime" };
+
 interface WebhookTarget {
   kind: "webhook";
   event: WebhookEvent;
@@ -104,7 +112,8 @@ type FanoutTarget =
   | CustomerSmsTarget
   | RiderInAppTarget
   | HubInAppTarget
-  | WebhookTarget;
+  | WebhookTarget
+  | ChatRealtimeTarget;
 
 interface ResolvedRecipient {
   key: string;
@@ -339,21 +348,23 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
     },
   ],
   [DomainEventType.DISCREPANCY_RESOLVED]: [],
-  // Communication platform events: durable, relay-processable, no notification
-  // fan-out yet. Phase 3 adds a realtime (socket) target here; chat in-app/SMS
-  // notifications are a later phase. Payloads carry ids only (no content).
-  [DomainEventType.CHAT_CONVERSATION_CREATED]: [],
-  [DomainEventType.CHAT_PARTICIPANT_ADDED]: [],
-  [DomainEventType.CHAT_PARTICIPANT_REMOVED]: [],
-  [DomainEventType.CHAT_MESSAGE_CREATED]: [],
-  [DomainEventType.CHAT_MESSAGE_EDITED]: [],
-  [DomainEventType.CHAT_MESSAGE_DELETED]: [],
-  [DomainEventType.CHAT_MESSAGE_REACTED]: [],
-  [DomainEventType.CHAT_MESSAGE_READ]: [],
-  [DomainEventType.CHAT_MESSAGE_DELIVERED]: [],
-  [DomainEventType.CHAT_CONVERSATION_ARCHIVED]: [],
-  [DomainEventType.CHAT_CONVERSATION_CLOSED]: [],
-  [DomainEventType.CHAT_CONVERSATION_STATUS_CHANGED]: [],
+  // Communication platform events: durable, content-free payloads, delivered
+  // to sockets by the realtime target (Phase 3). Chat in-app/SMS notifications
+  // are a later phase.
+  [DomainEventType.CHAT_CONVERSATION_CREATED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_PARTICIPANT_ADDED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_PARTICIPANT_REMOVED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_CREATED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_EDITED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_DELETED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_REACTED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_READ]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_DELIVERED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_CONVERSATION_ARCHIVED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_CONVERSATION_CLOSED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_CONVERSATION_STATUS_CHANGED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_PINNED]: [CHAT_REALTIME],
+  [DomainEventType.CHAT_MESSAGE_UNPINNED]: [CHAT_REALTIME],
 };
 
 const str = (value: unknown, fallback = ""): string =>
@@ -470,6 +481,9 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     private readonly notificationRepo: Repository<Notification>,
     @Optional() @InjectQueue("notifications") private readonly notificationsQueue?: Queue,
     @Optional() @InjectQueue("webhooks") private readonly webhooksQueue?: Queue,
+    @Optional()
+    @Inject(REALTIME_FANOUT_HANDLER)
+    private readonly realtime?: RealtimeFanoutHandler,
   ) {}
 
   onModuleInit(): void {
@@ -570,6 +584,18 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     for (const target of targets) {
       if (target.kind === "webhook") {
         await this.fanOutWebhook(manager, row, target.event, payload);
+      } else if (target.kind === "chat-realtime") {
+        // Committed row; handler is idempotent and throws when distribution
+        // is broken so this attempt is retried with backoff.
+        await this.realtime?.handle({
+          eventId: row.eventId,
+          eventType,
+          aggregateType: row.aggregateType,
+          aggregateId: row.aggregateId,
+          actorId: row.actorId,
+          payload,
+          createdAt: row.createdAt,
+        });
       } else if (target.kind === "hub-inapp") {
         await this.fanOutHubManagers(manager, row, target, payload);
       } else {

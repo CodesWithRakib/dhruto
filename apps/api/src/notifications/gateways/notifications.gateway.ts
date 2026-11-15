@@ -5,7 +5,8 @@ import {
   OnGatewayDisconnect,
 } from "@nestjs/websockets";
 import { Logger } from "@nestjs/common";
-import { Server, Socket } from "socket.io";
+import { type Namespace, type Socket } from "socket.io";
+import { SOCKET_SERVER_OPTIONS } from "../../common/websocket/socket-server.options.js";
 import { CustomJwtService } from "../../auth/jwt/custom-jwt.service.js";
 import { type JwtPayload } from "../../auth/jwt/jwt.interface.js";
 
@@ -26,17 +27,15 @@ export interface AuthenticatedSocket extends Socket {
  * gateway carries no chat traffic (see "Legacy chat containment" below).
  */
 @WebSocketGateway({
-  cors: {
-    origin: ["http://localhost:5000", "http://127.0.0.1:5000"],
-    credentials: true,
-  },
+  // Shared server options (S-2: env-driven origin allowlist + handshake Origin
+  // check). Must be identical across gateways on the same port.
+  ...SOCKET_SERVER_OPTIONS,
   namespace: "/",
-  pingInterval: 10000,
-  pingTimeout: 5000,
 })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  /** With `namespace` set, Nest injects the Namespace (not the root Server). */
   @WebSocketServer()
-  server: Server;
+  server: Namespace;
 
   private readonly logger = new Logger(NotificationsGateway.name);
 

@@ -83,6 +83,8 @@ export const EVENT_TEMPLATES: Readonly<Record<DomainEventType, TemplateKey | nul
   [DomainEventType.CHAT_CONVERSATION_ARCHIVED]: null,
   [DomainEventType.CHAT_CONVERSATION_CLOSED]: null,
   [DomainEventType.CHAT_CONVERSATION_STATUS_CHANGED]: null,
+  [DomainEventType.CHAT_MESSAGE_PINNED]: null,
+  [DomainEventType.CHAT_MESSAGE_UNPINNED]: null,
 };
 
 function taka(minor: number): string {
