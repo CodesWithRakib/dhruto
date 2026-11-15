@@ -1,5 +1,6 @@
 import React from "react";
 import { HubDashboardView } from "@/features/hubs/components/hub-dashboard-view";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata = {
   robots: { index: false, follow: false },
@@ -8,5 +9,12 @@ export const metadata = {
 };
 
 export default function HubDashboardPage() {
-  return <HubDashboardView />;
+  return (
+    <div className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden">
+      <DashboardCanvasBg />
+      <div className="relative z-10">
+        <HubDashboardView />
+      </div>
+    </div>
+  );
 }
