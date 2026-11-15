@@ -84,7 +84,13 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-5">
+      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-5 shadow-sm">
+        {/* Specular top highlight */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+          aria-hidden="true"
+        />
+
         <form onSubmit={handleLookup} className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
             <Search
@@ -99,13 +105,13 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
               onChange={(event) => setTrackingCode(event.target.value)}
               placeholder={t("lookup.searchPlaceholder")}
               aria-label={t("lookup.searchLabel")}
-              className="h-12 rounded-2xl border-0 bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
+              className="h-12 rounded-2xl border border-border/50 bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
             />
           </div>
           <Button
             type="submit"
             disabled={isLookingUp || !trackingCode.trim()}
-            className="h-12 rounded-2xl px-7 font-semibold"
+            className="h-12 rounded-2xl px-7 font-semibold shadow-xs"
           >
             {isLookingUp ? t("lookup.searching") : t("lookup.search")}
           </Button>
@@ -114,7 +120,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
         {error ? (
           <div
             role="alert"
-            className="flex items-start gap-3 rounded-2xl bg-danger-soft p-4 text-danger"
+            className="flex items-start gap-3 rounded-2xl border border-danger/30 bg-danger-soft p-4 text-danger shadow-xs"
           >
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
             <div>
@@ -127,7 +133,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
         {parcel ? (
           <div
             role="status"
-            className="space-y-4 rounded-2xl bg-primary/5 p-5"
+            className="relative space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-2xs"
           >
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <div>
@@ -170,7 +176,7 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                 type="button"
                 variant="ghost"
                 onClick={() => setAssignOpen(true)}
-                className="h-10 w-full gap-2 rounded-xl bg-surface-elevated sm:w-auto font-medium hover:bg-surface-muted"
+                className="h-10 w-full gap-2 rounded-xl bg-surface-elevated sm:w-auto font-medium hover:bg-surface-muted shadow-2xs"
               >
                 <UserCheck className="h-4 w-4" aria-hidden="true" />
                 {t("assignRider")}
@@ -190,14 +196,20 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
         ) : null}
       </div>
 
-      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
-        <div className="flex items-center justify-between p-5 sm:p-6">
+      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
+        {/* Specular top highlight */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+          aria-hidden="true"
+        />
+
+        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border/40">
           <div className="flex items-center gap-2.5">
             <Package className="h-4 w-4 text-primary" aria-hidden="true" />
             <h2 className="text-sm font-bold text-foreground">
               {t("inventoryTab")}
             </h2>
-            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
               {inventory?.parcels.length ?? 0}
             </span>
           </div>

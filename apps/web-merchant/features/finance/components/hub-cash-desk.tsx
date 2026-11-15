@@ -2,25 +2,10 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import {
-  Button,
-  Input,
-  Badge,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DataTable,
-  ColumnDef,
-} from "@dhruto/ui";
-import { KpiCard } from "@/components/data-display/kpi-card";
+import { Button, DataTable, Badge } from "@dhruto/ui";
 import { CheckCircle2, AlertTriangle, Coins, RefreshCw } from "lucide-react";
 import {
   type PendingReconciliationItem,
-  type CashHandInBatchItem,
-  type CashDiscrepancyItem,
 } from "@dhruto/contracts";
 import {
   useGetPendingReconciliationsQuery,
@@ -38,15 +23,20 @@ import { EnumBadge } from "@/components/data-display/enum-badge";
 import { CASH_HANDIN_STATUS_TONE, CASH_DISCREPANCY_STATUS_TONE } from "@/config/status";
 import { useActiveHub } from "@/features/hubs/hooks/use-active-hub";
 import { HubSelector } from "@/features/hubs/components/hub-selector";
-import { Link } from "@/lib/navigation";
+import { CashDeskKpiStrip } from "./cash-desk/cash-desk-kpi-strip";
+import { CashDeskVerifyDialog } from "./cash-desk/cash-desk-verify-dialog";
+import {
+  getPendingColumns,
+  getBatchesColumns,
+  getDiscrepanciesColumns,
+} from "./cash-desk/cash-desk-columns";
 
 type CashTab = "pending" | "batches" | "discrepancies";
 
 /**
  * Hub cash desk: pending collections, hand-in batches and discrepancies.
  * Verification requires an explicit confirmation showing the counted amount;
- * a counted-vs-expected difference opens a discrepancy instead of being
- * absorbed.
+ * differences open a formal discrepancy ticket for finance review.
  */
 export function HubCashDesk() {
   const t = useTranslations("Finance");
@@ -98,187 +88,39 @@ export function HubCashDesk() {
     }
   };
 
-  const pendingColumns: ColumnDef<PendingReconciliationItem>[] = React.useMemo(() => [
-    {
-      accessorKey: "trackingCode",
-      header: "Tracking ID",
-      cell: ({ row }) => (
-        <Link
-          href={`/track?code=${row.original.trackingCode}`}
-          className="font-mono text-xs font-bold text-primary hover:underline"
-        >
-          {row.original.trackingCode}
-        </Link>
-      ),
-    },
-    {
-      accessorKey: "riderName",
-      header: "Rider",
-      cell: ({ row }) => <span className="text-xs font-medium text-foreground">{row.original.riderName}</span>,
-    },
-    {
-      accessorKey: "recipientName",
-      header: "Recipient",
-      cell: ({ row }) => <span className="text-xs text-muted-foreground">{row.original.recipientName}</span>,
-    },
-    {
-      accessorKey: "amount",
-      header: () => <div className="text-right">Collected COD</div>,
-      cell: ({ row }) => (
-        <div className="text-right font-mono text-xs font-bold tabular-nums text-foreground">
-          {bdt(row.original.amount)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "netPayable",
-      header: () => <div className="text-right">Net Payable</div>,
-      cell: ({ row }) => (
-        <div className="text-right font-mono text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
-          {bdt(row.original.netPayable)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "handInStatus",
-      header: () => <div className="text-center">{t("status")}</div>,
-      cell: ({ row }) => (
-        <div className="text-center">
-          <Badge variant="secondary" className="text-[10px]">
-            {row.original.handInStatus}
-          </Badge>
-        </div>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">{t("actions")}</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            onClick={() => openVerify(row.original)}
-            className="h-7 gap-1.5 rounded-lg text-[11px] font-semibold shadow-xs"
-          >
-            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-            {t("verifyCash")}
-          </Button>
-        </div>
-      ),
-    },
-  ], [bdt, t]);
+  const pendingColumns = React.useMemo(
+    () =>
+      getPendingColumns({
+        onOpenVerify: openVerify,
+        bdt,
+        statusHeader: t("status"),
+        actionsHeader: t("actions"),
+        verifyCashText: t("verifyCash"),
+      }),
+    [bdt, t]
+  );
 
-  const batchesColumns: ColumnDef<CashHandInBatchItem>[] = React.useMemo(() => [
-    {
-      accessorKey: "handinCode",
-      header: "Batch Code",
-      cell: ({ row }) => (
-        <span className="font-mono text-xs font-bold text-foreground">{row.original.handinCode}</span>
-      ),
-    },
-    {
-      accessorKey: "riderName",
-      header: "Rider",
-      cell: ({ row }) => (
-        <span className="text-xs font-medium text-foreground">
-          {row.original.riderName ?? row.original.riderId}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "itemCount",
-      header: () => <div className="text-center">Parcels</div>,
-      cell: ({ row }) => (
-        <div className="text-center">
-          <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold tabular-nums">
-            {row.original.itemCount}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "expectedMinor",
-      header: () => <div className="text-right">Expected COD</div>,
-      cell: ({ row }) => (
-        <div className="text-right font-mono text-xs font-bold tabular-nums text-foreground">
-          {bdt(row.original.expectedMinor / 100)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: () => <div className="text-center">{t("status")}</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          <EnumBadge
-            namespace="CashHandInStatus"
-            value={row.original.status}
-            tones={CASH_HANDIN_STATUS_TONE}
-            className="text-[10px]"
-          />
-        </div>
-      ),
-    },
-  ], [bdt, t]);
+  const batchesColumns = React.useMemo(
+    () =>
+      getBatchesColumns({
+        bdt,
+        statusHeader: t("status"),
+      }),
+    [bdt, t]
+  );
 
-  const discrepanciesColumns: ColumnDef<CashDiscrepancyItem>[] = React.useMemo(() => [
-    {
-      accessorKey: "type",
-      header: "Discrepancy Type",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" aria-hidden="true" />
-          <span className="font-mono text-xs font-bold text-foreground">{row.original.type}</span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "expectedMinor",
-      header: () => <div className="text-right">{t("cash.expectedCash")}</div>,
-      cell: ({ row }) => (
-        <div className="text-right font-mono text-xs tabular-nums text-muted-foreground">
-          {bdt(row.original.expectedMinor / 100)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "actualMinor",
-      header: () => <div className="text-right">{t("cash.verifiedCash")}</div>,
-      cell: ({ row }) => (
-        <div className="text-right font-mono text-xs tabular-nums text-foreground">
-          {bdt(row.original.actualMinor / 100)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "differenceMinor",
-      header: () => <div className="text-right">Difference</div>,
-      cell: ({ row }) => {
-        const diff = row.original.differenceMinor / 100;
-        return (
-          <div className="text-right font-mono text-xs font-bold tabular-nums text-danger">
-            {diff < 0 ? `-৳${Math.abs(diff).toLocaleString()}` : diff > 0 ? `+৳${diff.toLocaleString()}` : "৳0"}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "status",
-      header: () => <div className="text-center">{t("status")}</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          <EnumBadge
-            namespace="CashDiscrepancyStatus"
-            value={row.original.status}
-            tones={CASH_DISCREPANCY_STATUS_TONE}
-            className="text-[10px]"
-          />
-        </div>
-      ),
-    },
-  ], [bdt, t]);
+  const discrepanciesColumns = React.useMemo(
+    () =>
+      getDiscrepanciesColumns({
+        bdt,
+        statusHeader: t("status"),
+        expectedHeader: t("cash.expectedCash"),
+        verifiedHeader: t("cash.verifiedCash"),
+      }),
+    [bdt, t]
+  );
 
-  // Tab-specific client search & pagination
+  // Tab-specific search & pagination
   const [pendingSearch, setPendingSearch] = React.useState("");
   const [pendingPage, setPendingPage] = React.useState(1);
   const [pendingLimit, setPendingLimit] = React.useState(10);
@@ -333,32 +175,6 @@ export function HubCashDesk() {
     return filteredDiscrepancies.slice(start, start + discrepanciesLimit);
   }, [filteredDiscrepancies, discrepanciesPage, discrepanciesLimit]);
 
-  const summaryCards = summary
-    ? [
-        {
-          label: t("cash.expectedCash"),
-          value: bdt(summary.totalPendingCod),
-          icon: Coins,
-          iconColor: "text-amber-600 dark:text-amber-400",
-          iconBg: "bg-amber-500/10",
-        },
-        {
-          label: t("admin.totalCod"),
-          value: bdt(summary.totalVerifiedCod),
-          icon: CheckCircle2,
-          iconColor: "text-emerald-600 dark:text-emerald-400",
-          iconBg: "bg-emerald-500/10",
-        },
-        {
-          label: t("admin.openDiscrepancies"),
-          value: `${summary.openDiscrepanciesCount}`,
-          icon: AlertTriangle,
-          iconColor: "text-rose-600 dark:text-rose-400",
-          iconBg: "bg-rose-500/10",
-        },
-      ]
-    : [];
-
   return (
     <div className="w-full space-y-6 pb-6">
       <PageHeader
@@ -375,31 +191,25 @@ export function HubCashDesk() {
                 refetchBatches();
                 refetchDiscrepancies();
               }}
-              className="h-10 gap-2 rounded-xl text-xs border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 hover:text-white"
+              className="gap-2 rounded-xl text-xs shadow-2xs"
             >
               <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-              {t("refresh")}
+              <span>{t("refresh")}</span>
             </Button>
           </div>
         }
       />
 
-      {summaryCards.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-          {summaryCards.map((card) => (
-            <KpiCard
-              key={card.label}
-              label={card.label}
-              value={card.value}
-              icon={card.icon}
-              className="rounded-3xl"
-            />
-          ))}
-        </div>
+      {summary ? (
+        <CashDeskKpiStrip
+          totalPendingCod={summary.totalPendingCod}
+          totalVerifiedCod={summary.totalVerifiedCod}
+          openDiscrepanciesCount={summary.openDiscrepanciesCount}
+        />
       ) : null}
 
       <div
-        className="flex w-fit flex-wrap items-center gap-1.5 rounded-2xl bg-surface-elevated p-1.5"
+        className="flex w-fit flex-wrap items-center gap-1.5 rounded-2xl border border-border/50 bg-card/90 backdrop-blur-md p-1.5 shadow-2xs"
         role="tablist"
       >
         {(
@@ -429,271 +239,230 @@ export function HubCashDesk() {
       </div>
 
       {tab === "pending" ? (
-        <div className="rounded-3xl bg-surface-elevated p-4">
-          <div>
-            {isLoading ? (
-              <p role="status" className="p-8 text-center text-xs text-muted-foreground">
-                {t("loading")}
-              </p>
-            ) : filteredPending.length === 0 ? (
-              <div className="p-6">
-                <EmptyState
-                  icon={CheckCircle2}
-                  title={t("cash.emptyPending")}
-                  description={t("cash.emptyPendingDescription")}
+        <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-4 shadow-sm">
+          {/* Specular top highlight */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+            aria-hidden="true"
+          />
+          {isLoading ? (
+            <p role="status" className="p-8 text-center text-xs text-muted-foreground">
+              {t("loading")}
+            </p>
+          ) : filteredPending.length === 0 ? (
+            <div className="p-6">
+              <EmptyState
+                icon={CheckCircle2}
+                title={t("cash.emptyPending")}
+                description={t("cash.emptyPendingDescription")}
+              />
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={pendingColumns}
+                  data={pagedPending}
+                  totalItems={filteredPending.length}
+                  pageCount={Math.max(1, Math.ceil(filteredPending.length / pendingLimit))}
+                  currentPage={pendingPage}
+                  itemsPerPage={pendingLimit}
+                  onPageChange={setPendingPage}
+                  onLimitChange={(lim) => {
+                    setPendingLimit(lim);
+                    setPendingPage(1);
+                  }}
+                  search={pendingSearch}
+                  onSearchChange={(val) => {
+                    setPendingSearch(val);
+                    setPendingPage(1);
+                  }}
+                  searchPlaceholder="Search tracking ID, rider, or recipient..."
+                  emptyMessage={t("cash.emptyPending")}
+                  className="border-0 shadow-none rounded-none"
                 />
               </div>
-            ) : (
-              <>
-                <div className="hidden md:block">
-                  <DataTable
-                    columns={pendingColumns}
-                    data={pagedPending}
-                    totalItems={filteredPending.length}
-                    pageCount={Math.max(1, Math.ceil(filteredPending.length / pendingLimit))}
-                    currentPage={pendingPage}
-                    itemsPerPage={pendingLimit}
-                    onPageChange={setPendingPage}
-                    onLimitChange={(limit) => {
-                      setPendingLimit(limit);
-                      setPendingPage(1);
-                    }}
-                    search={pendingSearch}
-                    onSearchChange={(val) => {
-                      setPendingSearch(val);
-                      setPendingPage(1);
-                    }}
-                    searchPlaceholder="Search tracking ID, rider, or recipient..."
-                    emptyMessage={t("cash.emptyPending")}
-                    className="border-0 shadow-none rounded-none"
-                  />
-                </div>
-                <ul className="divide-y divide-border/60 md:hidden">
-                  {pagedPending.map((item) => (
-                    <li key={item.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-primary">
-                          {item.trackingCode}
-                        </span>
-                        <Badge variant="secondary" className="text-[10px]">
-                          {item.handInStatus}
-                        </Badge>
-                        <span className="ml-auto font-mono text-sm font-bold tabular-nums text-foreground">
-                          {bdt(item.amount)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {item.recipientName} · {item.riderName} · {item.hubName}
-                      </p>
-                      <div className="flex justify-end pt-1">
-                        <Button size="sm" onClick={() => openVerify(item)} className="h-8 rounded-lg text-xs font-semibold shadow-xs">
-                          {t("verifyCash")}
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
+              <ul className="divide-y divide-border/60 md:hidden">
+                {pagedPending.map((item) => (
+                  <li key={item.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-primary">
+                        {item.trackingCode}
+                      </span>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {item.handInStatus}
+                      </Badge>
+                      <span className="ml-auto font-mono text-sm font-bold tabular-nums text-foreground">
+                        {bdt(item.amount)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {item.recipientName} · {item.riderName} · {item.hubName}
+                    </p>
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        size="sm"
+                        onClick={() => openVerify(item)}
+                        className="h-8 rounded-lg text-xs font-semibold shadow-xs"
+                      >
+                        {t("verifyCash")}
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       ) : null}
 
       {tab === "batches" ? (
-        <div className="rounded-3xl bg-surface-elevated p-4">
-          <div>
-            {filteredBatches.length === 0 ? (
-              <div className="p-6">
-                <EmptyState icon={Coins} title={t("cash.emptyBatches")} />
+        <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-4 shadow-sm">
+          {/* Specular top highlight */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+            aria-hidden="true"
+          />
+          {filteredBatches.length === 0 ? (
+            <div className="p-6">
+              <EmptyState icon={Coins} title={t("cash.emptyBatches")} />
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={batchesColumns}
+                  data={pagedBatches}
+                  totalItems={filteredBatches.length}
+                  pageCount={Math.max(1, Math.ceil(filteredBatches.length / batchesLimit))}
+                  currentPage={batchesPage}
+                  itemsPerPage={batchesLimit}
+                  onPageChange={setBatchesPage}
+                  onLimitChange={(lim) => {
+                    setBatchesLimit(lim);
+                    setBatchesPage(1);
+                  }}
+                  search={batchesSearch}
+                  onSearchChange={(val) => {
+                    setBatchesSearch(val);
+                    setBatchesPage(1);
+                  }}
+                  searchPlaceholder="Search batch code or rider..."
+                  emptyMessage={t("cash.emptyBatches")}
+                  className="border-0 shadow-none rounded-none"
+                />
               </div>
-            ) : (
-              <>
-                <div className="hidden md:block">
-                  <DataTable
-                    columns={batchesColumns}
-                    data={pagedBatches}
-                    totalItems={filteredBatches.length}
-                    pageCount={Math.max(1, Math.ceil(filteredBatches.length / batchesLimit))}
-                    currentPage={batchesPage}
-                    itemsPerPage={batchesLimit}
-                    onPageChange={setBatchesPage}
-                    onLimitChange={(limit) => {
-                      setBatchesLimit(limit);
-                      setBatchesPage(1);
-                    }}
-                    search={batchesSearch}
-                    onSearchChange={(val) => {
-                      setBatchesSearch(val);
-                      setBatchesPage(1);
-                    }}
-                    searchPlaceholder="Search batch code or rider..."
-                    emptyMessage={t("cash.emptyBatches")}
-                    className="border-0 shadow-none rounded-none"
-                  />
-                </div>
-                <div className="space-y-2 md:hidden">
-                  {pagedBatches.map((batch) => (
-                    <div key={batch.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-foreground">
-                          {batch.handinCode}
-                        </span>
-                        <EnumBadge
-                          namespace="CashHandInStatus"
-                          value={batch.status}
-                          tones={CASH_HANDIN_STATUS_TONE}
-                          className="text-[10px]"
-                        />
-                        <span className="ml-auto font-mono text-xs font-semibold tabular-nums text-foreground">
-                          {bdt(batch.expectedMinor / 100)} · {batch.itemCount}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {batch.riderName ?? batch.riderId} · {batch.hubName ?? ""}
-                      </p>
+              <div className="space-y-2 md:hidden">
+                {pagedBatches.map((batch) => (
+                  <div key={batch.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-foreground">
+                        {batch.handinCode}
+                      </span>
+                      <EnumBadge
+                        namespace="CashHandInStatus"
+                        value={batch.status}
+                        tones={CASH_HANDIN_STATUS_TONE}
+                        className="text-[10px]"
+                      />
+                      <span className="ml-auto font-mono text-xs font-semibold tabular-nums text-foreground">
+                        {bdt(batch.expectedMinor / 100)} · {batch.itemCount}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+                    <p className="text-xs text-muted-foreground">
+                      {batch.riderName ?? batch.riderId} · {batch.hubName ?? ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       ) : null}
 
       {tab === "discrepancies" ? (
-        <div className="rounded-3xl bg-surface-elevated p-4">
-          <div>
-            {filteredDiscrepancies.length === 0 ? (
-              <div className="p-6">
-                <EmptyState
-                  icon={AlertTriangle}
-                  title={t("cash.emptyDiscrepancies")}
-                  description={t("cash.emptyDiscrepanciesDescription")}
+        <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-4 shadow-sm">
+          {/* Specular top highlight */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+            aria-hidden="true"
+          />
+          {filteredDiscrepancies.length === 0 ? (
+            <div className="p-6">
+              <EmptyState
+                icon={AlertTriangle}
+                title={t("cash.emptyDiscrepancies")}
+                description={t("cash.emptyDiscrepanciesDescription")}
+              />
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <DataTable
+                  columns={discrepanciesColumns}
+                  data={pagedDiscrepancies}
+                  totalItems={filteredDiscrepancies.length}
+                  pageCount={Math.max(1, Math.ceil(filteredDiscrepancies.length / discrepanciesLimit))}
+                  currentPage={discrepanciesPage}
+                  itemsPerPage={discrepanciesLimit}
+                  onPageChange={setDiscrepanciesPage}
+                  onLimitChange={(lim) => {
+                    setDiscrepanciesLimit(lim);
+                    setDiscrepanciesPage(1);
+                  }}
+                  search={discrepanciesSearch}
+                  onSearchChange={(val) => {
+                    setDiscrepanciesSearch(val);
+                    setDiscrepanciesPage(1);
+                  }}
+                  searchPlaceholder="Filter discrepancies..."
+                  emptyMessage={t("cash.emptyDiscrepancies")}
+                  className="border-0 shadow-none rounded-none"
                 />
               </div>
-            ) : (
-              <>
-                <div className="hidden md:block">
-                  <DataTable
-                    columns={discrepanciesColumns}
-                    data={pagedDiscrepancies}
-                    totalItems={filteredDiscrepancies.length}
-                    pageCount={Math.max(1, Math.ceil(filteredDiscrepancies.length / discrepanciesLimit))}
-                    currentPage={discrepanciesPage}
-                    itemsPerPage={discrepanciesLimit}
-                    onPageChange={setDiscrepanciesPage}
-                    onLimitChange={(limit) => {
-                      setDiscrepanciesLimit(limit);
-                      setDiscrepanciesPage(1);
-                    }}
-                    search={discrepanciesSearch}
-                    onSearchChange={(val) => {
-                      setDiscrepanciesSearch(val);
-                      setDiscrepanciesPage(1);
-                    }}
-                    searchPlaceholder="Filter discrepancies..."
-                    emptyMessage={t("cash.emptyDiscrepancies")}
-                    className="border-0 shadow-none rounded-none"
-                  />
-                </div>
-                <div className="space-y-2 md:hidden">
-                  {pagedDiscrepancies.map((item) => (
-                    <div key={item.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" aria-hidden="true" />
-                        <span className="font-mono text-xs font-bold text-foreground">
-                          {item.type}
-                        </span>
-                        <EnumBadge
-                          namespace="CashDiscrepancyStatus"
-                          value={item.status}
-                          tones={CASH_DISCREPANCY_STATUS_TONE}
-                          className="text-[10px]"
-                        />
-                        <span className="ml-auto font-mono text-xs font-bold tabular-nums text-danger">
-                          {item.differenceMinor < 0
-                            ? `-৳${Math.abs(item.differenceMinor / 100).toLocaleString()}`
-                            : item.differenceMinor > 0
-                              ? `+৳${(item.differenceMinor / 100).toLocaleString()}`
-                              : "৳0"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {item.trackingCode ?? item.reason ?? "Discrepancy"} · Expected {bdt(item.expectedMinor / 100)} · Verified {bdt(item.actualMinor / 100)}
-                      </p>
+              <div className="space-y-2 md:hidden">
+                {pagedDiscrepancies.map((item) => (
+                  <div key={item.id} className="space-y-1.5 rounded-2xl bg-surface-muted/50 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" aria-hidden="true" />
+                      <span className="font-mono text-xs font-bold text-foreground">
+                        {item.type}
+                      </span>
+                      <EnumBadge
+                        namespace="CashDiscrepancyStatus"
+                        value={item.status}
+                        tones={CASH_DISCREPANCY_STATUS_TONE}
+                        className="text-[10px]"
+                      />
+                      <span className="ml-auto font-mono text-xs font-bold tabular-nums text-danger">
+                        {item.differenceMinor < 0
+                          ? `-৳${Math.abs(item.differenceMinor / 100).toLocaleString()}`
+                          : item.differenceMinor > 0
+                            ? `+৳${(item.differenceMinor / 100).toLocaleString()}`
+                            : "৳0"}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+                    <p className="text-xs text-muted-foreground">
+                      {item.trackingCode ?? item.reason ?? "Discrepancy"} · Expected {bdt(item.expectedMinor / 100)} · Verified {bdt(item.actualMinor / 100)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       ) : null}
 
-      <Dialog open={verifying !== null} onOpenChange={(open) => !open && setVerifying(null)}>
-        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("cash.verifyTitle")}</DialogTitle>
-            <DialogDescription className="text-xs">{t("cash.verifyMessage")}</DialogDescription>
-          </DialogHeader>
-          {verifying ? (
-            <div className="space-y-4 py-1">
-              <dl className="space-y-2 rounded-2xl bg-surface-muted/60 p-4 font-mono text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">{verifying.trackingCode}</dt>
-                  <dd className="font-bold tabular-nums text-foreground">{bdt(verifying.amount)}</dd>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <dt className="text-muted-foreground">{t("settlements.netPayable")}</dt>
-                  <dd className="font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-                    {bdt(verifying.netPayable)}
-                  </dd>
-                </div>
-              </dl>
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="counted-amount"
-                  className="text-xs font-semibold text-muted-foreground"
-                >
-                  {t("cash.countedAmount")} *
-                </label>
-                <Input
-                  id="counted-amount"
-                  type="number"
-                  min={0}
-                  value={countedAmount}
-                  onChange={(event) => setCountedAmount(event.target.value)}
-                  className="h-12 rounded-xl border-0 bg-surface-muted/60 font-mono text-lg"
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="verify-notes"
-                  className="text-xs font-semibold text-muted-foreground"
-                >
-                  {t("cash.verificationNotes")}
-                </label>
-                <Input
-                  id="verify-notes"
-                  value={verifyNotes}
-                  onChange={(event) => setVerifyNotes(event.target.value)}
-                  maxLength={500}
-                  className="rounded-xl border-0 bg-surface-muted/60"
-                />
-              </div>
-            </div>
-          ) : null}
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="ghost" onClick={() => setVerifying(null)} className="rounded-xl bg-surface-muted/60 hover:bg-surface-muted">
-              {t("cancel")}
-            </Button>
-            <Button type="button" onClick={handleVerify} disabled={isVerifying} className="rounded-xl font-bold shadow-xs">
-              {t("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CashDeskVerifyDialog
+        verifying={verifying}
+        onClose={() => setVerifying(null)}
+        countedAmount={countedAmount}
+        setCountedAmount={setCountedAmount}
+        verifyNotes={verifyNotes}
+        setVerifyNotes={setVerifyNotes}
+        onVerify={handleVerify}
+        isVerifying={isVerifying}
+      />
     </div>
   );
 }

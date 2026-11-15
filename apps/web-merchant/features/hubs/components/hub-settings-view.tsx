@@ -35,7 +35,12 @@ export function HubSettingsView() {
   return (
     <div className="space-y-6">
       {/* Overview Card */}
-      <Card className="overflow-hidden border border-border/80 shadow-soft">
+      <Card className="relative overflow-hidden border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
+        {/* Specular top highlight */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+          aria-hidden="true"
+        />
         <CardContent className="p-6">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
@@ -47,7 +52,7 @@ export function HubSettingsView() {
                   <h2 className="text-xl font-bold tracking-tight text-foreground">
                     {activeHub?.name || "Sorting Hub"}
                   </h2>
-                  <Badge variant="outline" className="border-emerald-500/30 bg-emerald-50 text-emerald-700">
+                  <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                     Active Station
                   </Badge>
                 </div>
@@ -61,7 +66,7 @@ export function HubSettingsView() {
               variant="outline"
               size="sm"
               onClick={() => refetch()}
-              className="gap-2 rounded-xl text-xs"
+              className="gap-2 rounded-xl text-xs shadow-2xs"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span>Refresh Station</span>
@@ -73,7 +78,12 @@ export function HubSettingsView() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Hub Station Information */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border border-border/80 shadow-soft">
+          <Card className="relative overflow-hidden border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
+            {/* Specular top highlight */}
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+              aria-hidden="true"
+            />
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Warehouse className="h-4 w-4 text-primary" />
@@ -85,7 +95,7 @@ export function HubSettingsView() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-border/60 bg-surface-muted/50 p-4">
+                <div className="rounded-2xl border border-border/50 bg-surface-muted/50 p-4">
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Station Name
                   </p>
@@ -96,7 +106,7 @@ export function HubSettingsView() {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-border/60 bg-surface-muted/50 p-4">
+                <div className="rounded-2xl border border-border/50 bg-surface-muted/50 p-4">
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Station Code
                   </p>
@@ -115,9 +125,9 @@ export function HubSettingsView() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border/60 bg-surface p-4">
+              <div className="rounded-2xl border border-border/50 bg-surface p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-foreground shadow-2xs">
                     <User className="h-5 w-5" />
                   </div>
                   <div>
@@ -132,7 +142,12 @@ export function HubSettingsView() {
 
         {/* Operational Shortcuts */}
         <div className="space-y-6">
-          <Card className="border border-border/80 shadow-soft">
+          <Card className="relative overflow-hidden border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
+            {/* Specular top highlight */}
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+              aria-hidden="true"
+            />
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
@@ -142,7 +157,7 @@ export function HubSettingsView() {
             <CardContent className="space-y-2">
               <Link
                 href={HUB_ROUTES.scanner}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl border border-border/50 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-primary/40 hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
                   <ScanLine className="h-4 w-4 text-primary" />
@@ -153,7 +168,7 @@ export function HubSettingsView() {
 
               <Link
                 href={HUB_ROUTES.bags}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl border border-border/50 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-primary/40 hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
                   <Package className="h-4 w-4 text-primary" />
@@ -164,7 +179,7 @@ export function HubSettingsView() {
 
               <Link
                 href={HUB_ROUTES.manifests}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl border border-border/50 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-primary/40 hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
                   <Truck className="h-4 w-4 text-primary" />
@@ -175,7 +190,7 @@ export function HubSettingsView() {
 
               <Link
                 href={HUB_ROUTES.cash}
-                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-border"
+                className="flex items-center justify-between rounded-2xl border border-border/50 bg-surface p-3 text-xs font-medium text-foreground transition-all hover:bg-surface-muted hover:border-primary/40 hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5">
                   <Wallet className="h-4 w-4 text-primary" />
