@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "@/lib/navigation";
 import { Button } from "@dhruto/ui";
 import { NotFoundState } from "@/components/feedback/states";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 /**
  * Locale-scoped 404. Uses the shared feedback system so it matches every other
@@ -10,7 +11,8 @@ import { NotFoundState } from "@/components/feedback/states";
  */
 export default function LocaleNotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+      <DashboardCanvasBg />
       <div className="w-full max-w-md">
         <NotFoundState
           title="Page not found · পৃষ্ঠা খুঁজে পাওয়া যায়নি"
