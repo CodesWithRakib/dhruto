@@ -2,24 +2,9 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  DataTable,
-  ColumnDef,
-} from "@dhruto/ui";
+import { Button, DataTable } from "@dhruto/ui";
 import { Package, Plus, Lock } from "lucide-react";
-import { BagStatus, type BagListItem } from "@dhruto/contracts";
+import { BagStatus } from "@dhruto/contracts";
 import {
   useGetBagsQuery,
   useCreateBagMutation,
@@ -33,6 +18,9 @@ import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
 import { EnumBadge } from "@/components/data-display/enum-badge";
 import { BAG_STATUS_TONE } from "@/config/status";
+import { BagCreateCard } from "./bags/bag-create-card";
+import { BagSealDialog } from "./bags/bag-seal-dialog";
+import { getBagColumns } from "./bags/bag-table-columns";
 
 interface BagManagerProps {
   currentHubId: string;
@@ -160,160 +148,53 @@ export function BagManager({ currentHubId }: BagManagerProps) {
     return filteredBags.slice(start, start + limit);
   }, [filteredBags, page, limit]);
 
-  const columns: ColumnDef<BagListItem>[] = React.useMemo(() => [
-    {
-      accessorKey: "bagCode",
-      header: "Bag",
-      cell: ({ row }) => (
-        <div>
-          <Link
-            href={HUB_ROUTES.bag(row.original.id)}
-            className="font-mono font-bold text-primary hover:underline"
-          >
-            {row.original.bagCode}
-          </Link>
-          {row.original.sealTag ? (
-            <p className="font-mono text-[11px] text-muted-foreground">
-              {row.original.sealTag}
-            </p>
-          ) : null}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "destinationHubName",
-      header: t("bags.destination"),
-      cell: ({ row }) => <span className="text-xs font-medium">{row.original.destinationHubName}</span>,
-    },
-    {
-      accessorKey: "status",
-      header: () => <div className="text-center">{t("status")}</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          <EnumBadge
-            namespace="BagStatus"
-            value={row.original.status}
-            tones={BAG_STATUS_TONE}
-            className="text-[10px]"
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "parcelCount",
-      header: () => <div className="text-center">{t("bags.parcelsInBag")}</div>,
-      cell: ({ row }) => (
-        <div className="text-center">
-          <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold tabular-nums">
-            {row.original.parcelCount}
-          </span>
-        </div>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">{t("actions")}</div>,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1.5">
-          {row.original.status === BagStatus.OPEN ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => openSealConfirm(row.original.id)}
-              className="h-8 gap-1 rounded-xl bg-surface-muted/60 text-xs font-medium hover:bg-surface-muted"
-            >
-              <Lock className="h-3 w-3" aria-hidden="true" />
-              {t("bags.seal")}
-            </Button>
-          ) : null}
-          <Link href={HUB_ROUTES.bag(row.original.id)}>
-            <Button size="sm" variant="ghost" className="h-8 rounded-xl bg-surface-muted/60 text-xs font-medium hover:bg-surface-muted">
-              {t("bags.details")}
-            </Button>
-          </Link>
-        </div>
-      ),
-    },
-  ], [t]);
+  const columns = React.useMemo(
+    () =>
+      getBagColumns({
+        onOpenSeal: openSealConfirm,
+        statusHeader: t("status"),
+        parcelsHeader: t("bags.parcelsInBag"),
+        actionsHeader: t("actions"),
+        destinationHeader: t("bags.destination"),
+        sealText: t("bags.seal"),
+        detailsText: t("bags.details"),
+      }),
+    [t]
+  );
 
   return (
     <div className="space-y-6">
       {isCreating ? (
-        <div className="rounded-3xl bg-primary/5 p-5 sm:p-6">
-          <form onSubmit={handleCreateBag} className="space-y-4">
-            <h3 className="text-sm font-bold text-foreground">{t("bags.create")}</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="bag-destination"
-                  className="text-xs font-semibold text-muted-foreground"
-                >
-                  {t("bags.destination")} *
-                </label>
-                <Select
-                  value={destHubId}
-                  onValueChange={setDestHubId}
-                  required
-                >
-                  <SelectTrigger id="bag-destination" className="w-full rounded-2xl border-0 bg-surface-muted/60 focus:bg-background">
-                    <SelectValue placeholder={t("bags.destination")} />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-0 bg-surface-elevated shadow-xl">
-                    {destinations.map((hub) => (
-                      <SelectItem key={hub.id} value={hub.id}>
-                        {hub.name} ({hub.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="bag-notes" className="text-xs font-semibold text-muted-foreground">
-                  {t("bags.notes")}
-                </label>
-                <input
-                  id="bag-notes"
-                  type="text"
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  placeholder={t("bags.notesPlaceholder")}
-                  maxLength={500}
-                  className="w-full rounded-2xl border-0 bg-surface-muted/60 p-3 text-xs outline-none focus:bg-background"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsCreating(false)}
-                className="rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" size="sm" disabled={isCreatingBag} className="gap-1.5 rounded-xl text-xs font-semibold">
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                {isCreatingBag ? t("bags.creating") : t("bags.confirmCreate")}
-              </Button>
-            </div>
-          </form>
-        </div>
+        <BagCreateCard
+          destinations={destinations}
+          destHubId={destHubId}
+          setDestHubId={setDestHubId}
+          notes={notes}
+          setNotes={setNotes}
+          onSubmit={handleCreateBag}
+          onCancel={() => setIsCreating(false)}
+          isCreating={isCreatingBag}
+        />
       ) : null}
 
-      <div className="rounded-3xl bg-surface-elevated overflow-hidden">
-        <div className="flex flex-col gap-3 p-5 sm:p-6">
+      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
+        {/* Specular top highlight */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+          aria-hidden="true"
+        />
+
+        <div className="flex flex-col gap-3 p-5 sm:p-6 border-b border-border/40">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-primary/10 p-2.5 text-primary">
+              <div className="rounded-2xl bg-primary/10 p-2.5 text-primary shadow-xs">
                 <Package className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-foreground sm:text-base">
                   Active Transit Bags
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {bags.length} total bags tracked at this hub
                 </p>
               </div>
@@ -321,7 +202,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
             <Button
               size="sm"
               onClick={() => setIsCreating((value) => !value)}
-              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shrink-0"
+              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shrink-0 shadow-xs"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               {isCreating ? t("cancel") : t("bags.create")}
@@ -348,7 +229,7 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                 }}
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   statusFilter === item.key
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground shadow-xs"
                     : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                 }`}
               >
@@ -436,37 +317,15 @@ export function BagManager({ currentHubId }: BagManagerProps) {
         </div>
       </div>
 
-      {/* Seal confirmation — sealing freezes membership irreversibly */}
-      <Dialog open={confirmSealOpen} onOpenChange={setConfirmSealOpen}>
-        <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("bags.sealConfirmTitle")}</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">{t("bags.sealConfirmMessage")}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-1.5 py-2">
-            <label htmlFor="seal-tag" className="text-xs font-semibold text-muted-foreground">
-              {t("bags.sealTag")} *
-            </label>
-            <input
-              id="seal-tag"
-              type="text"
-              value={sealTagInput}
-              onChange={(event) => setSealTagInput(event.target.value)}
-              placeholder={t("bags.sealTagPlaceholder")}
-              maxLength={100}
-              className="w-full rounded-2xl border-0 bg-surface-muted/60 p-3.5 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder:text-muted-foreground outline-none focus:bg-background"
-            />
-          </div>
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="ghost" onClick={() => setConfirmSealOpen(false)} className="rounded-xl">
-              {t("cancel")}
-            </Button>
-            <Button type="button" onClick={handleSeal} disabled={isSealing} className="rounded-xl">
-              {isSealing ? t("bags.sealing") : t("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Seal confirmation dialog */}
+      <BagSealDialog
+        open={confirmSealOpen}
+        onOpenChange={setConfirmSealOpen}
+        sealTagInput={sealTagInput}
+        setSealTagInput={setSealTagInput}
+        onConfirm={handleSeal}
+        isSealing={isSealing}
+      />
     </div>
   );
 }
