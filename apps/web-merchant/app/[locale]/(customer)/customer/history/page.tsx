@@ -1,5 +1,6 @@
 import React from "react";
 import { CustomerHistoryView } from "@/features/customer/components/customer-history-view";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata = {
   title: "Delivery History | Customer Portal | Dhruto",
@@ -7,5 +8,10 @@ export const metadata = {
 };
 
 export default function CustomerHistoryPage() {
-  return <CustomerHistoryView />;
+  return (
+    <div className="relative min-h-screen">
+      <DashboardCanvasBg />
+      <CustomerHistoryView />
+    </div>
+  );
 }

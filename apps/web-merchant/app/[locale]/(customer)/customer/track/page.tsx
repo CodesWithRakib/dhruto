@@ -1,5 +1,6 @@
 import React from "react";
 import { CustomerTrackingView } from "@/features/customer/components/customer-tracking-view";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata = {
   title: "Live Tracking | Customer Portal | Dhruto",
@@ -7,5 +8,10 @@ export const metadata = {
 };
 
 export default function CustomerTrackingPage() {
-  return <CustomerTrackingView />;
+  return (
+    <div className="relative min-h-screen">
+      <DashboardCanvasBg />
+      <CustomerTrackingView />
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { CustomerTrackingView } from "@/features/customer/components/customer-tracking-view";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 interface PageProps {
   params: Promise<{
@@ -14,5 +15,10 @@ export const metadata = {
 
 export default async function CustomerTrackCodePage({ params }: PageProps) {
   const { code } = await params;
-  return <CustomerTrackingView initialCode={code} />;
+  return (
+    <div className="relative min-h-screen">
+      <DashboardCanvasBg />
+      <CustomerTrackingView initialCode={code} />
+    </div>
+  );
 }
