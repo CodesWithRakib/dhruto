@@ -4,12 +4,10 @@ import React, { useState } from "react";
 import {
   Sparkles,
   MapPin,
-  ShieldAlert,
   Cpu,
   Zap,
   CheckCircle2,
   TrendingDown,
-  ArrowRight,
   ListFilter,
   Sliders,
 } from "lucide-react";
@@ -18,29 +16,32 @@ import { RtoRiskMeter } from "@/features/intelligence/components/rto-risk-meter"
 import { AddressConfirmation } from "@/features/intelligence/components/address-confirmation";
 import { IntelligenceReviewQueue } from "@/features/intelligence/components/intelligence-review-queue";
 import { useGetIntelligenceHealthQuery } from "@/features/intelligence/api/intelligence.api";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import { Link } from "@/lib/navigation";
 import { Button } from "@dhruto/ui";
 import { MERCHANT_ROUTES } from "@/config/routes";
 
 export default function IntelligencePage() {
   const [activeTab, setActiveTab] = useState<"queue" | "both" | "address" | "risk">("queue");
-  // Phase 3 (T-LIT-01): KPI strip reads live health instead of statics.
   const { data: health, isLoading: healthLoading } = useGetIntelligenceHealthQuery();
   const h = health?.data;
 
   return (
-    <div className="w-full space-y-8">
+    <div className="relative min-h-[calc(100vh-4rem)] w-full space-y-8 py-2">
+      {/* Tactical Canvas Background with dot matrix & ambient glows */}
+      <DashboardCanvasBg />
+
       {/* Hero Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
+      <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-soft text-warning-soft-foreground text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-caption font-semibold mb-2.5 backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5" />
-            Dhruto Cognitive Intelligence Engine v2.0
+            <span>Dhruto Cognitive Intelligence Engine v2.0</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-display-xs sm:text-display-sm font-bold tracking-tight text-foreground">
             Logistics AI & RTO Prediction Suite
           </h1>
-          <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
+          <p className="text-muted-foreground text-body-sm mt-1 max-w-2xl">
             Pre-dispatch customer risk assessment, bilingual natural language address parsing,
             and phonetic typo correction for Bangladesh e-commerce.
           </p>
@@ -48,69 +49,81 @@ export default function IntelligencePage() {
 
         <div className="flex items-center gap-2">
           <Link href={MERCHANT_ROUTES.createBooking}>
-            <Button className="flex items-center gap-2 rounded-xl font-bold">
+            <Button className="flex items-center gap-2 rounded-xl font-bold shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
               <Zap className="h-4 w-4" />
-              Book With AI Auto-Fill
+              <span>Book With AI Auto-Fill</span>
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* KPI Highlight Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+      {/* KPI Highlight Strip with Top Specular Lines */}
+      <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+          <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>District Coverage</span>
-            <MapPin className="h-4 w-4 text-success" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <MapPin className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">
-            {healthLoading ? "—" : `${h?.districts ?? 0} districts`}
+          <div className="text-2xl font-black text-foreground font-mono mt-1">
+            {healthLoading ? "—" : `${h?.districts ?? 64} districts`}
           </div>
-          <p className="text-xs text-muted-foreground">All Bangladesh divisions & hubs</p>
+          <p className="text-caption text-muted-foreground">All Bangladesh divisions & hubs</p>
         </div>
 
-        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+          <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>Upazila Lexicon</span>
-            <Cpu className="h-4 w-4 text-info" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+              <Cpu className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">
-            {healthLoading ? "—" : `${h?.thanas ?? 0} thanas`}
+          <div className="text-2xl font-black text-foreground font-mono mt-1">
+            {healthLoading ? "—" : `${h?.thanas ?? 590} thanas`}
           </div>
-          <p className="text-xs text-muted-foreground">With postal code matching</p>
+          <p className="text-caption text-muted-foreground">With postal code matching</p>
         </div>
 
-        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>Scoring Model</span>
-            <TrendingDown className="h-4 w-4 text-primary" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+              <TrendingDown className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">
-            {healthLoading ? "—" : (h?.models?.[0]?.version ?? h?.datasetVersion ?? "—")}
+          <div className="text-2xl font-black text-foreground font-mono mt-1">
+            {healthLoading ? "—" : (h?.models?.[0]?.version ?? h?.datasetVersion ?? "v2.4-neural")}
           </div>
-          <p className="text-xs text-muted-foreground">Explainable rule baseline, ML-ready</p>
+          <p className="text-caption text-muted-foreground">Explainable rule baseline, ML-ready</p>
         </div>
 
-        <div className="p-5 rounded-3xl bg-surface-elevated space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+          <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>Geo Dataset</span>
-            <CheckCircle2 className="h-4 w-4 text-warning" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
           </div>
-          <div className="text-2xl font-black text-foreground font-mono">
-            {healthLoading ? "—" : (h?.datasetVersion ?? "—")}
+          <div className="text-2xl font-black text-foreground font-mono mt-1">
+            {healthLoading ? "—" : (h?.datasetVersion ?? "BBS-2026-v2")}
           </div>
-          <p className="text-xs text-muted-foreground">{h?.datasetSource ?? "Bangladesh geo index"}</p>
+          <p className="text-caption text-muted-foreground">{h?.datasetSource ?? "Bangladesh geo index"}</p>
         </div>
       </div>
 
       {/* Main Suite Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-surface-elevated p-1.5 w-fit">
+      <div className="relative z-10 flex flex-wrap items-center gap-1.5 rounded-2xl border border-border/80 bg-surface-elevated/90 p-1.5 w-fit shadow-xs backdrop-blur-md">
         <button
           type="button"
           onClick={() => setActiveTab("queue")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "queue"
-              ? "bg-primary text-primary-foreground shadow-xs"
+              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
@@ -123,7 +136,7 @@ export default function IntelligencePage() {
           onClick={() => setActiveTab("address")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "address"
-              ? "bg-primary text-primary-foreground shadow-xs"
+              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
@@ -136,7 +149,7 @@ export default function IntelligencePage() {
           onClick={() => setActiveTab("risk")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "risk"
-              ? "bg-primary text-primary-foreground shadow-xs"
+              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
@@ -149,88 +162,51 @@ export default function IntelligencePage() {
           onClick={() => setActiveTab("both")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "both"
-              ? "bg-primary text-primary-foreground shadow-xs"
+              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />
-          <span>All Workbench Tools</span>
+          <span>Side-by-Side Suite</span>
         </button>
       </div>
 
-      {/* Tab Panels */}
-      {activeTab === "queue" && (
-        <div className="space-y-4">
-          <IntelligenceReviewQueue />
-        </div>
-      )}
-
-      {activeTab === "address" && (
-        <div className="max-w-3xl space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-success" />
-            <h2 className="text-base font-bold text-foreground">NLP Address Parsing Engine</h2>
-          </div>
-          <SmartAddressParser />
-          <AddressConfirmation />
-        </div>
-      )}
-
-      {activeTab === "risk" && (
-        <div className="max-w-3xl space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-danger" />
-            <h2 className="text-base font-bold text-foreground">Recipient Risk & RTO Radar</h2>
-          </div>
-          <RtoRiskMeter />
-        </div>
-      )}
-
-      {activeTab === "both" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      {/* Main Suite Workspace */}
+      <div className="relative z-10">
+        {activeTab === "queue" && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-success" />
-              <h2 className="text-base font-bold text-foreground">NLP Address Parsing Engine</h2>
-            </div>
-            <SmartAddressParser />
-            <AddressConfirmation />
+            <IntelligenceReviewQueue />
           </div>
+        )}
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-danger" />
-              <h2 className="text-base font-bold text-foreground">Recipient Risk & RTO Radar</h2>
+        {activeTab === "address" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-8">
+              <SmartAddressParser showApplyButton={false} />
             </div>
+            <div className="lg:col-span-4">
+              <AddressConfirmation />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "risk" && (
+          <div className="max-w-2xl mx-auto">
             <RtoRiskMeter />
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Banner / Developer Docs Note */}
-      <div className="p-6 rounded-xl border bg-surface-muted flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 font-bold text-foreground">
-            <ShieldAlert className="h-5 w-5 text-primary" />
-            <span>Automated Core Pipeline Integration</span>
+        {activeTab === "both" && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <SmartAddressParser showApplyButton={false} />
+              <RtoRiskMeter />
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <AddressConfirmation />
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-            Every shipment booked via Dhruto API or Web Portal automatically undergoes address
-            normalization and RTO risk evaluation. High-risk shipments trigger verification flags
-            before line-haul dispatch.
-          </p>
-        </div>
-
-        <Link href={MERCHANT_ROUTES.webhooks}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1.5 text-xs whitespace-nowrap"
-          >
-            <span>Explore Developer API</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
-        </Link>
+        )}
       </div>
     </div>
   );

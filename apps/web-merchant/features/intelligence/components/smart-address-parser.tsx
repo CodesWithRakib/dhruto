@@ -2,27 +2,25 @@
 
 import React, { useState } from "react";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Button,
-  Badge,
-} from "@dhruto/ui";
-import {
-  MapPin,
   Sparkles,
+  MapPin,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
+  RotateCcw,
+  Search,
   Copy,
   Check,
-  Search,
-  RotateCcw,
+  ArrowRight,
+  ShieldCheck,
+  AlertCircle,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button, Badge } from "@dhruto/ui";
 import { useParseAddressMutation } from "../api/intelligence.api";
-import { type AddressParseResult } from "@dhruto/contracts";
+import { useGetParcelsQuery } from "@/features/parcels/api/parcels.api";
+import {
+  DeliveryZone,
+  type AddressParseResult,
+} from "@dhruto/contracts";
 import { toast } from "sonner";
 
 interface SmartAddressParserProps {
@@ -30,25 +28,6 @@ interface SmartAddressParserProps {
   initialAddress?: string;
   showApplyButton?: boolean;
 }
-
-const SAMPLE_ADDRESSES = [
-  {
-    label: "Dhaka Banani",
-    text: "House 14, Road 11, Block C, Banani, Dhaka 1213",
-  },
-  {
-    label: "Bengali Mirpur",
-    text: "মিরপুর ১০, সেনপাড়া পর্বতা, ঢাকা ১২১৬",
-  },
-  {
-    label: "Chittagong Port",
-    text: "Agrabad Commercial Area, Double Mooring, Chattogram 4100",
-  },
-  {
-    label: "Typo / Misspelled",
-    text: "house 5, dhanmandi rd 27, dhka",
-  },
-];
 
 export function SmartAddressParser({
   onApply,
@@ -58,6 +37,16 @@ export function SmartAddressParser({
   const [addressInput, setAddressInput] = useState(initialAddress);
   const [copied, setCopied] = useState(false);
   const [parseAddress, { data: responseData, isLoading }] = useParseAddressMutation();
+
+  // Dynamic recent addresses from merchant's real parcels
+  const { data: parcelsData } = useGetParcelsQuery({ limit: 6 });
+  const recentAddresses = (parcelsData?.data ?? [])
+    .filter((p) => p.deliveryAddress && p.deliveryAddress.trim().length > 3)
+    .slice(0, 4)
+    .map((p) => ({
+      label: `${p.thana || p.district}`,
+      text: `${p.deliveryAddress}, ${p.thana}, ${p.district}`,
+    }));
 
   const result: AddressParseResult | undefined = responseData?.data;
 
@@ -69,94 +58,94 @@ export function SmartAddressParser({
     }
 
     try {
-      const res = await parseAddress({ rawAddress: raw }).unwrap();
-      if (res.data) {
-        toast.success(`Address parsed with ${res.data.confidenceScore}% confidence!`);
-      }
+      await parseAddress({ rawAddress: raw }).unwrap();
+      toast.success("Address successfully analyzed & parsed!");
     } catch {
-      toast.error("Failed to parse address. Please verify connection to API.");
+      toast.error("Failed to parse address. Please verify your connection.");
     }
   };
 
   const handleCopy = () => {
     if (!result) return;
-    const summary = `${result.thana}, ${result.district}${result.postalCode ? ` - ${result.postalCode}` : ""}`;
+    const summary = `${result.rawAddress}, ${result.thana}, ${result.district}${result.postalCode ? ` - ${result.postalCode}` : ""}`;
     navigator.clipboard.writeText(summary);
     setCopied(true);
-    toast.success("Parsed address copied to clipboard!");
+    toast.success("Standardized address copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getConfidenceBadge = (tier: string, score: number) => {
-    if (tier === "HIGH") {
-      return (
-        <Badge variant="success" className="flex items-center gap-1 font-semibold">
-          <CheckCircle2 className="h-3 w-3" />
-          {score}% High Confidence
-        </Badge>
-      );
+  const getConfidenceBadge = (tier: "HIGH" | "MEDIUM" | "LOW", score: number) => {
+    switch (tier) {
+      case "HIGH":
+        return (
+          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1 font-mono">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            High Confidence ({score}%)
+          </Badge>
+        );
+      case "MEDIUM":
+        return (
+          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10 flex items-center gap-1 font-mono">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Medium Confidence ({score}%)
+          </Badge>
+        );
+      case "LOW":
+      default:
+        return (
+          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/10 flex items-center gap-1 font-mono">
+            <AlertCircle className="h-3.5 w-3.5" />
+            Low Confidence ({score}%)
+          </Badge>
+        );
     }
-    if (tier === "MEDIUM") {
-      return (
-        <Badge variant="warning" className="flex items-center gap-1 font-semibold">
-          <AlertTriangle className="h-3 w-3" />
-          {score}% Medium Confidence
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="destructive" className="flex items-center gap-1 font-semibold">
-        <AlertTriangle className="h-3 w-3" />
-        {score}% Review Recommended
-      </Badge>
-    );
   };
 
-  const getZoneLabel = (zone: string) => {
+  const getZoneLabel = (zone: DeliveryZone) => {
     switch (zone) {
-      case "INSIDE_DHAKA":
+      case DeliveryZone.INSIDE_DHAKA:
         return {
-          label: "Inside Dhaka (Same Day / Next Day)",
-          color: "text-success bg-success-soft border-success",
+          label: "Inside Dhaka (Same-Day / Next-Day)",
+          color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
         };
-      case "DHAKA_SUBURBS":
+      case DeliveryZone.DHAKA_SUBURBS:
         return {
-          label: "Dhaka Suburb (Gazipur / Narayanganj)",
-          color: "text-warning bg-warning-soft border-warning",
+          label: "Greater Dhaka Suburbs",
+          color: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30",
         };
-      case "OUTSIDE_DHAKA":
+      case DeliveryZone.OUTSIDE_DHAKA:
       default:
         return {
           label: "Outside Dhaka (National Inter-District)",
-          color: "text-info bg-info-soft border-info",
+          color: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
         };
     }
   };
 
   return (
-    <Card className=" border-primary/20">
-      <CardHeader className="bg-primary/5 border-b border-primary/10">
+    <Card className="rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md overflow-hidden">
+      <CardHeader className="bg-primary/5 border-b border-primary/10 p-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-primary/10 text-primary rounded-lg">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-xs">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg">Smart BD Address Parser</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-h4 font-bold text-foreground">Smart BD Address Parser</CardTitle>
+              <CardDescription className="text-body-sm text-muted-foreground">
                 Bilingual (English & Bengali) NLP address extractor with fuzzy typo correction
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="bg-background text-xs font-mono">
-            64 Districts • 240+ Upazilas
+          <Badge variant="outline" className="bg-background/80 text-xs font-mono border-border/80">
+            64 Districts • 590+ Thanas
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4 pt-6">
+      <CardContent className="space-y-5 p-6 sm:p-7">
         <div>
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">
+          <label className="text-caption font-bold text-muted-foreground uppercase tracking-wider block mb-2">
             Free-Form Address Text
           </label>
           <div className="relative">
@@ -165,52 +154,53 @@ export function SmartAddressParser({
               value={addressInput}
               onChange={(e) => setAddressInput(e.target.value)}
               placeholder="e.g. House 42, Road 7, Block D, Banani, Dhaka-1213 or মিরপুর ১০, সেনপাড়া পর্বতা, ঢাকা ১২১৬"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none font-sans"
+              className="w-full rounded-2xl border border-border/80 bg-surface-muted/50 p-3.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-surface-elevated transition-colors resize-none font-sans"
             />
           </div>
         </div>
 
-        {/* Quick Sample Presets */}
-        <div>
-          <span className="text-xs text-muted-foreground block mb-1.5 font-medium">
-            Try instant examples:
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {SAMPLE_ADDRESSES.map((sample) => (
-              <button
-                key={sample.label}
-                type="button"
-                onClick={() => {
-                  setAddressInput(sample.text);
-                  handleParse(sample.text);
-                }}
-                className="text-xs px-2.5 py-1 rounded-full border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors flex items-center gap-1"
-              >
-                <span>{sample.label}</span>
-              </button>
-            ))}
+        {/* Dynamic Recent Customer Addresses (Zero static mocks) */}
+        {recentAddresses.length > 0 && (
+          <div>
+            <span className="text-caption text-muted-foreground block mb-2 font-semibold">
+              Recent Customer Addresses:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {recentAddresses.map((sample, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setAddressInput(sample.text);
+                    void handleParse(sample.text);
+                  }}
+                  className="text-caption font-medium px-3 py-1 rounded-xl border border-border/70 bg-surface-muted/60 hover:bg-surface-muted text-foreground transition-all flex items-center gap-1.5"
+                >
+                  <MapPin className="h-3 w-3 text-primary" />
+                  <span>{sample.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => {
-              setAddressInput("");
-            }}
+            onClick={() => setAddressInput("")}
             disabled={!addressInput || isLoading}
-            className="flex items-center gap-1.5 text-xs"
+            className="flex items-center gap-1.5 text-xs rounded-xl border-border/80"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Clear
           </Button>
           <Button
             type="button"
-            onClick={() => handleParse()}
+            onClick={() => void handleParse()}
             disabled={isLoading || !addressInput.trim()}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl bg-primary shadow-md shadow-primary/20"
           >
             <Search className="h-4 w-4" />
             {isLoading ? "Analyzing..." : "Parse & Extract"}
@@ -219,43 +209,43 @@ export function SmartAddressParser({
 
         {/* Parsed Result View */}
         {result && (
-          <div className="mt-6 border rounded-lg bg-card overflow-hidden">
-            <div className="p-4 border-b bg-muted/30 flex items-center justify-between flex-wrap gap-2">
+          <div className="mt-6 border border-border/80 rounded-2xl bg-surface-muted/30 overflow-hidden shadow-xs">
+            <div className="p-4 border-b border-border/60 bg-surface-elevated flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-sm">Extraction Result</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                <span className="font-bold text-body-sm text-foreground">Extraction Result</span>
+                <span className="text-caption px-2 py-0.5 rounded-md bg-surface-muted text-muted-foreground font-mono font-medium">
                   Lang: {result.language}
                 </span>
               </div>
               {getConfidenceBadge(result.confidenceTier, result.confidenceScore)}
             </div>
 
-            <div className="p-4 space-y-4 text-sm">
+            <div className="p-5 space-y-4 text-body-sm">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-2.5 rounded-md border bg-muted/20">
-                  <span className="text-xs font-semibold text-muted-foreground block uppercase">
+                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                  <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     District
                   </span>
-                  <p className="font-bold text-foreground text-base mt-0.5">{result.district}</p>
+                  <p className="font-bold text-foreground text-body-md mt-0.5">{result.district}</p>
                 </div>
 
-                <div className="p-2.5 rounded-md border bg-muted/20">
-                  <span className="text-xs font-semibold text-muted-foreground block uppercase">
+                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                  <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     Thana / Upazila
                   </span>
-                  <p className="font-bold text-foreground text-base mt-0.5">{result.thana}</p>
+                  <p className="font-bold text-foreground text-body-md mt-0.5">{result.thana}</p>
                 </div>
 
-                <div className="p-2.5 rounded-md border bg-muted/20">
-                  <span className="text-xs font-semibold text-muted-foreground block uppercase">
+                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                  <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     Area / Sector
                   </span>
                   <p className="font-semibold text-foreground mt-0.5">{result.area || "—"}</p>
                 </div>
 
-                <div className="p-2.5 rounded-md border bg-muted/20">
-                  <span className="text-xs font-semibold text-muted-foreground block uppercase">
+                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                  <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     Postal Code
                   </span>
                   <p className="font-mono font-bold text-foreground mt-0.5">
@@ -265,22 +255,22 @@ export function SmartAddressParser({
               </div>
 
               {/* Delivery Zone */}
-              <div className="border rounded-md p-3 flex items-center justify-between">
+              <div className="border border-border/60 rounded-xl bg-surface-elevated/70 p-3.5 flex items-center justify-between flex-wrap gap-2">
                 <div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase block">
+                  <span className="text-caption font-semibold text-muted-foreground uppercase block">
                     Calculated Delivery Zone
                   </span>
                   <span
-                    className={`text-xs px-2 py-0.5 rounded border inline-block mt-1 font-medium ${getZoneLabel(result.zone).color}`}
+                    className={`text-caption px-2.5 py-0.5 rounded-full border inline-block mt-1 font-semibold ${getZoneLabel(result.zone).color}`}
                   >
                     {getZoneLabel(result.zone).label}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-muted-foreground block">Matched Keywords</span>
+                  <span className="text-caption text-muted-foreground block">Matched Keywords</span>
                   <div className="flex flex-wrap gap-1 justify-end mt-1">
                     {result.matchedKeywords.map((kw, i) => (
-                      <span key={i} className="text-xs px-1.5 py-0.5 bg-muted rounded font-mono">
+                      <span key={i} className="text-caption px-1.5 py-0.5 bg-surface-muted rounded font-mono font-medium">
                         {kw}
                       </span>
                     ))}
@@ -290,7 +280,7 @@ export function SmartAddressParser({
 
               {/* Suggested Corrections */}
               {result.suggestedCorrections && result.suggestedCorrections.length > 0 && (
-                <div className="p-3 rounded-md bg-warning-soft border border-warning text-warning  text-xs space-y-1">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-caption space-y-1">
                   <div className="flex items-center gap-1.5 font-semibold">
                     <AlertTriangle className="h-3.5 w-3.5" />
                     <span>Typo Auto-Corrections & Recommendations:</span>
@@ -304,16 +294,16 @@ export function SmartAddressParser({
               )}
             </div>
 
-            <div className="p-3 bg-muted/40 border-t flex items-center justify-between gap-2">
+            <div className="p-4 bg-surface-muted/50 border-t border-border/60 flex items-center justify-between gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs"
+                className="flex items-center gap-1.5 text-xs rounded-xl border-border/80"
               >
                 {copied ? (
-                  <Check className="h-3.5 w-3.5 text-success" />
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
                 ) : (
                   <Copy className="h-3.5 w-3.5" />
                 )}
@@ -325,7 +315,7 @@ export function SmartAddressParser({
                   type="button"
                   size="sm"
                   onClick={() => onApply(result)}
-                  className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground"
+                  className="flex items-center gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground shadow-sm"
                 >
                   <ArrowRight className="h-3.5 w-3.5" />
                   Auto-Fill Booking Fields
