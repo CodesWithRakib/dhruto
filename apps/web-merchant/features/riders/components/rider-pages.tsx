@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { Link } from "@/lib/navigation";
 import { RIDER_ROUTES } from "@/config/routes";
 import { ArrowLeft } from "lucide-react";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import { RiderTasksView } from "./rider-tasks-view";
 import { TaskDetailsView } from "./task-details-view";
 import { RiderHistoryView } from "./rider-history-view";
@@ -14,7 +15,8 @@ import { RiderProfileView } from "./rider-profile-view";
 export function RiderTasksPage() {
   const t = useTranslations("Rider");
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <DashboardCanvasBg />
       <PageHeader title={t("tasks.title")} description={t("tasks.subtitle")} />
       <RiderTasksView />
     </div>
@@ -24,7 +26,8 @@ export function RiderTasksPage() {
 export function RiderTaskDetailsPage({ parcelId }: { parcelId: string }) {
   const t = useTranslations("Rider");
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <DashboardCanvasBg />
       <PageHeader
         title={t("details.title")}
         description="Verify recipient OTP, collect payment, and complete the package handover."
@@ -46,7 +49,8 @@ export function RiderTaskDetailsPage({ parcelId }: { parcelId: string }) {
 export function RiderHistoryPage() {
   const t = useTranslations("Rider");
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <DashboardCanvasBg />
       <PageHeader title={t("history.title")} description={t("history.subtitle")} />
       <RiderHistoryView />
     </div>
@@ -56,7 +60,8 @@ export function RiderHistoryPage() {
 export function RiderProfilePage() {
   const t = useTranslations("Rider");
   return (
-    <div className="w-full space-y-6 pb-6">
+    <div className="relative w-full space-y-6 pb-6">
+      <DashboardCanvasBg />
       <PageHeader title={t("profile.title")} />
       <RiderProfileView />
     </div>
