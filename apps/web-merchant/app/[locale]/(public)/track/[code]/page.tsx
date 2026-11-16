@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@/lib/navigation";
 import { ArrowLeft, Radio } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { TrackingQuickSearch } from "@/features/marketing/components/tracking-quick-search";
 import { PublicTrackingView } from "@/features/tracking/components/public-tracking-view";
 
@@ -15,6 +16,7 @@ export default async function TrackCodePage({
   params: Promise<{ code: string; locale: string }>;
 }) {
   const { code } = await params;
+  const t = await getTranslations("Tracking");
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,8 +30,8 @@ export default async function TrackCodePage({
                 href="/track"
                 className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-muted-foreground hover:text-primary transition-colors"
               >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Back to live radar search
+                <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />
+                {t("backToSearch")}
               </Link>
               <div className="flex items-center gap-3">
                 <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
@@ -38,7 +40,7 @@ export default async function TrackCodePage({
                 </h1>
                 <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-primary">
                   <Radio className="h-3 w-3 animate-pulse" />
-                  LIVE TELEMETRY
+                  {t("liveTelemetry")}
                 </span>
               </div>
             </div>

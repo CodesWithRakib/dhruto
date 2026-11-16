@@ -425,6 +425,8 @@
     "retry": "Try again",
     "eyebrow": "Shipment tracking",
     "badge": "Live status, no account needed",
+    "backToSearch": "Back to live radar search",
+    "liveTelemetry": "LIVE TELEMETRY",
     "features": {
       "eyebrow": "What you get",
       "title": "More than a status label",
