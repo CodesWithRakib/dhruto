@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "react-redux";
 import { Button, Sheet, SheetContent, SheetTitle } from "@dhruto/ui";
@@ -12,7 +11,6 @@ import type { RootState } from "@/store";
 import { Link } from "@/lib/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { NotFoundState } from "@/components/feedback/states";
 import { useGetConversationQuery, useGetPinsQuery } from "../api/chat.api";
 import { useConversationTimeline } from "../hooks/use-conversation-timeline";
@@ -32,12 +30,13 @@ import {
   latestSequence,
   type ParticipantCursor,
 } from "../state/chat-timeline.slice";
-import { ChatAvatar, TypingIndicator } from "./chat-primitives";
+import { TypingIndicator } from "./chat-primitives";
 import { ConversationInfoPanel } from "./conversation-info-panel";
-import { EditMessageDialog, RemoveMessageDialog, ReportMessageDialog } from "./message-dialogs";
 import { MessageComposer, type ComposerReply } from "./message-composer";
 import { type MessageBubbleHandlers } from "./message-bubble";
 import { MessageTimeline } from "./message-timeline";
+import { ConversationPanelHeader } from "./conversation-panel-header";
+import { ConversationPanelDialogs } from "./conversation-panel-dialogs";
 
 const MAX_JUMP_PAGES = 10;
 const EMPTY_SENDERS: Record<string, ChatPageSender> = {};
@@ -45,7 +44,12 @@ const EMPTY_CURSORS: Record<string, ParticipantCursor> = {};
 const HIGHLIGHT_MS = 3000;
 
 function isNotFound(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "status" in error && (error.status === 404 || error.status === 403 || error.status === 400);
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    (error.status === 404 || error.status === 403 || error.status === 400)
+  );
 }
 
 export function ConversationPanel({
@@ -85,7 +89,6 @@ export function ConversationPanel({
     () => (detail ? conversationCaps(detail.status, detail.myParticipation.capabilities) : NO_CAPS),
     [detail],
   );
-  // Stable empty fallbacks keep memoized children/handlers from re-rendering.
   const senders = timeline?.senders ?? EMPTY_SENDERS;
   const cursors = timeline?.cursors ?? EMPTY_CURSORS;
   const pinnedIds = useMemo(() => new Set((pinsQuery.data ?? []).map((pin) => pin.messageId)), [pinsQuery.data]);
@@ -95,7 +98,6 @@ export function ConversationPanel({
     return map;
   }, [view.messages]);
 
-  /* ---- read receipts ---- */
   const [atBottom, setAtBottom] = useState(true);
   useReadReceipts({
     conversationId,
@@ -106,12 +108,10 @@ export function ConversationPanel({
     atBottom: atBottom && view.initialized,
   });
 
-  /* ---- sending / typing ---- */
   const { send, retry, discard } = useSendMessage(conversationId, myUserId);
   const typingEmitter = useTypingEmitter(conversationId);
   const [reply, setReply] = useState<ComposerReply | null>(null);
 
-  /* ---- actions & dialogs ---- */
   const actions = useMessageActions(conversationId);
   const [editing, setEditing] = useState<TimelineMessage | null>(null);
   const [deleting, setDeleting] = useState<TimelineMessage | null>(null);
@@ -129,7 +129,6 @@ export function ConversationPanel({
     if (highlightTimer.current) clearTimeout(highlightTimer.current);
   }, []);
 
-  /** Brings a message into the window (bounded older-page loading), then highlights it. */
   const jumpTo = useCallback(
     async (messageId: string, sequence?: string | null) => {
       const loaded = () => findByMessageId(store.getState().chatTimeline.conversations[conversationId], messageId);
@@ -228,33 +227,16 @@ export function ConversationPanel({
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-2 sm:px-4">
-          <Button asChild variant="ghost" size="icon-sm" className="md:hidden">
-            <Link href={routes.list} aria-label={t("backToList")}>
-              <ArrowLeft className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
-            </Link>
-          </Button>
-          {detail && <ChatAvatar name={title} size="sm" />}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">{title}</p>
-            <PresenceSubtitle
-              typeLabel={detail ? t(`types.${detail.type}`) : ""}
-              participantCount={detail?.participants.length ?? 0}
-              otherUserId={other?.userId ?? null}
-            />
-          </div>
-          {detail && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("info")}
-              aria-expanded={infoOpen}
-              onClick={() => onInfoOpenChange(!infoOpen)}
-            >
-              <Info className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          )}
-        </header>
+        <ConversationPanelHeader
+          routes={routes}
+          title={title}
+          typeLabel={detail ? t(`types.${detail.type}`) : ""}
+          participantCount={detail?.participants.length ?? 0}
+          otherUserId={other?.userId ?? null}
+          hasDetail={Boolean(detail)}
+          infoOpen={infoOpen}
+          onInfoOpenChange={onInfoOpenChange}
+        />
         {detail?.parcel && <ParcelContextBar parcel={detail.parcel} section={section} />}
 
         <MessageTimeline
@@ -295,7 +277,7 @@ export function ConversationPanel({
       </div>
 
       {infoOpen && isWide && info && (
-        <aside className="hidden w-80 shrink-0 border-s border-border xl:block" aria-label={t("info")}>
+        <aside className="hidden w-80 shrink-0 border-s border-border/80 xl:block" aria-label={t("info")}>
           {info}
         </aside>
       )}
@@ -308,63 +290,17 @@ export function ConversationPanel({
         </Sheet>
       )}
 
-      {editing && (
-        <EditMessageDialog
-          open
-          onOpenChange={(open) => !open && setEditing(null)}
-          initialContent={editing.content ?? ""}
-          onSubmit={(content) => (editing.id ? actions.edit(editing.id, content) : Promise.resolve(false))}
-        />
-      )}
-      <ConfirmDialog
-        open={deleting !== null}
-        onOpenChange={(open) => !open && setDeleting(null)}
-        title={t("deleteTitle")}
-        description={t("deleteDescription")}
-        confirmLabel={t("deleteConfirm")}
-        cancelLabel={t("cancel")}
-        tone="danger"
-        onConfirm={async () => {
-          if (deleting?.id) await actions.deleteOwn(deleting.id);
-          setDeleting(null);
-        }}
-      />
-      <RemoveMessageDialog
-        open={removing !== null}
-        onOpenChange={(open) => !open && setRemoving(null)}
-        onSubmit={(reason) => (removing?.id ? actions.removeAsModerator(removing.id, reason) : Promise.resolve(false))}
-      />
-      <ReportMessageDialog
-        open={reporting !== null}
-        onOpenChange={(open) => !open && setReporting(null)}
-        onSubmit={(reason, details) => (reporting?.id ? actions.report(reporting.id, reason, details) : Promise.resolve(false))}
+      <ConversationPanelDialogs
+        editing={editing}
+        setEditing={setEditing}
+        deleting={deleting}
+        setDeleting={setDeleting}
+        removing={removing}
+        setRemoving={setRemoving}
+        reporting={reporting}
+        setReporting={setReporting}
+        actions={actions}
       />
     </div>
   );
 }
-
-/** Online state only for a DIRECT counterpart visible through the joined room. */
-function PresenceSubtitle({
-  typeLabel,
-  participantCount,
-  otherUserId,
-}: {
-  typeLabel: string;
-  participantCount: number;
-  otherUserId: string | null;
-}) {
-  const t = useTranslations("Chat");
-  const presence = useAppSelector((state) => (otherUserId ? state.chatEphemeral.presence[otherUserId] : undefined));
-  if (presence) {
-    return (
-      <p className="truncate text-xs text-muted-foreground">{presence.status === "online" ? t("online") : t("offline")}</p>
-    );
-  }
-  return (
-    <p className="truncate text-xs text-muted-foreground">
-      {typeLabel}
-      {participantCount > 0 ? ` · ${t("participants")}: ${participantCount}` : ""}
-    </p>
-  );
-}
-

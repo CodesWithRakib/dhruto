@@ -2,80 +2,27 @@
 
 import React, { memo } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Flag,
-  MapPin,
-  MoreVertical,
-  Pencil,
-  Pin,
-  PinOff,
-  Reply,
-  RotateCcw,
-  ShieldAlert,
-  Trash2,
-  Zap,
-} from "lucide-react";
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  cn,
-} from "@dhruto/ui";
-import { ChatMessageDeliveryStatus, ChatMessageType } from "@dhruto/contracts";
+import { MapPin, Pin, RotateCcw, Zap } from "lucide-react";
+import { Button, cn } from "@dhruto/ui";
+import { ChatMessageType } from "@dhruto/contracts";
 import { formatClock } from "../lib/display";
 import { type TimelineMessage } from "../lib/timeline";
-import { systemEventText } from "../lib/system-events";
-import { messagePermissions, type ConversationCaps, type MessagePermissions } from "../lib/permissions";
+import { messagePermissions } from "../lib/permissions";
 import { DeliveryStatus } from "./chat-primitives";
 import { MessageAttachments } from "./message-attachments";
+import {
+  MessageActionsMenu,
+  ReactionRow,
+  SystemRow,
+  QUICK_REACTIONS,
+} from "./message-bubble-actions";
+import {
+  type MessageBubbleHandlers,
+  type MessageBubbleProps,
+} from "./message-bubble-types";
 
-export const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"] as const;
-
-export interface MessageBubbleHandlers {
-  onReply: (message: TimelineMessage) => void;
-  onEdit: (message: TimelineMessage) => void;
-  onDelete: (message: TimelineMessage) => void;
-  onRemove: (message: TimelineMessage) => void;
-  onReport: (message: TimelineMessage) => void;
-  onTogglePin: (message: TimelineMessage, pinned: boolean) => void;
-  onToggleReaction: (message: TimelineMessage, reaction: string) => void;
-  onRetry: (message: TimelineMessage) => void;
-  onDiscard: (message: TimelineMessage) => void;
-  onJumpTo: (messageId: string) => void;
-}
-
-export interface MessageBubbleProps {
-  message: TimelineMessage;
-  mine: boolean;
-  senderLabel: string;
-  showSender: boolean;
-  firstInGroup: boolean;
-  lastInGroup: boolean;
-  /** Reply target as stored (stable reference); null when not loaded. */
-  replyTarget?: TimelineMessage | null;
-  replyName?: string;
-  pinned: boolean;
-  delivery: ChatMessageDeliveryStatus | null;
-  highlighted: boolean;
-  locale: string;
-  /** Stable, memoized per conversation (keeps React.memo effective). */
-  caps: ConversationCaps;
-  handlers: MessageBubbleHandlers;
-}
-
-function SystemRow({ message }: { message: TimelineMessage }) {
-  const t = useTranslations("Chat");
-  return (
-    <div className="flex justify-center py-1">
-      <span className="max-w-[90%] rounded-full bg-muted px-3 py-1 text-center text-xs text-muted-foreground">
-        {systemEventText(message.metadata, t)}
-      </span>
-    </div>
-  );
-}
+export { QUICK_REACTIONS };
+export type { MessageBubbleHandlers, MessageBubbleProps };
 
 function MessageBody({ message }: { message: TimelineMessage }) {
   const t = useTranslations("Chat");
@@ -133,7 +80,13 @@ function MessageBubbleImpl({
   const anyAction =
     persisted &&
     !message.deletedAt &&
-    (permissions.reply || permissions.react || permissions.edit || permissions.delete || permissions.pin || permissions.report || permissions.remove);
+    (permissions.reply ||
+      permissions.react ||
+      permissions.edit ||
+      permissions.delete ||
+      permissions.pin ||
+      permissions.report ||
+      permissions.remove);
 
   return (
     <div
@@ -148,7 +101,7 @@ function MessageBubbleImpl({
         <div
           className={cn(
             "relative min-w-0 rounded-2xl px-3 py-2 text-sm leading-relaxed transition-shadow",
-            mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+            mine ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-foreground",
             mine && lastInGroup && "rounded-ee-md",
             !mine && lastInGroup && "rounded-es-md",
             highlighted && "ring-2 ring-ring ring-offset-2 ring-offset-surface",
@@ -182,7 +135,12 @@ function MessageBubbleImpl({
 
           <MessageBody message={message} />
 
-          <div className={cn("mt-1 flex items-center justify-end gap-1.5 text-[11px]", mine ? "text-primary-foreground/75" : "text-muted-foreground")}>
+          <div
+            className={cn(
+              "mt-1 flex items-center justify-end gap-1.5 text-[11px]",
+              mine ? "text-primary-foreground/75" : "text-muted-foreground",
+            )}
+          >
             {pinned && (
               <span title={t("pinned")} className="inline-flex">
                 <Pin className="h-3 w-3" aria-hidden="true" />
@@ -220,130 +178,14 @@ function MessageBubbleImpl({
       )}
 
       {!message.deletedAt && message.reactions.length > 0 && (
-        <ReactionRow message={message} canReact={permissions.react} mine={mine} onToggle={handlers.onToggleReaction} />
+        <ReactionRow
+          message={message}
+          canReact={permissions.react}
+          mine={mine}
+          onToggle={handlers.onToggleReaction}
+        />
       )}
     </div>
-  );
-}
-
-function ReactionRow({
-  message,
-  canReact,
-  mine,
-  onToggle,
-}: {
-  message: TimelineMessage;
-  canReact: boolean;
-  mine: boolean;
-  onToggle: (message: TimelineMessage, reaction: string) => void;
-}) {
-  const t = useTranslations("Chat");
-  return (
-    <ul className={cn("mt-1 flex max-w-[85%] flex-wrap gap-1 sm:max-w-[70%]", mine && "justify-end")}>
-      {message.reactions.map((reaction) => (
-        <li key={reaction.reaction}>
-          <button
-            type="button"
-            disabled={!canReact}
-            aria-pressed={reaction.reactedByMe}
-            aria-label={t("reactionLabel", { reaction: reaction.reaction, count: reaction.count })}
-            onClick={() => onToggle(message, reaction.reaction)}
-            className={cn(
-              "inline-flex h-7 items-center gap-1 rounded-full border px-2 text-xs transition-colors",
-              reaction.reactedByMe ? "border-primary bg-primary-soft text-primary-soft-foreground" : "border-border bg-surface text-foreground",
-              canReact && "hover:bg-surface-muted",
-            )}
-          >
-            <span aria-hidden="true">{reaction.reaction}</span>
-            <span>{reaction.count}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function MessageActionsMenu({
-  message,
-  mine,
-  pinned,
-  permissions,
-  handlers,
-}: {
-  message: TimelineMessage;
-  mine: boolean;
-  pinned: boolean;
-  permissions: MessagePermissions;
-  handlers: MessageBubbleHandlers;
-}) {
-  const t = useTranslations("Chat.actions");
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("menu")}
-          className="shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
-        >
-          <MoreVertical className="h-4 w-4" aria-hidden="true" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={mine ? "end" : "start"} className="w-52">
-        {permissions.react && (
-          <div className="flex justify-between px-1 py-1" role="group" aria-label={t("react")}>
-            {QUICK_REACTIONS.map((reaction) => (
-              <DropdownMenuItem
-                key={reaction}
-                className="h-8 w-8 justify-center p-0 text-base"
-                onSelect={() => handlers.onToggleReaction(message, reaction)}
-              >
-                <span aria-hidden="true">{reaction}</span>
-                <span className="sr-only">{reaction}</span>
-              </DropdownMenuItem>
-            ))}
-          </div>
-        )}
-        {permissions.react && <DropdownMenuSeparator />}
-        {permissions.reply && (
-          <DropdownMenuItem onSelect={() => handlers.onReply(message)}>
-            <Reply className="me-2 h-4 w-4" aria-hidden="true" />
-            {t("reply")}
-          </DropdownMenuItem>
-        )}
-        {permissions.edit && (
-          <DropdownMenuItem onSelect={() => handlers.onEdit(message)}>
-            <Pencil className="me-2 h-4 w-4" aria-hidden="true" />
-            {t("edit")}
-          </DropdownMenuItem>
-        )}
-        {permissions.pin && (
-          <DropdownMenuItem onSelect={() => handlers.onTogglePin(message, pinned)}>
-            {pinned ? <PinOff className="me-2 h-4 w-4" aria-hidden="true" /> : <Pin className="me-2 h-4 w-4" aria-hidden="true" />}
-            {pinned ? t("unpin") : t("pin")}
-          </DropdownMenuItem>
-        )}
-        {permissions.report && (
-          <DropdownMenuItem onSelect={() => handlers.onReport(message)}>
-            <Flag className="me-2 h-4 w-4" aria-hidden="true" />
-            {t("report")}
-          </DropdownMenuItem>
-        )}
-        {(permissions.delete || permissions.remove) && <DropdownMenuSeparator />}
-        {permissions.delete && (
-          <DropdownMenuItem className="text-danger focus:text-danger" onSelect={() => handlers.onDelete(message)}>
-            <Trash2 className="me-2 h-4 w-4" aria-hidden="true" />
-            {t("delete")}
-          </DropdownMenuItem>
-        )}
-        {permissions.remove && (
-          <DropdownMenuItem className="text-danger focus:text-danger" onSelect={() => handlers.onRemove(message)}>
-            <ShieldAlert className="me-2 h-4 w-4" aria-hidden="true" />
-            {t("remove")}
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 

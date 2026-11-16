@@ -8,6 +8,7 @@ import { Button, cn } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { EmptyState, NotFoundState } from "@/components/feedback/states";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import { ChatRealtimeProvider } from "../realtime/chat-realtime-provider";
 import { messengerRoutes, type MessengerSection } from "../lib/routes";
 import { ConnectionBanner } from "./chat-primitives";
@@ -43,8 +44,8 @@ export function Messenger({ section }: { section: MessengerSection }) {
     <ChatRealtimeProvider>
       <div
         className={cn(
-          "-mx-4 -mt-6 flex h-[calc(100dvh-11rem)] flex-col overflow-hidden bg-surface sm:-mx-6",
-          "lg:mx-0 lg:mt-0 lg:h-[calc(100dvh-7rem)] lg:rounded-2xl lg:border lg:border-border",
+          "relative -mx-4 -mt-6 flex h-[calc(100dvh-11rem)] flex-col overflow-hidden bg-surface/90 backdrop-blur-md sm:-mx-6",
+          "lg:mx-0 lg:mt-0 lg:h-[calc(100dvh-7rem)] lg:rounded-2xl lg:border lg:border-border lg:shadow-xl lg:shadow-emerald-950/5 dark:lg:shadow-black/20",
         )}
       >
         <ConnectionBanner />
@@ -120,11 +121,12 @@ function UnavailableConversation({ listHref }: { listHref: string }) {
 /** Server-compatible layout wrapper for `messages/layout.tsx` route files. */
 export function MessengerLayout({ section, children }: { section: MessengerSection; children: React.ReactNode }) {
   return (
-    <>
+    <div className="relative">
+      <DashboardCanvasBg />
       <Suspense fallback={null}>
         <Messenger section={section} />
       </Suspense>
       {children}
-    </>
+    </div>
   );
 }
