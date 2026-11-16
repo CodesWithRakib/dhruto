@@ -787,7 +787,10 @@ describe.skipIf(
       expect(blockedSend.status).toBe(422);
     });
 
-    it("scanner outage fails closed: retried, then FAILED and blocked", async () => {
+    // Phase 8 changed the outage behavior: an unreachable scanner no longer
+    // consumes retry budgets (files stay PENDING and recover by themselves);
+    // per-file scanner errors still retry and then FAIL closed.
+    it("scanner outage keeps files pending (blocked); per-file scanner errors retry, then FAIL", async () => {
       failedId = await upload(
         "merchantA",
         threadA,
@@ -797,16 +800,25 @@ describe.skipIf(
       );
       await send("merchantA", threadA, { type: ChatMessageType.FILE, attachmentIds: [failedId] });
       clamd.setMode("down");
-      const first = await scan();
-      expect(first.retried).toBeGreaterThanOrEqual(1);
+      const skipped = await app.get(ChatAttachmentScanService).runOnce(new Date(Date.now() + 1000));
+      expect(skipped.scannerUnavailable).toBe(true);
+      expect(skipped.claimed).toBe(0);
       let row = await attachmentRow(failedId);
+      expect(row.scan_status).toBe("PENDING");
+      expect(row.scan_attempts).toBe(0);
+      expect((await download("customer", failedId)).status).toBe(409);
+
+      clamd.setMode("garbage"); // reachable, but returns an invalid scan result
+      const first = await app.get(ChatAttachmentScanService).runOnce(new Date(Date.now() + 20_000));
+      expect(first.retried).toBeGreaterThanOrEqual(1);
+      row = await attachmentRow(failedId);
       expect(row.scan_status).toBe("PENDING");
       expect(row.scan_attempts).toBe(1);
       expect((await download("customer", failedId)).status).toBe(409);
       await app.get(ChatAttachmentScanService).runOnce(new Date(Date.now() + 3600_000));
       row = await attachmentRow(failedId);
       expect(row.scan_status).toBe("FAILED");
-      expect(row.scan_error).toBe("unavailable");
+      expect(row.scan_error).toBe("protocol");
       expect((await download("customer", failedId)).status).toBe(409);
       clamd.setMode("normal");
     });

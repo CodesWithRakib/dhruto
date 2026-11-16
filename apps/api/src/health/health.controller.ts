@@ -14,6 +14,7 @@ import { Public } from "../auth/decorators/public.decorator.js";
 import { TelemetryService } from "../common/interceptors/telemetry.interceptor.js";
 import { queueCounts } from "../integrations/queue-helper.js";
 import { ChatRealtimeMetricsService } from "../chat/realtime/chat-realtime-metrics.service.js";
+import { ChatObservabilityService } from "../chat/observability/chat-observability.service.js";
 
 @ApiTags("Health & Observability")
 @Public()
@@ -26,6 +27,7 @@ export class HealthController {
     @Optional() @InjectQueue("notifications") private readonly notificationsQueue?: Queue,
     @Optional() @InjectQueue("webhooks") private readonly webhooksQueue?: Queue,
     @Optional() private readonly realtime?: ChatRealtimeMetricsService,
+    @Optional() private readonly chat?: ChatObservabilityService,
   ) {}
 
   @Get()
@@ -123,6 +125,21 @@ export class HealthController {
     // when Redis is optional (single-instance tolerance => "degraded").
     const degraded = health.redis.distribution === "redis" && !health.redis.healthy;
     return { status: !health.ready ? "not_ready" : degraded ? "degraded" : "ready", ...health };
+  }
+
+  @Get("chat")
+  @ApiOperation({
+    summary:
+      "Communication operations: scanner reachability/signature age, scan backlog, chat outbox lag (counts only)",
+  })
+  async chatStatus(@Res({ passthrough: true }) res: Response) {
+    if (!this.chat) {
+      res.status(HttpStatus.SERVICE_UNAVAILABLE);
+      return { status: "unavailable" };
+    }
+    // Informational (200 even when degraded): a scanner outage blocks
+    // attachments (fail closed) but must not take the API out of rotation.
+    return this.chat.status();
   }
 
   @Get("metrics")
@@ -268,6 +285,8 @@ export class HealthController {
       "# TYPE dhruto_process_memory_bytes gauge",
       `dhruto_process_memory_bytes{area="rss"} ${mem.rss}`,
       `dhruto_process_memory_bytes{area="heapUsed"} ${mem.heapUsed}`,
+      // Phase 8: communication signals (scanner, scan backlog, outbox lag, realtime).
+      ...((await this.chat?.prometheusLines().catch(() => [])) ?? []),
     ];
     return `${lines.join("\n")}\n`;
   }

@@ -1,5 +1,9 @@
 import { connect, type Socket } from "node:net";
-import { type ChatMalwareScanner, type MalwareScanVerdict } from "./malware-scanner.port.js";
+import {
+  type ChatMalwareScanner,
+  type MalwareScannerProbe,
+  type MalwareScanVerdict,
+} from "./malware-scanner.port.js";
 
 export interface ClamAvConfig {
   host: string;
@@ -12,6 +16,8 @@ export interface ClamAvConfig {
 const CHUNK_BYTES = 64 * 1024;
 const MAX_RESPONSE_BYTES = 4096;
 const THREAT_MAX_LENGTH = 200;
+/** Health probes must be fast; a scan may legitimately take much longer. */
+const PROBE_TIMEOUT_MS = 3000;
 
 /**
  * ClamAV adapter using clamd's documented `zINSTREAM` command over TCP:
@@ -54,10 +60,53 @@ export class ClamAvScanner implements ChatMalwareScanner {
     }
   }
 
-  private open(): Promise<Socket> {
+  /**
+   * Phase 8 health probe: `zPING` (must answer `PONG`) then `zVERSION`
+   * (`ClamAV <engine>/<sigVersion>/<sigDate>`). Bounded by the probe timeout;
+   * never throws. Used to avoid burning per-file retry budgets while clamd is
+   * down and to expose signature freshness.
+   */
+  async probe(): Promise<MalwareScannerProbe> {
+    const down: MalwareScannerProbe = {
+      reachable: false,
+      engineVersion: null,
+      signatureVersion: null,
+      signatureDate: null,
+    };
+    const pong = await this.command("zPING\0");
+    if (pong === null || pong.replace(/\0/g, "").trim() !== "PONG") return down;
+    const version = await this.command("zVERSION\0");
+    return { ...parseClamdVersion(version ?? ""), reachable: true };
+  }
+
+  /** One short request/response exchange; null on any failure or timeout. */
+  private async command(payload: string): Promise<string | null> {
+    let socket: Socket | null = null;
+    let timer: NodeJS.Timeout | null = null;
+    const timeoutMs = Math.min(this.config.timeoutMs, PROBE_TIMEOUT_MS);
+    try {
+      socket = await this.open(timeoutMs);
+      const response = this.readResponse(socket);
+      response.catch(() => undefined);
+      const deadline = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("timeout")), timeoutMs);
+        timer.unref?.();
+      });
+      deadline.catch(() => undefined);
+      await write(socket, Buffer.from(payload, "ascii"));
+      return await Promise.race([response, deadline]);
+    } catch {
+      return null;
+    } finally {
+      if (timer) clearTimeout(timer);
+      socket?.destroy();
+    }
+  }
+
+  private open(timeoutMs = this.config.timeoutMs): Promise<Socket> {
     return new Promise((resolve, reject) => {
       const socket = connect({ host: this.config.host, port: this.config.port });
-      socket.setTimeout(this.config.timeoutMs, () => socket.destroy(new Error("timeout")));
+      socket.setTimeout(timeoutMs, () => socket.destroy(new Error("timeout")));
       socket.once("connect", () => resolve(socket));
       socket.once("error", reject);
     });
@@ -111,6 +160,39 @@ export function parseClamdResponse(raw: string): MalwareScanVerdict {
   }
   if (/size limit exceeded/i.test(text)) return { result: "error", code: "size_limit" };
   return { result: "error", code: "protocol" };
+}
+
+/**
+ * Parses a clamd VERSION reply, e.g. "ClamAV 1.4.1/27458/Sun Nov 15 09:24:02 2026".
+ * Unknown shapes yield nulls (never an error). Exported for unit tests.
+ */
+export function parseClamdVersion(raw: string): Omit<MalwareScannerProbe, "reachable"> {
+  const text = raw.replace(/\0/g, "").trim();
+  const [engine, sig, date] = text.split("/");
+  const signatureVersion = sig && /^\d+$/.test(sig) ? Number(sig) : null;
+  return {
+    engineVersion: engine?.startsWith("ClamAV") ? engine.slice(0, 64) : null,
+    signatureVersion,
+    signatureDate: date ? parseCtime(date) : null,
+  };
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * ctime format clamd uses ("Sun Nov 15 09:24:02 2026"), interpreted as UTC
+ * (the official image runs clamd in UTC). Explicit parse: no locale-dependent
+ * `Date` string parsing.
+ */
+function parseCtime(value: string): Date | null {
+  const m = /^\w{3} (\w{3}) +(\d{1,2}) (\d{2}):(\d{2}):(\d{2}) (\d{4})$/.exec(value.trim());
+  if (!m) return null;
+  const month = MONTHS.indexOf(m[1] ?? "");
+  if (month < 0) return null;
+  const date = new Date(
+    Date.UTC(Number(m[6]), month, Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5])),
+  );
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export function loadClamAvConfig(): ClamAvConfig | null {

@@ -1,6 +1,59 @@
 import { createServer, type Server, type Socket } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
-import { ClamAvScanner, parseClamdResponse } from "./clamav-scanner.js";
+import { ClamAvScanner, parseClamdResponse, parseClamdVersion } from "./clamav-scanner.js";
+
+/** Minimal clamd answering PING/VERSION (Phase 8 probe tests). */
+function versionServer(reply: { ping: string; version: string }): Promise<{ server: Server; port: number }> {
+  return new Promise((resolve) => {
+    const server = createServer((socket) => {
+      socket.on("error", () => undefined);
+      socket.on("data", (data: Buffer) => {
+        const cmd = data.toString("ascii").replace(/\0/g, "");
+        socket.end(cmd === "zPING" ? reply.ping : cmd === "zVERSION" ? reply.version : "UNKNOWN\0");
+      });
+    });
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      resolve({ server, port: typeof address === "object" && address ? address.port : 0 });
+    });
+  });
+}
+
+describe("ClamAvScanner.probe (Phase 8)", () => {
+  it("reports engine, signature version and signature build time", async () => {
+    const { server, port } = await versionServer({
+      ping: "PONG\0",
+      version: "ClamAV 1.4.6/28184/Sun Nov 15 06:27:28 2026\0",
+    });
+    const probe = await new ClamAvScanner({ host: "127.0.0.1", port, timeoutMs: 5000 }).probe();
+    server.close();
+    expect(probe).toEqual({
+      reachable: true,
+      engineVersion: "ClamAV 1.4.6",
+      signatureVersion: 28184,
+      signatureDate: new Date(Date.UTC(2026, 10, 15, 6, 27, 28)),
+    });
+  });
+
+  it("is unreachable when clamd does not answer PONG or is down", async () => {
+    const wrong = await versionServer({ ping: "NOPE\0", version: "" });
+    expect((await new ClamAvScanner({ host: "127.0.0.1", port: wrong.port, timeoutMs: 5000 }).probe()).reachable).toBe(false);
+    wrong.server.close();
+    expect((await new ClamAvScanner({ host: "127.0.0.1", port: 1, timeoutMs: 5000 }).probe()).reachable).toBe(false);
+  });
+
+  it("parses VERSION strictly (unknown shapes → nulls, never errors)", () => {
+    expect(parseClamdVersion("ClamAV 1.4.6/28184/Sun Nov  5 06:27:28 2026").signatureDate).toEqual(
+      new Date(Date.UTC(2026, 10, 5, 6, 27, 28)),
+    );
+    expect(parseClamdVersion("garbage")).toEqual({ engineVersion: null, signatureVersion: null, signatureDate: null });
+    expect(parseClamdVersion("ClamAV 1.4.6/x/not a date")).toEqual({
+      engineVersion: "ClamAV 1.4.6",
+      signatureVersion: null,
+      signatureDate: null,
+    });
+  });
+});
 
 /**
  * The ClamAV adapter speaks the documented clamd INSTREAM protocol. These

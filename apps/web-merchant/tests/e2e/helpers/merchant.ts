@@ -10,7 +10,8 @@ export const API_BASE_URL = process.env.PLAYWRIGHT_API_URL || "http://localhost:
 
 /** Signs a merchant in through the real login form and waits for the dashboard. */
 export async function loginAsMerchant(page: Page): Promise<void> {
-  await page.goto("/en/login");
+  // Wait for hydration: a click before React attaches the submit handler is ignored (seen on WebKit).
+  await page.goto("/en/login", { waitUntil: "networkidle" });
   // Targeted by id: the password field also has a "Show password" toggle button
   // whose accessible name would otherwise collide with a label query.
   await page.locator("#login-email").fill(SEEDED_MERCHANT.email);

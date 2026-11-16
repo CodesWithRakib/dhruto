@@ -13,7 +13,12 @@ import { createServer, type Server, type Socket } from "node:net";
  * embedded behind a PDF/PNG header that passes our signature check. This
  * double flags it anywhere, purely to drive the INFECTED path in tests.
  */
-export type FakeClamdMode = "normal" | "down" | "garbage";
+/**
+ * normal: PING/VERSION ok, scans answered. down: every connection dropped.
+ * garbage: PING ok, scan replies unparseable. hang: PING ok, scans never
+ * answered. stale: like normal but VERSION reports a 10-day-old database.
+ */
+export type FakeClamdMode = "normal" | "down" | "garbage" | "hang" | "stale";
 
 export interface FakeClamd {
   port: number;
@@ -24,6 +29,13 @@ export interface FakeClamd {
 }
 
 const EICAR_MARKER = "EICAR-STANDARD-ANTIVIRUS-TEST-FILE";
+
+/** ctime-style UTC date as clamd prints it, e.g. "Sun Nov 15 09:24:02 2026". */
+function clamdDate(d: Date): string {
+  const [wd, , , , time] = d.toUTCString().replace(",", "").split(" ");
+  const month = d.toUTCString().split(" ")[2];
+  return `${wd} ${month} ${String(d.getUTCDate()).padStart(2, " ")} ${time} ${d.getUTCFullYear()}`;
+}
 
 export async function startFakeClamd(): Promise<FakeClamd> {
   let mode: FakeClamdMode = "normal";
@@ -45,7 +57,18 @@ export async function startFakeClamd(): Promise<FakeClamd> {
       if (!commandSeen) {
         const end = buffer.indexOf(0);
         if (end < 0) return;
-        if (buffer.subarray(0, end).toString("ascii") !== "zINSTREAM") {
+        const command = buffer.subarray(0, end).toString("ascii");
+        if (command === "zPING") {
+          socket.end("PONG\0");
+          return;
+        }
+        if (command === "zVERSION") {
+          // Real clamd shape: "ClamAV <engine>/<sigVersion>/<sigDate>".
+          const built = new Date(Date.now() - (mode === "stale" ? 10 * 86_400_000 : 3_600_000));
+          socket.end(`ClamAV 1.4.1/27458/${clamdDate(built)}\0`);
+          return;
+        }
+        if (command !== "zINSTREAM") {
           socket.end("UNKNOWN COMMAND\0");
           return;
         }
@@ -60,6 +83,7 @@ export async function startFakeClamd(): Promise<FakeClamd> {
             socket.end("???\0");
             return;
           }
+          if (mode === "hang") return; // never answers the scan (timeout path)
           const infected = Buffer.concat(payload).toString("latin1").includes(EICAR_MARKER);
           socket.end(infected ? "stream: Eicar-Test-Signature FOUND\0" : "stream: OK\0");
           return;

@@ -1,0 +1,55 @@
+# Dhruto communication platform — private ClamAV (clamd + freshclam) service.
+#
+# Reference deployment for staging/production hosts that run the API with
+# Docker. It is NOT applied automatically and contains no secrets.
+#
+#   docker compose -f deploy/clamav/docker-compose.clamav.yml up -d
+#
+# Security properties:
+#   - clamd listens only on the internal `dhruto-scan` network; NO host port is
+#     published, so it is unreachable from outside the host/network.
+#   - The API container must join `dhruto-scan` and set
+#       CHAT_CLAMAV_HOST=clamav  CHAT_CLAMAV_PORT=3310  CHAT_CLAMAV_TIMEOUT_MS=30000
+#   - freshclam (bundled in the image) updates signatures from the official
+#     mirror; outbound HTTPS to database.clamav.net must be allowed.
+#   - Signature freshness is monitored by the API (dhruto_chat_scanner_signature_age_seconds).
+services:
+  clamav:
+    image: clamav/clamav:1.4
+    container_name: dhruto-clamav
+    restart: unless-stopped
+    networks: [dhruto-scan]
+    # No `ports:` on purpose. Do not add one in production.
+    volumes:
+      - clamav_db:/var/lib/clamav
+      - ./clamd.conf:/etc/clamav/clamd.conf:ro
+    environment:
+      # freshclam checks per day (official image default is 12).
+      FRESHCLAM_CHECKS: "12"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      # First start downloads ~300 MB of signatures before clamd listens.
+      start_period: 300s
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  dhruto-scan:
+    name: dhruto-scan
+    internal: false # freshclam needs outbound HTTPS; no inbound ports are published
+
+volumes:
+  clamav_db:

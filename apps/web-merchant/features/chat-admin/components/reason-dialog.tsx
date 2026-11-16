@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import {
@@ -48,9 +48,25 @@ export function ReasonDialog({
   const id = useId();
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
+  // The dialog is opened programmatically (no DialogTrigger), so Radix has no
+  // element to return focus to. Remember the opener before Radix moves focus
+  // into the dialog (layout effects run before its focus effect) and restore
+  // it on close — keyboard and screen-reader users keep their place.
+  const opener = useRef<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    if (open && document.activeElement instanceof HTMLElement)
+      opener.current = document.activeElement;
+  }, [open]);
   useEffect(() => {
     if (!open) setValue("");
   }, [open]);
+  const restoreFocus = (event: Event) => {
+    const target = opener.current;
+    if (target && document.contains(target)) {
+      event.preventDefault();
+      target.focus();
+    }
+  };
 
   const trimmed = value.trim();
   const valid =
@@ -69,7 +85,7 @@ export function ReasonDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent onCloseAutoFocus={restoreFocus}>
         <form onSubmit={(event) => void submit(event)} className="space-y-4">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>

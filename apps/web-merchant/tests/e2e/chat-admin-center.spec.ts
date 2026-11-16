@@ -31,7 +31,8 @@ let merchantMessageId = "";
 const tokens: Record<string, string> = {};
 
 async function login(page: Page, email: string, landing: RegExp): Promise<void> {
-  await page.goto("/en/login");
+  // Wait for hydration: a click before React attaches the submit handler is ignored (seen on WebKit).
+  await page.goto("/en/login", { waitUntil: "networkidle" });
   await page.locator("#login-email").fill(email);
   await page.locator("#login-password").fill(PASSWORD);
   await page.getByRole("button", { name: /sign in to dashboard/i }).click();
@@ -297,7 +298,9 @@ test("9a. a file is invisible to participants until the real scanner clears it",
   await context.close();
 });
 
-test("9b. scanner outage fails closed; granted staff rescan after recovery; ordinary admin is denied", async ({
+// Phase 8: a clamd outage no longer consumes retry budgets — files stay
+// "security check in progress" (still blocked) and recover on their own.
+test("9b. scanner outage fails closed and recovers by itself; granted staff can inspect; ordinary admin is denied", async ({
   page,
   browser,
   request,
@@ -307,60 +310,50 @@ test("9b. scanner outage fails closed; granted staff rescan after recovery; ordi
   let id = "";
   try {
     id = await uploadAndSend(request, "invoice-outage.pdf", "%PDF-1.4\noutage invoice\n%%EOF\n");
-    await expect
-      .poll(
-        async () =>
-          (await api(request, "customer").get(`/chat/attachments/${id}/download`)).status(),
-        { timeout: 60_000 },
-      )
-      .toBe(409);
-    await expect
-      .poll(
-        async () => {
-          const body = await (
-            await api(request, "customer").get(`/chat/attachments/${id}/download`)
-          ).json();
-          return body.errorCode;
-        },
-        { timeout: 90_000, intervals: [2000] },
-      )
-      .toBe("CHAT_ATTACHMENT_BLOCKED");
+    // For 20 s (≈10 scan intervals) the file must never become available nor be marked FAILED.
+    const deadline = Date.now() + 20_000;
+    while (Date.now() < deadline) {
+      const res = await api(request, "customer").get(`/chat/attachments/${id}/download`);
+      expect(res.status()).toBe(409);
+      expect((await res.json()).errorCode).toBe("CHAT_ATTACHMENT_SCAN_PENDING");
+      await new Promise((r) => setTimeout(r, 2000));
+    }
 
     const context = await browser.newContext();
     const customer = await context.newPage();
     await login(customer, "customer@dhruto.com", /\/en\/customer/);
     await customer.goto(`/en/customer/messages/${conversationId}`);
-    await expect(customer.getByText("Blocked for security reasons").first()).toBeVisible({
+    await expect(customer.getByText("Security check in progress…").first()).toBeVisible({
       timeout: 30_000,
     });
     await context.close();
+
+    // Ordinary admin (no grant): no queue, no restricted download.
+    expect((await api(request, "admin2").get("/chat/admin/attachments")).status()).toBe(403);
+    expect(
+      (
+        await api(request, "admin2").get(
+          `/chat/admin/attachments/${id}/download?reason=${encodeURIComponent(REASON)}`,
+        )
+      ).status(),
+    ).toBe(404);
+
+    // Granted admin inspects the pending file in the scan queue and downloads it with a reason.
+    await login(page, "admin@dhruto.com", /\/en\/admin\/dashboard/);
+    await page.goto("/en/admin/communications?tab=attachments");
+    await page.getByLabel("Scan state").selectOption("PENDING");
+    const queue = page.getByRole("list", { name: "Attachments" });
+    await expect(queue.getByText("invoice-outage.pdf")).toBeVisible({ timeout: 15_000 });
+    const downloadPromise = page.waitForEvent("download");
+    await queue.getByRole("button", { name: "Download" }).first().click();
+    await page.getByRole("dialog").getByLabel("Reason").fill(REASON);
+    await page.getByRole("dialog").getByRole("button", { name: "Download" }).click();
+    expect((await downloadPromise).suggestedFilename()).toBe("invoice-outage.pdf");
   } finally {
     execSync(`docker unpause ${CLAMAV_CONTAINER}`);
   }
 
-  // Ordinary admin (no grant): no queue, no restricted download.
-  expect((await api(request, "admin2").get("/chat/admin/attachments")).status()).toBe(403);
-  expect(
-    (
-      await api(request, "admin2").get(
-        `/chat/admin/attachments/${id}/download?reason=${encodeURIComponent(REASON)}`,
-      )
-    ).status(),
-  ).toBe(404);
-
-  await login(page, "admin@dhruto.com", /\/en\/admin\/dashboard/);
-  await page.goto("/en/admin/communications?tab=attachments");
-  const queue = page.getByRole("list", { name: "Attachments" });
-  await expect(queue.getByText("invoice-outage.pdf")).toBeVisible({ timeout: 15_000 });
-  const downloadPromise = page.waitForEvent("download");
-  await queue.getByRole("button", { name: "Download" }).first().click();
-  await page.getByRole("dialog").getByLabel("Reason").fill(REASON);
-  await page.getByRole("dialog").getByRole("button", { name: "Download" }).click();
-  expect((await downloadPromise).suggestedFilename()).toBe("invoice-outage.pdf");
-
-  await queue.getByRole("button", { name: "Rescan" }).first().click();
-  await page.getByRole("dialog").getByLabel("Reason").fill("Scanner restored after outage");
-  await page.getByRole("dialog").getByRole("button", { name: "Rescan" }).click();
+  // Recovery without any staff action once clamd answers again.
   await expect
     .poll(
       async () => (await api(request, "customer").get(`/chat/attachments/${id}/download`)).status(),

@@ -12,7 +12,8 @@ export async function loginAsRider(
   page: Page,
   account: { email: string; password: string } = SEEDED_RIDER,
 ): Promise<void> {
-  await page.goto("/en/login");
+  // Wait for hydration: a click before React attaches the submit handler is ignored (seen on WebKit).
+  await page.goto("/en/login", { waitUntil: "networkidle" });
   await page.locator("#login-email").fill(account.email);
   await page.locator("#login-password").fill(account.password);
   await page.getByRole("button", { name: /sign in to dashboard/i }).click();

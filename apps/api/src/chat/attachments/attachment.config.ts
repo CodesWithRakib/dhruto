@@ -54,6 +54,8 @@ export interface ChatAttachmentTunables {
   scanLeaseSeconds: number;
   /** Retry backoff base (doubles per attempt, capped at 1 h). */
   scanRetryBaseSeconds: number;
+  /** Phase 8: parallel scans within one claimed batch (bounded 1–8). */
+  scanConcurrency: number;
   /* Phase 7 retention — null = retain indefinitely (no product decision configured) */
   deletedMessageObjectRetentionSeconds: number | null;
   quarantinedObjectRetentionSeconds: number | null;
@@ -98,6 +100,7 @@ export function loadChatAttachmentTunables(): ChatAttachmentTunables {
     scanMaxAttempts: envInt("CHAT_MALWARE_SCAN_MAX_ATTEMPTS", 5, 1),
     scanLeaseSeconds: envInt("CHAT_MALWARE_SCAN_LEASE_SECONDS", 300, 30),
     scanRetryBaseSeconds: envInt("CHAT_MALWARE_SCAN_RETRY_BASE_SECONDS", 30, 1),
+    scanConcurrency: Math.min(envInt("CHAT_MALWARE_SCAN_CONCURRENCY", 2, 1), 8),
     deletedMessageObjectRetentionSeconds: envOptionalSeconds(
       "CHAT_DELETED_MESSAGE_ATTACHMENT_RETENTION_SECONDS",
       86_400,

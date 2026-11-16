@@ -10,6 +10,7 @@ import { ChatStorageHolder } from "./chat-attachment.service.js";
 import {
   CHAT_MALWARE_SCANNER,
   ChatMalwareScannerHolder,
+  type MalwareScannerProbe,
   type MalwareScanVerdict,
 } from "./malware-scanner.port.js";
 import { CHAT_OBJECT_STORAGE } from "./object-storage.port.js";
@@ -30,7 +31,12 @@ export interface ScanRunResult {
   failed: number;
   /** True when no scanner is configured (nothing claimed; files stay pending). */
   scannerMissing: boolean;
+  /** Phase 8: scanner configured but unreachable — nothing claimed, files stay pending. */
+  scannerUnavailable?: boolean;
 }
+
+/** Probe results are reused briefly so status endpoints do not hammer clamd. */
+const PROBE_CACHE_MS = 10_000;
 
 /** Integrity failures are never retried and never releasable. */
 export const INTEGRITY_SCAN_ERRORS: readonly string[] = ["checksum_mismatch", "object_missing"];
@@ -64,6 +70,7 @@ export class ChatAttachmentScanService {
   private readonly logger = new Logger(ChatAttachmentScanService.name);
   private readonly tunables: ChatAttachmentTunables;
   private warnedMissing = false;
+  private probeCache: (MalwareScannerProbe & { checkedAt: Date }) | null = null;
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
@@ -77,6 +84,30 @@ export class ChatAttachmentScanService {
 
   get scannerEngine(): string | null {
     return this.scannerHolder.scanner?.engine ?? null;
+  }
+
+  /** Most recent probe result (null before the first probe or without a scanner). */
+  get lastProbe(): (MalwareScannerProbe & { checkedAt: Date }) | null {
+    return this.probeCache;
+  }
+
+  /** Probes the scanner (cached for `PROBE_CACHE_MS`). Unconfigured → unreachable. */
+  async probeScanner(maxAgeMs = PROBE_CACHE_MS): Promise<MalwareScannerProbe> {
+    const scanner = this.scannerHolder.scanner;
+    if (!scanner) {
+      return { reachable: false, engineVersion: null, signatureVersion: null, signatureDate: null };
+    }
+    if (this.probeCache && Date.now() - this.probeCache.checkedAt.getTime() < maxAgeMs) {
+      return this.probeCache;
+    }
+    const probe = await scanner.probe().catch(() => ({
+      reachable: false,
+      engineVersion: null,
+      signatureVersion: null,
+      signatureDate: null,
+    }));
+    this.probeCache = { ...probe, checkedAt: new Date() };
+    return probe;
   }
 
   async runOnce(now: Date = new Date()): Promise<ScanRunResult> {
@@ -102,6 +133,18 @@ export class ChatAttachmentScanService {
     }
     this.metrics.increment("scanRuns");
 
+    // Phase 8: never claim (and so never consume per-file retry budgets) while
+    // clamd is unreachable. Files stay PENDING — still blocked — and recover
+    // automatically once the scanner is back, instead of all turning FAILED
+    // during an outage or a clamd restart.
+    const probe = await this.probeScanner(0); // always fresh for the job itself
+    if (!probe.reachable) {
+      result.scannerUnavailable = true;
+      this.metrics.increment("scanSkippedUnavailable");
+      this.logger.warn("chat.attachment.scan_skipped reason=scanner_unreachable");
+      return result;
+    }
+
     const lease = new Date(now.getTime() + this.tunables.scanLeaseSeconds * 1000);
     const raw: unknown[] = await this.dataSource.query(
       `UPDATE "chat_attachments" a
@@ -121,10 +164,21 @@ export class ChatAttachmentScanService {
     const rows = (Array.isArray(raw[0]) ? raw[0] : raw) as ClaimedRow[];
     result.claimed = rows.length;
 
-    for (const row of rows) {
-      const outcome = await this.scanOne(row, now);
-      result[outcome] += 1;
-    }
+    // Bounded parallelism within one claimed batch (backlog throughput);
+    // batches themselves stay sequential (job scheduler concurrency 1).
+    let next = 0;
+    const worker = async (): Promise<void> => {
+      while (next < rows.length) {
+        const row = rows[next];
+        next += 1;
+        if (!row) continue;
+        const outcome = await this.scanOne(row, now);
+        result[outcome] += 1;
+      }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(this.tunables.scanConcurrency, rows.length) }, worker),
+    );
     if (rows.length > 0) {
       this.logger.log(
         `chat.attachment.scan claimed=${result.claimed} clean=${result.clean} infected=${result.infected} retried=${result.retried} failed=${result.failed}`,

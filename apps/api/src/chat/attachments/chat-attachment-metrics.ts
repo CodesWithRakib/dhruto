@@ -19,7 +19,9 @@ export type ChatAttachmentCounter =
   | "scanRuns"
   | "downloadScanPending"
   | "downloadBlocked"
-  | "retentionPurged";
+  | "retentionPurged"
+  // Phase 8
+  | "scanSkippedUnavailable";
 
 /**
  * Per-instance attachment counters (same model as the Phase 3 realtime

@@ -31,10 +31,17 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     const redisConf = this.configService.get<RedisConfig>("redis");
     try {
+      // Phase 8: bound every command. Without a command timeout a HUNG Redis
+      // (network partition, paused node — TCP stays open) never errors, so the
+      // in-memory fallbacks below never engage and every request that touches
+      // the cache (e.g. the per-user rate limiter on all chat routes) hangs.
+      // Verified: chat REST requests blocked > 60 s with Redis paused.
+      const commandTimeout = 500;
       const redisOptions = redisConf?.url
         ? {
             lazyConnect: true,
             connectTimeout: 1500,
+            commandTimeout,
             maxRetriesPerRequest: 1,
             retryStrategy: () => null, // Do not spam retries if redis is not running
           }
@@ -43,6 +50,7 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
             port: redisConf?.port || 6379,
             lazyConnect: true,
             connectTimeout: 1500,
+            commandTimeout,
             maxRetriesPerRequest: 1,
             retryStrategy: () => null,
           };

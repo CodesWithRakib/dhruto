@@ -14,10 +14,27 @@ import { loginAsRider } from "./helpers/rider";
 
 test.skip(!process.env.CHAT_E2E, "Requires the isolated Phase 6 stack (CHAT_E2E=1)");
 test.describe.configure({ mode: "serial" });
+// Phase 8: browser-aware media setup so the suite also runs on Firefox/WebKit
+// (Chromium fake-device flags and the "microphone" grant are Chromium-only;
+// Firefox gets fake streams via prefs in playwright.crossbrowser.config.ts).
+const CHROMIUM_FAKE_MEDIA = [
+  "--use-fake-ui-for-media-stream",
+  "--use-fake-device-for-media-stream",
+];
 test.use({
-  launchOptions: { args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] },
-  permissions: ["microphone"],
+  launchOptions: [
+    async ({ browserName, launchOptions }, provide) =>
+      provide(
+        browserName === "chromium"
+          ? { ...launchOptions, args: [...(launchOptions.args ?? []), ...CHROMIUM_FAKE_MEDIA] }
+          : launchOptions,
+      ),
+    { scope: "worker" },
+  ],
+  permissions: async ({ browserName }, provide) =>
+    provide(browserName === "chromium" ? ["microphone"] : []),
 });
+const micPermissions = (browserName: string) => (browserName === "chromium" ? ["microphone"] : []);
 
 const PARCEL_ID = process.env.CHAT_E2E_PARCEL_ID ?? "";
 
@@ -42,7 +59,9 @@ async function waitForSendEnabled(page: Page) {
 }
 
 async function riderPage(browser: Browser): Promise<Page> {
-  const context = await browser.newContext({ permissions: ["microphone"] });
+  const context = await browser.newContext({
+    permissions: micPermissions(browser.browserType().name()),
+  });
   const page = await context.newPage();
   await loginAsRider(page);
   return page;
@@ -57,7 +76,9 @@ test("merchant opens the parcel conversation and sends an image", async ({ page 
   conversationUrlPath = new URL(page.url()).pathname;
   conversationId = conversationUrlPath.split("/").pop() ?? "";
 
-  await (await composerFiles(page)).setInputFiles({ name: "package-photo.png", mimeType: "image/png", buffer: PNG });
+  await (
+    await composerFiles(page)
+  ).setInputFiles({ name: "package-photo.png", mimeType: "image/png", buffer: PNG });
   await expect(page.getByText("package-photo.png")).toBeVisible();
   await waitForSendEnabled(page);
   await page.getByLabel("Message", { exact: true }).fill("Package photo");
@@ -65,7 +86,9 @@ test("merchant opens the parcel conversation and sends an image", async ({ page 
 
   const image = page.getByRole("log").getByAltText("package-photo.png");
   await expect(image).toBeVisible({ timeout: 30_000 });
-  await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 30_000 }).toBeGreaterThan(0);
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 30_000 })
+    .toBeGreaterThan(0);
   await expect(page.getByRole("log").getByText("Package photo")).toBeVisible();
 });
 
@@ -82,7 +105,9 @@ test("the image opens in a preview", async ({ page }) => {
 test("a PDF uploads, sends and downloads", async ({ page }) => {
   await loginAsMerchant(page);
   await page.goto(conversationUrlPath);
-  await (await composerFiles(page)).setInputFiles({ name: "invoice.pdf", mimeType: "application/pdf", buffer: PDF });
+  await (
+    await composerFiles(page)
+  ).setInputFiles({ name: "invoice.pdf", mimeType: "application/pdf", buffer: PDF });
   await waitForSendEnabled(page);
   await page.getByRole("button", { name: "Send message" }).click();
   const card = page.getByRole("log").getByText("invoice.pdf");
@@ -94,7 +119,14 @@ test("a PDF uploads, sends and downloads", async ({ page }) => {
   expect(page.url()).toContain(conversationUrlPath); // never navigated away
 });
 
-test("a voice message records (fake microphone), uploads and plays", async ({ page }) => {
+let voiceSent = false;
+
+test("a voice message records (fake microphone), uploads and plays", async ({
+  page,
+  browserName,
+}) => {
+  // WebKit has no headless fake microphone; voice capture is verified on Chromium and Firefox.
+  test.skip(browserName === "webkit", "No fake microphone available in headless WebKit");
   await loginAsMerchant(page);
   await page.goto(conversationUrlPath);
   await page.getByRole("button", { name: "Record a voice message" }).click();
@@ -102,27 +134,37 @@ test("a voice message records (fake microphone), uploads and plays", async ({ pa
   await page.waitForTimeout(1500);
   await page.getByRole("button", { name: "Stop and send" }).click();
   await expect(page.getByRole("log").locator("audio").first()).toBeVisible({ timeout: 30_000 });
+  voiceSent = true;
 });
 
-test("another authorized participant (the assigned rider) sees all attachments", async ({ browser }) => {
+test("another authorized participant (the assigned rider) sees all attachments", async ({
+  browser,
+}) => {
   const rider = await riderPage(browser);
   await rider.goto(`/en/rider/messages/${conversationId}`);
   const log = rider.getByRole("log");
   const image = log.getByAltText("package-photo.png");
   await expect(image).toBeVisible({ timeout: 30_000 });
-  await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 30_000 }).toBeGreaterThan(0);
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 30_000 })
+    .toBeGreaterThan(0);
   await expect(log.getByText("invoice.pdf")).toBeVisible();
-  await expect(log.locator("audio").first()).toBeVisible();
+  if (voiceSent) await expect(log.locator("audio").first()).toBeVisible();
   await rider.context().close();
 });
 
 test("an unauthorized user cannot retrieve the attachment", async ({ page, request }) => {
   await loginAsMerchant(page);
   const token = await readAccessToken(page);
-  const history = await request.get(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const items = ((await history.json()).data.items ?? []) as Array<{ attachments: Array<{ id: string; kind: string }> }>;
+  const history = await request.get(
+    `${API_BASE_URL}/chat/conversations/${conversationId}/messages`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  const items = ((await history.json()).data.items ?? []) as Array<{
+    attachments: Array<{ id: string; kind: string }>;
+  }>;
   const imageId = items.flatMap((m) => m.attachments).find((a) => a.kind === "image")?.id;
   expect(imageId).toBeTruthy();
 
@@ -148,7 +190,10 @@ test("an unauthorized user cannot retrieve the attachment", async ({ page, reque
   expect(anonymous.status()).toBe(401);
 });
 
-test("reload and reconnect preserve history; text-only messaging still works in realtime", async ({ page, browser }) => {
+test("reload and reconnect preserve history; text-only messaging still works in realtime", async ({
+  page,
+  browser,
+}) => {
   await loginAsMerchant(page);
   await page.goto(conversationUrlPath);
   await page.reload();
@@ -163,7 +208,9 @@ test("reload and reconnect preserve history; text-only messaging still works in 
   // Realtime: merchant text appears for the rider without a reload.
   await page.getByLabel("Message", { exact: true }).fill("Text still works");
   await page.getByRole("button", { name: "Send message" }).click();
-  await expect(rider.getByRole("log").getByText("Text still works")).toBeVisible({ timeout: 20_000 });
+  await expect(rider.getByRole("log").getByText("Text still works")).toBeVisible({
+    timeout: 20_000,
+  });
 
   // Reconnect: messages sent while the rider is offline arrive after recovery.
   await rider.context().setOffline(true);
@@ -171,6 +218,8 @@ test("reload and reconnect preserve history; text-only messaging still works in 
   await page.getByRole("button", { name: "Send message" }).click();
   await expect(log.getByText("Sent while you were offline")).toBeVisible();
   await rider.context().setOffline(false);
-  await expect(rider.getByRole("log").getByText("Sent while you were offline")).toBeVisible({ timeout: 45_000 });
+  await expect(rider.getByRole("log").getByText("Sent while you were offline")).toBeVisible({
+    timeout: 45_000,
+  });
   await rider.context().close();
 });
