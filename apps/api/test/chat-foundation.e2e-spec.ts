@@ -43,6 +43,8 @@ const CHAT_TABLES = [
   "chat_reports",
   "chat_internal_notes",
   "chat_audit_logs",
+  // Phase 7
+  "chat_staff_grants",
 ];
 
 describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundation", () => {
@@ -151,7 +153,7 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
 
     it("registers all chat entities in ChatModule and the entity barrel", () => {
       const all = allEntityClasses();
-      expect(CHAT_ENTITIES).toHaveLength(10);
+      expect(CHAT_ENTITIES).toHaveLength(11);
       for (const entity of CHAT_ENTITIES) expect(all).toContain(entity);
     });
 
@@ -607,7 +609,8 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
     it("removes only chat objects, preserves existing data, and can be re-applied", async () => {
       const [{ count: usersBefore }] = await ds.query(`SELECT count(*)::int AS count FROM "users"`);
 
-      // Revert Phase 2 (indexes) then Phase 1 (tables), newest first.
+      // Revert Phase 7, Phase 2 (indexes) then Phase 1 (tables), newest first.
+      await ds.undoLastMigration({ transaction: "each" });
       await ds.undoLastMigration({ transaction: "each" });
       await ds.undoLastMigration({ transaction: "each" });
 
@@ -636,6 +639,7 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
       expect(reapplied.map((m) => m.name)).toEqual([
         "CommunicationPhase1Foundation1700000000010",
         "CommunicationPhase2Backend1700000000011",
+        "CommunicationPhase7AdminCenter1700000000012",
       ]);
     });
   });

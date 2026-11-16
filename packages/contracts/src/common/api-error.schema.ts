@@ -128,6 +128,12 @@ export const ApiErrorCode = {
   CHAT_CURSOR_INVALID: "CHAT_CURSOR_INVALID",
   CHAT_NOTE_NOT_FOUND: "CHAT_NOTE_NOT_FOUND",
   CHAT_REPORT_NOT_FOUND: "CHAT_REPORT_NOT_FOUND",
+  /** Phase 7: the attachment has not passed the malware scan yet (caller is authorized). */
+  CHAT_ATTACHMENT_SCAN_PENDING: "CHAT_ATTACHMENT_SCAN_PENDING",
+  /** Phase 7: the attachment is blocked (scan detected malware or could not complete). */
+  CHAT_ATTACHMENT_BLOCKED: "CHAT_ATTACHMENT_BLOCKED",
+  /** Phase 7: invalid escalation state change. */
+  CHAT_ESCALATION_INVALID: "CHAT_ESCALATION_INVALID",
 } as const;
 
 export type ApiErrorCodeValue = (typeof ApiErrorCode)[keyof typeof ApiErrorCode];

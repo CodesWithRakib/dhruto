@@ -1383,7 +1383,8 @@
     "exceptions": "ব্যতিক্রম / ইস্যু",
     "settings": "সেটিংস",
     "faq": "সহায়তা",
-    "status": "সিস্টেম স্ট্যাটাস"
+    "status": "সিস্টেম স্ট্যাটাস",
+    "communications": "কমিউনিকেশন সেন্টার"
   },
   "Footer": {
     "tagline": "Next-Gen Logistics & Courier OS",
@@ -2607,7 +2608,10 @@
       "voiceLabel": "ভয়েস মেসেজ, {duration}",
       "pdf": "PDF",
       "download": "{name} ডাউনলোড করুন",
-      "downloadShort": "ডাউনলোড"
+      "downloadShort": "ডাউনলোড",
+      "scanPending": "নিরাপত্তা যাচাই চলছে…",
+      "blocked": "নিরাপত্তার কারণে ব্লক করা",
+      "unavailable": "সংযুক্তি পাওয়া যাচ্ছে না"
     },
     "voice": {
       "record": "ভয়েস মেসেজ রেকর্ড করুন",
@@ -2806,7 +2810,10 @@
       "editWindow": "এই বার্তাটি আর সম্পাদনা করা যাবে না।",
       "notEditable": "এই বার্তাটি সম্পাদনা করা যায় না।",
       "duplicateReport": "আপনি ইতিমধ্যে এই বার্তাটি রিপোর্ট করেছেন।",
-      "generic": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।"
+      "generic": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+      "attachmentScanPending": "ফাইলটির নিরাপত্তা যাচাই এখনো চলছে।",
+      "attachmentBlocked": "নিরাপত্তার কারণে ফাইলটি ব্লক করা হয়েছে।",
+      "escalationInvalid": "এই মুহূর্তে এই এস্কেলেশন পরিবর্তন অনুমোদিত নয়।"
     }
   },
   "Calculator": {
@@ -2900,5 +2907,245 @@
     "registeredAccount": "নিবন্ধিত মার্চেন্ট অ্যাকাউন্ট",
     "activeStatus": "সক্রিয়",
     "refresh": "রিফ্রেশ"
+  },
+  "ChatAdmin": {
+    "loading": "লোড হচ্ছে…",
+    "retry": "আবার চেষ্টা করুন",
+    "cancel": "বাতিল",
+    "loadMore": "আরও দেখুন",
+    "title": "কমিউনিকেশন সেন্টার",
+    "subtitle": "অপারেশনাল ইনবক্স, এস্কেলেশন, রিপোর্ট ও সংযুক্তির নিরাপত্তা। প্রতিটি কনটেন্ট দেখার কারণ লিখতে হয় এবং অডিট হয়।",
+    "tabsLabel": "কমিউনিকেশন সেন্টারের অংশসমূহ",
+    "tabs": {
+      "overview": "সারসংক্ষেপ",
+      "inbox": "ইনবক্স",
+      "escalations": "এস্কেলেশন",
+      "reports": "রিপোর্ট",
+      "attachments": "সংযুক্তির নিরাপত্তা",
+      "audit": "অডিট"
+    },
+    "errors": {
+      "loadFailed": "তথ্য লোড করা যায়নি।"
+    },
+    "unauthorized": {
+      "title": "আপনার প্রবেশাধিকার নেই",
+      "description": "এই পৃষ্ঠার জন্য প্রয়োজনীয় কমিউনিকেশন স্টাফ অনুমতি আপনার অ্যাকাউন্টে নেই।"
+    },
+    "reason": {
+      "label": "কারণ",
+      "hint": "আবশ্যক, কমপক্ষে {min} অক্ষর। অডিট লগে সংরক্ষিত হবে।",
+      "optionalHint": "ঐচ্ছিক। দিলে কমপক্ষে {min} অক্ষর।"
+    },
+    "overview": {
+      "heading": "মূল পরিসংখ্যান",
+      "total": "কথোপকথন",
+      "active": "{count}টি সক্রিয়",
+      "needsAttention": "মনোযোগ প্রয়োজন",
+      "escalations": "সক্রিয় এস্কেলেশন",
+      "escalationBreakdown": "{open} খোলা · {review} পর্যালোচনায় · {escalated} এস্কেলেটেড",
+      "reports": "খোলা রিপোর্ট",
+      "reportBreakdown": "{open} খোলা · {review} পর্যালোচনায়",
+      "assignedToMe": "আমার দায়িত্বে",
+      "myUnread": "আমার অপঠিত কথোপকথন",
+      "interventions": "হস্তক্ষেপ (৭ দিন)",
+      "attachments": "ব্লক করা সংযুক্তি",
+      "scanPending": "{count}টি নিরাপত্তা স্ক্যানের অপেক্ষায়",
+      "volume": "প্রতিদিন নতুন কথোপকথন (১৪ দিন, UTC)",
+      "generatedAt": "হালনাগাদ {time}"
+    },
+    "inbox": {
+      "filters": "ইনবক্স ফিল্টার",
+      "search": "অনুসন্ধান",
+      "searchPlaceholder": "ট্র্যাকিং কোড, কথোপকথন বা রিপোর্ট আইডি",
+      "searchSubmit": "অনুসন্ধান",
+      "type": "ধরন",
+      "any": "যেকোনো",
+      "status": "অবস্থা",
+      "escalation": "এস্কেলেশন",
+      "escalationActive": "যেকোনো সক্রিয়",
+      "escalationNone": "এস্কেলেট করা হয়নি",
+      "flags": "চিহ্ন",
+      "hasOpenReports": "খোলা রিপোর্ট আছে",
+      "assignedToMe": "আমার দায়িত্বে",
+      "empty": "কোনো কথোপকথন মেলেনি",
+      "emptyHint": "অনুসন্ধান শুধু সঠিক আইডি মেলায়। ফিল্টার মুছে দেখুন।",
+      "results": "কথোপকথন",
+      "mine": "আমার",
+      "reportCount": "{count, plural, one {#টি রিপোর্ট} other {#টি রিপোর্ট}}"
+    },
+    "conversationStatus": {
+      "ACTIVE": "সক্রিয়",
+      "ARCHIVED": "আর্কাইভ",
+      "CLOSED": "বন্ধ",
+      "LOCKED": "লক করা"
+    },
+    "escalationStatus": {
+      "OPEN": "খোলা",
+      "IN_REVIEW": "পর্যালোচনায়",
+      "ESCALATED": "এস্কেলেটেড",
+      "RESOLVED": "সমাধান হয়েছে",
+      "CLOSED": "বন্ধ"
+    },
+    "reportStatus": {
+      "OPEN": "খোলা",
+      "UNDER_REVIEW": "পর্যালোচনায়",
+      "RESOLVED": "সমাধান হয়েছে",
+      "DISMISSED": "খারিজ"
+    },
+    "reportReason": {
+      "SPAM": "স্প্যাম",
+      "ABUSE": "অপব্যবহার",
+      "FRAUD": "প্রতারণা",
+      "PRIVACY_VIOLATION": "গোপনীয়তা লঙ্ঘন",
+      "INAPPROPRIATE_CONTENT": "অনুপযুক্ত কনটেন্ট",
+      "OTHER": "অন্যান্য"
+    },
+    "reports": {
+      "updated": "রিপোর্ট হালনাগাদ হয়েছে",
+      "status": "অবস্থা",
+      "empty": "কোনো রিপোর্ট নেই",
+      "results": "রিপোর্ট",
+      "resolution": "সিদ্ধান্ত: {note}",
+      "open": "কথোপকথন খুলুন",
+      "startReview": "পর্যালোচনা শুরু",
+      "resolve": "সমাধান",
+      "dismiss": "খারিজ",
+      "dismissTitle": "রিপোর্ট খারিজ",
+      "resolveTitle": "রিপোর্ট সমাধান",
+      "noteDescription": "সিদ্ধান্তের ব্যাখ্যা দিন। নোটটি রিপোর্টের সাথে সংরক্ষিত ও অডিট হবে।"
+    },
+    "scanStatus": {
+      "PENDING": "স্ক্যান বাকি",
+      "CLEAN": "নিরাপদ",
+      "INFECTED": "ম্যালওয়্যার শনাক্ত",
+      "FAILED": "স্ক্যান ব্যর্থ (ব্লক)"
+    },
+    "attachments": {
+      "decided": "সিদ্ধান্ত সংরক্ষিত",
+      "results": "সংযুক্তি",
+      "messageDeleted": "বার্তা মুছে ফেলা",
+      "purged": "ফাইল মুছে ফেলা",
+      "threat": "হুমকি: {name}",
+      "scanError": "ত্রুটি: {code}",
+      "download": "ডাউনলোড",
+      "release": "ছাড় দিন",
+      "rescan": "পুনরায় স্ক্যান",
+      "downloadTitle": "সীমাবদ্ধ ফাইল ডাউনলোড",
+      "releaseTitle": "সংযুক্তি ছাড় দিন",
+      "rescanTitle": "নতুন স্ক্যানের অনুরোধ",
+      "downloadWarning": "ফাইলটি স্ক্যান না হওয়া বা ক্ষতিকর হতে পারে। এটি কাঁচা ডেটা হিসেবে ডাউনলোড হবে, ব্রাউজারে খুলবে না। আপনার প্রবেশ অডিট হবে।",
+      "decisionDescription": "এই সিদ্ধান্ত আপনার কারণসহ অডিট লগে সংরক্ষিত হবে।",
+      "restrictedTitle": "সীমাবদ্ধ এলাকা",
+      "restrictedDescription": "কোয়ারেন্টাইন করা সংযুক্তি পর্যালোচনার জন্য অপারেটরের দেওয়া সুনির্দিষ্ট অনুমতি প্রয়োজন।",
+      "queueTitle": "কোয়ারেন্টাইন ও স্ক্যান সারি",
+      "scanFilter": "স্ক্যানের অবস্থা",
+      "blockedOnly": "ব্লক করা (ম্যালওয়্যার বা ব্যর্থ)",
+      "queueEmpty": "এই সারিতে কিছু নেই"
+    },
+    "retention": {
+      "indefinite": "অনির্দিষ্টকাল সংরক্ষিত (কোনো নীতি নির্ধারিত নেই)",
+      "days": "{count, plural, one {# দিন} other {# দিন}}",
+      "hours": "{count, plural, one {# ঘণ্টা} other {# ঘণ্টা}}",
+      "seconds": "{count} সেকেন্ড",
+      "title": "সংযুক্তি সংরক্ষণ নীতি",
+      "scannerOn": "ম্যালওয়্যার স্ক্যানার: {engine}",
+      "scannerOff": "কোনো ম্যালওয়্যার স্ক্যানার কনফিগার করা নেই — কনফিগার না হওয়া পর্যন্ত সংযুক্তি ব্লক থাকবে।",
+      "category": "শ্রেণি",
+      "period": "সংরক্ষণকাল",
+      "eligible": "এখন যোগ্য",
+      "categories": {
+        "expired_pending": "অসম্পূর্ণ আপলোড",
+        "unsent": "আপলোড হয়েছে কিন্তু পাঠানো হয়নি",
+        "rejected": "প্রত্যাখ্যাত আপলোড",
+        "orphan_objects": "অনাথ স্টোরেজ অবজেক্ট",
+        "deleted_message_objects": "মুছে ফেলা বার্তার ফাইল",
+        "quarantined_objects": "কোয়ারেন্টাইন করা ফাইল"
+      },
+      "evidenceHold": "বার্তায় খোলা রিপোর্ট বা কথোপকথনে সক্রিয় এস্কেলেশন থাকলে ফাইল কখনো মোছা হয় না। সংযুক্তির রেকর্ড ও অডিট ইতিহাস রাখা হয়।"
+    },
+    "audit": {
+      "action": "কাজ",
+      "empty": "কোনো অডিট রেকর্ড নেই",
+      "results": "অডিট রেকর্ড",
+      "actor": "{role} দ্বারা",
+      "system": "সিস্টেম",
+      "reason": "কারণ: {reason}"
+    },
+    "auditAction": {
+      "CONVERSATION_CREATED": "কথোপকথন তৈরি",
+      "CONVERSATION_STATUS_CHANGED": "কথোপকথনের অবস্থা পরিবর্তন",
+      "PARTICIPANT_ADDED": "অংশগ্রহণকারী যুক্ত",
+      "PARTICIPANT_REMOVED": "অংশগ্রহণকারী সরানো হয়েছে",
+      "PARTICIPANT_ROLE_CHANGED": "অংশগ্রহণকারীর ভূমিকা পরিবর্তন",
+      "ADMIN_CONVERSATION_VIEWED": "স্টাফ কথোপকথন দেখেছেন",
+      "ADMIN_INTERVENTION": "স্টাফ হস্তক্ষেপ",
+      "MESSAGE_REMOVED_BY_MODERATOR": "মডারেটর বার্তা সরিয়েছেন",
+      "MESSAGE_PINNED": "বার্তা পিন করা হয়েছে",
+      "MESSAGE_UNPINNED": "বার্তার পিন সরানো হয়েছে",
+      "REPORT_RESOLVED": "রিপোর্টের সিদ্ধান্ত",
+      "INTERNAL_NOTE_CREATED": "অভ্যন্তরীণ নোট তৈরি",
+      "INTERNAL_NOTE_DELETED": "অভ্যন্তরীণ নোট মুছে ফেলা হয়েছে",
+      "ATTACHMENT_REJECTED": "সংযুক্তি প্রত্যাখ্যাত",
+      "ADMIN_CONVERSATIONS_LISTED": "স্টাফ কথোপকথনের তালিকা দেখেছেন",
+      "ADMIN_CONVERSATION_EXPORTED": "স্টাফ ইতিহাস রপ্তানি করেছেন",
+      "AUDIT_LOG_VIEWED": "অডিট লগ দেখা হয়েছে",
+      "INTERNAL_NOTE_VIEWED": "অভ্যন্তরীণ নোট দেখা হয়েছে",
+      "REPORT_REVIEW_STARTED": "রিপোর্ট পর্যালোচনা শুরু",
+      "ESCALATION_CHANGED": "এস্কেলেশন পরিবর্তন",
+      "ATTACHMENT_QUARANTINED": "সংযুক্তি কোয়ারেন্টাইনে",
+      "ATTACHMENT_RELEASED": "সংযুক্তি ছাড় দেওয়া হয়েছে",
+      "ATTACHMENT_RESCAN_REQUESTED": "সংযুক্তি পুনরায় স্ক্যানের অনুরোধ",
+      "ATTACHMENT_RESTRICTED_ACCESSED": "সীমাবদ্ধ সংযুক্তিতে প্রবেশ",
+      "ATTACHMENT_OBJECT_PURGED": "সংযুক্তি ফাইল মুছে ফেলা হয়েছে (সংরক্ষণ নীতি)",
+      "STAFF_GRANT_CHANGED": "স্টাফ অনুমতি পরিবর্তন"
+    },
+    "escalation": {
+      "updated": "এস্কেলেশন হালনাগাদ হয়েছে",
+      "title": "এস্কেলেশন",
+      "none": "এস্কেলেট করা হয়নি",
+      "assignee": "দায়িত্বে: {name}",
+      "takeReview": "পর্যালোচনায় নিন",
+      "to": {
+        "OPEN": "মনোযোগের জন্য চিহ্নিত করুন",
+        "IN_REVIEW": "পর্যালোচনায় নিন",
+        "ESCALATED": "এস্কেলেট করুন",
+        "RESOLVED": "সমাধান করুন",
+        "CLOSED": "বন্ধ করুন"
+      },
+      "history": "ইতিহাস ({count})",
+      "noteDescription": "কারণ বা সমাধান লিখুন। এটি স্টাফরা দেখতে পাবেন ও অডিট হবে; অংশগ্রহণকারীরা কখনো দেখবেন না।",
+      "confirm": "সংরক্ষণ"
+    },
+    "notes": {
+      "title": "অভ্যন্তরীণ নোট",
+      "privacy": "শুধু অনুমোদিত স্টাফ দেখতে পাবেন। গ্রাহক, মার্চেন্ট, রাইডার বা হাব ম্যানেজারকে কখনো দেখানো হয় না।",
+      "add": "নোট যোগ করুন",
+      "placeholder": "অভ্যন্তরীণ নোট লিখুন…",
+      "empty": "এখনো কোনো অভ্যন্তরীণ নোট নেই।"
+    },
+    "workspace": {
+      "history": "বার্তার ইতিহাস (অডিট করা)",
+      "loadOlder": "পুরোনো বার্তা দেখুন",
+      "noMessages": "এখনো কোনো বার্তা নেই।",
+      "formerParticipant": "সাবেক অংশগ্রহণকারী",
+      "remove": "বার্তা সরান",
+      "removeTitle": "বার্তা সরান",
+      "removeDescription": "বার্তাটি অংশগ্রহণকারীদের কাছ থেকে লুকানো হবে; মডারেশনের প্রমাণ হিসেবে কনটেন্ট সংরক্ষিত থাকবে।",
+      "removed": "বার্তা সরানো হয়েছে",
+      "back": "ইনবক্সে ফিরুন",
+      "gateTitle": "স্টাফ হিসেবে কথোপকথন খুলুন",
+      "gateDescription": "আপনি এমন একটি কথোপকথন পড়তে যাচ্ছেন যাতে আপনি হয়তো অংশগ্রহণকারী নন। কেসের কারণ লিখুন; প্রতিটি পড়ার সাথে এটি অডিট লগে সংরক্ষিত হবে।",
+      "gateConfirm": "কথোপকথন খুলুন",
+      "notFound": "কথোপকথন পাওয়া যায়নি বা প্রবেশযোগ্য নয়।",
+      "created": "তৈরি {time}",
+      "openMessenger": "মেসেঞ্জারে খুলুন",
+      "intervene": "স্টাফ হিসেবে যোগ দিন",
+      "attachments": "সংযুক্তি ও স্ক্যানের অবস্থা",
+      "noAttachments": "কোনো সংযুক্তি নেই।",
+      "reports": "রিপোর্ট",
+      "participants": "অংশগ্রহণকারী ({count})",
+      "audit": "অডিট ট্রেইল",
+      "joined": "আপনি কথোপকথনে যোগ দিয়েছেন। অংশগ্রহণকারীদের জানানো হয়েছে।"
+    }
   }
 }

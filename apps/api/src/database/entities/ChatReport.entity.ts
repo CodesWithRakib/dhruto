@@ -15,6 +15,7 @@ import { User } from "./User.entity.js";
   where: `"message_id" IS NOT NULL`,
 })
 @Index("IDX_chat_reports_status_created", ["status", "createdAt"])
+@Index("IDX_chat_reports_conversation_status", ["conversationId", "status"])
 @Check(
   "CHK_chat_reports_review",
   `"status" IN ('OPEN', 'UNDER_REVIEW') OR ("reviewed_by_user_id" IS NOT NULL AND "reviewed_at" IS NOT NULL)`,

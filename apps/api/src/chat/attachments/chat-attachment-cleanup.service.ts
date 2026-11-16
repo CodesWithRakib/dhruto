@@ -1,7 +1,9 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource, In } from "typeorm";
+import { CHAT_ESCALATION_ACTIVE_STATUSES, ChatAuditAction } from "@dhruto/contracts";
 import { ChatAttachment } from "../../database/entities/index.js";
+import { ChatAuditService } from "../services/chat-audit.service.js";
 import {
   CHAT_STORAGE_KEY_PREFIX,
   loadChatAttachmentTunables,
@@ -11,13 +13,48 @@ import { ChatAttachmentMetrics } from "./chat-attachment-metrics.js";
 import { ChatStorageHolder } from "./chat-attachment.service.js";
 import { CHAT_OBJECT_STORAGE } from "./object-storage.port.js";
 
+interface PurgedRow {
+  id: string;
+  conversation_id: string;
+  storage_key: string;
+}
+
 export interface CleanupResult {
   expiredPending: number;
   unsent: number;
   rejected: number;
   orphanObjects: number;
+  /** Phase 7 retention: objects of deleted messages purged (rows kept). */
+  deletedMessageObjects: number;
+  /** Phase 7 retention: quarantined (INFECTED/FAILED) objects purged (rows kept). */
+  quarantinedObjects: number;
   storageErrors: number;
 }
+
+export type RetentionCategory = "deleted_message_objects" | "quarantined_objects";
+
+const ACTIVE_ESCALATIONS = `(${CHAT_ESCALATION_ACTIVE_STATUSES.map((s) => `'${s}'`).join(", ")})`;
+
+/**
+ * Evidence hold (Phase 7): an object is never purged while its message has
+ * an OPEN/UNDER_REVIEW report or its conversation has an active escalation.
+ */
+const EVIDENCE_HOLD = `
+  NOT EXISTS (SELECT 1 FROM "chat_reports" r
+               WHERE r."message_id" = a."message_id" AND r."status" IN ('OPEN', 'UNDER_REVIEW'))
+  AND NOT EXISTS (SELECT 1 FROM "chat_conversations" c
+                   WHERE c."id" = a."conversation_id" AND c."escalation_status" IN ${ACTIVE_ESCALATIONS})`;
+
+/** Row predicates (alias a) per Phase 7 retention category; $1 is the cutoff. */
+export const RETENTION_PREDICATES: Readonly<Record<RetentionCategory, string>> = {
+  deleted_message_objects: `a."object_purged_at" IS NULL AND a."message_id" IS NOT NULL
+    AND EXISTS (SELECT 1 FROM "chat_messages" m
+                 WHERE m."id" = a."message_id" AND m."deleted_at" IS NOT NULL AND m."deleted_at" < $1)
+    AND ${EVIDENCE_HOLD}`,
+  quarantined_objects: `a."object_purged_at" IS NULL AND a."message_id" IS NOT NULL
+    AND a."scan_status" IN ('INFECTED', 'FAILED') AND a."quarantined_at" < $1
+    AND ${EVIDENCE_HOLD}`,
+};
 
 /**
  * Storage lifecycle cleanup (Phase 6). Safe by construction:
@@ -48,6 +85,7 @@ export class ChatAttachmentCleanupService {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly metrics: ChatAttachmentMetrics,
     @Inject(CHAT_OBJECT_STORAGE) private readonly holder: ChatStorageHolder,
+    private readonly audit: ChatAuditService,
   ) {
     this.tunables = loadChatAttachmentTunables();
   }
@@ -58,6 +96,8 @@ export class ChatAttachmentCleanupService {
       unsent: 0,
       rejected: 0,
       orphanObjects: 0,
+      deletedMessageObjects: 0,
+      quarantinedObjects: 0,
       storageErrors: 0,
     };
     const storage = this.holder.storage;
@@ -89,7 +129,33 @@ export class ChatAttachmentCleanupService {
       result,
     );
 
+    // Phase 7 retention (disabled unless a duration is configured; see
+    // PHASE-7-ATTACHMENT-RETENTION.md). Unsent quarantined files are already
+    // covered by the unsent/rejected rules above (message_id IS NULL).
+    const { deletedMessageObjectRetentionSeconds: dm, quarantinedObjectRetentionSeconds: qo } =
+      this.tunables;
+    if (dm !== null) {
+      result.deletedMessageObjects = await this.purgeObjects(
+        "deleted_message_objects",
+        ago(dm),
+        batch,
+        result,
+      );
+    }
+    if (qo !== null) {
+      result.quarantinedObjects = await this.purgeObjects(
+        "quarantined_objects",
+        ago(qo),
+        batch,
+        result,
+      );
+    }
+
     this.metrics.increment("cleanupRuns");
+    this.metrics.increment(
+      "retentionPurged",
+      result.deletedMessageObjects + result.quarantinedObjects,
+    );
     this.metrics.increment(
       "cleanupDeleted",
       result.expiredPending + result.unsent + result.rejected,
@@ -100,11 +166,13 @@ export class ChatAttachmentCleanupService {
         result.unsent +
         result.rejected +
         result.orphanObjects +
+        result.deletedMessageObjects +
+        result.quarantinedObjects +
         result.storageErrors >
       0
     ) {
       this.logger.log(
-        `chat.attachment.cleanup expired_pending=${result.expiredPending} unsent=${result.unsent} rejected=${result.rejected} orphans=${result.orphanObjects} storage_errors=${result.storageErrors}`,
+        `chat.attachment.cleanup expired_pending=${result.expiredPending} unsent=${result.unsent} rejected=${result.rejected} orphans=${result.orphanObjects} deleted_message_objects=${result.deletedMessageObjects} quarantined_objects=${result.quarantinedObjects} storage_errors=${result.storageErrors}`,
       );
     }
     return result;
@@ -136,6 +204,79 @@ export class ChatAttachmentCleanupService {
       : claimed;
     for (const row of rows) await this.deleteObject(row.storage_key, result);
     return rows.length;
+  }
+
+  /**
+   * Retention purge of LINKED attachments' objects (Phase 7). The row is never
+   * deleted (message history, evidence metadata and audit stay intact); it is
+   * claimed by setting `object_purged_at` together with a system audit row in
+   * one committed transaction, then the object is deleted. If the delete
+   * fails, the claim is undone so the next run retries (the row still owns
+   * the key, so the orphan sweep would never remove it).
+   */
+  private async purgeObjects(
+    category: RetentionCategory,
+    cutoff: Date,
+    limit: number,
+    result: CleanupResult,
+  ): Promise<number> {
+    const claimed = await this.dataSource.transaction(async (manager) => {
+      const raw: unknown[] = await manager.query(
+        `UPDATE "chat_attachments" SET "object_purged_at" = now()
+          WHERE "id" IN (
+            SELECT a."id" FROM "chat_attachments" a
+             WHERE ${RETENTION_PREDICATES[category]}
+             ORDER BY a."createdAt"
+             LIMIT $2
+             FOR UPDATE OF a SKIP LOCKED
+          )
+          RETURNING "id", "conversation_id", "storage_key"`,
+        [cutoff, limit],
+      );
+      const rows = (Array.isArray(raw[0]) ? raw[0] : raw) as PurgedRow[];
+      for (const row of rows) {
+        await this.audit.record(manager, {
+          action: ChatAuditAction.ATTACHMENT_OBJECT_PURGED,
+          actorUserId: null,
+          actorRole: null,
+          conversationId: row.conversation_id,
+          targetType: "attachment",
+          targetId: row.id,
+          metadata: { category, cutoff: cutoff.toISOString() },
+        });
+      }
+      return rows;
+    });
+    let purged = 0;
+    for (const row of claimed) {
+      try {
+        await this.holder.storage?.delete(row.storage_key);
+        purged += 1;
+      } catch {
+        result.storageErrors += 1;
+        this.metrics.increment("storageErrors");
+        await this.dataSource.query(
+          `UPDATE "chat_attachments" SET "object_purged_at" = NULL WHERE "id" = $1`,
+          [row.id],
+        );
+      }
+    }
+    return purged;
+  }
+
+  /** Bounded count of rows currently eligible for a retention category (status view). */
+  async countEligible(category: RetentionCategory, cutoff: Date, cap = 10_000): Promise<number> {
+    const rows: Array<{ count: number }> = await this.dataSource.query(
+      `SELECT count(*)::int AS "count" FROM (
+         SELECT 1 FROM "chat_attachments" a WHERE ${RETENTION_PREDICATES[category]} LIMIT $2
+       ) x`,
+      [cutoff, cap],
+    );
+    return rows[0]?.count ?? 0;
+  }
+
+  get retentionTunables(): ChatAttachmentTunables {
+    return this.tunables;
   }
 
   private async deleteObject(key: string, result: CleanupResult): Promise<void> {

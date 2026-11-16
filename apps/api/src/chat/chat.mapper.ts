@@ -35,6 +35,7 @@ export function toAttachmentItem(a: ChatAttachment): ChatAttachmentItem {
     sizeBytes: a.sizeBytes,
     status: a.status,
     uploadedAt: iso(a.uploadedAt),
+    scanStatus: a.scanStatus,
   };
 }
 

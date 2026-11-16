@@ -106,6 +106,20 @@ export const chatErrors = {
       message: "Report not found",
       error: ApiErrorCode.CHAT_REPORT_NOT_FOUND,
     }),
+  escalationInvalid: (message: string) =>
+    new ConflictException({ message, error: ApiErrorCode.CHAT_ESCALATION_INVALID }),
+  /** Phase 7: authorized caller, but the malware scan has not cleared the file yet. */
+  attachmentScanPending: () =>
+    new ConflictException({
+      message: "This file is still being checked for security. Try again shortly.",
+      error: ApiErrorCode.CHAT_ATTACHMENT_SCAN_PENDING,
+    }),
+  /** Phase 7: authorized caller, but the file is blocked (malware or failed scan). */
+  attachmentBlocked: () =>
+    new ConflictException({
+      message: "This file is blocked for security reasons",
+      error: ApiErrorCode.CHAT_ATTACHMENT_BLOCKED,
+    }),
   cursorInvalid: () =>
     new UnprocessableEntityException({
       message: "Invalid cursor",

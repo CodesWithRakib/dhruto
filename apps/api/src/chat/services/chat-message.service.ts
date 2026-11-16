@@ -3,6 +3,7 @@ import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource, In, IsNull, QueryFailedError, type EntityManager } from "typeorm";
 import {
   CHAT_MESSAGE_PREVIEW_MAX_LENGTH,
+  ChatAttachmentScanStatus,
   ChatAttachmentStatus,
   ChatAuditAction,
   ChatMessageType,
@@ -371,6 +372,14 @@ export class ChatMessageService {
         throw chatErrors.attachmentInvalid("Attachment is not uploaded");
       if (a.messageId !== null)
         throw chatErrors.attachmentInvalid("Attachment is already used by another message");
+      // Phase 7: a file the malware scan already blocked can never be sent.
+      // (PENDING may be sent; recipients see it only once the scan is CLEAN.)
+      if (
+        a.scanStatus === ChatAttachmentScanStatus.INFECTED ||
+        a.scanStatus === ChatAttachmentScanStatus.FAILED
+      ) {
+        throw chatErrors.attachmentInvalid("Attachment is blocked for security reasons");
+      }
       if (type === ChatMessageType.IMAGE && !a.mimeType.startsWith("image/")) {
         throw chatErrors.attachmentInvalid("Image messages require image attachments");
       }

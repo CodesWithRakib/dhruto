@@ -18,9 +18,10 @@ import { useGetAttachmentDownloadQuery, useLazyGetAttachmentFileQuery } from "..
 import { chatErrorKey } from "../lib/errors";
 import { formatBytes } from "../lib/upload";
 import { formatDuration } from "./voice-recorder-bar";
+import { AttachmentSecurityGate } from "./attachment-security-gate";
 
 /**
- * Attachment rendering (Phase 6). Media bytes are fetched only through
+ * Attachment rendering (Phase 6; Phase 7 wraps each file in the malware-scan gate). Media bytes are fetched only through
  * short-lived authorized URLs from the API (never stored links); an expired
  * URL is refetched on error. Images and audio display inline; documents are
  * offered as downloads (served with `Content-Disposition: attachment`).
@@ -41,15 +42,21 @@ export function MessageAttachments({
       {images.length > 0 && (
         <div className={cn("grid gap-1", images.length > 1 ? "grid-cols-2" : "grid-cols-1")}>
           {images.map((attachment) => (
-            <AttachmentImage key={attachment.id} attachment={attachment} />
+            <AttachmentSecurityGate key={attachment.id} attachment={attachment}>
+              <AttachmentImage attachment={attachment} />
+            </AttachmentSecurityGate>
           ))}
         </div>
       )}
       {audio.map((attachment) => (
-        <VoicePlayer key={attachment.id} attachment={attachment} durationMs={durationMs} />
+        <AttachmentSecurityGate key={attachment.id} attachment={attachment}>
+          <VoicePlayer attachment={attachment} durationMs={durationMs} />
+        </AttachmentSecurityGate>
       ))}
       {documents.map((attachment) => (
-        <DocumentCard key={attachment.id} attachment={attachment} />
+        <AttachmentSecurityGate key={attachment.id} attachment={attachment}>
+          <DocumentCard attachment={attachment} />
+        </AttachmentSecurityGate>
       ))}
     </div>
   );

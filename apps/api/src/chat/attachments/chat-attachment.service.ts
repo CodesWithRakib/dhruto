@@ -7,6 +7,7 @@ import {
   ChatAttachmentStatus,
   ChatAuditAction,
   ChatParticipantCapability,
+  chatAttachmentServeDecision,
   checkChatUploadPolicy,
   isChatAttachmentMimeType,
   type ChatAttachmentDownload,
@@ -56,7 +57,8 @@ interface VerifiedObject {
  *              object deleted after commit)
  *   send     → existing message send links UPLOADED, unused, own,
  *              same-conversation attachments (ChatMessageService)
- *   download → short-lived presigned GET for current, eligible participants
+ *   download → short-lived presigned GET for current, eligible participants,
+ *              only once the Phase 7 malware scan reported CLEAN
  *
  * Nothing the client declares (type, size, name, key, ownership, status) is
  * trusted: declarations are only compared with what the server measured.
@@ -390,6 +392,24 @@ export class ChatAttachmentService {
         .findOne({ where: { id: row.messageId }, select: ["id", "deletedAt"] });
       if (!message || message.deletedAt) return deny("message_deleted");
     }
+    // Phase 7 malware gate (fail closed). The caller is already proven to be
+    // an authorized participant here, so a distinct "pending"/"blocked"
+    // answer leaks nothing to outsiders (they got 404 above).
+    const decision = chatAttachmentServeDecision({
+      status: row.status,
+      scanStatus: row.scanStatus,
+      objectPurged: row.objectPurgedAt !== null,
+    });
+    if (decision === "scan_pending") {
+      this.metrics.increment("downloadScanPending");
+      throw chatErrors.attachmentScanPending();
+    }
+    if (decision === "blocked") {
+      this.metrics.increment("downloadBlocked");
+      this.logger.warn(`chat.attachment.download_blocked attachment=${attachmentId}`);
+      throw chatErrors.attachmentBlocked();
+    }
+    if (decision !== "serve") return deny(decision);
 
     const kind = CHAT_UPLOAD_POLICY[row.mimeType].kind;
     // Documents always download; images/audio render inline unless a download is requested.

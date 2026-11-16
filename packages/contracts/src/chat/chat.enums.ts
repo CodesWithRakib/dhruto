@@ -145,6 +145,24 @@ export enum ChatAuditAction {
   ADMIN_CONVERSATION_EXPORTED = "ADMIN_CONVERSATION_EXPORTED",
   /** Staff read the chat audit log. Phase 2. */
   AUDIT_LOG_VIEWED = "AUDIT_LOG_VIEWED",
+  /** Staff read the internal notes of a conversation. Phase 7. */
+  INTERNAL_NOTE_VIEWED = "INTERNAL_NOTE_VIEWED",
+  /** A report was taken into review. Phase 7. */
+  REPORT_REVIEW_STARTED = "REPORT_REVIEW_STARTED",
+  /** Escalation state, assignee or note changed. Phase 7. */
+  ESCALATION_CHANGED = "ESCALATION_CHANGED",
+  /** Malware scan flagged or could not clear an attachment (system actor). Phase 7. */
+  ATTACHMENT_QUARANTINED = "ATTACHMENT_QUARANTINED",
+  /** Staff released a blocked attachment after review. Phase 7. */
+  ATTACHMENT_RELEASED = "ATTACHMENT_RELEASED",
+  /** Staff requested a new malware scan. Phase 7. */
+  ATTACHMENT_RESCAN_REQUESTED = "ATTACHMENT_RESCAN_REQUESTED",
+  /** Staff accessed restricted attachment metadata or content. Phase 7. */
+  ATTACHMENT_RESTRICTED_ACCESSED = "ATTACHMENT_RESTRICTED_ACCESSED",
+  /** Retention removed a stored object (row and audit kept). Phase 7. */
+  ATTACHMENT_OBJECT_PURGED = "ATTACHMENT_OBJECT_PURGED",
+  /** An operator granted or revoked a staff permission. Phase 7. */
+  STAFF_GRANT_CHANGED = "STAFF_GRANT_CHANGED",
 }
 
 /**
@@ -173,4 +191,54 @@ export enum ChatPermission {
   PARTICIPANT_MANAGE = "chat.participant.manage",
   /** Export conversation history (paged, always audited). */
   CONVERSATION_EXPORT = "chat.conversation.export",
+  /** Escalate, assign and resolve conversation escalations (Phase 7). */
+  ESCALATION_MANAGE = "chat.escalation.manage",
+  /**
+   * Inspect blocked/unscanned attachment metadata and download restricted
+   * attachment content as staff (Phase 7). Grant-required: see
+   * `CHAT_GRANT_REQUIRED_PERMISSIONS`.
+   */
+  ATTACHMENT_RESTRICTED_ACCESS = "chat.attachment.restricted_access",
+  /** Release or rescan quarantined attachments (Phase 7). Grant-required. */
+  ATTACHMENT_QUARANTINE_MANAGE = "chat.attachment.quarantine_manage",
+  /** View and operate attachment retention (Phase 7). Grant-required. */
+  RETENTION_MANAGE = "chat.retention.manage",
+}
+
+/**
+ * Permissions that the role ceiling alone does not confer (Phase 7): the
+ * user additionally needs an active, explicit row in `chat_staff_grants`.
+ * Grants are created and revoked only by the operator CLI (audited), so an
+ * admin can never grant these to themselves through the application.
+ */
+export const CHAT_GRANT_REQUIRED_PERMISSIONS: readonly ChatPermission[] = [
+  ChatPermission.ATTACHMENT_RESTRICTED_ACCESS,
+  ChatPermission.ATTACHMENT_QUARANTINE_MANAGE,
+  ChatPermission.RETENTION_MANAGE,
+];
+
+/** Operational escalation state of a conversation (Phase 7); independent of lifecycle status. */
+export enum ChatEscalationStatus {
+  /** Flagged as needing staff attention; nobody has taken it yet. */
+  OPEN = "OPEN",
+  /** A staff member is actively working on it. */
+  IN_REVIEW = "IN_REVIEW",
+  /** Raised to senior staff / higher priority. */
+  ESCALATED = "ESCALATED",
+  /** Handled; a resolution note is recorded. May be reopened. */
+  RESOLVED = "RESOLVED",
+  /** Final; no further escalation work on this cycle. Re-flagging starts a new cycle. */
+  CLOSED = "CLOSED",
+}
+
+/** Malware-scan state of a stored attachment object (Phase 7). */
+export enum ChatAttachmentScanStatus {
+  /** Not yet scanned (or rescan requested). Never downloadable through ordinary routes. */
+  PENDING = "PENDING",
+  /** Scanner reported the exact verified object clean. */
+  CLEAN = "CLEAN",
+  /** Scanner detected malware: quarantined, never served to participants. */
+  INFECTED = "INFECTED",
+  /** Scan could not complete after the retry budget (or object changed): blocked (fail closed). */
+  FAILED = "FAILED",
 }

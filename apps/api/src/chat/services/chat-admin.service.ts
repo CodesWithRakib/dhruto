@@ -29,10 +29,12 @@ import {
   ChatReport,
   UserRole,
 } from "../../database/entities/index.js";
-import { roleHasChatPermission } from "../../common/permissions/chat-permissions.js";
 import { chatErrors } from "../chat.errors.js";
 import { type ChatRequestContext } from "../chat.context.js";
-import { type ChatActorScope } from "../policies/chat-eligibility.policy.js";
+import {
+  actorHoldsChatPermission,
+  type ChatActorScope,
+} from "../policies/chat-eligibility.policy.js";
 import { ChatAuthorizationService } from "./chat-authorization.service.js";
 import { ChatAuditService } from "./chat-audit.service.js";
 import { ChatMessageReaderService } from "./chat-message-reader.service.js";
@@ -82,11 +84,7 @@ export class ChatAdminService {
     ctx: ChatRequestContext,
     permission: ChatPermission,
   ): Promise<ChatActorScope> {
-    const actor = await this.authz.loadActorScope(ctx.user);
-    if (!roleHasChatPermission(actor.role, permission) || actor.role !== UserRole.ADMIN) {
-      throw chatErrors.permissionDenied(`Missing chat permission ${permission}`);
-    }
-    return actor;
+    return this.authz.requirePlatformStaff(ctx.user, permission);
   }
 
   /** Permissions needed to read a conversation via the staff path. */
@@ -155,7 +153,7 @@ export class ChatAdminService {
     if (query.merchantId) add(`c."merchant_id" = ?`, query.merchantId);
     if (query.hubId) add(`c."hub_id" = ?`, query.hubId);
     if (query.parcelId) add(`c."parcel_id" = ?`, query.parcelId);
-    if (!roleHasChatPermission(actor.role, ChatPermission.CONVERSATION_VIEW_RESTRICTED)) {
+    if (!actorHoldsChatPermission(actor, ChatPermission.CONVERSATION_VIEW_RESTRICTED)) {
       where.push(`c."type" <> 'INTERNAL_SUPERVISOR'`);
     }
     if (cursor) {
@@ -345,13 +343,28 @@ export class ChatAdminService {
     ctx: ChatRequestContext,
     conversationId: string,
   ): Promise<ChatInternalNoteItem[]> {
-    await this.authz.requireStaff(ctx.user, conversationId, [ChatPermission.INTERNAL_NOTE_MANAGE]);
-    const notes = await this.dataSource.getRepository(ChatInternalNote).find({
-      where: { conversationId, deletedAt: IsNull() },
-      order: { createdAt: "DESC" },
-      take: 200,
+    const { actor } = await this.authz.requireStaff(ctx.user, conversationId, [
+      ChatPermission.INTERNAL_NOTE_MANAGE,
+    ]);
+    // Phase 7: reading notes is a privileged access and is audited with the read.
+    return this.dataSource.transaction(async (manager) => {
+      const notes = await manager.getRepository(ChatInternalNote).find({
+        where: { conversationId, deletedAt: IsNull() },
+        order: { createdAt: "DESC" },
+        take: 200,
+      });
+      await this.audit.record(manager, {
+        action: ChatAuditAction.INTERNAL_NOTE_VIEWED,
+        actorUserId: actor.userId,
+        actorRole: actor.role,
+        conversationId,
+        targetType: "conversation",
+        targetId: conversationId,
+        requestId: ctx.requestId,
+        metadata: { count: notes.length },
+      });
+      return notes.map(toNoteItem);
     });
-    return notes.map(toNoteItem);
   }
 
   async createNote(
@@ -432,6 +445,9 @@ export class ChatAdminService {
       .addOrderBy("r.id", "DESC")
       .limit(query.limit + 1);
     if (query.status) qb.andWhere("r.status = :status", { status: query.status });
+    if (query.conversationId) {
+      qb.andWhere("r.conversationId = :cid", { cid: query.conversationId });
+    }
     if (cursor) {
       qb.andWhere(`(r."createdAt", r."id") < (:t::timestamptz, :id::uuid)`, {
         t: cursor.t,
@@ -461,6 +477,9 @@ export class ChatAdminService {
         .getRepository(ChatReport)
         .findOne({ where: { id: reportId }, lock: { mode: "pessimistic_write" } });
       if (!report) throw chatErrors.reportNotFound();
+      // Phase 7 idempotency: repeating the decision that is already recorded
+      // (a retried request) returns the report unchanged, without a new audit row.
+      if (report.status === req.status) return toReportItem(report);
       if (
         report.status === ChatReportStatus.RESOLVED ||
         report.status === ChatReportStatus.DISMISSED
@@ -474,19 +493,21 @@ export class ChatAdminService {
         resolutionNote: req.resolutionNote ?? report.resolutionNote,
       });
       await manager.getRepository(ChatReport).save(report);
-      if (req.status !== ChatReportStatus.UNDER_REVIEW) {
-        await this.audit.record(manager, {
-          action: ChatAuditAction.REPORT_RESOLVED,
-          actorUserId: actor.userId,
-          actorRole: actor.role,
-          conversationId: report.conversationId,
-          targetType: "report",
-          targetId: report.id,
-          reason: req.resolutionNote ?? null,
-          requestId: ctx.requestId,
-          metadata: { status: req.status, messageId: report.messageId },
-        });
-      }
+      // Phase 7: every report decision is audited, including taking it into review.
+      await this.audit.record(manager, {
+        action:
+          req.status === ChatReportStatus.UNDER_REVIEW
+            ? ChatAuditAction.REPORT_REVIEW_STARTED
+            : ChatAuditAction.REPORT_RESOLVED,
+        actorUserId: actor.userId,
+        actorRole: actor.role,
+        conversationId: report.conversationId,
+        targetType: "report",
+        targetId: report.id,
+        reason: req.resolutionNote ?? null,
+        requestId: ctx.requestId,
+        metadata: { status: req.status, messageId: report.messageId },
+      });
       return toReportItem(report);
     });
   }
@@ -509,6 +530,7 @@ export class ChatAdminService {
       if (query.conversationId)
         qb.andWhere("a.conversationId = :cid", { cid: query.conversationId });
       if (query.actorUserId) qb.andWhere("a.actorUserId = :aid", { aid: query.actorUserId });
+      if (query.action) qb.andWhere("a.action = :action", { action: query.action });
       if (cursor) {
         qb.andWhere(`(a."createdAt", a."id") < (:t::timestamptz, :id::uuid)`, {
           t: cursor.t,
@@ -527,6 +549,7 @@ export class ChatAdminService {
         null,
         {
           actorUserId: query.actorUserId ?? null,
+          action: query.action ?? null,
           count: page.length,
         },
       );

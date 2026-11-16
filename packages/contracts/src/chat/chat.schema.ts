@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  type ChatAttachmentScanStatus,
   ChatAttachmentStatus,
   ChatConversationStatus,
   ChatConversationType,
@@ -415,6 +416,11 @@ export interface ChatAttachmentItem {
   sizeBytes: number;
   status: ChatAttachmentStatus;
   uploadedAt: string | null;
+  /**
+   * Malware-scan state (Phase 7). Content is downloadable through ordinary
+   * routes only when `CLEAN`; the UI shows a "security check" state otherwise.
+   */
+  scanStatus: ChatAttachmentScanStatus;
 }
 
 /**

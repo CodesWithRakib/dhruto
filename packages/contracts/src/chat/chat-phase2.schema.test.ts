@@ -116,7 +116,11 @@ describe("participant, message and moderation schemas", () => {
 
   it("report review cannot reopen to OPEN", () => {
     expect(reviewChatReportSchema.safeParse({ status: "OPEN" }).success).toBe(false);
-    expect(reviewChatReportSchema.safeParse({ status: "DISMISSED" }).success).toBe(true);
+    // Phase 7: dismissing/resolving now requires a justification.
+    expect(reviewChatReportSchema.safeParse({ status: "DISMISSED" }).success).toBe(false);
+    expect(
+      reviewChatReportSchema.safeParse({ status: "DISMISSED", resolutionNote: "Not abusive" }).success,
+    ).toBe(true);
   });
 });
 

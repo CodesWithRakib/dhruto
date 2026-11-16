@@ -11,12 +11,16 @@ import {
   ChatParticipant,
   ChatPin,
   ChatReport,
+  ChatStaffGrant,
 } from "../database/entities/index.js";
 import { IntegrationsModule } from "../integrations/integrations.module.js";
 import { ChatAdminController } from "./chat-admin.controller.js";
+import { ChatAdminCenterController } from "./chat-admin-center.controller.js";
 import { ChatConversationsController } from "./chat-conversations.controller.js";
 import { ChatMessagesController } from "./chat-messages.controller.js";
 import { ChatAdminService } from "./services/chat-admin.service.js";
+import { ChatAdminInboxService } from "./services/chat-admin-inbox.service.js";
+import { ChatEscalationService } from "./services/chat-escalation.service.js";
 import { ChatAuditService } from "./services/chat-audit.service.js";
 import { ChatAuthorizationService } from "./services/chat-authorization.service.js";
 import { ChatConversationService } from "./services/chat-conversation.service.js";
@@ -42,6 +46,7 @@ export const CHAT_ENTITIES = [
   ChatReport,
   ChatInternalNote,
   ChatAuditLog,
+  ChatStaffGrant,
 ] as const;
 
 /**
@@ -53,7 +58,12 @@ export const CHAT_ENTITIES = [
  */
 @Module({
   imports: [TypeOrmModule.forFeature([...CHAT_ENTITIES]), IntegrationsModule],
-  controllers: [ChatConversationsController, ChatMessagesController, ChatAdminController],
+  controllers: [
+    ChatConversationsController,
+    ChatMessagesController,
+    ChatAdminController,
+    ChatAdminCenterController,
+  ],
   providers: [
     ChatAuthorizationService,
     ChatAuditService,
@@ -68,6 +78,8 @@ export const CHAT_ENTITIES = [
     ChatAdminService,
     ChatParcelMembershipService,
     ChatStaffInterventionService,
+    ChatAdminInboxService,
+    ChatEscalationService,
   ],
   exports: [
     TypeOrmModule,

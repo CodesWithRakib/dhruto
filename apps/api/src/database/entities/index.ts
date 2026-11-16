@@ -59,3 +59,4 @@ export * from "./ChatPin.entity.js";
 export * from "./ChatReport.entity.js";
 export * from "./ChatInternalNote.entity.js";
 export * from "./ChatAuditLog.entity.js";
+export * from "./ChatStaffGrant.entity.js";

@@ -1383,7 +1383,8 @@
     "exceptions": "Exceptions",
     "settings": "Settings",
     "faq": "Help",
-    "status": "System Status"
+    "status": "System Status",
+    "communications": "Communication Center"
   },
   "Footer": {
     "tagline": "Next-Gen Logistics & Courier OS",
@@ -2607,7 +2608,10 @@
       "voiceLabel": "Voice message, {duration}",
       "pdf": "PDF",
       "download": "Download {name}",
-      "downloadShort": "Download"
+      "downloadShort": "Download",
+      "scanPending": "Security check in progress…",
+      "blocked": "Blocked for security reasons",
+      "unavailable": "Attachment unavailable"
     },
     "voice": {
       "record": "Record a voice message",
@@ -2806,7 +2810,10 @@
       "editWindow": "This message can no longer be edited.",
       "notEditable": "This message can't be edited.",
       "duplicateReport": "You have already reported this message.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "attachmentScanPending": "This file is still being checked for security.",
+      "attachmentBlocked": "This file is blocked for security reasons.",
+      "escalationInvalid": "That escalation change isn't allowed right now."
     }
   },
   "Calculator": {
@@ -2900,5 +2907,245 @@
     "registeredAccount": "Registered Merchant Account",
     "activeStatus": "Active",
     "refresh": "Refresh"
+  },
+  "ChatAdmin": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "loadMore": "Load more",
+    "title": "Communication Center",
+    "subtitle": "Operational inbox, escalations, reports and attachment security. Every content access is justified and audited.",
+    "tabsLabel": "Communication Center sections",
+    "tabs": {
+      "overview": "Overview",
+      "inbox": "Inbox",
+      "escalations": "Escalations",
+      "reports": "Reports",
+      "attachments": "Attachment security",
+      "audit": "Audit"
+    },
+    "errors": {
+      "loadFailed": "Couldn't load this data."
+    },
+    "unauthorized": {
+      "title": "You don't have access",
+      "description": "Your account lacks the communication staff permissions required for this page."
+    },
+    "reason": {
+      "label": "Reason",
+      "hint": "Required, at least {min} characters. Recorded in the audit log.",
+      "optionalHint": "Optional. If given, at least {min} characters."
+    },
+    "overview": {
+      "heading": "Key metrics",
+      "total": "Conversations",
+      "active": "{count} active",
+      "needsAttention": "Need attention",
+      "escalations": "Active escalations",
+      "escalationBreakdown": "{open} open · {review} in review · {escalated} escalated",
+      "reports": "Open reports",
+      "reportBreakdown": "{open} open · {review} in review",
+      "assignedToMe": "Assigned to me",
+      "myUnread": "My unread conversations",
+      "interventions": "Interventions (7 days)",
+      "attachments": "Blocked attachments",
+      "scanPending": "{count} awaiting security scan",
+      "volume": "New conversations per day (14 days, UTC)",
+      "generatedAt": "Updated {time}"
+    },
+    "inbox": {
+      "filters": "Inbox filters",
+      "search": "Search",
+      "searchPlaceholder": "Tracking code, conversation or report ID",
+      "searchSubmit": "Search",
+      "type": "Type",
+      "any": "Any",
+      "status": "Status",
+      "escalation": "Escalation",
+      "escalationActive": "Any active",
+      "escalationNone": "Not escalated",
+      "flags": "Flags",
+      "hasOpenReports": "Has open reports",
+      "assignedToMe": "Assigned to me",
+      "empty": "No conversations match",
+      "emptyHint": "Search matches exact identifiers only. Try clearing filters.",
+      "results": "Conversations",
+      "mine": "mine",
+      "reportCount": "{count, plural, one {# report} other {# reports}}"
+    },
+    "conversationStatus": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived",
+      "CLOSED": "Closed",
+      "LOCKED": "Locked"
+    },
+    "escalationStatus": {
+      "OPEN": "Open",
+      "IN_REVIEW": "In review",
+      "ESCALATED": "Escalated",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "reportStatus": {
+      "OPEN": "Open",
+      "UNDER_REVIEW": "Under review",
+      "RESOLVED": "Resolved",
+      "DISMISSED": "Dismissed"
+    },
+    "reportReason": {
+      "SPAM": "Spam",
+      "ABUSE": "Abuse",
+      "FRAUD": "Fraud",
+      "PRIVACY_VIOLATION": "Privacy violation",
+      "INAPPROPRIATE_CONTENT": "Inappropriate content",
+      "OTHER": "Other"
+    },
+    "reports": {
+      "updated": "Report updated",
+      "status": "Status",
+      "empty": "No reports",
+      "results": "Reports",
+      "resolution": "Resolution: {note}",
+      "open": "Open conversation",
+      "startReview": "Start review",
+      "resolve": "Resolve",
+      "dismiss": "Dismiss",
+      "dismissTitle": "Dismiss report",
+      "resolveTitle": "Resolve report",
+      "noteDescription": "Explain the decision. The note is stored with the report and audited."
+    },
+    "scanStatus": {
+      "PENDING": "Scan pending",
+      "CLEAN": "Clean",
+      "INFECTED": "Malware detected",
+      "FAILED": "Scan failed (blocked)"
+    },
+    "attachments": {
+      "decided": "Decision recorded",
+      "results": "Attachments",
+      "messageDeleted": "Message deleted",
+      "purged": "File purged",
+      "threat": "Threat: {name}",
+      "scanError": "Error: {code}",
+      "download": "Download",
+      "release": "Release",
+      "rescan": "Rescan",
+      "downloadTitle": "Download restricted file",
+      "releaseTitle": "Release attachment",
+      "rescanTitle": "Request a new scan",
+      "downloadWarning": "This file may be unscanned or malicious. It downloads as raw bytes and never opens in the browser. Your access is audited.",
+      "decisionDescription": "This decision is recorded in the audit log with your reason.",
+      "restrictedTitle": "Restricted area",
+      "restrictedDescription": "Reviewing quarantined attachments requires an explicit permission grant from an operator.",
+      "queueTitle": "Quarantine and scan queue",
+      "scanFilter": "Scan state",
+      "blockedOnly": "Blocked (malware or failed)",
+      "queueEmpty": "Nothing in this queue"
+    },
+    "retention": {
+      "indefinite": "Kept indefinitely (no policy configured)",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "hours": "{count, plural, one {# hour} other {# hours}}",
+      "seconds": "{count} seconds",
+      "title": "Attachment retention",
+      "scannerOn": "Malware scanner: {engine}",
+      "scannerOff": "No malware scanner configured — attachments stay blocked until one is.",
+      "category": "Category",
+      "period": "Retention",
+      "eligible": "Eligible now",
+      "categories": {
+        "expired_pending": "Unfinished uploads",
+        "unsent": "Uploaded but never sent",
+        "rejected": "Rejected uploads",
+        "orphan_objects": "Orphaned storage objects",
+        "deleted_message_objects": "Files of deleted messages",
+        "quarantined_objects": "Quarantined files"
+      },
+      "evidenceHold": "Files are never purged while their message has an open report or the conversation has an active escalation. Attachment records and audit history are kept."
+    },
+    "audit": {
+      "action": "Action",
+      "empty": "No audit records",
+      "results": "Audit records",
+      "actor": "By {role}",
+      "system": "System",
+      "reason": "Reason: {reason}"
+    },
+    "auditAction": {
+      "CONVERSATION_CREATED": "Conversation created",
+      "CONVERSATION_STATUS_CHANGED": "Conversation status changed",
+      "PARTICIPANT_ADDED": "Participant added",
+      "PARTICIPANT_REMOVED": "Participant removed",
+      "PARTICIPANT_ROLE_CHANGED": "Participant role changed",
+      "ADMIN_CONVERSATION_VIEWED": "Staff viewed conversation",
+      "ADMIN_INTERVENTION": "Staff intervention",
+      "MESSAGE_REMOVED_BY_MODERATOR": "Message removed by moderator",
+      "MESSAGE_PINNED": "Message pinned",
+      "MESSAGE_UNPINNED": "Message unpinned",
+      "REPORT_RESOLVED": "Report decided",
+      "INTERNAL_NOTE_CREATED": "Internal note created",
+      "INTERNAL_NOTE_DELETED": "Internal note deleted",
+      "ATTACHMENT_REJECTED": "Attachment rejected",
+      "ADMIN_CONVERSATIONS_LISTED": "Staff listed conversations",
+      "ADMIN_CONVERSATION_EXPORTED": "Staff exported history",
+      "AUDIT_LOG_VIEWED": "Audit log viewed",
+      "INTERNAL_NOTE_VIEWED": "Internal notes viewed",
+      "REPORT_REVIEW_STARTED": "Report review started",
+      "ESCALATION_CHANGED": "Escalation changed",
+      "ATTACHMENT_QUARANTINED": "Attachment quarantined",
+      "ATTACHMENT_RELEASED": "Attachment released",
+      "ATTACHMENT_RESCAN_REQUESTED": "Attachment rescan requested",
+      "ATTACHMENT_RESTRICTED_ACCESSED": "Restricted attachment accessed",
+      "ATTACHMENT_OBJECT_PURGED": "Attachment file purged (retention)",
+      "STAFF_GRANT_CHANGED": "Staff permission grant changed"
+    },
+    "escalation": {
+      "updated": "Escalation updated",
+      "title": "Escalation",
+      "none": "Not escalated",
+      "assignee": "Assigned to {name}",
+      "takeReview": "Take into review",
+      "to": {
+        "OPEN": "Flag for attention",
+        "IN_REVIEW": "Take into review",
+        "ESCALATED": "Escalate",
+        "RESOLVED": "Resolve",
+        "CLOSED": "Close"
+      },
+      "history": "History ({count})",
+      "noteDescription": "Add the reason or resolution. It is shown to staff and audited; participants never see it.",
+      "confirm": "Save"
+    },
+    "notes": {
+      "title": "Internal notes",
+      "privacy": "Visible only to authorized staff. Never shown to customers, merchants, riders or hub managers.",
+      "add": "Add note",
+      "placeholder": "Write an internal note…",
+      "empty": "No internal notes yet."
+    },
+    "workspace": {
+      "history": "Message history (audited)",
+      "loadOlder": "Load older messages",
+      "noMessages": "No messages yet.",
+      "formerParticipant": "Former participant",
+      "remove": "Remove message",
+      "removeTitle": "Remove message",
+      "removeDescription": "The message is hidden from participants; its content is retained as moderation evidence.",
+      "removed": "Message removed",
+      "back": "Back to inbox",
+      "gateTitle": "Open conversation as staff",
+      "gateDescription": "You are about to read a conversation you may not be part of. Enter the case reason; it is recorded with every read in the audit log.",
+      "gateConfirm": "Open conversation",
+      "notFound": "Conversation not found or not accessible.",
+      "created": "Created {time}",
+      "openMessenger": "Open in messenger",
+      "intervene": "Join as staff",
+      "attachments": "Attachments and scan state",
+      "noAttachments": "No attachments.",
+      "reports": "Reports",
+      "participants": "Participants ({count})",
+      "audit": "Audit trail",
+      "joined": "You joined this conversation. Participants were notified."
+    }
   }
 }

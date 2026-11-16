@@ -1,5 +1,9 @@
 import { Entity, Column, ManyToOne, JoinColumn, Index, Check } from "typeorm";
-import { ChatConversationStatus, ChatConversationType } from "@dhruto/contracts";
+import {
+  ChatConversationStatus,
+  ChatConversationType,
+  ChatEscalationStatus,
+} from "@dhruto/contracts";
 import { BaseEntity } from "./Base.entity.js";
 import { Parcel } from "./Parcel.entity.js";
 import { Hub } from "./Hub.entity.js";
@@ -45,6 +49,23 @@ import { User } from "./User.entity.js";
   `("status" <> 'ARCHIVED' OR "archived_at" IS NOT NULL) AND ("status" <> 'CLOSED' OR "closed_at" IS NOT NULL) AND ("status" <> 'LOCKED' OR "locked_at" IS NOT NULL)`,
 )
 @Check("CHK_chat_conversations_sequence", `"last_message_sequence" >= 0`)
+// Expression index ((COALESCE(last_message_at, createdAt)), id) for inbox
+// activity ordering; defined in migration 0012, unmanaged by TypeORM.
+@Index("IDX_chat_conversations_activity", { synchronize: false })
+@Index("IDX_chat_conversations_escalation", ["escalationStatus", "escalationUpdatedAt"], {
+  where: `"escalation_status" IS NOT NULL`,
+})
+@Index("IDX_chat_conversations_escalation_assignee", ["escalationAssigneeUserId"], {
+  where: `"escalation_assignee_user_id" IS NOT NULL`,
+})
+@Check(
+  "CHK_chat_conversations_escalation",
+  `"escalation_status" IS NULL OR "escalation_updated_at" IS NOT NULL`,
+)
+@Check(
+  "CHK_chat_conversations_escalation_note",
+  `"escalation_note" IS NULL OR char_length("escalation_note") <= 1000`,
+)
 export class ChatConversation extends BaseEntity {
   @Column({ type: "enum", enum: ChatConversationType })
   type: ChatConversationType;
@@ -108,4 +129,40 @@ export class ChatConversation extends BaseEntity {
 
   @Column({ name: "locked_at", type: "timestamptz", nullable: true })
   lockedAt: Date | null;
+
+  /* Phase 7 escalation overlay (independent of lifecycle `status`). */
+
+  @Column({
+    name: "escalation_status",
+    type: "enum",
+    enum: ChatEscalationStatus,
+    nullable: true,
+  })
+  escalationStatus: ChatEscalationStatus | null;
+
+  @Column({ name: "escalation_note", type: "text", nullable: true })
+  escalationNote: string | null;
+
+  @Column({ name: "escalation_assignee_user_id", type: "uuid", nullable: true })
+  escalationAssigneeUserId: string | null;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: "RESTRICT" })
+  @JoinColumn({
+    name: "escalation_assignee_user_id",
+    foreignKeyConstraintName: "FK_chat_conversations_escalation_assignee",
+  })
+  escalationAssignee: User | null;
+
+  @Column({ name: "escalation_updated_at", type: "timestamptz", nullable: true })
+  escalationUpdatedAt: Date | null;
+
+  @Column({ name: "escalation_updated_by_user_id", type: "uuid", nullable: true })
+  escalationUpdatedByUserId: string | null;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: "RESTRICT" })
+  @JoinColumn({
+    name: "escalation_updated_by_user_id",
+    foreignKeyConstraintName: "FK_chat_conversations_escalation_updated_by",
+  })
+  escalationUpdatedBy: User | null;
 }

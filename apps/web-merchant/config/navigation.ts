@@ -20,6 +20,7 @@ import {
   Radio,
   BrainCircuit,
   MessagesSquare,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import { ADMIN_ROUTES, CUSTOMER_ROUTES, HUB_ROUTES, MERCHANT_ROUTES, PUBLIC_ROUTES, RIDER_ROUTES } from "./routes";
@@ -136,6 +137,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
         { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
         { href: ADMIN_ROUTES.messages, labelKey: "messages", icon: MessagesSquare, indicator: "chat-unread" },
+        { href: ADMIN_ROUTES.communications, labelKey: "communications", icon: ShieldAlert },
       ],
     },
     {

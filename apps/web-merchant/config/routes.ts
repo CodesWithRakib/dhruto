@@ -73,6 +73,9 @@ export const ADMIN_ROUTES = {
   settings: "/admin/settings",
   messages: "/admin/messages",
   messageThread: (id: string) => `/admin/messages/${id}`,
+  /** Phase 7 Admin Communication Center. */
+  communications: "/admin/communications",
+  communicationThread: (id: string) => `/admin/communications/${id}`,
 } as const;
 
 export const HUB_ROUTES = {

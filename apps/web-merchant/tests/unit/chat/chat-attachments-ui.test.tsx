@@ -4,6 +4,7 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-li
 import { NextIntlClientProvider } from "next-intl";
 import { Provider } from "react-redux";
 import {
+  ChatAttachmentScanStatus,
   ChatAttachmentStatus,
   ChatMessageType,
   type ChatAttachmentItem,
@@ -38,6 +39,8 @@ function item(overrides: Partial<ChatAttachmentItem> = {}): ChatAttachmentItem {
     sizeBytes: 8,
     status: ChatAttachmentStatus.UPLOADED,
     uploadedAt: "2026-11-16T10:00:00.000Z",
+    // Phase 7: rendering tests use scanned files; the gate has its own tests.
+    scanStatus: ChatAttachmentScanStatus.CLEAN,
     ...overrides,
   };
 }

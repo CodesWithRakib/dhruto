@@ -8,6 +8,7 @@ import {
 import { type Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import { type RequestWithId } from "../middleware/request-id.middleware.js";
+import { redactUrl } from "./redact-url.js";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -19,7 +20,9 @@ export class LoggingInterceptor implements NestInterceptor {
     const response = ctx.getResponse();
 
     const startTime = Date.now();
-    const { method, originalUrl, ip } = request;
+    const { method, ip } = request;
+    // Sensitive query values (staff reasons, search text, tokens) are redacted.
+    const originalUrl = redactUrl(request.originalUrl);
     const requestId = request.requestId || "unknown";
 
     return next.handle().pipe(

@@ -12,6 +12,7 @@ import { Phase7Analytics1700000000008 } from "../../src/database/migrations/1700
 import { Phase8ParcelListIndex1700000000009 } from "../../src/database/migrations/1700000000009-Phase8ParcelListIndex.js";
 import { CommunicationPhase1Foundation1700000000010 } from "../../src/database/migrations/1700000000010-CommunicationPhase1Foundation.js";
 import { CommunicationPhase2Backend1700000000011 } from "../../src/database/migrations/1700000000011-CommunicationPhase2Backend.js";
+import { CommunicationPhase7AdminCenter1700000000012 } from "../../src/database/migrations/1700000000012-CommunicationPhase7AdminCenter.js";
 
 /**
  * Disposable-database harness for schema/migration tests.
@@ -45,6 +46,7 @@ export const ALL_MIGRATIONS = [
   Phase8ParcelListIndex1700000000009,
   CommunicationPhase1Foundation1700000000010,
   CommunicationPhase2Backend1700000000011,
+  CommunicationPhase7AdminCenter1700000000012,
 ];
 
 /** Every class exported from the entity barrel that TypeORM knows as an entity. */

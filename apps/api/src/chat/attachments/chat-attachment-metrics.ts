@@ -10,7 +10,16 @@ export type ChatAttachmentCounter =
   | "storageErrors"
   | "cleanupDeleted"
   | "cleanupOrphansDeleted"
-  | "cleanupRuns";
+  | "cleanupRuns"
+  // Phase 7 malware scan + retention
+  | "scanClean"
+  | "scanInfected"
+  | "scanErrors"
+  | "scanFailed"
+  | "scanRuns"
+  | "downloadScanPending"
+  | "downloadBlocked"
+  | "retentionPurged";
 
 /**
  * Per-instance attachment counters (same model as the Phase 3 realtime

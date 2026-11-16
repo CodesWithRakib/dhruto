@@ -1,9 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { ChatConversationType, ChatPermission } from "@dhruto/contracts";
+import {
+  CHAT_GRANT_REQUIRED_PERMISSIONS,
+  ChatConversationType,
+  ChatPermission,
+} from "@dhruto/contracts";
 import { UserRole } from "../../database/entities/User.entity.js";
 import {
   CHAT_TYPE_CREATOR_ROLES,
   CHAT_TYPE_PARTICIPANT_ROLES,
+  actorHoldsChatPermission,
   isEligibleParticipant,
   isParcelRecipient,
   sharesHub,
@@ -164,9 +169,33 @@ describe("chat eligibility: other conversation types", () => {
 describe("staff permissions are scoped, never a blanket ADMIN bypass for others", () => {
   const dhkOps = scope({ type: ChatConversationType.HUB_OPERATIONS, hubId: HUB_DHK });
 
-  it("admin holds every staff permission platform-wide", () => {
-    for (const p of Object.values(ChatPermission))
+  // Phase 7 narrowed this: grant-required permissions need an explicit grant.
+  it("admin holds every non-grant-required staff permission platform-wide", () => {
+    for (const p of Object.values(ChatPermission).filter(
+      (permission) => !CHAT_GRANT_REQUIRED_PERMISSIONS.includes(permission),
+    ))
       expect(staffHasPermission(admin, p, dhkOps, null)).toBe(true);
+  });
+
+  it("admin holds grant-required permissions only with an explicit active grant", () => {
+    for (const p of CHAT_GRANT_REQUIRED_PERMISSIONS) {
+      expect(staffHasPermission(admin, p, dhkOps, null)).toBe(false);
+      expect(actorHoldsChatPermission(admin, p)).toBe(false);
+      const granted = { ...admin, staffGrants: [p] };
+      expect(staffHasPermission(granted, p, dhkOps, null)).toBe(true);
+      // A grant for one permission never confers another.
+      for (const other of CHAT_GRANT_REQUIRED_PERMISSIONS.filter((o) => o !== p))
+        expect(actorHoldsChatPermission(granted, other)).toBe(false);
+    }
+  });
+
+  it("a grant never lifts the role ceiling (hub manager / merchant with a grant row)", () => {
+    for (const p of CHAT_GRANT_REQUIRED_PERMISSIONS) {
+      expect(actorHoldsChatPermission({ ...managerDhk, staffGrants: [p] }, p)).toBe(false);
+      expect(
+        actorHoldsChatPermission({ ...actor(UserRole.MERCHANT), staffGrants: [p] }, p),
+      ).toBe(false);
+    }
   });
 
   it("hub manager may moderate only inside assigned hubs (incl. parcel's current hub)", () => {

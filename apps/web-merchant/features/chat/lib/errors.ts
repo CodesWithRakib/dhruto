@@ -17,6 +17,9 @@ export type ChatErrorKey =
   | "attachmentNotFound"
   | "storageUnavailable"
   | "limitExceeded"
+  | "attachmentScanPending"
+  | "attachmentBlocked"
+  | "escalationInvalid"
   | "generic";
 
 /**
@@ -68,6 +71,13 @@ export function chatErrorKey(error: unknown): ChatErrorKey {
       return "storageUnavailable";
     case ApiErrorCode.CHAT_LIMIT_EXCEEDED:
       return "limitExceeded";
+    // Phase 7.
+    case ApiErrorCode.CHAT_ATTACHMENT_SCAN_PENDING:
+      return "attachmentScanPending";
+    case ApiErrorCode.CHAT_ATTACHMENT_BLOCKED:
+      return "attachmentBlocked";
+    case ApiErrorCode.CHAT_ESCALATION_INVALID:
+      return "escalationInvalid";
     default:
       return "generic";
   }

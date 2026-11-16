@@ -22,6 +22,8 @@ vi.hoisted(() => {
     process.env.CHAT_STORAGE_SECRET_ACCESS_KEY = "test";
     process.env.CHAT_ATTACHMENT_CLEANUP_ENABLED = "false"; // runOnce is driven by the tests
     process.env.CHAT_MAX_PENDING_UPLOADS_PER_USER = "5";
+    // Phase 7: downloads require a CLEAN malware scan; tests drive the scan job.
+    process.env.CHAT_MALWARE_SCAN_ENABLED = "false";
   }
 });
 
@@ -41,6 +43,8 @@ import { AppModule } from "../src/app.module.js";
 import { CustomJwtService } from "../src/auth/jwt/custom-jwt.service.js";
 import { UserRole } from "../src/database/entities/index.js";
 import { ChatAttachmentCleanupService } from "../src/chat/attachments/chat-attachment-cleanup.service.js";
+import { ChatAttachmentScanService } from "../src/chat/attachments/chat-attachment-scan.service.js";
+import { startFakeClamd, type FakeClamd } from "./utils/fake-clamd.js";
 import {
   CHAT_TEST_DATABASE_URL,
   assertDisposableDatabaseUrl,
@@ -85,6 +89,7 @@ describe.skipIf(
   let app: INestApplication;
   let ds: DataSource;
   let s3: S3Client;
+  let clamd: FakeClamd;
   const users: Record<string, Fixture> = {};
   let threadA = "";
   let threadB = "";
@@ -146,6 +151,8 @@ describe.skipIf(
     expect((await put(ticket.body.data, data)).status).toBe(200);
     const done = await complete(who, ticket.body.data.attachment.id);
     expect(done.status, JSON.stringify(done.body)).toBe(200);
+    // Phase 7: the asynchronous malware scan must clear the file before it is served.
+    await app.get(ChatAttachmentScanService).runOnce();
     return ticket.body.data.attachment.id as string;
   }
 
@@ -223,6 +230,9 @@ describe.skipIf(
 
     if (process.env.DATABASE_URL !== url)
       throw new Error("Refusing to boot: DATABASE_URL is not the disposable DB");
+    clamd = await startFakeClamd();
+    process.env.CHAT_CLAMAV_HOST = "127.0.0.1";
+    process.env.CHAT_CLAMAV_PORT = String(clamd.port);
     app = await NestFactory.create(AppModule, { logger: ["error"] });
     app.setGlobalPrefix("api/v1");
     await app.listen(0, "127.0.0.1");
@@ -256,6 +266,7 @@ describe.skipIf(
     await app?.close();
     if (ds?.isInitialized) await ds.destroy();
     s3?.destroy();
+    await clamd?.close();
   });
 
   /* ================================================================ */

@@ -15,7 +15,8 @@
     "migration:revert": "node dist/database/migrate-cli.js revert",
     "migration:show": "node dist/database/migrate-cli.js show",
     "db:setup": "pnpm build && pnpm migration:run && pnpm seed",
-    "clean": "rimraf dist .turbo"
+    "clean": "rimraf dist .turbo",
+    "chat:grants": "node dist/chat/staff-grants/chat-staff-grants-cli.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1169.0",

@@ -104,6 +104,8 @@ export type CreateChatInternalNoteRequest = z.infer<typeof createChatInternalNot
 export const adminListChatReportsQuerySchema = z
   .object({
     status: z.nativeEnum(ChatReportStatus).optional(),
+    /** Phase 7: reports of one conversation (workspace panel). */
+    conversationId: z.string().uuid().optional(),
     cursor: cursorSchema.optional(),
     limit: adminLimit,
   })
@@ -120,7 +122,12 @@ export const reviewChatReportSchema = z
     ]),
     resolutionNote: z.string().trim().min(1).max(1000).optional(),
   })
-  .strict();
+  .strict()
+  // Phase 7: a terminal decision (resolve / dismiss) must be justified.
+  .refine((r) => r.status === ChatReportStatus.UNDER_REVIEW || !!r.resolutionNote, {
+    message: "A resolution note is required to resolve or dismiss a report",
+    path: ["resolutionNote"],
+  });
 
 export type ReviewChatReportRequest = z.infer<typeof reviewChatReportSchema>;
 
@@ -128,6 +135,8 @@ export const adminChatAuditQuerySchema = z
   .object({
     conversationId: z.string().uuid().optional(),
     actorUserId: z.string().uuid().optional(),
+    /** Phase 7: filter by audit action. */
+    action: z.nativeEnum(ChatAuditAction).optional(),
     cursor: cursorSchema.optional(),
     limit: adminLimit,
   })

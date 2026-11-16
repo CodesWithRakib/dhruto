@@ -45,6 +45,26 @@ export interface ChatAttachmentTunables {
   cleanupBatchSize: number;
   /** Max PENDING reservations a user may hold at once (abuse protection). */
   maxPendingPerUser: number;
+  /* Phase 7 malware scan */
+  scanIntervalMs: number;
+  scanBatchSize: number;
+  /** Scanner errors tolerated before the file is FAILED (blocked). */
+  scanMaxAttempts: number;
+  /** A claimed scan not finished within this lease becomes claimable again. */
+  scanLeaseSeconds: number;
+  /** Retry backoff base (doubles per attempt, capped at 1 h). */
+  scanRetryBaseSeconds: number;
+  /* Phase 7 retention — null = retain indefinitely (no product decision configured) */
+  deletedMessageObjectRetentionSeconds: number | null;
+  quarantinedObjectRetentionSeconds: number | null;
+}
+
+/** Optional duration: unset/blank/invalid → null (feature disabled). */
+function envOptionalSeconds(name: string, min: number): number | null {
+  const raw = process.env[name];
+  if (raw === undefined || raw.trim() === "") return null;
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed >= min ? parsed : null;
 }
 
 export function loadChatStorageConfig(): ChatStorageConfig | null {
@@ -73,6 +93,19 @@ export function loadChatAttachmentTunables(): ChatAttachmentTunables {
     cleanupIntervalMs: envInt("CHAT_ATTACHMENT_CLEANUP_INTERVAL_MS", 10 * 60_000, 10_000),
     cleanupBatchSize: envInt("CHAT_ATTACHMENT_CLEANUP_BATCH", 100, 1),
     maxPendingPerUser: envInt("CHAT_MAX_PENDING_UPLOADS_PER_USER", 20, 1),
+    scanIntervalMs: envInt("CHAT_MALWARE_SCAN_INTERVAL_MS", 15_000, 1000),
+    scanBatchSize: envInt("CHAT_MALWARE_SCAN_BATCH", 20, 1),
+    scanMaxAttempts: envInt("CHAT_MALWARE_SCAN_MAX_ATTEMPTS", 5, 1),
+    scanLeaseSeconds: envInt("CHAT_MALWARE_SCAN_LEASE_SECONDS", 300, 30),
+    scanRetryBaseSeconds: envInt("CHAT_MALWARE_SCAN_RETRY_BASE_SECONDS", 30, 1),
+    deletedMessageObjectRetentionSeconds: envOptionalSeconds(
+      "CHAT_DELETED_MESSAGE_ATTACHMENT_RETENTION_SECONDS",
+      86_400,
+    ),
+    quarantinedObjectRetentionSeconds: envOptionalSeconds(
+      "CHAT_QUARANTINED_ATTACHMENT_RETENTION_SECONDS",
+      86_400,
+    ),
   };
 }
 

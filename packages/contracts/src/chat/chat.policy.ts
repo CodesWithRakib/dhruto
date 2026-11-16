@@ -1,6 +1,9 @@
 import {
+  ChatAttachmentScanStatus,
+  ChatAttachmentStatus,
   ChatConversationStatus,
   ChatConversationType,
+  ChatEscalationStatus,
   ChatParticipantRole,
   ChatParticipantStatus,
 } from "./chat.enums.js";
@@ -155,4 +158,94 @@ export function participantHasCapability(
 ): boolean {
   if (membership !== ChatParticipantStatus.ACTIVE) return false;
   return CHAT_PARTICIPANT_ROLE_CAPABILITIES[role].includes(capability);
+}
+
+/* ------------------------------------------------------------------ */
+/* Escalation (Phase 7)                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Allowed escalation transitions. `null` is "never escalated". Escalation is
+ * an operational overlay: it never changes the conversation lifecycle status
+ * (ACTIVE/CLOSED/…) and never touches parcels.
+ *
+ * - none     -> OPEN | ESCALATED                 (flag / escalate directly)
+ * - OPEN     -> IN_REVIEW | ESCALATED | RESOLVED | CLOSED
+ * - IN_REVIEW-> OPEN | ESCALATED | RESOLVED      (OPEN = hand back to the queue)
+ * - ESCALATED-> IN_REVIEW | RESOLVED
+ * - RESOLVED -> OPEN | ESCALATED | CLOSED        (reopen / close)
+ * - CLOSED   -> OPEN | ESCALATED                 (new cycle)
+ */
+export const CHAT_ESCALATION_TRANSITIONS: Readonly<
+  Record<ChatEscalationStatus | "NONE", readonly ChatEscalationStatus[]>
+> = {
+  NONE: [ChatEscalationStatus.OPEN, ChatEscalationStatus.ESCALATED],
+  [ChatEscalationStatus.OPEN]: [
+    ChatEscalationStatus.IN_REVIEW,
+    ChatEscalationStatus.ESCALATED,
+    ChatEscalationStatus.RESOLVED,
+    ChatEscalationStatus.CLOSED,
+  ],
+  [ChatEscalationStatus.IN_REVIEW]: [
+    ChatEscalationStatus.OPEN,
+    ChatEscalationStatus.ESCALATED,
+    ChatEscalationStatus.RESOLVED,
+  ],
+  [ChatEscalationStatus.ESCALATED]: [ChatEscalationStatus.IN_REVIEW, ChatEscalationStatus.RESOLVED],
+  [ChatEscalationStatus.RESOLVED]: [
+    ChatEscalationStatus.OPEN,
+    ChatEscalationStatus.ESCALATED,
+    ChatEscalationStatus.CLOSED,
+  ],
+  [ChatEscalationStatus.CLOSED]: [ChatEscalationStatus.OPEN, ChatEscalationStatus.ESCALATED],
+};
+
+export function canTransitionEscalation(
+  from: ChatEscalationStatus | null,
+  to: ChatEscalationStatus,
+): boolean {
+  return CHAT_ESCALATION_TRANSITIONS[from ?? "NONE"].includes(to);
+}
+
+/**
+ * A note is mandatory for every escalation change except taking a case into
+ * review: flagging/escalating needs a reason, resolving/closing a resolution.
+ */
+export function escalationNoteRequired(to: ChatEscalationStatus): boolean {
+  return to !== ChatEscalationStatus.IN_REVIEW;
+}
+
+/** Escalation states that count as "needs staff attention". */
+export const CHAT_ESCALATION_ACTIVE_STATUSES: readonly ChatEscalationStatus[] = [
+  ChatEscalationStatus.OPEN,
+  ChatEscalationStatus.IN_REVIEW,
+  ChatEscalationStatus.ESCALATED,
+];
+
+/* ------------------------------------------------------------------ */
+/* Attachment access gate (Phase 7)                                    */
+/* ------------------------------------------------------------------ */
+
+export type ChatAttachmentServeDecision = "serve" | "not_ready" | "scan_pending" | "blocked" | "purged";
+
+/**
+ * Whether stored bytes may be served through ORDINARY (participant) routes.
+ * Only verified (`UPLOADED`) objects whose malware scan is `CLEAN` and whose
+ * object still exists are served. Everything else fails closed.
+ */
+export function chatAttachmentServeDecision(input: {
+  status: ChatAttachmentStatus;
+  scanStatus: ChatAttachmentScanStatus;
+  objectPurged: boolean;
+}): ChatAttachmentServeDecision {
+  if (input.status !== ChatAttachmentStatus.UPLOADED) return "not_ready";
+  if (input.objectPurged) return "purged";
+  switch (input.scanStatus) {
+    case ChatAttachmentScanStatus.CLEAN:
+      return "serve";
+    case ChatAttachmentScanStatus.PENDING:
+      return "scan_pending";
+    default:
+      return "blocked";
+  }
 }

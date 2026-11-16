@@ -1,4 +1,8 @@
-import { ChatConversationType, type ChatPermission } from "@dhruto/contracts";
+import {
+  CHAT_GRANT_REQUIRED_PERMISSIONS,
+  ChatConversationType,
+  type ChatPermission,
+} from "@dhruto/contracts";
 import { UserRole } from "../../database/entities/User.entity.js";
 import { roleHasChatPermission } from "../../common/permissions/chat-permissions.js";
 
@@ -26,6 +30,27 @@ export interface ChatActorScope {
   riderHubId: string | null;
   /** Hubs with an ACTIVE HubUserAssignment (HUB_MANAGER role only). */
   managedHubIds: readonly string[];
+  /**
+   * Active explicit grants for grant-required permissions (Phase 7). Loaded
+   * only for the acting user; absent/empty means "no grants".
+   */
+  staffGrants?: readonly ChatPermission[];
+}
+
+/**
+ * Effective platform-level chat permission (Phase 7): the role ceiling, and
+ * for `CHAT_GRANT_REQUIRED_PERMISSIONS` additionally an active explicit grant.
+ * Scope (hubs) is NOT checked here — see `staffHasPermission`.
+ */
+export function actorHoldsChatPermission(
+  actor: ChatActorScope,
+  permission: ChatPermission,
+): boolean {
+  if (!roleHasChatPermission(actor.role, permission)) return false;
+  if (CHAT_GRANT_REQUIRED_PERMISSIONS.includes(permission)) {
+    return (actor.staffGrants ?? []).includes(permission);
+  }
+  return true;
 }
 
 export interface ChatConversationScope {
@@ -173,7 +198,7 @@ export function staffHasPermission(
   conversation: ChatConversationScope,
   parcel: ChatParcelScope | null,
 ): boolean {
-  if (!roleHasChatPermission(actor.role, permission)) return false;
+  if (!actorHoldsChatPermission(actor, permission)) return false;
   if (actor.role === UserRole.ADMIN) return true;
   if (actor.role === UserRole.HUB_MANAGER) {
     const hubId = conversationHubId(conversation, parcel);

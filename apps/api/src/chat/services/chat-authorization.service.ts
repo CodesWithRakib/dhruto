@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, In, type EntityManager } from "typeorm";
+import { DataSource, In, IsNull, type EntityManager } from "typeorm";
 import {
+  CHAT_GRANT_REQUIRED_PERMISSIONS,
   ChatParticipantStatus,
   isConversationWritable,
   participantHasCapability,
@@ -11,6 +12,7 @@ import {
 import {
   ChatConversation,
   ChatParticipant,
+  ChatStaffGrant,
   HubUserAssignment,
   Merchant,
   Parcel,
@@ -23,6 +25,7 @@ import { type AuthenticatedUser } from "../../auth/jwt/jwt.interface.js";
 import { chatErrors } from "../chat.errors.js";
 import {
   CHAT_HUB_SHARING_TYPES,
+  actorHoldsChatPermission,
   isEligibleParticipant,
   sharesHub,
   staffHasPermission,
@@ -82,10 +85,31 @@ export class ChatAuthorizationService {
 
   /** Loads the acting user's scope; inactive or missing accounts are rejected. */
   async loadActorScope(user: AuthenticatedUser, manager?: EntityManager): Promise<ChatActorScope> {
-    const scopes = await this.loadScopesForUsers([user.id], manager);
-    const scope = scopes.get(user.id);
+    return this.loadActorScopeById(user.id, manager);
+  }
+
+  /** Same as `loadActorScope`, by user id (e.g. validating an escalation assignee). */
+  async loadActorScopeById(userId: string, manager?: EntityManager): Promise<ChatActorScope> {
+    const scopes = await this.loadScopesForUsers([userId], manager);
+    const scope = scopes.get(userId);
     if (!scope) throw chatErrors.forbidden("Account is not active");
+    // Phase 7: explicit grants matter only for staff roles acting right now.
+    if (scope.role === UserRole.ADMIN || scope.role === UserRole.HUB_MANAGER) {
+      scope.staffGrants = await this.loadActiveGrants(userId, manager);
+    }
     return scope;
+  }
+
+  /** Active (not revoked, not expired) grant permissions of one user. */
+  async loadActiveGrants(userId: string, manager?: EntityManager): Promise<ChatPermission[]> {
+    const rows = await this.em(manager)
+      .getRepository(ChatStaffGrant)
+      .find({ where: { userId, revokedAt: IsNull() }, select: ["permission", "expiresAt"] });
+    const now = Date.now();
+    return rows
+      .filter((row) => row.expiresAt === null || row.expiresAt.getTime() > now)
+      .map((row) => CHAT_GRANT_REQUIRED_PERMISSIONS.find((p) => p === row.permission))
+      .filter((permission): permission is ChatPermission => permission !== undefined);
   }
 
   /**
@@ -281,6 +305,23 @@ export class ChatAuthorizationService {
       );
     }
     throw chatErrors.conversationNotFound();
+  }
+
+  /**
+   * Platform-scope staff operation (no single conversation): ADMIN holding
+   * the effective permission (role ceiling + grant where required). 403,
+   * because no resource id is being probed.
+   */
+  async requirePlatformStaff(
+    user: AuthenticatedUser,
+    permission: ChatPermission,
+    manager?: EntityManager,
+  ): Promise<ChatActorScope> {
+    const actor = await this.loadActorScope(user, manager);
+    if (actor.role !== UserRole.ADMIN || !actorHoldsChatPermission(actor, permission)) {
+      throw chatErrors.permissionDenied(`Missing chat permission ${permission}`);
+    }
+    return actor;
   }
 
   /** Staff-only access (admin endpoints). Non-holders get 404 (no existence leak). */
