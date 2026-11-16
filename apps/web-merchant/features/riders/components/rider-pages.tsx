@@ -31,7 +31,7 @@ export function RiderTaskDetailsPage({ parcelId }: { parcelId: string }) {
       <DashboardCanvasBg />
       <PageHeader
         title={t("details.title")}
-        description="Verify recipient OTP, collect payment, and complete the package handover."
+        description={t("details.subtitle")}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {/* Delivery conversation with the customer/merchant; the API checks current assignment. */}

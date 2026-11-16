@@ -775,7 +775,8 @@
       "failNotesPlaceholder": "e.g. Gate locked, phone switched off",
       "rescheduleLabel": "Reschedule date (optional)",
       "submitFailure": "Submit attempt",
-      "submitting": "Submitting…"
+      "submitting": "Submitting…",
+      "subtitle": "Verify recipient OTP, collect payment, and complete the package handover."
     },
     "failReasons": {
       "CUSTOMER_UNAVAILABLE": "Customer unavailable",

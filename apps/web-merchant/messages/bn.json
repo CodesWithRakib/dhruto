@@ -775,7 +775,8 @@
       "failNotesPlaceholder": "যেমন গেট তালাবদ্ধ, ফোন বন্ধ",
       "rescheduleLabel": "পুনর্নির্ধারণের তারিখ (ঐচ্ছিক)",
       "submitFailure": "চেষ্টা জমা দিন",
-      "submitting": "জমা হচ্ছে…"
+      "submitting": "জমা হচ্ছে…",
+      "subtitle": "প্রাপকের ওটিপি যাচাই করুন, অর্থ সংগ্রহ করুন এবং প্যাকেজ হস্তান্তর সম্পন্ন করুন।"
     },
     "failReasons": {
       "CUSTOMER_UNAVAILABLE": "গ্রাহককে পাওয়া যায়নি",
