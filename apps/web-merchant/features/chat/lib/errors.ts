@@ -13,6 +13,10 @@ export type ChatErrorKey =
   | "duplicateReport"
   | "unavailable"
   | "reasonRequired"
+  | "attachmentInvalid"
+  | "attachmentNotFound"
+  | "storageUnavailable"
+  | "limitExceeded"
   | "generic";
 
 /**
@@ -55,6 +59,15 @@ export function chatErrorKey(error: unknown): ChatErrorKey {
       return "unavailable";
     case ApiErrorCode.CHAT_REASON_REQUIRED:
       return "reasonRequired";
+    // Phase 6 attachments.
+    case ApiErrorCode.CHAT_ATTACHMENT_INVALID:
+      return "attachmentInvalid";
+    case ApiErrorCode.CHAT_ATTACHMENT_NOT_FOUND:
+      return "attachmentNotFound";
+    case ApiErrorCode.CHAT_STORAGE_UNAVAILABLE:
+      return "storageUnavailable";
+    case ApiErrorCode.CHAT_LIMIT_EXCEEDED:
+      return "limitExceeded";
     default:
       return "generic";
   }

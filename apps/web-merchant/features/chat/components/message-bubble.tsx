@@ -6,7 +6,6 @@ import {
   Flag,
   MapPin,
   MoreVertical,
-  Paperclip,
   Pencil,
   Pin,
   PinOff,
@@ -31,6 +30,7 @@ import { type TimelineMessage } from "../lib/timeline";
 import { systemEventText } from "../lib/system-events";
 import { messagePermissions, type ConversationCaps, type MessagePermissions } from "../lib/permissions";
 import { DeliveryStatus } from "./chat-primitives";
+import { MessageAttachments } from "./message-attachments";
 
 export const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"] as const;
 
@@ -98,14 +98,10 @@ function MessageBody({ message }: { message: TimelineMessage }) {
         </p>
       )}
       {message.attachments.length > 0 && (
-        <ul className="mb-1 space-y-1">
-          {message.attachments.map((attachment) => (
-            <li key={attachment.id} className="flex items-center gap-1.5 text-sm">
-              <Paperclip className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="truncate">{attachment.originalFilename}</span>
-            </li>
-          ))}
-        </ul>
+        <MessageAttachments
+          attachments={message.attachments}
+          durationMs={metadata && "durationMs" in metadata ? metadata.durationMs : undefined}
+        />
       )}
       {message.content && <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{message.content}</p>}
     </>

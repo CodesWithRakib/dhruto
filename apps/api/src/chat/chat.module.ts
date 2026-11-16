@@ -77,6 +77,8 @@ export const CHAT_ENTITIES = [
     // Phase 5 logistics sync (ChatLogisticsModule).
     ChatMessageService,
     ChatParcelMembershipService,
+    // Phase 6 attachments (ChatAttachmentsModule).
+    ChatAuditService,
   ],
 })
 export class ChatModule {}

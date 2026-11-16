@@ -1,6 +1,7 @@
 import {
   CHAT_PARTICIPANT_ROLE_CAPABILITIES,
   ChatParticipantStatus,
+  chatAttachmentKind,
   computeChatUnreadCount,
   type ChatAttachmentItem,
   type ChatConversationSummary,
@@ -30,6 +31,7 @@ export function toAttachmentItem(a: ChatAttachment): ChatAttachmentItem {
     id: a.id,
     originalFilename: a.originalFilename,
     mimeType: a.mimeType,
+    kind: chatAttachmentKind(a.mimeType),
     sizeBytes: a.sizeBytes,
     status: a.status,
     uploadedAt: iso(a.uploadedAt),

@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { ApiErrorCode } from "@dhruto/contracts";
@@ -72,6 +73,17 @@ export const chatErrors = {
     }),
   attachmentInvalid: (message: string) =>
     new UnprocessableEntityException({ message, error: ApiErrorCode.CHAT_ATTACHMENT_INVALID }),
+  /** Unknown, not visible to the caller, not ready, or of a deleted message — indistinguishable. */
+  attachmentNotFound: () =>
+    new NotFoundException({
+      message: "Attachment not found",
+      error: ApiErrorCode.CHAT_ATTACHMENT_NOT_FOUND,
+    }),
+  storageUnavailable: () =>
+    new ServiceUnavailableException({
+      message: "Attachments are temporarily unavailable",
+      error: ApiErrorCode.CHAT_STORAGE_UNAVAILABLE,
+    }),
   duplicateReport: () =>
     new ConflictException({
       message: "You have already reported this message",

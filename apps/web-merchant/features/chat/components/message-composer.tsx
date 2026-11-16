@@ -1,18 +1,41 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { SendHorizontal, X } from "lucide-react";
+import { Paperclip, SendHorizontal, X } from "lucide-react";
 import { Button, cn } from "@dhruto/ui";
-import { CHAT_MESSAGE_MAX_LENGTH } from "@dhruto/contracts";
+import {
+  CHAT_ALLOWED_ATTACHMENT_MIME_TYPES,
+  CHAT_MAX_ATTACHMENTS_PER_MESSAGE,
+  CHAT_MESSAGE_MAX_LENGTH,
+  CHAT_UPLOAD_POLICY,
+} from "@dhruto/contracts";
+import { toast } from "sonner";
+import { useAttachmentUploads } from "../hooks/use-attachment-uploads";
+import { mediaTypeFor, type OutgoingMedia } from "../hooks/use-send-message";
+import { ComposerAttachments } from "./composer-attachments";
+import { VoiceRecorderBar } from "./voice-recorder-bar";
 
-/** Mirrors the backend TEXT rule (trimmed, 1..CHAT_MESSAGE_MAX_LENGTH). */
+/**
+ * Text field rule: at most CHAT_MESSAGE_MAX_LENGTH. Emptiness is checked at
+ * submit, because a message with ready attachments may have no text (the
+ * backend TEXT rule — trimmed, non-empty — still applies to text-only sends).
+ */
 const composerSchema = z.object({
-  content: z.string().trim().min(1).max(CHAT_MESSAGE_MAX_LENGTH),
+  content: z.string().max(CHAT_MESSAGE_MAX_LENGTH),
 });
+
+const ACCEPT = CHAT_ALLOWED_ATTACHMENT_MIME_TYPES.filter((type) => !type.startsWith("audio/")).join(",");
+
+/** Guidance derived from the shared upload policy (never hardcoded twice). */
+const HINT_LIMITS = {
+  imageMb: CHAT_UPLOAD_POLICY["image/jpeg"].maxBytes / (1024 * 1024),
+  pdfMb: CHAT_UPLOAD_POLICY["application/pdf"].maxBytes / (1024 * 1024),
+  max: CHAT_MAX_ATTACHMENTS_PER_MESSAGE,
+};
 
 type ComposerValues = z.infer<typeof composerSchema>;
 
@@ -30,19 +53,23 @@ export interface MessageComposerProps {
   disabledReason: string | null;
   reply: ComposerReply | null;
   onCancelReply: () => void;
-  onSend: (content: string, replyToMessageId: string | null) => void;
+  /** `media` is present for image/file/voice messages (attachments already verified). */
+  onSend: (content: string, replyToMessageId: string | null, media?: OutgoingMedia) => void;
   onTyping: () => void;
   onStopTyping: () => void;
   /** Changes when switching conversations (resets the draft). */
   resetKey: string;
+  /** Conversation that uploads are authorized for (Phase 6). */
+  conversationId: string;
 }
 
 /**
  * Text composer. Enter sends, Shift+Enter inserts a newline (IME-safe).
  * Sending is optimistic: the input clears immediately and the pending bubble
  * carries retry state, so a slow network never blocks typing the next message.
- * Attachment controls are intentionally absent until the upload service
- * exists (Phase 6) — no non-functional buttons.
+ * Attachments (Phase 6): images/PDFs upload directly to storage with
+ * progress, cancel and retry; the message can only be sent once every
+ * attachment is verified by the server. Voice messages use the mic button.
  */
 export function MessageComposer({
   disabledReason,
@@ -52,6 +79,7 @@ export function MessageComposer({
   onTyping,
   onStopTyping,
   resetKey,
+  conversationId,
 }: MessageComposerProps) {
   const t = useTranslations("Chat");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -63,9 +91,17 @@ export function MessageComposer({
   const content = form.watch("content");
   const remaining = CHAT_MESSAGE_MAX_LENGTH - content.length;
   const disabled = disabledReason !== null;
+  const uploads = useAttachmentUploads(conversationId);
+  const fileInput = useRef<HTMLInputElement | null>(null);
+  const [voiceActive, setVoiceActive] = useState(false);
+  const [emptyError, setEmptyError] = useState(false);
+  const hasText = content.trim().length > 0;
+  const attachmentsBlocking = uploads.busy || uploads.hasFailed;
+  const canSend = (hasText || uploads.ready.length > 0) && !attachmentsBlocking && remaining >= 0;
 
   useEffect(() => {
     form.reset({ content: "" });
+    setEmptyError(false);
   }, [resetKey, form]);
 
   useEffect(() => {
@@ -79,12 +115,41 @@ export function MessageComposer({
     if (reply) textareaRef.current?.focus();
   }, [reply]);
 
-  const submit = form.handleSubmit(({ content: text }) => {
-    onSend(text, reply?.messageId ?? null);
+  const submit = form.handleSubmit(({ content: raw }) => {
+    const text = raw.trim();
+    const attachments = uploads.ready;
+    // Incomplete or failed uploads block sending (never send a partial set).
+    if (attachmentsBlocking) return;
+    if (!text && attachments.length === 0) {
+      setEmptyError(true);
+      return;
+    }
+    setEmptyError(false);
+    const replyTo = reply?.messageId ?? null;
+    if (attachments.length > 0) {
+      onSend(text, replyTo, { type: mediaTypeFor(attachments), attachments });
+      uploads.clearSent();
+    } else {
+      onSend(text, replyTo);
+    }
     onStopTyping();
     form.reset({ content: "" });
     textareaRef.current?.focus();
   });
+
+  const onFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const result = uploads.add(Array.from(files));
+    for (const rejected of result.rejected) {
+      toast.error(t(`attachments.rejected.${rejected.violation}`, { name: rejected.name }));
+    }
+    if (fileInput.current) fileInput.current.value = "";
+  };
+
+  const sendVoice = useCallback(
+    (media: OutgoingMedia) => onSend("", reply?.messageId ?? null, media),
+    [onSend, reply],
+  );
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -107,9 +172,13 @@ export function MessageComposer({
   }
 
   const error = form.formState.errors.content;
+  const showEmpty = emptyError && !hasText && uploads.ready.length === 0;
 
   return (
-    <form onSubmit={submit} className="border-t border-border bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-4">
+    <form
+      onSubmit={submit}
+      className="relative border-t border-border bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-4"
+    >
       {reply && (
         <div className="mb-2 flex items-start gap-2 rounded-lg border-s-2 border-primary bg-muted px-3 py-2 text-xs">
           <div className="min-w-0 flex-1">
@@ -121,43 +190,77 @@ export function MessageComposer({
           </Button>
         </div>
       )}
+      {!voiceActive && (
+        <ComposerAttachments drafts={uploads.drafts} onRetry={uploads.retry} onRemove={uploads.remove} />
+      )}
       <div className="flex items-end gap-2">
-        <label htmlFor="chat-composer" className="sr-only">
-          {t("composerLabel")}
-        </label>
-        <textarea
-          id="chat-composer"
-          ref={(element) => {
-            ref(element);
-            textareaRef.current = element;
-          }}
-          rows={1}
-          maxLength={CHAT_MESSAGE_MAX_LENGTH}
-          placeholder={t("composerPlaceholder")}
-          aria-describedby="chat-composer-hint"
-          aria-invalid={Boolean(error)}
-          onKeyDown={onKeyDown}
-          onChange={(event) => {
-            void onChange(event);
-            if (event.target.value.trim()) onTyping();
-          }}
-          className={cn(
-            "max-h-40 min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2.5 text-sm leading-relaxed",
-            "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-          {...field}
-        />
-        <Button type="submit" size="icon" aria-label={t("send")} disabled={!content.trim() || remaining < 0} className="rounded-full">
-          <SendHorizontal className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
-        </Button>
+        {!voiceActive && (
+          <>
+            <input
+              ref={fileInput}
+              id="chat-composer-files"
+              type="file"
+              multiple
+              accept={ACCEPT}
+              className="sr-only"
+              tabIndex={-1}
+              onChange={(event) => onFiles(event.target.files)}
+              aria-label={t("attachments.add")}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={() => fileInput.current?.click()}
+              aria-label={t("attachments.add")}
+              title={t("attachments.hint", HINT_LIMITS)}
+            >
+              <Paperclip className="h-5 w-5" aria-hidden="true" />
+            </Button>
+            <label htmlFor="chat-composer" className="sr-only">
+              {t("composerLabel")}
+            </label>
+            <textarea
+              id="chat-composer"
+              ref={(element) => {
+                ref(element);
+                textareaRef.current = element;
+              }}
+              rows={1}
+              maxLength={CHAT_MESSAGE_MAX_LENGTH}
+              placeholder={uploads.ready.length > 0 ? t("attachments.captionPlaceholder") : t("composerPlaceholder")}
+              aria-describedby="chat-composer-hint"
+              aria-invalid={Boolean(error) || showEmpty}
+              onKeyDown={onKeyDown}
+              onChange={(event) => {
+                void onChange(event);
+                if (event.target.value.trim()) onTyping();
+              }}
+              className={cn(
+                "max-h-40 min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2.5 text-sm leading-relaxed",
+                "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+              {...field}
+            />
+          </>
+        )}
+        {(voiceActive || (!hasText && uploads.drafts.length === 0)) && (
+          <VoiceRecorderBar conversationId={conversationId} onSend={sendVoice} onActiveChange={setVoiceActive} />
+        )}
+        {!voiceActive && (
+          <Button type="submit" size="icon" aria-label={t("send")} disabled={!canSend} className="rounded-full">
+            <SendHorizontal className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+          </Button>
+        )}
       </div>
       <div className="mt-1 flex items-center justify-between gap-2 px-1 text-[11px] text-muted-foreground">
         <span id="chat-composer-hint" className="hidden sm:inline">
-          {t("composerHint")}
+          {uploads.busy ? t("attachments.waitForUploads") : t("composerHint")}
         </span>
-        {error && (
+        {(error || showEmpty) && (
           <span role="alert" className="text-danger">
-            {content.trim().length === 0 ? t("emptyMessage") : t("tooLong")}
+            {showEmpty ? t("emptyMessage") : t("tooLong")}
           </span>
         )}
         {remaining <= COUNTER_THRESHOLD && (

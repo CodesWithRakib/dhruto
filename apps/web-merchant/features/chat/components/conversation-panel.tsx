@@ -281,12 +281,13 @@ export function ConversationPanel({
 
         <MessageComposer
           resetKey={conversationId}
+          conversationId={conversationId}
           disabledReason={disabledReason}
           reply={reply}
           onCancelReply={() => setReply(null)}
-          onSend={(content, replyTo) => {
+          onSend={(content, replyTo, media) => {
             setReply(null);
-            void send(content, replyTo);
+            void send(content, replyTo, media);
           }}
           onTyping={typingEmitter.onInput}
           onStopTyping={typingEmitter.stop}

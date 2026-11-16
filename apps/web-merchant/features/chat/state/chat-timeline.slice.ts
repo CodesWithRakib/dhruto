@@ -1,7 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
   ChatMessageType,
+  type ChatAttachmentItem,
   type ChatMessageItem,
+  type ChatVoiceMetadata,
   type ChatMessagePage,
   type ChatPageSender,
   type ChatParticipantItem,
@@ -54,7 +56,20 @@ export interface ConversationTimeline {
   cursors: Record<string, ParticipantCursor>;
   appliedEventIds: string[];
   /** Optimistic payloads kept for retry (same clientMessageId). */
-  outbox: Record<string, { content: string; replyToMessageId: string | null }>;
+  outbox: Record<string, OutboxEntry>;
+}
+
+/**
+ * What is needed to resend a logical message with the same clientMessageId.
+ * Attachment fields are present only for media messages (Phase 6); text
+ * entries keep the original two-field shape.
+ */
+export interface OutboxEntry {
+  content: string;
+  replyToMessageId: string | null;
+  type?: ChatMessageType;
+  attachments?: ChatAttachmentItem[];
+  metadata?: ChatVoiceMetadata;
 }
 
 export interface ChatTimelineState {
@@ -177,11 +192,22 @@ const chatTimelineSlice = createSlice({
         content: string;
         replyToMessageId: string | null;
         createdAt: string;
+        /** Media messages (Phase 6): attachments are already uploaded and verified. */
+        type?: ChatMessageType;
+        attachments?: ChatAttachmentItem[];
+        metadata?: ChatVoiceMetadata;
       }>,
     ) {
       const { conversationId, clientMessageId, senderId, content, replyToMessageId, createdAt } = action.payload;
+      const { type, attachments, metadata } = action.payload;
       const timeline = ensure(state, conversationId);
-      timeline.outbox[clientMessageId] = { content, replyToMessageId };
+      timeline.outbox[clientMessageId] = {
+        content,
+        replyToMessageId,
+        ...(type && type !== ChatMessageType.TEXT ? { type } : {}),
+        ...(attachments?.length ? { attachments } : {}),
+        ...(metadata ? { metadata } : {}),
+      };
       timeline.messages[clientMessageId] = {
         key: clientMessageId,
         id: null,
@@ -189,11 +215,11 @@ const chatTimelineSlice = createSlice({
         conversationId,
         sequence: null,
         senderId,
-        type: ChatMessageType.TEXT,
-        content,
+        type: type ?? ChatMessageType.TEXT,
+        content: content || null,
         replyToMessageId,
-        metadata: null,
-        attachments: [],
+        metadata: metadata ?? null,
+        attachments: attachments ?? [],
         reactions: [],
         createdAt,
         editedAt: null,

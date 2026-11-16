@@ -54,6 +54,68 @@ export const CHAT_ALLOWED_ATTACHMENT_MIME_TYPES = [
 
 export type ChatAttachmentMimeType = (typeof CHAT_ALLOWED_ATTACHMENT_MIME_TYPES)[number];
 
+/** How an attachment is presented (derived from its verified MIME type). */
+export type ChatAttachmentKind = "image" | "document" | "audio";
+
+export interface ChatUploadPolicyEntry {
+  kind: ChatAttachmentKind;
+  /** Lowercase extensions accepted for this type (the filename must use one). */
+  extensions: readonly string[];
+  /** Per-type size limit in bytes (always ≤ CHAT_ATTACHMENT_MAX_SIZE_BYTES). */
+  maxBytes: number;
+}
+
+const MiB = 1024 * 1024;
+
+/**
+ * Central upload policy (Phase 6) — the single source for backend validation
+ * and frontend guidance. A file is accepted only if its declared MIME type is
+ * listed, its extension matches that type, its size is within the type limit,
+ * and (server-side, after upload) its magic bytes match the type.
+ */
+export const CHAT_UPLOAD_POLICY: Readonly<Record<ChatAttachmentMimeType, ChatUploadPolicyEntry>> = {
+  "image/jpeg": { kind: "image", extensions: ["jpg", "jpeg"], maxBytes: 10 * MiB },
+  "image/png": { kind: "image", extensions: ["png"], maxBytes: 10 * MiB },
+  "image/webp": { kind: "image", extensions: ["webp"], maxBytes: 10 * MiB },
+  "application/pdf": { kind: "document", extensions: ["pdf"], maxBytes: 20 * MiB },
+  "audio/webm": { kind: "audio", extensions: ["webm", "weba"], maxBytes: 10 * MiB },
+  "audio/ogg": { kind: "audio", extensions: ["ogg", "oga", "opus"], maxBytes: 10 * MiB },
+  "audio/mpeg": { kind: "audio", extensions: ["mp3"], maxBytes: 10 * MiB },
+  "audio/mp4": { kind: "audio", extensions: ["m4a", "mp4"], maxBytes: 10 * MiB },
+};
+
+/** Voice recordings longer than this are rejected (also bounds audio size). */
+export const CHAT_VOICE_MAX_DURATION_MS = 5 * 60 * 1000;
+
+export function isChatAttachmentMimeType(value: string): value is ChatAttachmentMimeType {
+  return (CHAT_ALLOWED_ATTACHMENT_MIME_TYPES as readonly string[]).includes(value);
+}
+
+export function chatAttachmentKind(mimeType: string): ChatAttachmentKind {
+  return isChatAttachmentMimeType(mimeType) ? CHAT_UPLOAD_POLICY[mimeType].kind : "document";
+}
+
+/** Lowercase extension after the last dot ("" when none). */
+export function chatFileExtension(filename: string): string {
+  const dot = filename.lastIndexOf(".");
+  return dot > 0 && dot < filename.length - 1 ? filename.slice(dot + 1).toLowerCase() : "";
+}
+
+export type ChatUploadPolicyViolation = "type" | "extension" | "size";
+
+/** Declared-metadata check shared by the composer and the API (bytes are verified later). */
+export function checkChatUploadPolicy(input: {
+  originalFilename: string;
+  mimeType: string;
+  sizeBytes: number;
+}): ChatUploadPolicyViolation | null {
+  if (!isChatAttachmentMimeType(input.mimeType)) return "type";
+  const policy = CHAT_UPLOAD_POLICY[input.mimeType];
+  if (!policy.extensions.includes(chatFileExtension(input.originalFilename))) return "extension";
+  if (input.sizeBytes <= 0 || input.sizeBytes > policy.maxBytes) return "size";
+  return null;
+}
+
 /* ------------------------------------------------------------------ */
 /* Primitives                                                          */
 /* ------------------------------------------------------------------ */
@@ -284,7 +346,12 @@ function isSafeFilename(name: string): boolean {
   return true;
 }
 
-/** Reserves attachment metadata before upload (upload itself is a later phase). */
+/**
+ * Reserves an attachment upload slot (Phase 6: `POST /chat/conversations/:id/attachments`).
+ * Declared values are checked against CHAT_UPLOAD_POLICY here and are only
+ * hints: the server re-verifies size, checksum and file signature on the
+ * stored object before the attachment becomes usable.
+ */
 export const createChatAttachmentSchema = z
   .object({
     originalFilename: z
@@ -299,7 +366,23 @@ export const createChatAttachmentSchema = z
       .string()
       .regex(/^[a-f0-9]{64}$/, "checksumSha256 must be lowercase hex SHA-256"),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    const violation = checkChatUploadPolicy(value);
+    if (violation === "extension") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["originalFilename"],
+        message: "File extension does not match the file type",
+      });
+    } else if (violation === "size") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["sizeBytes"],
+        message: "File is larger than allowed for this type",
+      });
+    }
+  });
 
 export type CreateChatAttachmentRequest = z.infer<typeof createChatAttachmentSchema>;
 
@@ -327,9 +410,33 @@ export interface ChatAttachmentItem {
   id: string;
   originalFilename: string;
   mimeType: string;
+  /** Presentation kind derived from the verified MIME type (Phase 6). */
+  kind: ChatAttachmentKind;
   sizeBytes: number;
   status: ChatAttachmentStatus;
   uploadedAt: string | null;
+}
+
+/**
+ * Upload authorization returned by the reservation endpoint (Phase 6). The
+ * URL is a short-lived presigned PUT for ONE server-generated object key; it
+ * is never stored, logged or broadcast. Send exactly `headers` with the PUT.
+ */
+export interface ChatAttachmentUploadTicket {
+  attachment: ChatAttachmentItem;
+  upload: {
+    method: "PUT";
+    url: string;
+    headers: Record<string, string>;
+    expiresAt: string;
+  };
+}
+
+/** Short-lived authorized download (Phase 6). Never cache beyond `expiresAt`. */
+export interface ChatAttachmentDownload {
+  url: string;
+  expiresAt: string;
+  disposition: "inline" | "attachment";
 }
 
 export interface ChatReactionSummary {

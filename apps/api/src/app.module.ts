@@ -23,6 +23,7 @@ import { AnalyticsModule } from "./analytics/analytics.module.js";
 import { ChatModule } from "./chat/chat.module.js";
 import { ChatRealtimeModule } from "./chat/realtime/chat-realtime.module.js";
 import { ChatLogisticsModule } from "./chat/logistics/chat-logistics.module.js";
+import { ChatAttachmentsModule } from "./chat/attachments/chat-attachments.module.js";
 import { IdempotencyModule } from "./common/idempotency/idempotency.module.js";
 import { SeederModule } from "./database/seed/seeder.module.js";
 
@@ -62,6 +63,7 @@ import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
     ChatModule,
     ChatRealtimeModule,
     ChatLogisticsModule,
+    ChatAttachmentsModule,
     SeederModule,
     EventsModule,
   ],

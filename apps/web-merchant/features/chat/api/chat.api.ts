@@ -10,7 +10,11 @@ import {
   type ChatPinItem,
   type ChatReportReason,
   type ChatSearchResponse,
+  type ChatAttachmentDownload,
+  type ChatAttachmentItem,
+  type ChatAttachmentUploadTicket,
   type ChatUnreadSummary,
+  type CreateChatAttachmentRequest,
   type CreateChatConversationRequest,
   type SendChatMessageRequest,
 } from "@dhruto/contracts";
@@ -70,6 +74,47 @@ export const chatApi = baseApi
         query: (body) => ({ url: "/chat/conversations", method: "POST", body }),
         transformResponse: (response: ApiResponse<ChatConversationDetail>) => unwrap(response),
         invalidatesTags: ["ChatConversations", "ChatUnread"],
+      }),
+
+      /* --------------------------- Attachments (Phase 6) --------------------------- */
+
+      reserveAttachment: builder.mutation<
+        ChatAttachmentUploadTicket,
+        { conversationId: string; body: CreateChatAttachmentRequest }
+      >({
+        query: ({ conversationId, body }) => ({
+          url: `/chat/conversations/${conversationId}/attachments`,
+          method: "POST",
+          body,
+        }),
+        transformResponse: (response: ApiResponse<ChatAttachmentUploadTicket>) => unwrap(response),
+      }),
+
+      completeAttachment: builder.mutation<ChatAttachmentItem, string>({
+        query: (id) => ({ url: `/chat/attachments/${id}/complete`, method: "POST" }),
+        transformResponse: (response: ApiResponse<ChatAttachmentItem>) => unwrap(response),
+      }),
+
+      cancelAttachment: builder.mutation<{ id: string; deleted: true }, string>({
+        query: (id) => ({ url: `/chat/attachments/${id}`, method: "DELETE" }),
+        transformResponse: (response: ApiResponse<{ id: string; deleted: true }>) => unwrap(response),
+      }),
+
+      /**
+       * Short-lived authorized URL. Cached for less than the server TTL (300 s)
+       * and refetched on demand; never persisted.
+       */
+      getAttachmentDownload: builder.query<ChatAttachmentDownload, string>({
+        query: (id) => `/chat/attachments/${id}/download`,
+        transformResponse: (response: ApiResponse<ChatAttachmentDownload>) => unwrap(response),
+        keepUnusedDataFor: 120,
+      }),
+
+      /** Explicit "Download" action: forces Content-Disposition: attachment. Not cached. */
+      getAttachmentFile: builder.query<ChatAttachmentDownload, string>({
+        query: (id) => `/chat/attachments/${id}/download?download=true`,
+        transformResponse: (response: ApiResponse<ChatAttachmentDownload>) => unwrap(response),
+        keepUnusedDataFor: 0,
       }),
 
       /** Global unread indicator (nav badge). Polled lightly; realtime invalidates it. */
@@ -226,6 +271,11 @@ export const chatApi = baseApi
   });
 
 export const {
+  useReserveAttachmentMutation,
+  useCompleteAttachmentMutation,
+  useCancelAttachmentMutation,
+  useGetAttachmentDownloadQuery,
+  useLazyGetAttachmentFileQuery,
   useOpenConversationMutation,
   useGetUnreadSummaryQuery,
   useGetConversationsInfiniteQuery,

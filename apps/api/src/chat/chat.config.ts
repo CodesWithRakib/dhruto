@@ -30,6 +30,10 @@ export const CHAT_RATE_LIMITS = {
   mutate: perMinute("chat-mutate", "CHAT_RATE_LIMIT_MUTATE_PER_MIN", 60),
   read: perMinute("chat-read", "CHAT_RATE_LIMIT_READ_PER_MIN", 300),
   admin: perMinute("chat-admin", "CHAT_RATE_LIMIT_ADMIN_PER_MIN", 120),
+  /** Phase 6: reserve/complete/cancel attachment uploads. */
+  upload: perMinute("chat-upload", "CHAT_RATE_LIMIT_UPLOAD_PER_MIN", 30),
+  /** Phase 6: authorized download URL issuance. */
+  download: perMinute("chat-download", "CHAT_RATE_LIMIT_DOWNLOAD_PER_MIN", 240),
 } as const;
 
 /** Seconds after sending during which a sender may edit (0 disables editing). */

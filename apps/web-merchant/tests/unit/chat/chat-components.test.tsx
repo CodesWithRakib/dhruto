@@ -158,6 +158,7 @@ describe("MessageComposer", () => {
       onTyping: vi.fn(),
       onStopTyping: vi.fn(),
       resetKey: "c1",
+      conversationId: "c1",
       ...overrides,
     };
     renderUi(<MessageComposer {...props} />);
@@ -202,9 +203,12 @@ describe("MessageComposer", () => {
     expect(screen.queryByLabelText(messages.Chat.composerLabel)).toBeNull();
   });
 
-  it("has no attachment controls (uploads are out of scope until Phase 6)", () => {
+  // Phase 6 replaced "no attachment controls" (uploads were out of scope until then).
+  it("offers attachment and voice controls restricted to the upload policy", () => {
     composer();
-    expect(screen.queryByRole("button", { name: /attach|upload|file/i })).toBeNull();
-    expect(document.querySelector('input[type="file"]')).toBeNull();
+    expect(screen.getAllByRole("button", { name: messages.Chat.attachments.add }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: messages.Chat.voice.record })).toBeTruthy();
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input?.accept.split(",").sort()).toEqual(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
   });
 });
