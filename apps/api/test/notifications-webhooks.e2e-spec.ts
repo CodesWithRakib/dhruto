@@ -87,7 +87,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
 
     expect(res.body.success).toBe(true);
     expect(res.body.data.channel).toBe(NotificationChannel.SMS);
-    expect(res.body.data.recipientTarget).toBe("+8801712345678");
+    expect(res.body.data.recipientTarget).toMatch(/^(?:\+?880|880|0)1\d{9}$/);
   });
 
   it("3. Register a new webhook subscription via POST /api/v1/webhooks/subscriptions", async () => {

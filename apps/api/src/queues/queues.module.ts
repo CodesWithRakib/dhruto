@@ -33,7 +33,7 @@ const logger = new Logger("QueuesModule");
           ? redis.url.replace(/:[^:@]+@/, ":****@")
           : `${redis?.host || "localhost"}:${redis?.port || 6379}`;
         logger.log(
-          `Configured BullMQ queue infrastructure with Redis: ${targetEndpoint}`,
+          `Configured BullMQ queue infrastructure with Redis: ${redis?.targetSummary || targetEndpoint}`,
         );
 
         return {
