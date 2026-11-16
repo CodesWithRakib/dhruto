@@ -42,6 +42,7 @@ import { useSignOut } from "@/lib/auth/session";
 import { NotificationBell } from "@/components/notification-bell";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
 /** Dashboard sections that render inside this shell. */
@@ -212,8 +213,13 @@ export function DashboardShell({
           <SidebarRail />
         </Sidebar>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 bg-surface/80 backdrop-blur-xl px-4 sm:px-6">
+        <div className="flex min-w-0 flex-1 flex-col relative">
+          {/* Tactical Atmospheric Background with dot-matrix & ambient blooms */}
+          <DashboardCanvasBg className="fixed inset-0 pointer-events-none" />
+
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/80 bg-surface/80 backdrop-blur-xl px-4 sm:px-6 shadow-xs">
+            {/* Luminous bottom specular line */}
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent pointer-events-none" />
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger />
               <Link href="/" aria-label="Dhruto" className="lg:hidden">

@@ -27,7 +27,7 @@ export default async function NewBookingPage() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
           <Zap className="h-3 w-3" />
-          <span>Express Engine Online</span>
+          <span>{t("engineOnline")}</span>
         </div>
 
         <h1 className="text-display-sm sm:text-display-md font-bold text-foreground tracking-tight">

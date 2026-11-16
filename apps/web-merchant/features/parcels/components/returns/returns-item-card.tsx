@@ -53,7 +53,7 @@ export function ReturnsItemCard({
               type="button"
               onClick={handleCopy}
               className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
-              title="Copy code"
+              title={t("copyCode")}
             >
               {copied ? (
                 <Check className="h-3.5 w-3.5 text-emerald-500" />

@@ -191,6 +191,7 @@
     "createFailed": "Failed to create parcel booking. Please check your inputs and try again.",
     "pageTitle": "Book a Parcel",
     "pageSubtitle": "Fill in the recipient and package details. Delivery fees are calculated by Dhruto and shown before you confirm.",
+    "engineOnline": "Express Engine Online",
     "sectionRecipient": "Recipient",
     "sectionRecipientHint": "Who will receive this parcel?",
     "sectionDestination": "Destination",
@@ -2373,7 +2374,9 @@
     "bookedOn": "Booked: {date} at {time}",
     "fee": "Fee:",
     "details": "Details",
-    "copied": "Copied tracking code {code}"
+    "copied": "Copied tracking code {code}",
+    "refresh": "Refresh",
+    "copyCode": "Copy tracking code"
   },
   "ApiErrors": {
     "fallback": "Something went wrong. Please try again.",

@@ -95,7 +95,7 @@ export function ReturnsListView() {
             className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`} />
-            <span>Refresh</span>
+            <span>{t("refresh")}</span>
           </Button>
           <Link href={routes.parcels}>
             <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated font-medium">
