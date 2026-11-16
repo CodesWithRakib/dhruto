@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/page-header";
 import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import {
@@ -18,14 +19,15 @@ import { ADMIN_ROUTES } from "@/config/routes";
 import { useAppSelector } from "@/store/hooks";
 
 export default function AdminSettingsPage() {
+  const t = useTranslations("Admin.settings");
   const authUser = useAppSelector((s) => s.auth.user);
 
   return (
     <div className="relative w-full space-y-6 pb-6">
       <DashboardCanvasBg />
       <PageHeader
-        title="Admin Console & Settings"
-        description="System administration, role privileges, and platform-wide configurations."
+        title={t("title")}
+        description={t("subtitle")}
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -35,10 +37,10 @@ export default function AdminSettingsPage() {
             <div className="pb-1">
               <h3 className="text-base font-bold flex items-center gap-2 text-foreground">
                 <UserCheck className="h-4 w-4 text-primary" />
-                Administrator Identity
+                {t("identityTitle")}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Your authenticated account has elevated privileges across the Dhruto operating network.
+                {t("identitySubtitle")}
               </p>
             </div>
 
@@ -49,7 +51,7 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-base font-bold text-foreground">{authUser?.name || "System Admin"}</p>
+                    <p className="text-base font-bold text-foreground">{authUser?.name || t("systemAdmin")}</p>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
                       {authUser?.role || "ADMIN"}
                     </span>
@@ -61,21 +63,21 @@ export default function AdminSettingsPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl bg-surface-muted/60 p-4 space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Privilege Level
+                    {t("privilegeLevel")}
                   </p>
-                  <p className="text-sm font-bold text-foreground">Global Supervisor</p>
+                  <p className="text-sm font-bold text-foreground">{t("globalSupervisor")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Unrestricted access to all hubs, merchants, ledgers, and rider fleets.
+                    {t("privilegeDescription")}
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-surface-muted/60 p-4 space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Session Security
+                    {t("sessionSecurity")}
                   </p>
-                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Active & Verified</p>
+                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t("activeVerified")}</p>
                   <p className="text-xs text-muted-foreground">
-                    JWT Session with HttpOnly refresh cookies & RBAC authorization.
+                    {t("securityDescription")}
                   </p>
                 </div>
               </div>
@@ -88,7 +90,7 @@ export default function AdminSettingsPage() {
           <div className="rounded-3xl bg-surface-elevated p-6 space-y-4">
             <h3 className="text-base font-bold flex items-center gap-2 text-foreground">
               <Server className="h-4 w-4 text-primary" />
-              System Surfaces
+              {t("systemSurfaces")}
             </h3>
 
             <div className="space-y-2">
@@ -98,7 +100,7 @@ export default function AdminSettingsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <Layers className="h-4 w-4 text-primary" />
-                  <span>Integrations & Outbox DLQ</span>
+                  <span>{t("integrationsDlq")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
@@ -109,7 +111,7 @@ export default function AdminSettingsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <Wallet className="h-4 w-4 text-primary" />
-                  <span>Financial Console & Ledger</span>
+                  <span>{t("financialConsole")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
@@ -120,7 +122,7 @@ export default function AdminSettingsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <Bike className="h-4 w-4 text-primary" />
-                  <span>Rider Fleet Management</span>
+                  <span>{t("riderFleet")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
@@ -131,7 +133,7 @@ export default function AdminSettingsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <Warehouse className="h-4 w-4 text-primary" />
-                  <span>Hub Infrastructure</span>
+                  <span>{t("hubInfrastructure")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>

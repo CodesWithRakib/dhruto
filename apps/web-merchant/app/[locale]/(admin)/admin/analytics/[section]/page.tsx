@@ -5,6 +5,7 @@ import {
   AdminSectionDashboard,
   type AnalyticsSection,
 } from "@/features/analytics/components/admin-section-dashboard";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 const TITLES: Record<string, string> = {
   parcels: "Parcel Analytics",
@@ -50,5 +51,10 @@ export default async function AdminAnalyticsSectionPage({
   if (!TITLES[section]) {
     notFound();
   }
-  return <AdminSectionDashboard section={section as AnalyticsSection} />;
+  return (
+    <div className="relative w-full">
+      <DashboardCanvasBg />
+      <AdminSectionDashboard section={section as AnalyticsSection} />
+    </div>
+  );
 }

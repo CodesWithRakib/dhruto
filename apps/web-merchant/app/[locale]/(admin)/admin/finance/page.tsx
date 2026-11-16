@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { AdminFinanceDashboard } from "@/features/finance/components/admin-finance-dashboard";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminFinancePage() {
-  return <AdminFinanceDashboard />;
+  return (
+    <div className="relative w-full">
+      <DashboardCanvasBg />
+      <AdminFinanceDashboard />
+    </div>
+  );
 }

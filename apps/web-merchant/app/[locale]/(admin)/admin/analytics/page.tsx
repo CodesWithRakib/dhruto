@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { AdminOverviewDashboard } from "@/features/analytics/components/admin-overview-dashboard";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata: Metadata = {
   title: "Analytics Overview — Admin",
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminAnalyticsPage() {
-  return <AdminOverviewDashboard />;
+  return (
+    <div className="relative w-full">
+      <DashboardCanvasBg />
+      <AdminOverviewDashboard />
+    </div>
+  );
 }

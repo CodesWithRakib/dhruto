@@ -979,7 +979,45 @@
       "checkMerchants": "মার্চেন্ট ওয়ালেট",
       "checkRiders": "রাইডার নগদ অবস্থান",
       "checkSettlements": "সেটেলমেন্ট গণিত",
-      "checkTransactions": "জার্নাল ভারসাম্য"
+      "checkTransactions": "জার্নাল ভারসাম্য",
+      "hints": {
+        "totalCod": "ডেলিভারি থেকে সংগৃহীত মোট নগদ অর্থ",
+        "pendingReconciliation": "ট্রানজিটে বা অসত্যায়িত নগদ অর্থ",
+        "merchantPayables": "বর্তমান সামগ্রিক মার্চেন্ট ব্যালেন্স",
+        "disbursedPayouts": "সফলভাবে নিষ্পন্ন মার্চেন্ট পেআউট",
+        "openDiscrepancies": "অমীমাংসিত রাইডার/হাব বৈষম্য"
+      },
+      "headers": {
+        "payoutCode": "পেআউট কোড",
+        "date": "তারিখ",
+        "methodAccount": "মাধ্যম ও অ্যাকাউন্ট",
+        "reference": "রেফারেন্স",
+        "amount": "পরিমাণ",
+        "status": "অবস্থা",
+        "actions": "পদক্ষেপ",
+        "transactionCode": "লেনদেন কোড",
+        "type": "ধরন",
+        "debitTotal": "মোট ডেবিট",
+        "ledgerEntries": "লেজার এন্ট্রি (ডেবিট / ক্রেডিট)",
+        "discrepancyType": "অমিলের ধরন",
+        "expectedCash": "প্রত্যাশিত নগদ",
+        "verifiedCash": "যাচাইকৃত নগদ",
+        "netVariance": "নেট তারতম্য"
+      },
+      "form": {
+        "merchantIdLabel": "মার্চেন্ট আইডেন্টিফায়ার (UUID) *",
+        "merchantIdPlaceholder": "যেমন: 550e8400-e29b-41d4-a716-446655440000",
+        "merchantIdHelper": "অডিট সমন্বয় ডেবিট বা ক্রেডিট পোস্ট করার জন্য লক্ষ্য মার্চেন্ট প্রোফাইল।",
+        "amountLabel": "পরিমাণ (টাকা) *",
+        "reasonPlaceholder": "আর্থিক অডিট সম্মতির জন্য স্পষ্ট অপারেশনাল কারণ উল্লেখ করুন...",
+        "referenceHelper": "অডিট এবং মার্চেন্ট চালান রসিদের জন্য ব্যাংক BEFTN/RTGS রেফারেন্স বা MFS লেনদেন আইডি লিখুন।",
+        "reverseReasonPlaceholder": "লেজার রিভার্সালের কারণ উল্লেখ করুন..."
+      },
+      "reports": {
+        "description": "যাচাইযোগ্য ডাবল-এন্ট্রি লেনদেন লেজার এবং প্ল্যাটফর্ম ফি সংগ্রহ এক্সপোর্ট করুন।",
+        "cumulativeFees": "মোট সঞ্চিত ফি সংগ্রহ",
+        "journalExport": "জার্নাল"
+      }
     },
     "zeroFeeGuaranteed": "০% ফি গ্যারান্টিযুক্ত",
     "personal": "ব্যক্তিগত",
@@ -2213,6 +2251,62 @@
     "rider": {
       "title": "রাইডার অপারেশন",
       "description": "লাস্ট-মাইল টাস্ক কিউ ও নগদ সংগ্রহ।"
+    },
+    "networkStatusTitle": "দেশব্যাপী লজিস্টিক নেটওয়ার্কের স্থিতি",
+    "allSystemsActive": "সকল ব্যবস্থা সক্রিয়",
+    "networkStatusDescription": "সকল ১৪টি হাব লোকেশন, লাইনহল স্থানান্তর, রাইডার ডিসপ্যাচ কিউ এবং স্বয়ংক্রিয় পেআউট ইঞ্জিন SLA সীমার মধ্যে পরিচালিত হচ্ছে।",
+    "slaBadge": "এসএলএ: ৯৯.৮%",
+    "hubsOnline": "১৪টি হাব সক্রিয়",
+    "fleetSync": "ফ্লিট সিঙ্ক্রোনাইজড",
+    "systemGuide": "সিস্টেম গাইড",
+    "globalLookup": "গ্লোবাল অনুসন্ধান",
+    "commandDomains": "অপারেশনাল কমান্ড ডোমেন",
+    "directAccess": "সরাসরি সুপারভাইজারি অ্যাক্সেস",
+    "platformGateways": "প্ল্যাটফর্ম ইন্টেলিজেন্স ও গেটওয়ে",
+    "telemetryAutomation": "টেলিমেট্রি ও অটোমেশন",
+    "exploreTelemetry": "টেলিমেট্রি অন্বেষণ করুন",
+    "supervisoryNotice": "তদারকি সংক্রান্ত বিজ্ঞপ্তি:",
+    "supervisoryNoticeText": "পার্সেল, হাব ম্যানিফেস্ট এবং মার্চেন্ট আর্থিক পেআউট সংক্রান্ত সমস্ত প্রশাসনিক কার্যক্রম অপারেটর টাইমস্ট্যাম্প ও আইপি ফিঙ্গারপ্রিন্টসহ অপরিবর্তনযোগ্য অডিট লগে সংরক্ষিত হয়।",
+    "badges": {
+      "realtimeTracking": "রিয়েল-টাইম ট্র্যাকিং",
+      "activeHubs": "১৪টি সক্রিয় হাব",
+      "lastMileRunsheets": "লাস্ট-মাইল রানশীট",
+      "payoutApprovalQueue": "পেআউট অনুমোদন কিউ",
+      "executiveKpis": "নির্বাহী কেপিআই",
+      "mlProtection": "এমএল সুরক্ষা",
+      "apiInfrastructure": "এপিআই অবকাঠামো"
+    },
+    "ctas": {
+      "openParcels": "পার্সেল রেজিস্ট্রি খুলুন",
+      "superviseHubs": "হাবসমূহ তত্ত্বাবধান করুন",
+      "manageFleet": "ফ্লিট পরিচালনা করুন",
+      "openFinance": "ফাইন্যান্স ডেস্ক খুলুন"
+    },
+    "intelligence": {
+      "analyticsTitle": "প্ল্যাটফর্ম অ্যানালিটিক্স ও রিপোর্ট",
+      "analyticsDescription": "ভলিউম ট্রেন্ড, ডেলিভারি সফলতার হার, আরটিও কোহর্ট বিশ্লেষণ এবং কাস্টমাইজড সিএসভি ডেটাসেট এক্সপোর্ট।",
+      "intelligenceTitle": "এআই ঝুঁকি ও জালিয়াতি ইন্টেলিজেন্স",
+      "intelligenceDescription": "স্বয়ংক্রিয় উচ্চ-ঝুঁকিপূর্ণ অর্ডার স্কোরিং, রিটার্ন পূর্বাভাস অ্যালগরিদম এবং মার্চেন্ট বিশ্বাসযোগ্যতা যাচাই।",
+      "integrationsTitle": "ওয়েবহুক ও ডেভেলপার গেটওয়ে",
+      "integrationsDescription": "রিয়েল-টাইম ডিসপ্যাচ ইভেন্ট ওয়েবহুক, পার্টনার এপিআই কী এবং এন্ডপয়েন্ট নির্ভরযোগ্যতা টেলিমেট্রি।"
+    },
+    "settings": {
+      "title": "অ্যাডমিন কনসোল ও সেটিংস",
+      "subtitle": "সিস্টেম প্রশাসন, ভূমিকার সুবিধা এবং প্ল্যাটফর্মব্যাপী কনফিগারেশন।",
+      "identityTitle": "প্রশাসকের পরিচয়",
+      "identitySubtitle": "ঢ্রুতো অপারেটিং নেটওয়ার্ক জুড়ে আপনার অ্যাকাউন্টে বিশেষ সুপারভাইজারি সুবিধা রয়েছে।",
+      "systemAdmin": "সিস্টেম অ্যাডমিন",
+      "privilegeLevel": "সুবিধার স্তর",
+      "globalSupervisor": "গ্লোবাল সুপারভাইজার",
+      "privilegeDescription": "সমস্ত হাব, মার্চেন্ট, লেজার এবং রাইডার ফ্লিটে বাধাহীন প্রবেশাধিকার।",
+      "sessionSecurity": "সেশন নিরাপত্তা",
+      "activeVerified": "সক্রিয় ও যাচাইকৃত",
+      "securityDescription": "HttpOnly রিফ্রেশ কুকি ও RBAC অনুমোদনসহ JWT সেশন।",
+      "systemSurfaces": "সিস্টেম সারফেস",
+      "integrationsDlq": "ইন্টিগ্রেশন ও আউটবক্স DLQ",
+      "financialConsole": "ফাইন্যান্স কনসোল ও লেজার",
+      "riderFleet": "রাইডার ফ্লিট ব্যবস্থাপনা",
+      "hubInfrastructure": "হাব অবকাঠামো"
     }
   },
   "Pwa": {
@@ -2341,7 +2435,11 @@
     "insufficientDataHint": "কমপক্ষে ১০টি ফলাফল লেবেল হলে প্রিসিশন দেখা যাবে।",
     "ack": "স্বীকার",
     "exportFailed": "এক্সপোর্ট অনুরোধ ব্যর্থ।",
-    "requestExport": "অনুরোধ"
+    "requestExport": "অনুরোধ",
+    "loading": "লোড হচ্ছে…",
+    "loadErrorTitle": "এই বিভাগটি লোড করা যায়নি",
+    "retry": "পুনরায় চেষ্টা করুন",
+    "emptyState": "নির্বাচিত সময়ের জন্য কোনো তথ্য নেই"
   },
   "MerchantAnalytics": {
     "title": "স্টোর অ্যানালিটিক্স",

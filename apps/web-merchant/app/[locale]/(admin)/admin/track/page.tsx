@@ -1,5 +1,6 @@
 import React from "react";
 import { PublicTrackingView } from "@/features/tracking/components/public-tracking-view";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata = {
   title: "Track Shipment — Admin Operations",
@@ -8,7 +9,8 @@ export const metadata = {
 
 export default function AdminTrackPage() {
   return (
-    <div className="w-full">
+    <div className="relative w-full">
+      <DashboardCanvasBg />
       <PublicTrackingView />
     </div>
   );

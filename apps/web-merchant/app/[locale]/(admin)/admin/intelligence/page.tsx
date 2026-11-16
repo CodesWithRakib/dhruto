@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { AdminIntelligenceDashboard } from "@/features/intelligence/components/admin-intelligence-dashboard";
+import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 
 export const metadata: Metadata = {
   title: "Intelligence Operations — Admin",
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminIntelligencePage() {
-  return <AdminIntelligenceDashboard />;
+  return (
+    <div className="relative w-full">
+      <DashboardCanvasBg />
+      <AdminIntelligenceDashboard />
+    </div>
+  );
 }

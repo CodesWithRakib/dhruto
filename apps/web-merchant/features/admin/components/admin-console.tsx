@@ -37,56 +37,56 @@ export function AdminConsole() {
       labelKey: "parcels",
       icon: Package,
       tone: "border-blue-500/25 bg-blue-500/10 text-blue-700 dark:text-blue-300",
-      cta: "Open Parcel Registry",
-      badge: "Real-Time Tracking",
+      cta: t("ctas.openParcels"),
+      badge: t("badges.realtimeTracking"),
     },
     {
       href: ADMIN_ROUTES.hub,
       labelKey: "hub",
       icon: Warehouse,
       tone: "border-amber-500/25 bg-amber-500/10 text-amber-800 dark:text-amber-200",
-      cta: "Supervise Hubs",
-      badge: "14 Active Hubs",
+      cta: t("ctas.superviseHubs"),
+      badge: t("badges.activeHubs"),
     },
     {
       href: ADMIN_ROUTES.rider,
       labelKey: "rider",
       icon: Bike,
       tone: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-      cta: "Manage Fleet",
-      badge: "Last-Mile Runsheets",
+      cta: t("ctas.manageFleet"),
+      badge: t("badges.lastMileRunsheets"),
     },
     {
       href: ADMIN_ROUTES.finance,
       labelKey: "finance",
       icon: Wallet,
       tone: "border-purple-500/25 bg-purple-500/10 text-purple-700 dark:text-purple-300",
-      cta: "Open Finance Desk",
-      badge: "Payout Approval Queue",
+      cta: t("ctas.openFinance"),
+      badge: t("badges.payoutApprovalQueue"),
     },
   ];
 
   const intelligenceCards = [
     {
       href: ADMIN_ROUTES.analytics,
-      title: "Platform Analytics & Reports",
-      description: "Volume trends, delivery success rate, RTO cohort analysis, and customized CSV dataset exports.",
+      title: t("intelligence.analyticsTitle"),
+      description: t("intelligence.analyticsDescription"),
       icon: BarChart3,
-      badge: "Executive KPIs",
+      badge: t("badges.executiveKpis"),
     },
     {
       href: ADMIN_ROUTES.intelligence,
-      title: "AI Risk & Fraud Intelligence",
-      description: "Automated high-risk order scoring, return prediction algorithms, and merchant trust verification.",
+      title: t("intelligence.intelligenceTitle"),
+      description: t("intelligence.intelligenceDescription"),
       icon: BrainCircuit,
-      badge: "ML Protection",
+      badge: t("badges.mlProtection"),
     },
     {
       href: ADMIN_ROUTES.integrations,
-      title: "Webhooks & Developer Gateways",
-      description: "Real-time dispatch event webhooks, partner API keys, and endpoint reliability telemetry.",
+      title: t("intelligence.integrationsTitle"),
+      description: t("intelligence.integrationsDescription"),
       icon: Radio,
-      badge: "API Infrastructure",
+      badge: t("badges.apiInfrastructure"),
     },
   ];
 
@@ -104,7 +104,7 @@ export function AdminConsole() {
                 className="gap-1.5"
               >
                 <Workflow className="h-4 w-4" />
-                <span>System Guide</span>
+                <span>{t("systemGuide")}</span>
               </Button>
             </Link>
             <Link href={ADMIN_ROUTES.tracking}>
@@ -112,7 +112,7 @@ export function AdminConsole() {
                 className="gap-1.5"
               >
                 <Search className="h-4 w-4" />
-                <span>Global Lookup</span>
+                <span>{t("globalLookup")}</span>
               </Button>
             </Link>
           </div>
@@ -129,12 +129,12 @@ export function AdminConsole() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-extrabold text-foreground">
-                  Nationwide Logistics Network Status
+                  {t("networkStatusTitle")}
                 </h3>
-                <Badge variant="primary-soft" className="text-[10px] font-bold">All Systems Active</Badge>
+                <Badge variant="primary-soft" className="text-[10px] font-bold">{t("allSystemsActive")}</Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                All 14 hub locations, linehaul transfers, rider dispatch queues, and automated payout engines are operating within SLA.
+                {t("networkStatusDescription")}
               </p>
             </div>
           </div>
@@ -142,15 +142,15 @@ export function AdminConsole() {
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              SLA: 99.8%
+              {t("slaBadge")}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-              14 Hubs Online
+              {t("hubsOnline")}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-              Fleet Synchronized
+              {t("fleetSync")}
             </span>
           </div>
         </div>
@@ -160,9 +160,9 @@ export function AdminConsole() {
       <section aria-label="Operational Domains">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Operational Command Domains
+            {t("commandDomains")}
           </h2>
-          <span className="text-[11px] text-muted-foreground font-medium">Direct Supervisory Access</span>
+          <span className="text-[11px] text-muted-foreground font-medium">{t("directAccess")}</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -209,9 +209,9 @@ export function AdminConsole() {
       <section aria-label="Intelligence & Infrastructure">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Platform Intelligence & Gateways
+            {t("platformGateways")}
           </h2>
-          <span className="text-[11px] text-muted-foreground font-medium">Telemetry & Automation</span>
+          <span className="text-[11px] text-muted-foreground font-medium">{t("telemetryAutomation")}</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -241,7 +241,7 @@ export function AdminConsole() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary">
-                  <span>Explore Telemetry</span>
+                  <span>{t("exploreTelemetry")}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </Link>
@@ -257,7 +257,8 @@ export function AdminConsole() {
             <ShieldCheck className="h-4 w-4" />
           </span>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <span className="font-bold text-foreground">Supervisory Notice:</span> Administrative actions across parcels, hub manifests, and merchant financial payouts are permanently recorded in immutable audit logs with operator timestamp and IP fingerprinting.
+            <span className="font-bold text-foreground">{t("supervisoryNotice")}</span>{" "}
+            {t("supervisoryNoticeText")}
           </p>
         </div>
       </Card>

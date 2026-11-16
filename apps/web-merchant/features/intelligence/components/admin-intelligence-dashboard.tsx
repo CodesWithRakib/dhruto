@@ -11,6 +11,7 @@ import {
   useListOverridesQuery,
 } from "../api/intelligence-admin.api";
 import { PageHeader } from "@/components/page-header";
+import { AdminIllustrationBg } from "@/components/visual/illustration-backgrounds";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { useFormatters } from "@/lib/format";
 
@@ -41,6 +42,8 @@ export function AdminIntelligenceDashboard() {
 
   return (
     <div className="relative w-full space-y-6">
+      <AdminIllustrationBg opacity={0.35} />
+
       <PageHeader
         title={t("title")}
         description={t("subtitle")}

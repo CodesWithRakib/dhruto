@@ -979,7 +979,45 @@
       "checkMerchants": "Merchant wallets",
       "checkRiders": "Rider cash positions",
       "checkSettlements": "Settlement math",
-      "checkTransactions": "Journal balance"
+      "checkTransactions": "Journal balance",
+      "hints": {
+        "totalCod": "Total cash collected from deliveries",
+        "pendingReconciliation": "Cash in transit or unverified",
+        "merchantPayables": "Current aggregate merchant balance",
+        "disbursedPayouts": "Successfully settled merchant payouts",
+        "openDiscrepancies": "Unresolved rider/hub variances"
+      },
+      "headers": {
+        "payoutCode": "Payout Code",
+        "date": "Date",
+        "methodAccount": "Method & Account",
+        "reference": "Reference",
+        "amount": "Amount",
+        "status": "Status",
+        "actions": "Actions",
+        "transactionCode": "Transaction Code",
+        "type": "Type",
+        "debitTotal": "Debit Total",
+        "ledgerEntries": "Ledger Entries (Debit / Credit)",
+        "discrepancyType": "Discrepancy Type",
+        "expectedCash": "Expected Cash",
+        "verifiedCash": "Verified Cash",
+        "netVariance": "Net Variance"
+      },
+      "form": {
+        "merchantIdLabel": "Merchant Identifier (UUID) *",
+        "merchantIdPlaceholder": "e.g. 550e8400-e29b-41d4-a716-446655440000",
+        "merchantIdHelper": "Target merchant profile to post an audit adjustment debit or credit.",
+        "amountLabel": "Amount (BDT) *",
+        "reasonPlaceholder": "State clear operational reason for financial audit compliance...",
+        "referenceHelper": "Enter bank BEFTN/RTGS reference or MFS Transaction ID for audit and merchant invoice receipts.",
+        "reverseReasonPlaceholder": "State reason for ledger reversal..."
+      },
+      "reports": {
+        "description": "Export verifiable double-entry transaction ledgers and platform fee collections.",
+        "cumulativeFees": "Cumulative Fee Collections",
+        "journalExport": "Journal"
+      }
     },
     "zeroFeeGuaranteed": "0% Fee Guaranteed",
     "personal": "Personal",
@@ -2213,6 +2251,62 @@
     "rider": {
       "title": "Rider operations",
       "description": "Last-mile task queues and cash collection."
+    },
+    "networkStatusTitle": "Nationwide Logistics Network Status",
+    "allSystemsActive": "All Systems Active",
+    "networkStatusDescription": "All 14 hub locations, linehaul transfers, rider dispatch queues, and automated payout engines are operating within SLA.",
+    "slaBadge": "SLA: 99.8%",
+    "hubsOnline": "14 Hubs Online",
+    "fleetSync": "Fleet Synchronized",
+    "systemGuide": "System Guide",
+    "globalLookup": "Global Lookup",
+    "commandDomains": "Operational Command Domains",
+    "directAccess": "Direct Supervisory Access",
+    "platformGateways": "Platform Intelligence & Gateways",
+    "telemetryAutomation": "Telemetry & Automation",
+    "exploreTelemetry": "Explore Telemetry",
+    "supervisoryNotice": "Supervisory Notice:",
+    "supervisoryNoticeText": "Administrative actions across parcels, hub manifests, and merchant financial payouts are permanently recorded in immutable audit logs with operator timestamp and IP fingerprinting.",
+    "badges": {
+      "realtimeTracking": "Real-Time Tracking",
+      "activeHubs": "14 Active Hubs",
+      "lastMileRunsheets": "Last-Mile Runsheets",
+      "payoutApprovalQueue": "Payout Approval Queue",
+      "executiveKpis": "Executive KPIs",
+      "mlProtection": "ML Protection",
+      "apiInfrastructure": "API Infrastructure"
+    },
+    "ctas": {
+      "openParcels": "Open Parcel Registry",
+      "superviseHubs": "Supervise Hubs",
+      "manageFleet": "Manage Fleet",
+      "openFinance": "Open Finance Desk"
+    },
+    "intelligence": {
+      "analyticsTitle": "Platform Analytics & Reports",
+      "analyticsDescription": "Volume trends, delivery success rate, RTO cohort analysis, and customized CSV dataset exports.",
+      "intelligenceTitle": "AI Risk & Fraud Intelligence",
+      "intelligenceDescription": "Automated high-risk order scoring, return prediction algorithms, and merchant trust verification.",
+      "integrationsTitle": "Webhooks & Developer Gateways",
+      "integrationsDescription": "Real-time dispatch event webhooks, partner API keys, and endpoint reliability telemetry."
+    },
+    "settings": {
+      "title": "Admin Console & Settings",
+      "subtitle": "System administration, role privileges, and platform-wide configurations.",
+      "identityTitle": "Administrator Identity",
+      "identitySubtitle": "Your authenticated account has elevated privileges across the Dhruto operating network.",
+      "systemAdmin": "System Admin",
+      "privilegeLevel": "Privilege Level",
+      "globalSupervisor": "Global Supervisor",
+      "privilegeDescription": "Unrestricted access to all hubs, merchants, ledgers, and rider fleets.",
+      "sessionSecurity": "Session Security",
+      "activeVerified": "Active & Verified",
+      "securityDescription": "JWT Session with HttpOnly refresh cookies & RBAC authorization.",
+      "systemSurfaces": "System Surfaces",
+      "integrationsDlq": "Integrations & Outbox DLQ",
+      "financialConsole": "Financial Console & Ledger",
+      "riderFleet": "Rider Fleet Management",
+      "hubInfrastructure": "Hub Infrastructure"
     }
   },
   "Pwa": {
@@ -2341,7 +2435,11 @@
     "insufficientDataHint": "Precision and recall appear once at least 10 outcomes are labeled.",
     "ack": "Acknowledge",
     "exportFailed": "Export request failed.",
-    "requestExport": "Request"
+    "requestExport": "Request",
+    "loading": "Loading…",
+    "loadErrorTitle": "Could not load this section",
+    "retry": "Try again",
+    "emptyState": "No data for selected period"
   },
   "MerchantAnalytics": {
     "title": "Store Analytics",
