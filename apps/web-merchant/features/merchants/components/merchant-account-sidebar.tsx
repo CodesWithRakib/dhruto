@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Bell, ExternalLink, ShieldCheck, Wallet, Webhook } from "lucide-react";
 import { CopyButton } from "@/components/data-display/copy-button";
 import { Link } from "@/lib/navigation";
@@ -19,6 +20,8 @@ export function MerchantAccountSidebar({
   userEmail,
   createdAt,
 }: MerchantAccountSidebarProps) {
+  const t = useTranslations("Settings");
+
   return (
     <div className="space-y-6">
       {/* Identity & Technical Info */}
@@ -27,19 +30,19 @@ export function MerchantAccountSidebar({
 
         <h3 className="text-body-md font-bold flex items-center gap-2 text-foreground">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          <span>Account Details</span>
+          <span>{t("accountDetails")}</span>
         </h3>
 
         <div className="space-y-4 text-xs">
           <div>
-            <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">Merchant ID</p>
+            <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">{t("merchantId")}</p>
             <div className="mt-1 flex items-center justify-between rounded-xl border border-border/70 bg-surface-muted/60 px-3 py-2 font-mono text-[11px]">
               <span className="truncate max-w-[180px] font-semibold text-foreground">{merchantId || "N/A"}</span>
               {merchantId ? (
                 <CopyButton
                   value={merchantId}
-                  label="Copy Merchant ID"
-                  copiedLabel="Copied"
+                  label={t("merchantId")}
+                  copiedLabel={t("merchantId")}
                   errorLabel="Error"
                   size="sm"
                 />
@@ -48,13 +51,13 @@ export function MerchantAccountSidebar({
           </div>
 
           <div>
-            <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">User Account</p>
+            <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">{t("userAccount")}</p>
             <p className="font-bold mt-0.5 text-foreground text-body-sm">{userName}</p>
             <p className="text-caption text-muted-foreground font-mono">{userEmail}</p>
           </div>
 
           <div>
-            <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">Member Since</p>
+            <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">{t("memberSince")}</p>
             <p className="font-bold mt-0.5 text-foreground">
               {createdAt
                 ? new Date(createdAt).toLocaleDateString("en-US", {
@@ -62,7 +65,7 @@ export function MerchantAccountSidebar({
                     month: "short",
                     day: "numeric",
                   })
-                : "Active"}
+                : t("activeStatus")}
             </p>
           </div>
         </div>
@@ -70,7 +73,7 @@ export function MerchantAccountSidebar({
 
       {/* Connected Shortcuts */}
       <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 space-y-3 shadow-sm backdrop-blur-md">
-        <h3 className="text-body-md font-bold text-foreground">Quick Links</h3>
+        <h3 className="text-body-md font-bold text-foreground">{t("quickLinks")}</h3>
 
         <div className="space-y-2">
           <Link
@@ -79,7 +82,7 @@ export function MerchantAccountSidebar({
           >
             <div className="flex items-center gap-2.5">
               <Webhook className="h-4 w-4 text-primary" />
-              <span>Webhooks & API Keys</span>
+              <span>{t("webhooksApiKeys")}</span>
             </div>
             <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Link>
@@ -90,7 +93,7 @@ export function MerchantAccountSidebar({
           >
             <div className="flex items-center gap-2.5">
               <Wallet className="h-4 w-4 text-primary" />
-              <span>Wallet & Payouts</span>
+              <span>{t("walletPayouts")}</span>
             </div>
             <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Link>
@@ -101,7 +104,7 @@ export function MerchantAccountSidebar({
           >
             <div className="flex items-center gap-2.5">
               <Bell className="h-4 w-4 text-primary" />
-              <span>Notification Center</span>
+              <span>{t("notifications")}</span>
             </div>
             <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Link>

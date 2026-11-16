@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@dhruto/ui";
 import {
   useGetMerchantProfileQuery,
@@ -13,6 +14,7 @@ import { MerchantDetailsForm } from "./merchant-details-form";
 import { MerchantAccountSidebar } from "./merchant-account-sidebar";
 
 export function MerchantSettingsView() {
+  const t = useTranslations("Settings");
   const authUser = useAppSelector((s) => s.auth.user);
 
   const { data: profileResponse, isLoading, refetch, isFetching } = useGetMerchantProfileQuery();
@@ -37,7 +39,7 @@ export function MerchantSettingsView() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!businessName.trim() || !contactPhone.trim() || !pickupAddress.trim()) {
-      toast.error("Please fill in all required profile fields.");
+      toast.error(t("validationError"));
       return;
     }
 
@@ -48,10 +50,10 @@ export function MerchantSettingsView() {
         pickupAddress: pickupAddress.trim(),
       }).unwrap();
 
-      toast.success("Merchant profile updated successfully.");
+      toast.success(t("saved"));
       setIsDirty(false);
     } catch {
-      toast.error("Failed to update merchant profile. Please try again.");
+      toast.error(t("saveError"));
     }
   };
 

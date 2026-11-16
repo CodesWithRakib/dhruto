@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, RefreshCw, Store } from "lucide-react";
 import { Button } from "@dhruto/ui";
 
@@ -19,6 +20,8 @@ export function MerchantProfileCard({
   onRefresh,
   isFetching,
 }: MerchantProfileCardProps) {
+  const t = useTranslations("Settings");
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 shadow-sm backdrop-blur-md">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -39,7 +42,7 @@ export function MerchantProfileCard({
               </span>
             </div>
             <p className="text-body-sm text-muted-foreground">
-              {email} • Registered Merchant Account
+              {email ? `${email} • ${t("registeredAccount")}` : t("registeredAccount")}
             </p>
           </div>
         </div>
@@ -53,7 +56,7 @@ export function MerchantProfileCard({
             className="gap-2 rounded-xl text-xs font-semibold border-border/80 hover:bg-surface-elevated"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`} />
-            <span>Refresh</span>
+            <span>{t("refresh")}</span>
           </Button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Code2, Copy, ExternalLink, Terminal } from "lucide-react";
 import { Button } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
@@ -11,6 +12,7 @@ interface ApiCodeSnippetViewerProps {
 }
 
 export function ApiCodeSnippetViewer({ apiKeySecret }: ApiCodeSnippetViewerProps) {
+  const t = useTranslations("Developer");
   const [activeCodeLang, setActiveCodeLang] = useState<"curl" | "node" | "python">("curl");
   const [snippetCopied, setSnippetCopied] = useState(false);
 
@@ -76,7 +78,7 @@ print("Tracking Code:", response.json()["data"]["trackingCode"])`,
   const handleCopySnippet = () => {
     void navigator.clipboard.writeText(codeSnippets[activeCodeLang]);
     setSnippetCopied(true);
-    toast.success(`${activeCodeLang.toUpperCase()} snippet copied to clipboard`);
+    toast.success(t("snippetCopied", { lang: activeCodeLang.toUpperCase() }));
     setTimeout(() => setSnippetCopied(false), 2000);
   };
 
@@ -88,8 +90,8 @@ print("Tracking Code:", response.json()["data"]["trackingCode"])`,
             <Code2 className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-body font-bold text-foreground">Integration Quickstart</h3>
-            <p className="text-caption text-muted-foreground">Authenticate your backend services in under 2 minutes</p>
+            <h3 className="text-body font-bold text-foreground">{t("quickstartTitle")}</h3>
+            <p className="text-caption text-muted-foreground">{t("quickstartDesc")}</p>
           </div>
         </div>
 

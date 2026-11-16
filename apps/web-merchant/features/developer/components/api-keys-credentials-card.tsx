@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Copy, Check, Eye, EyeOff, Key, Lock, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button, Badge } from "@dhruto/ui";
 
@@ -23,6 +24,8 @@ export function ApiKeysCredentialsCard({
   onCopy,
   onRequestRotate,
 }: ApiKeysCredentialsCardProps) {
+  const t = useTranslations("Developer");
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 sm:p-8 shadow-sm backdrop-blur-md space-y-6">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -33,17 +36,17 @@ export function ApiKeysCredentialsCard({
             <Key className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-body-md font-bold text-foreground tracking-tight">Active API Credentials</h2>
-            <p className="text-caption text-muted-foreground">Standard bearer authentication for Dhruto REST APIs</p>
+            <h2 className="text-body-md font-bold text-foreground tracking-tight">{t("activeCredentials")}</h2>
+            <p className="text-caption text-muted-foreground">{t("credentialsDesc")}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono">
-            Environment: Production
+            {t("envProduction")}
           </Badge>
           <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30 font-mono">
-            Rate: 1,200 req/min
+            {t("rateLimit")}
           </Badge>
         </div>
       </div>
@@ -53,9 +56,9 @@ export function ApiKeysCredentialsCard({
         <div className="rounded-2xl border border-border/70 bg-surface-muted/40 p-4 space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
-              Merchant Public Client ID
+              {t("publicClientId")}
             </label>
-            <span className="text-[11px] font-mono text-muted-foreground">Safe to expose in frontend SDKs</span>
+            <span className="text-[11px] font-mono text-muted-foreground">{t("publicClientDesc")}</span>
           </div>
           <div className="flex items-center gap-2">
             <code className="flex-1 font-mono text-body-sm font-semibold text-foreground break-all select-all">
@@ -72,7 +75,7 @@ export function ApiKeysCredentialsCard({
               ) : (
                 <Copy className="h-3.5 w-3.5" />
               )}
-              <span>{copiedKey === "Client ID" ? "Copied" : "Copy"}</span>
+              <span>{copiedKey === "Client ID" ? t("copied") : t("copy")}</span>
             </Button>
           </div>
         </div>
@@ -83,10 +86,10 @@ export function ApiKeysCredentialsCard({
             <div className="flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5 text-amber-500" />
               <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
-                API Secret Key (Bearer Token)
+                {t("secretKey")}
               </label>
             </div>
-            <span className="text-[11px] font-mono text-rose-500 font-semibold">Keep secret on backend servers only</span>
+            <span className="text-[11px] font-mono text-rose-500 font-semibold">{t("secretKeyDesc")}</span>
           </div>
           <div className="flex items-center gap-2">
             <code className="flex-1 font-mono text-body-sm font-semibold text-foreground break-all select-all">
@@ -99,7 +102,7 @@ export function ApiKeysCredentialsCard({
               className="h-8 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-semibold gap-1.5"
             >
               {showSecret ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-              <span>{showSecret ? "Hide" : "Reveal"}</span>
+              <span>{showSecret ? t("hide") : t("reveal")}</span>
             </Button>
             <Button
               variant="outline"
@@ -112,7 +115,7 @@ export function ApiKeysCredentialsCard({
               ) : (
                 <Copy className="h-3.5 w-3.5" />
               )}
-              <span>{copiedKey === "Secret Key" ? "Copied" : "Copy"}</span>
+              <span>{copiedKey === "Secret Key" ? t("copied") : t("copy")}</span>
             </Button>
           </div>
         </div>
@@ -121,7 +124,7 @@ export function ApiKeysCredentialsCard({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
         <p className="text-caption text-muted-foreground flex items-center gap-1.5">
           <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
-          <span>Rotating your secret invalidates existing token instances immediately.</span>
+          <span>{t("rotateWarning")}</span>
         </p>
 
         <Button
@@ -131,7 +134,7 @@ export function ApiKeysCredentialsCard({
           className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated text-xs font-semibold self-start sm:self-auto"
         >
           <RefreshCw className="h-3.5 w-3.5 text-primary" />
-          <span>Rotate Secret Key</span>
+          <span>{t("rotateSecret")}</span>
         </Button>
       </div>
     </div>

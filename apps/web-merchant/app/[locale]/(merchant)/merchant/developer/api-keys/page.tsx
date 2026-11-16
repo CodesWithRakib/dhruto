@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/page-header";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { ApiKeysCredentialsCard } from "@/features/developer/components/api-keys
 import { ApiCodeSnippetViewer } from "@/features/developer/components/api-code-snippet-viewer";
 
 export default function MerchantApiKeysPage() {
+  const t = useTranslations("Developer");
   const { user } = useAppSelector((state) => state.auth);
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export default function MerchantApiKeysPage() {
   const copyToClipboard = (text: string, label: string) => {
     void navigator.clipboard.writeText(text);
     setCopiedKey(label);
-    toast.success(`${label} copied to clipboard`);
+    toast.success(t("toastCopied", { label }));
     setTimeout(() => setCopiedKey(null), 2500);
   };
 
@@ -37,7 +39,7 @@ export default function MerchantApiKeysPage() {
     const newKey = `dhr_sec_${randomHex}`;
     setApiKeySecret(newKey);
     setRotateDialogOpen(false);
-    toast.success("API Secret regenerated successfully. Remember to update your servers.");
+    toast.success(t("toastRegenerated"));
   };
 
   return (
@@ -48,8 +50,8 @@ export default function MerchantApiKeysPage() {
       {/* Hero Header */}
       <div className="relative z-10">
         <PageHeader
-          title="API Keys & Access Tokens"
-          description="Authenticate automated shipments, warehouse order sync, and logistics data pipelines."
+          title={t("apiKeysTitle")}
+          description={t("apiKeysSubtitle")}
         />
       </div>
 
@@ -70,10 +72,10 @@ export default function MerchantApiKeysPage() {
       <ConfirmDialog
         open={rotateDialogOpen}
         onOpenChange={setRotateDialogOpen}
-        title="Rotate Secret Key?"
-        description="Are you sure you want to rotate your API Secret? Any active scripts or server integrations currently using the old secret will fail immediately until updated."
-        confirmLabel="Yes, Generate New Secret"
-        cancelLabel="Cancel"
+        title={t("rotateTitle")}
+        description={t("rotateDesc")}
+        confirmLabel={t("rotateConfirm")}
+        cancelLabel={t("rotateCancel")}
         tone="danger"
         onConfirm={handleRotateKey}
       />
