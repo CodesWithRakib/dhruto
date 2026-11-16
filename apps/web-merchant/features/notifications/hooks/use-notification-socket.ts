@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { notificationsApi } from "../api/notifications.api";
+import { baseApi } from "@/lib/api/base-api";
 import { playNotificationSound } from "@/lib/sound";
 import { apiSocketOrigin } from "@/lib/api/socket-origin";
 
@@ -93,6 +94,13 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
 
       // 3. Immediately refresh Redux RTK notification cache (0ms delay)
       dispatch(notificationsApi.util.invalidateTags(["Notification"]));
+
+      // 4. Invalidate related entities for instant dashboard reactivity
+      if (data.type === "PARCEL_STATUS_UPDATE") {
+        dispatch(baseApi.util.invalidateTags(["Parcel", "Analytics"]));
+      } else if (data.type === "CASH_COLLECTED" || data.type === "PAYOUT_UPDATE") {
+        dispatch(baseApi.util.invalidateTags(["Wallet", "Finance"]));
+      }
     };
 
     const onUnreadCount = (_data: { unreadCount: number }) => {
