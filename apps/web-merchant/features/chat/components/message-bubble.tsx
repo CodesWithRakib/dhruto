@@ -28,6 +28,7 @@ import {
 import { ChatMessageDeliveryStatus, ChatMessageType } from "@dhruto/contracts";
 import { formatClock } from "../lib/display";
 import { type TimelineMessage } from "../lib/timeline";
+import { systemEventText } from "../lib/system-events";
 import { messagePermissions, type ConversationCaps, type MessagePermissions } from "../lib/permissions";
 import { DeliveryStatus } from "./chat-primitives";
 
@@ -67,12 +68,10 @@ export interface MessageBubbleProps {
 
 function SystemRow({ message }: { message: TimelineMessage }) {
   const t = useTranslations("Chat");
-  const key =
-    message.metadata && "eventKey" in message.metadata ? message.metadata.eventKey : null;
   return (
     <div className="flex justify-center py-1">
-      <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-        {key === "chat.staff_joined" ? t("systemStaffJoined") : t("systemEvent")}
+      <span className="max-w-[90%] rounded-full bg-muted px-3 py-1 text-center text-xs text-muted-foreground">
+        {systemEventText(message.metadata, t)}
       </span>
     </div>
   );

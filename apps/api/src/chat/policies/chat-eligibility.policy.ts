@@ -81,10 +81,17 @@ export const CHAT_HUB_SHARING_TYPES: ReadonlySet<ChatConversationType> = new Set
   ChatConversationType.INTERNAL_SUPERVISOR,
 ]);
 
-/** Digits-only phone comparison tolerant of a `+88`/`88` country prefix. */
-export function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  return digits.length === 13 && digits.startsWith("88") ? digits.slice(2) : digits;
+/**
+ * Recipient-customer identity (Phase 5): the same rule the parcel module uses
+ * for customer parcel access (`parcels.recipient_phone = users.phone`, exact).
+ * Customer accounts are provisioned server-side (public registration is
+ * merchant-only), and `users.phone` is unique on its raw value, so exact
+ * equality is the only comparison that maps one parcel to one account —
+ * format-tolerant matching could admit two accounts ("01…" and "+8801…").
+ * Chat access is therefore never broader than parcel-details access.
+ */
+export function isParcelRecipient(actor: ChatActorScope, parcel: ChatParcelScope): boolean {
+  return actor.role === UserRole.CUSTOMER && actor.phone === parcel.recipientPhone;
 }
 
 /** Hubs an internal user operates in (assignments for managers, home hub for riders). */
@@ -133,7 +140,7 @@ export function isEligibleParticipant(
       return actor.merchantId !== null && conversation.merchantId === actor.merchantId;
 
     case UserRole.CUSTOMER:
-      if (parcel) return normalizePhone(parcel.recipientPhone) === normalizePhone(actor.phone);
+      if (parcel) return isParcelRecipient(actor, parcel);
       return isSupportTicket && isCreator;
 
     case UserRole.RIDER:

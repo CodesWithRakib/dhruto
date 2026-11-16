@@ -27,6 +27,7 @@ import {
 } from "@dhruto/ui";
 import { Link, usePathname, useRouter } from "@/lib/navigation";
 import { bottomNavForRole, navForRole, type NavItem } from "@/config/navigation";
+import { ChatUnreadBadge } from "@/features/chat/components/chat-unread-badge";
 import {
   asAppRole,
   canAccessSection,
@@ -102,6 +103,9 @@ function SidebarNavItems({
                             aria-hidden="true"
                           />
                           <span className="truncate group-data-[collapsible=icon]:hidden">{label}</span>
+                          {item.indicator === "chat-unread" ? (
+                            <ChatUnreadBadge className="ms-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground group-data-[collapsible=icon]:hidden" />
+                          ) : null}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

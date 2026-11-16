@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useStore } from "react-redux";
-import { ChatServerEvent, type ChatMessageEvent } from "@dhruto/contracts";
+import { ChatMessageType, ChatServerEvent, type ChatMessageEvent } from "@dhruto/contracts";
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/store/hooks";
 import { chatApi } from "../api/chat.api";
@@ -34,6 +34,18 @@ export function useChatEventHandlers(client: ChatSocketClient | null, myUserId: 
     const onMessage = (event: ChatMessageEvent, isNew: boolean) => {
       dispatch(messageReceived({ message: event.message, eventId: event.eventId }));
       dispatch(applyMessageToInbox(event.message, myUserId, isNew));
+      // A logistics lifecycle message means the parcel status changed: refresh
+      // the conversation detail so the parcel context bar is not stale.
+      const metadata = event.message.metadata;
+      if (
+        isNew &&
+        event.message.type === ChatMessageType.SYSTEM_EVENT &&
+        metadata &&
+        "eventKey" in metadata &&
+        metadata.eventKey.startsWith("parcel.")
+      ) {
+        dispatch(chatApi.util.invalidateTags([{ type: "ChatConversation", id: event.conversationId }]));
+      }
       // Live gap detection: a sequence beyond lastSeen + 1 means we missed events.
       const timeline = store.getState().chatTimeline.conversations[event.conversationId];
       const lastSeen = timeline?.initialized ? lastSeenSequence(timeline) : null;

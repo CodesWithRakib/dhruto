@@ -155,7 +155,9 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 2 — chat REST ba
         `INSERT INTO "parcels" ("tracking_code", "merchant_id", "recipient_name", "recipient_phone", "raw_address", "current_rider_id", "current_hub_id")
          VALUES ('CHT-A-1', $1, 'Recipient', $3, 'Dhaka', $4, $5),
                 ('CHT-B-1', $2, 'Other', '01799999999', 'Dhaka', NULL, $5) RETURNING "id"`,
-        [merchantA, merchantB, `+88${RECIPIENT_PHONE}`, rider1, HUB_DHK],
+        // Phase 5: recipient identity is exact phone equality (same rule as the
+        // parcel module), so the parcel stores the customer's phone verbatim.
+        [merchantA, merchantB, RECIPIENT_PHONE, rider1, HUB_DHK],
       )
     ).map((r: { id: string }) => r.id);
 
@@ -775,6 +777,10 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 2 — chat REST ba
           rider1,
           parcelA,
         ]);
+        // Phase 5: rider3's get-or-create reconciled membership, so rider1's
+        // row is now REMOVED by the workflow. Assigned back, rider1 is
+        // re-admitted through get-or-create (workflow removals only).
+        expect((await createParcelThread("rider1")).status).toBe(200);
       }
     });
 

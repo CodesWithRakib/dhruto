@@ -167,3 +167,21 @@ The UPDATE's row lock serializes senders in one conversation; the unique index i
 
 **Decision.** Message rows use `content-visibility: auto` with an intrinsic size; history pages are 50 messages and the timeline is bounded.
 **Why.** Keeps browser scroll anchoring, find-in-page and screen-reader order intact without a new dependency. Revisit if very long sessions show measurable cost.
+
+# Phase 5 additions
+
+## ADR-030 — Logistics sync is a post-commit outbox consumer, not an in-transaction call
+
+**Decision.** Parcel/rider services keep publishing their existing domain events inside their transactions; a new `chat-logistics` relay target hands committed `parcel.*` events to a chat-side handler (global module + port, like ADR-024's realtime port) that commits its own transaction.
+**Why.** A rolled-back transition can never reach chat, a chat failure can never block a delivery, and retries are free (idempotent per event id). No second outbox; no parcel/hub service changes.
+**Consequences.** Chat effects lag the parcel commit by one relay poll; access is already correct immediately because eligibility is live.
+
+## ADR-031 — Membership rows converge to live eligibility (workflow removals)
+
+**Decision.** Reconciliation marks ineligible ACTIVE members `REMOVED` with an actor-less, `metadata.workflow` audit row and admits the current rider. Re-admission happens only when the latest removal was a workflow removal; moderator removals are final.
+**Why.** Resolves the Phase 2 finding (stale ACTIVE rows), gives immediate socket revocation, and keeps moderator decisions authoritative without a new column (the audit trail distinguishes the two).
+
+## ADR-032 — Staff get-or-create on an existing thread is an intervention
+
+**Decision.** An ADMIN who is not an ACTIVE participant must supply a reason to open an existing parcel thread or merchant desk; it runs the single intervention writer (permission, `ADMIN_INTERVENTION` audit, visible notice). Customer identity uses exact phone equality, matching the parcel module.
+**Why.** Removes the last implicit ADMIN path to conversation history and keeps chat access a subset of parcel access.

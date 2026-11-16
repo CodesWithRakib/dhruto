@@ -5,7 +5,7 @@ import {
   CHAT_TYPE_CREATOR_ROLES,
   CHAT_TYPE_PARTICIPANT_ROLES,
   isEligibleParticipant,
-  normalizePhone,
+  isParcelRecipient,
   sharesHub,
   staffHasPermission,
   type ChatActorScope,
@@ -49,7 +49,7 @@ const parcel: ChatParcelScope = {
   merchantId: MERCHANT_A,
   currentRiderId: RIDER_1,
   currentHubId: HUB_DHK,
-  recipientPhone: "+8801812345678",
+  recipientPhone: "01812345678",
 };
 
 const scope = (overrides: Partial<ChatConversationScope>): ChatConversationScope => ({
@@ -213,10 +213,17 @@ describe("staff permissions are scoped, never a blanket ADMIN bypass for others"
 });
 
 describe("helpers", () => {
-  it("normalizePhone tolerates +88 / 88 prefixes", () => {
-    expect(normalizePhone("+8801812345678")).toBe("01812345678");
-    expect(normalizePhone("8801812345678")).toBe("01812345678");
-    expect(normalizePhone("01812345678")).toBe("01812345678");
+  it("recipient identity is exact phone equality, like parcel-details access (Phase 5)", () => {
+    expect(isParcelRecipient(recipient, parcel)).toBe(true);
+    // Same number in another format may be a different account (users.phone is unique raw).
+    const plus88 = actor(UserRole.CUSTOMER, { phone: "+8801812345678" });
+    const bare88 = actor(UserRole.CUSTOMER, { phone: "8801812345678" });
+    for (const a of [plus88, bare88]) {
+      expect(isParcelRecipient(a, parcel)).toBe(false);
+      expect(isEligibleParticipant(a, parcelThread, parcel)).toBe(false);
+    }
+    // Only customers can be the recipient, even with a matching phone.
+    expect(isParcelRecipient(actor(UserRole.RIDER, { phone: "01812345678" }), parcel)).toBe(false);
   });
 
   it("sharesHub: admin always; otherwise a common hub", () => {

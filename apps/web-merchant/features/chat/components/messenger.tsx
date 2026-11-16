@@ -13,6 +13,7 @@ import { messengerRoutes, type MessengerSection } from "../lib/routes";
 import { ConnectionBanner } from "./chat-primitives";
 import { ConversationPanel } from "./conversation-panel";
 import { ConversationSidebar } from "./conversation-sidebar";
+import { OpenConversationButton } from "./open-conversation-button";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -54,7 +55,16 @@ export function Messenger({ section }: { section: MessengerSection }) {
               activeId ? "hidden" : "flex",
             )}
           >
-            <ConversationSidebar routes={routes} activeId={activeId} myUserId={userId} />
+            <ConversationSidebar
+              routes={routes}
+              activeId={activeId}
+              myUserId={userId}
+              headerAction={
+                section === "merchant" ? (
+                  <OpenConversationButton target={{ kind: "merchantDesk" }} variant="soft" />
+                ) : undefined
+              }
+            />
           </aside>
           <section className={cn("min-h-0 min-w-0 flex-1 flex-col", activeId ? "flex" : "hidden md:flex")}>
             {activeId === null ? (
@@ -68,6 +78,7 @@ export function Messenger({ section }: { section: MessengerSection }) {
                   conversationId={activeId}
                   myUserId={userId}
                   routes={routes}
+                  section={section}
                   infoOpen={infoOpen}
                   onInfoOpenChange={setInfoOpen}
                 />

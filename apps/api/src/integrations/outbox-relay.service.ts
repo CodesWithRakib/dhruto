@@ -56,6 +56,7 @@ import {
 } from "../notifications/templates.js";
 import { getErrorMessage } from "../common/utils/error.util.js";
 import { REALTIME_FANOUT_HANDLER, type RealtimeFanoutHandler } from "./realtime-fanout.port.js";
+import { CHAT_LOGISTICS_HANDLER, type ChatLogisticsHandler } from "./chat-logistics.port.js";
 
 type Payload = Record<string, unknown>;
 
@@ -99,6 +100,17 @@ interface ChatRealtimeTarget {
 
 const CHAT_REALTIME: ChatRealtimeTarget = { kind: "chat-realtime" };
 
+/**
+ * Parcel lifecycle → communication sync (Phase 5) — see chat-logistics.port.ts.
+ * Listed LAST for each parcel event so notification/webhook rows are written
+ * first; every target is idempotent, so a retry caused by this one is safe.
+ */
+interface ChatLogisticsTarget {
+  kind: "chat-logistics";
+}
+
+const CHAT_LOGISTICS: ChatLogisticsTarget = { kind: "chat-logistics" };
+
 interface WebhookTarget {
   kind: "webhook";
   event: WebhookEvent;
@@ -120,7 +132,8 @@ type FanoutTarget =
   | RiderInAppTarget
   | HubInAppTarget
   | WebhookTarget
-  | ChatRealtimeTarget;
+  | ChatRealtimeTarget
+  | ChatLogisticsTarget;
 
 interface ResolvedRecipient {
   key: string;
@@ -167,6 +180,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_ASSIGNED },
+    CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_OUT_FOR_DELIVERY]: [
     // NOTE: no customer-sms here by design. The customer is notified on the
@@ -182,6 +196,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_OUT_FOR_DELIVERY },
+    CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_DELIVERED]: [
     {
@@ -204,6 +219,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       templateKey: "parcel_delivered",
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_DELIVERED },
+    CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_FAILED]: [
     {
@@ -227,6 +243,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/rider/tasks/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_FAILED },
+    CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_RETURNED]: [
     {
@@ -237,6 +254,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_RETURNED },
+    CHAT_LOGISTICS,
   ],
   [DomainEventType.CASH_HAND_IN_SUBMITTED]: [
     {
@@ -491,6 +509,9 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     @Optional()
     @Inject(REALTIME_FANOUT_HANDLER)
     private readonly realtime?: RealtimeFanoutHandler,
+    @Optional()
+    @Inject(CHAT_LOGISTICS_HANDLER)
+    private readonly chatLogistics?: ChatLogisticsHandler,
   ) {}
 
   onModuleInit(): void {
@@ -602,6 +623,16 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
           actorId: row.actorId,
           payload,
           createdAt: row.createdAt,
+        });
+      } else if (target.kind === "chat-logistics") {
+        // Committed parcel event; the handler commits its own chat changes and
+        // is idempotent per eventId, so retries never duplicate effects.
+        await this.chatLogistics?.handle({
+          eventId: row.eventId,
+          eventType,
+          aggregateId: row.aggregateId,
+          requestId: row.requestId,
+          payload,
         });
       } else if (target.kind === "hub-inapp") {
         await this.fanOutHubManagers(manager, row, target, payload);

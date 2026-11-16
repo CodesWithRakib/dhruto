@@ -24,6 +24,7 @@ import { CUSTOMER_ROUTES } from "@/config/routes";
 import { ParcelStatus } from "@dhruto/contracts";
 import type { CustomerDelivery } from "../../hooks/use-customer-deliveries";
 import { useFormatters } from "@/lib/format";
+import { OpenConversationButton } from "@/features/chat/components/open-conversation-button";
 
 export function getProgressStep(status: ParcelStatus | string): {
   step: number;
@@ -200,6 +201,13 @@ export function CustomerActiveShipmentCard({
                   View Proof of Delivery (POD)
                 </Button>
               )}
+
+              {/* Delivery conversation with the rider; the API checks recipient ownership. */}
+              <OpenConversationButton
+                target={{ kind: "parcel", parcelId: activeShipment.id }}
+                size="default"
+                className="h-10 text-xs font-semibold gap-1.5 rounded-xl border-border/70 bg-card hover:bg-surface-muted shadow-2xs"
+              />
 
               <Link href={`${CUSTOMER_ROUTES.tracking}/${activeShipment.trackingCode}`}>
                 <Button variant="default" className="h-10 text-xs font-semibold gap-1.5 rounded-xl shadow-xs">

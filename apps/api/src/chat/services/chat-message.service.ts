@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, In, QueryFailedError, type EntityManager } from "typeorm";
+import { DataSource, In, IsNull, QueryFailedError, type EntityManager } from "typeorm";
 import {
   CHAT_MESSAGE_PREVIEW_MAX_LENGTH,
   ChatAttachmentStatus,
@@ -236,6 +236,49 @@ export class ChatMessageService {
       senderId: null,
       type: message.type,
     });
+    return message;
+  }
+
+  /**
+   * Workflow SYSTEM_EVENT message (Phase 5 logistics), idempotent per source
+   * domain event: `sourceEventId` is stored as the message's
+   * `client_message_id` and checked under the conversation row lock, so an
+   * outbox retry of the same event never posts a second message. (The unique
+   * (conversation, sender, client id) index cannot dedupe here because
+   * system messages have a NULL sender.) Returns null when already posted.
+   */
+  async appendWorkflowSystemMessage(
+    manager: EntityManager,
+    conversationId: string,
+    metadata: ChatSystemEventMetadata,
+    source: { sourceEventId: string; requestId: string | null },
+  ): Promise<ChatMessage | null> {
+    const conversation = await this.lockConversation(manager, conversationId);
+    const existing = await manager.getRepository(ChatMessage).findOne({
+      where: {
+        conversationId,
+        senderUserId: IsNull(),
+        clientMessageId: source.sourceEventId,
+        type: ChatMessageType.SYSTEM_EVENT,
+      },
+      select: ["id"],
+    });
+    if (existing) return null;
+    const message = await this.insertAtNextSequence(manager, conversation, {
+      senderUserId: null,
+      clientMessageId: source.sourceEventId,
+      type: ChatMessageType.SYSTEM_EVENT,
+      content: null,
+      metadata,
+      replyToMessageId: null,
+    });
+    await this.events.appendWorkflow(
+      manager,
+      source.requestId,
+      DomainEventType.CHAT_MESSAGE_CREATED,
+      conversationId,
+      { messageId: message.id, sequence: message.sequence, senderId: null, type: message.type },
+    );
     return message;
   }
 

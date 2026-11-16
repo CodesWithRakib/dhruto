@@ -24,7 +24,8 @@ import { useConversationRoom } from "../realtime/use-conversation-room";
 import { conversationTitleWithParticipants, senderName } from "../lib/display";
 import { conversationCaps, NO_CAPS } from "../lib/permissions";
 import { compareSequence, type TimelineMessage } from "../lib/timeline";
-import { type MessengerRoutes } from "../lib/routes";
+import { type MessengerRoutes, type MessengerSection } from "../lib/routes";
+import { ParcelContextBar } from "./parcel-context-bar";
 import {
   cursorsSeeded,
   findByMessageId,
@@ -51,12 +52,14 @@ export function ConversationPanel({
   conversationId,
   myUserId,
   routes,
+  section,
   infoOpen,
   onInfoOpenChange,
 }: {
   conversationId: string;
   myUserId: string;
   routes: MessengerRoutes;
+  section: MessengerSection;
   infoOpen: boolean;
   onInfoOpenChange: (open: boolean) => void;
 }) {
@@ -252,6 +255,7 @@ export function ConversationPanel({
             </Button>
           )}
         </header>
+        {detail?.parcel && <ParcelContextBar parcel={detail.parcel} section={section} />}
 
         <MessageTimeline
           key={conversationId}

@@ -27,6 +27,8 @@ import { ChatMessageReaderService } from "./services/chat-message-reader.service
 import { ChatMessageService } from "./services/chat-message.service.js";
 import { ChatParticipantService } from "./services/chat-participant.service.js";
 import { ChatSearchService } from "./services/chat-search.service.js";
+import { ChatParcelMembershipService } from "./services/chat-parcel-membership.service.js";
+import { ChatStaffInterventionService } from "./services/chat-staff-intervention.service.js";
 
 /** Communication platform persistence entities (registered for autoLoadEntities). */
 export const CHAT_ENTITIES = [
@@ -64,7 +66,17 @@ export const CHAT_ENTITIES = [
     ChatInteractionService,
     ChatSearchService,
     ChatAdminService,
+    ChatParcelMembershipService,
+    ChatStaffInterventionService,
   ],
-  exports: [TypeOrmModule, ChatAuthorizationService, ChatCursorService, ChatMessageReaderService],
+  exports: [
+    TypeOrmModule,
+    ChatAuthorizationService,
+    ChatCursorService,
+    ChatMessageReaderService,
+    // Phase 5 logistics sync (ChatLogisticsModule).
+    ChatMessageService,
+    ChatParcelMembershipService,
+  ],
 })
 export class ChatModule {}

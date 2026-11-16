@@ -10,6 +10,7 @@ import {
   ChatReportReason,
 } from "./chat.enums.js";
 import { type ChatParticipantCapability } from "./chat.policy.js";
+import { type ParcelStatus } from "../parcel/parcel.schema.js";
 
 /**
  * Communication API boundary contracts (Phase 1 foundation).
@@ -409,12 +410,25 @@ export interface ChatLastMessagePreview {
   createdAt: string;
 }
 
+/**
+ * Parcel context of a parcel-linked conversation (Phase 5). Loaded by the
+ * server from `parcels` for callers already authorized for the conversation;
+ * deliberately minimal — no recipient contact data, no address, no COD.
+ */
+export interface ChatParcelContext {
+  id: string;
+  trackingCode: string;
+  status: ParcelStatus;
+}
+
 export interface ChatConversationSummary {
   id: string;
   type: ChatConversationType;
   title: string | null;
   status: ChatConversationStatus;
   parcelId: string | null;
+  /** Present when `parcelId` is set and the parcel still exists. */
+  parcel: ChatParcelContext | null;
   hubId: string | null;
   merchantId: string | null;
   lastMessageSequence: ChatSequence;
@@ -438,6 +452,37 @@ export interface ChatConversationPage {
   nextCursor: string | null;
   hasMore: boolean;
 }
+
+/** Upper bound of `GET /chat/unread-summary` counting (UI shows "99+"). */
+export const CHAT_UNREAD_SUMMARY_CAP = 99;
+
+/**
+ * Global unread indicator (Phase 5): number of accessible conversations with
+ * unread messages, counted up to `CHAT_UNREAD_SUMMARY_CAP`.
+ */
+export interface ChatUnreadSummary {
+  unreadConversations: number;
+  /** True when more than `CHAT_UNREAD_SUMMARY_CAP` conversations are unread. */
+  capped: boolean;
+}
+
+/**
+ * Controlled mapping of logistics lifecycle events to SYSTEM_EVENT messages
+ * (Phase 5). Only these keys are generated from parcel workflows; params are
+ * limited to `trackingCode` and, for failures, the `DeliveryFailureReason`
+ * code and reschedule date.
+ */
+export const CHAT_LOGISTICS_EVENT_KEYS = {
+  RIDER_ASSIGNED: "parcel.rider_assigned",
+  RIDER_REASSIGNED: "parcel.rider_reassigned",
+  OUT_FOR_DELIVERY: "parcel.out_for_delivery",
+  DELIVERED: "parcel.delivered",
+  DELIVERY_FAILED: "parcel.delivery_failed",
+  RETURNED: "parcel.returned",
+} as const;
+
+export type ChatLogisticsEventKey =
+  (typeof CHAT_LOGISTICS_EVENT_KEYS)[keyof typeof CHAT_LOGISTICS_EVENT_KEYS];
 
 /** Staff-only. Never returned by participant-facing endpoints. */
 export interface ChatInternalNoteItem {

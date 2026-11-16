@@ -6,6 +6,7 @@ import { Link } from "@/lib/navigation";
 import { RIDER_ROUTES } from "@/config/routes";
 import { ArrowLeft } from "lucide-react";
 import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
+import { OpenConversationButton } from "@/features/chat/components/open-conversation-button";
 import { RiderTasksView } from "./rider-tasks-view";
 import { TaskDetailsView } from "./task-details-view";
 import { RiderHistoryView } from "./rider-history-view";
@@ -32,13 +33,21 @@ export function RiderTaskDetailsPage({ parcelId }: { parcelId: string }) {
         title={t("details.title")}
         description="Verify recipient OTP, collect payment, and complete the package handover."
         actions={
-          <Link
-            href={RIDER_ROUTES.tasks}
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-semibold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>{t("tasks.title")}</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Delivery conversation with the customer/merchant; the API checks current assignment. */}
+            <OpenConversationButton
+              target={{ kind: "parcel", parcelId }}
+              variant="secondary"
+              className="h-9 gap-2 rounded-xl text-xs font-semibold"
+            />
+            <Link
+              href={RIDER_ROUTES.tasks}
+              className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-semibold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>{t("tasks.title")}</span>
+            </Link>
+          </div>
         }
       />
       <TaskDetailsView parcelId={parcelId} />

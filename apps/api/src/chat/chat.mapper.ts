@@ -4,6 +4,7 @@ import {
   computeChatUnreadCount,
   type ChatAttachmentItem,
   type ChatConversationSummary,
+  type ChatParcelContext,
   type ChatMessageItem,
   type ChatMessageMetadata,
   type ChatMyParticipation,
@@ -79,6 +80,7 @@ export function toConversationSummary(
   c: ChatConversation,
   me: ChatParticipant,
   lastMessageSenderId: string | null,
+  parcel: ChatParcelContext | null,
 ): ChatConversationSummary {
   return {
     id: c.id,
@@ -86,6 +88,7 @@ export function toConversationSummary(
     title: c.title,
     status: c.status,
     parcelId: c.parcelId,
+    parcel,
     hubId: c.hubId,
     merchantId: c.merchantId,
     lastMessageSequence: c.lastMessageSequence,

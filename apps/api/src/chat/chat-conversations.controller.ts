@@ -86,6 +86,17 @@ export class ChatConversationsController {
     return this.conversations.list(chatContext(user, req), query);
   }
 
+  /** Declared before `:id` so the literal segment is not parsed as a UUID. */
+  @Get("unread-summary")
+  @RateLimit(CHAT_RATE_LIMITS.read)
+  @ApiOperation({
+    summary:
+      "Global unread indicator: accessible unmuted conversations with unread messages (capped)",
+  })
+  unreadSummary(@CurrentUser() user: AuthenticatedUser | null, @Req() req: RequestWithId) {
+    return this.conversations.unreadSummary(chatContext(user, req));
+  }
+
   @Get(":id")
   @RateLimit(CHAT_RATE_LIMITS.read)
   @ApiOperation({ summary: "Conversation detail (members only)" })

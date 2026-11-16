@@ -10,6 +10,7 @@ import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
 import { StatusBadge } from "@/components/data-display/status-badge";
+import { OpenConversationButton } from "@/features/chat/components/open-conversation-button";
 
 /** Parcel states that may be handed to a rider from this hub. */
 const ASSIGNABLE_STATUSES = [
@@ -171,17 +172,26 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                 <p className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">{parcel.weightKg} kg</p>
               </div>
             </div>
-            {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
-              <Button
-                type="button"
+            <div className="flex flex-wrap gap-2">
+              {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setAssignOpen(true)}
+                  className="h-10 w-full gap-2 rounded-xl bg-surface-elevated sm:w-auto font-medium hover:bg-surface-muted shadow-2xs"
+                >
+                  <UserCheck className="h-4 w-4" aria-hidden="true" />
+                  {t("assignRider")}
+                </Button>
+              ) : null}
+              {/* Parcel thread (rider ↔ hub); the API checks the manager's hub assignment. */}
+              <OpenConversationButton
+                target={{ kind: "parcel", parcelId: parcel.id }}
                 variant="ghost"
-                onClick={() => setAssignOpen(true)}
+                size="default"
                 className="h-10 w-full gap-2 rounded-xl bg-surface-elevated sm:w-auto font-medium hover:bg-surface-muted shadow-2xs"
-              >
-                <UserCheck className="h-4 w-4" aria-hidden="true" />
-                {t("assignRider")}
-              </Button>
-            ) : null}
+              />
+            </div>
           </div>
         ) : null}
         {parcel ? (

@@ -11,6 +11,8 @@ export type ChatErrorKey =
   | "editWindow"
   | "notEditable"
   | "duplicateReport"
+  | "unavailable"
+  | "reasonRequired"
   | "generic";
 
 /**
@@ -47,6 +49,12 @@ export function chatErrorKey(error: unknown): ChatErrorKey {
       return "notEditable";
     case ApiErrorCode.CHAT_DUPLICATE_REPORT:
       return "duplicateReport";
+    // Get-or-create on a parcel/merchant the caller may not access ("not
+    // found or not accessible" — deliberately indistinguishable).
+    case ApiErrorCode.CHAT_SCOPE_INVALID:
+      return "unavailable";
+    case ApiErrorCode.CHAT_REASON_REQUIRED:
+      return "reasonRequired";
     default:
       return "generic";
   }

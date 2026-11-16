@@ -35,4 +35,24 @@ export class ChatEventsService {
       payload: { conversationId, ...payload },
     });
   }
+
+  /**
+   * Workflow-originated chat event (Phase 5 logistics sync): no acting user —
+   * the cause is a committed domain event, referenced by `requestId`.
+   */
+  async appendWorkflow(
+    manager: EntityManager,
+    requestId: string | null,
+    eventType: DomainEventType,
+    conversationId: string,
+    payload: ChatEventPayload,
+  ): Promise<void> {
+    await this.outbox.append(manager, {
+      eventType,
+      aggregateType: CHAT_AGGREGATE_TYPE,
+      aggregateId: conversationId,
+      requestId,
+      payload: { conversationId, ...payload },
+    });
+  }
 }

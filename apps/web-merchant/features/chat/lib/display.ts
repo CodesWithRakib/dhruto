@@ -1,4 +1,8 @@
-import { type ChatConversationType, type ChatPageSender } from "@dhruto/contracts";
+import {
+  type ChatConversationType,
+  type ChatPageSender,
+  type ChatParcelContext,
+} from "@dhruto/contracts";
 
 /** Minimal translator signature (next-intl `useTranslations("Chat")`). */
 export type ChatTranslator = (key: string, values?: Record<string, string | number>) => string;
@@ -11,15 +15,27 @@ export type ChatTranslator = (key: string, values?: Record<string, string | numb
  * `conversationTitleWithParticipants`.
  */
 export function conversationTitle(
-  conversation: { title: string | null; type: ChatConversationType },
+  conversation: {
+    title: string | null;
+    type: ChatConversationType;
+    parcel?: Pick<ChatParcelContext, "trackingCode"> | null;
+  },
   t: ChatTranslator,
 ): string {
-  return conversation.title?.trim() || t(`types.${conversation.type}`);
+  const title = conversation.title?.trim();
+  if (title) return title;
+  // Phase 5: parcel-linked threads are named by their server-provided tracking code.
+  if (conversation.parcel) return t("parcelTitle", { code: conversation.parcel.trackingCode });
+  return t(`types.${conversation.type}`);
 }
 
 /** Detail view: untitled DIRECT conversations show the other participant's name. */
 export function conversationTitleWithParticipants(
-  conversation: { title: string | null; type: ChatConversationType },
+  conversation: {
+    title: string | null;
+    type: ChatConversationType;
+    parcel?: Pick<ChatParcelContext, "trackingCode"> | null;
+  },
   participants: ReadonlyArray<{ userId: string; displayName: string }>,
   myUserId: string,
   t: ChatTranslator,

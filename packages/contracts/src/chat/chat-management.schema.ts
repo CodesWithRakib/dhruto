@@ -55,7 +55,15 @@ export const chatReasonSchema = z
  */
 export const createChatConversationSchema = z.discriminatedUnion("type", [
   z
-    .object({ type: z.literal(ChatConversationType.PARCEL_DELIVERY), parcelId: z.string().uuid() })
+    .object({
+      type: z.literal(ChatConversationType.PARCEL_DELIVERY),
+      parcelId: z.string().uuid(),
+      /**
+       * Staff only (Phase 5): required when a staff member who is not a
+       * participant joins an EXISTING thread; recorded as ADMIN_INTERVENTION.
+       */
+      reason: chatReasonSchema.optional(),
+    })
     .strict(),
   z
     .object({
@@ -77,6 +85,8 @@ export const createChatConversationSchema = z.discriminatedUnion("type", [
       type: z.literal(ChatConversationType.MERCHANT_DESK),
       /** Required for staff; forbidden-by-validation for merchants (server derives it). */
       merchantId: z.string().uuid().optional(),
+      /** Staff joining an existing desk they are not a participant of (Phase 5). */
+      reason: chatReasonSchema.optional(),
     })
     .strict(),
   z

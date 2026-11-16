@@ -55,6 +55,7 @@ export function summary(overrides: Partial<ChatConversationSummary> = {}): ChatC
     title: null,
     status: ChatConversationStatus.ACTIVE,
     parcelId: null,
+    parcel: null,
     hubId: null,
     merchantId: null,
     lastMessageSequence: "3",

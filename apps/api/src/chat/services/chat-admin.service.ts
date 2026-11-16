@@ -4,10 +4,8 @@ import { DataSource, IsNull, type EntityManager } from "typeorm";
 import {
   ChatAuditAction,
   ChatConversationType,
-  ChatParticipantRole,
   ChatPermission,
   ChatReportStatus,
-  DomainEventType,
   type AdminChatAuditQuery,
   type AdminChatExportQuery,
   type AdminChatMessagesQuery,
@@ -37,11 +35,9 @@ import { type ChatRequestContext } from "../chat.context.js";
 import { type ChatActorScope } from "../policies/chat-eligibility.policy.js";
 import { ChatAuthorizationService } from "./chat-authorization.service.js";
 import { ChatAuditService } from "./chat-audit.service.js";
-import { ChatEventsService } from "./chat-events.service.js";
 import { ChatMessageReaderService } from "./chat-message-reader.service.js";
-import { ChatMessageService } from "./chat-message.service.js";
 import { ChatConversationService } from "./chat-conversation.service.js";
-import { ensureMembership } from "./chat-participant-writer.js";
+import { ChatStaffInterventionService } from "./chat-staff-intervention.service.js";
 
 interface KeysetCursor {
   t: string;
@@ -76,10 +72,9 @@ export class ChatAdminService {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly authz: ChatAuthorizationService,
     private readonly audit: ChatAuditService,
-    private readonly events: ChatEventsService,
     private readonly reader: ChatMessageReaderService,
-    private readonly messages: ChatMessageService,
     private readonly conversations: ChatConversationService,
+    private readonly intervention: ChatStaffInterventionService,
   ) {}
 
   /** Global (non-conversation) permission check; 403 because no resource id is probed. */
@@ -336,40 +331,9 @@ export class ChatAdminService {
       conversationId,
       ChatPermission.CONVERSATION_INTERVENE,
     );
-    await this.dataSource.transaction(async (manager) => {
-      const outcome = await ensureMembership(
-        manager,
-        conversationId,
-        { userId: actor.userId, role: ChatParticipantRole.MODERATOR },
-        { allowRemoved: true },
-      );
-      await this.audit.record(manager, {
-        action: ChatAuditAction.ADMIN_INTERVENTION,
-        actorUserId: actor.userId,
-        actorRole: actor.role,
-        conversationId,
-        targetType: "conversation",
-        targetId: conversationId,
-        reason,
-        requestId: ctx.requestId,
-        metadata: { membership: outcome },
-      });
-      if (outcome === "unchanged") return;
-      await this.events.append(
-        manager,
-        ctx,
-        DomainEventType.CHAT_PARTICIPANT_ADDED,
-        conversationId,
-        {
-          userId: actor.userId,
-          role: ChatParticipantRole.MODERATOR,
-        },
-      );
-      await this.messages.appendSystemMessage(manager, ctx, conversationId, {
-        eventKey: "chat.staff_joined",
-        params: { role: actor.role },
-      });
-    });
+    await this.dataSource.transaction((manager) =>
+      this.intervention.record(manager, ctx, actor, conversationId, reason),
+    );
     return this.conversations.getDetail(ctx, conversationId);
   }
 

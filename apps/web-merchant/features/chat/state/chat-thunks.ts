@@ -106,6 +106,19 @@ export function syncToHead(conversationId: string, head: string): Thunk {
 /* Inbox cache patches (realtime)                                      */
 /* ------------------------------------------------------------------ */
 
+/** Coalesces global-badge refreshes during message bursts (one refetch per window). */
+const UNREAD_REFRESH_WINDOW_MS = 1500;
+let unreadRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Schedules a `ChatUnread` refresh (nav badge) at most once per window. */
+export function refreshUnreadSoon(dispatch: AppDispatch): void {
+  if (unreadRefreshTimer) return;
+  unreadRefreshTimer = setTimeout(() => {
+    unreadRefreshTimer = null;
+    dispatch(chatApi.util.invalidateTags(["ChatUnread"]));
+  }, UNREAD_REFRESH_WINDOW_MS);
+}
+
 /**
  * Applies a new/edited message to the inbox entry and moves it to the top.
  * Unknown conversations (e.g. just created) trigger a refetch instead.
@@ -147,6 +160,7 @@ export function applyMessageToInbox(message: ChatMessageItem, myUserId: string, 
     // Not in the loaded pages (new or older conversation): refetch the inbox.
     // Invalidating a tag with no active subscription is a no-op.
     if (!found && isNew) dispatch(chatApi.util.invalidateTags(["ChatConversations"]));
+    if (isNew && message.senderId !== myUserId) refreshUnreadSoon(dispatch);
   };
 }
 
@@ -164,6 +178,7 @@ export function applyMyCursorToInbox(conversationId: string, lastReadSequence: s
         }
       }),
     );
+    refreshUnreadSoon(dispatch);
   };
 }
 

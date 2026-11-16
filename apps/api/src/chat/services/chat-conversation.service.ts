@@ -7,12 +7,16 @@ import {
   ChatConversationType,
   ChatParticipantCapability,
   ChatParticipantRole,
+  ChatParticipantStatus,
   ChatPermission,
   DomainEventType,
+  CHAT_UNREAD_SUMMARY_CAP,
   canTransitionConversation,
   transitionRequiresModeration,
   type ChatConversationDetail,
   type ChatConversationPage,
+  type ChatParcelContext,
+  type ChatUnreadSummary,
   type CreateChatConversationRequest,
   type ListChatConversationsQuery,
 } from "@dhruto/contracts";
@@ -22,6 +26,7 @@ import {
   ChatParticipant,
   Hub,
   Merchant,
+  Parcel,
   Rider,
   User,
   UserRole,
@@ -33,7 +38,6 @@ import { toConversationSummary } from "../chat.mapper.js";
 import {
   CHAT_TYPE_CREATOR_ROLES,
   isEligibleParticipant,
-  normalizePhone,
   staffHasPermission,
   type ChatActorScope,
   type ChatConversationScope,
@@ -48,6 +52,24 @@ import {
   insertParticipants,
   type NewParticipant,
 } from "./chat-participant-writer.js";
+import {
+  ChatParcelMembershipService,
+  latestRemovalWasWorkflow,
+} from "./chat-parcel-membership.service.js";
+import { ChatStaffInterventionService } from "./chat-staff-intervention.service.js";
+
+/**
+ * Get-or-create joining an EXISTING conversation as ADMIN (whose eligibility
+ * is unconditional) is a staff intervention (Phase 5): it requires a reason,
+ * the CONVERSATION_INTERVENE permission, and goes through the audited
+ * intervention writer. Natural participants (merchant, rider, customer, hub
+ * manager of the current hub) join on the participant path.
+ */
+interface StaffJoinGuard {
+  reason: string | undefined;
+  scope: ChatConversationScope;
+  parcel: ChatParcelScope | null;
+}
 
 export interface CreateConversationResult {
   conversation: ChatConversationDetail;
@@ -60,6 +82,9 @@ interface ListCursor {
 }
 
 const STAFF_ROLES: readonly UserRole[] = [UserRole.ADMIN, UserRole.HUB_MANAGER];
+
+/** Unread memberships scanned for the global badge (bounded; badge shows "99+"). */
+const UNREAD_SCAN_LIMIT = 200;
 
 /** Conversation lifecycle actions exposed by the API. */
 export type ChatStatusAction = "archive" | "close" | "reopen" | "lock" | "unlock";
@@ -89,6 +114,8 @@ export class ChatConversationService {
     private readonly audit: ChatAuditService,
     private readonly events: ChatEventsService,
     private readonly reader: ChatMessageReaderService,
+    private readonly membership: ChatParcelMembershipService,
+    private readonly intervention: ChatStaffInterventionService,
   ) {}
 
   /* ---------------------------------------------------------------- */
@@ -107,10 +134,10 @@ export class ChatConversationService {
     let result: { id: string; created: boolean };
     switch (req.type) {
       case ChatConversationType.PARCEL_DELIVERY:
-        result = await this.getOrCreateParcelDelivery(ctx, actor, req.parcelId);
+        result = await this.getOrCreateParcelDelivery(ctx, actor, req.parcelId, req.reason);
         break;
       case ChatConversationType.MERCHANT_DESK:
-        result = await this.getOrCreateMerchantDesk(ctx, actor, req.merchantId);
+        result = await this.getOrCreateMerchantDesk(ctx, actor, req.merchantId, req.reason);
         break;
       case ChatConversationType.DIRECT:
         result = await this.getOrCreateDirect(ctx, actor, req.participantUserId);
@@ -161,6 +188,7 @@ export class ChatConversationService {
     ctx: ChatRequestContext,
     actor: ChatActorScope,
     parcelId: string,
+    reason: string | undefined,
   ): Promise<{ id: string; created: boolean }> {
     const parcel = await this.authz.loadParcelScope(parcelId);
     const scope: ChatConversationScope | null = parcel
@@ -202,24 +230,34 @@ export class ChatConversationService {
         return { id, created: true };
       }
 
-      const existing = await manager
-        .getRepository(ChatConversation)
-        .findOneOrFail({
-          where: { parcelId, type: ChatConversationType.PARCEL_DELIVERY },
-          select: ["id"],
-        });
-      await this.joinExisting(manager, ctx, actor, existing.id);
+      // Lock the thread so reconciliation and the join serialize with the
+      // logistics handler and with other openers.
+      const existing = await manager.getRepository(ChatConversation).findOneOrFail({
+        where: { parcelId, type: ChatConversationType.PARCEL_DELIVERY },
+        lock: { mode: "pessimistic_write" },
+      });
+      // Converge stale rows (e.g. a previous rider) before anyone joins.
+      await this.membership.reconcile(manager, existing, parcel, {
+        workflow: "access",
+        sourceEventId: null,
+        sourceEventType: null,
+        requestId: ctx.requestId,
+      });
+      await this.joinExisting(manager, ctx, actor, existing.id, this.staffRole(actor), {
+        reason,
+        scope: { ...scope, createdByUserId: existing.createdByUserId },
+        parcel,
+      });
       return { id: existing.id, created: false };
     });
   }
 
-  /** Merchant user, current rider, registered recipient customer, and the creator. */
+  /** Merchant user, current rider, recipient customer (exact phone), and the creator. */
   private async parcelParticipants(
     manager: EntityManager,
     actor: ChatActorScope,
     parcel: ChatParcelScope,
   ): Promise<NewParticipant[]> {
-    const phone = normalizePhone(parcel.recipientPhone);
     const [merchant, rider, customers] = await Promise.all([
       manager
         .getRepository(Merchant)
@@ -229,10 +267,11 @@ export class ChatConversationService {
             .getRepository(Rider)
             .findOne({ where: { id: parcel.currentRiderId }, select: ["id", "userId"] })
         : Promise.resolve(null),
-      // Exact matches on the unique, indexed phone column (no scan).
+      // Exact match on the unique, indexed phone column — the same identity
+      // rule as `isParcelRecipient` and the parcel module (Phase 5).
       manager.getRepository(User).find({
         where: {
-          phone: In([parcel.recipientPhone, phone, `+88${phone}`, `88${phone}`]),
+          phone: parcel.recipientPhone,
           role: UserRole.CUSTOMER,
           status: UserStatus.ACTIVE,
         },
@@ -252,6 +291,7 @@ export class ChatConversationService {
     ctx: ChatRequestContext,
     actor: ChatActorScope,
     requestedMerchantId: string | undefined,
+    reason: string | undefined,
   ): Promise<{ id: string; created: boolean }> {
     let merchantId: string;
     if (actor.role === UserRole.MERCHANT) {
@@ -277,10 +317,20 @@ export class ChatConversationService {
       ]);
       const existing = await manager.getRepository(ChatConversation).findOne({
         where: { type: ChatConversationType.MERCHANT_DESK, merchantId },
-        select: ["id"],
+        select: ["id", "createdByUserId"],
       });
       if (existing) {
-        await this.joinExisting(manager, ctx, actor, existing.id);
+        await this.joinExisting(manager, ctx, actor, existing.id, this.staffRole(actor), {
+          reason,
+          scope: {
+            type: ChatConversationType.MERCHANT_DESK,
+            parcelId: null,
+            hubId: null,
+            merchantId,
+            createdByUserId: existing.createdByUserId,
+          },
+          parcel: null,
+        });
         return { id: existing.id, created: false };
       }
 
@@ -447,19 +497,51 @@ export class ChatConversationService {
     });
   }
 
-  /** Get-or-create on an existing conversation: (re)join the caller if allowed. */
+  /**
+   * Get-or-create on an existing conversation: (re)join the caller if allowed.
+   *
+   * - With `staffGuard` and an ADMIN caller who is not already ACTIVE: the
+   *   audited staff intervention path (reason + CONVERSATION_INTERVENE).
+   * - Otherwise the participant path. A user REMOVED by the workflow (e.g. a
+   *   rider reassigned away and now assigned back) may rejoin while eligible;
+   *   a user removed by a moderator may not.
+   */
   private async joinExisting(
     manager: EntityManager,
     ctx: ChatRequestContext,
     actor: ChatActorScope,
     conversationId: string,
     role: ChatParticipantRole = this.staffRole(actor),
+    staffGuard: StaffJoinGuard | null = null,
   ): Promise<void> {
+    if (staffGuard && actor.role === UserRole.ADMIN) {
+      const current = await manager.getRepository(ChatParticipant).findOne({
+        where: { conversationId, userId: actor.userId },
+        select: ["id", "status"],
+      });
+      if (current?.status === ChatParticipantStatus.ACTIVE) return;
+      if (!staffGuard.reason) throw chatErrors.reasonRequired();
+      if (
+        !staffHasPermission(
+          actor,
+          ChatPermission.CONVERSATION_INTERVENE,
+          staffGuard.scope,
+          staffGuard.parcel,
+        )
+      ) {
+        throw chatErrors.permissionDenied("Missing permission to intervene in this conversation");
+      }
+      await this.intervention.record(manager, ctx, actor, conversationId, staffGuard.reason, {
+        via: "get_or_create",
+      });
+      return;
+    }
+
     const outcome = await ensureMembership(
       manager,
       conversationId,
       { userId: actor.userId, role },
-      { allowRemoved: false },
+      { allowRemoved: await latestRemovalWasWorkflow(manager, conversationId, actor.userId) },
     );
     if (outcome === "unchanged") return;
     await this.audit.record(manager, {
@@ -524,12 +606,18 @@ export class ChatConversationService {
     conversation: ChatConversation,
     me: ChatParticipant,
   ): Promise<ChatConversationDetail> {
-    const [participants, lastSender] = await Promise.all([
+    const [participants, lastSender, parcels] = await Promise.all([
       this.reader.activeParticipants(conversation.id),
       this.lastSenders([conversation]),
+      this.parcelContexts([conversation]),
     ]);
     return {
-      ...toConversationSummary(conversation, me, lastSender.get(conversation.id) ?? null),
+      ...toConversationSummary(
+        conversation,
+        me,
+        lastSender.get(conversation.id) ?? null,
+        (conversation.parcelId && parcels.get(conversation.parcelId)) || null,
+      ),
       participants,
       archivedAt: conversation.archivedAt?.toISOString() ?? null,
       closedAt: conversation.closedAt?.toISOString() ?? null,
@@ -591,14 +679,23 @@ export class ChatConversationService {
     const eligible = new Set(
       (await this.authz.filterEligible(actor, conversations)).map((c) => c.id),
     );
-    const lastSenders = await this.lastSenders(conversations.filter((c) => eligible.has(c.id)));
+    const visible = conversations.filter((c) => eligible.has(c.id));
+    const [lastSenders, parcels] = await Promise.all([
+      this.lastSenders(visible),
+      this.parcelContexts(visible),
+    ]);
 
     const items = ids
       .map((id) => {
         const conversation = conversations.find((c) => c.id === id);
         const me = memberships.find((m) => m.conversationId === id);
         if (!conversation || !me || !eligible.has(id)) return null;
-        return toConversationSummary(conversation, me, lastSenders.get(id) ?? null);
+        return toConversationSummary(
+          conversation,
+          me,
+          lastSenders.get(id) ?? null,
+          (conversation.parcelId && parcels.get(conversation.parcelId)) || null,
+        );
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
@@ -607,6 +704,60 @@ export class ChatConversationService {
       items,
       hasMore,
       nextCursor: hasMore && last ? this.encodeCursor({ t: last.sort_key, id: last.id }) : null,
+    };
+  }
+
+  /**
+   * Minimal parcel context (id, tracking code, status) for conversations the
+   * caller is ALREADY authorized for — one query per page. No recipient
+   * contact, address or COD data is ever included.
+   */
+  private async parcelContexts(
+    conversations: readonly ChatConversation[],
+  ): Promise<Map<string, ChatParcelContext>> {
+    const parcelIds = [
+      ...new Set(conversations.map((c) => c.parcelId).filter((id): id is string => id !== null)),
+    ];
+    const result = new Map<string, ChatParcelContext>();
+    if (parcelIds.length === 0) return result;
+    const parcels = await this.dataSource.getRepository(Parcel).find({
+      where: { id: In(parcelIds) },
+      select: ["id", "trackingCode", "status"],
+    });
+    for (const p of parcels) {
+      result.set(p.id, { id: p.id, trackingCode: p.trackingCode, status: p.status });
+    }
+    return result;
+  }
+
+  /**
+   * Global unread indicator (Phase 5): accessible, unmuted conversations with
+   * unread messages, counted up to CHAT_UNREAD_SUMMARY_CAP. Bounded scan of
+   * the caller's newest unread memberships, then live-eligibility filtering
+   * (stale rows never count).
+   */
+  async unreadSummary(ctx: ChatRequestContext): Promise<ChatUnreadSummary> {
+    const actor = await this.authz.loadActorScope(ctx.user);
+    const rows: Array<{ id: string }> = await this.dataSource.query(
+      `SELECT c."id"
+         FROM "chat_participants" p
+         JOIN "chat_conversations" c ON c."id" = p."conversation_id"
+        WHERE p."user_id" = $1
+          AND p."status" = 'ACTIVE'
+          AND c."last_message_sequence" > p."last_read_sequence"
+          AND NOT (p."is_muted" AND (p."muted_until" IS NULL OR p."muted_until" > now()))
+        ORDER BY c."last_message_at" DESC NULLS LAST
+        LIMIT $2`,
+      [ctx.user.id, UNREAD_SCAN_LIMIT],
+    );
+    if (rows.length === 0) return { unreadConversations: 0, capped: false };
+    const conversations = await this.dataSource
+      .getRepository(ChatConversation)
+      .find({ where: { id: In(rows.map((r) => r.id)) } });
+    const eligible = (await this.authz.filterEligible(actor, conversations)).length;
+    return {
+      unreadConversations: Math.min(eligible, CHAT_UNREAD_SUMMARY_CAP),
+      capped: eligible > CHAT_UNREAD_SUMMARY_CAP,
     };
   }
 

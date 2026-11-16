@@ -38,6 +38,8 @@ export interface NavItem {
   /** Key relative to the `Nav` namespace. */
   labelKey: string;
   icon: LucideIcon;
+  /** Live indicator rendered next to the label (Phase 5: global chat unread). */
+  indicator?: "chat-unread";
 }
 
 export interface NavGroup {
@@ -77,6 +79,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           href: MERCHANT_ROUTES.messages,
           labelKey: "messages",
           icon: MessagesSquare,
+          indicator: "chat-unread",
         },
       ],
     },
@@ -132,7 +135,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: ADMIN_ROUTES.parcels, labelKey: "parcels", icon: Package },
         { href: ADMIN_ROUTES.hub, labelKey: "hub", icon: Warehouse },
         { href: ADMIN_ROUTES.rider, labelKey: "rider", icon: Bike },
-        { href: ADMIN_ROUTES.messages, labelKey: "messages", icon: MessagesSquare },
+        { href: ADMIN_ROUTES.messages, labelKey: "messages", icon: MessagesSquare, indicator: "chat-unread" },
       ],
     },
     {
@@ -167,7 +170,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
         { href: HUB_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
         { href: HUB_ROUTES.scanner, labelKey: "scanner", icon: ScanLine },
         { href: HUB_ROUTES.parcels, labelKey: "parcels", icon: PackageSearch },
-        { href: HUB_ROUTES.messages, labelKey: "messages", icon: MessagesSquare },
+        { href: HUB_ROUTES.messages, labelKey: "messages", icon: MessagesSquare, indicator: "chat-unread" },
       ],
     },
     {
@@ -195,7 +198,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
       items: [
         { href: RIDER_ROUTES.dashboard, labelKey: "overview", icon: LayoutDashboard },
         { href: RIDER_ROUTES.tasks, labelKey: "tasks", icon: ClipboardList },
-        { href: RIDER_ROUTES.messages, labelKey: "messages", icon: MessagesSquare },
+        { href: RIDER_ROUTES.messages, labelKey: "messages", icon: MessagesSquare, indicator: "chat-unread" },
       ],
     },
     {
@@ -239,6 +242,7 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           href: CUSTOMER_ROUTES.messages,
           labelKey: "messages",
           icon: MessagesSquare,
+          indicator: "chat-unread",
         },
       ],
     },

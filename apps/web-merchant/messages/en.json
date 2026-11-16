@@ -2388,6 +2388,36 @@
     "idempotencyInProgress": "This booking is already being processed. Please wait."
   },
   "Chat": {
+    "parcelTitle": "Parcel {code}",
+    "openParcelChat": "Message about this parcel",
+    "contactOperations": "Contact operations",
+    "unreadConversations": "{count, plural, one {# unread conversation} other {# unread conversations}}",
+    "staffJoinTitle": "Join this conversation as staff",
+    "staffJoinDescription": "You are not a participant. Joining is recorded in the audit log with your reason and shown to participants.",
+    "staffJoinReason": "Reason",
+    "staffJoinReasonHint": "Enter a reason of at least 10 characters.",
+    "staffJoinConfirm": "Join conversation",
+    "parcelContext": "Parcel details",
+    "viewParcel": "View parcel",
+    "parcelUpdated": "Parcel status updated",
+    "system": {
+      "riderAssigned": "A rider was assigned to parcel {code}.",
+      "riderReassigned": "Parcel {code} was reassigned to another rider.",
+      "outForDelivery": "Parcel {code} is out for delivery.",
+      "delivered": "Parcel {code} was delivered.",
+      "deliveryFailed": "Delivery attempt for parcel {code} failed.",
+      "returned": "Parcel {code} was returned to the merchant.",
+      "failureReason": "Reason: {reason}."
+    },
+    "failureReasons": {
+      "CUSTOMER_UNAVAILABLE": "customer unavailable",
+      "CUSTOMER_REFUSED": "customer refused",
+      "ADDRESS_INCORRECT": "incorrect address",
+      "PAYMENT_NOT_READY": "payment not ready",
+      "CUSTOMER_REQUESTED_RESCHEDULE": "customer requested a new time",
+      "DAMAGED_PACKAGE": "package damaged",
+      "OTHER": "other"
+    },
     "title": "Messages",
     "searchPlaceholder": "Search messages…",
     "searchLabel": "Search messages",
@@ -2526,6 +2556,8 @@
     "jumpToLatest": "Jump to latest messages",
     "messageTooOld": "That message is too far back to open here.",
     "errors": {
+      "unavailable": "This conversation isn't available to you.",
+      "reasonRequired": "A reason is required to join this conversation as staff.",
       "network": "Network problem — check your connection and try again.",
       "notWritable": "This conversation no longer accepts changes.",
       "notFound": "The message or conversation no longer exists.",

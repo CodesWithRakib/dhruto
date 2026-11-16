@@ -10,6 +10,8 @@ import {
   type ChatPinItem,
   type ChatReportReason,
   type ChatSearchResponse,
+  type ChatUnreadSummary,
+  type CreateChatConversationRequest,
   type SendChatMessageRequest,
 } from "@dhruto/contracts";
 import { baseApi } from "@/lib/api/base-api";
@@ -55,9 +57,28 @@ function query(params: Record<string, string | number | boolean | undefined>): s
 }
 
 export const chatApi = baseApi
-  .enhanceEndpoints({ addTagTypes: ["ChatConversations", "ChatConversation", "ChatPins"] })
+  .enhanceEndpoints({ addTagTypes: ["ChatConversations", "ChatConversation", "ChatPins", "ChatUnread"] })
   .injectEndpoints({
     endpoints: (builder) => ({
+      /**
+       * Get-or-create (Phase 5 contextual entry points). The backend decides
+       * participants and eligibility from the parcel / merchant; the client
+       * only names the context. Staff joining an existing thread must send a
+       * `reason` (422 CHAT_REASON_REQUIRED otherwise).
+       */
+      openConversation: builder.mutation<ChatConversationDetail, CreateChatConversationRequest>({
+        query: (body) => ({ url: "/chat/conversations", method: "POST", body }),
+        transformResponse: (response: ApiResponse<ChatConversationDetail>) => unwrap(response),
+        invalidatesTags: ["ChatConversations", "ChatUnread"],
+      }),
+
+      /** Global unread indicator (nav badge). Polled lightly; realtime invalidates it. */
+      getUnreadSummary: builder.query<ChatUnreadSummary, void>({
+        query: () => "/chat/conversations/unread-summary",
+        transformResponse: (response: ApiResponse<ChatUnreadSummary>) => unwrap(response),
+        providesTags: ["ChatUnread"],
+      }),
+
       /** Keyset-paginated inbox (backend opaque cursor). */
       getConversations: builder.infiniteQuery<ChatConversationPage, ConversationListArgs, string | null>({
         infiniteQueryOptions: {
@@ -205,6 +226,8 @@ export const chatApi = baseApi
   });
 
 export const {
+  useOpenConversationMutation,
+  useGetUnreadSummaryQuery,
   useGetConversationsInfiniteQuery,
   useGetConversationQuery,
   useGetPinsQuery,

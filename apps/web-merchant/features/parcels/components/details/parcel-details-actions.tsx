@@ -5,6 +5,7 @@ import { ArrowLeft, Edit3, Printer, RefreshCw, Truck, XCircle } from "lucide-rea
 import { Button } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { ParcelStatus } from "@dhruto/contracts";
+import { OpenConversationButton } from "@/features/chat/components/open-conversation-button";
 
 interface ParcelDetailsActionsProps {
   t: (key: string) => string;
@@ -22,6 +23,7 @@ export function ParcelDetailsActions({
   t,
   backHref,
   status,
+  parcelId,
   printLabelHref,
   onRefresh,
   onRequestPickup,
@@ -55,6 +57,12 @@ export function ParcelDetailsActions({
           <RefreshCw className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           <span>{t("refresh")}</span>
         </Button>
+
+        {/* Parcel-linked conversation (merchant, admin); eligibility is enforced by the API. */}
+        <OpenConversationButton
+          target={{ kind: "parcel", parcelId }}
+          className="gap-1.5 rounded-xl border-border/80 font-medium"
+        />
 
         {isPickupRequestable ? (
           <Button

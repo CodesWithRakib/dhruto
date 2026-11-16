@@ -25,10 +25,13 @@ export function ConversationSidebar({
   routes,
   activeId,
   myUserId,
+  headerAction,
 }: {
   routes: MessengerRoutes;
   activeId: string | null;
   myUserId: string;
+  /** Role-specific action next to the title (e.g. merchant "Contact operations"). */
+  headerAction?: React.ReactNode;
 }) {
   const t = useTranslations("Chat");
   const [query, setQuery] = useState("");
@@ -54,7 +57,10 @@ export function ConversationSidebar({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="space-y-3 border-b border-border px-4 pb-3 pt-4">
-        <h1 className="text-lg font-semibold text-foreground">{t("title")}</h1>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-lg font-semibold text-foreground">{t("title")}</h1>
+          {headerAction}
+        </div>
         <div className="relative">
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input

@@ -2388,6 +2388,36 @@
     "idempotencyInProgress": "এই বুকিংটি আগে থেকেই প্রক্রিয়াধীন। অপেক্ষা করুন।"
   },
   "Chat": {
+    "parcelTitle": "পার্সেল {code}",
+    "openParcelChat": "এই পার্সেল নিয়ে বার্তা",
+    "contactOperations": "অপারেশনস টিমের সাথে যোগাযোগ",
+    "unreadConversations": "{count}টি অপঠিত কথোপকথন",
+    "staffJoinTitle": "স্টাফ হিসেবে কথোপকথনে যোগ দিন",
+    "staffJoinDescription": "আপনি এই কথোপকথনের অংশগ্রহণকারী নন। যোগ দিলে আপনার কারণসহ অডিট লগে রেকর্ড হবে এবং অংশগ্রহণকারীরা দেখতে পাবেন।",
+    "staffJoinReason": "কারণ",
+    "staffJoinReasonHint": "কমপক্ষে ১০ অক্ষরের একটি কারণ লিখুন।",
+    "staffJoinConfirm": "কথোপকথনে যোগ দিন",
+    "parcelContext": "পার্সেলের তথ্য",
+    "viewParcel": "পার্সেল দেখুন",
+    "parcelUpdated": "পার্সেলের অবস্থা হালনাগাদ হয়েছে",
+    "system": {
+      "riderAssigned": "পার্সেল {code}-এ একজন রাইডার নিয়োগ করা হয়েছে।",
+      "riderReassigned": "পার্সেল {code} অন্য রাইডারকে পুনর্নিয়োগ করা হয়েছে।",
+      "outForDelivery": "পার্সেল {code} ডেলিভারির জন্য বের হয়েছে।",
+      "delivered": "পার্সেল {code} ডেলিভারি হয়েছে।",
+      "deliveryFailed": "পার্সেল {code}-এর ডেলিভারি প্রচেষ্টা ব্যর্থ হয়েছে।",
+      "returned": "পার্সেল {code} মার্চেন্টকে ফেরত দেওয়া হয়েছে।",
+      "failureReason": "কারণ: {reason}।"
+    },
+    "failureReasons": {
+      "CUSTOMER_UNAVAILABLE": "গ্রাহক অনুপস্থিত",
+      "CUSTOMER_REFUSED": "গ্রাহক গ্রহণ করেননি",
+      "ADDRESS_INCORRECT": "ভুল ঠিকানা",
+      "PAYMENT_NOT_READY": "পেমেন্ট প্রস্তুত নয়",
+      "CUSTOMER_REQUESTED_RESCHEDULE": "গ্রাহক নতুন সময় চেয়েছেন",
+      "DAMAGED_PACKAGE": "প্যাকেজ ক্ষতিগ্রস্ত",
+      "OTHER": "অন্যান্য"
+    },
     "title": "বার্তা",
     "searchPlaceholder": "বার্তা খুঁজুন…",
     "searchLabel": "বার্তা খুঁজুন",
@@ -2526,6 +2556,8 @@
     "jumpToLatest": "সর্বশেষ বার্তায় যান",
     "messageTooOld": "এই বার্তাটি অনেক পুরোনো, এখানে খোলা যাচ্ছে না।",
     "errors": {
+      "unavailable": "এই কথোপকথনটি আপনার জন্য উপলব্ধ নয়।",
+      "reasonRequired": "স্টাফ হিসেবে যোগ দিতে একটি কারণ প্রয়োজন।",
       "network": "নেটওয়ার্ক সমস্যা — সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
       "notWritable": "এই কথোপকথনে আর পরিবর্তন করা যায় না।",
       "notFound": "বার্তা বা কথোপকথনটি আর নেই।",
