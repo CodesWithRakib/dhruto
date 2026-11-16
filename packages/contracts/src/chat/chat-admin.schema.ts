@@ -41,9 +41,9 @@ export const adminListChatConversationsQuerySchema = z
   .object({
     type: z.nativeEnum(ChatConversationType).optional(),
     status: z.nativeEnum(ChatConversationStatus).optional(),
-    merchantId: z.string().uuid().optional(),
-    hubId: z.string().uuid().optional(),
-    parcelId: z.string().uuid().optional(),
+    merchantId: z.string().guid().optional(),
+    hubId: z.string().guid().optional(),
+    parcelId: z.string().guid().optional(),
     cursor: cursorSchema.optional(),
     limit: adminLimit,
   })
@@ -105,7 +105,7 @@ export const adminListChatReportsQuerySchema = z
   .object({
     status: z.nativeEnum(ChatReportStatus).optional(),
     /** Phase 7: reports of one conversation (workspace panel). */
-    conversationId: z.string().uuid().optional(),
+    conversationId: z.string().guid().optional(),
     cursor: cursorSchema.optional(),
     limit: adminLimit,
   })
@@ -133,8 +133,8 @@ export type ReviewChatReportRequest = z.infer<typeof reviewChatReportSchema>;
 
 export const adminChatAuditQuerySchema = z
   .object({
-    conversationId: z.string().uuid().optional(),
-    actorUserId: z.string().uuid().optional(),
+    conversationId: z.string().guid().optional(),
+    actorUserId: z.string().guid().optional(),
     /** Phase 7: filter by audit action. */
     action: z.nativeEnum(ChatAuditAction).optional(),
     cursor: cursorSchema.optional(),

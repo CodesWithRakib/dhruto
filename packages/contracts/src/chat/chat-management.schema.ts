@@ -30,7 +30,7 @@ const titleSchema = z.string().trim().min(1).max(CHAT_CONVERSATION_TITLE_MAX_LEN
 
 const participantIdsSchema = (min: number) =>
   z
-    .array(z.string().uuid())
+    .array(z.string().guid())
     .min(min)
     .max(CHAT_GROUP_MAX_PARTICIPANTS - 1)
     .refine((ids) => new Set(ids).size === ids.length, "Duplicate participant ids");
@@ -57,7 +57,7 @@ export const createChatConversationSchema = z.discriminatedUnion("type", [
   z
     .object({
       type: z.literal(ChatConversationType.PARCEL_DELIVERY),
-      parcelId: z.string().uuid(),
+      parcelId: z.string().guid(),
       /**
        * Staff only (Phase 5): required when a staff member who is not a
        * participant joins an EXISTING thread; recorded as ADMIN_INTERVENTION.
@@ -69,13 +69,13 @@ export const createChatConversationSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal(ChatConversationType.SUPPORT_TICKET),
       title: titleSchema,
-      parcelId: z.string().uuid().optional(),
+      parcelId: z.string().guid().optional(),
     })
     .strict(),
   z
     .object({
       type: z.literal(ChatConversationType.HUB_OPERATIONS),
-      hubId: z.string().uuid(),
+      hubId: z.string().guid(),
       title: titleSchema,
       participantUserIds: participantIdsSchema(0).optional(),
     })
@@ -84,7 +84,7 @@ export const createChatConversationSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal(ChatConversationType.MERCHANT_DESK),
       /** Required for staff; forbidden-by-validation for merchants (server derives it). */
-      merchantId: z.string().uuid().optional(),
+      merchantId: z.string().guid().optional(),
       /** Staff joining an existing desk they are not a participant of (Phase 5). */
       reason: chatReasonSchema.optional(),
     })
@@ -97,7 +97,7 @@ export const createChatConversationSchema = z.discriminatedUnion("type", [
     })
     .strict(),
   z
-    .object({ type: z.literal(ChatConversationType.DIRECT), participantUserId: z.string().uuid() })
+    .object({ type: z.literal(ChatConversationType.DIRECT), participantUserId: z.string().guid() })
     .strict(),
   z
     .object({
@@ -128,7 +128,7 @@ export type ChatStatusActionRequest = z.infer<typeof chatStatusActionSchema>;
 
 export const addChatParticipantSchema = z
   .object({
-    userId: z.string().uuid(),
+    userId: z.string().guid(),
     /** OWNER cannot be granted; MODERATOR only by an OWNER or staff. */
     role: z
       .enum([
@@ -173,7 +173,7 @@ export const markChatDeliveredSchema = z
 
 export type MarkChatDeliveredRequest = z.infer<typeof markChatDeliveredSchema>;
 
-export const chatPinSchema = z.object({ messageId: z.string().uuid() }).strict();
+export const chatPinSchema = z.object({ messageId: z.string().guid() }).strict();
 
 export type ChatPinRequest = z.infer<typeof chatPinSchema>;
 
@@ -188,7 +188,7 @@ export type ChatPinRequest = z.infer<typeof chatPinSchema>;
 export const chatSearchQuerySchema = z
   .object({
     q: z.string().trim().min(2).max(100),
-    conversationId: z.string().uuid().optional(),
+    conversationId: z.string().guid().optional(),
     from: z.string().datetime({ offset: true }).optional(),
     to: z.string().datetime({ offset: true }).optional(),
     limit: z.coerce

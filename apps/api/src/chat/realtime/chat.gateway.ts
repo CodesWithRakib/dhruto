@@ -10,7 +10,7 @@ import {
   type OnGatewayInit,
 } from "@nestjs/websockets";
 import { type Namespace, type Socket } from "socket.io";
-import { type ZodType, type ZodTypeDef } from "zod";
+import { type ZodType } from "zod";
 import {
   ApiErrorCode,
   CHAT_MAX_JOINED_CONVERSATIONS_PER_SOCKET,
@@ -374,7 +374,7 @@ export class ChatGateway
   private admit<T>(
     socket: Socket,
     body: unknown,
-    schema: ZodType<T, ZodTypeDef, unknown>,
+    schema: ZodType<T, unknown>,
   ): { ok: true; session: ChatSession; payload: T } | { ok: false; ack: ChatSocketAck<never> } {
     const session = this.sessions.get(socket.id);
     if (!session)

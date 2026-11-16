@@ -36,14 +36,14 @@ export const adminChatInboxQuerySchema = z
   .object({
     type: z.nativeEnum(ChatConversationType).optional(),
     status: z.nativeEnum(ChatConversationStatus).optional(),
-    merchantId: z.string().uuid().optional(),
-    hubId: z.string().uuid().optional(),
-    parcelId: z.string().uuid().optional(),
+    merchantId: z.string().guid().optional(),
+    hubId: z.string().guid().optional(),
+    parcelId: z.string().guid().optional(),
     /** Parcel's current rider (riders table id). */
-    riderId: z.string().uuid().optional(),
+    riderId: z.string().guid().optional(),
     parcelStatus: z.nativeEnum(ParcelStatus).optional(),
     /** Conversations where this user is an ACTIVE participant (e.g. a customer account). */
-    participantUserId: z.string().uuid().optional(),
+    participantUserId: z.string().guid().optional(),
     escalation: z
       .union([z.nativeEnum(ChatEscalationStatus), z.enum(CHAT_INBOX_ESCALATION_FILTERS)])
       .optional(),
@@ -162,7 +162,7 @@ export const updateChatEscalationSchema = z
     /** Reason / resolution note; required except when taking a case into review. */
     note: z.string().trim().min(10).max(CHAT_ESCALATION_NOTE_MAX_LENGTH).optional(),
     /** Staff user to assign (ADMIN), `null` to unassign, omitted to keep. */
-    assigneeUserId: z.string().uuid().nullable().optional(),
+    assigneeUserId: z.string().guid().nullable().optional(),
   })
   .strict();
 

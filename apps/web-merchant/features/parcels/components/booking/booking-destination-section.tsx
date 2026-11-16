@@ -1,22 +1,16 @@
 import React from "react";
-import type { Control, FieldErrors } from "react-hook-form";
+import type { FieldErrors } from "react-hook-form";
 import { MapPin } from "lucide-react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-} from "@dhruto/ui";
-import type { ParcelBooking } from "@dhruto/contracts";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@dhruto/ui";
+import type { ParcelBookingInput } from "@dhruto/contracts";
+import type { ParcelBookingControl } from "../../hooks/use-parcel-booking";
 import { DistrictSelect, ThanaSelect } from "@/components/location/district-thana-picker";
 import { BookingSectionWrapper } from "./booking-section-wrapper";
 
 interface BookingDestinationSectionProps {
-  control: Control<ParcelBooking>;
+  control: ParcelBookingControl;
   district: string;
-  errors: FieldErrors<ParcelBooking>;
+  errors: FieldErrors<ParcelBookingInput>;
   isLoading: boolean;
   t: (key: string) => string;
 }

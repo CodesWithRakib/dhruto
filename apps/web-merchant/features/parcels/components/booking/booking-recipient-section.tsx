@@ -1,5 +1,4 @@
 import React from "react";
-import type { Control } from "react-hook-form";
 import { User } from "lucide-react";
 import {
   FormControl,
@@ -10,20 +9,16 @@ import {
   FormMessage,
   Input,
 } from "@dhruto/ui";
-import type { ParcelBooking } from "@dhruto/contracts";
+import type { ParcelBookingControl } from "../../hooks/use-parcel-booking";
 import { BookingSectionWrapper } from "./booking-section-wrapper";
 
 interface BookingRecipientSectionProps {
-  control: Control<ParcelBooking>;
+  control: ParcelBookingControl;
   isLoading: boolean;
   t: (key: string) => string;
 }
 
-export function BookingRecipientSection({
-  control,
-  isLoading,
-  t,
-}: BookingRecipientSectionProps) {
+export function BookingRecipientSection({ control, isLoading, t }: BookingRecipientSectionProps) {
   return (
     <BookingSectionWrapper
       icon={User}
@@ -68,7 +63,9 @@ export function BookingRecipientSection({
                   {...field}
                 />
               </FormControl>
-              <FormDescription className="text-caption text-muted-foreground">{t("recipientPhoneHint")}</FormDescription>
+              <FormDescription className="text-caption text-muted-foreground">
+                {t("recipientPhoneHint")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

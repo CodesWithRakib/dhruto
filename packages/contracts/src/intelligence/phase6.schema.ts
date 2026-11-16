@@ -71,7 +71,7 @@ export const structuredAddressSchema = z.object({
 export type StructuredAddress = z.infer<typeof structuredAddressSchema>;
 
 export const addressCandidateSchema = z.object({
-  placeId: z.string().uuid().nullable().default(null),
+  placeId: z.string().guid().nullable().default(null),
   district: z.string(),
   districtBn: z.string().nullable().default(null),
   upazila: z.string().nullable().default(null),
@@ -113,7 +113,7 @@ export interface AddressParseV2Result {
 }
 
 export const addressConfirmRequestSchema = z.object({
-  parseId: z.string().uuid(),
+  parseId: z.string().guid(),
   /** Chosen candidate index, or a manual structure when nothing fits. */
   candidateIndex: z.number().int().min(0).max(9).optional(),
   manualStructure: structuredAddressSchema.optional(),

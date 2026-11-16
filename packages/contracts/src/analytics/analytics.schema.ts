@@ -7,8 +7,8 @@ export const analyticsQuerySchema = z.object({
   period: analyticsPeriodSchema.optional().default("30d"),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  merchantId: z.string().uuid().optional(),
-  hubId: z.string().uuid().optional(),
+  merchantId: z.string().guid().optional(),
+  hubId: z.string().guid().optional(),
 });
 export type AnalyticsQuery = z.infer<typeof analyticsQuerySchema>;
 

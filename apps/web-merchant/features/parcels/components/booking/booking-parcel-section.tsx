@@ -1,5 +1,4 @@
 import React from "react";
-import type { Control } from "react-hook-form";
 import { Package } from "lucide-react";
 import {
   FormControl,
@@ -10,20 +9,16 @@ import {
   FormMessage,
   Input,
 } from "@dhruto/ui";
-import type { ParcelBooking } from "@dhruto/contracts";
+import type { ParcelBookingControl } from "../../hooks/use-parcel-booking";
 import { BookingSectionWrapper } from "./booking-section-wrapper";
 
 interface BookingParcelSectionProps {
-  control: Control<ParcelBooking>;
+  control: ParcelBookingControl;
   isLoading: boolean;
   t: (key: string) => string;
 }
 
-export function BookingParcelSection({
-  control,
-  isLoading,
-  t,
-}: BookingParcelSectionProps) {
+export function BookingParcelSection({ control, isLoading, t }: BookingParcelSectionProps) {
   return (
     <BookingSectionWrapper
       icon={Package}
@@ -50,7 +45,9 @@ export function BookingParcelSection({
                   {...field}
                 />
               </FormControl>
-              <FormDescription className="text-caption text-muted-foreground">{t("weightHint")}</FormDescription>
+              <FormDescription className="text-caption text-muted-foreground">
+                {t("weightHint")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -61,7 +58,9 @@ export function BookingParcelSection({
           name="parcelDescription"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-semibold text-foreground">{t("parcelDescription")}</FormLabel>
+              <FormLabel className="font-semibold text-foreground">
+                {t("parcelDescription")}
+              </FormLabel>
               <FormControl>
                 <Input
                   placeholder={t("parcelDescriptionPlaceholder")}

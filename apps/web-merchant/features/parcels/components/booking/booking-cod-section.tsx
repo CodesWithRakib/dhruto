@@ -1,5 +1,4 @@
 import React from "react";
-import type { Control } from "react-hook-form";
 import { Wallet } from "lucide-react";
 import {
   FormControl,
@@ -10,26 +9,18 @@ import {
   FormMessage,
   Input,
 } from "@dhruto/ui";
-import type { ParcelBooking } from "@dhruto/contracts";
+import type { ParcelBookingControl } from "../../hooks/use-parcel-booking";
 import { BookingSectionWrapper } from "./booking-section-wrapper";
 
 interface BookingCodSectionProps {
-  control: Control<ParcelBooking>;
+  control: ParcelBookingControl;
   isLoading: boolean;
   t: (key: string) => string;
 }
 
-export function BookingCodSection({
-  control,
-  isLoading,
-  t,
-}: BookingCodSectionProps) {
+export function BookingCodSection({ control, isLoading, t }: BookingCodSectionProps) {
   return (
-    <BookingSectionWrapper
-      icon={Wallet}
-      title={t("sectionCod")}
-      description={t("sectionCodHint")}
-    >
+    <BookingSectionWrapper icon={Wallet} title={t("sectionCod")} description={t("sectionCodHint")}>
       <FormField
         control={control}
         name="codAmount"
@@ -54,7 +45,9 @@ export function BookingCodSection({
                 />
               </div>
             </FormControl>
-            <FormDescription className="text-caption text-muted-foreground">{t("codHint")}</FormDescription>
+            <FormDescription className="text-caption text-muted-foreground">
+              {t("codHint")}
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

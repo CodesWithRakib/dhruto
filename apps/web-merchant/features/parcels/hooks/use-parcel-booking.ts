@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   parcelBookingSchema,
   type ApiValidationErrorItem,
   type ParcelBooking,
+  type ParcelBookingInput,
   type ParcelCreatedResponse,
 } from "@dhruto/contracts";
 import { toast } from "sonner";
@@ -14,6 +15,9 @@ import { useTranslations } from "next-intl";
 import { useCreateParcelMutation } from "../api/parcels.api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { getApiErrorKey } from "@/lib/api-errors";
+
+/** Control type shared by the booking form sections (input state → validated output). */
+export type ParcelBookingControl = Control<ParcelBookingInput, unknown, ParcelBooking>;
 
 /**
  * Generates the `Idempotency-Key` for one booking attempt.
@@ -89,7 +93,7 @@ export function useParcelBooking() {
    */
   const attemptRef = useRef<{ fingerprint: string; key: string } | null>(null);
 
-  const form = useForm<ParcelBooking>({
+  const form = useForm<ParcelBookingInput, unknown, ParcelBooking>({
     resolver: zodResolver(parcelBookingSchema),
     defaultValues: {
       recipientName: "",
@@ -132,12 +136,7 @@ export function useParcelBooking() {
 
         const key = getApiErrorKey(err);
         setServerErrorKey(key);
-        setServerError(
-          getApiErrorMessage(
-            err,
-            t("createFailed"),
-          ),
-        );
+        setServerError(getApiErrorMessage(err, t("createFailed")));
 
         // Field-level messages are already shown next to the inputs; only
         // surface a toast when the failure has no field to attach to.

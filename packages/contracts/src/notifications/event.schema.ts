@@ -48,15 +48,15 @@ export enum DomainEventType {
 }
 
 export const domainEventSchema = z.object({
-  eventId: z.string().uuid(),
+  eventId: z.string().guid(),
   eventType: z.nativeEnum(DomainEventType),
   version: z.literal(DOMAIN_EVENT_VERSION),
   occurredAt: z.string(),
   aggregateType: z.string().min(1).max(64),
-  aggregateId: z.string().uuid(),
+  aggregateId: z.string().guid(),
   requestId: z.string().min(1).max(128),
-  actorId: z.string().uuid().optional(),
-  payload: z.record(z.unknown()),
+  actorId: z.string().guid().optional(),
+  payload: z.record(z.string(), z.unknown()),
 });
 
 export type DomainEvent = z.infer<typeof domainEventSchema>;

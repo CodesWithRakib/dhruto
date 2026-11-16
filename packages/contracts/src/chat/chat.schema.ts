@@ -132,7 +132,7 @@ export const chatSequenceSchema = z
 export type ChatSequence = z.infer<typeof chatSequenceSchema>;
 
 /** Client-generated message id (UUID) — the idempotency key for sends. */
-export const chatClientMessageIdSchema = z.string().uuid();
+export const chatClientMessageIdSchema = z.string().guid();
 
 const messageContentSchema = z
   .string()
@@ -188,7 +188,7 @@ export const chatSystemEventMetadataSchema = z
   .object({
     eventKey: chatActionKeySchema,
     params: z
-      .record(z.union([z.string().max(200), z.number(), z.boolean()]))
+      .record(z.string(), z.union([z.string().max(200), z.number(), z.boolean()]))
       .refine((value) => Object.keys(value).length <= 20, "Too many system event params")
       .optional(),
   })
@@ -205,11 +205,11 @@ export type ChatMessageMetadata =
 
 const sendMessageBase = {
   clientMessageId: chatClientMessageIdSchema,
-  replyToMessageId: z.string().uuid().optional(),
+  replyToMessageId: z.string().guid().optional(),
 };
 
 const attachmentIdsSchema = z
-  .array(z.string().uuid())
+  .array(z.string().guid())
   .min(1, "At least one attachment is required")
   .max(CHAT_MAX_ATTACHMENTS_PER_MESSAGE)
   .refine((ids) => new Set(ids).size === ids.length, "Duplicate attachment ids");

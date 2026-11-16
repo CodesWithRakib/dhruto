@@ -30,7 +30,7 @@ export enum HubStatus {
 export const HUB_CODE_REGEX = /^[A-Z]{2,4}-[A-Z]{2,4}-\d{2,3}$/;
 
 export const hubSummarySchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   code: z.string(),
   name: z.string(),
   type: z.nativeEnum(HubType),
@@ -160,7 +160,7 @@ export enum ScanOutcome {
 export const hubScanSchema = z.object({
   barcode: z.string().trim().min(3, "Barcode required").max(64),
   scanType: z.nativeEnum(HubScanType),
-  bagId: z.string().uuid().optional(),
+  bagId: z.string().guid().optional(),
   notes: z.string().trim().max(500).optional(),
   /** Client-generated key so a retried/submitted-twice scan is not double-recorded. */
   idempotencyKey: z.string().trim().min(8).max(128).optional(),
@@ -174,15 +174,15 @@ export const hubScanResultSchema = z.object({
   scanType: z.nativeEnum(HubScanType),
   barcode: z.string(),
   itemType: z.enum(["PARCEL", "BAG", "UNKNOWN"]),
-  parcelId: z.string().uuid().optional(),
-  bagId: z.string().uuid().optional(),
+  parcelId: z.string().guid().optional(),
+  bagId: z.string().guid().optional(),
   previousStatus: z.string().optional(),
   currentStatus: z.string(),
   message: z.string(),
   /** Machine-readable reason when `outcome` is DUPLICATE or REJECTED. */
   reasonCode: z.string().optional(),
   exceptionType: z.nativeEnum(OperationalExceptionType).optional(),
-  exceptionId: z.string().uuid().optional(),
+  exceptionId: z.string().guid().optional(),
   routingInfo: z
     .object({
       originHubName: z.string().optional(),
@@ -197,7 +197,7 @@ export type HubScanResult = z.infer<typeof hubScanResultSchema>;
 
 /** Append-only scan log row as returned to operators. */
 export const parcelScanItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   trackingCode: z.string().nullable(),
   bagCode: z.string().nullable(),
   hubCode: z.string(),
@@ -213,7 +213,7 @@ export const parcelScanItemSchema = z.object({
 export type ParcelScanItem = z.infer<typeof parcelScanItemSchema>;
 
 export const operationalExceptionItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   type: z.nativeEnum(OperationalExceptionType),
   status: z.nativeEnum(ExceptionStatus),
   description: z.string(),
@@ -236,7 +236,7 @@ export type OperationalExceptionItem = z.infer<typeof operationalExceptionItemSc
 /* ------------------------------------------------------------------ */
 
 export const createBagSchema = z.object({
-  destinationHubId: z.string().uuid("Invalid destination hub ID"),
+  destinationHubId: z.string().guid("Invalid destination hub ID"),
   sealTag: z.string().trim().max(100).optional(),
   notes: z.string().trim().max(500).optional(),
 });
@@ -256,7 +256,7 @@ export const sealBagSchema = z.object({
 export type SealBagDto = z.infer<typeof sealBagSchema>;
 
 export const bagListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   bagCode: z.string(),
   originHubCode: z.string(),
   originHubName: z.string(),
@@ -275,7 +275,7 @@ export const bagListItemSchema = z.object({
 export type BagListItem = z.infer<typeof bagListItemSchema>;
 
 export const bagParcelItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   trackingCode: z.string(),
   recipientName: z.string(),
   district: z.string().nullable(),
@@ -291,7 +291,7 @@ export const bagDetailsSchema = bagListItemSchema.extend({
   createdByName: z.string().nullable(),
   sealedByName: z.string().nullable(),
   sealTag: z.string().nullable(),
-  manifestId: z.string().uuid().nullable(),
+  manifestId: z.string().guid().nullable(),
   manifestCode: z.string().nullable(),
   parcels: z.array(bagParcelItemSchema),
 });
@@ -303,8 +303,8 @@ export type BagDetails = z.infer<typeof bagDetailsSchema>;
 /* ------------------------------------------------------------------ */
 
 export const createManifestSchema = z.object({
-  destinationHubId: z.string().uuid("Invalid destination hub ID"),
-  bagIds: z.array(z.string().uuid()).min(1, "Select at least one bag for manifest").max(200),
+  destinationHubId: z.string().guid("Invalid destination hub ID"),
+  bagIds: z.array(z.string().guid()).min(1, "Select at least one bag for manifest").max(200),
   vehicleNumber: z.string().trim().min(3).max(50),
   driverName: z.string().trim().max(150).optional(),
   driverPhone: z.string().trim().max(20).optional(),
@@ -314,7 +314,7 @@ export const createManifestSchema = z.object({
 export type CreateManifestDto = z.infer<typeof createManifestSchema>;
 
 export const manifestListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   manifestCode: z.string(),
   originHubCode: z.string(),
   originHubName: z.string(),
@@ -403,7 +403,7 @@ export const hubInventorySchema = z.object({
   }),
   parcels: z.array(
     z.object({
-      id: z.string().uuid(),
+      id: z.string().guid(),
       trackingCode: z.string(),
       recipientName: z.string(),
       district: z.string().nullable(),

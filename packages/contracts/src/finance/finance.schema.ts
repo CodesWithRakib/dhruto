@@ -224,7 +224,7 @@ export interface CashDiscrepancyItem {
 
 export const requestPayoutSchema = z.object({
   amount: z.coerce
-    .number({ invalid_type_error: "Amount must be a number" })
+    .number({ error: "Amount must be a number" })
     .positive("Withdrawal amount must be greater than 0")
     .min(100, "Minimum payout request amount is ৳100"),
   payoutMethod: z.nativeEnum(PayoutMethod),
@@ -241,7 +241,7 @@ export const requestPayoutSchema = z.object({
 export type RequestPayoutDto = z.infer<typeof requestPayoutSchema>;
 
 export const verifyCashLedgerSchema = z.object({
-  cashLedgerId: z.string().uuid("Invalid cash ledger ID"),
+  cashLedgerId: z.string().guid("Invalid cash ledger ID"),
   actualAmount: z.coerce.number().positive().optional(),
   notes: z.string().trim().optional(),
 });
@@ -264,7 +264,7 @@ export const approvePayoutSchema = z.object({
 export type ApprovePayoutDto = z.infer<typeof approvePayoutSchema>;
 
 export const createAdjustmentSchema = z.object({
-  merchantId: z.string().uuid("Invalid merchant ID"),
+  merchantId: z.string().guid("Invalid merchant ID"),
   direction: z.enum(["CREDIT", "DEBIT"]),
   /** Major units (taka); converted to minor units server-side. */
   amount: z.coerce.number().positive().max(100_000_000),
@@ -282,8 +282,8 @@ export const reverseTransactionSchema = z.object({
 export type ReverseTransactionDto = z.infer<typeof reverseTransactionSchema>;
 
 export const createSettlementBatchSchema = z.object({
-  merchantId: z.string().uuid("Invalid merchant ID"),
-  settlementIds: z.array(z.string().uuid()).min(1).max(500),
+  merchantId: z.string().guid("Invalid merchant ID"),
+  settlementIds: z.array(z.string().guid()).min(1).max(500),
   notes: z.string().trim().max(500).optional(),
 });
 
@@ -300,9 +300,9 @@ export type ResolveDiscrepancyDto = z.infer<typeof resolveDiscrepancySchema>;
 export const financeReportQuerySchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
-  merchantId: z.string().uuid().optional(),
-  hubId: z.string().uuid().optional(),
-  riderId: z.string().uuid().optional(),
+  merchantId: z.string().guid().optional(),
+  hubId: z.string().guid().optional(),
+  riderId: z.string().guid().optional(),
   status: z.string().max(50).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),

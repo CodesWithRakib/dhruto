@@ -10,3 +10,8 @@ allowBuilds:
   sharp: set this to true or false
 minimumReleaseAgeExclude:
   - lucide-react@1.52.0
+overrides:
+  # RELEASE-BLOCKER-01: vitest 3.x pins tinypool ^1 (GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr, critical).
+  # tinypool 2.x's only breaking change is dropping Node 18 (engines here: node >= 20.18).
+  # Remove when vitest is upgraded to a release that no longer depends on tinypool 1.x.
+  "vitest>tinypool": 2.2.0

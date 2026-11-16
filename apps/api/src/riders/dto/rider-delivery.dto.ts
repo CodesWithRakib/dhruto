@@ -18,7 +18,6 @@ import {
   type CashHandInDto as ICashHandInDto,
   type CompleteDeliveryDto as ICompleteDeliveryDto,
   type FailDeliveryDto as IFailDeliveryDto,
-  type RequestOtpDto as IRequestOtpDto,
   type SetDutyDto as ISetDutyDto,
   type VerifyOtpDto as IVerifyOtpDto,
 } from "@dhruto/contracts";
@@ -32,7 +31,12 @@ export class VerifyOtpDto implements IVerifyOtpDto {
   otp: string;
 }
 
-export class RequestOtpDto implements IRequestOtpDto {}
+/**
+ * Empty body (contracts: `requestOtpSchema = z.object({}).strict()`). Under zod 4
+ * the inferred type is `Record<string, never>`, which a class cannot implement;
+ * the empty class still matches the contract.
+ */
+export class RequestOtpDto {}
 
 export class CompleteDeliveryDto implements ICompleteDeliveryDto {
   @ApiPropertyOptional({ example: "123456", description: "6-digit OTP provided by recipient" })

@@ -65,34 +65,41 @@ export enum ParcelStatus {
 /** The status a parcel is created in. */
 export const INITIAL_PARCEL_STATUS = ParcelStatus.CREATED;
 
+/**
+ * zod 4 replacement for zod 3 `required_error`: the custom message applies only
+ * when the field is missing; any other type error keeps zod's default message.
+ */
+const requiredMessage = (message: string) => (issue: { input: unknown }) =>
+  issue.input === undefined ? message : undefined;
+
 /** Canonical tracking code format: DHR-YYYYMMDD-XXXXXX. */
 export const TRACKING_CODE_REGEX = /^DHR-\d{8}-[0-9A-Z]{6}$/;
 
 export const parcelBookingSchema = z.object({
   recipientName: z
-    .string({ required_error: "Recipient name is required" })
+    .string({ error: requiredMessage("Recipient name is required") })
     .trim()
     .min(2, "Recipient name must be at least 2 characters")
     .max(100, "Recipient name cannot exceed 100 characters"),
   recipientPhone: z
-    .string({ required_error: "Recipient phone is required" })
+    .string({ error: requiredMessage("Recipient phone is required") })
     .transform((value) => normalizeBangladeshPhone(value))
     .refine(
       (value) => BANGLADESH_PHONE_REGEX.test(value),
       "Invalid Bangladesh mobile number (format: 01XXXXXXXXX, 11 digits)",
     ),
   district: z
-    .string({ required_error: "District is required" })
+    .string({ error: requiredMessage("District is required") })
     .trim()
     .min(1, "District is required")
     .max(50, "District cannot exceed 50 characters"),
   thana: z
-    .string({ required_error: "Thana/Upazila is required" })
+    .string({ error: requiredMessage("Thana/Upazila is required") })
     .trim()
     .min(1, "Thana/Upazila is required")
     .max(50, "Thana cannot exceed 50 characters"),
   deliveryAddress: z
-    .string({ required_error: "Delivery address is required" })
+    .string({ error: requiredMessage("Delivery address is required") })
     .trim()
     .min(5, "Delivery address must be at least 5 characters")
     .max(300, "Delivery address cannot exceed 300 characters"),
@@ -102,20 +109,25 @@ export const parcelBookingSchema = z.object({
     .max(500, "Parcel description cannot exceed 500 characters")
     .optional(),
   codAmount: z.coerce
-    .number({ invalid_type_error: "COD amount must be a number" })
+    .number<number | string>({ error: "COD amount must be a number" })
     .min(0, "COD amount cannot be negative")
     .max(500000, "COD amount exceeds maximum limit of 500,000 BDT"),
   weight: z.coerce
-    .number({ invalid_type_error: "Weight must be a number" })
+    .number<number | string>({ error: "Weight must be a number" })
     .positive("Weight must be positive (greater than 0 kg)")
     .max(50, "Weight exceeds maximum allowable limit of 50 kg"),
 });
 
 export type ParcelBooking = z.infer<typeof parcelBookingSchema>;
+/**
+ * Booking form state before validation: number inputs may hold strings while
+ * the user edits; the schema coerces them into `ParcelBooking`.
+ */
+export type ParcelBookingInput = z.input<typeof parcelBookingSchema>;
 
 /** Summary projection of a parcel. Never exposes internal audit columns. */
 export const parcelSummarySchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   trackingCode: z.string(),
   recipientName: z.string(),
   recipientPhone: z.string(),
@@ -216,7 +228,7 @@ export type ParcelListQuery = z.infer<typeof parcelListQuerySchema>;
 /* ------------------------------------------------------------------ */
 
 export const parcelHistoryEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().guid(),
   fromStatus: z.nativeEnum(ParcelStatus).nullable(),
   toStatus: z.nativeEnum(ParcelStatus),
   eventType: z.string(),
@@ -274,7 +286,7 @@ export const parcelAddressIntelligenceSchema = z.object({
 export type ParcelAddressIntelligence = z.infer<typeof parcelAddressIntelligenceSchema>;
 
 export const parcelDetailsResponseSchema = parcelSummarySchema.extend({
-  merchantId: z.string().uuid(),
+  merchantId: z.string().guid(),
   merchantName: z.string(),
   pickupAddress: z.string(),
   currentRiderName: z.string().nullable(),

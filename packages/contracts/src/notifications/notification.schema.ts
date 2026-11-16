@@ -22,14 +22,14 @@ export enum NotificationStatus {
 }
 
 export const createNotificationSchema = z.object({
-  merchantId: z.string().uuid().optional(),
-  userId: z.string().uuid().optional(),
+  merchantId: z.string().guid().optional(),
+  userId: z.string().guid().optional(),
   channel: z.nativeEnum(NotificationChannel),
   type: z.nativeEnum(NotificationType),
   title: z.string().min(1, "Title is required").max(255),
   message: z.string().min(1, "Message is required"),
   recipientTarget: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type CreateNotificationDto = z.infer<typeof createNotificationSchema>;

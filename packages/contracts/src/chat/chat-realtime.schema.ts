@@ -81,19 +81,19 @@ export enum ChatSocketErrorCode {
 /* ------------------------------------------------------------------ */
 
 export const chatSocketConversationSchema = z
-  .object({ conversationId: z.string().uuid() })
+  .object({ conversationId: z.string().guid() })
   .strict();
 
 export type ChatSocketConversationPayload = z.infer<typeof chatSocketConversationSchema>;
 
 export const chatSocketReadSchema = z
-  .object({ conversationId: z.string().uuid(), lastReadSequence: chatSequenceSchema })
+  .object({ conversationId: z.string().guid(), lastReadSequence: chatSequenceSchema })
   .strict();
 
 export type ChatSocketReadPayload = z.infer<typeof chatSocketReadSchema>;
 
 export const chatSocketDeliveredSchema = z
-  .object({ conversationId: z.string().uuid(), lastDeliveredSequence: chatSequenceSchema })
+  .object({ conversationId: z.string().guid(), lastDeliveredSequence: chatSequenceSchema })
   .strict();
 
 export type ChatSocketDeliveredPayload = z.infer<typeof chatSocketDeliveredSchema>;

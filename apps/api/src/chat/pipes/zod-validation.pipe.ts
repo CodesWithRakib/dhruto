@@ -1,5 +1,5 @@
 import { type PipeTransform } from "@nestjs/common";
-import { type ZodType, type ZodTypeDef } from "zod";
+import { type ZodType } from "zod";
 import { type ApiValidationErrorItem } from "@dhruto/contracts";
 import { DhrutoValidationException } from "../../common/pipes/validation.pipe.js";
 
@@ -13,7 +13,7 @@ import { DhrutoValidationException } from "../../common/pipes/validation.pipe.js
  * DhrutoValidationPipe skips non-class metatypes.
  */
 export class ZodValidationPipe<TOutput> implements PipeTransform<unknown, TOutput> {
-  constructor(private readonly schema: ZodType<TOutput, ZodTypeDef, unknown>) {}
+  constructor(private readonly schema: ZodType<TOutput, unknown>) {}
 
   transform(value: unknown): TOutput {
     const result = this.schema.safeParse(value ?? {});
