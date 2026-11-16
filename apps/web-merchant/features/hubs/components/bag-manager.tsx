@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Button, DataTable } from "@dhruto/ui";
-import { Package, Plus, Lock } from "lucide-react";
+import { Package, Plus } from "lucide-react";
 import { BagStatus } from "@dhruto/contracts";
 import {
   useGetBagsQuery,
@@ -12,15 +12,13 @@ import {
   useGetDestinationHubsQuery,
 } from "../api/hubs.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { Link } from "@/lib/navigation";
-import { HUB_ROUTES } from "@/config/routes";
 import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
-import { EnumBadge } from "@/components/data-display/enum-badge";
-import { BAG_STATUS_TONE } from "@/config/status";
 import { BagCreateCard } from "./bags/bag-create-card";
 import { BagSealDialog } from "./bags/bag-seal-dialog";
 import { getBagColumns } from "./bags/bag-table-columns";
+import { BagStatusFilterStrip } from "./bags/bag-status-filter-strip";
+import { BagMobileList } from "./bags/bag-mobile-list";
 
 interface BagManagerProps {
   currentHubId: string;
@@ -178,7 +176,6 @@ export function BagManager({ currentHubId }: BagManagerProps) {
       ) : null}
 
       <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
-        {/* Specular top highlight */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
           aria-hidden="true"
@@ -192,10 +189,10 @@ export function BagManager({ currentHubId }: BagManagerProps) {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-foreground sm:text-base">
-                  Active Transit Bags
+                  {t("bags.title")}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {bags.length} total bags tracked at this hub
+                  {t("bags.activeBagsCount", { count: bags.length })}
                 </p>
               </div>
             </div>
@@ -209,34 +206,12 @@ export function BagManager({ currentHubId }: BagManagerProps) {
             </Button>
           </div>
 
-          {/* Quick status filter pills */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            {(
-              [
-                { key: "ALL", label: `All (${statusCounts.ALL})` },
-                { key: BagStatus.OPEN, label: `Open (${statusCounts[BagStatus.OPEN]})` },
-                { key: BagStatus.SEALED, label: `Sealed (${statusCounts[BagStatus.SEALED]})` },
-                { key: BagStatus.IN_TRANSIT, label: `In Transit (${statusCounts[BagStatus.IN_TRANSIT]})` },
-                { key: BagStatus.RECEIVED, label: `Received (${statusCounts[BagStatus.RECEIVED]})` },
-              ] as const
-            ).map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => {
-                  setStatusFilter(item.key);
-                  setPage(1);
-                }}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                  statusFilter === item.key
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <BagStatusFilterStrip
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            statusCounts={statusCounts}
+            onFilterChange={() => setPage(1)}
+          />
         </div>
 
         <div>
@@ -272,52 +247,17 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                     setSearch(val);
                     setPage(1);
                   }}
-                  searchPlaceholder="Search bag code, seal tag, destination..."
+                  searchPlaceholder={t("bags.searchPlaceholder")}
                   emptyMessage={t("bags.empty")}
                   className="border-0 shadow-none rounded-none"
                 />
               </div>
-              {/* Mobile cards */}
-              <ul className="divide-y divide-border/20 md:hidden">
-                {pagedBags.map((bag) => (
-                  <li key={bag.id} className="space-y-2 p-4 transition-colors hover:bg-surface-muted/30">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link
-                        href={HUB_ROUTES.bag(bag.id)}
-                        className="font-mono text-xs font-bold text-primary hover:underline"
-                      >
-                        {bag.bagCode}
-                      </Link>
-                      <EnumBadge
-                        namespace="BagStatus"
-                        value={bag.status}
-                        tones={BAG_STATUS_TONE}
-                        className="text-[10px]"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {bag.destinationHubName} · {t("bags.parcelCount", { count: bag.parcelCount })}
-                    </p>
-                    {bag.status === BagStatus.OPEN ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openSealConfirm(bag.id)}
-                        className="h-9 w-full rounded-xl bg-surface-muted/60"
-                      >
-                        <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                        {t("bags.seal")}
-                      </Button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+              <BagMobileList bags={pagedBags} onOpenSeal={openSealConfirm} />
             </>
           )}
         </div>
       </div>
 
-      {/* Seal confirmation dialog */}
       <BagSealDialog
         open={confirmSealOpen}
         onOpenChange={setConfirmSealOpen}

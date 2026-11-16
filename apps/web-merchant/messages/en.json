@@ -604,7 +604,9 @@
       "noParcels": "No parcels in this bag yet. Scan parcels to add them.",
       "sealedBanner": "This bag is sealed. Membership is frozen.",
       "inTransitBanner": "This bag is in transit.",
-      "receivedBanner": "This bag was received at its destination."
+      "receivedBanner": "This bag was received at its destination.",
+      "activeBagsCount": "{count} total bags tracked at this hub",
+      "searchPlaceholder": "Search bag code, seal tag, destination..."
     },
     "manifests": {
       "title": "Dispatch manifests",
@@ -645,7 +647,9 @@
       "allowPartial": "Allow partial receipt (record missing bags as exceptions)",
       "completeReceive": "Complete receipt",
       "receiving": "Receiving…",
-      "reconciliation": "Reconciliation"
+      "reconciliation": "Reconciliation",
+      "activeCount": "{count} total manifests recorded",
+      "searchPlaceholder": "Search manifest code, vehicle, driver, route..."
     },
     "exceptions": {
       "title": "Operational exceptions",
@@ -660,6 +664,25 @@
       "resolved": "Exception resolved",
       "raisedBy": "Raised by",
       "resolvedBy": "Resolved by"
+    },
+    "settings": {
+      "title": "Station Profile & Settings",
+      "subtitle": "Assigned sorting hub station, operator credentials, and operations shortcuts.",
+      "activeStation": "Active Station",
+      "refreshStation": "Refresh Station",
+      "stationOperations": "Station Operations",
+      "stationOperationsDesc": "Physical logistics hub details and station operator identity.",
+      "stationName": "Station Name",
+      "stationCode": "Station Code",
+      "copyHubCode": "Copy Hub Code",
+      "copied": "Copied",
+      "error": "Error",
+      "role": "Role",
+      "hubWorkflows": "Hub Workflows",
+      "inboundScanner": "Continuous Inbound Scanner",
+      "bagManagement": "Bag Management",
+      "manifestsTransit": "Manifests & Transit",
+      "cashDesk": "Cash Desk & Hand-in"
     }
   },
   "Rider": {

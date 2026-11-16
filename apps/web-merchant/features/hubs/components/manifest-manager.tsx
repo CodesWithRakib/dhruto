@@ -13,14 +13,12 @@ import {
   useGetDestinationHubsQuery,
 } from "../api/hubs.api";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { Link } from "@/lib/navigation";
-import { HUB_ROUTES } from "@/config/routes";
 import { EmptyState } from "@/components/feedback/states";
 import { toast } from "sonner";
-import { EnumBadge } from "@/components/data-display/enum-badge";
-import { MANIFEST_STATUS_TONE } from "@/config/status";
 import { ManifestCreateCard } from "./manifests/manifest-create-card";
 import { getManifestColumns } from "./manifests/manifest-table-columns";
+import { ManifestStatusFilterStrip } from "./manifests/manifest-status-filter-strip";
+import { ManifestMobileList } from "./manifests/manifest-mobile-list";
 
 interface ManifestManagerProps {
   currentHubId: string;
@@ -213,7 +211,6 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
       ) : null}
 
       <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
-        {/* Specular top highlight */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
           aria-hidden="true"
@@ -227,10 +224,10 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-foreground sm:text-base">
-                  Active Dispatch Records
+                  {t("manifests.title")}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {manifests.length} total manifests recorded
+                  {t("manifests.activeCount", { count: manifests.length })}
                 </p>
               </div>
             </div>
@@ -244,35 +241,12 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
             </Button>
           </div>
 
-          {/* Quick status filter pills */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            {(
-              [
-                { key: "ALL", label: `All (${statusCounts.ALL})` },
-                { key: ManifestStatus.CREATED, label: `Created (${statusCounts[ManifestStatus.CREATED]})` },
-                { key: ManifestStatus.DISPATCHED, label: `Dispatched (${statusCounts[ManifestStatus.DISPATCHED]})` },
-                { key: ManifestStatus.IN_TRANSIT, label: `In Transit (${statusCounts[ManifestStatus.IN_TRANSIT]})` },
-                { key: ManifestStatus.RECEIVED, label: `Received (${statusCounts[ManifestStatus.RECEIVED]})` },
-                { key: ManifestStatus.RECONCILED, label: `Reconciled (${statusCounts[ManifestStatus.RECONCILED]})` },
-              ] as const
-            ).map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => {
-                  setStatusFilter(item.key);
-                  setPage(1);
-                }}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                  statusFilter === item.key
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <ManifestStatusFilterStrip
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            statusCounts={statusCounts}
+            onFilterChange={() => setPage(1)}
+          />
         </div>
 
         <div>
@@ -308,35 +282,12 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                     setSearch(val);
                     setPage(1);
                   }}
-                  searchPlaceholder="Search manifest code, vehicle, driver, route..."
+                  searchPlaceholder={t("manifests.searchPlaceholder")}
                   emptyMessage={t("manifests.empty")}
                   className="border-0 shadow-none rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border/20 md:hidden">
-                {pagedManifests.map((manifest) => (
-                  <li key={manifest.id} className="space-y-2 p-4 transition-colors hover:bg-surface-muted/30">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link
-                        href={HUB_ROUTES.manifest(manifest.id)}
-                        className="font-mono text-xs font-bold text-primary hover:underline"
-                      >
-                        {manifest.manifestCode}
-                      </Link>
-                      <EnumBadge
-                        namespace="ManifestStatus"
-                        value={manifest.status}
-                        tones={MANIFEST_STATUS_TONE}
-                        className="text-[10px]"
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {manifest.originHubName} → {manifest.destinationHubName} · {manifest.bagCount}{" "}
-                      {t("bags.title")}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+              <ManifestMobileList manifests={pagedManifests} />
             </>
           )}
         </div>

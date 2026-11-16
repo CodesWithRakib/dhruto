@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ import { useAppSelector } from "@/store/hooks";
 import { CopyButton } from "@/components/data-display/copy-button";
 
 export function HubSettingsView() {
+  const t = useTranslations("Hub.settings");
   const authUser = useAppSelector((s) => s.auth.user);
   const { activeHub, refetch } = useActiveHub();
 
@@ -36,7 +38,6 @@ export function HubSettingsView() {
     <div className="space-y-6">
       {/* Overview Card */}
       <Card className="relative overflow-hidden border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
-        {/* Specular top highlight */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
           aria-hidden="true"
@@ -53,11 +54,11 @@ export function HubSettingsView() {
                     {activeHub?.name || "Sorting Hub"}
                   </h2>
                   <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                    Active Station
+                    {t("activeStation")}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Code: <span className="font-mono font-semibold">{activeHub?.code || "HUB-DHK"}</span> • {activeHub?.district || "Dhaka"}
+                  {t("stationCode")}: <span className="font-mono font-semibold">{activeHub?.code || "HUB-DHK"}</span> • {activeHub?.district || "Dhaka"}
                 </p>
               </div>
             </div>
@@ -69,7 +70,7 @@ export function HubSettingsView() {
               className="gap-2 rounded-xl text-xs shadow-2xs"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              <span>Refresh Station</span>
+              <span>{t("refreshStation")}</span>
             </Button>
           </div>
         </CardContent>
@@ -79,7 +80,6 @@ export function HubSettingsView() {
         {/* Hub Station Information */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="relative overflow-hidden border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
-            {/* Specular top highlight */}
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
               aria-hidden="true"
@@ -87,17 +87,17 @@ export function HubSettingsView() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Warehouse className="h-4 w-4 text-primary" />
-                Station Operations
+                {t("stationOperations")}
               </CardTitle>
               <CardDescription className="text-xs">
-                Physical logistics hub details and station operator identity.
+                {t("stationOperationsDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-border/50 bg-surface-muted/50 p-4">
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Station Name
+                    {t("stationName")}
                   </p>
                   <p className="mt-1 text-sm font-bold text-foreground">{activeHub?.name || "Dhaka Central"}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground flex items-center gap-1">
@@ -108,16 +108,16 @@ export function HubSettingsView() {
 
                 <div className="rounded-2xl border border-border/50 bg-surface-muted/50 p-4">
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Station Code
+                    {t("stationCode")}
                   </p>
                   <div className="mt-1 flex items-center justify-between font-mono text-sm font-bold text-foreground">
                     <span>{activeHub?.code || "N/A"}</span>
                     {activeHub?.code ? (
                       <CopyButton
                         value={activeHub.code}
-                        label="Copy Hub Code"
-                        copiedLabel="Copied"
-                        errorLabel="Error"
+                        label={t("copyHubCode")}
+                        copiedLabel={t("copied")}
+                        errorLabel={t("error")}
                         size="sm"
                       />
                     ) : null}
@@ -132,7 +132,7 @@ export function HubSettingsView() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{authUser?.name || "Hub Operator"}</p>
-                    <p className="text-xs text-muted-foreground">{authUser?.email} • Role: HUB_MANAGER</p>
+                    <p className="text-xs text-muted-foreground">{authUser?.email} • {t("role")}: {authUser?.role || "HUB_MANAGER"}</p>
                   </div>
                 </div>
               </div>
@@ -143,7 +143,6 @@ export function HubSettingsView() {
         {/* Operational Shortcuts */}
         <div className="space-y-6">
           <Card className="relative overflow-hidden border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
-            {/* Specular top highlight */}
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
               aria-hidden="true"
@@ -151,7 +150,7 @@ export function HubSettingsView() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                Hub Workflows
+                {t("hubWorkflows")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -161,7 +160,7 @@ export function HubSettingsView() {
               >
                 <div className="flex items-center gap-2.5">
                   <ScanLine className="h-4 w-4 text-primary" />
-                  <span>Continuous Inbound Scanner</span>
+                  <span>{t("inboundScanner")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
@@ -172,7 +171,7 @@ export function HubSettingsView() {
               >
                 <div className="flex items-center gap-2.5">
                   <Package className="h-4 w-4 text-primary" />
-                  <span>Bag Management</span>
+                  <span>{t("bagManagement")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
@@ -183,7 +182,7 @@ export function HubSettingsView() {
               >
                 <div className="flex items-center gap-2.5">
                   <Truck className="h-4 w-4 text-primary" />
-                  <span>Manifests & Transit</span>
+                  <span>{t("manifestsTransit")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
@@ -194,7 +193,7 @@ export function HubSettingsView() {
               >
                 <div className="flex items-center gap-2.5">
                   <Wallet className="h-4 w-4 text-primary" />
-                  <span>Cash Desk & Hand-in</span>
+                  <span>{t("cashDesk")}</span>
                 </div>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
               </Link>
