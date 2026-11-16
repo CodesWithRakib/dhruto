@@ -109,7 +109,7 @@ export function SettlementsView() {
               <span>{t("schedule.title")}</span>
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success bg-success-soft px-2 py-0.5 rounded-full">
                 <ShieldCheck className="h-3 w-3" />
-                0% Fee Guaranteed
+                {t("zeroFeeGuaranteed")}
               </span>
             </p>
             <p className="text-muted-foreground mt-0.5 max-w-2xl leading-relaxed">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -31,6 +32,7 @@ import { ParcelCancelDialog } from "@/features/parcels/components/parcel-cancel-
 import { ParcelPickupDialog } from "@/features/parcels/components/parcel-pickup-dialog";
 
 export function IntelligenceReviewQueue() {
+  const t = useTranslations("Intelligence");
   const { bdt, date } = useFormatters();
   const routes = useRouteBase();
 
@@ -141,7 +143,7 @@ export function IntelligenceReviewQueue() {
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                High Risk Attention
+                {t("highRiskAttention")}
               </span>
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-danger/10 text-danger">
                 <ShieldAlert className="h-4 w-4" />
@@ -151,7 +153,7 @@ export function IntelligenceReviewQueue() {
               {highRiskCount}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Vague addresses or large COD exposure
+              {t("highRiskDesc")}
             </p>
           </CardContent>
         </Card>
@@ -160,7 +162,7 @@ export function IntelligenceReviewQueue() {
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Moderate Caution
+                {t("moderateAttention")}
               </span>
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/10 text-warning">
                 <AlertTriangle className="h-4 w-4" />
@@ -170,7 +172,7 @@ export function IntelligenceReviewQueue() {
               {mediumRiskCount}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Review before rider pickup
+              {t("moderateDesc")}
             </p>
           </CardContent>
         </Card>
@@ -179,7 +181,7 @@ export function IntelligenceReviewQueue() {
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Awaiting Pre-Dispatch
+                {t("safeToDispatch")}
               </span>
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Truck className="h-4 w-4" />
@@ -189,7 +191,7 @@ export function IntelligenceReviewQueue() {
               {reviewedParcels.length}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Total bookings ready for pickup
+              {t("safeDesc")}
             </p>
           </CardContent>
         </Card>
@@ -201,10 +203,10 @@ export function IntelligenceReviewQueue() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-base font-bold text-foreground">
-                Pre-Dispatch Risk & Address Radar
+                {t("tabQueue")}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Screen booked orders for address ambiguities and RTO risk before scheduling rider pickup.
+                {t("subtitle")}
               </CardDescription>
             </div>
 
@@ -217,7 +219,7 @@ export function IntelligenceReviewQueue() {
                 className="gap-1.5 h-8 text-xs"
               >
                 <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
-                Refresh
+                {t("reset")}
               </Button>
             </div>
           </div>
@@ -234,7 +236,7 @@ export function IntelligenceReviewQueue() {
                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                 }`}
               >
-                All Bookings ({reviewedParcels.length})
+                {t("allRisks")} ({reviewedParcels.length})
               </button>
               <button
                 type="button"
@@ -245,7 +247,7 @@ export function IntelligenceReviewQueue() {
                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                 }`}
               >
-                High Risk ({highRiskCount})
+                {t("highRiskOnly")} ({highRiskCount})
               </button>
               <button
                 type="button"
@@ -256,7 +258,7 @@ export function IntelligenceReviewQueue() {
                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                 }`}
               >
-                Moderate Risk ({mediumRiskCount})
+                {t("mediumRiskOnly")} ({mediumRiskCount})
               </button>
             </div>
 
@@ -265,7 +267,7 @@ export function IntelligenceReviewQueue() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search recipient, code, phone..."
+                placeholder={t("searchQueue")}
                 className="h-8 pl-8 text-xs"
               />
             </div>
@@ -285,10 +287,10 @@ export function IntelligenceReviewQueue() {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <h3 className="mt-3 text-sm font-semibold text-foreground">
-                Queue Clean
+                {t("noQueueItems")}
               </h3>
               <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
-                No orders requiring risk intervention under this filter. All orders are verified and ready for rider pickup.
+                {t("noQueueItemsDesc")}
               </p>
             </div>
           ) : (
@@ -320,7 +322,7 @@ export function IntelligenceReviewQueue() {
                                 : "bg-success/10 text-success border border-success/25"
                           }`}
                         >
-                          {isHigh ? "High RTO Risk" : isMed ? "Review Address" : "Low Risk"} · Score {item.riskScore}
+                          {isHigh ? t("holdReview") : isMed ? t("callNeeded") : t("safeDispatch")} · {t("riskScore")} {item.riskScore}
                         </span>
                         <span className="text-[11px] text-muted-foreground">
                           {date(item.createdAt)}
@@ -384,7 +386,7 @@ export function IntelligenceReviewQueue() {
                           }
                         >
                           <Edit3 className="h-3 w-3" />
-                          Correct Address
+                          {t("editAddress")}
                         </Button>
 
                         <Button
@@ -399,7 +401,7 @@ export function IntelligenceReviewQueue() {
                           }
                         >
                           <Truck className="h-3 w-3" />
-                          Request Pickup
+                          {t("requestPickup")}
                         </Button>
 
                         <Button

@@ -911,7 +911,10 @@
       "auditNote": "Computer-generated financial settlement voucher. Electronically audited and cleared via Dhruto Double-Entry Ledger.",
       "print": "Print / Save PDF",
       "copyTrx": "Copy Reference",
-      "copied": "Transaction reference copied to clipboard"
+      "copied": "Transaction reference copied to clipboard",
+      "clearingInProgress": "Electronic clearing in progress",
+      "digitallyAudited": "Digitally Audited & Reconciled",
+      "auditBadge": "Double-Entry Ledger Settled"
     },
     "schedule": {
       "title": "Automated COD Settlement Policy",
@@ -977,7 +980,13 @@
       "checkRiders": "Rider cash positions",
       "checkSettlements": "Settlement math",
       "checkTransactions": "Journal balance"
-    }
+    },
+    "zeroFeeGuaranteed": "0% Fee Guaranteed",
+    "personal": "Personal",
+    "merchant": "Merchant",
+    "bank": "Bank",
+    "branch": "Branch",
+    "maxAmount": "Max ({amount})"
   },
   "Webhooks": {
     "title": "Webhooks & Real-time Integrations",
@@ -1177,7 +1186,7 @@
   },
   "Intelligence": {
     "title": "Logistics AI & RTO Prediction Suite",
-    "subtitle": "Bilingual natural language address parsing, phonetic typo correction, and pre-dispatch customer risk assessment for Bangladesh e-commerce.",
+    "subtitle": "Pre-dispatch customer risk assessment, bilingual natural language address parsing, and phonetic typo correction for Bangladesh e-commerce.",
     "parserTitle": "Smart BD Address Parser",
     "parserDesc": "Bilingual (English & Bengali) NLP address extractor with fuzzy typo correction",
     "riskTitle": "Recipient Risk & RTO Predictor",
@@ -1187,12 +1196,54 @@
     "safeDispatch": "Safe to Dispatch",
     "holdReview": "Hold for Review",
     "callNeeded": "Call Verification Needed",
-    "advanceNeeded": "Advance Fee Suggested"
+    "advanceNeeded": "Advance Fee Suggested",
+    "eyebrow": "Dhruto Cognitive Intelligence Engine v2.0",
+    "bookWithAi": "Book With AI Auto-Fill",
+    "districtCoverage": "District Coverage",
+    "districtCoverageDesc": "All Bangladesh divisions & hubs",
+    "upazilaLexicon": "Upazila Lexicon",
+    "upazilaLexiconDesc": "With postal code matching",
+    "scoringModel": "Scoring Model",
+    "scoringModelDesc": "Explainable rule baseline, ML-ready",
+    "geoDataset": "Geo Dataset",
+    "tabQueue": "Pre-Dispatch Risk Radar & Queue",
+    "tabAddress": "Address NLP Parser",
+    "tabRisk": "RTO Risk Radar",
+    "tabBoth": "Side-by-Side Suite",
+    "districtsCount": "{count} districts",
+    "thanasCount": "{count} thanas",
+    "recentCustomerOrders": "Recent Customer Bookings:",
+    "recipientPhone": "Recipient Mobile Number *",
+    "codAmount": "COD Amount (BDT) *",
+    "deliveryAddress": "Delivery Address *",
+    "reset": "Reset",
+    "predictRto": "Predict RTO Risk",
+    "evaluating": "Calculating...",
+    "highRiskAttention": "High Risk Attention",
+    "highRiskDesc": "Vague addresses or large COD exposure",
+    "moderateAttention": "Moderate Risk",
+    "moderateDesc": "Requires phone call verification",
+    "safeToDispatch": "Safe to Dispatch",
+    "safeDesc": "Clear address & low risk score",
+    "allRisks": "All Shipments",
+    "highRiskOnly": "High Risk Only",
+    "mediumRiskOnly": "Medium Risk",
+    "searchQueue": "Search recipient, phone or tracking code...",
+    "riskScore": "Risk Score",
+    "dispatchRecommendation": "Recommendation",
+    "actions": "Actions",
+    "callCustomer": "Call Customer",
+    "editAddress": "Edit Address",
+    "cancelBooking": "Cancel Order",
+    "requestPickup": "Request Pickup",
+    "noQueueItems": "No pending pre-dispatch shipments found.",
+    "noQueueItemsDesc": "All recent parcels have passed cognitive validation and dispatched safely."
   },
   "Nav": {
     "messages": "Messages",
     "loadingWorkspace": "Loading workspace...",
-    "accountMenu": "User account menu",    "home": "Home",
+    "accountMenu": "User account menu",
+    "home": "Home",
     "tracking": "Tracking",
     "services": "Services",
     "pricing": "Calculator",
@@ -1643,9 +1694,24 @@
       "sla": "Delivery time",
       "note": "Rates shown are standard published rates for individual parcels. Regular merchants get negotiated per-parcel pricing.",
       "rows": [
-        { "zone": "Inside Dhaka", "upTo1kg": "৳60", "perKg": "+৳15", "sla": "12–24 hours" },
-        { "zone": "Dhaka suburbs", "upTo1kg": "৳100", "perKg": "+৳20", "sla": "24–36 hours" },
-        { "zone": "Outside Dhaka", "upTo1kg": "৳130", "perKg": "+৳25", "sla": "36–48 hours" }
+        {
+          "zone": "Inside Dhaka",
+          "upTo1kg": "৳60",
+          "perKg": "+৳15",
+          "sla": "12–24 hours"
+        },
+        {
+          "zone": "Dhaka suburbs",
+          "upTo1kg": "৳100",
+          "perKg": "+৳20",
+          "sla": "24–36 hours"
+        },
+        {
+          "zone": "Outside Dhaka",
+          "upTo1kg": "৳130",
+          "perKg": "+৳25",
+          "sla": "36–48 hours"
+        }
       ]
     },
     "included": {
@@ -2618,5 +2684,41 @@
       "duplicateReport": "You have already reported this message.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "Calculator": {
+    "eyebrow": "INTERACTIVE FREIGHT & ESCROW COCKPIT",
+    "title": "Freight & Escrow Simulator",
+    "subtitle": "Simulate accurate shipping fees across all 64 districts, COD collection commissions, and net daily settlement payouts before booking.",
+    "ctaLabel": "Create Parcel with These Parameters",
+    "ctaSubtext": "Pre-fills rate specifications into the merchant shipment booking form",
+    "stepDestination": "1. Select Delivery Destination (64 Districts)",
+    "mappedZone": "Mapped: {zone}",
+    "searchDistrict": "Search district...",
+    "searchThana": "Search thana...",
+    "choosePrompt": "Choose District & Thana for exact rate calculation:",
+    "stepWeight": "2. Parcel Billable Weight",
+    "baseCovers": "Base rate covers up to 1.0 kg",
+    "extraWeightNote": "+{extraKg} kg over 1kg @ ৳{rate}/kg = ৳{fee} extra weight fee",
+    "stepCod": "3. Cash on Delivery (COD) Amount",
+    "codNote": "1.0% cash collection & counting fee",
+    "prepaid": "৳0 (Prepaid)",
+    "fragileTitle": "Reinforced Padded Box / Bubble Security",
+    "fragileDesc": "Extra protection for fragile electronics or glassware",
+    "slipBarcode": "*DHR-SIMULATOR-2026*",
+    "slipTitle": "Dhruto Settlement Slip",
+    "slipSubtitle": "Digital Escrow Breakdown",
+    "destinationZone": "Destination Zone",
+    "transitSla": "Transit SLA",
+    "baseFreight": "Base Freight (Up to 1kg)",
+    "extraWeight": "Extra Weight ({kg}kg)",
+    "codCollectionFee": "COD Collection Fee (1%)",
+    "packagingBubble": "Packaging & Bubble",
+    "fuelSurcharge": "Fuel & Unannounced Surcharge",
+    "zeroFee": "৳0.00 (Zero)",
+    "totalLogisticsFee": "Total Logistics Fee:",
+    "netMerchantPayout": "Net Merchant Payout",
+    "escrowReconciled": "ESCROW RECONCILED",
+    "disbursementSchedule": "Disbursed daily by 23:59 BST via bKash, Nagad, or BEFTN Bank Transfer",
+    "authoritativeQuote": "Authoritative Live API Quote"
   }
 }

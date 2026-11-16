@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Calculator } from "lucide-react";
 import {
   CalculatorDestinationPicker,
@@ -8,6 +9,7 @@ import {
 } from "./calculator/calculator-destination-picker";
 import { CalculatorParametersCard } from "./calculator/calculator-parameters-card";
 import { CalculatorReceiptSlip } from "./calculator/calculator-receipt-slip";
+import { useParcelPricing } from "@/features/parcels/hooks/use-parcel-pricing";
 
 const ZONES: ZoneOption[] = [
   {
@@ -56,13 +58,19 @@ export interface PricingCalculatorCockpitProps {
 
 export function PricingCalculatorCockpit({
   ctaHref = "/register",
-  ctaLabel = "Book This Delivery Rate",
-  ctaSubtext = "Free merchant sign-up • No credit card or deposit needed",
-  title = "Real-Time Delivery Cost & Escrow Simulator",
-  subtitle = "Adjust destination, package weight, and cash-on-delivery amounts. Watch your itemized thermal receipt and net bank payout update instantaneously.",
+  ctaLabel,
+  ctaSubtext,
+  title,
+  subtitle,
   compact = false,
   headingTag = "h1",
 }: PricingCalculatorCockpitProps = {}) {
+  const t = useTranslations("Calculator");
+  const displayTitle = title ?? t("title");
+  const displaySubtitle = subtitle ?? t("subtitle");
+  const displayCtaLabel = ctaLabel ?? t("ctaLabel");
+  const displayCtaSubtext = ctaSubtext ?? t("ctaSubtext");
+
   const [selectedZoneId, setSelectedZoneId] = useState<string>("dhaka");
   const [calcDistrict, setCalcDistrict] = useState<string>("Dhaka");
   const [calcThana, setCalcThana] = useState<string>("");
@@ -94,12 +102,22 @@ export function PricingCalculatorCockpit({
 
   const selectedZone = ZONES.find((z) => z.id === selectedZoneId) ?? ZONES[0]!;
 
+  // Dynamic live rate calculation via authoritative API
+  const { pricing } = useParcelPricing({
+    district: calcDistrict,
+    thana: calcThana,
+    weight: weightKg,
+    codAmount,
+    enabled: Boolean(calcDistrict),
+  });
+
   const extraKg = Math.max(0, Math.ceil(weightKg - 1));
-  const extraWeightFee = extraKg * selectedZone.perKg;
-  const baseDeliveryFee = selectedZone.baseRate;
+  const baseDeliveryFee = pricing?.baseFee ?? selectedZone.baseRate;
+  const extraWeightFee = pricing?.weightFee ?? extraKg * selectedZone.perKg;
   const packagingFee = isFragileBox ? 20 : 0;
-  const codFee = codAmount > 0 ? Math.round(codAmount * 0.01) : 0;
-  const totalDeductions = baseDeliveryFee + extraWeightFee + packagingFee + codFee;
+  const codFee = pricing?.codFee ?? (codAmount > 0 ? Math.round(codAmount * 0.01) : 0);
+  const totalDeductions =
+    (pricing ? pricing.totalFee : baseDeliveryFee + extraWeightFee + codFee) + packagingFee;
   const netMerchantPayout = Math.max(0, codAmount - totalDeductions);
 
   return (
@@ -109,19 +127,19 @@ export function PricingCalculatorCockpit({
         <div className="mx-auto max-w-3xl text-center space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-caption font-semibold text-primary backdrop-blur-md">
             <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>INTERACTIVE FREIGHT & ESCROW COCKPIT</span>
+            <span>{t("eyebrow")}</span>
           </div>
           {headingTag === "h2" ? (
             <h2 className={`font-bold tracking-tight text-foreground ${compact ? "text-display-xs sm:text-display-sm" : "text-display-sm sm:text-display-md"}`}>
-              {title}
+              {displayTitle}
             </h2>
           ) : (
             <h1 className={`font-bold tracking-tight text-foreground ${compact ? "text-display-xs sm:text-display-sm" : "text-display-sm sm:text-display-md"}`}>
-              {title}
+              {displayTitle}
             </h1>
           )}
           <p className="mx-auto max-w-xl text-body-sm sm:text-body-md text-muted-foreground">
-            {subtitle}
+            {displaySubtitle}
           </p>
         </div>
 
@@ -168,8 +186,8 @@ export function PricingCalculatorCockpit({
               totalDeductions={totalDeductions}
               netMerchantPayout={netMerchantPayout}
               ctaHref={ctaHref}
-              ctaLabel={ctaLabel}
-              ctaSubtext={ctaSubtext}
+              ctaLabel={displayCtaLabel}
+              ctaSubtext={displayCtaSubtext}
             />
           </div>
         </div>

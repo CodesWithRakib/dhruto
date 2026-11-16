@@ -226,7 +226,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                           : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted"
                       }`}
                     >
-                      {value === "PERSONAL" ? "Personal" : "Merchant"}
+                      {value === "PERSONAL" ? t("personal") : t("merchant")}
                     </button>
                   );
                 })}
@@ -250,7 +250,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="bank-name-input" className="text-xs text-muted-foreground">
-                      Bank
+                      {t("bank")}
                     </Label>
                     <Input
                       id="bank-name-input"
@@ -262,7 +262,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   </div>
                   <div>
                     <Label htmlFor="branch-name-input" className="text-xs text-muted-foreground">
-                      Branch
+                      {t("branch")}
                     </Label>
                     <Input
                       id="branch-name-input"
@@ -329,7 +329,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   disabled={availableBalance < 100}
                   className="rounded-xl bg-success-soft px-3 py-1.5 text-xs font-semibold text-success transition-colors hover:bg-success-soft/80"
                 >
-                  Max ({bdt(availableBalance)})
+                  {t("maxAmount", { amount: bdt(availableBalance) })}
                 </button>
               </div>
             </div>

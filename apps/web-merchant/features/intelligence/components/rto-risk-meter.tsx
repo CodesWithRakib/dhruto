@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Card,
   CardHeader,
@@ -26,6 +27,7 @@ import {
   Info,
 } from "lucide-react";
 import { useEvaluateRecipientRiskMutation } from "../api/intelligence.api";
+import { useGetParcelsQuery } from "@/features/parcels/api/parcels.api";
 import { type RecipientRiskResult, type RiskTier } from "@dhruto/contracts";
 import { toast } from "sonner";
 
@@ -35,35 +37,27 @@ interface RtoRiskMeterProps {
   initialAddress?: string;
 }
 
-const PRESET_SCENARIOS = [
-  {
-    name: "Safe Repeat Customer",
-    phone: "01712345678",
-    cod: 1500,
-    address: "House 12, Road 4, Dhanmondi, Dhaka",
-  },
-  {
-    name: "High COD Rural Order",
-    phone: "01811223344",
-    cod: 14500,
-    address: "Bazar Road, Shajahanpur, Bogura",
-  },
-  {
-    name: "Suspicious / Invalid Number",
-    phone: "01234567890",
-    cod: 3000,
-    address: "Station Road, Sylhet",
-  },
-];
-
 export function RtoRiskMeter({
   initialPhone = "",
   initialCod = 1000,
   initialAddress = "",
 }: RtoRiskMeterProps) {
+  const t = useTranslations("Intelligence");
   const [phone, setPhone] = useState(initialPhone);
   const [cod, setCod] = useState<number | string>(initialCod);
   const [address, setAddress] = useState(initialAddress);
+
+  // Dynamic recent customer shipments (Zero static mocks)
+  const { data: parcelsData } = useGetParcelsQuery({ limit: 4 });
+  const recentOrders = (parcelsData?.data ?? [])
+    .filter((p) => p.recipientPhone && p.recipientPhone.length >= 10)
+    .slice(0, 3)
+    .map((p) => ({
+      name: `${p.recipientName || "Customer"} (${p.trackingCode})`,
+      phone: p.recipientPhone,
+      cod: Number(p.codAmount ?? 0),
+      address: p.deliveryAddress || "",
+    }));
 
   const [evaluateRisk, { data: responseData, isLoading }] = useEvaluateRecipientRiskMutation();
   const riskResult: RecipientRiskResult | undefined = responseData?.data;
@@ -166,9 +160,9 @@ export function RtoRiskMeter({
               <ShieldAlert className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg">Recipient Risk & RTO Predictor</CardTitle>
+              <CardTitle className="text-lg">{t("riskTitle")}</CardTitle>
               <CardDescription>
-                Predict Return-To-Origin (RTO) probability and prevent fake order losses
+                {t("riskDesc")}
               </CardDescription>
             </div>
           </div>
@@ -179,35 +173,37 @@ export function RtoRiskMeter({
       </CardHeader>
 
       <CardContent className="space-y-4 pt-6">
-        {/* Preset quick test buttons */}
-        <div>
-          <span className="text-xs text-muted-foreground block mb-1.5 font-medium">
-            Test scenarios:
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {PRESET_SCENARIOS.map((scenario) => (
-              <button
-                key={scenario.name}
-                type="button"
-                onClick={() => {
-                  setPhone(scenario.phone);
-                  setCod(scenario.cod);
-                  setAddress(scenario.address);
-                  handleEvaluate(scenario.phone, scenario.cod, scenario.address);
-                }}
-                className="text-xs px-2.5 py-1 rounded-full border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors flex items-center gap-1"
-              >
-                <span>{scenario.name}</span>
-              </button>
-            ))}
+        {/* Dynamic recent customer bookings (Zero static mocks) */}
+        {recentOrders.length > 0 && (
+          <div>
+            <span className="text-xs text-muted-foreground block mb-1.5 font-medium">
+              {t("recentCustomerOrders")}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {recentOrders.map((scenario) => (
+                <button
+                  key={scenario.name}
+                  type="button"
+                  onClick={() => {
+                    setPhone(scenario.phone);
+                    setCod(scenario.cod);
+                    setAddress(scenario.address);
+                    handleEvaluate(scenario.phone, scenario.cod, scenario.address);
+                  }}
+                  className="text-xs px-2.5 py-1 rounded-full border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors flex items-center gap-1 font-mono"
+                >
+                  <span>{scenario.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Inputs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-              Recipient Mobile Number *
+              {t("recipientPhone")}
             </label>
             <Input
               value={phone}
@@ -220,7 +216,7 @@ export function RtoRiskMeter({
 
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-              COD Amount (BDT) *
+              {t("codAmount")}
             </label>
             <Input
               type="number"
@@ -234,7 +230,7 @@ export function RtoRiskMeter({
 
         <div>
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-            Delivery Address *
+            {t("deliveryAddress")}
           </label>
           <Input
             value={address}
@@ -258,7 +254,7 @@ export function RtoRiskMeter({
             className="flex items-center gap-1.5 text-xs"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            Reset
+            {t("reset")}
           </Button>
 
           <Button
@@ -268,7 +264,7 @@ export function RtoRiskMeter({
             className="flex items-center gap-2"
           >
             <Sparkles className="h-4 w-4" />
-            {isLoading ? "Calculating..." : "Predict RTO Risk"}
+            {isLoading ? t("evaluating") : t("predictRto")}
           </Button>
         </div>
 

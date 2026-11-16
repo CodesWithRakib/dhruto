@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Minus, Plus, Scale } from "lucide-react";
 import type { ZoneOption } from "./calculator-destination-picker";
 
@@ -27,6 +28,8 @@ export function CalculatorParametersCard({
   extraWeightFee,
   selectedZone,
 }: CalculatorParametersCardProps) {
+  const t = useTranslations("Calculator");
+
   return (
     <>
       {/* 2. Parcel Billable Weight Slider */}
@@ -34,9 +37,9 @@ export function CalculatorParametersCard({
         <div className="flex items-center justify-between">
           <div>
             <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
-              2. Parcel Billable Weight
+              {t("stepWeight")}
             </label>
-            <p className="text-caption text-muted-foreground">Base rate covers up to 1.0 kg</p>
+            <p className="text-caption text-muted-foreground">{t("baseCovers")}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -82,8 +85,7 @@ export function CalculatorParametersCard({
           <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 border border-primary/20 px-3.5 py-2 text-xs text-foreground">
             <Scale className="h-3.5 w-3.5 text-primary" />
             <span>
-              +{extraKg} kg over 1kg @ ৳{selectedZone.perKg}/kg ={" "}
-              <strong className="text-primary font-bold">৳{extraWeightFee} extra weight fee</strong>
+              {t("extraWeightNote", { extraKg, rate: selectedZone.perKg, fee: extraWeightFee })}
             </span>
           </div>
         )}
@@ -94,9 +96,9 @@ export function CalculatorParametersCard({
         <div className="flex items-center justify-between">
           <div>
             <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
-              3. Cash on Delivery (COD) Amount
+              {t("stepCod")}
             </label>
-            <p className="text-caption text-muted-foreground">1.0% cash collection & counting fee</p>
+            <p className="text-caption text-muted-foreground">{t("codNote")}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -130,7 +132,7 @@ export function CalculatorParametersCard({
             className="prc-range-slider"
           />
           <div className="mt-2 flex justify-between text-[11px] font-mono text-muted-foreground">
-            <span>৳0 (Prepaid)</span>
+            <span>{t("prepaid")}</span>
             <span>৳5,000</span>
             <span>৳10,000</span>
             <span>৳15,000</span>
@@ -146,10 +148,10 @@ export function CalculatorParametersCard({
             <Box className="h-5 w-5 text-primary" />
             <div>
               <div className="text-sm font-bold text-foreground">
-                Reinforced Padded Box / Bubble Security
+                {t("fragileTitle")}
               </div>
               <div className="text-caption text-muted-foreground">
-                Extra protection for fragile electronics or glassware
+                {t("fragileDesc")}
               </div>
             </div>
           </div>

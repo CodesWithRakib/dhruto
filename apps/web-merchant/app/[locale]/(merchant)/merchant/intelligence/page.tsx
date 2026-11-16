@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Sparkles,
   MapPin,
@@ -22,6 +23,7 @@ import { Button } from "@dhruto/ui";
 import { MERCHANT_ROUTES } from "@/config/routes";
 
 export default function IntelligencePage() {
+  const t = useTranslations("Intelligence");
   const [activeTab, setActiveTab] = useState<"queue" | "both" | "address" | "risk">("queue");
   const { data: health, isLoading: healthLoading } = useGetIntelligenceHealthQuery();
   const h = health?.data;
@@ -36,14 +38,13 @@ export default function IntelligencePage() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-caption font-semibold mb-2.5 backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>Dhruto Cognitive Intelligence Engine v2.0</span>
+            <span>{t("eyebrow")}</span>
           </div>
           <h1 className="text-display-xs sm:text-display-sm font-bold tracking-tight text-foreground">
-            Logistics AI & RTO Prediction Suite
+            {t("title")}
           </h1>
           <p className="text-muted-foreground text-body-sm mt-1 max-w-2xl">
-            Pre-dispatch customer risk assessment, bilingual natural language address parsing,
-            and phonetic typo correction for Bangladesh e-commerce.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -51,7 +52,7 @@ export default function IntelligencePage() {
           <Link href={MERCHANT_ROUTES.createBooking}>
             <Button className="flex items-center gap-2 rounded-xl font-bold shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
               <Zap className="h-4 w-4" />
-              <span>Book With AI Auto-Fill</span>
+              <span>{t("bookWithAi")}</span>
             </Button>
           </Link>
         </div>
@@ -62,35 +63,35 @@ export default function IntelligencePage() {
         <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
-            <span>District Coverage</span>
+            <span>{t("districtCoverage")}</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
               <MapPin className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-foreground font-mono mt-1">
-            {healthLoading ? "—" : `${h?.districts ?? 64} districts`}
+            {healthLoading ? "—" : t("districtsCount", { count: h?.districts ?? 64 })}
           </div>
-          <p className="text-caption text-muted-foreground">All Bangladesh divisions & hubs</p>
+          <p className="text-caption text-muted-foreground">{t("districtCoverageDesc")}</p>
         </div>
 
         <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
-            <span>Upazila Lexicon</span>
+            <span>{t("upazilaLexicon")}</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
               <Cpu className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-foreground font-mono mt-1">
-            {healthLoading ? "—" : `${h?.thanas ?? 590} thanas`}
+            {healthLoading ? "—" : t("thanasCount", { count: h?.thanas ?? 590 })}
           </div>
-          <p className="text-caption text-muted-foreground">With postal code matching</p>
+          <p className="text-caption text-muted-foreground">{t("upazilaLexiconDesc")}</p>
         </div>
 
         <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
-            <span>Scoring Model</span>
+            <span>{t("scoringModel")}</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
               <TrendingDown className="h-4 w-4" />
             </div>
@@ -98,13 +99,13 @@ export default function IntelligencePage() {
           <div className="text-2xl font-black text-foreground font-mono mt-1">
             {healthLoading ? "—" : (h?.models?.[0]?.version ?? h?.datasetVersion ?? "v2.4-neural")}
           </div>
-          <p className="text-caption text-muted-foreground">Explainable rule baseline, ML-ready</p>
+          <p className="text-caption text-muted-foreground">{t("scoringModelDesc")}</p>
         </div>
 
         <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
-            <span>Geo Dataset</span>
+            <span>{t("geoDataset")}</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
               <CheckCircle2 className="h-4 w-4" />
             </div>
@@ -128,7 +129,7 @@ export default function IntelligencePage() {
           }`}
         >
           <ListFilter className="h-3.5 w-3.5" />
-          <span>Pre-Dispatch Risk Radar & Queue</span>
+          <span>{t("tabQueue")}</span>
         </button>
 
         <button
@@ -141,7 +142,7 @@ export default function IntelligencePage() {
           }`}
         >
           <MapPin className="h-3.5 w-3.5" />
-          <span>Address NLP Parser</span>
+          <span>{t("tabAddress")}</span>
         </button>
 
         <button
@@ -154,7 +155,7 @@ export default function IntelligencePage() {
           }`}
         >
           <TrendingDown className="h-3.5 w-3.5" />
-          <span>RTO Risk Radar</span>
+          <span>{t("tabRisk")}</span>
         </button>
 
         <button
@@ -167,7 +168,7 @@ export default function IntelligencePage() {
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />
-          <span>Side-by-Side Suite</span>
+          <span>{t("tabBoth")}</span>
         </button>
       </div>
 

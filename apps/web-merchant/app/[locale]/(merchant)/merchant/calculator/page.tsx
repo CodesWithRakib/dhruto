@@ -21,10 +21,6 @@ export default function MerchantCalculatorPage() {
         <PricingCalculatorCockpit
           compact
           ctaHref={MERCHANT_ROUTES.createBooking}
-          ctaLabel="Create Parcel with These Parameters"
-          ctaSubtext="Pre-fills rate specifications into the merchant shipment booking form"
-          title="Freight & Escrow Simulator"
-          subtitle="Simulate accurate shipping fees across all 64 districts, COD collection commissions, and net daily settlement payouts before booking."
         />
       </div>
     </div>

@@ -183,7 +183,7 @@ export function PayoutInvoiceDialog({
                   </div>
                 ) : (
                   <div className="pt-1 text-[11px] text-muted-foreground italic">
-                    Electronic clearing in progress
+                    {t("invoice.clearingInProgress")}
                   </div>
                 )}
               </dl>
@@ -248,7 +248,7 @@ export function PayoutInvoiceDialog({
               </div>
               <div className="text-xs">
                 <p className="font-semibold text-foreground flex items-center gap-1">
-                  <span>Digitally Audited & Reconciled</span>
+                  <span>{t("invoice.digitallyAudited")}</span>
                   <FileCheck2 className="h-3.5 w-3.5 text-success" />
                 </p>
                 <p className="text-[11px] text-muted-foreground max-w-sm">

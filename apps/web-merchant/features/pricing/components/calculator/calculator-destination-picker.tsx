@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Clock, MapPin } from "lucide-react";
 import { DistrictSelect, ThanaSelect } from "@/components/location/district-thana-picker";
 
@@ -34,15 +35,17 @@ export function CalculatorDestinationPicker({
   onThanaChange,
   selectedZone,
 }: CalculatorDestinationPickerProps) {
+  const t = useTranslations("Calculator");
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
         <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
-          1. Select Delivery Destination (64 Districts)
+          {t("stepDestination")}
         </label>
         {calcDistrict && (
           <span className="text-[11px] font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-md font-semibold self-start sm:self-auto">
-            Mapped: {selectedZone.name}
+            {t("mappedZone", { zone: selectedZone.name })}
           </span>
         )}
       </div>
@@ -51,7 +54,7 @@ export function CalculatorDestinationPicker({
       <div className="mb-3.5 rounded-2xl border border-border/60 bg-surface-muted/40 p-3.5 space-y-2 backdrop-blur-xs">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
           <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-          <span>Choose District & Thana for exact rate calculation:</span>
+          <span>{t("choosePrompt")}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <DistrictSelect
@@ -60,14 +63,14 @@ export function CalculatorDestinationPicker({
               onDistrictChange(d);
               onThanaChange("");
             }}
-            placeholder="Search district..."
+            placeholder={t("searchDistrict")}
             className="h-9.5 text-xs bg-background/80 rounded-xl"
           />
           <ThanaSelect
             districtName={calcDistrict}
             value={calcThana}
             onChange={onThanaChange}
-            placeholder="Search thana..."
+            placeholder={t("searchThana")}
             className="h-9.5 text-xs bg-background/80 rounded-xl"
           />
         </div>
