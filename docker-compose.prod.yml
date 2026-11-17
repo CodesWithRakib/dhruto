@@ -1,0 +1,210 @@
+services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL 16 (Relational Source of Truth & ACID Financial Ledger)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: dhruto-postgres-prod
+    restart: unless-stopped
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=150"
+      - "-c"
+      - "shared_buffers=512MB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=128MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_DATABASE:-dhruto}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-dhruto}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - dhruto-prod-net
+
+  # ----------------------------------------------------------------------------
+  # Redis 7 (Realtime Distribution, BullMQ Queues & Fast Ephemeral Caches)
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: dhruto-redis-prod
+    restart: unless-stopped
+    command:
+      - "redis-server"
+      - "--appendonly"
+      - "yes"
+      - "--appendfsync"
+      - "everysec"
+      - "--maxmemory"
+      - "512mb"
+      - "--maxmemory-policy"
+      - "noeviction"
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - dhruto-prod-net
+
+  # ----------------------------------------------------------------------------
+  # Database Migration Runner (Runs Once Before API Boot)
+  # ----------------------------------------------------------------------------
+  migration:
+    container_name: dhruto-migration-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    command: ["node", "dist/database/migrate-cli.js", "run"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_DATABASE:-dhruto}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_DATABASE: ${DB_DATABASE:-dhruto}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - dhruto-prod-net
+
+  # ----------------------------------------------------------------------------
+  # Backend NestJS Core API Engine (Port 4000)
+  # ----------------------------------------------------------------------------
+  api:
+    container_name: dhruto-api-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-4000}:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      API_PREFIX: /api/v1
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5000}
+      DATABASE_URL: postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_DATABASE:-dhruto}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_DATABASE: ${DB_DATABASE:-dhruto}
+      DB_POOL_MAX: ${DB_POOL_MAX:-25}
+      DB_POOL_MIN: ${DB_POOL_MIN:-5}
+      DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-30000}
+      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CHAT_REALTIME_REDIS_ENABLED: "true"
+      OUTBOX_POLL_MS: ${OUTBOX_POLL_MS:-3000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dhruto_prod_jwt_access_secret_change_me_32chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dhruto_prod_jwt_refresh_secret_change_me_32chars}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      INTELLIGENCE_PHONE_PEPPER: ${INTELLIGENCE_PHONE_PEPPER:-change_this_to_a_long_random_pepper}
+      SMS_PROVIDER_URL: ${SMS_PROVIDER_URL:-}
+      SMS_PROVIDER_KEY: ${SMS_PROVIDER_KEY:-}
+      EMAIL_PROVIDER_URL: ${EMAIL_PROVIDER_URL:-}
+      EMAIL_PROVIDER_KEY: ${EMAIL_PROVIDER_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - dhruto-prod-net
+
+  # ----------------------------------------------------------------------------
+  # Next.js 16 Web Merchant & Command Control Portal (Port 5000)
+  # ----------------------------------------------------------------------------
+  web:
+    container_name: dhruto-web-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Dhruto Logistics}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-5000}:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Dhruto Logistics}
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - dhruto-prod-net
+
+volumes:
+  postgres_prod_data:
+    name: dhruto_postgres_prod_data
+  redis_prod_data:
+    name: dhruto_redis_prod_data
+
+networks:
+  dhruto-prod-net:
+    name: dhruto-prod-net
+    driver: bridge
