@@ -5,7 +5,7 @@ import {
   Injectable,
   Logger,
 } from "@nestjs/common";
-import { EntityManager, QueryFailedError } from "typeorm";
+import { EntityManager } from "typeorm";
 import {
   ApiErrorCode,
   CURRENCY_BDT,
@@ -19,8 +19,6 @@ import {
   IdempotencyClaimConflict,
   IdempotencyService,
 } from "../../common/idempotency/idempotency.service.js";
-
-const PG_UNIQUE_VIOLATION = "23505";
 
 export interface LedgerEntryInput {
   account: FinancialAccount;
@@ -200,62 +198,61 @@ export class LedgerService {
     }
   }
 
+  private async nextTransactionCode(manager: EntityManager): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const code = `FIN-${Math.floor(100000 + Math.random() * 900000)}`;
+      const existing = await manager.findOne(FinancialTransaction, {
+        where: { transactionCode: code },
+        select: ["id"],
+      });
+      if (!existing) return code;
+    }
+    const suffix = `${Date.now() % 10000000000}`.padStart(10, "0");
+    return `FIN-${suffix}`.slice(0, 20);
+  }
+
   private async insertTransaction(
     manager: EntityManager,
     input: PostLedgerInput,
   ): Promise<FinancialTransaction> {
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const transactionCode = `FIN-${Math.floor(100000 + Math.random() * 900000)}`;
-      try {
-        const transaction = await manager.getRepository(FinancialTransaction).save(
-          manager.getRepository(FinancialTransaction).create({
-            transactionCode,
-            type: input.type,
-            status: FinancialTransactionStatus.POSTED,
-            referenceType: input.referenceType ?? null,
-            referenceId: input.referenceId ?? null,
-            description: input.description ?? null,
-            createdBy: input.createdBy ?? null,
-          }),
-        );
-        await manager.getRepository(FinancialEntry).save(
-          input.entries.map((entry) =>
-            manager.getRepository(FinancialEntry).create({
-              transactionId: transaction.id,
-              account: entry.account,
-              direction: entry.direction,
-              amountMinor: entry.amountMinor,
-              currency: CURRENCY_BDT,
-              merchantId: entry.merchantId ?? null,
-              memo: entry.memo ?? null,
-            }),
-          ),
-        );
-        const posted = await manager.findOne(FinancialTransaction, {
-          where: { id: transaction.id },
-          relations: ["entries"],
-        });
-        if (!posted) {
-          throw new BadRequestException({
-            message: "Failed to post financial transaction",
-            error: ApiErrorCode.INTERNAL_SERVER_ERROR,
-          });
-        }
-        this.logger.log(
-          `LEDGER_POSTED type=${input.type} code=${transactionCode} ref=${input.referenceType ?? "-"}/${input.referenceId ?? "-"}`,
-        );
-        return posted;
-      } catch (error) {
-        if (error instanceof QueryFailedError) {
-          const driverError = error.driverError as { code?: string };
-          if (driverError?.code === PG_UNIQUE_VIOLATION) continue;
-        }
-        throw error;
-      }
-    }
-    throw new ConflictException({
-      message: "Could not issue a unique transaction code",
-      error: ApiErrorCode.INTERNAL_SERVER_ERROR,
+    const transactionCode = await this.nextTransactionCode(manager);
+    const transaction = await manager.getRepository(FinancialTransaction).save(
+      manager.getRepository(FinancialTransaction).create({
+        transactionCode,
+        type: input.type,
+        status: FinancialTransactionStatus.POSTED,
+        referenceType: input.referenceType ?? null,
+        referenceId: input.referenceId ?? null,
+        description: input.description ?? null,
+        createdBy: input.createdBy ?? null,
+      }),
+    );
+    await manager.getRepository(FinancialEntry).save(
+      input.entries.map((entry) =>
+        manager.getRepository(FinancialEntry).create({
+          transactionId: transaction.id,
+          account: entry.account,
+          direction: entry.direction,
+          amountMinor: entry.amountMinor,
+          currency: CURRENCY_BDT,
+          merchantId: entry.merchantId ?? null,
+          memo: entry.memo ?? null,
+        }),
+      ),
+    );
+    const posted = await manager.findOne(FinancialTransaction, {
+      where: { id: transaction.id },
+      relations: ["entries"],
     });
+    if (!posted) {
+      throw new BadRequestException({
+        message: "Failed to post financial transaction",
+        error: ApiErrorCode.INTERNAL_SERVER_ERROR,
+      });
+    }
+    this.logger.log(
+      `LEDGER_POSTED type=${input.type} code=${transactionCode} ref=${input.referenceType ?? "-"}/${input.referenceId ?? "-"}`,
+    );
+    return posted;
   }
 }

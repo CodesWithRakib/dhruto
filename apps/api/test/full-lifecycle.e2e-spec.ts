@@ -44,12 +44,14 @@ describe("Full Lifecycle End-to-End Simulation", () => {
   const unique = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
   beforeAll(async () => {
+    process.env.CHAT_REALTIME_REDIS_ENABLED = "false";
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api/v1");
+    app.enableShutdownHooks();
     await app.init();
     dataSource = moduleFixture.get(DataSource);
 

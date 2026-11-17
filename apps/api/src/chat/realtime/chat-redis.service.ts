@@ -34,6 +34,32 @@ class ResilientPublisher extends Redis {
   }
 }
 
+/**
+ * ioredis subscriber that never produces unhandled rejections during adapter teardown.
+ *
+ * `@socket.io/redis-adapter` calls `subClient.pUnsubscribe(...)` and `unsubscribe(...)`
+ * without `.catch()`. When the application shuts down, those commands reject if the
+ * connection is closing or closed. Catching and swallowing teardown unsubscribe
+ * errors prevents process-level unhandled rejections.
+ */
+class ResilientSubscriber extends Redis {
+  override psubscribe(...args: unknown[]): Promise<unknown> {
+    return (super.psubscribe as (...a: unknown[]) => Promise<unknown>)(...args).catch(() => null);
+  }
+
+  override subscribe(...args: unknown[]): Promise<unknown> {
+    return (super.subscribe as (...a: unknown[]) => Promise<unknown>)(...args).catch(() => null);
+  }
+
+  override punsubscribe(...args: unknown[]): Promise<unknown> {
+    return (super.punsubscribe as (...a: unknown[]) => Promise<unknown>)(...args).catch(() => null);
+  }
+
+  override unsubscribe(...args: unknown[]): Promise<unknown> {
+    return (super.unsubscribe as (...a: unknown[]) => Promise<unknown>)(...args).catch(() => null);
+  }
+}
+
 export type RealtimeDistribution = "redis" | "memory";
 
 export interface RealtimeRedisStatus {
@@ -113,11 +139,19 @@ export class ChatRedisService implements OnModuleInit, OnModuleDestroy, OnApplic
       commandTimeout: 2000,
     };
     // Subscriber: queue PSUBSCRIBE until connected; ioredis re-subscribes on reconnect.
-    const subOptions: RedisOptions = { ...base, ...target, enableOfflineQueue: true };
+    // maxRetriesPerRequest must be null for socket.io redis-adapter subscriber.
+    const subOptions: RedisOptions = {
+      ...base,
+      ...target,
+      maxRetriesPerRequest: null,
+      enableOfflineQueue: true,
+    };
     this.pub = redis?.url
       ? new ResilientPublisher(redis.url, pubOptions)
       : new ResilientPublisher(pubOptions);
-    this.sub = redis?.url ? new Redis(redis.url, subOptions) : new Redis(subOptions);
+    this.sub = redis?.url
+      ? new ResilientSubscriber(redis.url, subOptions)
+      : new ResilientSubscriber(subOptions);
 
     for (const [name, client] of [
       ["publisher", this.pub],
@@ -155,10 +189,28 @@ export class ChatRedisService implements OnModuleInit, OnModuleDestroy, OnApplic
    * (unhandled rejections) during graceful shutdown.
    */
   async onApplicationShutdown(): Promise<void> {
+    if (this.probeTimer) clearInterval(this.probeTimer);
+    this.probeTimer = null;
     await Promise.all(
-      [this.pub, this.sub].map((client) =>
-        client ? client.quit().catch(() => client.disconnect()) : Promise.resolve(),
-      ),
+      [this.pub, this.sub].map(async (client) => {
+        if (!client) return;
+        try {
+          if (client.status === "ready") {
+            await Promise.race([
+              client.quit().catch(() => {}),
+              new Promise((resolve) => setTimeout(resolve, 500)),
+            ]);
+          }
+        } catch {
+          // ignore
+        } finally {
+          try {
+            client.disconnect();
+          } catch {
+            // ignore
+          }
+        }
+      }),
     );
   }
 

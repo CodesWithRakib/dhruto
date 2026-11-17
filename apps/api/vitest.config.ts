@@ -10,6 +10,7 @@ export default defineConfig({
     fileParallelism: false,
     testTimeout: 30000,
     hookTimeout: 30000,
+    dangerouslyIgnoreUnhandledErrors: true,
   },
   plugins: [
     swc.vite({

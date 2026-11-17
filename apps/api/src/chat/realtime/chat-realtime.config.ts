@@ -43,7 +43,7 @@ export interface ChatRealtimeConfig {
 export function loadChatRealtimeConfig(env: NodeJS.ProcessEnv = process.env): ChatRealtimeConfig {
   const heartbeat = envInt(env, "CHAT_PRESENCE_HEARTBEAT_MS", 25_000, 1000);
   return {
-    redisEnabled: envBool(env, "CHAT_REALTIME_REDIS_ENABLED", true),
+    redisEnabled: envBool(env, "CHAT_REALTIME_REDIS_ENABLED", env.NODE_ENV !== "test"),
     redisRequired: envBool(env, "CHAT_REALTIME_REQUIRE_REDIS", env.NODE_ENV === "production"),
     presenceHeartbeatMs: heartbeat,
     presenceTtlMs: Math.max(
