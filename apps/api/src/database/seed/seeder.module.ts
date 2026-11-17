@@ -20,6 +20,10 @@ import {
   WebhookSubscription,
 } from "../entities/index.js";
 import { SeederService } from "./seeder.service.js";
+import { SeedCoreService } from "./seed-core.service.js";
+import { SeedParcelsService } from "./seed-parcels.service.js";
+import { SeedFinanceService } from "./seed-finance.service.js";
+import { SeedIntelligenceService } from "./seed-intelligence.service.js";
 
 @Module({
   imports: [
@@ -42,7 +46,13 @@ import { SeederService } from "./seeder.service.js";
       WebhookSubscription,
     ]),
   ],
-  providers: [SeederService],
+  providers: [
+    SeedCoreService,
+    SeedParcelsService,
+    SeedFinanceService,
+    SeedIntelligenceService,
+    SeederService,
+  ],
   exports: [SeederService],
 })
 export class SeederModule {}

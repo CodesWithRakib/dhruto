@@ -87,11 +87,18 @@ export async function importGeoPlaces(
     }
     districtCount++;
 
-    for (const t of d.thanas) {
-      const code = `${districtCode}-${t.name.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6)}`;
+    for (let ti = 0; ti < d.thanas.length; ti++) {
+      const t = d.thanas[ti];
+      if (!t) continue;
+      const baseCode = `${districtCode}-${t.name.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 8)}`;
+      let code = baseCode;
       const existing = await manager.getRepository(GeoPlace).findOne({ where: { code } });
-      if (!existing) {
-        await manager.getRepository(GeoPlace).save(
+      if (existing && existing.name !== t.name) {
+        code = `${baseCode}-${String(ti + 1).padStart(2, "0")}`;
+      }
+      let place = await manager.getRepository(GeoPlace).findOne({ where: { code } });
+      if (!place) {
+        place = await manager.getRepository(GeoPlace).save(
           manager.getRepository(GeoPlace).create({
             kind: "UPAZILA",
             code,
@@ -116,7 +123,7 @@ export async function importGeoPlaces(
         if (!dup) {
           await manager.getRepository(AddressAlias).save(
             manager.getRepository(AddressAlias).create({
-              placeId: existing?.id ?? district.id,
+              placeId: place.id,
               alias,
               normalizedAlias: normalized,
               language: /[\u0980-\u09FF]/.test(alias) ? "bn" : "en",
