@@ -22,6 +22,13 @@ import { RuleBasedRtoEngine } from "./rto-engine.service.js";
 import { RecommendationEngineService } from "./recommendation.service.js";
 import { canonicalPhone, hashPhone, isValidBangladeshPhone } from "../common/phone-hash.util.js";
 import { getErrorMessage } from "../../common/utils/error.util.js";
+import {
+  resolveConfirmationStructure,
+  buildRtoFeatureSet,
+  resolveTerminalParcelOutcome,
+  mapRiskSnapshotResponse,
+  mapRtoPredictionResponse,
+} from "./intelligence-facade.helper.js";
 
 /**
  * Phase 6 orchestration facade: address confirm/correct, parcel-scoped risk /
@@ -79,48 +86,9 @@ export class IntelligenceFacadeService {
         error: ApiErrorCode.ADDRESS_PARSE_FAILED,
       });
     }
-    let structure: AddressParseV2Result["structuredAddress"];
-    if (input.manualStructure) {
-      structure = input.manualStructure;
-    } else if (typeof input.candidateIndex === "number") {
-      const candidates = parse.candidates as unknown as Array<{
-        district: string;
-        districtBn?: string;
-        thana?: string;
-        upazila?: string;
-        division?: string;
-      }>;
-      const chosen = candidates[input.candidateIndex];
-      if (!chosen) {
-        throw new NotFoundException({
-          message: "Candidate not found for this parse result",
-          error: ApiErrorCode.ADDRESS_AMBIGUOUS,
-        });
-      }
-      structure = {
-        division: chosen.division ?? null,
-        district: chosen.district,
-        upazila: chosen.upazila ?? chosen.thana ?? null,
-        thana: chosen.thana ?? null,
-        union: null,
-        ward: null,
-        municipality: null,
-        cityCorporation: null,
-        village: null,
-        area: null,
-        road: null,
-        house: null,
-        building: null,
-        flat: null,
-        postalCode: null,
-        landmark: null,
-      };
-    } else {
-      throw new NotFoundException({
-        message: "Provide a candidate index or a manual structure",
-        error: ApiErrorCode.ADDRESS_AMBIGUOUS,
-      });
-    }
+
+    const structure = resolveConfirmationStructure(input, parse.candidates);
+
     const row = await this.confirmationRepo.save(
       this.confirmationRepo.create({
         parseId,
@@ -156,13 +124,7 @@ export class IntelligenceFacadeService {
     recommendations: IntelligenceRecommendation[];
   }> {
     const parcel = await this.parcelRepo.findOne({ where: { id: parcelId } });
-    if (!parcel) {
-      throw new NotFoundException({
-        message: "Parcel not found",
-        error: ApiErrorCode.PARCEL_NOT_FOUND,
-      });
-    }
-    if (scope.merchantId && parcel.merchantId !== scope.merchantId) {
+    if (!parcel || (scope.merchantId && parcel.merchantId !== scope.merchantId)) {
       throw new NotFoundException({
         message: "Parcel not found",
         error: ApiErrorCode.PARCEL_NOT_FOUND,
@@ -201,21 +163,7 @@ export class IntelligenceFacadeService {
         this.logger.warn(`Merchant risk snapshot failed: ${getErrorMessage(error, "unknown")}`),
       );
 
-    const total = platformFeatures.totalOrders;
-    const rtoFeatures = {
-      deliverySuccessRate: total > 0 ? platformFeatures.deliveredOrders / total : 0,
-      rtoRate: total > 0 ? platformFeatures.returnedOrders / total : 0,
-      codFailureRate:
-        platformFeatures.codCollectedMinor + platformFeatures.codFailedMinor > 0
-          ? platformFeatures.codFailedMinor /
-            (platformFeatures.codCollectedMinor + platformFeatures.codFailedMinor)
-          : 0,
-      recentOrderCount: platformFeatures.recentOrderCount,
-      recentFailureCount: platformFeatures.recentFailedDeliveries,
-      addressConfidence: address.confidence,
-      codAmountMinor: Math.round(Number(parcel.codAmount) * 100),
-      featureVersion: platformFeatures.featureVersion,
-    };
+    const rtoFeatures = buildRtoFeatureSet(parcel, platformFeatures, address.confidence);
     const rtoResult = this.rtoEngine.predict(rtoFeatures);
     let prediction = await this.predictionRepo.findOne({ where: { parcelId } });
     if (!prediction) {
@@ -236,15 +184,7 @@ export class IntelligenceFacadeService {
         }),
       );
     } else if (prediction.outcome === null) {
-      // Converge outcomes lazily: terminal parcel state fills the label.
-      // Feature set is frozen at predictedAt, so this never leaks the future.
-      const terminal = ["DELIVERED", "CASH_PENDING", "CASH_VERIFIED"].includes(parcel.status)
-        ? "DELIVERED"
-        : ["RTO_INITIATED", "RETURN_IN_TRANSIT", "RETURNED_TO_MERCHANT", "CANCELLED"].includes(
-              parcel.status,
-            )
-          ? "RTO"
-          : null;
+      const terminal = resolveTerminalParcelOutcome(parcel.status);
       if (terminal) {
         prediction.outcome = terminal;
         prediction.outcomeAt = new Date();
@@ -274,33 +214,8 @@ export class IntelligenceFacadeService {
       parcelId,
       trackingCode: parcel.trackingCode,
       address,
-      risk: {
-        id: snapshot.id,
-        phoneHash: snapshot.phoneHash,
-        merchantId: snapshot.merchantId,
-        scope: snapshot.scope as "PLATFORM" | "MERCHANT",
-        riskScore: snapshot.riskScore,
-        level: snapshot.level as never,
-        reasons: snapshot.reasons as never,
-        riskConfidence: snapshot.riskConfidence as never,
-        scoringVersion: snapshot.scoringVersion,
-        featureSnapshot: snapshot.features as never,
-        scoredAt: snapshot.scoredAt.toISOString(),
-      },
-      rto: {
-        id: prediction.id,
-        parcelId,
-        phoneHash: prediction.phoneHash,
-        score: prediction.score,
-        level: prediction.level as never,
-        reasons: prediction.reasons as never,
-        modelType: prediction.modelType as never,
-        modelVersion: prediction.modelVersion,
-        features: prediction.features as never,
-        predictedAt: prediction.predictedAt.toISOString(),
-        outcome: prediction.outcome as never,
-        outcomeAt: prediction.outcomeAt?.toISOString() ?? null,
-      },
+      risk: mapRiskSnapshotResponse(snapshot),
+      rto: mapRtoPredictionResponse(prediction),
       recommendations,
     };
   }

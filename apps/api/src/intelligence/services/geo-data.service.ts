@@ -7,10 +7,8 @@ import {
   GEO_DATASET_VERSION,
   type DistrictInfo,
 } from "../data/bangladesh-locations.js";
-import { GeoDatasetVersion } from "../../database/entities/GeoDatasetVersion.entity.js";
-import { GeoPlace } from "../../database/entities/GeoPlace.entity.js";
-import { AddressAlias } from "../../database/entities/AddressAlias.entity.js";
 import { normalizeAddressText } from "../common/normalization.util.js";
+import { importGeoPlaces, type GeoImportSummary } from "./geo-import.util.js";
 
 export interface GeoDistrict {
   code: string;
@@ -40,9 +38,9 @@ export interface GeoMatch {
 export class GeoDataService implements OnModuleInit {
   private readonly logger = new Logger(GeoDataService.name);
   private districts: GeoDistrict[] = [];
-  /** normalized alias → district index */
+  /** normalized alias -> district index */
   private districtAliasIndex = new Map<string, number>();
-  /** normalized thana alias → list of {districtIdx, thanaIdx} */
+  /** normalized thana alias -> list of {districtIdx, thanaIdx} */
   private thanaAliasIndex = new Map<string, Array<{ districtIdx: number; thanaIdx: number }>>();
 
   constructor(private readonly dataSource: DataSource) {}
@@ -120,7 +118,7 @@ export class GeoDataService implements OnModuleInit {
     return null;
   }
 
-  /** All thana hits in text (may span districts → ambiguity signal). */
+  /** All thana hits in text (may span districts -> ambiguity signal). */
   findThanasInText(normalizedText: string): Array<{ districtIdx: number; thanaIdx: number }> {
     const hits: Array<{ districtIdx: number; thanaIdx: number }> = [];
     const seen = new Set<string>();
@@ -147,153 +145,9 @@ export class GeoDataService implements OnModuleInit {
    * places (code-keyed) and aliases (alias-keyed). Old versions are marked
    * SUPERSEDED, never deleted. Safe to re-run; reports counts.
    */
-  async ensureImported(): Promise<{
-    version: string;
-    divisions: number;
-    districts: number;
-    upazilas: number;
-    aliases: number;
-  }> {
+  async ensureImported(): Promise<GeoImportSummary> {
     return this.dataSource.transaction(async (manager) => {
-      let versionRow = await manager
-        .getRepository(GeoDatasetVersion)
-        .findOne({ where: { version: GEO_DATASET_VERSION } });
-      if (!versionRow) {
-        versionRow = await manager.getRepository(GeoDatasetVersion).save(
-          manager.getRepository(GeoDatasetVersion).create({
-            version: GEO_DATASET_VERSION,
-            source: GEO_DATASET_SOURCE,
-            importedAt: new Date(),
-            divisions: 0,
-            districts: 0,
-            upazilas: 0,
-            aliases: 0,
-            status: "ACTIVE",
-          }),
-        );
-      }
-      const divisions = new Map<string, GeoPlace>();
-      let districtCount = 0;
-      let aliasCount = 0;
-      for (const d of this.districts) {
-        const divisionName = d.division ?? "Unknown";
-        let division = divisions.get(divisionName);
-        if (!division) {
-          division =
-            (await manager.getRepository(GeoPlace).findOne({
-              where: {
-                code: `BD-DIV-${divisionName
-                  .toUpperCase()
-                  .replace(/[^A-Z]/g, "")
-                  .slice(0, 4)}`,
-              },
-            })) ?? undefined;
-          if (!division) {
-            division = await manager.getRepository(GeoPlace).save(
-              manager.getRepository(GeoPlace).create({
-                kind: "DIVISION",
-                code: `BD-DIV-${divisionName
-                  .toUpperCase()
-                  .replace(/[^A-Z]/g, "")
-                  .slice(0, 4)}`,
-                name: divisionName,
-                nameBn: null,
-                parentId: null,
-                division: divisionName,
-                zone: null,
-                aliases: [],
-                postalCodes: [],
-                datasetVersion: GEO_DATASET_VERSION,
-              }),
-            );
-          }
-          divisions.set(divisionName, division);
-        }
-        const districtCode = d.code;
-        let district = await manager
-          .getRepository(GeoPlace)
-          .findOne({ where: { code: districtCode } });
-        if (!district) {
-          district = await manager.getRepository(GeoPlace).save(
-            manager.getRepository(GeoPlace).create({
-              kind: "DISTRICT",
-              code: districtCode,
-              name: d.name,
-              nameBn: d.nameBn,
-              parentId: division.id,
-              division: divisionName,
-              zone: d.zone,
-              aliases: d.aliases,
-              postalCodes: [],
-              datasetVersion: GEO_DATASET_VERSION,
-            }),
-          );
-        }
-        districtCount++;
-        for (const t of d.thanas) {
-          const code = `${districtCode}-${t.name
-            .toUpperCase()
-            .replace(/[^A-Z]/g, "")
-            .slice(0, 6)}`;
-          const existing = await manager.getRepository(GeoPlace).findOne({ where: { code } });
-          if (!existing) {
-            await manager.getRepository(GeoPlace).save(
-              manager.getRepository(GeoPlace).create({
-                kind: "UPAZILA",
-                code,
-                name: t.name,
-                nameBn: t.nameBn,
-                parentId: district.id,
-                division: divisionName,
-                zone: d.zone,
-                aliases: t.aliases,
-                postalCodes: t.postalCode ? [t.postalCode] : [],
-                datasetVersion: GEO_DATASET_VERSION,
-              }),
-            );
-          }
-          for (const alias of t.aliases) {
-            const normalized = normalizeAddressText(alias);
-            if (!normalized) continue;
-            const dup = await manager
-              .getRepository(AddressAlias)
-              .findOne({ where: { normalizedAlias: normalized } });
-            if (!dup) {
-              await manager.getRepository(AddressAlias).save(
-                manager.getRepository(AddressAlias).create({
-                  placeId: existing?.id ?? district.id,
-                  alias,
-                  normalizedAlias: normalized,
-                  language: /[\u0980-\u09FF]/.test(alias) ? "bn" : "en",
-                  aliasType: "common_usage",
-                  source: GEO_DATASET_SOURCE,
-                }),
-              );
-              aliasCount++;
-            }
-          }
-        }
-      }
-      versionRow.divisions = divisions.size;
-      versionRow.districts = districtCount;
-      versionRow.upazilas = this.thanaCount();
-      versionRow.aliases = aliasCount;
-      versionRow.status = "ACTIVE";
-      await manager.getRepository(GeoDatasetVersion).save(versionRow);
-      await manager
-        .getRepository(GeoDatasetVersion)
-        .createQueryBuilder()
-        .update()
-        .set({ status: "SUPERSEDED" })
-        .where("version != :version", { version: GEO_DATASET_VERSION })
-        .execute();
-      return {
-        version: GEO_DATASET_VERSION,
-        divisions: divisions.size,
-        districts: districtCount,
-        upazilas: this.thanaCount(),
-        aliases: aliasCount,
-      };
+      return importGeoPlaces(manager, this.districts, this.thanaCount());
     });
   }
 }

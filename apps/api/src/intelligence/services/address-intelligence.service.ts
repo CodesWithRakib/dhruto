@@ -6,20 +6,24 @@ import {
   ADDRESS_PARSER_VERSION,
   DEFAULT_CONFIDENCE_THRESHOLDS,
   AddressMatchMethod,
-  type AddressCandidate,
   type AddressParseV2Result,
-  type StructuredAddress,
 } from "@dhruto/contracts";
 import { AddressParse } from "../../database/entities/AddressParse.entity.js";
 import { CacheService } from "../../common/cache/cache.service.js";
 import { GeoDataService } from "./geo-data.service.js";
 import {
   detectAddressLanguage,
-  levenshteinBounded,
   normalizeAddressText,
   tokenizeAddress,
 } from "../common/normalization.util.js";
 import { getErrorMessage } from "../../common/utils/error.util.js";
+import {
+  fuzzyDistrict,
+  fuzzyThana,
+  computeAddressConfidence,
+  buildAddressCandidates,
+  buildStructuredAddress,
+} from "./address-pipeline.util.js";
 
 const CACHE_TTL_SECONDS = 3600;
 
@@ -148,24 +152,23 @@ export class AddressIntelligenceService {
         thanaIdx = thanaHits[0].thanaIdx;
         thanaMethod = AddressMatchMethod.ALIAS;
       } else if (thanaHits[0]) {
-        // Explicit district but thana belongs elsewhere: keep the explicit
-        // district, attach the thana, and flag the hierarchy conflict below
-        // instead of silently switching districts.
+        // Explicit district but thana belongs elsewhere: keep explicit district, flag conflict.
         thanaIdx = thanaHits[0].thanaIdx;
         thanaMethod = AddressMatchMethod.ALIAS;
       }
     }
 
-    // Stage 4: bounded fuzzy fallback (tokens ≥4 chars, distance ≤2).
+    // Stage 4: bounded fuzzy fallback (tokens >= 4 chars, distance <= 2).
+    const districts = this.geo.getDistricts();
     if (districtIdx === null) {
-      const fuzzy = this.fuzzyDistrict(tokens);
+      const fuzzy = fuzzyDistrict(districts, tokens);
       if (fuzzy) {
         districtIdx = fuzzy.index;
         districtMethod = AddressMatchMethod.FUZZY;
       }
     }
     if (districtIdx !== null && thanaIdx === null) {
-      const fuzzy = this.fuzzyThana(districtIdx, tokens);
+      const fuzzy = fuzzyThana(districts[districtIdx], tokens);
       if (fuzzy !== null) {
         thanaIdx = fuzzy;
         thanaMethod = AddressMatchMethod.FUZZY;
@@ -181,7 +184,6 @@ export class AddressIntelligenceService {
       }
     }
 
-    const districts = this.geo.getDistricts();
     const district = districtIdx !== null ? districts[districtIdx] : null;
     const thana =
       district && thanaIdx !== null && thanaIdx < district.thanas.length
@@ -200,83 +202,35 @@ export class AddressIntelligenceService {
       }
     }
 
-    // Stage 6: confidence 0..1 from evidence (no fake precision — 2dp).
-    const evidence: number[] = [];
-    if (district)
-      evidence.push(
-        districtMethod === AddressMatchMethod.EXACT
-          ? 0.5
-          : districtMethod === AddressMatchMethod.ALIAS
-            ? 0.45
-            : 0.25,
-      );
-    else evidence.push(0.05);
-    if (thana) evidence.push(thanaMethod === AddressMatchMethod.FUZZY ? 0.28 : 0.35);
-    else evidence.push(0.05);
-    if (postalCode) evidence.push(0.1);
-    if (/\b(house|road|sector|block|lane|flat|holding)\b/.test(normalized)) evidence.push(0.05);
-    let confidence = Math.min(
-      1,
-      evidence.reduce((a, b) => a + b, 0),
-    );
-    if (hasConflict) confidence = Math.max(0, confidence - 0.2);
-    if (!district) confidence = Math.min(confidence, 0.3);
-    confidence = Math.round(confidence * 100) / 100;
+    // Stage 6: confidence 0..1 from evidence.
+    const confidence = computeAddressConfidence({
+      district,
+      districtMethod,
+      thana,
+      thanaMethod,
+      postalCode,
+      normalized,
+      hasConflict,
+    });
 
-    // Candidates: winner + alternate-district thana matches (never guess silently).
-    const candidates: AddressCandidate[] = [];
-    if (district) {
-      candidates.push({
-        placeId: null,
-        district: district.name,
-        districtBn: district.nameBn,
-        upazila: thana?.name ?? null,
-        thana: thana?.name ?? null,
-        division: district.division,
-        confidence,
-        matchedBy: thanaMethod ?? districtMethod,
-        hasConflict,
-      });
-    }
-    for (const hit of otherDistrictThanas.slice(
-      0,
-      Math.max(0, maxCandidates - candidates.length),
-    )) {
-      const alt = districts[hit.districtIdx];
-      const altThana = alt?.thanas[hit.thanaIdx];
-      if (!alt) continue;
-      candidates.push({
-        placeId: null,
-        district: alt.name,
-        districtBn: alt.nameBn,
-        upazila: altThana?.name ?? null,
-        thana: altThana?.name ?? null,
-        division: alt.division,
-        confidence: Math.max(0, Math.round((confidence - 0.25) * 100) / 100),
-        matchedBy: AddressMatchMethod.ALIAS,
-        hasConflict: true,
-      });
-    }
+    const candidates = buildAddressCandidates({
+      district,
+      thana,
+      confidence,
+      thanaMethod,
+      districtMethod,
+      hasConflict,
+      otherDistrictThanas,
+      districts,
+      maxCandidates,
+    });
 
-    const structured: StructuredAddress = {
-      division: district?.division ?? null,
-      district: district?.name ?? null,
-      upazila: thana?.name ?? null,
-      thana: thana?.name ?? null,
-      union: null,
-      ward: null,
-      municipality: null,
-      cityCorporation: null,
-      village: null,
-      area: this.extractArea(rawAddress),
-      road: this.extractPattern(rawAddress, /road\s*(?:no\.?|number)?\s*([a-z0-9/\- ]+)/i),
-      house: this.extractPattern(rawAddress, /house\s*(?:no\.?|number|#)?\s*([a-z0-9/\- ]+)/i),
-      building: null,
-      flat: null,
-      postalCode: postalCode ?? thana?.postalCode ?? null,
-      landmark: null,
-      // Note: union/ward/municipality/village await dataset depth beyond upazila.
-    };
+    const structured = buildStructuredAddress({
+      district,
+      thana,
+      rawAddress,
+      postalCode,
+    });
 
     const requiresConfirmation =
       confidence < DEFAULT_CONFIDENCE_THRESHOLDS.confirm ||
@@ -298,52 +252,5 @@ export class AddressIntelligenceService {
       candidates: candidates.slice(0, maxCandidates),
       requiresConfirmation,
     };
-  }
-
-  private fuzzyDistrict(tokens: string[]): { index: number } | null {
-    const districts = this.geo.getDistricts();
-    let best = -1;
-    let bestDist = 3;
-    districts.forEach((d, i) => {
-      const name = normalizeAddressText(d.name);
-      for (const token of tokens) {
-        if (token.length < 4) continue;
-        const dist = levenshteinBounded(token, name, 2);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      }
-    });
-    return best >= 0 ? { index: best } : null;
-  }
-
-  private fuzzyThana(districtIdx: number, tokens: string[]): number | null {
-    const district = this.geo.getDistricts()[districtIdx];
-    if (!district) return null;
-    let best = -1;
-    let bestDist = 3;
-    district.thanas.forEach((t, i) => {
-      const name = normalizeAddressText(t.name);
-      for (const token of tokens) {
-        if (token.length < 4) continue;
-        const dist = levenshteinBounded(token, name, 2);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      }
-    });
-    return best >= 0 ? best : null;
-  }
-
-  private extractArea(raw: string): string | null {
-    const match = raw.match(/(?:sector|block|area| basha| road|lane)\s*[:#\d\w\s,/-]+/i);
-    return match?.[0]?.trim().slice(0, 120) ?? null;
-  }
-
-  private extractPattern(raw: string, pattern: RegExp): string | null {
-    const match = raw.match(pattern);
-    return match?.[1]?.trim().slice(0, 60) ?? null;
   }
 }
