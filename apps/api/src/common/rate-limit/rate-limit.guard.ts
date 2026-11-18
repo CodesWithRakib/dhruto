@@ -20,7 +20,6 @@ interface RateLimitedRequest {
   user?: AuthenticatedUser;
   ip?: string;
   socket?: { remoteAddress?: string };
-  headers: Record<string, string | string[] | undefined>;
 }
 
 /**
@@ -105,13 +104,10 @@ export class RateLimitGuard implements CanActivate {
     if (request.user?.id) {
       return `user:${request.user.id}`;
     }
-    const forwarded = request.headers["x-forwarded-for"];
-    const forwardedValue = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-    const ip =
-      forwardedValue?.split(",")[0]?.trim() ||
-      request.ip ||
-      request.socket?.remoteAddress ||
-      "unknown";
+    // `req.ip` already honours X-Forwarded-For, but only from proxies trusted
+    // via TRUST_PROXY (see common/http/trust-proxy.ts). Reading the header
+    // here directly would let any client choose its own rate-limit bucket.
+    const ip = request.ip || request.socket?.remoteAddress || "unknown";
     return `ip:${ip}`;
   }
 }

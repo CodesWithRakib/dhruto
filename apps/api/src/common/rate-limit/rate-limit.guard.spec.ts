@@ -32,7 +32,8 @@ describe("RateLimitGuard (T-SEC-02)", () => {
       getHandler: () => ({}),
       getClass: () => ({}),
       switchToHttp: () => ({
-        getRequest: () => ({ headers: { "x-forwarded-for": ip } }),
+        // `ip` is what Express resolves (honouring trusted proxies only).
+        getRequest: () => ({ ip, headers: {} }),
         getResponse: () => ({ setHeader: () => {} }),
       }),
     } as never;
@@ -52,7 +53,7 @@ describe("RateLimitGuard (T-SEC-02)", () => {
       getHandler: () => ({}),
       getClass: () => ({}),
       switchToHttp: () => ({
-        getRequest: () => ({ headers: { "x-forwarded-for": "10.0.0.2" } }),
+        getRequest: () => ({ ip: "10.0.0.2", headers: {} }),
         getResponse: () => ({ setHeader: (n: string, v: string) => seen.push(`${n}:${v}`) }),
       }),
     } as never;
@@ -79,6 +80,25 @@ describe("RateLimitGuard (T-SEC-02)", () => {
     }
     // A different client is unaffected by the first client's usage.
     expect(await guard.canActivate(ctx("10.0.1.2"))).toBe(true);
+  });
+
+  // Regression: the guard used to key on the client-supplied X-Forwarded-For
+  // header, so rotating it bypassed every per-IP limit (login, public quote).
+  it("ignores a spoofed X-Forwarded-For header and keys on the resolved IP", async () => {
+    const guard = makeGuard({});
+    const spoofing = (n: number) =>
+      ({
+        getHandler: () => ({}),
+        getClass: () => ({}),
+        switchToHttp: () => ({
+          getRequest: () => ({ ip: "10.0.5.5", headers: { "x-forwarded-for": `198.51.100.${n}` } }),
+          getResponse: () => ({ setHeader: () => {} }),
+        }),
+      }) as never;
+    for (let i = 0; i < 3; i += 1) {
+      expect(await guard.canActivate(spoofing(i))).toBe(true);
+    }
+    await expect(guard.canActivate(spoofing(99))).rejects.toBeInstanceOf(HttpException);
   });
 
   it("passes through when no rate-limit metadata is set", async () => {

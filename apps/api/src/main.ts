@@ -6,6 +6,7 @@ import compression from "compression";
 import { json, urlencoded } from "express";
 
 import { AppModule } from "./app.module.js";
+import { applyTrustProxy, parseTrustProxy } from "./common/http/trust-proxy.js";
 
 async function bootstrap() {
   const logger = new Logger("Bootstrap");
@@ -14,6 +15,12 @@ async function bootstrap() {
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
   const apiPrefix = process.env.API_PREFIX || "/api/v1";
   const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5000";
+
+  // Client IP trust boundary: `req.ip` honours X-Forwarded-For only from the
+  // proxies named in TRUST_PROXY (default: none). Invalid values fail boot.
+  const trustProxy = parseTrustProxy(process.env.TRUST_PROXY);
+  applyTrustProxy(app, trustProxy);
+  logger.log(`trust proxy: ${trustProxy === false ? "disabled" : JSON.stringify(trustProxy)}`);
 
   // Security Headers
   app.use(
@@ -87,7 +94,8 @@ async function bootstrap() {
 }
 
 process.on("unhandledRejection", (reason) => {
-  Logger.error("Unhandled Rejection in background process:", reason as any, "ProcessMonitor");
+  const detail = reason instanceof Error ? (reason.stack ?? reason.message) : String(reason);
+  Logger.error("Unhandled Rejection in background process:", detail, "ProcessMonitor");
 });
 
 process.on("uncaughtException", (error) => {

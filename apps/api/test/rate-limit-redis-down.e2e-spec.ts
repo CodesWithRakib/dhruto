@@ -3,6 +3,7 @@ import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
+import { applyTrustProxy } from "../src/common/http/trust-proxy.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { CacheService } from "../src/common/cache/cache.service.js";
 
@@ -38,6 +39,8 @@ describe("Rate limit — Redis-down drill, memory fallback still throttles (Phas
       imports: [AppModule],
     }).compile();
     app = moduleFixture.createNestApplication();
+    // X-Forwarded-For arrives via a trusted local reverse proxy (TRUST_PROXY=loopback).
+    applyTrustProxy(app, ["loopback"]);
     app.setGlobalPrefix("api/v1");
     app.useGlobalPipes(new DhrutoValidationPipe());
     await app.init();
