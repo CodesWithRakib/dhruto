@@ -5,6 +5,7 @@ import { TrackingController } from "./tracking.controller.js";
 import { ParcelsService } from "./parcels.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
 import { TrackingCodeService } from "./services/tracking-code.service.js";
+import { DeliveryPreferenceService } from "./services/delivery-preference.service.js";
 import {
   Parcel,
   ParcelStatusHistory,
@@ -22,14 +23,29 @@ import { PasswordService } from "../auth/services/password.service.js";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Parcel, ParcelStatusHistory, Merchant, ParcelAssignment, Rider, Hub, HubUserAssignment]),
+    TypeOrmModule.forFeature([
+      Parcel,
+      ParcelStatusHistory,
+      Merchant,
+      ParcelAssignment,
+      Rider,
+      Hub,
+      HubUserAssignment,
+    ]),
     PricingModule,
     IdempotencyModule,
     // OutboxService for transactional domain-event emission.
     IntegrationsModule,
   ],
   controllers: [ParcelsController, TrackingController],
-  providers: [ParcelsService, ParcelLifecycleService, TrackingCodeService, RateLimitGuard, PasswordService],
+  providers: [
+    ParcelsService,
+    ParcelLifecycleService,
+    TrackingCodeService,
+    DeliveryPreferenceService,
+    RateLimitGuard,
+    PasswordService,
+  ],
   // ParcelLifecycleService is exported so the hub module routes its status
   // changes through the same centralized state machine (docs/08-STATE-MACHINE.md).
   exports: [ParcelsService, ParcelLifecycleService],

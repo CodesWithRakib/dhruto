@@ -11,6 +11,7 @@ import {
   type PricingCalculation,
   type PricingResult,
   type ApiResponse,
+  type DeliveryPreferenceRequest,
 } from "@dhruto/contracts";
 
 /** Server-side parcel list query. Mirrors `parcelListQuerySchema` on the API. */
@@ -148,6 +149,15 @@ export const parcelsApi = baseApi.injectEndpoints({
     calculatePricing: builder.mutation<ApiResponse<PricingResult>, PricingCalculation>({
       query: (body) => ({
         url: "/pricing/calculate",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    /** Anonymous quote (same formula) for visitors without merchant/admin access. */
+    quotePublicPricing: builder.mutation<ApiResponse<PricingResult>, PricingCalculation>({
+      query: (body) => ({
+        url: "/pricing/quote",
         method: "POST",
         body,
       }),
@@ -340,10 +350,27 @@ export const parcelsApi = baseApi.injectEndpoints({
         { type: PARCEL_TAG, id: "LIST" },
       ],
     }),
+
+    /** Recipient delivery preference ("Reschedule"); never changes parcel status. */
+    setDeliveryPreference: builder.mutation<
+      ApiResponse<NonNullable<ParcelListItem["deliveryPreference"]>>,
+      { id: string; body: DeliveryPreferenceRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/parcels/${id}/delivery-preference`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_res, _err, { id }) => [
+        { type: PARCEL_TAG, id },
+        { type: PARCEL_TAG, id: "LIST" },
+      ],
+    }),
   }),
 });
 
 export const {
+  useSetDeliveryPreferenceMutation,
   useGetParcelsQuery,
   useGetParcelByIdQuery,
   useGetParcelHistoryQuery,
@@ -354,6 +381,7 @@ export const {
   useLazyGetDeliveryOtpQuery,
   useRefreshDeliveryOtpMutation,
   useCalculatePricingMutation,
+  useQuotePublicPricingMutation,
   useCreateParcelMutation,
   useGetBulkTemplateQuery,
   useValidateBulkMutation,
@@ -366,5 +394,3 @@ export const {
   useAdvanceRtoMutation,
   useCompleteRtoMutation,
 } = parcelsApi;
-
-

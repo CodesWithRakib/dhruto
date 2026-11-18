@@ -27,7 +27,7 @@ export function CustomerHistoryView() {
       (d) =>
         d.status === ParcelStatus.DELIVERED ||
         d.status === ParcelStatus.RETURNED_TO_MERCHANT ||
-        d.status === "DELIVERED"
+        d.status === "DELIVERED",
     );
   }, [deliveries]);
 
@@ -39,7 +39,7 @@ export function CustomerHistoryView() {
         item.trackingCode.toLowerCase().includes(q) ||
         item.merchantName.toLowerCase().includes(q) ||
         item.itemsDescription.toLowerCase().includes(q) ||
-        item.destination.toLowerCase().includes(q)
+        item.destination.toLowerCase().includes(q),
     );
   }, [historyList, search]);
 
@@ -50,10 +50,7 @@ export function CustomerHistoryView() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t("historyPageTitle")}
-        description={t("historyPageSubtitle")}
-      />
+      <PageHeader title={t("historyPageTitle")} description={t("historyPageSubtitle")} />
 
       {selectedPod ? (
         <PodModal
@@ -75,7 +72,8 @@ export function CustomerHistoryView() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-xs font-semibold text-muted-foreground">
-          Showing <span className="font-bold text-foreground">{filteredHistory.length}</span> completed doorstep deliveries
+          Showing <span className="font-bold text-foreground">{filteredHistory.length}</span>{" "}
+          completed doorstep deliveries
         </div>
 
         <div className="relative w-full sm:w-72">
@@ -110,9 +108,7 @@ export function CustomerHistoryView() {
                     <span className="font-mono text-xs font-bold text-foreground block">
                       {item.trackingCode}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      {item.merchantName}
-                    </span>
+                    <span className="text-[11px] text-muted-foreground">{item.merchantName}</span>
                   </div>
                 </div>
 
@@ -135,7 +131,12 @@ export function CustomerHistoryView() {
                 </div>
 
                 <div className="font-semibold text-foreground">
-                  COD: {item.codAmount > 0 ? `৳${item.codAmount}` : "Prepaid"}
+                  COD:{" "}
+                  {item.codAmount === null
+                    ? "Not disclosed"
+                    : item.codAmount > 0
+                      ? `৳${item.codAmount}`
+                      : "Prepaid"}
                 </div>
               </div>
 
@@ -150,7 +151,11 @@ export function CustomerHistoryView() {
                   POD Receipt
                 </Button>
                 <Link href={`${CUSTOMER_ROUTES.tracking}/${item.trackingCode}`}>
-                  <Button variant="ghost" size="sm" className="h-8 gap-1 rounded-xl bg-primary-soft text-primary text-xs font-semibold hover:bg-primary/20">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1 rounded-xl bg-primary-soft text-primary text-xs font-semibold hover:bg-primary/20"
+                  >
                     Timeline
                     <ArrowRight className="h-3 w-3" />
                   </Button>

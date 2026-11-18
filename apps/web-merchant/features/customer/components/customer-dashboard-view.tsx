@@ -66,9 +66,9 @@ export function CustomerDashboardView() {
         onOpenChange={setRescheduleOpen}
         trackingCode={activeTrackingForModal || activeShipment?.trackingCode || ""}
         currentAddress={activeShipment?.destination}
-        onRescheduleSuccess={(details) => {
-          rescheduleDelivery(activeTrackingForModal || activeShipment?.trackingCode || "", details);
-        }}
+        onSubmit={(details) =>
+          rescheduleDelivery(activeTrackingForModal || activeShipment?.trackingCode || "", details)
+        }
       />
 
       {/* Proof of Delivery (POD) Modal */}

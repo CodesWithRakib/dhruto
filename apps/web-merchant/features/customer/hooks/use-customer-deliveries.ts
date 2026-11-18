@@ -6,12 +6,9 @@ import {
   useGetParcelsQuery,
   useLazyGetPublicTrackingQuery,
   useRefreshDeliveryOtpMutation,
+  useSetDeliveryPreferenceMutation,
 } from "@/features/parcels/api/parcels.api";
-import {
-  ParcelStatus,
-  type ParcelListItem,
-  type PublicTrackingResponse,
-} from "@dhruto/contracts";
+import { ParcelStatus, type ParcelListItem, type PublicTrackingResponse } from "@dhruto/contracts";
 
 export interface CustomerDelivery {
   id: string;
@@ -23,7 +20,8 @@ export interface CustomerDelivery {
   status: ParcelStatus | string;
   statusLabel: string;
   eta: string;
-  codAmount: number;
+  /** `null` when unknown (parcel tracked by code but not addressed to this customer). */
+  codAmount: number | null;
   isPaid: boolean;
   itemsDescription: string;
   riderName?: string;
@@ -33,20 +31,19 @@ export interface CustomerDelivery {
   deliveryNote?: string;
   updatedAt?: string;
   timeline?: PublicTrackingResponse["timeline"];
+  /** True for parcels addressed to this customer (API list); false for codes added manually. */
+  isOwned: boolean;
 }
 
-const STORAGE_KEY = "dhruto_customer_deliveries_v4";
+export interface RescheduleDetails {
+  /** Preferred day, YYYY-MM-DD (Asia/Dhaka). */
+  date: string;
+  slotLabel: string;
+  instruction: string;
+}
 
-/**
- * Seed tracking codes that point to real database records.
- * Used only to fetch live dynamic telemetry if the customer has no assigned parcels yet.
- */
-export const DEFAULT_TRACKED_CODES = [
-  "DHR-20261114-NNN27T",
-  "DHR-20261113-K25WQ5",
-  "DHR-2610-00101",
-  "DHR-2610-00102",
-];
+// v5: drops records cached by older builds that contained simulated rider/COD data.
+const STORAGE_KEY = "dhruto_customer_deliveries_v5";
 
 /**
  * Format a status string into a human-readable title
@@ -120,23 +117,19 @@ export function estimateEtaFromStatus(status: ParcelStatus | string): string {
   }
 }
 
-/**
- * Generates a unique, deterministic 6-digit delivery OTP specific to each parcel.
- * Uses a mathematical dispersion over the parcel's tracking code so every delivery
- * has a distinct, individual, non-static doorstep OTP.
- */
-export function generateDeliveryOtp(trackingCode: string): string {
-  const seed = `${trackingCode.toUpperCase()}:dhruto-delivery-otp`;
-  let hash = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    hash ^= seed.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  const abs = Math.abs(hash);
-  return String(100000 + (abs % 900000));
+/** "Wed, 19 Nov (Afternoon ...)" style ETA from a saved delivery preference. */
+function etaFromPreference(pref: NonNullable<ParcelListItem["deliveryPreference"]>): string {
+  const day = pref.date
+    ? new Date(`${pref.date}T00:00:00`).toLocaleDateString(undefined, {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      })
+    : "Preferred day";
+  return pref.slot ? `${day} (${pref.slot})` : day;
 }
 
-function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
+export function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
   const isDelivered = parcel.status === ParcelStatus.DELIVERED;
   const isPaid = isDelivered || Number(parcel.codAmount) === 0;
   const destination =
@@ -147,33 +140,34 @@ function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
   return {
     id: parcel.id,
     trackingCode: parcel.trackingCode,
-    merchantName: "Dhruto Merchant Partner",
+    merchantName: parcel.merchantName || "Merchant",
     destination,
     district: parcel.district,
     thana: parcel.thana,
     status: parcel.status,
     statusLabel: formatStatusLabel(parcel.status),
-    eta: estimateEtaFromStatus(parcel.status),
+    eta:
+      parcel.deliveryPreference && !isDelivered
+        ? etaFromPreference(parcel.deliveryPreference)
+        : estimateEtaFromStatus(parcel.status),
     codAmount: Number(parcel.codAmount) || 0,
     isPaid,
     itemsDescription: parcel.parcelDescription || `Shipment Package (${parcel.trackingCode})`,
-    riderName:
-      parcel.status === ParcelStatus.OUT_FOR_DELIVERY || parcel.status === ParcelStatus.DELIVERED
-        ? "Karim Rider (Dhaka Central Fleet)"
-        : undefined,
-    riderPhone:
-      parcel.status === ParcelStatus.OUT_FOR_DELIVERY || parcel.status === ParcelStatus.DELIVERED
-        ? "+8801700000003"
-        : undefined,
-    otp: parcel.deliveryOtp || generateDeliveryOtp(parcel.trackingCode),
+    // The API exposes the assigned rider only while delivery is active.
+    riderName: parcel.riderName ?? undefined,
+    riderPhone: parcel.riderPhone ?? undefined,
+    // Only the server issues delivery OTPs; an empty value renders as "not issued yet".
+    otp: parcel.deliveryOtp ?? "",
     deliveredAt: isDelivered ? new Date(parcel.updatedAt).toLocaleDateString() : undefined,
+    deliveryNote: parcel.deliveryPreference?.note ?? undefined,
     updatedAt: parcel.updatedAt,
+    isOwned: true,
   };
 }
 
 function mapTrackingResponseToDelivery(
   tracking: PublicTrackingResponse,
-  fallback?: Partial<CustomerDelivery>
+  fallback?: Partial<CustomerDelivery>,
 ): CustomerDelivery {
   const isDelivered = tracking.status === ParcelStatus.DELIVERED;
   const destination =
@@ -184,31 +178,29 @@ function mapTrackingResponseToDelivery(
   return {
     id: fallback?.id || `del-${tracking.trackingCode}`,
     trackingCode: tracking.trackingCode,
-    merchantName: fallback?.merchantName || "Dhruto Merchant Partner",
+    merchantName: fallback?.merchantName || "Merchant",
     destination,
     district: tracking.recipientDistrict ?? fallback?.district,
     thana: tracking.recipientThana ?? fallback?.thana,
     status: tracking.status,
     statusLabel: formatStatusLabel(tracking.status),
-    eta: isDelivered ? "Delivered" : estimateEtaFromStatus(tracking.status),
-    codAmount: fallback?.codAmount ?? (isDelivered ? 0 : 1500),
+    // Keep a preference-based ETA from the owned record while not delivered.
+    eta: isDelivered ? "Delivered" : fallback?.eta || estimateEtaFromStatus(tracking.status),
+    // Public tracking does not disclose COD: unknown unless the owned record had it.
+    codAmount: fallback?.codAmount ?? null,
     isPaid: isDelivered ? true : (fallback?.isPaid ?? false),
     itemsDescription: fallback?.itemsDescription || `Shipment Package (${tracking.trackingCode})`,
-    riderName:
-      tracking.status === ParcelStatus.OUT_FOR_DELIVERY || isDelivered
-        ? fallback?.riderName || "Karim Rider (Dhaka Central Fleet)"
-        : undefined,
-    riderPhone:
-      tracking.status === ParcelStatus.OUT_FOR_DELIVERY || isDelivered
-        ? fallback?.riderPhone || "+8801700000003"
-        : undefined,
-    otp: fallback?.otp || generateDeliveryOtp(tracking.trackingCode),
+    // Public tracking has no rider contact; keep what the owned API record provided.
+    riderName: fallback?.riderName,
+    riderPhone: fallback?.riderPhone,
+    otp: fallback?.otp ?? "",
     deliveredAt: isDelivered
       ? new Date(tracking.updatedAt).toLocaleDateString()
       : fallback?.deliveredAt,
     deliveryNote: fallback?.deliveryNote,
     updatedAt: tracking.updatedAt,
     timeline: tracking.timeline,
+    isOwned: fallback?.isOwned ?? false,
   };
 }
 
@@ -219,14 +211,18 @@ function mapTrackingResponseToDelivery(
  */
 export function useCustomerDeliveries() {
   const [deliveries, setDeliveries] = React.useState<CustomerDelivery[]>([]);
-  const [activeTrackingCode, setActiveTrackingCode] = React.useState<string>("DHR-20261114-NNN27T");
+  const [activeTrackingCode, setActiveTrackingCode] = React.useState<string>("");
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   // Live database queries
-  const { data: parcelsResponse, isLoading: isLoadingParcels, refetch: refetchParcels } =
-    useGetParcelsQuery({ limit: 50 });
+  const {
+    data: parcelsResponse,
+    isLoading: isLoadingParcels,
+    refetch: refetchParcels,
+  } = useGetParcelsQuery({ limit: 50 });
   const [triggerFetchTracking] = useLazyGetPublicTrackingQuery();
   const [triggerRefreshOtpMutation] = useRefreshDeliveryOtpMutation();
+  const [triggerSetPreference] = useSetDeliveryPreferenceMutation();
 
   // Sync state to localStorage whenever deliveries change
   const saveDeliveries = React.useCallback((next: CustomerDelivery[]) => {
@@ -262,7 +258,7 @@ export function useCustomerDeliveries() {
               // Keep existing if fetch fails
             }
             return delivery;
-          })
+          }),
         );
 
         saveDeliveries(updatedList);
@@ -273,7 +269,7 @@ export function useCustomerDeliveries() {
         if (!silent) setIsRefreshing(false);
       }
     },
-    [deliveries, refetchParcels, saveDeliveries, triggerFetchTracking]
+    [deliveries, refetchParcels, saveDeliveries, triggerFetchTracking],
   );
 
   // Synchronize when real database parcels are loaded from GET /api/v1/parcels
@@ -296,7 +292,7 @@ export function useCustomerDeliveries() {
         // LocalStorage unavailable
       }
 
-      // Merge: DB deliveries take priority, followed by stored, and if empty, fallback to DEFAULT_TRACKED_CODES
+      // Merge: DB deliveries take priority, followed by codes the customer added themselves.
       const mergedMap = new Map<string, CustomerDelivery>();
 
       for (const d of dbDeliveries) {
@@ -307,27 +303,6 @@ export function useCustomerDeliveries() {
         const key = d.trackingCode.toUpperCase();
         if (!mergedMap.has(key)) {
           mergedMap.set(key, d);
-        }
-      }
-
-      // If user has zero parcels in DB and zero in storage, query the default seeded codes dynamically
-      if (mergedMap.size === 0) {
-        const fetchedSeeds = await Promise.all(
-          DEFAULT_TRACKED_CODES.map(async (code) => {
-            try {
-              const res = await triggerFetchTracking(code).unwrap();
-              if (res.data) {
-                return mapTrackingResponseToDelivery(res.data);
-              }
-            } catch {
-              // Ignore
-            }
-            return null;
-          })
-        );
-
-        for (const item of fetchedSeeds) {
-          if (item) mergedMap.set(item.trackingCode.toUpperCase(), item);
         }
       }
 
@@ -366,15 +341,13 @@ export function useCustomerDeliveries() {
   // Dynamic statistics calculated strictly from real data
   const incomingCount = React.useMemo(() => {
     return deliveries.filter(
-      (d) => d.status !== ParcelStatus.DELIVERED && d.status !== ParcelStatus.CANCELLED
+      (d) => d.status !== ParcelStatus.DELIVERED && d.status !== ParcelStatus.CANCELLED,
     ).length;
   }, [deliveries]);
 
   const arrivingTodayCount = React.useMemo(() => {
     return deliveries.filter(
-      (d) =>
-        d.status === ParcelStatus.OUT_FOR_DELIVERY ||
-        d.eta.toLowerCase().includes("today")
+      (d) => d.status === ParcelStatus.OUT_FOR_DELIVERY || d.eta.toLowerCase().includes("today"),
     ).length;
   }, [deliveries]);
 
@@ -385,7 +358,7 @@ export function useCustomerDeliveries() {
   const totalCodDue = React.useMemo(() => {
     return deliveries
       .filter((d) => d.status !== ParcelStatus.DELIVERED && !d.isPaid)
-      .reduce((acc, d) => acc + (d.codAmount || 0), 0);
+      .reduce((acc, d) => acc + (d.codAmount ?? 0), 0);
   }, [deliveries]);
 
   const primaryLocation = React.useMemo(() => {
@@ -428,72 +401,53 @@ export function useCustomerDeliveries() {
         toast.success(`Shipment ${code} successfully connected to your dashboard!`);
         return true;
       } catch {
-        toast.error(`Could not locate ${code} on the network. Check the tracking code and try again.`);
+        toast.error(
+          `Could not locate ${code} on the network. Check the tracking code and try again.`,
+        );
         return false;
       }
     },
-    [deliveries, saveDeliveries, triggerFetchTracking]
+    [deliveries, saveDeliveries, triggerFetchTracking],
   );
 
   /**
-   * Reschedule delivery time and attach custom rider instructions
+   * Save the recipient's delivery preference (day, slot, instruction) via the API.
+   * Resolves true on success. Status is never changed client-side: the server
+   * records a preference for hub/rider planning, not a state transition.
    */
   const rescheduleDelivery = React.useCallback(
-    (
-      code: string,
-      details: {
-        dateChoice: "today" | "tomorrow" | "dayAfter";
-        slotLabel: string;
-        instruction: string;
-        customNote: string;
+    async (code: string, details: RescheduleDetails): Promise<boolean> => {
+      const target = deliveries.find((d) => d.trackingCode === code);
+      if (!target?.isOwned) {
+        toast.error("Only parcels addressed to you can be rescheduled.");
+        return false;
       }
-    ) => {
-      const updated = deliveries.map((d) => {
-        if (d.trackingCode === code) {
-          const datePrefix =
-            details.dateChoice === "today"
-              ? "Today"
-              : details.dateChoice === "tomorrow"
-              ? "Tomorrow"
-              : "In 2 Days";
-          return {
-            ...d,
-            status: ParcelStatus.RESCHEDULED,
-            statusLabel: "Rescheduled",
-            eta: `${datePrefix} (${details.slotLabel})`,
-            deliveryNote: details.instruction,
-          };
+      try {
+        const res = await triggerSetPreference({
+          id: target.id,
+          body: { date: details.date, slot: details.slotLabel, note: details.instruction },
+        }).unwrap();
+        const pref = res.data;
+        if (pref) {
+          saveDeliveries(
+            deliveries.map((d) =>
+              d.trackingCode === code
+                ? { ...d, eta: etaFromPreference(pref), deliveryNote: pref.note ?? undefined }
+                : d,
+            ),
+          );
         }
-        return d;
-      });
-
-      saveDeliveries(updated);
+        toast.success(`Delivery preference saved for ${code}.`);
+        return true;
+      } catch (err) {
+        const message =
+          (err as { data?: { message?: string } })?.data?.message ??
+          "Could not save your delivery preference. Please try again.";
+        toast.error(message);
+        return false;
+      }
     },
-    [deliveries, saveDeliveries]
-  );
-
-  /**
-   * Mark shipment as delivered
-   */
-  const markAsDelivered = React.useCallback(
-    (code: string) => {
-      const updated = deliveries.map((d) => {
-        if (d.trackingCode === code) {
-          return {
-            ...d,
-            status: ParcelStatus.DELIVERED,
-            statusLabel: "Delivered",
-            eta: "Delivered",
-            isPaid: true,
-            deliveredAt: "Today at " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          };
-        }
-        return d;
-      });
-      saveDeliveries(updated);
-      toast.success(`Handoff logged: ${code} marked as delivered.`);
-    },
-    [deliveries, saveDeliveries]
+    [deliveries, saveDeliveries, triggerSetPreference],
   );
 
   /**
@@ -508,7 +462,7 @@ export function useCustomerDeliveries() {
       }
       toast.info(`Removed ${code} from your delivery dashboard.`);
     },
-    [deliveries, activeTrackingCode, saveDeliveries]
+    [deliveries, activeTrackingCode, saveDeliveries],
   );
 
   /**
@@ -518,7 +472,11 @@ export function useCustomerDeliveries() {
   const refreshOtp = React.useCallback(
     async (code: string) => {
       const target = deliveries.find((d) => d.trackingCode === code);
-      const targetId = target?.id || code;
+      if (!target?.isOwned) {
+        toast.error("Delivery OTPs are only available for parcels addressed to you.");
+        return "";
+      }
+      const targetId = target.id;
       let freshOtp = "";
       try {
         const res = await triggerRefreshOtpMutation(targetId).unwrap();
@@ -526,8 +484,9 @@ export function useCustomerDeliveries() {
           freshOtp = res.data.otp;
         }
       } catch {
-        // Fallback if offline
-        freshOtp = String(Math.floor(100000 + Math.random() * 900000));
+        // Never show a locally invented OTP: the rider verifies against the server hash.
+        toast.error(`Could not issue a fresh OTP for ${code}. Please try again.`);
+        return "";
       }
 
       if (freshOtp) {
@@ -546,7 +505,7 @@ export function useCustomerDeliveries() {
       }
       return freshOtp;
     },
-    [deliveries, triggerRefreshOtpMutation, saveDeliveries]
+    [deliveries, triggerRefreshOtpMutation, saveDeliveries],
   );
 
   /**
@@ -559,7 +518,7 @@ export function useCustomerDeliveries() {
       // Storage unavailable
     }
     void refetchParcels();
-    setActiveTrackingCode("DHR-20261114-NNN27T");
+    setActiveTrackingCode("");
     toast.success("Synchronized deliveries with live database.");
   }, [refetchParcels]);
 
@@ -578,7 +537,6 @@ export function useCustomerDeliveries() {
     addDeliveryByTrackingCode,
     refreshAllDeliveries,
     rescheduleDelivery,
-    markAsDelivered,
     removeDelivery,
     refreshOtp,
     resetToDefaults,

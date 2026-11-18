@@ -12,19 +12,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@dhruto/ui";
-import { toast } from "sonner";
+import type { RescheduleDetails } from "../hooks/use-customer-deliveries";
 
 export interface RescheduleModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trackingCode: string;
   currentAddress?: string;
-  onRescheduleSuccess?: (details: {
-    dateChoice: "today" | "tomorrow" | "dayAfter";
-    slotLabel: string;
-    instruction: string;
-    customNote: string;
-  }) => void;
+  /** Persists the preference; resolve `true` to close the dialog. Errors are surfaced by the caller. */
+  onSubmit: (details: RescheduleDetails) => Promise<boolean>;
+}
+
+const DAY_OFFSETS = { today: 0, tomorrow: 1, dayAfter: 2 } as const;
+
+/** YYYY-MM-DD on the Asia/Dhaka calendar (UTC+6, no DST), `days` from now. */
+function dhakaDate(days: number): string {
+  return new Date(Date.now() + 6 * 3_600_000 + days * 86_400_000).toISOString().slice(0, 10);
 }
 
 const PRESET_INSTRUCTIONS = [
@@ -45,40 +48,39 @@ export function RescheduleModal({
   onOpenChange,
   trackingCode,
   currentAddress,
-  onRescheduleSuccess,
+  onSubmit,
 }: RescheduleModalProps) {
   const t = useTranslations("Customer");
 
   const [dateChoice, setDateChoice] = React.useState<"today" | "tomorrow" | "dayAfter">("today");
   const [selectedSlot, setSelectedSlot] = React.useState<string>("afternoon");
-  const [selectedInstruction, setSelectedInstruction] = React.useState<string>(PRESET_INSTRUCTIONS[0] ?? "");
+  const [selectedInstruction, setSelectedInstruction] = React.useState<string>(
+    PRESET_INSTRUCTIONS[0] ?? "",
+  );
   const [customNote, setCustomNote] = React.useState<string>("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
-
-    // Simulate saving delivery preferences
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const slotObj = TIME_SLOTS.find((s) => s.id === selectedSlot);
     const combinedInstruction = customNote.trim()
       ? `${selectedInstruction} (${customNote.trim()})`
       : selectedInstruction;
 
-    onRescheduleSuccess?.({
-      dateChoice,
-      slotLabel: slotObj?.label ?? selectedSlot,
-      instruction: combinedInstruction,
-      customNote,
-    });
-
-    setIsSubmitting(false);
-    toast.success(
-      `Delivery preferences updated for ${trackingCode}. The rider has been notified of your instructions.`
-    );
-    onOpenChange(false);
+    try {
+      const saved = await onSubmit({
+        date: dhakaDate(DAY_OFFSETS[dateChoice]),
+        slotLabel: slotObj?.label ?? selectedSlot,
+        instruction: combinedInstruction.slice(0, 300),
+      });
+      // Keep the dialog open on failure so the customer can retry.
+      if (saved) onOpenChange(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,8 +105,12 @@ export function RescheduleModal({
 
           {currentAddress ? (
             <div className="rounded-xl border border-border/60 bg-surface-muted/60 p-3 text-xs text-muted-foreground flex items-center justify-between">
-              <span className="truncate pr-2">Delivering to: <strong className="text-foreground">{currentAddress}</strong></span>
-              <span className="shrink-0 font-mono text-[11px] text-primary font-semibold">Active</span>
+              <span className="truncate pr-2">
+                Delivering to: <strong className="text-foreground">{currentAddress}</strong>
+              </span>
+              <span className="shrink-0 font-mono text-[11px] text-primary font-semibold">
+                Active
+              </span>
             </div>
           ) : null}
 
@@ -203,7 +209,9 @@ export function RescheduleModal({
 
           <div className="flex items-center gap-2 rounded-xl bg-primary-soft/50 p-2.5 text-[11px] text-primary-soft-foreground border border-primary/20">
             <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
-            <span>Instructions will be instantly dispatched to your assigned rider&apos;s terminal.</span>
+            <span>
+              Instructions will be instantly dispatched to your assigned rider&apos;s terminal.
+            </span>
           </div>
 
           <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">

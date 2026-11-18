@@ -10,6 +10,7 @@ import {
 import { CalculatorParametersCard } from "./calculator/calculator-parameters-card";
 import { CalculatorReceiptSlip } from "./calculator/calculator-receipt-slip";
 import { useParcelPricing } from "@/features/parcels/hooks/use-parcel-pricing";
+import { useAppSelector } from "@/store/hooks";
 
 const ZONES: ZoneOption[] = [
   {
@@ -82,7 +83,15 @@ export function PricingCalculatorCockpit({
     if (!calcDistrict) return;
     const dNorm = calcDistrict.trim().toLowerCase();
     const SUBURB_DISTRICTS = ["gazipur", "narayanganj", "munshiganj", "manikganj", "narsingdi"];
-    const DIVISIONAL_DISTRICTS = ["chattogram", "sylhet", "rajshahi", "khulna", "barishal", "rangpur", "mymensingh"];
+    const DIVISIONAL_DISTRICTS = [
+      "chattogram",
+      "sylhet",
+      "rajshahi",
+      "khulna",
+      "barishal",
+      "rangpur",
+      "mymensingh",
+    ];
 
     if (dNorm === "dhaka") {
       const tNorm = calcThana.trim().toLowerCase();
@@ -102,8 +111,14 @@ export function PricingCalculatorCockpit({
 
   const selectedZone = ZONES.find((z) => z.id === selectedZoneId) ?? ZONES[0]!;
 
+  // Merchants/admins use the authenticated endpoint (higher per-user limit);
+  // anonymous visitors and other roles get the public quote (same formula).
+  const role = useAppSelector((state) => state.auth.user?.role);
+  const canUseMerchantPricing = role === "MERCHANT" || role === "ADMIN";
+
   // Dynamic live rate calculation via authoritative API
   const { pricing } = useParcelPricing({
+    usePublicQuote: !canUseMerchantPricing,
     district: calcDistrict,
     thana: calcThana,
     weight: weightKg,
@@ -121,7 +136,10 @@ export function PricingCalculatorCockpit({
   const netMerchantPayout = Math.max(0, codAmount - totalDeductions);
 
   return (
-    <section id="calculator-cockpit" className={`relative scroll-mt-24 ${compact ? "py-4" : "py-16"}`}>
+    <section
+      id="calculator-cockpit"
+      className={`relative scroll-mt-24 ${compact ? "py-4" : "py-16"}`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center space-y-3">
@@ -130,11 +148,15 @@ export function PricingCalculatorCockpit({
             <span>{t("eyebrow")}</span>
           </div>
           {headingTag === "h2" ? (
-            <h2 className={`font-bold tracking-tight text-foreground ${compact ? "text-display-xs sm:text-display-sm" : "text-display-sm sm:text-display-md"}`}>
+            <h2
+              className={`font-bold tracking-tight text-foreground ${compact ? "text-display-xs sm:text-display-sm" : "text-display-sm sm:text-display-md"}`}
+            >
               {displayTitle}
             </h2>
           ) : (
-            <h1 className={`font-bold tracking-tight text-foreground ${compact ? "text-display-xs sm:text-display-sm" : "text-display-sm sm:text-display-md"}`}>
+            <h1
+              className={`font-bold tracking-tight text-foreground ${compact ? "text-display-xs sm:text-display-sm" : "text-display-sm sm:text-display-md"}`}
+            >
               {displayTitle}
             </h1>
           )}

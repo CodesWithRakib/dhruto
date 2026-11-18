@@ -2,7 +2,18 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Search, CheckCircle2, Package, MessageSquare, ShieldCheck, Copy, FileCheck, Calendar, ArrowRight, X } from "lucide-react";
+import {
+  Search,
+  CheckCircle2,
+  Package,
+  MessageSquare,
+  ShieldCheck,
+  Copy,
+  FileCheck,
+  Calendar,
+  ArrowRight,
+  X,
+} from "lucide-react";
 import { Button } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { CUSTOMER_ROUTES } from "@/config/routes";
@@ -139,7 +150,11 @@ export function CustomerDeliveriesList({
                         : "bg-primary-soft text-primary border-primary/20"
                     }`}
                   >
-                    {isDelivered ? <CheckCircle2 className="h-5 w-5" /> : <Package className="h-5 w-5" />}
+                    {isDelivered ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : (
+                      <Package className="h-5 w-5" />
+                    )}
                   </button>
 
                   <div className="space-y-1">
@@ -179,30 +194,38 @@ export function CustomerDeliveriesList({
                     ) : null}
 
                     <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-muted-foreground">
-                      <span>{isDelivered ? delivery.deliveredAt || "Delivered" : delivery.eta}</span>
+                      <span>
+                        {isDelivered ? delivery.deliveredAt || "Delivered" : delivery.eta}
+                      </span>
                       <span>•</span>
                       <span>
                         COD:{" "}
                         <strong className="text-foreground">
-                          {delivery.codAmount > 0 && !delivery.isPaid
-                            ? bdt(delivery.codAmount)
-                            : "Prepaid"}
+                          {delivery.codAmount === null
+                            ? "Not disclosed"
+                            : delivery.codAmount > 0 && !delivery.isPaid
+                              ? bdt(delivery.codAmount)
+                              : "Prepaid"}
                         </strong>
                       </span>
-                      <span>•</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onCopy(delivery.otp, `Delivery OTP for ${delivery.trackingCode}`);
-                        }}
-                        title="Click to copy delivery OTP"
-                        className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 hover:bg-primary-soft hover:border-primary/40 px-2 py-0.5 rounded-md font-bold border border-primary/20 transition-all cursor-pointer shadow-2xs group/otp"
-                      >
-                        <ShieldCheck className="h-3 w-3 text-primary" />
-                        <span>OTP: {delivery.otp}</span>
-                        <Copy className="h-2.5 w-2.5 ml-0.5 opacity-70 group-hover/otp:opacity-100 transition-opacity" />
-                      </button>
+                      {delivery.otp ? (
+                        <>
+                          <span>•</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onCopy(delivery.otp, `Delivery OTP for ${delivery.trackingCode}`);
+                            }}
+                            title="Click to copy delivery OTP"
+                            className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 hover:bg-primary-soft hover:border-primary/40 px-2 py-0.5 rounded-md font-bold border border-primary/20 transition-all cursor-pointer shadow-2xs group/otp"
+                          >
+                            <ShieldCheck className="h-3 w-3 text-primary" />
+                            <span>OTP: {delivery.otp}</span>
+                            <Copy className="h-2.5 w-2.5 ml-0.5 opacity-70 group-hover/otp:opacity-100 transition-opacity" />
+                          </button>
+                        </>
+                      ) : null}
                       <span>•</span>
                       <span className="truncate max-w-[200px]">{delivery.destination}</span>
                     </div>
@@ -244,7 +267,11 @@ export function CustomerDeliveriesList({
                   )}
 
                   <Link href={`${CUSTOMER_ROUTES.tracking}/${delivery.trackingCode}`}>
-                    <Button size="sm" variant="ghost" className="h-9 gap-1 rounded-xl bg-primary-soft text-primary text-xs font-semibold hover:bg-primary/20">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-9 gap-1 rounded-xl bg-primary-soft text-primary text-xs font-semibold hover:bg-primary/20"
+                    >
                       Track
                       <ArrowRight className="h-3 w-3" />
                     </Button>

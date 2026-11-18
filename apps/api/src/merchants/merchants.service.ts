@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { ApiErrorCode } from "@dhruto/contracts";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import {
@@ -7,6 +8,7 @@ import {
   Parcel,
   ParcelStatus,
   User,
+  UserRole,
 } from "../database/entities/index.js";
 import { UpdateMerchantDto } from "./dto/update-merchant.dto.js";
 
@@ -66,6 +68,15 @@ export class MerchantsService {
       const user = await this.userRepo.findOne({ where: { id: userId } });
       if (!user) {
         throw new NotFoundException("User not found");
+      }
+      // Only merchant accounts own a merchant profile. Without this guard an
+      // admin (whom RolesGuard admits everywhere) opening a merchant page
+      // silently created a phantom "<name>'s Shop" merchant row.
+      if (user.role !== UserRole.MERCHANT) {
+        throw new ForbiddenException({
+          message: "Merchant profile endpoints are only available to merchant accounts",
+          error: ApiErrorCode.FORBIDDEN,
+        });
       }
 
       merchant = this.merchantRepo.create({

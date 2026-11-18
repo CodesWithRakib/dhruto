@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { PricingResult } from "@dhruto/contracts";
-import { useCalculatePricingMutation } from "../api/parcels.api";
+import { useCalculatePricingMutation, useQuotePublicPricingMutation } from "../api/parcels.api";
 
 export interface UseParcelPricingArgs {
   district: string;
@@ -11,6 +11,11 @@ export interface UseParcelPricingArgs {
   codAmount: number;
   /** Skip the request until the form is worth pricing (e.g. district chosen). */
   enabled?: boolean;
+  /**
+   * Use the anonymous `POST /pricing/quote` endpoint instead of the
+   * merchant/admin-only `POST /pricing/calculate` (same formula).
+   */
+  usePublicQuote?: boolean;
 }
 
 export interface UseParcelPricingResult {
@@ -36,8 +41,12 @@ export function useParcelPricing({
   weight,
   codAmount,
   enabled = true,
+  usePublicQuote = false,
 }: UseParcelPricingArgs): UseParcelPricingResult {
-  const [calculatePricing, { isLoading, isError }] = useCalculatePricingMutation();
+  const [calculateAuthenticated, authState] = useCalculatePricingMutation();
+  const [quotePublic, publicState] = useQuotePublicPricingMutation();
+  const calculatePricing = usePublicQuote ? quotePublic : calculateAuthenticated;
+  const { isLoading, isError } = usePublicQuote ? publicState : authState;
   const [pricing, setPricing] = useState<PricingResult | null>(null);
   const [isError_, setError] = useState(false);
 

@@ -113,4 +113,17 @@ export class Parcel extends BaseEntity {
 
   @Column({ type: "enum", enum: ParcelStatus, default: ParcelStatus.CREATED })
   status: ParcelStatus;
+
+  /** Recipient's preferred delivery day (YYYY-MM-DD). Planning hint only; never changes status. */
+  @Column({ name: "preferred_delivery_date", type: "date", nullable: true })
+  preferredDeliveryDate: string | null;
+
+  @Column({ name: "preferred_delivery_slot", type: "varchar", length: 40, nullable: true })
+  preferredDeliverySlot: string | null;
+
+  @Column({ name: "customer_delivery_note", type: "varchar", length: 300, nullable: true })
+  customerDeliveryNote: string | null;
+
+  @Column({ name: "delivery_preference_updated_at", type: "timestamptz", nullable: true })
+  deliveryPreferenceUpdatedAt: Date | null;
 }

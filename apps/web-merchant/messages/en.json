@@ -381,7 +381,10 @@
     "nextIs": "Next stage: {stage}",
     "deliveredNext": "Delivered. COD moves through rider hand-in and verification into your settlement.",
     "returnedNext": "Returned to you. The parcel journey is complete.",
-    "exceptionNext": "This shipment needs attention. Contact support with the tracking code."
+    "exceptionNext": "This shipment needs attention. Contact support with the tracking code.",
+    "copyTrackingCode": "Copy tracking ID",
+    "trackingCopied": "Tracking ID copied",
+    "copyFailed": "Could not copy to clipboard"
   },
   "ShippingLabel": {
     "title": "Shipping Label",

@@ -1,7 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, Download, Printer, ShieldCheck, MapPin, Calendar, User, Package } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  Printer,
+  ShieldCheck,
+  MapPin,
+  Calendar,
+  User,
+  Package,
+} from "lucide-react";
 import {
   Button,
   Dialog,
@@ -24,7 +33,8 @@ export interface PodModalProps {
     deliveredAt: string;
     riderName: string;
     merchantName: string;
-    codAmount: number;
+    /** `null` when the amount is not disclosed to this viewer. */
+    codAmount: number | null;
     description?: string;
   };
 }
@@ -64,7 +74,9 @@ export function PodModal({ open, onOpenChange, parcel }: PodModalProps) {
               <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground block">
                 Tracking Number
               </span>
-              <span className="font-mono text-sm font-bold text-foreground">{parcel.trackingCode}</span>
+              <span className="font-mono text-sm font-bold text-foreground">
+                {parcel.trackingCode}
+              </span>
             </div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-3 py-1 text-xs font-bold text-success-soft-foreground border border-success/20">
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -89,12 +101,18 @@ export function PodModal({ open, onOpenChange, parcel }: PodModalProps) {
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <Package className="h-3 w-3 text-muted-foreground" /> Merchant:
               </span>
-              <span className="font-medium text-foreground block mt-0.5">{parcel.merchantName}</span>
+              <span className="font-medium text-foreground block mt-0.5">
+                {parcel.merchantName}
+              </span>
             </div>
             <div>
               <span className="text-[11px] text-muted-foreground block">Amount Collected:</span>
               <span className="font-bold text-foreground block mt-0.5">
-                {parcel.codAmount > 0 ? `৳${parcel.codAmount.toLocaleString()}` : "Paid in Advance"}
+                {parcel.codAmount === null
+                  ? "Not disclosed"
+                  : parcel.codAmount > 0
+                    ? `৳${parcel.codAmount.toLocaleString()}`
+                    : "Paid in Advance"}
               </span>
             </div>
           </div>
@@ -109,7 +127,9 @@ export function PodModal({ open, onOpenChange, parcel }: PodModalProps) {
           <div className="rounded-xl border border-success/20 bg-success-soft/30 p-3 flex items-center gap-2.5">
             <ShieldCheck className="h-5 w-5 shrink-0 text-success" />
             <div className="text-[11px] text-foreground">
-              <span className="font-bold block text-success">Verified with Recipient One-Time-Password (OTP)</span>
+              <span className="font-bold block text-success">
+                Verified with Recipient One-Time-Password (OTP)
+              </span>
               Handoff identity confirmed via phone authorization at doorstep.
             </div>
           </div>

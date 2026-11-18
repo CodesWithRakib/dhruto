@@ -44,7 +44,12 @@ import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
 import type { BulkImportDto, BulkImportResult, BulkRowResult } from "./dto/bulk-import.dto.js";
 import { UpdateParcelDto } from "./dto/update-parcel.dto.js";
-import { DomainEventPublisher, ParcelCreatedEvent, ParcelAssignedEvent, ParcelReturnedEvent } from "../events/index.js";
+import {
+  DomainEventPublisher,
+  ParcelCreatedEvent,
+  ParcelAssignedEvent,
+  ParcelReturnedEvent,
+} from "../events/index.js";
 import { IntelligenceService } from "../intelligence/intelligence.service.js";
 import { CacheService } from "../common/cache/cache.service.js";
 import { ParcelLifecycleService } from "./lifecycle/parcel-lifecycle.service.js";
@@ -120,6 +125,14 @@ const STATUS_DESCRIPTIONS: Record<string, { en: string; bn: string }> = {
 };
 
 /** Tenant boundary for every parcel read/write. */
+/** Statuses in which the recipient may see the assigned rider's name and phone. */
+const RIDER_CONTACT_STATUSES: ReadonlySet<ParcelStatus> = new Set([
+  ParcelStatus.ASSIGNED_TO_RIDER,
+  ParcelStatus.OUT_FOR_DELIVERY,
+  ParcelStatus.DELIVERY_ATTEMPTED,
+  ParcelStatus.RESCHEDULED,
+]);
+
 export interface ParcelAccessScope {
   userId: string;
   /** `undefined` means unscoped (platform admin). */
@@ -221,6 +234,16 @@ export class ParcelsService {
    * Rejects cross-tenant access. A parcel owned by another merchant is reported
    * as not-found so the endpoint does not confirm its existence.
    */
+  /**
+   * Loads a parcel the caller may access (admin, owning merchant, or the
+   * recipient by phone); otherwise 404. For collaborating parcel services.
+   */
+  async findAccessibleParcel(idOrCode: string, scope: ParcelAccessScope): Promise<Parcel> {
+    const parcel = await this.findParcelOrThrow(idOrCode);
+    this.assertOwnership(parcel, scope);
+    return parcel;
+  }
+
   private assertOwnership(parcel: Parcel, scope: ParcelAccessScope): void {
     if (scope.isAdmin) {
       return;
@@ -523,6 +546,11 @@ export class ParcelsService {
       qb.andWhere("parcel.recipientPhone = :phone", {
         phone: scope.customerPhone,
       });
+      // Recipients see who shipped the parcel and who is bringing it.
+      // Many-to-one joins: no row multiplication, so pagination stays exact.
+      qb.leftJoinAndSelect("parcel.merchant", "merchant")
+        .leftJoinAndSelect("parcel.currentRider", "currentRider")
+        .leftJoinAndSelect("currentRider.user", "currentRiderUser");
     } else if (scope.merchantId) {
       qb.andWhere("parcel.merchantId = :merchantId", {
         merchantId: scope.merchantId,
@@ -647,21 +675,6 @@ export class ParcelsService {
       addressIntelligence: this.toAddressIntelligence(parcel),
       history: history.map((entry) => this.toHistoryEntry(entry)),
     };
-  }
-
-  /**
-   * Generates a deterministic unique 6-digit OTP for a parcel based on its trackingCode.
-   * Every single parcel receives a distinct, non-static delivery OTP.
-   */
-  generateParcelOtp(trackingCode: string): string {
-    const seed = `${trackingCode.toUpperCase()}:dhruto-delivery-otp`;
-    let hash = 2166136261;
-    for (let i = 0; i < seed.length; i++) {
-      hash ^= seed.charCodeAt(i);
-      hash = Math.imul(hash, 16777619);
-    }
-    const abs = Math.abs(hash);
-    return String(100000 + (abs % 900000));
   }
 
   /**
@@ -1066,7 +1079,9 @@ export class ParcelsService {
     const scope = await this.resolveScope(actor);
     return this.dataSource.transaction(async (manager) => {
       const parcel = await manager.getRepository(Parcel).findOne({
-        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+        where: UUID_REGEX.test(idOrCode)
+          ? { id: idOrCode }
+          : { trackingCode: idOrCode.trim().toUpperCase() },
       });
       if (!parcel) {
         throw new NotFoundException({
@@ -1116,7 +1131,9 @@ export class ParcelsService {
     const scope = await this.resolveScope(actor);
     return this.dataSource.transaction(async (manager) => {
       const parcel = await manager.getRepository(Parcel).findOne({
-        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+        where: UUID_REGEX.test(idOrCode)
+          ? { id: idOrCode }
+          : { trackingCode: idOrCode.trim().toUpperCase() },
       });
       if (!parcel) {
         throw new NotFoundException({
@@ -1159,7 +1176,9 @@ export class ParcelsService {
     const scope = await this.resolveScope(actor);
     return this.dataSource.transaction(async (manager) => {
       const parcel = await manager.getRepository(Parcel).findOne({
-        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+        where: UUID_REGEX.test(idOrCode)
+          ? { id: idOrCode }
+          : { trackingCode: idOrCode.trim().toUpperCase() },
       });
       if (!parcel) {
         throw new NotFoundException({
@@ -1268,7 +1287,9 @@ export class ParcelsService {
     }
     return this.dataSource.transaction(async (manager) => {
       const parcel = await manager.getRepository(Parcel).findOne({
-        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+        where: UUID_REGEX.test(idOrCode)
+          ? { id: idOrCode }
+          : { trackingCode: idOrCode.trim().toUpperCase() },
       });
       if (!parcel) {
         throw new NotFoundException({
@@ -1326,7 +1347,9 @@ export class ParcelsService {
     }
     return this.dataSource.transaction(async (manager) => {
       const parcel = await manager.getRepository(Parcel).findOne({
-        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+        where: UUID_REGEX.test(idOrCode)
+          ? { id: idOrCode }
+          : { trackingCode: idOrCode.trim().toUpperCase() },
       });
       if (!parcel) {
         throw new NotFoundException({
@@ -1385,7 +1408,9 @@ export class ParcelsService {
     }
     return this.dataSource.transaction(async (manager) => {
       const parcel = await manager.getRepository(Parcel).findOne({
-        where: UUID_REGEX.test(idOrCode) ? { id: idOrCode } : { trackingCode: idOrCode.trim().toUpperCase() },
+        where: UUID_REGEX.test(idOrCode)
+          ? { id: idOrCode }
+          : { trackingCode: idOrCode.trim().toUpperCase() },
       });
       if (!parcel) {
         throw new NotFoundException({
@@ -1601,11 +1626,37 @@ export class ParcelsService {
       deliveryFee: Number(parcel.deliveryFee),
       status: parcel.status,
       deliveryOtp:
-        scope?.isCustomer || scope?.isAdmin
-          ? (parcel.deliveryOtpCode ?? undefined)
-          : undefined,
+        scope?.isCustomer || scope?.isAdmin ? (parcel.deliveryOtpCode ?? undefined) : undefined,
+      ...this.recipientView(parcel, scope),
       createdAt: parcel.createdAt.toISOString(),
       updatedAt: parcel.updatedAt.toISOString(),
+    };
+  }
+
+  /**
+   * Fields only the recipient (or an admin) sees: merchant name, the assigned
+   * rider's contact while delivery is active, and their delivery preference.
+   * Relations are present only when the caller joined them (customer lists,
+   * parcel details); absent relations simply yield null.
+   */
+  private recipientView(
+    parcel: Parcel,
+    scope?: ParcelAccessScope,
+  ): Pick<ParcelSummary, "merchantName" | "riderName" | "riderPhone" | "deliveryPreference"> {
+    if (!scope?.isCustomer && !scope?.isAdmin) return {};
+    const rider = RIDER_CONTACT_STATUSES.has(parcel.status) ? parcel.currentRider?.user : undefined;
+    return {
+      merchantName: parcel.merchant?.businessName ?? null,
+      riderName: rider?.name ?? null,
+      riderPhone: rider?.phone ?? null,
+      deliveryPreference: parcel.deliveryPreferenceUpdatedAt
+        ? {
+            date: parcel.preferredDeliveryDate,
+            slot: parcel.preferredDeliverySlot,
+            note: parcel.customerDeliveryNote,
+            updatedAt: parcel.deliveryPreferenceUpdatedAt.toISOString(),
+          }
+        : null,
     };
   }
 

@@ -140,11 +140,42 @@ export const parcelSummarySchema = z.object({
   deliveryFee: z.number(),
   status: z.nativeEnum(ParcelStatus),
   deliveryOtp: z.string().nullable().optional(),
+  /** Merchant business name (recipient/admin views). */
+  merchantName: z.string().nullable().optional(),
+  /** Assigned rider, exposed to the recipient only while delivery is active. */
+  riderName: z.string().nullable().optional(),
+  riderPhone: z.string().nullable().optional(),
+  /** Recipient's delivery preference (customer "Reschedule"). */
+  deliveryPreference: z
+    .object({
+      date: z.string().nullable(),
+      slot: z.string().nullable(),
+      note: z.string().nullable(),
+      updatedAt: z.string(),
+    })
+    .nullable()
+    .optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
 export type ParcelSummary = z.infer<typeof parcelSummarySchema>;
+
+/** Days ahead a recipient may ask for delivery (today = 0). */
+export const DELIVERY_PREFERENCE_MAX_DAYS_AHEAD = 7;
+
+/**
+ * Recipient delivery preference request. A planning hint for hub and rider:
+ * it never changes parcel status. Date range is enforced server-side against
+ * the server clock (Asia/Dhaka) as well.
+ */
+export const deliveryPreferenceRequestSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+  slot: z.string().trim().min(1, "Time slot is required").max(40),
+  note: z.string().trim().max(300, "Instruction cannot exceed 300 characters").optional(),
+});
+
+export type DeliveryPreferenceRequest = z.infer<typeof deliveryPreferenceRequestSchema>;
 
 /** Response returned by parcel creation. */
 export const parcelCreatedResponseSchema = parcelSummarySchema;

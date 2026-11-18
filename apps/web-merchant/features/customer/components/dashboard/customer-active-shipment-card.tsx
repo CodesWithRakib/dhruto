@@ -141,7 +141,8 @@ export function CustomerActiveShipmentCard({
                 <div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs text-amber-800 dark:text-amber-200">
                   <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                   <div>
-                    <span className="font-bold">Customer Instruction:</span> {activeShipment.deliveryNote}
+                    <span className="font-bold">Customer Instruction:</span>{" "}
+                    {activeShipment.deliveryNote}
                   </div>
                 </div>
               ) : null}
@@ -210,7 +211,10 @@ export function CustomerActiveShipmentCard({
               />
 
               <Link href={`${CUSTOMER_ROUTES.tracking}/${activeShipment.trackingCode}`}>
-                <Button variant="default" className="h-10 text-xs font-semibold gap-1.5 rounded-xl shadow-xs">
+                <Button
+                  variant="default"
+                  className="h-10 text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
+                >
                   <Truck className="h-3.5 w-3.5" />
                   {t("viewFullTimeline")}
                 </Button>
@@ -234,7 +238,9 @@ export function CustomerActiveShipmentCard({
                 </div>
                 <div className="flex items-center justify-between pt-1">
                   <div>
-                    <span className="text-xs text-muted-foreground block font-medium">OTP Verified:</span>
+                    <span className="text-xs text-muted-foreground block font-medium">
+                      OTP Verified:
+                    </span>
                     <span className="font-mono text-lg font-bold text-success tracking-wider">
                       {activeShipment.otp}
                     </span>
@@ -261,7 +267,11 @@ export function CustomerActiveShipmentCard({
                       className="text-muted-foreground hover:text-foreground text-xs"
                       aria-label="Toggle OTP visibility"
                     >
-                      {showOtp ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      {showOtp ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -340,7 +350,9 @@ export function CustomerActiveShipmentCard({
             <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-3.5 text-xs shadow-xs">
               <span className="text-muted-foreground font-medium">{t("codPayment")}:</span>
               <span className="font-bold text-foreground">
-                {activeShipment.codAmount > 0 && !activeShipment.isPaid ? (
+                {activeShipment.codAmount === null ? (
+                  <span className="text-muted-foreground font-semibold">Not disclosed</span>
+                ) : activeShipment.codAmount > 0 && !activeShipment.isPaid ? (
                   <span className="text-primary font-black">
                     {bdt(activeShipment.codAmount)} (Cash on Delivery)
                   </span>

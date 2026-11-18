@@ -35,7 +35,10 @@ export const ROLE_CONFIG: Record<AppRole, RoleConfig> = {
     labelKey: "roleAdmin",
     section: "admin",
     home: ADMIN_ROUTES.dashboard,
-    sections: ["public", "admin", "merchant", "hub", "rider"],
+    // No "merchant": merchant pages are scoped to the signed-in merchant's own
+    // profile (`/merchants/me/*`) and have no merchant picker. Admins supervise
+    // merchants and parcels from /admin/parcels, /admin/finance and /admin/analytics.
+    sections: ["public", "admin", "hub", "rider"],
   },
   MERCHANT: {
     role: "MERCHANT",

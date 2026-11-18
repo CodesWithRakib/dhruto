@@ -6,10 +6,13 @@ async function main() {
   console.log("   DHRUTO EXPRESS — 5 ROLES SIMULTANEOUS LIVE BROWSER LAUNCH");
   console.log("================================================================\n");
 
+  // Real Google Chrome with DevTools auto-opened on every tab so network,
+  // console and WebSocket traffic for each role is visible from the start.
   const browser = await chromium.launch({
+    channel: process.env.BROWSER_CHANNEL || "chrome",
     headless: false,
     slowMo: 200,
-    args: ["--start-maximized"],
+    args: ["--start-maximized", "--auto-open-devtools-for-tabs"],
   });
 
   const roles = [
@@ -42,7 +45,8 @@ async function main() {
 
   for (const role of roles) {
     console.log(`--> Logging in ${role.name} (${role.email})...`);
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    // viewport: null lets the page fill the maximized window (full width).
+    const ctx = await browser.newContext({ viewport: null });
     const page = await ctx.newPage();
     await page.goto("http://localhost:5000/en/login");
     await page.locator("#login-email").fill(role.email);

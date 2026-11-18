@@ -34,6 +34,8 @@ import { CreateParcelDto } from "./dto/create-parcel.dto.js";
 import { UpdateParcelDto } from "./dto/update-parcel.dto.js";
 import { RequestPickupDto, BatchRequestPickupDto } from "./dto/request-pickup.dto.js";
 import { AssignRiderDto } from "./dto/assign-rider.dto.js";
+import { DeliveryPreferenceDto } from "./dto/delivery-preference.dto.js";
+import { DeliveryPreferenceService } from "./services/delivery-preference.service.js";
 import { BulkImportDto, MAX_BULK_ROWS } from "./dto/bulk-import.dto.js";
 import { ParcelResponseDto } from "./dto/parcel-response.dto.js";
 import { ParcelListQueryDto } from "./dto/parcel-list-query.dto.js";
@@ -55,7 +57,10 @@ import { RateLimit } from "../common/rate-limit/rate-limit.decorator.js";
 @Roles(UserRole.MERCHANT, UserRole.ADMIN)
 @Controller("parcels")
 export class ParcelsController {
-  constructor(private readonly parcelsService: ParcelsService) {}
+  constructor(
+    private readonly parcelsService: ParcelsService,
+    private readonly deliveryPreferenceService: DeliveryPreferenceService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -225,7 +230,8 @@ export class ParcelsController {
   @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
   @ApiOperation({
     summary: "Generate fresh delivery OTP for parcel recipient",
-    description: "Generates and returns a fresh 6-digit delivery OTP for the authenticated recipient and synchronizes bcrypt hash in DB.",
+    description:
+      "Generates and returns a fresh 6-digit delivery OTP for the authenticated recipient and synchronizes bcrypt hash in DB.",
   })
   async refreshDeliveryOtp(
     @Param("id") id: string,
@@ -239,6 +245,36 @@ export class ParcelsController {
       success: true,
       statusCode: HttpStatus.OK,
       message: "Delivery OTP refreshed successfully",
+      data,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  @Post(":id/delivery-preference")
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 10, windowSeconds: 60, scope: "parcel-delivery-preference" })
+  @Roles(UserRole.CUSTOMER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: "Set recipient delivery preference",
+    description:
+      "Records the recipient's preferred delivery day, time slot and doorstep instruction for hub/rider planning. Does not change parcel status.",
+  })
+  async setDeliveryPreference(
+    @Param("id") id: string,
+    @Body() dto: DeliveryPreferenceDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const data = await this.deliveryPreferenceService.setPreference(id, dto, scope);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "Delivery preference saved",
       data,
       meta: {
         requestId: req.requestId || "unknown",

@@ -85,11 +85,7 @@ function SidebarNavItems({
                   const label = t(item.labelKey);
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={active}
-                        tooltip={label}
-                      >
+                      <SidebarMenuButton asChild isActive={active} tooltip={label}>
                         <Link
                           href={item.href}
                           onClick={handleItemClick}
@@ -103,7 +99,9 @@ function SidebarNavItems({
                             )}
                             aria-hidden="true"
                           />
-                          <span className="truncate group-data-[collapsible=icon]:hidden">{label}</span>
+                          <span className="truncate group-data-[collapsible=icon]:hidden">
+                            {label}
+                          </span>
                           {item.indicator === "chat-unread" ? (
                             <ChatUnreadBadge className="ms-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground group-data-[collapsible=icon]:hidden" />
                           ) : null}
@@ -173,8 +171,10 @@ export function DashboardShell({
     router.push("/login");
   };
 
-  // Prevent flash of protected dashboard content before hydration or redirect
-  if (!mounted || !isAuthenticated || !user) {
+  // Prevent flash of protected dashboard content before hydration or redirect.
+  // A wrong-section visit must not mount the page either: it would render
+  // another role's UI and fire its (server-rejected) data requests.
+  if (!mounted || !isAuthenticated || !user || !canAccessSection(role, section)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">

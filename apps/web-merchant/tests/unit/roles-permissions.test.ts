@@ -37,6 +37,14 @@ describe("role isolation", () => {
     expect(canAccessSection("HUB_MANAGER", "admin")).toBe(false);
   });
 
+  it("sends admins to their console instead of merchant-scoped pages", () => {
+    // Merchant pages read `/merchants/me/*`, which only merchant accounts own.
+    expect(canAccessSection("ADMIN", "merchant")).toBe(false);
+    expect(canAccessSection("ADMIN", "admin")).toBe(true);
+    expect(canAccessSection("ADMIN", "hub")).toBe(true);
+    expect(canAccessSection("ADMIN", "rider")).toBe(true);
+  });
+
   it("gives every role a translated label key", () => {
     for (const role of ["ADMIN", "MERCHANT", "HUB_MANAGER", "RIDER", "CUSTOMER", undefined]) {
       expect(roleConfigFor(role).labelKey).toMatch(/^role[A-Z]/);
