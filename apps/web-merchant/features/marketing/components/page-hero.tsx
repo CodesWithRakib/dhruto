@@ -104,10 +104,10 @@ export function PageHero({
             {eyebrow ? (
               <div
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-semibold",
+                  "inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-semibold",
                   isDark
-                    ? "border-white/20 bg-white/10 text-white/90"
-                    : "border-primary/25 bg-primary/10 text-primary",
+                    ? "bg-white/10 text-white/90"
+                    : "bg-primary/10 text-primary",
                   align === "center" && "mx-auto",
                 )}
               >
@@ -168,10 +168,10 @@ export function PageHero({
                 <div
                   key={stat.label}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl border p-4 backdrop-blur-sm",
+                    "flex items-center gap-3 rounded-2xl p-4 backdrop-blur-sm",
                     isDark
-                      ? "border-white/15 bg-white/5"
-                      : "border-border/60 bg-surface/70 shadow-soft",
+                      ? "bg-white/5"
+                      : "bg-surface/70",
                   )}
                 >
                   {Icon ? (

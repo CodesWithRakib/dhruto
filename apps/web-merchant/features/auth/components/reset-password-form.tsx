@@ -55,8 +55,8 @@ export function ResetPasswordForm() {
   if (success) {
     return (
       <div className="w-full space-y-6">
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/60 p-6 text-emerald-950 dark:bg-emerald-950/20 dark:text-emerald-100 text-center space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+        <div className="rounded-2xl bg-success-soft/60 p-6 text-success-soft-foreground text-center space-y-3">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-success-soft text-success-soft-foreground">
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <h2 className="text-lg font-bold text-foreground">Password Reset Complete</h2>
@@ -67,7 +67,7 @@ export function ResetPasswordForm() {
 
         <Button
           onClick={() => router.push("/login")}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold shadow-xs"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold"
         >
           <span>Continue to Sign In</span>
           <ArrowRight className="h-4 w-4" />
@@ -79,7 +79,7 @@ export function ResetPasswordForm() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary-soft-foreground shadow-xs">
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary-soft-foreground">
           <KeyRound className="h-6 w-6" />
         </div>
         <h1 className="text-display font-extrabold tracking-tight text-foreground">
@@ -158,7 +158,7 @@ export function ResetPasswordForm() {
         <Button
           type="submit"
           size="lg"
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold shadow-xs mt-2"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold mt-2"
           disabled={isLoading}
         >
           {isLoading ? (

@@ -101,7 +101,7 @@ export function getManifestColumns({
               size="sm"
               onClick={() => onDispatch(row.original.id)}
               disabled={isDispatching}
-              className="h-8 gap-1.5 rounded-xl text-xs font-semibold shadow-xs"
+              className="h-8 gap-1.5 rounded-xl text-xs font-semibold"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
               {dispatchText}

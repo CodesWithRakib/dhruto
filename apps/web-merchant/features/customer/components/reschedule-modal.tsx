@@ -85,11 +85,11 @@ export function RescheduleModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-lg p-6 sm:p-7 shadow-2xl rounded-3xl border border-border/80">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-lg p-6 sm:p-7 rounded-3xl">
         <form onSubmit={handleSubmit} className="space-y-5">
           <DialogHeader className="gap-2.5">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft border border-primary/20 text-primary shadow-2xs">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
                 <Calendar className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
@@ -104,7 +104,7 @@ export function RescheduleModal({
           </DialogHeader>
 
           {currentAddress ? (
-            <div className="rounded-xl border border-border/60 bg-surface-muted/60 p-3 text-xs text-muted-foreground flex items-center justify-between">
+            <div className="rounded-xl bg-surface-muted/60 p-3 text-xs text-muted-foreground flex items-center justify-between">
               <span className="truncate pr-2">
                 Delivering to: <strong className="text-foreground">{currentAddress}</strong>
               </span>
@@ -131,10 +131,10 @@ export function RescheduleModal({
                     key={item.id}
                     type="button"
                     onClick={() => setDateChoice(item.id as typeof dateChoice)}
-                    className={`flex h-11 items-center justify-center rounded-xl border text-xs font-semibold transition-all ${
+                    className={`flex h-11 items-center justify-center rounded-xl text-xs font-semibold transition-all ${
                       isSelected
-                        ? "border-primary bg-primary-soft text-primary shadow-xs ring-1 ring-primary/40"
-                        : "border-border/80 bg-surface hover:bg-surface-muted text-foreground"
+                        ? "bg-primary-soft text-primary"
+                        : "bg-surface hover:bg-surface-muted text-foreground"
                     }`}
                   >
                     {isSelected ? <Check className="mr-1.5 h-3.5 w-3.5 text-primary" /> : null}
@@ -159,10 +159,10 @@ export function RescheduleModal({
                     key={slot.id}
                     type="button"
                     onClick={() => setSelectedSlot(slot.id)}
-                    className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-left text-xs transition-all ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-xs transition-all ${
                       isSelected
-                        ? "border-primary bg-primary-soft/60 text-primary font-bold shadow-2xs"
-                        : "border-border/70 bg-surface hover:bg-surface-muted text-foreground font-medium"
+                        ? "bg-primary-soft/60 text-primary font-bold"
+                        : "bg-surface hover:bg-surface-muted text-foreground font-medium"
                     }`}
                   >
                     <span>{slot.label}</span>
@@ -187,10 +187,10 @@ export function RescheduleModal({
                     key={preset}
                     type="button"
                     onClick={() => setSelectedInstruction(preset)}
-                    className={`rounded-lg border px-2.5 py-1.5 text-left text-[11px] transition-colors ${
+                    className={`rounded-lg px-2.5 py-1.5 text-left text-[11px] transition-colors ${
                       isSelected
-                        ? "border-primary bg-primary text-primary-foreground font-semibold"
-                        : "border-border/70 bg-surface hover:bg-surface-muted text-muted-foreground"
+                        ? "bg-primary text-primary-foreground font-semibold"
+                        : "bg-surface hover:bg-surface-muted text-muted-foreground"
                     }`}
                   >
                     {preset}
@@ -203,11 +203,11 @@ export function RescheduleModal({
               value={customNote}
               onChange={(e) => setCustomNote(e.target.value)}
               placeholder="Or write custom instructions for the rider (gate code, landmark, etc.)..."
-              className="w-full rounded-xl border border-border/80 bg-surface p-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-xl bg-field p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 hover:bg-field-hover focus:bg-surface"
             />
           </div>
 
-          <div className="flex items-center gap-2 rounded-xl bg-primary-soft/50 p-2.5 text-[11px] text-primary-soft-foreground border border-primary/20">
+          <div className="flex items-center gap-2 rounded-xl bg-primary-soft/50 p-2.5 text-[11px] text-primary-soft-foreground">
             <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
             <span>
               Instructions will be instantly dispatched to your assigned rider&apos;s terminal.
@@ -226,7 +226,7 @@ export function RescheduleModal({
             </Button>
             <Button
               type="submit"
-              className="w-full sm:w-auto h-10 px-5 text-xs font-semibold shadow-xs"
+              className="w-full sm:w-auto h-10 px-5 text-xs font-semibold"
               loading={isSubmitting}
             >
               Confirm Instructions

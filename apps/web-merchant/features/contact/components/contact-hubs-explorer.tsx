@@ -100,7 +100,7 @@ export function ContactHubsExplorer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Compass className="h-3.5 w-3.5" aria-hidden="true" />
             <span>NATIONWIDE PHYSICAL INFRASTRUCTURE</span>
           </div>
@@ -130,8 +130,8 @@ export function ContactHubsExplorer() {
         </div>
 
         {/* Selected Hub Detail Card */}
-        <div className="mt-10 overflow-hidden rounded-3xl border border-border/80 bg-surface shadow-xl">
-          <div className="border-b border-border/60 bg-muted/40 p-6 sm:p-8">
+        <div className="mt-10 overflow-hidden rounded-3xl bg-surface">
+          <div className="bg-muted/40 p-6 sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
@@ -143,8 +143,8 @@ export function ContactHubsExplorer() {
                   {selectedHub.name}
                 </h3>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3.5 py-1.5 text-xs font-bold text-success">
+                <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                 <span>{selectedHub.status}</span>
               </div>
             </div>
@@ -153,7 +153,7 @@ export function ContactHubsExplorer() {
           <div className="p-6 sm:p-8">
             {/* 4 Hub Metrics */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                   <MapPin className="h-4 w-4 text-primary" />
                   <span>Physical Address</span>
@@ -163,9 +163,9 @@ export function ContactHubsExplorer() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <Clock className="h-4 w-4 text-emerald-500" />
+                  <Clock className="h-4 w-4 text-success" />
                   <span>Drop-Off Cutoff</span>
                 </div>
                 <div className="mt-2 text-base font-bold text-foreground">
@@ -176,9 +176,9 @@ export function ContactHubsExplorer() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <Package className="h-4 w-4 text-sky-500" />
+                  <Package className="h-4 w-4 text-info" />
                   <span>Sortation Throughput</span>
                 </div>
                 <div className="mt-2 text-base font-bold text-foreground">
@@ -189,9 +189,9 @@ export function ContactHubsExplorer() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <Phone className="h-4 w-4 text-amber-500" />
+                  <Phone className="h-4 w-4 text-warning" />
                   <span>Hub Manager Contact</span>
                 </div>
                 <div className="mt-2 text-sm font-bold text-foreground">

@@ -277,7 +277,7 @@ export function ConversationPanel({
       </div>
 
       {infoOpen && isWide && info && (
-        <aside className="hidden w-80 shrink-0 border-s border-border/80 xl:block" aria-label={t("info")}>
+        <aside className="hidden w-80 shrink-0 xl:block" aria-label={t("info")}>
           {info}
         </aside>
       )}

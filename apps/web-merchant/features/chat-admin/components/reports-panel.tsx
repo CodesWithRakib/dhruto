@@ -80,7 +80,7 @@ export function ReportsPanel({
             <Label htmlFor="reports-status">{t("reports.status")}</Label>
             <select
               id="reports-status"
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-10 rounded-md bg-field px-3 text-sm hover:bg-field-hover focus:bg-surface"
               value={status ?? ""}
               onChange={(event) =>
                 setStatus((event.target.value || undefined) as ChatReportStatus | undefined)
@@ -107,7 +107,7 @@ export function ReportsPanel({
         <EmptyState icon={Flag} title={t("reports.empty")} />
       ) : (
         <ul
-          className="divide-y divide-border/60 overflow-hidden rounded-xl bg-card"
+          className="overflow-hidden rounded-xl bg-card"
           aria-label={t("reports.results")}
         >
           {items.map((report) => {

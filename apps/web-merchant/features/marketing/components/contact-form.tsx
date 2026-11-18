@@ -55,7 +55,7 @@ export function ContactForm() {
       <div
         role="status"
         aria-live="polite"
-        className="rounded-2xl border border-success/30 bg-success-soft/60 p-6 text-center shadow-soft sm:p-8"
+        className="rounded-2xl bg-success-soft/60 p-6 text-center sm:p-8"
       >
         <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success text-success-foreground">
           <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
@@ -78,7 +78,7 @@ export function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-border/60 bg-surface p-6 shadow-soft sm:p-8"
+      className="rounded-2xl bg-surface p-6 sm:p-8"
     >
       <h2 className="text-h3 font-bold text-foreground">{t("form.title")}</h2>
       <p className="mt-1.5 text-body text-pretty text-muted-foreground">{t("form.description")}</p>
@@ -118,7 +118,7 @@ export function ContactForm() {
             name="topic"
             value={values.topic}
             onChange={(event) => setValues((prev) => ({ ...prev, topic: event.target.value }))}
-            className="h-11 w-full rounded-md border border-input bg-surface px-3 text-body text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="h-11 w-full rounded-md bg-field px-3 text-body text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-field-hover focus:bg-surface"
           >
             {topics.map((topic) => (
               <option key={topic.value} value={topic.value}>
@@ -138,7 +138,7 @@ export function ContactForm() {
             placeholder={t("form.messagePlaceholder")}
             rows={5}
             required
-            className="w-full rounded-md border border-input bg-surface p-3 text-body text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="w-full rounded-md bg-field p-3 text-body text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-field-hover focus:bg-surface"
           />
         </div>
       </div>

@@ -53,10 +53,10 @@ export function TaskFailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
+      <DialogContent className="max-w-md rounded-3xl bg-surface-elevated p-6">
         <DialogHeader>
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-danger/15 text-danger">
               <AlertTriangle className="h-5 w-5" />
             </span>
             <div>
@@ -81,11 +81,11 @@ export function TaskFailDialog({
             >
               <SelectTrigger
                 id="fail-reason"
-                className="w-full h-11 rounded-2xl border-0 bg-surface-muted/60 focus:bg-background"
+                className="w-full h-11 rounded-2xl bg-surface-muted/60 focus:bg-background"
               >
                 <SelectValue placeholder={t("details.failReason")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-0 bg-surface-elevated shadow-xl">
+              <SelectContent className="rounded-2xl bg-surface-elevated">
                 {FAILURE_REASONS.map((reason) => (
                   <SelectItem key={reason} value={reason} className="rounded-xl">
                     {t(`failReasons.${reason}` as "failReasons.CUSTOMER_UNAVAILABLE")}
@@ -104,7 +104,7 @@ export function TaskFailDialog({
               onChange={(event) => setFailNotes(event.target.value)}
               placeholder={t("details.failNotesPlaceholder")}
               maxLength={500}
-              className="h-11 rounded-2xl border-0 bg-surface-muted/60 text-sm focus:bg-background"
+              className="h-11 rounded-2xl bg-surface-muted/60 text-sm focus:bg-background"
             />
           </div>
           <div className="space-y-1.5">
@@ -119,7 +119,7 @@ export function TaskFailDialog({
               type="datetime-local"
               value={rescheduleDate}
               onChange={(event) => setRescheduleDate(event.target.value)}
-              className="h-11 rounded-2xl border-0 bg-surface-muted/60 text-sm focus:bg-background"
+              className="h-11 rounded-2xl bg-surface-muted/60 text-sm focus:bg-background"
             />
           </div>
           <DialogFooter className="gap-2 pt-2">

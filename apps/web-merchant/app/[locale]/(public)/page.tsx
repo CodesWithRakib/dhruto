@@ -9,7 +9,6 @@ import { StackingOperations } from "@/features/marketing/components/stacking-ope
 import { RateCalculatorPreview } from "@/features/marketing/components/rate-calculator-preview";
 import { CoverageExplorer } from "@/features/marketing/components/coverage-explorer";
 import { ProcessPipeline } from "@/features/marketing/components/process-pipeline";
-import { MerchantTestimonials } from "@/features/marketing/components/merchant-testimonials";
 import { PartnershipContact } from "@/features/marketing/components/partnership-contact";
 import {
   FaqList,
@@ -62,7 +61,6 @@ export default async function HomePage() {
       <ProcessPipeline steps={steps} />
 
       {/* 9 — Merchant Testimonials Carousel & Results Panel */}
-      <MerchantTestimonials />
 
       {/* 10 — FAQ Section */}
       {faq.length > 0 && (

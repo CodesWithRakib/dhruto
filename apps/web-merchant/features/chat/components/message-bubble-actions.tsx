@@ -62,10 +62,10 @@ export function ReactionRow({
             aria-label={t("reactionLabel", { reaction: reaction.reaction, count: reaction.count })}
             onClick={() => onToggle(message, reaction.reaction)}
             className={cn(
-              "inline-flex h-7 items-center gap-1 rounded-full border px-2 text-xs transition-colors",
+              "inline-flex h-7 items-center gap-1 rounded-full px-2 text-xs transition-colors",
               reaction.reactedByMe
-                ? "border-primary bg-primary-soft text-primary-soft-foreground"
-                : "border-border bg-surface text-foreground",
+                ? "bg-primary-soft text-primary-soft-foreground"
+                : "bg-surface text-foreground",
               canReact && "hover:bg-surface-muted",
             )}
           >

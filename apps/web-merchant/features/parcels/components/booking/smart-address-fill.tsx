@@ -53,7 +53,7 @@ export function SmartAddressFill({ onApply }: SmartAddressFillProps) {
         : "destructive";
 
   return (
-    <div className="mb-6 space-y-3 rounded-md border border-border bg-primary-soft p-4">
+    <div className="mb-6 space-y-3 rounded-md bg-primary-soft p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-caption font-semibold uppercase tracking-wider text-primary">
           <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
@@ -95,7 +95,7 @@ export function SmartAddressFill({ onApply }: SmartAddressFillProps) {
       ) : null}
 
       {parsed ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
           <span className="flex items-center gap-1.5 text-caption text-foreground">
             <Check className="h-3.5 w-3.5 text-success" aria-hidden="true" />
             {t("smartFillDetected", { thana: parsed.thana, district: parsed.district })}

@@ -210,16 +210,12 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
         />
       ) : null}
 
-      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-          aria-hidden="true"
-        />
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden">
 
-        <div className="flex flex-col gap-3 p-5 sm:p-6 border-b border-border/40">
+        <div className="flex flex-col gap-3 p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-primary/10 p-2.5 text-primary shadow-xs">
+              <div className="rounded-2xl bg-primary/10 p-2.5 text-primary">
                 <Truck className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
@@ -234,7 +230,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
             <Button
               size="sm"
               onClick={() => setIsCreating((value) => !value)}
-              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shrink-0 shadow-xs"
+              className="h-9 gap-1.5 rounded-xl text-xs font-semibold shrink-0"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               {isCreating ? t("cancel") : t("manifests.create")}
@@ -284,7 +280,7 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                   }}
                   searchPlaceholder={t("manifests.searchPlaceholder")}
                   emptyMessage={t("manifests.empty")}
-                  className="border-0 shadow-none rounded-none"
+                  className="rounded-none"
                 />
               </div>
               <ManifestMobileList manifests={pagedManifests} />

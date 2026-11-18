@@ -30,7 +30,7 @@ export function ContactHero({
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#07090e] pb-20 pt-28 text-white md:pb-28 md:pt-36">
+    <section className="relative overflow-hidden bg-inverse pb-20 pt-28 text-white md:pb-28 md:pt-36">
       {/* Background Starry Mesh & Dual Ambient Glow Orbs */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.14]"
@@ -43,7 +43,7 @@ export function ContactHero({
       <div
         className="pointer-events-none absolute -top-40 left-1/2 h-[560px] w-[900px] -translate-x-1/2 rounded-full opacity-35 blur-[130px]"
         style={{
-          background: "radial-gradient(ellipse at center, rgba(255, 107, 0, 0.4), rgba(16, 185, 129, 0.2), transparent 70%)",
+          background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.4), hsl(var(--success) / 0.2), transparent 70%)",
         }}
         aria-hidden="true"
       />
@@ -72,7 +72,7 @@ export function ContactHero({
               </>
             )}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-inverse-muted sm:text-lg">
             {description}
           </p>
 
@@ -81,7 +81,7 @@ export function ContactHero({
             <button
               type="button"
               onClick={() => scrollTo("#dispatch-form")}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02] hover:bg-primary-hover hover:shadow-primary/40 active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:bg-primary-hover active:scale-[0.98]"
             >
               <Send className="h-4 w-4" aria-hidden="true" />
               <span>Compose Dispatch Inquiry</span>
@@ -89,9 +89,9 @@ export function ContactHero({
             <button
               type="button"
               onClick={() => scrollTo("#regional-hubs")}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:border-white/30 hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/10"
             >
-              <MapPin className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+              <MapPin className="h-4 w-4 text-success" aria-hidden="true" />
               <span>Explore 64 District Hubs</span>
             </button>
           </div>
@@ -99,40 +99,40 @@ export function ContactHero({
 
         {/* Live Operational Health Status Strip */}
         <div className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4.5 backdrop-blur-md transition hover:border-white/20">
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+          <div className="rounded-2xl bg-white/[0.04] p-4.5 backdrop-blur-md transition">
+            <div className="flex items-center gap-2 text-xs font-semibold text-success">
               <Zap className="h-4 w-4" />
               <span>First Response SLA</span>
             </div>
             <div className="mt-1.5 text-2xl font-extrabold text-white">&lt; 18 Mins</div>
-            <div className="text-[11px] text-slate-400">During active dispatch hours</div>
+            <div className="text-[11px] text-muted-foreground">During active dispatch hours</div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4.5 backdrop-blur-md transition hover:border-white/20">
+          <div className="rounded-2xl bg-white/[0.04] p-4.5 backdrop-blur-md transition">
             <div className="flex items-center gap-2 text-xs font-semibold text-primary">
               <Headphones className="h-4 w-4" />
               <span>Operations Desk</span>
             </div>
             <div className="mt-1.5 text-2xl font-extrabold text-white">24/7 Monitored</div>
-            <div className="text-[11px] text-slate-400">Night line-haul telemetry</div>
+            <div className="text-[11px] text-muted-foreground">Night line-haul telemetry</div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4.5 backdrop-blur-md transition hover:border-white/20">
-            <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400">
+          <div className="rounded-2xl bg-white/[0.04] p-4.5 backdrop-blur-md transition">
+            <div className="flex items-center gap-2 text-xs font-semibold text-info">
               <Radio className="h-4 w-4" />
               <span>Emergency Escalation</span>
             </div>
             <div className="mt-1.5 text-2xl font-extrabold text-white">Direct Line</div>
-            <div className="text-[11px] text-slate-400">Immediate rider contact</div>
+            <div className="text-[11px] text-muted-foreground">Immediate rider contact</div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4.5 backdrop-blur-md transition hover:border-white/20">
-            <div className="flex items-center gap-2 text-xs font-semibold text-amber-400">
+          <div className="rounded-2xl bg-white/[0.04] p-4.5 backdrop-blur-md transition">
+            <div className="flex items-center gap-2 text-xs font-semibold text-warning">
               <ShieldCheck className="h-4 w-4" />
               <span>Resolution Rate</span>
             </div>
-            <div className="mt-1.5 text-2xl font-extrabold text-white">99.2%</div>
-            <div className="text-[11px] text-slate-400">Same-shift resolution</div>
+            <div className="mt-1.5 text-2xl font-extrabold text-white">In-app</div>
+            <div className="text-[11px] text-muted-foreground">Support chat in your dashboard</div>
           </div>
         </div>
       </div>

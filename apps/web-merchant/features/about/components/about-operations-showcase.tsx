@@ -61,8 +61,8 @@ const SHOWCASE_TABS = [
       "Masked customer contact numbers to safeguard recipient privacy",
       "High-contrast interface engineered for harsh sunlight and monsoon delivery",
     ],
-    metric: "99.2%",
-    metricLabel: "Doorstep delivery success on first attempt in Metro",
+    metric: "OTP",
+    metricLabel: "Every doorstep handoff is confirmed with the recipient's one-time code",
   },
 ];
 
@@ -83,7 +83,7 @@ export function AboutOperationsShowcase() {
         />
 
         {/* Interactive Tab Selector Buttons */}
-        <div className="mt-12 max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 rounded-2xl border border-border/70 bg-surface-muted/50 backdrop-blur-sm">
+        <div className="mt-12 max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 rounded-2xl bg-surface-muted/50 backdrop-blur-sm">
           {SHOWCASE_TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = tab.id === activeTabId;
@@ -94,7 +94,7 @@ export function AboutOperationsShowcase() {
                 onClick={() => setActiveTabId(tab.id)}
                 className={`flex items-center justify-center sm:justify-start gap-2.5 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${
                   isActive
-                    ? "bg-surface text-primary shadow-sm border border-border/80"
+                    ? "bg-surface text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-surface/50"
                 }`}
               >
@@ -111,7 +111,7 @@ export function AboutOperationsShowcase() {
             {/* Left Content Column */}
             <div className="lg:col-span-6 space-y-6">
               <div className="flex items-center gap-2">
-                <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-xs font-semibold text-primary">
+                <span className="rounded-full bg-primary/10 px-3 py-1 font-mono text-xs font-semibold text-primary">
                   {currentTab.eyebrow}
                 </span>
                 <span className="text-xs font-mono text-muted-foreground">• {currentTab.badge}</span>
@@ -140,7 +140,7 @@ export function AboutOperationsShowcase() {
               </div>
 
               {/* Metric Card */}
-              <div className="mt-6 pt-5 border-t border-border/60 flex items-center gap-4">
+              <div className="mt-6 pt-5 flex items-center gap-4">
                 <div className="font-mono text-2xl font-black text-primary">
                   {currentTab.metric}
                 </div>
@@ -152,7 +152,7 @@ export function AboutOperationsShowcase() {
 
             {/* Right Photographic Visual Column */}
             <div className="lg:col-span-6">
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/70 shadow-xl bg-surface-muted">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-surface-muted">
                 <Image
                   src={currentTab.image}
                   alt={currentTab.alt}
@@ -163,7 +163,7 @@ export function AboutOperationsShowcase() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                 {/* Floating Corner Overlay */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl border border-white/20 bg-black/60 px-4 py-2.5 backdrop-blur-md">
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl bg-black/60 px-4 py-2.5 backdrop-blur-md">
                   <span className="font-mono text-xs font-bold text-white uppercase tracking-wider">
                     OPERATIONAL FACILITY
                   </span>

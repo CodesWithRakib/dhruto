@@ -8,16 +8,12 @@ export function RiderSafetySop() {
   const [showSop, setShowSop] = useState(true);
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 sm:p-6 overflow-hidden shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 overflow-hidden">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary shadow-2xs">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
             <ShieldCheck className="h-5 w-5" />
           </span>
           <div>
@@ -25,7 +21,7 @@ export function RiderSafetySop() {
               <h3 className="text-sm font-extrabold text-foreground">
                 Doorstep Delivery & Cash Protocol
               </h3>
-              <Badge variant="primary-soft" className="text-[10px] font-bold border-0">
+              <Badge variant="primary-soft" className="text-[10px] font-bold">
                 Rider Safety SOP
               </Badge>
             </div>
@@ -46,10 +42,10 @@ export function RiderSafetySop() {
       </div>
 
       {showSop ? (
-        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 border-t border-border/40 pt-4">
-          <div className="rounded-2xl border border-border/50 bg-surface-muted/40 p-3.5 space-y-1">
+        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 pt-4">
+          <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 font-bold text-xs">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-info/10 text-info font-bold text-xs">
                 1
               </span>
               <span className="text-xs font-bold text-foreground">GPS Navigation</span>
@@ -59,9 +55,9 @@ export function RiderSafetySop() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/50 bg-surface-muted/40 p-3.5 space-y-1">
+          <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success font-bold text-xs">
                 2
               </span>
               <span className="text-xs font-bold text-foreground">6-Digit OTP Handshake</span>
@@ -71,9 +67,9 @@ export function RiderSafetySop() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/50 bg-surface-muted/40 p-3.5 space-y-1">
+          <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 font-bold text-xs">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-warning/10 text-warning font-bold text-xs">
                 3
               </span>
               <span className="text-xs font-bold text-foreground">Exact COD Collection</span>
@@ -83,9 +79,9 @@ export function RiderSafetySop() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/50 bg-surface-muted/40 p-3.5 space-y-1">
+          <div className="rounded-2xl bg-surface-muted/40 p-3.5 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500/10 text-purple-600 font-bold text-xs">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
                 4
               </span>
               <span className="text-xs font-bold text-foreground">Hub Cash Hand-In</span>

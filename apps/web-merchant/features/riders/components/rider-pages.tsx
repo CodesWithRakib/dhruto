@@ -42,7 +42,7 @@ export function RiderTaskDetailsPage({ parcelId }: { parcelId: string }) {
             />
             <Link
               href={RIDER_ROUTES.tasks}
-              className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-semibold text-white shadow-2xs backdrop-blur-md transition-all hover:bg-white/20"
+              className="inline-flex h-9 items-center gap-2 rounded-xl bg-white/10 px-3.5 text-xs font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>{t("tasks.title")}</span>

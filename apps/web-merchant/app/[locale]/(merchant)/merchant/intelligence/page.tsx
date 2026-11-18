@@ -25,7 +25,7 @@ import { MERCHANT_ROUTES } from "@/config/routes";
 export default function IntelligencePage() {
   const t = useTranslations("Intelligence");
   const [activeTab, setActiveTab] = useState<"queue" | "both" | "address" | "risk">("queue");
-  const { data: health, isLoading: healthLoading } = useGetIntelligenceHealthQuery();
+  const { data: health } = useGetIntelligenceHealthQuery();
   const h = health?.data;
 
   return (
@@ -36,7 +36,7 @@ export default function IntelligencePage() {
       {/* Hero Header */}
       <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-caption font-semibold mb-2.5 backdrop-blur-md">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/10 text-primary text-caption font-semibold mb-2.5 backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5" />
             <span>{t("eyebrow")}</span>
           </div>
@@ -50,7 +50,7 @@ export default function IntelligencePage() {
 
         <div className="flex items-center gap-2">
           <Link href={MERCHANT_ROUTES.createBooking}>
-            <Button className="flex items-center gap-2 rounded-xl font-bold shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
+            <Button className="flex items-center gap-2 rounded-xl font-bold hover:scale-[1.01] active:scale-[0.99] transition-all">
               <Zap className="h-4 w-4" />
               <span>{t("bookWithAi")}</span>
             </Button>
@@ -60,71 +60,67 @@ export default function IntelligencePage() {
 
       {/* KPI Highlight Strip with Top Specular Lines */}
       <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-3.5">
-        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+        <div className="relative overflow-hidden p-5 rounded-3xl bg-surface-elevated/90 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>{t("districtCoverage")}</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 text-success">
               <MapPin className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-foreground font-mono mt-1">
-            {healthLoading ? "—" : t("districtsCount", { count: h?.districts ?? 64 })}
+            {h?.districts == null ? "—" : t("districtsCount", { count: h.districts })}
           </div>
           <p className="text-caption text-muted-foreground">{t("districtCoverageDesc")}</p>
         </div>
 
-        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+        <div className="relative overflow-hidden p-5 rounded-3xl bg-surface-elevated/90 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>{t("upazilaLexicon")}</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-info/10 text-info">
               <Cpu className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-foreground font-mono mt-1">
-            {healthLoading ? "—" : t("thanasCount", { count: h?.thanas ?? 590 })}
+            {h?.thanas == null ? "—" : t("thanasCount", { count: h.thanas })}
           </div>
           <p className="text-caption text-muted-foreground">{t("upazilaLexiconDesc")}</p>
         </div>
 
-        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="relative overflow-hidden p-5 rounded-3xl bg-surface-elevated/90 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>{t("scoringModel")}</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <TrendingDown className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-foreground font-mono mt-1">
-            {healthLoading ? "—" : (h?.models?.[0]?.version ?? h?.datasetVersion ?? "v2.4-neural")}
+            {h?.models?.[0]?.version ?? h?.datasetVersion ?? "—"}
           </div>
           <p className="text-caption text-muted-foreground">{t("scoringModelDesc")}</p>
         </div>
 
-        <div className="relative overflow-hidden p-5 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md space-y-1">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+        <div className="relative overflow-hidden p-5 rounded-3xl bg-surface-elevated/90 backdrop-blur-md space-y-1">
           <div className="flex items-center justify-between text-caption text-muted-foreground font-bold uppercase tracking-wider">
             <span>{t("geoDataset")}</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/10 text-warning">
               <CheckCircle2 className="h-4 w-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-foreground font-mono mt-1">
-            {healthLoading ? "—" : (h?.datasetVersion ?? "BBS-2026-v2")}
+            {h?.datasetVersion ?? "—"}
           </div>
           <p className="text-caption text-muted-foreground">{h?.datasetSource ?? "Bangladesh geo index"}</p>
         </div>
       </div>
 
       {/* Main Suite Navigation Tabs */}
-      <div className="relative z-10 flex flex-wrap items-center gap-1.5 rounded-2xl border border-border/80 bg-surface-elevated/90 p-1.5 w-fit shadow-xs backdrop-blur-md">
+      <div className="relative z-10 flex flex-wrap items-center gap-1.5 rounded-2xl bg-surface-elevated/90 p-1.5 w-fit backdrop-blur-md">
         <button
           type="button"
           onClick={() => setActiveTab("queue")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "queue"
-              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
+              ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
@@ -137,7 +133,7 @@ export default function IntelligencePage() {
           onClick={() => setActiveTab("address")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "address"
-              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
+              ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
@@ -150,7 +146,7 @@ export default function IntelligencePage() {
           onClick={() => setActiveTab("risk")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "risk"
-              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
+              ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >
@@ -163,7 +159,7 @@ export default function IntelligencePage() {
           onClick={() => setActiveTab("both")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "both"
-              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
+              ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
           }`}
         >

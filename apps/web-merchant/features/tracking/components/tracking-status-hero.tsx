@@ -125,7 +125,7 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
             {shared ? t("copied") : "Share Link"}
           </Button>
 
-          <StatusBadge status={status as ParcelStatus} withIcon className="px-3.5 py-1 text-xs font-semibold shadow-sm" />
+          <StatusBadge status={status as ParcelStatus} withIcon className="px-3.5 py-1 text-xs font-semibold" />
         </div>
       </div>
 
@@ -136,7 +136,7 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
             <Radio className="h-4 w-4 text-primary animate-pulse" />
             Shipment Journey Milestone
           </span>
-          <span className="font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+          <span className="font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
             Stage {currentLevel} of 5
           </span>
         </div>
@@ -151,7 +151,7 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
             <div className="h-full w-full bg-border/70 rounded-full" />
             {/* Active Filled Line */}
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-primary to-primary rounded-full transition-all duration-700 ease-out"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-success via-primary to-primary rounded-full transition-all duration-700 ease-out"
               style={{
                 width: `${Math.min(100, Math.max(0, ((currentLevel - 1) / 4) * 100))}%`,
               }}
@@ -168,12 +168,12 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
               return (
                 <div key={m.step} className="flex flex-col items-center text-center px-1">
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-all duration-300 ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 ${
                       isPassed
-                        ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                        ? "bg-success text-white"
                         : isCurrent
-                          ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30 scale-110 ring-4 ring-primary/25"
-                          : "bg-surface border-border text-muted-foreground/60"
+                          ? "bg-primary text-primary-foreground scale-110"
+                          : "bg-surface text-muted-foreground/60"
                     }`}
                   >
                     {isPassed ? (

@@ -63,7 +63,7 @@ export function TrackingSearchBar({
   return (
     <div className="track-cockpit-card p-6 sm:p-9 mb-10 max-w-3xl mx-auto">
       <div className="text-center space-y-2 mb-6">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-sm">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Package className="h-7 w-7" aria-hidden="true" />
         </span>
         <h1 className="text-balance text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
@@ -94,7 +94,7 @@ export function TrackingSearchBar({
         <Button
           type="submit"
           disabled={isFetching}
-          className="h-12 gap-2 px-7 rounded-xl font-semibold shadow-md"
+          className="h-12 gap-2 px-7 rounded-xl font-semibold"
         >
           <Search className="h-4 w-4" aria-hidden="true" />
           {t("trackBtn")}
@@ -103,7 +103,7 @@ export function TrackingSearchBar({
 
       {/* Dynamic real recent parcels or search history chips */}
       {merchantParcels.length > 0 ? (
-        <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-4 pt-4 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
             <Zap className="h-3.5 w-3.5 text-primary" />
             Your active shipments:
@@ -124,7 +124,7 @@ export function TrackingSearchBar({
           </div>
         </div>
       ) : recentSearches.length > 0 ? (
-        <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-4 pt-4 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
             <History className="h-3.5 w-3.5 text-primary" />
             Recent searches:

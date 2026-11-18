@@ -17,10 +17,10 @@ export function HubExceptionsAlert({ openExceptions }: HubExceptionsAlertProps) 
   if (openExceptions.length === 0) return null;
 
   return (
-    <div className="relative rounded-3xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-md p-5 shadow-xs">
+    <div className="relative rounded-3xl bg-warning/10 backdrop-blur-md p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-300 shadow-2xs">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-warning/15 text-warning-soft-foreground">
             <AlertTriangle className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
@@ -31,7 +31,7 @@ export function HubExceptionsAlert({ openExceptions }: HubExceptionsAlertProps) 
               {openExceptions.slice(0, 4).map((e, idx) => (
                 <span
                   key={idx}
-                  className="rounded-lg bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-800 dark:text-amber-200"
+                  className="rounded-lg bg-warning/15 px-2 py-0.5 font-mono text-[10px] font-bold text-warning-soft-foreground"
                 >
                   {e.type.replace(/_/g, " ")}
                 </span>
@@ -49,7 +49,7 @@ export function HubExceptionsAlert({ openExceptions }: HubExceptionsAlertProps) 
           <Button
             size="sm"
             variant="ghost"
-            className="h-10 gap-1.5 rounded-xl bg-surface-elevated text-xs font-bold text-amber-800 dark:text-amber-200 hover:bg-amber-500/15 shadow-xs"
+            className="h-10 gap-1.5 rounded-xl bg-surface-elevated text-xs font-bold text-warning-soft-foreground hover:bg-warning/15"
           >
             <ClipboardList className="h-4 w-4" aria-hidden="true" />
             <span>{t("dashboard.reviewExceptions")}</span>

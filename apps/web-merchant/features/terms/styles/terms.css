@@ -5,12 +5,8 @@
 
 @keyframes trm-glow-seal {
   0%, 100% {
-    box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
-    border-color: rgba(16, 185, 129, 0.35);
   }
   50% {
-    box-shadow: 0 0 45px 0px rgba(16, 185, 129, 0.45);
-    border-color: rgba(16, 185, 129, 0.65);
   }
 }
 
@@ -35,7 +31,7 @@
 
 /* SLA Meter Bar */
 .trm-sla-bar {
-  background: linear-gradient(90deg, #10b981 0%, #34d399 75%, #059669 100%);
+  background: linear-gradient(90deg, hsl(var(--success)) 0%, hsl(var(--success)) 75%, #059669 100%);
   position: relative;
   overflow: hidden;
 }
@@ -78,14 +74,11 @@
 }
 
 .trm-clause-card:hover {
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
 /* Sticky TOC link indicator */
 .trm-toc-active {
-  color: #10b981;
+  color: hsl(var(--success));
   font-weight: 600;
-  border-left-color: #10b981;
-  background: rgba(16, 185, 129, 0.06);
+  background: hsl(var(--success) / 0.06);
 }

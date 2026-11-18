@@ -102,7 +102,7 @@ export function PublicTrackingView({ initialCode = "", showIntro = true, classNa
             <DetailsSkeleton />
           </div>
         ) : showError ? (
-          <Card className="border-danger/30 p-4">
+          <Card className="p-4">
             <ErrorState
               title={t("loadError")}
               description={t("loadErrorDesc")}

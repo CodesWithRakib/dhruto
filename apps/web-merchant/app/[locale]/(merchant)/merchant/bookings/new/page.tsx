@@ -21,7 +21,7 @@ export default async function NewBookingPage() {
 
       {/* Atmospheric Header & Engine Status Badge */}
       <div className="relative mx-auto max-w-3xl text-center space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-caption font-semibold text-primary backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-caption font-semibold text-primary backdrop-blur-md">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />

@@ -42,7 +42,7 @@ export function BagStatusFilterStrip({
           }}
           className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
             statusFilter === item.key
-              ? "bg-primary text-primary-foreground shadow-xs"
+              ? "bg-primary text-primary-foreground"
               : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
           }`}
         >

@@ -48,8 +48,8 @@ export function TaskOtpSection({
         </div>
 
         {otpVerified ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-200">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success-soft-foreground">
+            <CheckCircle2 className="h-3.5 w-3.5 text-success" />
             Verified
           </span>
         ) : null}
@@ -58,9 +58,9 @@ export function TaskOtpSection({
       {otpVerified ? (
         <div
           role="status"
-          className="flex items-center gap-2.5 rounded-2xl bg-emerald-500/15 px-4 py-3 text-xs font-bold text-emerald-800 dark:text-emerald-200"
+          className="flex items-center gap-2.5 rounded-2xl bg-success/15 px-4 py-3 text-xs font-bold text-success-soft-foreground"
         >
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <CheckCircle2 className="h-4 w-4 text-success" />
           <span>{t("details.otpVerified")} — Handover authorized.</span>
         </div>
       ) : (
@@ -75,7 +75,7 @@ export function TaskOtpSection({
               onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))}
               placeholder="Enter 6-digit OTP code"
               aria-label={t("details.otpLabel")}
-              className="h-12 flex-1 rounded-2xl border-0 bg-surface-muted/60 text-center font-mono text-xl tracking-[0.35em] font-black placeholder:tracking-normal placeholder:font-sans placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
+              className="h-12 flex-1 rounded-2xl bg-surface-muted/60 text-center font-mono text-xl tracking-[0.35em] font-black placeholder:tracking-normal placeholder:font-sans placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
             />
             <Button
               type="submit"

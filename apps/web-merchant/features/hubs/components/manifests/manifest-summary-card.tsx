@@ -15,12 +15,8 @@ export function ManifestSummaryCard({ manifest }: ManifestSummaryCardProps) {
   const t = useTranslations("Hub");
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-5 sm:p-6 space-y-4 shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden p-5 sm:p-6 space-y-4">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -39,7 +35,7 @@ export function ManifestSummaryCard({ manifest }: ManifestSummaryCardProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 pt-2 border-t border-border/40">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 pt-2">
         <div>
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
             Manifest Code

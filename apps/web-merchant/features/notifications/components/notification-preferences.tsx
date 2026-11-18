@@ -146,7 +146,7 @@ export function NotificationPreferences() {
       <DataTable
         columns={columns}
         data={CATEGORIES}
-        className="p-0 border-0 shadow-none"
+        className="p-0"
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -171,10 +171,10 @@ export function NotificationPreferences() {
       {feedback && (
         <div
           role={feedback.kind === "err" ? "alert" : "status"}
-          className={`rounded-lg border px-4 py-2.5 text-xs ${
+          className={`rounded-lg px-4 py-2.5 text-xs ${
             feedback.kind === "ok"
-              ? "border-border bg-success-soft text-success-soft-foreground"
-              : "border-border bg-danger-soft text-danger-soft-foreground"
+              ? "bg-success-soft text-success-soft-foreground"
+              : "bg-danger-soft text-danger-soft-foreground"
           }`}
         >
           {feedback.text}

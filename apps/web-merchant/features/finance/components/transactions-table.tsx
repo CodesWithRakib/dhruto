@@ -163,7 +163,7 @@ export function TransactionsTable({
                     onClick={() => onTypeFilterChange(tab.id)}
                     className={`h-8 rounded-xl px-3.5 text-xs font-semibold transition-colors ${
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-xs"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                     }`}
                   >

@@ -41,7 +41,7 @@ export function TestSmsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl bg-surface-elevated border-0 shadow-2xl p-6">
+      <DialogContent className="max-w-md rounded-3xl bg-surface-elevated p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Smartphone className="h-5 w-5 text-primary" aria-hidden="true" />

@@ -22,12 +22,12 @@ export function DashboardCanvasBg({ className, opacity = 1, ...props }: Dashboar
     >
       {/* 1. Precision Coordinate Dot Grid with Radial Falloff */}
       <div
-        className="absolute inset-0 bg-[radial-gradient(rgba(16,185,129,0.08)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_15%,#000_25%,transparent_100%)]"
+        className="absolute inset-0 bg-[radial-gradient(hsl(var(--success) / 0.08)_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_15%,#000_25%,transparent_100%)]"
       />
 
       {/* 2. Top-Right Ambient Radial Glow Bloom */}
       <div
-        className="absolute -top-40 -right-40 h-[680px] w-[680px] rounded-full blur-3xl opacity-40 dark:opacity-25"
+        className="absolute -top-40 -right-40 h-[680px] w-[680px] rounded-full blur-3xl opacity-40"
         style={{
           background:
             "radial-gradient(closest-side, rgba(var(--glow-rgb, 16 185 129), 0.75), rgba(var(--glow-rgb, 16 185 129), 0.25) 45%, transparent)",
@@ -36,16 +36,16 @@ export function DashboardCanvasBg({ className, opacity = 1, ...props }: Dashboar
 
       {/* 3. Bottom-Left Ambient Radial Glow Bloom */}
       <div
-        className="absolute top-[40%] -left-40 h-[580px] w-[580px] rounded-full blur-3xl opacity-25 dark:opacity-15"
+        className="absolute top-[40%] -left-40 h-[580px] w-[580px] rounded-full blur-3xl opacity-25"
         style={{
           background:
-            "radial-gradient(closest-side, rgba(6, 182, 212, 0.55), rgba(16, 185, 129, 0.2) 50%, transparent)",
+            "radial-gradient(closest-side, hsl(var(--info) / 0.55), hsl(var(--success) / 0.2) 50%, transparent)",
         }}
       />
 
       {/* 4. Velocity Vectors & Isometric Parcel Flow */}
       <svg
-        className="absolute top-0 right-0 h-[700px] w-[700px] text-emerald-500/10 dark:text-emerald-400/5"
+        className="absolute top-0 right-0 h-[700px] w-[700px] text-success/10"
         viewBox="0 0 700 700"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

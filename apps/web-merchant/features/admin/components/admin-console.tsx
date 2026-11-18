@@ -2,13 +2,12 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, Card } from "@dhruto/ui";
+import { Button, Card } from "@dhruto/ui";
 import {
   ArrowRight,
   BarChart3,
   Bike,
   BrainCircuit,
-  CheckCircle2,
   Package,
   Radio,
   Search,
@@ -21,6 +20,7 @@ import { Link } from "@/lib/navigation";
 import { ADMIN_ROUTES } from "@/config/routes";
 import { PageHeader } from "@/components/page-header";
 import { AdminIllustrationBg } from "@/components/visual/illustration-backgrounds";
+import { AdminNetworkStatus } from "./admin-network-status";
 
 /**
  * Admin operations supervision command center.
@@ -36,7 +36,7 @@ export function AdminConsole() {
       href: ADMIN_ROUTES.parcels,
       labelKey: "parcels",
       icon: Package,
-      tone: "border-blue-500/25 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+      tone: "bg-info/10 text-info-soft-foreground",
       cta: t("ctas.openParcels"),
       badge: t("badges.realtimeTracking"),
     },
@@ -44,7 +44,7 @@ export function AdminConsole() {
       href: ADMIN_ROUTES.hub,
       labelKey: "hub",
       icon: Warehouse,
-      tone: "border-amber-500/25 bg-amber-500/10 text-amber-800 dark:text-amber-200",
+      tone: "bg-warning/10 text-warning-soft-foreground",
       cta: t("ctas.superviseHubs"),
       badge: t("badges.activeHubs"),
     },
@@ -52,7 +52,7 @@ export function AdminConsole() {
       href: ADMIN_ROUTES.rider,
       labelKey: "rider",
       icon: Bike,
-      tone: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+      tone: "bg-success/10 text-success-soft-foreground",
       cta: t("ctas.manageFleet"),
       badge: t("badges.lastMileRunsheets"),
     },
@@ -60,7 +60,7 @@ export function AdminConsole() {
       href: ADMIN_ROUTES.finance,
       labelKey: "finance",
       icon: Wallet,
-      tone: "border-purple-500/25 bg-purple-500/10 text-purple-700 dark:text-purple-300",
+      tone: "bg-primary/10 text-primary-soft-foreground",
       cta: t("ctas.openFinance"),
       badge: t("badges.payoutApprovalQueue"),
     },
@@ -119,42 +119,8 @@ export function AdminConsole() {
         }
       />
 
-      {/* Network Pulse Status Bar */}
-      <Card className="rounded-2xl bg-surface-elevated p-4.5 sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-2xs">
-              <CheckCircle2 className="h-5 w-5" />
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-extrabold text-foreground">
-                  {t("networkStatusTitle")}
-                </h3>
-                <Badge variant="primary-soft" className="text-[10px] font-bold">{t("allSystemsActive")}</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t("networkStatusDescription")}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {t("slaBadge")}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-              {t("hubsOnline")}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-              {t("fleetSync")}
-            </span>
-          </div>
-        </div>
-      </Card>
+      {/* Live network status (system health + operations analytics) */}
+      <AdminNetworkStatus />
 
       {/* Primary Operational Command Pillars (4 Columns) */}
       <section aria-label="Operational Domains">
@@ -175,7 +141,7 @@ export function AdminConsole() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl border shadow-2xs ${section.tone}`}>
+                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${section.tone}`}>
                       <Icon className="h-5 w-5" aria-hidden="true" />
                     </span>
                     <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
@@ -191,9 +157,9 @@ export function AdminConsole() {
                   </p>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-border/60">
+                <div className="mt-4 pt-4">
                   <Link href={section.href} className="block">
-                    <Button variant="outline" size="sm" className="h-9 w-full text-xs font-bold justify-between px-3 rounded-xl group-hover:border-primary/40 group-hover:text-primary">
+                    <Button variant="outline" size="sm" className="h-9 w-full text-xs font-bold justify-between px-3 rounded-xl group-hover:text-primary">
                       <span>{section.cta}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Button>

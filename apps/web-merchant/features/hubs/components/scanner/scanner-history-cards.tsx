@@ -19,12 +19,8 @@ export function ScannerHistoryCards({ hubName, attempts, hubLog }: ScannerHistor
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Session history */}
-      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-6 space-y-4 shadow-sm">
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-6 space-y-4">
         {/* Specular top highlight */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
-          aria-hidden="true"
-        />
 
         <div>
           <h3 className="text-base font-bold text-foreground">
@@ -42,7 +38,7 @@ export function ScannerHistoryCards({ hubName, attempts, hubLog }: ScannerHistor
               {attempts.map((attempt) => (
                 <div
                   key={attempt.key}
-                  className="flex flex-wrap items-center gap-2.5 rounded-2xl border border-border/40 bg-surface-muted/50 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/80"
+                  className="flex flex-wrap items-center gap-2.5 rounded-2xl bg-surface-muted/50 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/80"
                 >
                   <span className="font-mono font-bold text-foreground">{attempt.barcode}</span>
                   {attempt.result ? (
@@ -62,12 +58,8 @@ export function ScannerHistoryCards({ hubName, attempts, hubLog }: ScannerHistor
 
       {/* Hub scan log */}
       {hubLog.length > 0 ? (
-        <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-6 space-y-4 shadow-sm">
+        <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-6 space-y-4">
           {/* Specular top highlight */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
-            aria-hidden="true"
-          />
 
           <div>
             <h3 className="text-base font-bold text-foreground">
@@ -80,7 +72,7 @@ export function ScannerHistoryCards({ hubName, attempts, hubLog }: ScannerHistor
               {hubLog.slice(0, 8).map((scan) => (
                 <div
                   key={scan.id}
-                  className="flex flex-wrap items-center gap-2.5 rounded-2xl border border-border/40 bg-surface-muted/50 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/80"
+                  className="flex flex-wrap items-center gap-2.5 rounded-2xl bg-surface-muted/50 px-4 py-3 text-xs transition-colors hover:bg-surface-muted/80"
                 >
                   <span className="font-mono font-bold text-foreground">
                     {scan.trackingCode ?? scan.bagCode ?? "—"}

@@ -33,7 +33,7 @@ export function RiderCashSummaryCard({
 
   return (
     <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-6">
-      <div className="flex items-center justify-between gap-3 border-b border-border/20 pb-4">
+      <div className="flex items-center justify-between gap-3 pb-4">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-warning-soft text-warning-soft-foreground">
             <Wallet className="h-5 w-5" aria-hidden="true" />
@@ -72,8 +72,8 @@ export function RiderCashSummaryCard({
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
                   (cash?.pendingHandIn ?? 0) > 0
-                    ? "bg-amber-500/15 text-amber-800 dark:text-amber-200"
-                    : "bg-emerald-500/15 text-emerald-800 dark:text-emerald-200"
+                    ? "bg-warning/15 text-warning-soft-foreground"
+                    : "bg-success/15 text-success-soft-foreground"
                 }`}
               >
                 {(cash?.pendingHandIn ?? 0) > 0 ? "Action required" : "Settled"}
@@ -84,7 +84,7 @@ export function RiderCashSummaryCard({
             </p>
             <p className="mt-1 text-xs text-muted-foreground">In rider possession</p>
           </div>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-300">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-warning/15 text-warning-soft-foreground">
             <Wallet className="h-5 w-5" aria-hidden="true" />
           </span>
         </div>
@@ -96,7 +96,7 @@ export function RiderCashSummaryCard({
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 {t("profile.awaitingVerification")}
               </span>
-              <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:text-blue-200">
+              <span className="inline-flex items-center rounded-full bg-info/15 px-2 py-0.5 text-[10px] font-bold text-info-soft-foreground">
                 Pending
               </span>
             </div>
@@ -105,7 +105,7 @@ export function RiderCashSummaryCard({
             </p>
             <p className="mt-1 text-xs text-muted-foreground">Submitted to hub</p>
           </div>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-700 dark:text-blue-300">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-info/15 text-info-soft-foreground">
             <Clock className="h-5 w-5" aria-hidden="true" />
           </span>
         </div>
@@ -117,7 +117,7 @@ export function RiderCashSummaryCard({
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 {t("profile.verified")}
               </span>
-              <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-200">
+              <span className="inline-flex items-center rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success-soft-foreground">
                 Reconciled
               </span>
             </div>
@@ -126,7 +126,7 @@ export function RiderCashSummaryCard({
             </p>
             <p className="mt-1 text-xs text-muted-foreground">Hub reconciled</p>
           </div>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-success/15 text-success-soft-foreground">
             <ShieldCheck className="h-5 w-5" aria-hidden="true" />
           </span>
         </div>
@@ -134,7 +134,7 @@ export function RiderCashSummaryCard({
 
       {/* Hand In Deposit Form or Inline Status Banner */}
       {(cash?.pendingHandIn ?? 0) > 0 ? (
-        <form onSubmit={onHandIn} className="space-y-3.5 rounded-2xl bg-amber-500/10 p-5">
+        <form onSubmit={onHandIn} className="space-y-3.5 rounded-2xl bg-warning/10 p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h4 className="text-sm font-bold text-foreground">Hand in cash to hub</h4>
@@ -144,7 +144,7 @@ export function RiderCashSummaryCard({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-muted-foreground">Deposit amount:</span>
-              <span className="font-mono text-base font-extrabold text-amber-700 dark:text-amber-300">
+              <span className="font-mono text-base font-extrabold text-warning-soft-foreground">
                 {bdt(cash?.pendingHandIn ?? 0)}
               </span>
             </div>
@@ -157,7 +157,7 @@ export function RiderCashSummaryCard({
               placeholder={t("profile.handInNotes")}
               maxLength={500}
               aria-label={t("profile.handInNotes")}
-              className="h-11 flex-1 rounded-2xl border-0 bg-surface-muted/60 text-sm focus:bg-background"
+              className="h-11 flex-1 rounded-2xl bg-surface-muted/60 text-sm focus:bg-background"
             />
             <Button
               type="submit"
@@ -172,10 +172,10 @@ export function RiderCashSummaryCard({
       ) : (
         <div className="flex items-center justify-between rounded-2xl bg-surface-muted/40 px-4 py-3 text-xs">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 className="h-4 w-4 text-success" />
             <span className="font-medium text-foreground">{t("profile.handInEmpty")}</span>
           </div>
-          <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+          <span className="rounded-full bg-success/15 px-2.5 py-0.5 text-[11px] font-bold text-success-soft-foreground">
             Zero Balance
           </span>
         </div>

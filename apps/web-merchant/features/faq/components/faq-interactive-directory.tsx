@@ -188,10 +188,10 @@ export function FaqInteractiveDirectory({
   };
 
   return (
-    <section id="faq-directory" className="relative py-20 bg-surface border-b border-border/80 scroll-mt-20">
+    <section id="faq-directory" className="relative py-20 bg-surface scroll-mt-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Results Counter & Search Status */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-5">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-5">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-primary">
               Interactive FAQ Index
@@ -202,7 +202,7 @@ export function FaqInteractiveDirectory({
           </div>
 
           {searchQuery && (
-            <div className="flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs text-primary font-medium">
+            <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-1.5 text-xs text-primary font-medium">
               <Search className="h-3.5 w-3.5" />
               <span>Query: &quot;{searchQuery}&quot;</span>
               <button
@@ -218,7 +218,7 @@ export function FaqInteractiveDirectory({
 
         {/* Empty State */}
         {filteredItems.length === 0 ? (
-          <div className="mt-12 rounded-3xl border border-border/80 bg-card p-12 text-center shadow-sm">
+          <div className="mt-12 rounded-3xl bg-card p-12 text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
               <SearchX className="h-7 w-7" />
             </div>
@@ -235,13 +235,13 @@ export function FaqInteractiveDirectory({
                   onSearchChange("");
                   onCategorySelect("all");
                 }}
-                className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm hover:opacity-90 transition"
+                className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:opacity-90 transition"
               >
                 Reset All Filters
               </button>
               <Link
                 href="/contact"
-                className="rounded-xl border border-border bg-surface px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
+                className="rounded-xl bg-surface px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
               >
                 Contact Operations Desk
               </Link>
@@ -256,7 +256,7 @@ export function FaqInteractiveDirectory({
               return (
                 <details
                   key={item.id || idx}
-                  className="faq-item group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition hover:border-primary/40 hover:shadow-md open:border-primary/50 open:bg-card"
+                  className="faq-item group overflow-hidden rounded-2xl bg-card transition open:bg-card"
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-base font-bold text-foreground select-none sm:p-6 sm:text-lg">
                     <div className="flex items-center gap-3 pr-2">
@@ -267,18 +267,18 @@ export function FaqInteractiveDirectory({
                       )}
                       <span>{item.question}</span>
                     </div>
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted/50 text-muted-foreground transition-transform duration-200 group-open:border-primary/40 group-open:bg-primary/10 group-open:text-primary">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground transition-transform duration-200 group-open:bg-primary/10 group-open:text-primary">
                       <ChevronDown className="faq-chevron h-4 w-4 transition-transform duration-200" />
                     </span>
                   </summary>
 
-                  <div className="faq-answer border-t border-border/40 px-5 pb-6 pt-4 sm:px-6">
+                  <div className="faq-answer px-5 pb-6 pt-4 sm:px-6">
                     <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
                       {item.answer}
                     </p>
 
                     {/* Action link & Feedback Row */}
-                    <div className="mt-6 pt-4 border-t border-border/40 flex flex-wrap items-center justify-between gap-4 text-xs">
+                    <div className="mt-6 pt-4 flex flex-wrap items-center justify-between gap-4 text-xs">
                       {item.actionLink ? (
                         <Link
                           href={item.actionLink.href}
@@ -298,7 +298,7 @@ export function FaqInteractiveDirectory({
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <span>Helpful?</span>
                         {voted ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-success font-semibold">
                             <Check className="h-3 w-3" />
                             <span>Thanks for the feedback!</span>
                           </span>
@@ -308,7 +308,7 @@ export function FaqInteractiveDirectory({
                               type="button"
                               onClick={() => handleVote(idx, "up")}
                               aria-label="Mark helpful"
-                              className="faq-vote-btn rounded-lg border border-border/80 bg-surface p-1.5 text-muted-foreground hover:border-emerald-500/50 hover:text-emerald-500"
+                              className="faq-vote-btn rounded-lg bg-surface p-1.5 text-muted-foreground hover:text-success"
                             >
                               <ThumbsUp className="h-3.5 w-3.5" />
                             </button>
@@ -316,7 +316,7 @@ export function FaqInteractiveDirectory({
                               type="button"
                               onClick={() => handleVote(idx, "down")}
                               aria-label="Mark unhelpful"
-                              className="faq-vote-btn rounded-lg border border-border/80 bg-surface p-1.5 text-muted-foreground hover:border-rose-500/50 hover:text-rose-500"
+                              className="faq-vote-btn rounded-lg bg-surface p-1.5 text-muted-foreground hover:text-danger"
                             >
                               <ThumbsDown className="h-3.5 w-3.5" />
                             </button>

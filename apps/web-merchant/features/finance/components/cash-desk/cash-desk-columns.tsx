@@ -67,7 +67,7 @@ export function getPendingColumns({
       accessorKey: "netPayable",
       header: () => <div className="text-right">Net Payable</div>,
       cell: ({ row }) => (
-        <div className="text-right font-mono text-xs font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+        <div className="text-right font-mono text-xs font-semibold tabular-nums text-success">
           {bdt(row.original.netPayable)}
         </div>
       ),
@@ -91,7 +91,7 @@ export function getPendingColumns({
           <Button
             size="sm"
             onClick={() => onOpenVerify(row.original)}
-            className="h-7 gap-1.5 rounded-lg text-[11px] font-semibold shadow-xs"
+            className="h-7 gap-1.5 rounded-lg text-[11px] font-semibold"
           >
             <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
             {verifyCashText}

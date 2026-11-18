@@ -126,7 +126,7 @@ export function FinanceDashboard() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex shrink-0 snap-start items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 ${
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-xs"
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-surface-muted hover:text-foreground"
               }`}
             >

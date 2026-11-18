@@ -38,7 +38,7 @@ export default async function TrackCodePage({
                 <h1 className="font-mono text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
                   {code}
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-primary">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-primary">
                   <Radio className="h-3 w-3 animate-pulse" />
                   {t("liveTelemetry")}
                 </span>

@@ -74,7 +74,7 @@ export function MerchantAnalyticsDashboard() {
               size="sm"
               onClick={refresh}
               disabled={overview.isFetching}
-              className="h-10 gap-2 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+              className="h-10 gap-2 text-xs rounded-xl hover:bg-surface-elevated font-medium"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${overview.isFetching ? "animate-spin text-primary" : ""}`} />
               <span>{t("refresh")}</span>
@@ -91,9 +91,9 @@ export function MerchantAnalyticsDashboard() {
           <p className="text-body-sm text-muted-foreground font-medium">{t("loading")}</p>
         </div>
       ) : overview.isError || !data ? (
-        <div className="rounded-3xl border border-destructive/20 bg-surface-elevated/90 p-8 text-center space-y-3 shadow-sm backdrop-blur-md">
+        <div className="rounded-3xl bg-surface-elevated/90 p-8 text-center space-y-3 backdrop-blur-md">
           <p className="text-body font-bold text-foreground">{t("loadErrorTitle")}</p>
-          <Button variant="outline" size="sm" onClick={refresh} className="rounded-xl border-border/80">
+          <Button variant="outline" size="sm" onClick={refresh} className="rounded-xl">
             {t("retry")}
           </Button>
         </div>
@@ -116,10 +116,9 @@ export function MerchantAnalyticsDashboard() {
           </div>
 
           {/* Volume Trend Bento Card */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 shadow-sm backdrop-blur-md space-y-4">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 backdrop-blur-md space-y-4">
             <div className="flex items-center gap-2.5 pb-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <TrendingUp className="h-4 w-4" />
               </span>
               <h3 className="text-body font-bold text-foreground tracking-tight">{t("volumeTrend")}</h3>
@@ -133,9 +132,9 @@ export function MerchantAnalyticsDashboard() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Delivery Performance Bento Card */}
-            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-3">
+            <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-3">
               <div className="flex items-center gap-2.5 pb-1">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Truck className="h-4 w-4" />
                 </span>
                 <h3 className="text-body font-bold text-foreground">{t("deliveryTitle")}</h3>
@@ -149,9 +148,9 @@ export function MerchantAnalyticsDashboard() {
             </div>
 
             {/* RTO Deep Dive Bento Card */}
-            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-3">
+            <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-3">
               <div className="flex items-center gap-2.5 pb-1">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-xs">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/10 text-warning">
                   <AlertTriangle className="h-4 w-4" />
                 </span>
                 <h3 className="text-body font-bold text-foreground">{t("rtoTitle")}</h3>
@@ -176,9 +175,9 @@ export function MerchantAnalyticsDashboard() {
           </div>
 
           {/* COD Settlement Analytics Card */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-3">
+          <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-3">
             <div className="flex items-center gap-2.5 pb-1">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Wallet className="h-4 w-4" />
               </span>
               <h3 className="text-body font-bold text-foreground">{t("codTitle")}</h3>
@@ -193,9 +192,9 @@ export function MerchantAnalyticsDashboard() {
           </div>
 
           {/* Generated Reports History Card */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-4">
+          <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-4">
             <div className="flex items-center gap-2.5 pb-1">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <FileText className="h-4 w-4" />
               </span>
               <h3 className="text-body font-bold text-foreground">

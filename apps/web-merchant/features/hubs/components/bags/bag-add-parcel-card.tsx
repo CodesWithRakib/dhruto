@@ -21,12 +21,8 @@ export const BagAddParcelCard = forwardRef<HTMLInputElement, BagAddParcelCardPro
     const t = useTranslations("Hub");
 
     return (
-      <div className="relative rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-4 shadow-sm">
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-4">
         {/* Specular top highlight */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-          aria-hidden="true"
-        />
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -62,14 +58,14 @@ export const BagAddParcelCard = forwardRef<HTMLInputElement, BagAddParcelCardPro
               placeholder={t("bags.addParcelPlaceholder")}
               aria-label={t("bags.addParcel")}
               disabled={isAdding}
-              className="h-12 rounded-2xl border border-border/50 bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
+              className="h-12 rounded-2xl bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground focus:bg-background"
               autoFocus
             />
           </div>
           <Button
             type="submit"
             disabled={isAdding || !trackingInput.trim()}
-            className="h-12 rounded-2xl px-7 font-semibold shadow-xs"
+            className="h-12 rounded-2xl px-7 font-semibold"
           >
             {isAdding ? t("bags.adding") : t("bags.addParcel")}
           </Button>

@@ -40,7 +40,7 @@ export function BookingCodSection({ control, isLoading, t }: BookingCodSectionPr
                   inputMode="numeric"
                   placeholder="0"
                   disabled={isLoading}
-                  className="rounded-xl border-border/80 bg-surface-muted/50 focus:bg-surface-elevated transition-colors pl-8 tabular-nums font-semibold"
+                  className="rounded-xl bg-surface-muted/50 focus:bg-surface-elevated transition-colors pl-8 tabular-nums font-semibold"
                   {...field}
                 />
               </div>

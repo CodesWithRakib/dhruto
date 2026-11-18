@@ -143,7 +143,7 @@ export function PricingCalculatorCockpit({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-caption font-semibold text-primary backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-caption font-semibold text-primary backdrop-blur-md">
             <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{t("eyebrow")}</span>
           </div>
@@ -168,8 +168,7 @@ export function PricingCalculatorCockpit({
         {/* Cockpit Grid */}
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
           {/* Left Controls Bento Card (7 cols) */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 sm:p-8 shadow-xl backdrop-blur-md lg:col-span-7">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 sm:p-8 backdrop-blur-md lg:col-span-7">
 
             <CalculatorDestinationPicker
               zones={ZONES}

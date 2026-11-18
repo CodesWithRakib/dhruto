@@ -26,7 +26,7 @@ export function PublicMobileBottomNav() {
   return (
     <nav
       aria-label={t("primaryLabel")}
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-surface/85 backdrop-blur-2xl pb-safe md:hidden shadow-2xl"
+      className="fixed inset-x-0 bottom-0 z-40 bg-surface/85 backdrop-blur-2xl pb-safe md:hidden"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around px-2 py-1">
         {publicItems.map((item) => {
@@ -48,7 +48,7 @@ export function PublicMobileBottomNav() {
                 <div className="relative">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                   {active && (
-                    <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary shadow-sm shadow-primary" />
+                    <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary" />
                   )}
                 </div>
                 <span className="truncate text-[11px] leading-none">{item.label}</span>

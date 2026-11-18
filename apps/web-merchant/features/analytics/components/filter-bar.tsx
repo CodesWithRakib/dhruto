@@ -53,7 +53,7 @@ export function FilterBar({ value, onChange }: FilterBarProps) {
           max={to || undefined}
           onChange={(e) => setFrom(e.target.value)}
           aria-label={t("fromLabel")}
-          className="h-8 min-w-0 max-w-[150px] flex-1 rounded-lg border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-8 min-w-0 max-w-[150px] flex-1 rounded-lg bg-field px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 hover:bg-field-hover focus:bg-surface"
         />
         <span className="shrink-0 text-xs text-muted-foreground">→</span>
         <input
@@ -62,7 +62,7 @@ export function FilterBar({ value, onChange }: FilterBarProps) {
           min={from || undefined}
           onChange={(e) => setTo(e.target.value)}
           aria-label={t("toLabel")}
-          className="h-8 min-w-0 max-w-[150px] flex-1 rounded-lg border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-8 min-w-0 max-w-[150px] flex-1 rounded-lg bg-field px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 hover:bg-field-hover focus:bg-surface"
         />
         <Button
           variant={value.preset === "custom" ? "default" : "outline"}

@@ -95,7 +95,7 @@ export function PricingTierCards() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Layers className="h-3.5 w-3.5" aria-hidden="true" />
             <span>TRANSPARENT MERCHANT PLANS</span>
           </div>
@@ -118,7 +118,7 @@ export function PricingTierCards() {
                 {/* Featured Badge */}
                 {plan.featured && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-md shadow-primary/30">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white">
                       <Sparkles className="h-3.5 w-3.5" />
                       <span>MOST POPULAR CHOICE</span>
                     </span>
@@ -139,7 +139,7 @@ export function PricingTierCards() {
                 </div>
 
                 {/* Pricing Block */}
-                <div className="mt-6 border-y border-border/60 py-5">
+                <div className="mt-6 py-5">
                   <div className="flex items-baseline gap-1">
                     <span className="font-mono text-3xl font-extrabold text-foreground">
                       {plan.monthlyFee}
@@ -161,7 +161,7 @@ export function PricingTierCards() {
                     </div>
                     <div>
                       <div className="text-[10px] text-muted-foreground">COD Fee</div>
-                      <div className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{plan.codFee}</div>
+                      <div className="font-mono font-bold text-success">{plan.codFee}</div>
                     </div>
                   </div>
                 </div>
@@ -184,8 +184,8 @@ export function PricingTierCards() {
                     href={plan.ctaHref}
                     className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
                       plan.featured
-                        ? "bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
-                        : "border border-border bg-surface text-foreground hover:border-primary hover:bg-muted"
+                        ? "bg-primary text-white hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
+                        : "bg-surface text-foreground hover:bg-muted"
                     }`}
                   >
                     <span>{plan.ctaLabel}</span>

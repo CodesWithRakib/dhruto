@@ -135,7 +135,7 @@ export function buildParcelListColumns({
             href={routes.parcel(row.original.id)}
             aria-label={`${t("view")} ${row.original.trackingCode}`}
           >
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-lg border-border/80 text-xs font-semibold hover:bg-surface-elevated">
+            <Button variant="outline" size="sm" className="gap-1.5 rounded-lg text-xs font-semibold hover:bg-surface-elevated">
               <Eye className="h-3.5 w-3.5" aria-hidden="true" />
               {t("view")}
             </Button>

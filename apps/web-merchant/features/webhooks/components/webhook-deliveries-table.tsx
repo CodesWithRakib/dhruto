@@ -43,7 +43,7 @@ export function WebhookDeliveriesTable({
   ).length;
 
   return (
-    <div className="space-y-4 pt-4 border-t border-border/60">
+    <div className="space-y-4 pt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-body-md font-bold tracking-tight text-foreground">
@@ -56,12 +56,12 @@ export function WebhookDeliveriesTable({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 border border-border/80 bg-surface-elevated/90 p-1.5 rounded-2xl text-xs backdrop-blur-md">
+        <div className="flex items-center gap-1 bg-surface-elevated/90 p-1.5 rounded-2xl text-xs backdrop-blur-md">
           <button
             onClick={() => setFilterStatus("ALL")}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === "ALL"
-                ? "bg-primary text-primary-foreground shadow-xs shadow-primary/20"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
@@ -71,7 +71,7 @@ export function WebhookDeliveriesTable({
             onClick={() => setFilterStatus(WebhookDeliveryStatus.DELIVERED)}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === WebhookDeliveryStatus.DELIVERED
-                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                ? "bg-success/15 text-success"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
@@ -81,7 +81,7 @@ export function WebhookDeliveriesTable({
             onClick={() => setFilterStatus(WebhookDeliveryStatus.FAILED)}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === WebhookDeliveryStatus.FAILED
-                ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                ? "bg-danger/15 text-danger"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
@@ -91,7 +91,7 @@ export function WebhookDeliveriesTable({
             onClick={() => setFilterStatus(WebhookDeliveryStatus.DEAD_LETTER)}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === WebhookDeliveryStatus.DEAD_LETTER
-                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                ? "bg-warning/15 text-warning"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
@@ -106,7 +106,7 @@ export function WebhookDeliveriesTable({
           <span className="text-xs">Fetching delivery records...</span>
         </div>
       ) : filteredDeliveries.length === 0 ? (
-        <div className="p-12 text-center text-muted-foreground rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md">
+        <div className="p-12 text-center text-muted-foreground rounded-3xl bg-surface-elevated/90 backdrop-blur-md">
           <FileCode className="h-8 w-8 mx-auto opacity-30 mb-2" />
           <p className="text-body-sm font-bold text-foreground">No webhook deliveries found</p>
           <p className="text-caption text-muted-foreground mt-1">
@@ -114,7 +114,7 @@ export function WebhookDeliveriesTable({
           </p>
         </div>
       ) : (
-        <div className="rounded-3xl border border-border/80 bg-surface-elevated/90 p-4 shadow-sm backdrop-blur-md">
+        <div className="rounded-3xl bg-surface-elevated/90 p-4 backdrop-blur-md">
           <div className="overflow-x-auto">
             <DataTable
               columns={[
@@ -136,12 +136,12 @@ export function WebhookDeliveriesTable({
                       row.original.status === WebhookDeliveryStatus.DEAD_LETTER;
                     return (
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           isDelivered
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                            ? "bg-success/10 text-success"
                             : isDeadLetter
-                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
-                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30"
+                              ? "bg-warning/10 text-warning"
+                              : "bg-danger/10 text-danger"
                         }`}
                       >
                         {isDelivered && <CheckCircle2 className="h-3 w-3" />}
@@ -160,8 +160,8 @@ export function WebhookDeliveriesTable({
                         <span
                           className={
                             row.original.statusCode >= 200 && row.original.statusCode < 300
-                              ? "text-emerald-600 dark:text-emerald-400 font-bold"
-                              : "text-rose-600 dark:text-rose-400 font-bold"
+                              ? "text-success font-bold"
+                              : "text-danger font-bold"
                           }
                         >
                           HTTP {row.original.statusCode}
@@ -213,7 +213,7 @@ export function WebhookDeliveriesTable({
                             variant="outline"
                             disabled={isRetrying}
                             onClick={() => onRetry(item.id)}
-                            className="h-7 text-xs px-2.5 rounded-lg flex items-center gap-1 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 font-semibold"
+                            className="h-7 text-xs px-2.5 rounded-lg flex items-center gap-1 text-warning hover:bg-warning/10 font-semibold"
                           >
                             <RefreshCw className="h-3 w-3" />
                             Replay
@@ -234,7 +234,7 @@ export function WebhookDeliveriesTable({
       {/* Payload Inspector Modal */}
       {inspectDelivery && (
         <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-elevated text-card-foreground border border-border/80 rounded-3xl max-w-2xl w-full p-6 sm:p-7 relative shadow-2xl animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
+          <div className="bg-surface-elevated text-card-foreground rounded-3xl max-w-2xl w-full p-6 sm:p-7 relative animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
             <button
               onClick={() => setInspectDelivery(null)}
               className="absolute top-5 right-5 text-muted-foreground hover:text-foreground p-1 rounded-xl"
@@ -242,8 +242,8 @@ export function WebhookDeliveriesTable({
               <X className="h-5 w-5" />
             </button>
 
-            <div className="flex items-center gap-2.5 mb-4 border-b border-border/60 pb-3">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
+            <div className="flex items-center gap-2.5 mb-4 pb-3">
+              <div className="p-2 rounded-xl bg-primary/10 text-primary">
                 <Code2 className="h-5 w-5" />
               </div>
               <div>
@@ -259,7 +259,7 @@ export function WebhookDeliveriesTable({
                 <span className="text-caption font-bold uppercase text-muted-foreground tracking-wider block mb-1.5">
                   Outbound Request Headers
                 </span>
-                <div className="bg-surface-muted/60 p-3.5 rounded-2xl border border-border/70 font-mono text-xs space-y-1">
+                <div className="bg-surface-muted/60 p-3.5 rounded-2xl font-mono text-xs space-y-1">
                   <div>
                     <span className="text-primary font-semibold">X-Dhruto-Event:</span> {inspectDelivery.event}
                   </div>
@@ -280,7 +280,7 @@ export function WebhookDeliveriesTable({
                 <span className="text-caption font-bold uppercase text-muted-foreground tracking-wider block mb-1.5">
                   JSON Body Payload
                 </span>
-                <pre className="bg-neutral-950 p-4 rounded-2xl border border-neutral-800 font-mono text-xs overflow-x-auto text-neutral-100 shadow-inner">
+                <pre className="bg-inverse p-4 rounded-2xl font-mono text-xs overflow-x-auto text-inverse-foreground">
                   {JSON.stringify(inspectDelivery.payload, null, 2)}
                 </pre>
               </div>
@@ -290,15 +290,15 @@ export function WebhookDeliveriesTable({
                   <span className="text-caption font-bold uppercase text-muted-foreground tracking-wider block mb-1.5">
                     Destination Server Response
                   </span>
-                  <pre className="bg-surface-muted/60 p-3.5 rounded-2xl border border-border/70 font-mono text-xs overflow-x-auto text-muted-foreground">
+                  <pre className="bg-surface-muted/60 p-3.5 rounded-2xl font-mono text-xs overflow-x-auto text-muted-foreground">
                     {inspectDelivery.responseBody}
                   </pre>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-border/60 mt-4">
-              <Button size="sm" variant="outline" onClick={() => setInspectDelivery(null)} className="rounded-xl border-border/80">
+            <div className="flex justify-end pt-4 mt-4">
+              <Button size="sm" variant="outline" onClick={() => setInspectDelivery(null)} className="rounded-xl">
                 Close
               </Button>
             </div>

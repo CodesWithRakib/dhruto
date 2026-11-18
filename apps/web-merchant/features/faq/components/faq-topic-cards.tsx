@@ -65,11 +65,11 @@ export function FaqTopicCards({
   ];
 
   return (
-    <section className="relative py-24 bg-muted/20 border-b border-border/80">
+    <section className="relative py-24 bg-muted/20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Compass className="h-3.5 w-3.5" />
             <span>{eyebrow}</span>
           </div>
@@ -89,11 +89,11 @@ export function FaqTopicCards({
               <Link
                 key={topic.href}
                 href={topic.href}
-                className="group relative flex flex-col justify-between rounded-3xl border border-border/70 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-xl"
+                className="group relative flex flex-col justify-between rounded-3xl bg-card p-6 transition-all duration-300 hover:-translate-y-1.5"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                       <Icon className="h-6 w-6" />
                     </span>
                     <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -109,8 +109,8 @@ export function FaqTopicCards({
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                <div className="mt-6 pt-4 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-success">
                     <Zap className="h-3 w-3" />
                     <span>{topic.stat}</span>
                   </span>

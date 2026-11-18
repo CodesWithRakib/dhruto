@@ -105,7 +105,7 @@ export function Combobox({
       <DropdownMenuContent
         align="start"
         sideOffset={6}
-        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-xl border border-border/70 bg-popover p-1.5 shadow-lift"
+        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-xl bg-popover p-1.5"
       >
         <div className="relative p-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -116,7 +116,7 @@ export function Combobox({
             onKeyDown={(event) => event.stopPropagation()}
             placeholder={searchPlaceholder}
             aria-label={searchPlaceholder}
-            className="h-9 border-transparent bg-surface-muted/60 pl-8 focus-visible:border-primary"
+            className="h-9 bg-surface-muted/60 pl-8"
           />
         </div>
         <div className="max-h-64 overflow-y-auto" role="listbox" aria-label={ariaLabel ?? placeholder}>

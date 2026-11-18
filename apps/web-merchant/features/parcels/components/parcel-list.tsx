@@ -158,7 +158,7 @@ export function ParcelList() {
   const isTableLoading = isLoading || (isFetching && parcels.length === 0);
 
   const table = (
-    <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 shadow-sm backdrop-blur-md">
+    <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 backdrop-blur-md">
       <DataTable
         columns={columns}
         data={parcels}
@@ -234,7 +234,7 @@ export function ParcelList() {
       <ActiveFilters filters={chips} onRemove={handleRemoveFilter} onClearAll={resetFilters} />
 
       {/* Desktop filters */}
-      <div className="hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-5 shadow-sm backdrop-blur-md lg:block">
+      <div className="hidden rounded-3xl bg-surface-elevated/90 p-5 backdrop-blur-md lg:block">
         <ParcelFilterControls
           idPrefix="desktop"
           filters={filters}

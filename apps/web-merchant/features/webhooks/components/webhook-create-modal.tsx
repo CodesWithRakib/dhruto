@@ -123,7 +123,7 @@ export function WebhookCreateModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-overlay backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-surface-elevated text-card-foreground border border-border/80 rounded-3xl max-w-xl w-full p-6 sm:p-7 relative shadow-2xl animate-in fade-in zoom-in-95">
+      <div className="bg-surface-elevated text-card-foreground rounded-3xl max-w-xl w-full p-6 sm:p-7 relative animate-in fade-in zoom-in-95">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-muted-foreground hover:text-foreground p-1 rounded-xl"
@@ -131,8 +131,8 @@ export function WebhookCreateModal({
           <X className="h-5 w-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-5 border-b border-border/60 pb-4">
-          <div className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20">
+        <div className="flex items-center gap-3 mb-5 pb-4">
+          <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
             <Webhook className="h-5 w-5" />
           </div>
           <div>
@@ -154,7 +154,7 @@ export function WebhookCreateModal({
               required
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="w-full text-sm border border-border/80 rounded-xl px-3.5 py-2.5 bg-surface-muted/50 focus:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-primary font-mono transition-colors"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-field focus:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-primary font-mono transition-colors hover:bg-field-hover"
             />
           </div>
 
@@ -167,7 +167,7 @@ export function WebhookCreateModal({
               placeholder="e.g. Production ERP Sync"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full text-sm border border-border/80 rounded-xl px-3.5 py-2.5 bg-surface-muted/50 focus:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+              className="w-full text-sm rounded-xl px-3.5 py-2.5 bg-field focus:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-primary transition-colors hover:bg-field-hover"
             />
           </div>
 
@@ -175,16 +175,16 @@ export function WebhookCreateModal({
             <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
               Subscribed Events <span className="text-destructive">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 border border-border/70 rounded-2xl p-3 bg-surface-muted/30 max-h-48 overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-2xl p-3 bg-surface-muted/30 max-h-48 overflow-y-auto">
               {AVAILABLE_EVENTS.map(({ event, label, desc }) => {
                 const checked = selectedEvents.includes(event);
                 return (
                   <label
                     key={event}
-                    className={`flex items-start gap-2 p-2 rounded-xl border text-xs cursor-pointer transition-colors ${
+                    className={`flex items-start gap-2 p-2 rounded-xl text-xs cursor-pointer transition-colors ${
                       checked
-                        ? "bg-primary/10 border-primary/30 text-foreground"
-                        : "bg-surface-elevated border-border/60 text-muted-foreground"
+                        ? "bg-primary/10 text-foreground"
+                        : "bg-surface-elevated text-muted-foreground"
                     }`}
                   >
                     <input
@@ -214,23 +214,23 @@ export function WebhookCreateModal({
               placeholder="Leave empty to auto-generate secure dhr_whsec_... key"
               value={customSecret}
               onChange={(e) => setCustomSecret(e.target.value)}
-              className="w-full text-xs border border-border/80 rounded-xl px-3.5 py-2.5 bg-surface-muted/50 focus:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-primary font-mono transition-colors"
+              className="w-full text-xs rounded-xl px-3.5 py-2.5 bg-field focus:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-primary font-mono transition-colors hover:bg-field-hover"
             />
           </div>
 
           {formError && (
-            <div className="text-xs p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive font-medium">
+            <div className="text-xs p-3 rounded-xl bg-destructive/10 text-destructive font-medium">
               {formError}
             </div>
           )}
 
-          <div className="flex justify-end gap-2.5 pt-4 border-t border-border/60">
+          <div className="flex justify-end gap-2.5 pt-4">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="rounded-xl border-border/80"
+              className="rounded-xl"
             >
               Cancel
             </Button>
@@ -238,7 +238,7 @@ export function WebhookCreateModal({
               type="submit"
               size="sm"
               disabled={isLoading}
-              className="bg-primary text-primary-foreground flex items-center gap-1.5 rounded-xl font-bold shadow-md shadow-primary/20"
+              className="bg-primary text-primary-foreground flex items-center gap-1.5 rounded-xl font-bold"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

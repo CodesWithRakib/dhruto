@@ -25,7 +25,7 @@ export function ScannerBagTargetCard({
   const t = useTranslations("Hub");
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 shadow-xs">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-bold text-foreground">{t("scanner.targetBag")}:</p>
@@ -39,7 +39,7 @@ export function ScannerBagTargetCard({
           <Select value={selectedBagId} onValueChange={onSelectBagId}>
             <SelectTrigger
               aria-label={t("scanner.targetBag")}
-              className="w-full sm:w-[320px] font-mono text-xs rounded-xl border border-border/50 bg-surface-muted/60"
+              className="w-full sm:w-[320px] font-mono text-xs rounded-xl bg-surface-muted/60"
             >
               <SelectValue placeholder={t("scanner.targetBag")} />
             </SelectTrigger>

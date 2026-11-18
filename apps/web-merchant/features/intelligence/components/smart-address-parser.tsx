@@ -78,14 +78,14 @@ export function SmartAddressParser({
     switch (tier) {
       case "HIGH":
         return (
-          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1 font-mono">
+          <Badge variant="outline" className="text-success bg-success/10 flex items-center gap-1 font-mono">
             <CheckCircle2 className="h-3.5 w-3.5" />
             High Confidence ({score}%)
           </Badge>
         );
       case "MEDIUM":
         return (
-          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10 flex items-center gap-1 font-mono">
+          <Badge variant="outline" className="text-warning bg-warning/10 flex items-center gap-1 font-mono">
             <ShieldCheck className="h-3.5 w-3.5" />
             Medium Confidence ({score}%)
           </Badge>
@@ -93,7 +93,7 @@ export function SmartAddressParser({
       case "LOW":
       default:
         return (
-          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/10 flex items-center gap-1 font-mono">
+          <Badge variant="outline" className="text-danger bg-danger/10 flex items-center gap-1 font-mono">
             <AlertCircle className="h-3.5 w-3.5" />
             Low Confidence ({score}%)
           </Badge>
@@ -106,28 +106,28 @@ export function SmartAddressParser({
       case DeliveryZone.INSIDE_DHAKA:
         return {
           label: "Inside Dhaka (Same-Day / Next-Day)",
-          color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+          color: "text-success bg-success/10",
         };
       case DeliveryZone.DHAKA_SUBURBS:
         return {
           label: "Greater Dhaka Suburbs",
-          color: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30",
+          color: "text-warning bg-warning/10",
         };
       case DeliveryZone.OUTSIDE_DHAKA:
       default:
         return {
           label: "Outside Dhaka (National Inter-District)",
-          color: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+          color: "text-info bg-info/10",
         };
     }
   };
 
   return (
-    <Card className="rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md overflow-hidden">
-      <CardHeader className="bg-primary/5 border-b border-primary/10 p-6">
+    <Card className="rounded-3xl bg-surface-elevated/90 backdrop-blur-md overflow-hidden">
+      <CardHeader className="bg-primary/5 p-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-xs">
+            <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
@@ -137,7 +137,7 @@ export function SmartAddressParser({
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="bg-background/80 text-xs font-mono border-border/80">
+          <Badge variant="outline" className="bg-background/80 text-xs font-mono">
             64 Districts • 590+ Thanas
           </Badge>
         </div>
@@ -154,7 +154,7 @@ export function SmartAddressParser({
               value={addressInput}
               onChange={(e) => setAddressInput(e.target.value)}
               placeholder="e.g. House 42, Road 7, Block D, Banani, Dhaka-1213 or মিরপুর ১০, সেনপাড়া পর্বতা, ঢাকা ১২১৬"
-              className="w-full rounded-2xl border border-border/80 bg-surface-muted/50 p-3.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-surface-elevated transition-colors resize-none font-sans"
+              className="w-full rounded-2xl bg-field p-3.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-surface-elevated transition-colors resize-none font-sans hover:bg-field-hover"
             />
           </div>
         </div>
@@ -174,7 +174,7 @@ export function SmartAddressParser({
                     setAddressInput(sample.text);
                     void handleParse(sample.text);
                   }}
-                  className="text-caption font-medium px-3 py-1 rounded-xl border border-border/70 bg-surface-muted/60 hover:bg-surface-muted text-foreground transition-all flex items-center gap-1.5"
+                  className="text-caption font-medium px-3 py-1 rounded-xl bg-surface-muted/60 hover:bg-surface-muted text-foreground transition-all flex items-center gap-1.5"
                 >
                   <MapPin className="h-3 w-3 text-primary" />
                   <span>{sample.label}</span>
@@ -191,7 +191,7 @@ export function SmartAddressParser({
             size="sm"
             onClick={() => setAddressInput("")}
             disabled={!addressInput || isLoading}
-            className="flex items-center gap-1.5 text-xs rounded-xl border-border/80"
+            className="flex items-center gap-1.5 text-xs rounded-xl"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Clear
@@ -200,7 +200,7 @@ export function SmartAddressParser({
             type="button"
             onClick={() => void handleParse()}
             disabled={isLoading || !addressInput.trim()}
-            className="flex items-center gap-2 rounded-xl bg-primary shadow-md shadow-primary/20"
+            className="flex items-center gap-2 rounded-xl bg-primary"
           >
             <Search className="h-4 w-4" />
             {isLoading ? "Analyzing..." : "Parse & Extract"}
@@ -209,8 +209,8 @@ export function SmartAddressParser({
 
         {/* Parsed Result View */}
         {result && (
-          <div className="mt-6 border border-border/80 rounded-2xl bg-surface-muted/30 overflow-hidden shadow-xs">
-            <div className="p-4 border-b border-border/60 bg-surface-elevated flex items-center justify-between flex-wrap gap-2">
+          <div className="mt-6 rounded-2xl bg-surface-muted/30 overflow-hidden">
+            <div className="p-4 bg-surface-elevated flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
                 <span className="font-bold text-body-sm text-foreground">Extraction Result</span>
@@ -223,28 +223,28 @@ export function SmartAddressParser({
 
             <div className="p-5 space-y-4 text-body-sm">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                <div className="p-3 rounded-xl bg-surface-elevated/70">
                   <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     District
                   </span>
                   <p className="font-bold text-foreground text-body-md mt-0.5">{result.district}</p>
                 </div>
 
-                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                <div className="p-3 rounded-xl bg-surface-elevated/70">
                   <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     Thana / Upazila
                   </span>
                   <p className="font-bold text-foreground text-body-md mt-0.5">{result.thana}</p>
                 </div>
 
-                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                <div className="p-3 rounded-xl bg-surface-elevated/70">
                   <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     Area / Sector
                   </span>
                   <p className="font-semibold text-foreground mt-0.5">{result.area || "—"}</p>
                 </div>
 
-                <div className="p-3 rounded-xl border border-border/60 bg-surface-elevated/70">
+                <div className="p-3 rounded-xl bg-surface-elevated/70">
                   <span className="text-caption font-semibold text-muted-foreground block uppercase">
                     Postal Code
                   </span>
@@ -255,13 +255,13 @@ export function SmartAddressParser({
               </div>
 
               {/* Delivery Zone */}
-              <div className="border border-border/60 rounded-xl bg-surface-elevated/70 p-3.5 flex items-center justify-between flex-wrap gap-2">
+              <div className="rounded-xl bg-surface-elevated/70 p-3.5 flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <span className="text-caption font-semibold text-muted-foreground uppercase block">
                     Calculated Delivery Zone
                   </span>
                   <span
-                    className={`text-caption px-2.5 py-0.5 rounded-full border inline-block mt-1 font-semibold ${getZoneLabel(result.zone).color}`}
+                    className={`text-caption px-2.5 py-0.5 rounded-full inline-block mt-1 font-semibold ${getZoneLabel(result.zone).color}`}
                   >
                     {getZoneLabel(result.zone).label}
                   </span>
@@ -280,7 +280,7 @@ export function SmartAddressParser({
 
               {/* Suggested Corrections */}
               {result.suggestedCorrections && result.suggestedCorrections.length > 0 && (
-                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-caption space-y-1">
+                <div className="p-3.5 rounded-xl bg-warning/10 text-warning-soft-foreground text-caption space-y-1">
                   <div className="flex items-center gap-1.5 font-semibold">
                     <AlertTriangle className="h-3.5 w-3.5" />
                     <span>Typo Auto-Corrections & Recommendations:</span>
@@ -294,16 +294,16 @@ export function SmartAddressParser({
               )}
             </div>
 
-            <div className="p-4 bg-surface-muted/50 border-t border-border/60 flex items-center justify-between gap-2">
+            <div className="p-4 bg-surface-muted/50 flex items-center justify-between gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs rounded-xl border-border/80"
+                className="flex items-center gap-1.5 text-xs rounded-xl"
               >
                 {copied ? (
-                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  <Check className="h-3.5 w-3.5 text-success" />
                 ) : (
                   <Copy className="h-3.5 w-3.5" />
                 )}
@@ -315,7 +315,7 @@ export function SmartAddressParser({
                   type="button"
                   size="sm"
                   onClick={() => onApply(result)}
-                  className="flex items-center gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground shadow-sm"
+                  className="flex items-center gap-1.5 text-xs rounded-xl bg-primary text-primary-foreground"
                 >
                   <ArrowRight className="h-3.5 w-3.5" />
                   Auto-Fill Booking Fields

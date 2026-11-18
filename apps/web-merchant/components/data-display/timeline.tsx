@@ -6,12 +6,12 @@ import type { StatusTone } from "@/config/status";
 export type TimelineTone = StatusTone | "primary";
 
 const DOT_TONES: Record<TimelineTone, string> = {
-  primary: "bg-primary text-primary-foreground shadow-sm shadow-primary/30",
-  neutral: "bg-surface-elevated text-muted-foreground border border-border/80",
-  info: "bg-info-soft text-info-soft-foreground border border-info/30",
-  success: "bg-success-soft text-success-soft-foreground border border-success/30",
-  warning: "bg-warning-soft text-warning-soft-foreground border border-warning/30",
-  danger: "bg-danger-soft text-danger-soft-foreground border border-danger/30",
+  primary: "bg-primary text-primary-foreground",
+  neutral: "bg-surface-elevated text-muted-foreground",
+  info: "bg-info-soft text-info-soft-foreground",
+  success: "bg-success-soft text-success-soft-foreground",
+  warning: "bg-warning-soft text-warning-soft-foreground",
+  danger: "bg-danger-soft text-danger-soft-foreground",
 };
 
 export interface TimelineProps {
@@ -66,9 +66,9 @@ export function TimelineItem({
         <div
           aria-hidden="true"
           className={cn(
-            "relative z-10 flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-xs transition-all duration-200",
+            "relative z-10 flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200",
             DOT_TONES[tone],
-            current && "ring-2 ring-primary ring-offset-2 ring-offset-background scale-105",
+            current && "ring-offset-2 ring-offset-background scale-105",
           )}
         >
           {icon ?? <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 stroke-[2.5]" aria-hidden="true" />}

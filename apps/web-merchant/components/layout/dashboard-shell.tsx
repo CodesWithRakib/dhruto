@@ -41,7 +41,6 @@ import { useAppSelector } from "@/store/hooks";
 import { useSignOut } from "@/lib/auth/session";
 import { NotificationBell } from "@/components/notification-bell";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
@@ -189,7 +188,7 @@ export function DashboardShell({
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-background text-foreground">
         {/* Desktop & Mobile Collapsible Sidebar */}
-        <Sidebar collapsible="icon" className="border-r-0 bg-surface/90">
+        <Sidebar collapsible="icon" className="bg-surface/90">
           <SidebarHeader className="p-3">
             <Link
               href="/"
@@ -217,9 +216,8 @@ export function DashboardShell({
           {/* Tactical Atmospheric Background with dot-matrix & ambient blooms */}
           <DashboardCanvasBg className="fixed inset-0 pointer-events-none" />
 
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/80 bg-surface/80 backdrop-blur-xl px-4 sm:px-6 shadow-xs">
-            {/* Luminous bottom specular line */}
-            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent pointer-events-none" />
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 bg-surface/80 backdrop-blur-xl px-4 sm:px-6">
+            {/* Luminous bottom specular line */}
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger />
               <Link href="/" aria-label="Dhruto" className="lg:hidden">
@@ -232,7 +230,6 @@ export function DashboardShell({
 
             <div className="flex items-center gap-2">
               <LanguageSwitcher currentLocale={locale} label={t("language")} />
-              <ThemeSwitcher />
               <NotificationBell />
               {/* User Profile Dropdown */}
               <DropdownMenu>
@@ -242,7 +239,7 @@ export function DashboardShell({
                     className="flex items-center gap-2.5 rounded-xl p-1.5 text-left transition-all duration-200 hover:bg-surface-muted focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 pl-3 ml-1"
                     aria-label={t("accountMenu")}
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-emerald-600 text-xs font-bold text-white">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-success text-xs font-bold text-white">
                       {(user?.name || "M").charAt(0).toUpperCase()}
                     </div>
                     <div className="hidden flex-col text-left sm:flex">
@@ -263,7 +260,7 @@ export function DashboardShell({
                   align="end"
                   className="w-56 p-1.5 rounded-2xl bg-surface-elevated"
                 >
-                  <div className="px-3 py-2 border-b border-surface-muted mb-1">
+                  <div className="px-3 py-2 mb-1">
                     <p className="text-xs font-bold text-foreground truncate">
                       {user?.name ?? "Merchant"}
                     </p>

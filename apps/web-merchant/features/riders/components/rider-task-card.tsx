@@ -39,8 +39,8 @@ function StatusBadge({ status }: { status: string }) {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-3 py-1 text-[11px] font-bold text-warning-soft-foreground">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warning opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-warning" />
           </span>
           Out for Delivery
         </span>
@@ -54,8 +54,8 @@ function StatusBadge({ status }: { status: string }) {
       );
     case "CASH_PENDING":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-800 dark:text-amber-200">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-3 py-1 text-[11px] font-bold text-warning-soft-foreground">
+          <span className="h-1.5 w-1.5 rounded-full bg-warning" />
           Cash Pending
         </span>
       );
@@ -131,8 +131,8 @@ export function RiderTaskCard({ task, onStartDelivery, isStarting = false }: Rid
         <div className="flex items-start justify-between gap-2">
           <h4 className="text-base font-bold text-foreground">{task.recipientName}</h4>
           {task.codAmount > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-xl bg-amber-500/10 px-2.5 py-1 font-mono text-xs font-bold tabular-nums text-amber-800 dark:text-amber-200">
-              <span className="text-[10px] font-medium uppercase text-amber-700/80 dark:text-amber-400">COD</span>
+            <span className="inline-flex items-center gap-1 rounded-xl bg-warning/10 px-2.5 py-1 font-mono text-xs font-bold tabular-nums text-warning-soft-foreground">
+              <span className="text-[10px] font-medium uppercase text-warning-soft-foreground/80">COD</span>
               {bdt(task.codAmount)}
             </span>
           ) : (
@@ -159,7 +159,7 @@ export function RiderTaskCard({ task, onStartDelivery, isStarting = false }: Rid
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2.5 border-t border-surface-muted pt-3">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3">
         <div className="flex items-center gap-2">
           <a
             href={`tel:${task.recipientPhone}`}
@@ -196,7 +196,7 @@ export function RiderTaskCard({ task, onStartDelivery, isStarting = false }: Rid
               size="sm"
               onClick={() => onStartDelivery(task.id)}
               disabled={isStarting}
-              className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold shadow-xs"
+              className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {isStarting ? t("details.starting") : t("details.startDelivery")}

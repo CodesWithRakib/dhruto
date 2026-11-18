@@ -12,7 +12,7 @@ interface DistrictDistributionCardProps {
 export function DistrictDistributionCard({ districts }: DistrictDistributionCardProps) {
   if (!districts || districts.length === 0) {
     return (
-      <Card className="shadow-sm border-border">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Geographic Destination Spread</CardTitle>
           <CardDescription>Top districts receiving customer deliveries</CardDescription>
@@ -27,8 +27,8 @@ export function DistrictDistributionCard({ districts }: DistrictDistributionCard
   }
 
   return (
-    <Card className="shadow-sm border-primary/20">
-      <CardHeader className="border-b bg-muted/20">
+    <Card>
+      <CardHeader className="bg-muted/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-primary/10 text-primary rounded-lg">
@@ -63,7 +63,7 @@ export function DistrictDistributionCard({ districts }: DistrictDistributionCard
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="font-semibold text-success">
                   {item.successRate}% Success
                 </span>
                 <span className="font-mono text-xs font-bold text-foreground">

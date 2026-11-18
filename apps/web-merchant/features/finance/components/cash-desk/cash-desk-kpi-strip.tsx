@@ -44,18 +44,14 @@ export function CashDeskKpiStrip({
   return (
     <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
       {summaryCards.map((card) => (
-        <div key={card.label} className="relative overflow-hidden rounded-3xl shadow-sm">
+        <div key={card.label} className="relative overflow-hidden rounded-3xl">
           {/* Specular top highlight */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-            aria-hidden="true"
-          />
           <KpiCard
             label={card.label}
             value={card.value}
             icon={card.icon}
             tone={card.tone}
-            className="rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md"
+            className="rounded-3xl bg-card/90 backdrop-blur-md"
           />
         </div>
       ))}

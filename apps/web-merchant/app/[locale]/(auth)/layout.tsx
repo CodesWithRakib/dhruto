@@ -45,7 +45,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <ul className="flex flex-wrap gap-5">
               {FEATURES.map(({ icon: Icon, title, sub }) => (
                 <li key={title} className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[hsl(var(--hero-dark-foreground)/0.15)] bg-[hsl(var(--hero-dark-foreground)/0.08)] text-[hsl(var(--hero-dark-foreground))]">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[hsl(var(--hero-dark-foreground)/0.08)] text-[hsl(var(--hero-dark-foreground))]">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <span className="leading-tight">

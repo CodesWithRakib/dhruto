@@ -24,7 +24,7 @@ export function ParcelContextBar({
   const t = useTranslations("Chat");
   return (
     <div
-      className="flex shrink-0 items-center gap-2 border-b border-border bg-muted/40 px-3 py-2 text-xs sm:px-4"
+      className="flex shrink-0 items-center gap-2 bg-muted/40 px-3 py-2 text-xs sm:px-4"
       aria-label={t("parcelContext")}
       role="region"
     >

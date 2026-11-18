@@ -190,7 +190,7 @@ export function BulkImportDialog({ open, onOpenChange }: BulkImportDialogProps) 
             {previewRows.slice(0, 8).map(({ row, quote }) => (
               <div
                 key={`${row.recipientPhone}-${row.recipientName}`}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm"
               >
                 <span className="truncate font-medium">{row.recipientName}</span>
                 <span className="shrink-0 font-mono text-xs text-muted-foreground">

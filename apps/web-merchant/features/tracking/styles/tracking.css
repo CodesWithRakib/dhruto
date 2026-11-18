@@ -82,10 +82,8 @@
 
 @keyframes track-pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 15px -3px var(--glow-color, rgba(255, 107, 0, 0.3));
   }
   50% {
-    box-shadow: 0 0 30px 2px var(--glow-color, rgba(255, 107, 0, 0.6));
   }
 }
 
@@ -99,9 +97,7 @@
   max-width: 420px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: radial-gradient(circle at center, rgba(16, 24, 38, 0.95) 0%, rgba(8, 12, 20, 0.98) 100%);
-  box-shadow: 0 0 50px -10px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.8);
+  background: radial-gradient(circle at center, rgba(16, 24, 38, 0.95) 0%, hsl(var(--inverse) / 0.98) 100%);
   overflow: hidden;
   margin: 0 auto;
 }
@@ -112,7 +108,6 @@
   position: absolute;
   inset: 16%;
   border-radius: 50%;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
 
@@ -121,7 +116,6 @@
   position: absolute;
   inset: 34%;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   pointer-events: none;
 }
 
@@ -129,7 +123,6 @@
   position: absolute;
   inset: 52%;
   border-radius: 50%;
-  border: 1px dashed rgba(255, 255, 255, 0.15);
   pointer-events: none;
 }
 
@@ -160,8 +153,8 @@
     from 0deg,
     transparent 0deg,
     transparent 280deg,
-    rgba(255, 107, 0, 0.08) 320deg,
-    rgba(255, 107, 0, 0.35) 360deg
+    hsl(var(--primary) / 0.08) 320deg,
+    hsl(var(--primary) / 0.35) 360deg
   );
   animation: track-radar-sweep 4s linear infinite;
   pointer-events: none;
@@ -173,9 +166,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #ff6b00;
+  background-color: hsl(var(--primary));
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px #ff6b00;
 }
 
 .track-radar-blip::after {
@@ -183,7 +175,6 @@
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 1.5px solid #ff6b00;
   animation: track-radar-ping 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
@@ -193,10 +184,8 @@
 
 .track-cockpit-card {
   position: relative;
-  background: rgba(18, 22, 32, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: hsl(var(--inverse) / 0.85);
   border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   overflow: hidden;
@@ -204,8 +193,6 @@
 
 .light .track-cockpit-card {
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.04);
 }
 
 /* Corner cyber brackets for HUD feel */
@@ -216,8 +203,6 @@
   left: 10px;
   width: 12px;
   height: 12px;
-  border-top: 2px solid rgba(255, 107, 0, 0.6);
-  border-left: 2px solid rgba(255, 107, 0, 0.6);
   pointer-events: none;
 }
 
@@ -228,8 +213,6 @@
   right: 10px;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid rgba(255, 107, 0, 0.6);
-  border-right: 2px solid rgba(255, 107, 0, 0.6);
   pointer-events: none;
 }
 
@@ -245,22 +228,19 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.9);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
 .light .track-sample-chip {
-  background: rgba(15, 23, 42, 0.04);
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  color: rgba(15, 23, 42, 0.85);
+  background: hsl(var(--foreground) / 0.04);
+  color: hsl(var(--foreground) / 0.85);
 }
 
 .track-sample-chip:hover {
-  background: rgba(255, 107, 0, 0.14);
-  border-color: rgba(255, 107, 0, 0.5);
-  color: #ff6b00;
+  background: hsl(var(--primary) / 0.14);
+  color: hsl(var(--primary));
   transform: translateY(-1px);
 }
 
@@ -271,17 +251,13 @@
 .track-flight-deck {
   position: relative;
   background: rgba(14, 18, 28, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1.75rem;
   overflow: hidden;
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px);
 }
 
 .light .track-flight-deck {
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(15, 23, 42, 0.09);
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.04);
 }
 
 /* Flight Stage Nav Tab */
@@ -292,7 +268,6 @@
   gap: 0.75rem;
   padding: 0.85rem 1.1rem;
   border-radius: 1rem;
-  border: 1px solid transparent;
   background: transparent;
   color: rgba(255, 255, 255, 0.65);
   text-align: left;
@@ -302,7 +277,7 @@
 }
 
 .light .track-flight-tab {
-  color: rgba(15, 23, 42, 0.65);
+  color: hsl(var(--foreground) / 0.65);
 }
 
 .track-flight-tab:hover {
@@ -311,28 +286,24 @@
 }
 
 .light .track-flight-tab:hover {
-  background: rgba(15, 23, 42, 0.04);
-  color: #0f172a;
+  background: hsl(var(--foreground) / 0.04);
+  color: hsl(var(--foreground));
 }
 
 .track-flight-tab.is-active {
-  background: rgba(255, 107, 0, 0.12);
-  border-color: rgba(255, 107, 0, 0.4);
+  background: hsl(var(--primary) / 0.12);
   color: #ffffff;
-  box-shadow: 0 4px 20px -2px rgba(255, 107, 0, 0.2);
 }
 
 .light .track-flight-tab.is-active {
-  background: rgba(255, 107, 0, 0.08);
-  border-color: rgba(255, 107, 0, 0.35);
-  color: #0f172a;
+  background: hsl(var(--primary) / 0.08);
+  color: hsl(var(--foreground));
 }
 
 /* Flight HUD Screen */
 .track-flight-screen {
   position: relative;
-  background: rgba(8, 12, 20, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: hsl(var(--inverse) / 0.95);
   border-radius: 1.25rem;
   padding: 1.5rem;
   overflow: hidden;
@@ -340,7 +311,6 @@
 
 .light .track-flight-screen {
   background: rgba(248, 250, 252, 0.95);
-  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 /* Terminal Log Window */
@@ -349,24 +319,22 @@
   font-size: 0.72rem;
   line-height: 1.6;
   background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  color: #10b981;
+  color: hsl(var(--success));
   max-height: 110px;
   overflow-y: auto;
 }
 
 .light .track-terminal-box {
-  background: #0f172a;
-  border-color: rgba(0, 0, 0, 0.1);
-  color: #34d399;
+  background: hsl(var(--foreground));
+  color: hsl(var(--success));
 }
 
 /* Auto-Advance Progress Bar */
 .track-flight-timer-bar {
   height: 2px;
-  background: linear-gradient(90deg, #10b981, #ff6b00);
+  background: linear-gradient(90deg, hsl(var(--success)), hsl(var(--primary)));
   transition: width 0.1s linear;
 }
 
@@ -395,23 +363,18 @@
 .track-bento-card {
   position: relative;
   background: var(--surface, #ffffff);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.25rem;
   padding: 1.5rem;
   overflow: hidden;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
 .light .track-bento-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
   background: #ffffff;
 }
 
 .track-bento-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 107, 0, 0.35);
-  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 107, 0, 0.15);
 }
 
 /* Watermark mask icon */
@@ -438,29 +401,22 @@
 .track-protocol-card {
   position: relative;
   background: var(--surface, #ffffff);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1.5rem;
   padding: 1.75rem;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 25px -4px rgba(0, 0, 0, 0.05);
 }
 
 .light .track-protocol-card {
   background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04);
 }
 
 .track-protocol-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 107, 0, 0.4);
-  box-shadow: 0 20px 40px -10px rgba(255, 107, 0, 0.12);
 }
 
 /* Simulated Message Widget inside Protocol Step 1 */
 .track-sim-sms {
-  background: rgba(15, 23, 42, 0.05);
-  border: 1px dashed rgba(255, 107, 0, 0.3);
+  background: hsl(var(--foreground) / 0.05);
   border-radius: 0.875rem;
   padding: 0.75rem 1rem;
   font-family: var(--font-mono, monospace);
@@ -479,8 +435,7 @@
   position: relative;
   border-radius: 1.5rem;
   overflow: hidden;
-  border: 1px solid var(--status-border, rgba(255, 107, 0, 0.25));
-  background: var(--status-bg, rgba(255, 107, 0, 0.05));
+  background: var(--status-bg, hsl(var(--primary) / 0.05));
   padding: 1.75rem;
   backdrop-filter: blur(12px);
   transition: all 0.3s ease;
@@ -488,27 +443,27 @@
 
 /* Status variants */
 .track-status-masthead[data-status-type="delivered"] {
-  --status-border: rgba(16, 185, 129, 0.35);
-  --status-bg: rgba(16, 185, 129, 0.08);
-  --glow-color: rgba(16, 185, 129, 0.4);
+  --status-border: hsl(var(--success) / 0.35);
+  --status-bg: hsl(var(--success) / 0.08);
+  --glow-color: hsl(var(--success) / 0.4);
 }
 
 .track-status-masthead[data-status-type="transit"] {
-  --status-border: rgba(245, 158, 11, 0.35);
-  --status-bg: rgba(245, 158, 11, 0.08);
-  --glow-color: rgba(245, 158, 11, 0.4);
+  --status-border: hsl(var(--warning) / 0.35);
+  --status-bg: hsl(var(--warning) / 0.08);
+  --glow-color: hsl(var(--warning) / 0.4);
 }
 
 .track-status-masthead[data-status-type="out_for_delivery"] {
-  --status-border: rgba(6, 182, 212, 0.35);
-  --status-bg: rgba(6, 182, 212, 0.08);
-  --glow-color: rgba(6, 182, 212, 0.4);
+  --status-border: hsl(var(--info) / 0.35);
+  --status-bg: hsl(var(--info) / 0.08);
+  --glow-color: hsl(var(--info) / 0.4);
 }
 
 .track-status-masthead[data-status-type="return"] {
-  --status-border: rgba(239, 68, 68, 0.35);
-  --status-bg: rgba(239, 68, 68, 0.08);
-  --glow-color: rgba(239, 68, 68, 0.4);
+  --status-border: hsl(var(--danger) / 0.35);
+  --status-bg: hsl(var(--danger) / 0.08);
+  --glow-color: hsl(var(--danger) / 0.4);
 }
 
 .track-status-beacon {
@@ -527,7 +482,6 @@
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  border: 1.5px solid currentColor;
   animation: track-radar-ping 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
@@ -537,15 +491,13 @@
 
 .track-command-header {
   position: relative;
-  background: rgba(18, 22, 32, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: hsl(var(--inverse) / 0.95);
   padding: 1.5rem 0;
   backdrop-filter: blur(16px);
 }
 
 .light .track-command-header {
   background: #ffffff;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 /* --------------------------------------------------------------------------
@@ -555,7 +507,6 @@
 .track-not-found-cockpit {
   position: relative;
   background: rgba(20, 24, 34, 0.85);
-  border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: 1.5rem;
   padding: 2.5rem 1.5rem;
   backdrop-filter: blur(16px);
@@ -564,8 +515,6 @@
 
 .light .track-not-found-cockpit {
   background: #ffffff;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  box-shadow: 0 20px 40px -15px rgba(245, 158, 11, 0.08);
 }
 
 /* Mobile & Print Optimizations */
@@ -579,7 +528,6 @@
   }
   .track-cockpit-card,
   .track-status-masthead {
-    border: 1px solid #ccc !important;
     box-shadow: none !important;
     background: #fff !important;
   }

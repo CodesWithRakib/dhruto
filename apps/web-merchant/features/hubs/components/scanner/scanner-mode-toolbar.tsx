@@ -50,7 +50,7 @@ export function ScannerModeToolbar({
 
   return (
     <div
-      className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-2 sm:p-2.5 shadow-xs"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-card/90 backdrop-blur-md p-2 sm:p-2.5"
       role="toolbar"
       aria-label={t("scanner.title")}
     >
@@ -65,7 +65,7 @@ export function ScannerModeToolbar({
               aria-pressed={isActive}
               className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-xs"
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
               }`}
             >
@@ -87,7 +87,7 @@ export function ScannerModeToolbar({
         >
           {soundEnabled ? (
             <>
-              <Volume2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <Volume2 className="h-4 w-4 text-success" aria-hidden="true" />
               <span className="font-semibold">{t("scanner.audioOn")}</span>
             </>
           ) : (

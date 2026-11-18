@@ -17,7 +17,7 @@ export function RiderHandInsHistoryCard({ handIns }: RiderHandInsHistoryCardProp
 
   return (
     <div className="space-y-3 rounded-3xl bg-surface-elevated p-5 sm:p-6">
-      <div className="flex items-center justify-between border-b border-border/20 pb-4">
+      <div className="flex items-center justify-between pb-4">
         <div className="flex items-center gap-2">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Recent Hand-in Batches

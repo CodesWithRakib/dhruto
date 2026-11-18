@@ -52,7 +52,7 @@ export function TrackFlightDeck() {
         <button
           type="button"
           onClick={() => setIsAutoPlay(!isAutoPlay)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-xs font-mono text-white/80 hover:bg-white/10 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1 text-xs font-mono text-white/80 hover:bg-white/10 transition-colors"
           title={isAutoPlay ? "Pause live telemetry simulation" : "Play live telemetry simulation"}
         >
           {isAutoPlay ? (
@@ -74,7 +74,7 @@ export function TrackFlightDeck() {
           <div className="track-flight-timer-bar" style={{ width: `${progress}%` }} />
         ) : null}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-3 border-b border-white/10 bg-black/20">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-3 bg-black/20">
           {FLIGHT_STAGES.map((stage) => {
             const Icon = stage.icon;
             const isActive = activeStage.id === stage.id;
@@ -86,10 +86,10 @@ export function TrackFlightDeck() {
                 className={`track-flight-tab ${isActive ? "is-active" : ""}`}
               >
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-mono font-bold transition-all ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-mono font-bold transition-all ${
                     isActive
-                      ? "bg-[var(--acc)] border-[var(--acc)] text-black"
-                      : "bg-white/5 border-white/10 text-white/70"
+                      ? "bg-[var(--acc)] text-black"
+                      : "bg-white/5 text-white/70"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function TrackFlightDeck() {
 
         <div className="p-4 sm:p-6 bg-gradient-to-b from-black/40 to-black/70 space-y-5">
           <div className="grid gap-4 lg:grid-cols-12 items-center">
-            <div className="lg:col-span-5 rounded-2xl border border-white/10 bg-black/40 p-4 relative overflow-hidden">
+            <div className="lg:col-span-5 rounded-2xl bg-black/40 p-4 relative overflow-hidden">
               <div className="flex items-center justify-between text-[11px] font-mono text-white/60 mb-2">
                 <span className="flex items-center gap-1.5 text-[var(--acc)] font-bold">
                   <Navigation className="h-3.5 w-3.5" />
@@ -138,14 +138,14 @@ export function TrackFlightDeck() {
                   />
                   <defs>
                     <linearGradient id="routeGrad" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#10b981" />
-                      <stop offset="50%" stopColor="#ff6b00" />
-                      <stop offset="100%" stopColor="#38bdf8" />
+                      <stop offset="0%" style={{ stopColor: "hsl(var(--success))" }} />
+                      <stop offset="50%" style={{ stopColor: "hsl(var(--primary))" }} />
+                      <stop offset="100%" style={{ stopColor: "hsl(var(--info))" }} />
                     </linearGradient>
                   </defs>
-                  <circle cx="20" cy="40" r="6" fill="#10b981" />
-                  <circle cx="160" cy="40" r="6" fill="#ff6b00" />
-                  <circle cx="300" cy="40" r="6" fill="#38bdf8" />
+                  <circle cx="20" cy="40" r="6" className="fill-success" />
+                  <circle cx="160" cy="40" r="6" className="fill-primary" />
+                  <circle cx="300" cy="40" r="6" className="fill-info" />
                 </svg>
 
                 <div className="absolute bottom-1 left-2 font-mono text-[10px] text-white/50">
@@ -161,28 +161,28 @@ export function TrackFlightDeck() {
             </div>
 
             <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <div className="rounded-xl bg-white/5 p-3">
                 <span className="text-[10px] font-mono text-white/50 uppercase block">Current Location</span>
                 <span className="text-xs font-bold text-white mt-1 block truncate">
                   {activeStage.hub}
                 </span>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <div className="rounded-xl bg-white/5 p-3">
                 <span className="text-[10px] font-mono text-white/50 uppercase block">GPS Coordinates</span>
                 <span className="text-xs font-mono font-bold text-[var(--acc)] mt-1 block truncate">
                   {activeStage.coords}
                 </span>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <div className="rounded-xl bg-white/5 p-3">
                 <span className="text-[10px] font-mono text-white/50 uppercase block">Security Seal</span>
                 <span className="text-xs font-mono font-bold text-white mt-1 block truncate">
                   {activeStage.seal}
                 </span>
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <div className="rounded-xl bg-white/5 p-3">
                 <span className="text-[10px] font-mono text-white/50 uppercase block">Status / ETA</span>
                 <span className="text-xs font-bold text-success mt-1 block truncate">
                   {activeStage.eta}
@@ -203,7 +203,7 @@ export function TrackFlightDeck() {
               {activeStage.logs.map((log, index) => (
                 <div key={index} className="flex items-start gap-2">
                   <span className="text-white/40 select-none">&gt;</span>
-                  <span className="text-emerald-400">{log}</span>
+                  <span className="text-success">{log}</span>
                 </div>
               ))}
             </div>

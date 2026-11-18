@@ -237,7 +237,7 @@ export function StackingOperations() {
                           <b>Batch Settlement #4102</b>
                           Auto-transferred to City Bank
                         </span>
-                        <em className="text-emerald-600">+৳ 32,400</em>
+                        <em className="text-success">+৳ 32,400</em>
                       </div>
                       <div>
                         <i />
@@ -245,14 +245,14 @@ export function StackingOperations() {
                           <b>bKash Merchant Disburse</b>
                           Dispatched today
                         </span>
-                        <em className="text-emerald-600">+৳ 15,850</em>
+                        <em className="text-success">+৳ 15,850</em>
                       </div>
                     </div>
                   </div>
 
                   <div className="flo o2">
                     <small>Auto-Disbursed 09:30 AM</small>
-                    <b className="text-emerald-700">✓ ৳ 48,250 Transferred</b>
+                    <b className="text-success-soft-foreground">✓ ৳ 48,250 Transferred</b>
                   </div>
                 </div>
               </div>
@@ -327,7 +327,7 @@ export function StackingOperations() {
                             Parcels Today<b>18,420</b>
                           </div>
                           <div>
-                            SLA Compliance<b>99.98%</b>
+                            Districts covered<b>64</b>
                           </div>
                         </div>
                         <div className="ec">
@@ -349,7 +349,7 @@ export function StackingOperations() {
 
                   <div className="flo o3">
                     <small>Line-Haul Radar</small>
-                    <b className="text-blue-600">✓ Dhaka → Chittagong Dispatched</b>
+                    <b className="text-info">✓ Dhaka → Chittagong Dispatched</b>
                   </div>
                 </div>
               </div>

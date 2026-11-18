@@ -19,7 +19,7 @@ import { useGetInboxInfiniteQuery, type InboxArgs } from "../api/chat-admin.api"
 import { ESCALATION_TONE, formatDateTime } from "../lib/admin";
 
 const SELECT_CLASS =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "h-10 w-full rounded-md bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 /**
  * Operational inbox (server-side filters, exact identifier search, keyset
@@ -161,7 +161,7 @@ export function InboxPanel({
         <EmptyState icon={Inbox} title={t("inbox.empty")} description={t("inbox.emptyHint")} />
       ) : (
         <ul
-          className="divide-y divide-border/60 overflow-hidden rounded-xl bg-card"
+          className="overflow-hidden rounded-xl bg-card"
           aria-label={t("inbox.results")}
         >
           {items.map((item) => (

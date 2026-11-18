@@ -165,7 +165,7 @@ export function MessageComposer({
 
   if (disabled) {
     return (
-      <div className="border-t border-border bg-surface px-4 py-3 text-center text-sm text-muted-foreground" role="status">
+      <div className="bg-surface px-4 py-3 text-center text-sm text-muted-foreground" role="status">
         {disabledReason}
       </div>
     );
@@ -177,10 +177,10 @@ export function MessageComposer({
   return (
     <form
       onSubmit={submit}
-      className="relative border-t border-border bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-4"
+      className="relative bg-surface px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-4"
     >
       {reply && (
-        <div className="mb-2 flex items-start gap-2 rounded-lg border-s-2 border-primary bg-muted px-3 py-2 text-xs">
+        <div className="mb-2 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs">
           <div className="min-w-0 flex-1">
             <p className="font-semibold">{t("replyingTo", { name: reply.name })}</p>
             <p className="truncate text-muted-foreground">{reply.preview ?? t("originalUnavailable")}</p>
@@ -238,7 +238,7 @@ export function MessageComposer({
                 if (event.target.value.trim()) onTyping();
               }}
               className={cn(
-                "max-h-40 min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-input bg-background px-4 py-2.5 text-sm leading-relaxed",
+                "max-h-40 min-h-[2.75rem] flex-1 resize-none rounded-2xl bg-background px-4 py-2.5 text-sm leading-relaxed",
                 "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               )}
               {...field}

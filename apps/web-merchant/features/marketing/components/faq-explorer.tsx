@@ -52,7 +52,7 @@ export function FaqExplorer({ items }: { items: FaqExplorerItem[] }) {
       </p>
 
       {filtered.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-border/60 bg-surface p-10 text-center shadow-soft">
+        <div className="mt-6 rounded-2xl bg-surface p-10 text-center">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-muted text-muted-foreground">
             <SearchX className="h-6 w-6" aria-hidden="true" />
           </span>
@@ -64,18 +64,18 @@ export function FaqExplorer({ items }: { items: FaqExplorerItem[] }) {
           {filtered.map((item) => (
             <details
               key={item.question}
-              className="group overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-soft transition-colors hover:border-primary/40 open:border-primary/50"
+              className="group overflow-hidden rounded-2xl bg-surface transition-colors"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-base font-bold text-foreground select-none sm:p-6 sm:text-lg">
                 <span>{item.question}</span>
                 <span
                   aria-hidden="true"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-surface-muted/60 text-muted-foreground transition-transform duration-200 group-open:rotate-180 group-open:border-primary/30 group-open:bg-primary/10 group-open:text-primary"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-muted/60 text-muted-foreground transition-transform duration-200 group-open:rotate-180 group-open:bg-primary/10 group-open:text-primary"
                 >
                   <ChevronDown className="h-4 w-4" />
                 </span>
               </summary>
-              <div className="mt-1 border-t border-border/30 px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
+              <div className="mt-1 px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
                 <p className="pt-3 text-body leading-relaxed text-muted-foreground">{item.answer}</p>
               </div>
             </details>

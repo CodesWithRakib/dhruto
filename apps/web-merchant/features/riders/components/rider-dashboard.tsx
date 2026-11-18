@@ -106,10 +106,10 @@ export function RiderDashboard() {
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
             {onDuty ? (
-              <span className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/20 px-3.5 py-2 text-xs font-bold text-emerald-200">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-success/20 px-3.5 py-2 text-xs font-bold text-success-soft">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
                 {t("onDuty")}
               </span>
@@ -124,7 +124,7 @@ export function RiderDashboard() {
               size="sm"
               onClick={handleDutyToggle}
               disabled={isTogglingDuty}
-              className="gap-1.5 rounded-xl shadow-2xs"
+              className="gap-1.5 rounded-xl"
             >
               <Power className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{onDuty ? t("goOffDuty") : t("goOnDuty")}</span>
@@ -134,7 +134,7 @@ export function RiderDashboard() {
               size="icon"
               onClick={handleRefresh}
               aria-label={t("refresh")}
-              className="rounded-xl shadow-2xs"
+              className="rounded-xl"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isFetchingTasks ? "animate-spin" : ""}`} aria-hidden="true" />
             </Button>

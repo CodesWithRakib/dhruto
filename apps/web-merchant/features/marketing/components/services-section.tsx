@@ -31,7 +31,7 @@ export function ServicesSection() {
             <ul>
               <li>60-Minute Metro Rapid Pickup</li>
               <li>Automated Next-Day Bank &amp; MFS COD</li>
-              <li>100% Escrow Cargo Insurance</li>
+              <li>COD tracked from doorstep to payout</li>
               <li>Real-time GPS Line-Haul Tracking</li>
             </ul>
             <Link href="/register" className="btn-bl inline-flex items-center gap-2 mt-auto self-start">

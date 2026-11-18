@@ -103,7 +103,7 @@ export function IntegrationDlqTable({
               .map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px]"
+                  className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px]"
                 >
                   <span className="max-w-[180px] truncate font-mono">{f.jobId ?? f.id}</span>
                   <Button

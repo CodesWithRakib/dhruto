@@ -31,12 +31,8 @@ export function ManifestReceiveCard({
   const t = useTranslations("Hub");
 
   return (
-    <div className="relative rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-4 shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-4">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
 
       <div>
         <h2 className="text-sm font-bold text-foreground">{t("manifests.receiveTitle")}</h2>
@@ -52,12 +48,12 @@ export function ManifestReceiveCard({
           onChange={(event) => setBagCodeInput(event.target.value)}
           placeholder={t("manifests.bagCodePlaceholder")}
           aria-label={t("manifests.scannedBags")}
-          className="h-12 rounded-2xl border border-border/50 bg-surface-muted/60 font-mono uppercase focus:bg-background"
+          className="h-12 rounded-2xl bg-surface-muted/60 font-mono uppercase focus:bg-background"
         />
         <Button
           type="submit"
           disabled={!bagCodeInput.trim()}
-          className="h-12 rounded-2xl px-6 font-semibold shadow-xs"
+          className="h-12 rounded-2xl px-6 font-semibold"
         >
           {t("manifests.addScannedBag")}
         </Button>
@@ -96,7 +92,7 @@ export function ManifestReceiveCard({
         <Button
           onClick={onReceive}
           disabled={isReceiving}
-          className="w-full gap-1.5 rounded-2xl sm:w-auto font-semibold shadow-xs"
+          className="w-full gap-1.5 rounded-2xl sm:w-auto font-semibold"
         >
           <PackageCheck className="h-4 w-4" aria-hidden="true" />
           {isReceiving ? t("manifests.receiving") : t("manifests.completeReceive")}

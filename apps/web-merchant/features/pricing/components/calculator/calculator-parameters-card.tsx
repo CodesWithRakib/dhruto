@@ -33,7 +33,7 @@ export function CalculatorParametersCard({
   return (
     <>
       {/* 2. Parcel Billable Weight Slider */}
-      <div className="mt-8 pt-6 border-t border-border/60">
+      <div className="mt-8 pt-6">
         <div className="flex items-center justify-between">
           <div>
             <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
@@ -49,7 +49,7 @@ export function CalculatorParametersCard({
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
-            <div className="rounded-xl bg-primary/10 border border-primary/20 px-3 py-1 font-mono text-sm font-bold text-primary">
+            <div className="rounded-xl bg-primary/10 px-3 py-1 font-mono text-sm font-bold text-primary">
               {weightKg.toFixed(1)} kg
             </div>
             <button
@@ -82,7 +82,7 @@ export function CalculatorParametersCard({
         </div>
 
         {extraKg > 0 && (
-          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 border border-primary/20 px-3.5 py-2 text-xs text-foreground">
+          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3.5 py-2 text-xs text-foreground">
             <Scale className="h-3.5 w-3.5 text-primary" />
             <span>
               {t("extraWeightNote", { extraKg, rate: selectedZone.perKg, fee: extraWeightFee })}
@@ -92,7 +92,7 @@ export function CalculatorParametersCard({
       </div>
 
       {/* 3. Cash-on-Delivery (COD) Amount Slider */}
-      <div className="mt-8 pt-6 border-t border-border/60">
+      <div className="mt-8 pt-6">
         <div className="flex items-center justify-between">
           <div>
             <label className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
@@ -108,7 +108,7 @@ export function CalculatorParametersCard({
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
-            <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="rounded-xl bg-success/10 px-3 py-1 font-mono text-sm font-bold text-success">
               ৳{codAmount.toLocaleString()}
             </div>
             <button
@@ -142,8 +142,8 @@ export function CalculatorParametersCard({
       </div>
 
       {/* 4. Packaging & Fragile Add-on Option */}
-      <div className="mt-8 pt-6 border-t border-border/60">
-        <label className="flex items-center justify-between rounded-2xl border border-border/70 bg-surface-muted/60 p-4 cursor-pointer transition hover:bg-surface-muted">
+      <div className="mt-8 pt-6">
+        <label className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-4 cursor-pointer transition hover:bg-surface-muted">
           <div className="flex items-center gap-3">
             <Box className="h-5 w-5 text-primary" />
             <div>

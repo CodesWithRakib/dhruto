@@ -26,7 +26,7 @@ export function AboutHero() {
 
       <div className="dhruto-container relative z-10 max-w-6xl mx-auto px-4">
         {/* Eyebrow Pill */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-[var(--acc)] mb-6 shadow-sm">
+        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-[var(--acc)] mb-6">
           <Sparkles className="h-3.5 w-3.5" />
           <span>{t("badge")}</span>
           <span className="hidden sm:inline text-white/40">•</span>
@@ -51,7 +51,7 @@ export function AboutHero() {
           <Link href="/register">
             <Button
               size="lg"
-              className="btn-bl h-12 px-7 rounded-xl font-bold shadow-lg shadow-[var(--acc)]/25 inline-flex items-center gap-2"
+              className="btn-bl h-12 px-7 rounded-xl font-bold inline-flex items-center gap-2"
             >
               {t("heroPrimary")}
               <ArrowRight className="h-4 w-4 ar" />
@@ -61,7 +61,7 @@ export function AboutHero() {
             <Button
               size="lg"
               variant="outline"
-              className="btn-bw h-12 px-7 rounded-xl font-semibold border-white/20 bg-white/5 text-white hover:bg-white/10"
+              className="btn-bw h-12 px-7 rounded-xl font-semibold bg-white/5 text-white hover:bg-white/10"
             >
               {t("heroSecondary")}
             </Button>
@@ -83,15 +83,15 @@ export function AboutHero() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
               {/* Floating Top Telemetry Pill */}
-              <div className="absolute top-4 right-4 hidden sm:flex items-center gap-2 rounded-xl border border-white/15 bg-black/60 px-3.5 py-1.5 font-mono text-xs text-white/90 backdrop-blur-md">
+              <div className="absolute top-4 right-4 hidden sm:flex items-center gap-2 rounded-xl bg-black/60 px-3.5 py-1.5 font-mono text-xs text-white/90 backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-success animate-ping" />
                 <span>ALL 64 DISTRICT HUBS SYNCHRONIZED</span>
               </div>
 
               {/* Bottom Floating Stats Inside Visual */}
               <div className="absolute bottom-4 inset-x-4 sm:bottom-6 sm:inset-x-6 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-black/70 px-4 py-3 shadow-xl backdrop-blur-xl">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--acc)]/20 border border-[var(--acc)]/40 text-[var(--acc)]">
+                <div className="flex items-center gap-3 rounded-2xl bg-black/70 px-4 py-3 backdrop-blur-xl">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--acc)]/20 text-[var(--acc)]">
                     <Truck className="h-6 w-6" aria-hidden="true" />
                   </span>
                   <div className="text-left">
@@ -104,10 +104,10 @@ export function AboutHero() {
                   </div>
                 </div>
 
-                <div className="hidden md:flex items-center gap-2 rounded-2xl border border-white/15 bg-black/70 px-4 py-3 backdrop-blur-xl text-left">
+                <div className="hidden md:flex items-center gap-2 rounded-2xl bg-black/70 px-4 py-3 backdrop-blur-xl text-left">
                   <Activity className="h-5 w-5 text-success" />
                   <div>
-                    <div className="text-xs font-mono font-bold text-white">99.2% ON-TIME SLA</div>
+                    <div className="text-xs font-mono font-bold text-white">METRO NEXT-DAY</div>
                     <div className="text-[11px] text-white/60">Automated Next-Day Metro Delivery</div>
                   </div>
                 </div>
@@ -118,7 +118,7 @@ export function AboutHero() {
           {/* Quick Metrics Ticker Below Visual */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
             <div className="about-stat-pill">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <MapPin className="h-5 w-5" />
               </span>
               <div>
@@ -128,7 +128,7 @@ export function AboutHero() {
             </div>
 
             <div className="about-stat-pill">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Building2 className="h-5 w-5" />
               </span>
               <div>
@@ -138,7 +138,7 @@ export function AboutHero() {
             </div>
 
             <div className="about-stat-pill">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
@@ -148,7 +148,7 @@ export function AboutHero() {
             </div>
 
             <div className="about-stat-pill">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Activity className="h-5 w-5" />
               </span>
               <div>

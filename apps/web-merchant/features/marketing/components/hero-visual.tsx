@@ -43,7 +43,7 @@ export function HeroVisual() {
           {/* Main Dashboard Panel */}
           <div className="dmain">
             <h4>Good morning, Dispatch Team</h4>
-            <p>Nationwide 64 districts live • 99.98% Line-Haul on-time delivery SLA</p>
+            <p>Nationwide 64 districts • live line-haul tracking</p>
 
             <div className="dgrid">
               {/* Card 1: Revenue / COD */}
@@ -91,8 +91,8 @@ export function HeroVisual() {
                   </span>
                 </div>
                 <div className="dc">
-                  <small>Service Uptime</small>
-                  <b>99.98%</b>
+                  <small>Districts covered</small>
+                  <b>64</b>
                   <span className="up">
                     <u>↑ 0.1%</u>Radar active
                   </span>
@@ -108,10 +108,10 @@ export function HeroVisual() {
 
               {/* Card 3: Growth & Throughput Chart */}
               <div className="dc">
-                <small style={{ fontSize: "1.3em", color: "#111", fontWeight: 600 }}>
+                <small style={{ fontSize: "1.3em", color: "hsl(var(--foreground))", fontWeight: 600 }}>
                   Delivery Throughput
                 </small>
-                <small style={{ fontSize: "0.9em", color: "#888", marginTop: "0.3em" }}>
+                <small style={{ fontSize: "0.9em", color: "hsl(var(--muted-foreground))", marginTop: "0.3em" }}>
                   Real-time parcels delivered vs settled COD
                 </small>
                 <div className="dchart">

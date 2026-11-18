@@ -21,7 +21,7 @@ export function ScannerCameraFeed({ cameraState, videoRef, onClose }: ScannerCam
     return (
       <p
         role="status"
-        className="rounded-2xl border border-border/60 bg-card/90 px-4 py-3 text-xs text-muted-foreground shadow-xs"
+        className="rounded-2xl bg-card/90 px-4 py-3 text-xs text-muted-foreground"
       >
         {t("scanner.cameraUnsupported")}
       </p>
@@ -32,7 +32,7 @@ export function ScannerCameraFeed({ cameraState, videoRef, onClose }: ScannerCam
     return (
       <p
         role="alert"
-        className="rounded-2xl border border-danger/30 bg-danger-soft px-4 py-3 text-xs text-danger shadow-xs"
+        className="rounded-2xl bg-danger-soft px-4 py-3 text-xs text-danger"
       >
         {t("scanner.cameraDenied")}
       </p>
@@ -40,7 +40,7 @@ export function ScannerCameraFeed({ cameraState, videoRef, onClose }: ScannerCam
   }
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-4 space-y-2 shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-4 space-y-2">
       <video
         ref={videoRef}
         playsInline

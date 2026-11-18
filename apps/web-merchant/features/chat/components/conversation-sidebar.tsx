@@ -56,7 +56,7 @@ export function ConversationSidebar({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="space-y-3 border-b border-border px-4 pb-3 pt-4">
+      <div className="space-y-3 px-4 pb-3 pt-4">
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-lg font-semibold text-foreground">{t("title")}</h1>
           {headerAction}

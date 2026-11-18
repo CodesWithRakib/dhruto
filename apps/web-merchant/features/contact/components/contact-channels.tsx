@@ -31,7 +31,7 @@ const CHANNELS: ChannelCard[] = [
     secondaryValue: "+880 9613-DHRUTO (Sales)",
     icon: Sparkles,
     tag: "SCHEDULE CALL",
-    tagColor: "bg-primary/10 text-primary border-primary/20",
+    tagColor: "bg-primary/10 text-primary",
     actionLabel: "Email Corporate Sales",
     actionHref: "mailto:sales@dhruto.com?subject=Merchant%20Volume%20Inquiry",
   },
@@ -43,7 +43,7 @@ const CHANNELS: ChannelCard[] = [
     secondaryValue: "Sun–Thu, 9:00–21:00 BST",
     icon: Headphones,
     tag: "LIVE DESK",
-    tagColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    tagColor: "bg-success/10 text-success",
     actionLabel: "Reach Operations Desk",
     actionHref: "mailto:support@dhruto.com?subject=Shipment%20Escalation",
   },
@@ -55,7 +55,7 @@ const CHANNELS: ChannelCard[] = [
     secondaryValue: "API Sandbox & Webhook Help",
     icon: Code2,
     tag: "SUB-200MS API",
-    tagColor: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
+    tagColor: "bg-info/10 text-info",
     actionLabel: "Email API Engineers",
     actionHref: "mailto:developers@dhruto.com?subject=API%20Integration%20Assistance",
   },
@@ -67,7 +67,7 @@ const CHANNELS: ChannelCard[] = [
     secondaryValue: "Dhaka-1213, Bangladesh",
     icon: MapPin,
     tag: "MERCHANT DROP-OFF",
-    tagColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    tagColor: "bg-warning/10 text-warning",
     actionLabel: "View Hub Location",
     actionHref: "#regional-hubs",
   },
@@ -87,11 +87,11 @@ export function ContactChannels() {
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
                       <Icon className="h-6 w-6" />
                     </span>
                     <span
-                      className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${channel.tagColor}`}
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${channel.tagColor}`}
                     >
                       {channel.tag}
                     </span>
@@ -105,7 +105,7 @@ export function ContactChannels() {
                   </p>
                 </div>
 
-                <div className="mt-6 border-t border-border/60 pt-4">
+                <div className="mt-6 pt-4">
                   <div className="font-semibold text-sm text-foreground">
                     {channel.primaryValue}
                   </div>

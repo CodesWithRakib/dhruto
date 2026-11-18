@@ -23,9 +23,9 @@ export function ParcelInfoSections({
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       {/* Recipient Bento Card */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-4">
-        <div className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground border-b border-border/50 pb-3">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+      <section className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-4">
+        <div className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground pb-3">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <User className="h-4 w-4" aria-hidden="true" />
           </span>
           <span className="text-body-sm font-bold text-foreground">{t("recipientInfo")}</span>
@@ -53,9 +53,9 @@ export function ParcelInfoSections({
       </section>
 
       {/* Financial Summary Bento Card */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/85 p-6 shadow-sm backdrop-blur-md space-y-4">
-        <div className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground border-b border-border/50 pb-3">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+      <section className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-4">
+        <div className="flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground pb-3">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Wallet className="h-4 w-4" aria-hidden="true" />
           </span>
           <span className="text-body-sm font-bold text-foreground">{t("financialSummary")}</span>
@@ -68,7 +68,7 @@ export function ParcelInfoSections({
               {bdt(parcel.codAmount)}
             </span>
           </div>
-          <div className="flex items-center justify-between border-b border-border/40 pb-2.5 text-caption text-muted-foreground">
+          <div className="flex items-center justify-between pb-2.5 text-caption text-muted-foreground">
             <span>{t("deliveryFee")}</span>
             <span className="tabular-nums font-semibold">− {bdt(parcel.deliveryFee)}</span>
           </div>
@@ -94,8 +94,8 @@ export function ParcelInfoSections({
       {/* Operations Bento Card */}
       <section className="space-y-4 md:col-span-2">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex items-center gap-3.5 rounded-2xl border border-border/80 bg-surface-elevated/80 p-4 sm:p-5 shadow-xs backdrop-blur-sm">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <div className="flex items-center gap-3.5 rounded-2xl bg-surface-elevated/80 p-4 sm:p-5 backdrop-blur-sm">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Building2 className="h-6 w-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
@@ -106,8 +106,8 @@ export function ParcelInfoSections({
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 rounded-2xl border border-border/80 bg-surface-elevated/80 p-4 sm:p-5 shadow-xs backdrop-blur-sm">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <div className="flex items-center gap-3.5 rounded-2xl bg-surface-elevated/80 p-4 sm:p-5 backdrop-blur-sm">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Truck className="h-6 w-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
@@ -118,8 +118,8 @@ export function ParcelInfoSections({
             </div>
           </div>
 
-          <div className="flex items-center gap-3.5 rounded-2xl border border-border/80 bg-surface-elevated/80 p-4 sm:p-5 shadow-xs backdrop-blur-sm">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <div className="flex items-center gap-3.5 rounded-2xl bg-surface-elevated/80 p-4 sm:p-5 backdrop-blur-sm">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Package className="h-6 w-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
@@ -133,7 +133,7 @@ export function ParcelInfoSections({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/80 bg-surface-elevated/80 p-5 text-body-sm shadow-xs backdrop-blur-sm space-y-1">
+        <div className="rounded-2xl bg-surface-elevated/80 p-5 text-body-sm backdrop-blur-sm space-y-1">
           <p className="text-caption text-muted-foreground font-medium">{t("merchant")}</p>
           <p className="font-bold text-foreground">{parcel.merchantName}</p>
           <p className="pt-2 text-caption text-muted-foreground font-medium">{t("pickupAddress")}</p>
@@ -141,7 +141,7 @@ export function ParcelInfoSections({
         </div>
 
         {intelligence && (intelligence.confidenceScore !== null || intelligence.riskTier !== null) ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/80 bg-surface-elevated/80 p-4 sm:p-5 text-caption shadow-xs backdrop-blur-sm">
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-elevated/80 p-4 sm:p-5 text-caption backdrop-blur-sm">
             <span className="flex items-center gap-1.5 font-bold text-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
               {t("addressIntelligence")}

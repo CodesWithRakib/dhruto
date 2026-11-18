@@ -38,7 +38,7 @@ export function FilterTabs<T extends string>({
       role="group"
       aria-label={label}
       className={cn(
-        "flex w-full max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-border bg-surface-muted p-1 sm:w-fit",
+        "flex w-full max-w-full items-center gap-1 overflow-x-auto rounded-lg bg-surface-muted p-1 sm:w-fit",
         className,
       )}
     >
@@ -54,7 +54,7 @@ export function FilterTabs<T extends string>({
               "whitespace-nowrap rounded-md px-3 py-1.5 text-caption font-semibold transition-all duration-fast ease-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
               isActive
-                ? "bg-surface text-foreground shadow-soft"
+                ? "bg-surface text-foreground"
                 : "text-muted-foreground hover:bg-surface/60 hover:text-foreground",
             )}
           >

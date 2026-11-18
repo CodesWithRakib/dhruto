@@ -39,7 +39,7 @@ export function ParcelListHeader({
           <div className="flex flex-wrap items-center gap-2">
             {createHref ? (
               <Link href={createHref}>
-                <Button size="sm" className="h-10 gap-2 text-xs rounded-xl shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                <Button size="sm" className="h-10 gap-2 text-xs rounded-xl hover:scale-[1.01] active:scale-[0.99] transition-all">
                   <Plus className="h-4 w-4" aria-hidden="true" />
                   <span className="font-semibold">{t("create")}</span>
                 </Button>
@@ -50,7 +50,7 @@ export function ParcelListHeader({
                 variant="outline"
                 size="sm"
                 onClick={onBulkOpen}
-                className="h-10 gap-2 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+                className="h-10 gap-2 text-xs rounded-xl hover:bg-surface-elevated font-medium"
               >
                 <UploadCloud className="h-4 w-4 text-primary" aria-hidden="true" />
                 {t("bulkImport")}
@@ -61,9 +61,9 @@ export function ParcelListHeader({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 gap-2 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+                  className="h-10 gap-2 text-xs rounded-xl hover:bg-surface-elevated font-medium"
                 >
-                  <RotateCcw className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                  <RotateCcw className="h-4 w-4 text-warning" aria-hidden="true" />
                   <span>Returns Hub</span>
                 </Button>
               </Link>
@@ -73,7 +73,7 @@ export function ParcelListHeader({
               size="sm"
               onClick={onRefresh}
               disabled={isFetching}
-              className="h-10 gap-2 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+              className="h-10 gap-2 text-xs rounded-xl hover:bg-surface-elevated font-medium"
             >
               <RefreshCw
                 className={cn("h-3.5 w-3.5", isFetching && "animate-spin text-primary")}
@@ -87,7 +87,7 @@ export function ParcelListHeader({
 
       {/* Result context chip */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface-elevated/80 px-3 py-1 shadow-xs backdrop-blur-sm">
+        <div className="inline-flex items-center gap-2 rounded-full bg-surface-elevated/80 px-3 py-1 backdrop-blur-sm">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
@@ -100,7 +100,7 @@ export function ParcelListHeader({
           </p>
         </div>
         {activeFilterCount > 0 ? (
-          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-caption font-semibold text-primary">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-caption font-semibold text-primary">
             {t("countFiltered", { count: activeFilterCount })}
           </span>
         ) : null}

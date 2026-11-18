@@ -30,12 +30,12 @@ export function RiderProfileHeaderCard({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-emerald-600 font-extrabold text-xl text-white">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-success font-extrabold text-xl text-white">
               {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="h-8 w-8" />}
             </span>
             <span
               className={`absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full ${
-                onDuty ? "bg-emerald-500" : "bg-muted-foreground"
+                onDuty ? "bg-success" : "bg-muted-foreground"
               }`}
               title={onDuty ? "On duty" : "Off duty"}
             >
@@ -65,7 +65,7 @@ export function RiderProfileHeaderCard({
             disabled={isToggling}
             className={`h-11 gap-2 rounded-2xl px-5 text-xs font-bold transition-all ${
               onDuty
-                ? "bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/25 dark:text-emerald-300"
+                ? "bg-success/15 text-success-soft-foreground hover:bg-success/25"
                 : ""
             }`}
           >
@@ -103,7 +103,7 @@ export function RiderProfileHeaderCard({
           <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Active Duty Mode
           </p>
-          <p className={`mt-1 text-xs font-bold ${onDuty ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"}`}>
+          <p className={`mt-1 text-xs font-bold ${onDuty ? "text-success-soft-foreground" : "text-muted-foreground"}`}>
             {onDuty ? "On duty (Dispatched)" : "Off duty (Standby)"}
           </p>
           <p className="text-[11px] text-muted-foreground">Live dispatch availability</p>

@@ -69,7 +69,7 @@ export function PricingTransparencyMatrix() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             <span>TRANSPARENCY AUDIT</span>
           </div>
@@ -86,19 +86,19 @@ export function PricingTransparencyMatrix() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[680px] border-collapse text-left">
               <thead>
-                <tr className="bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 border-0">
-                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-slate-100 dark:text-slate-100">
+                <tr className="bg-inverse text-inverse-foreground">
+                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-inverse-foreground">
                     Capability & Billing Term
                   </th>
-                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-primary-soft bg-slate-800/80 dark:bg-slate-900">
+                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-primary-soft bg-inverse/80">
                     Dhruto Express
                   </th>
-                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-slate-300 dark:text-slate-300">
+                  <th className="py-4.5 px-6 text-xs font-bold uppercase tracking-wider text-inverse-muted">
                     Legacy Courier Market
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/60 text-sm">
+              <tbody className="text-sm">
                 {COMPARISON_ROWS.map((row, idx) => (
                   <tr
                     key={row.feature}
@@ -111,7 +111,7 @@ export function PricingTransparencyMatrix() {
                     </td>
                     <td className="py-4.5 px-6 bg-primary/[0.04]">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-success/20 text-success">
                           <Check className="h-3.5 w-3.5 stroke-[3]" />
                         </span>
                         <span className="font-bold text-foreground">
@@ -124,7 +124,7 @@ export function PricingTransparencyMatrix() {
                     </td>
                     <td className="py-4.5 px-6">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-500/20 text-rose-500">
+                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-danger/20 text-danger">
                           <X className="h-3.5 w-3.5 stroke-[3]" />
                         </span>
                         <span className="font-semibold text-muted-foreground">

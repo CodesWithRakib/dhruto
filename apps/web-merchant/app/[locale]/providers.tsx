@@ -4,8 +4,11 @@ import React, { useRef } from "react";
 import { Provider } from "react-redux";
 import { makeStore, type AppStore } from "@/store";
 import { Toaster } from "@dhruto/ui";
-import { ThemeProvider } from "next-themes";
 
+/**
+ * App-wide client providers. The product ships a single theme whose colors
+ * live in `@dhruto/ui/styles/tokens.css`, so no theme provider is needed.
+ */
 export function Providers({ children }: { children: React.ReactNode }) {
   const storeRef = useRef<AppStore | null>(null);
   if (!storeRef.current) {
@@ -14,10 +17,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <Provider store={storeRef.current}>
-      <ThemeProvider attribute="data-theme" defaultTheme="purple" themes={["purple", "green", "red"]}>
-        {children}
-        <Toaster />
-      </ThemeProvider>
+      {children}
+      <Toaster />
     </Provider>
   );
 }

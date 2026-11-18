@@ -39,7 +39,7 @@ export function LegalPage({ eyebrow, title, updated, sections, footerNote }: Leg
             <aside className="lg:sticky lg:top-28 lg:self-start">
               <nav
                 aria-label={title}
-                className="rounded-2xl border border-border/60 bg-surface/70 p-5 shadow-soft backdrop-blur-sm"
+                className="rounded-2xl bg-surface/70 p-5 backdrop-blur-sm"
               >
                 <p className="mb-3 flex items-center gap-2 text-caption font-bold uppercase tracking-wider text-muted-foreground">
                   <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -69,7 +69,7 @@ export function LegalPage({ eyebrow, title, updated, sections, footerNote }: Leg
                 <section
                   key={section.title}
                   id={`legal-${index + 1}`}
-                  className="scroll-mt-28 rounded-2xl border border-border/50 bg-surface p-6 shadow-soft sm:p-8"
+                  className="scroll-mt-28 rounded-2xl bg-surface p-6 sm:p-8"
                 >
                   <div className="flex items-baseline gap-3">
                     <span className="font-mono text-sm font-bold text-primary">
@@ -84,7 +84,7 @@ export function LegalPage({ eyebrow, title, updated, sections, footerNote }: Leg
               ))}
 
               {footerNote ? (
-                <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-body-sm text-foreground/90">
+                <div className="flex items-center gap-3 rounded-2xl bg-primary/5 p-5 text-body-sm text-foreground/90">
                   <ShieldCheck className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                   <p>{footerNote}</p>
                 </div>

@@ -71,12 +71,11 @@ export function NeedsAttention({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
+    <div className="relative overflow-hidden rounded-3xl bg-card/90 backdrop-blur-md">
       {/* Top Specular Accent Line */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
 
-      <div className="flex items-start gap-3.5 border-b border-amber-500/20 bg-amber-500/10 px-5 py-4 sm:px-6">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-xs">
+      <div className="flex items-start gap-3.5 bg-warning/10 px-5 py-4 sm:px-6">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-warning/20 text-warning">
           <Clock className="h-5 w-5" aria-hidden="true" />
         </span>
         <div className="min-w-0">
@@ -87,7 +86,7 @@ export function NeedsAttention({
         </div>
       </div>
 
-      <ul className="divide-y divide-border/50">
+      <ul>
         {items.map((item) => {
           const config = ROW_CONFIG[item.key];
           const Icon = config.icon;
@@ -99,7 +98,7 @@ export function NeedsAttention({
               >
                 <span
                   className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-current/20 shadow-2xs",
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
                     config.tone,
                   )}
                   aria-hidden="true"

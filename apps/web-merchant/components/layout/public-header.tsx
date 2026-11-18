@@ -18,7 +18,6 @@ import { homeForRole, roleConfigFor } from "@/config/roles";
 import { useAppSelector } from "@/store/hooks";
 import { useSignOut } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { PublicStatusIndicator } from "./public-status-indicator";
 
 const PUBLIC_LINKS = [
@@ -78,8 +77,8 @@ export function PublicHeader() {
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
         scrolled
-          ? "border-b border-white/10 bg-[rgba(var(--dk-rgb),0.88)] text-white backdrop-blur-xl shadow-lg"
-          : "border-b border-white/5 bg-[var(--dk)] text-white",
+          ? "bg-[rgba(var(--dk-rgb),0.88)] text-white backdrop-blur-xl"
+          : "bg-[var(--dk)] text-white",
       )}
     >
       <div className="dhruto-container flex h-16 sm:h-20 items-center justify-between gap-4">
@@ -90,7 +89,7 @@ export function PublicHeader() {
 
         {/* Desktop Navigation */}
         <nav aria-label={t("primaryLabel")} className="hidden lg:flex items-center">
-          <ul className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] p-1.5 backdrop-blur-md shadow-inner">
+          <ul className="flex items-center gap-1.5 rounded-full bg-white/[0.04] p-1.5 backdrop-blur-md">
             {PUBLIC_LINKS.map((link) => {
               const active = isActiveRoute(pathname, link.href);
               return (
@@ -101,7 +100,7 @@ export function PublicHeader() {
                     className={cn(
                       "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-all duration-200",
                       active
-                        ? "bg-[var(--acc)] text-[var(--dk)] font-semibold shadow-sm"
+                        ? "bg-[var(--acc)] text-[var(--dk)] font-semibold"
                         : "text-white/80 hover:bg-white/10 hover:text-white",
                     )}
                   >
@@ -116,7 +115,6 @@ export function PublicHeader() {
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           <PublicStatusIndicator />
-          <ThemeSwitcher />
           <div className="text-white">
             <LanguageSwitcher currentLocale={locale} label={t("language")} />
           </div>
@@ -127,7 +125,7 @@ export function PublicHeader() {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 py-1.5 pl-2 pr-3 text-sm font-medium text-white hover:bg-white/10 hover:border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-white/5 py-1.5 pl-2 pr-3 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-all"
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--acc)] text-[var(--dk)] font-bold text-xs uppercase">
                       {user?.name ? user.name[0] : (user?.role ? user.role[0] : "U")}
@@ -138,8 +136,8 @@ export function PublicHeader() {
                     <ChevronDown className="h-3.5 w-3.5 text-white/60" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl border border-white/15 bg-[var(--dk2)] text-white shadow-2xl">
-                  <div className="px-3 py-2 border-b border-white/10 mb-1">
+                <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl bg-[var(--dk2)] text-white">
+                  <div className="px-3 py-2 mb-1">
                     <p className="text-sm font-bold text-white truncate">{user?.name || "Account"}</p>
                     {user?.email && <p className="text-xs text-white/70 truncate">{user.email}</p>}
                     <span className="mt-1.5 inline-block rounded-full bg-[var(--acc)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--dk)]">
@@ -158,7 +156,7 @@ export function PublicHeader() {
 
                   <DropdownMenuItem
                     onClick={() => void signOut()}
-                    className="cursor-pointer rounded-xl px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors flex items-center gap-2"
+                    className="cursor-pointer rounded-xl px-2.5 py-2 text-xs font-semibold text-danger hover:bg-danger/20 hover:text-danger transition-colors flex items-center gap-2"
                   >
                     <LogOut className="h-4 w-4" aria-hidden="true" />
                     <span>{t("signOut")}</span>
@@ -192,7 +190,7 @@ export function PublicHeader() {
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={open ? t("closeMenu") : t("openMenu")}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/50 text-foreground hover:bg-surface-muted lg:hidden transition-colors"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-foreground hover:bg-surface-muted lg:hidden transition-colors"
           >
             {open ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -205,16 +203,10 @@ export function PublicHeader() {
 
       {/* Mobile Drawer */}
       {open ? (
-        <div id={panelId} className="border-t border-white/10 bg-[var(--dk2)] text-white backdrop-blur-2xl lg:hidden shadow-2xl">
+        <div id={panelId} className="bg-[var(--dk2)] text-white backdrop-blur-2xl lg:hidden">
           <nav aria-label={t("primaryLabel")} className="dhruto-container py-4 space-y-3">
-            {/* Theme switcher row in mobile */}
-            <div className="flex items-center justify-between py-2 border-b border-white/10 text-sm font-medium">
-              <span className="text-white/80">Theme Color</span>
-              <ThemeSwitcher />
-            </div>
-
             {isAuthenticated && user && (
-              <div className="flex items-center justify-between p-3 rounded-2xl border border-white/10 bg-white/5 mb-2">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 mb-2">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--acc)] text-[var(--dk)] font-bold text-sm uppercase">
                     {user?.name ? user.name[0] : (user?.role ? user.role[0] : "U")}
@@ -230,7 +222,7 @@ export function PublicHeader() {
                     setOpen(false);
                     void signOut();
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-300 text-xs font-semibold hover:bg-red-500/10"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-danger text-xs font-semibold hover:bg-danger/10"
                 >
                   <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>{t("signOut")}</span>
@@ -249,7 +241,7 @@ export function PublicHeader() {
                       className={cn(
                         "flex h-12 items-center rounded-xl px-4 text-sm font-medium transition-colors",
                         active
-                          ? "bg-[var(--acc)] text-[var(--dk)] font-semibold shadow-sm"
+                          ? "bg-[var(--acc)] text-[var(--dk)] font-semibold"
                           : "text-white/80 hover:bg-white/10 hover:text-white",
                       )}
                     >
@@ -260,7 +252,7 @@ export function PublicHeader() {
               })}
             </ul>
 
-            <div className="pt-2 sm:hidden border-t border-white/10 space-y-2">
+            <div className="pt-2 sm:hidden space-y-2">
               <Link href={ctaHref} className="block">
                 <button type="button" className="w-full h-11 rounded-xl font-semibold btn-bl flex items-center justify-center gap-2">
                   {isAuthenticated ? t("openApp") : t("signIn")}

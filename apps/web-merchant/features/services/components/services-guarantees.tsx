@@ -49,7 +49,7 @@ const GUARANTEE_ITEMS: GuaranteeItem[] = [
     description:
       "Everything accessible in our dashboard is powered by the same public REST API and webhook architecture available to your software engineering and logistics teams.",
     icon: Code2,
-    tag: "99.98% Platform SLA",
+    tag: "REST API & signed webhooks",
   },
 ];
 
@@ -69,7 +69,7 @@ export function ServicesGuarantees({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{eyebrow}</span>
           </div>
@@ -88,11 +88,11 @@ export function ServicesGuarantees({
             return (
               <div
                 key={item.number}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border/70 bg-surface p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-surface p-6 transition-all duration-300 hover:-translate-y-1"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
                       <Icon className="h-5 w-5" />
                     </span>
                     <span className="font-mono text-xl font-extrabold text-muted-foreground/40 group-hover:text-primary/70 transition-colors">
@@ -109,7 +109,7 @@ export function ServicesGuarantees({
                   </p>
                 </div>
 
-                <div className="mt-6 border-t border-border/60 pt-3">
+                <div className="mt-6 pt-3">
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary">
                     <CheckCircle2 className="h-3 w-3" />
                     <span>{item.tag}</span>

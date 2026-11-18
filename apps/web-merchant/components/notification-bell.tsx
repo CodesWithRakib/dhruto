@@ -38,9 +38,10 @@ export function NotificationBell() {
   const isCustomer = authUser?.role === "CUSTOMER";
   const [isOpen, setIsOpen] = useState(false);
   const [showSmsModal, setShowSmsModal] = useState(false);
-  const [testPhone, setTestPhone] = useState("01712345678");
+  // Real gateway send: default to the signed-in user's own number, never a stranger's.
+  const [testPhone, setTestPhone] = useState(authUser?.phone ?? "");
   const [testMessage, setTestMessage] = useState(
-    "Dhruto Express: Your order #DHR-9821 is out for delivery with rider.",
+    "Dhruto: this is a test SMS to confirm your notification settings.",
   );
   const [smsFeedback, setSmsFeedback] = useState<string | null>(null);
 
@@ -209,9 +210,9 @@ export function NotificationBell() {
 
       {/* Notifications Dropdown Popover */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-card text-card-foreground sm:w-96">
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl bg-card text-card-foreground sm:w-96">
           {/* Header */}
-          <div className="px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2 bg-muted/30">
+          <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-2 bg-muted/30">
             <div className="flex items-center gap-2">
               <h4 className="font-semibold text-sm">Notifications</h4>
               {unreadCount > 0 && (
@@ -220,14 +221,14 @@ export function NotificationBell() {
                 </Badge>
               )}
               <span
-                className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
+                className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                   isConnected
-                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                    : "bg-muted text-muted-foreground border-border"
+                    ? "bg-success/10 text-success"
+                    : "bg-muted text-muted-foreground"
                 }`}
                 title={isConnected ? "Real-time WebSocket connected" : "Connecting..."}
               >
-                <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"}`} />
+                <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-success animate-pulse" : "bg-muted-foreground"}`} />
                 {isConnected ? "Live" : "Offline"}
               </span>
             </div>
@@ -235,10 +236,10 @@ export function NotificationBell() {
               <button
                 type="button"
                 onClick={handleToggleSound}
-                className={`p-1.5 rounded-lg border text-xs transition-colors ${
+                className={`p-1.5 rounded-lg text-xs transition-colors ${
                   soundActive
-                    ? "text-primary border-primary/30 bg-primary/10 hover:bg-primary/20"
-                    : "text-muted-foreground border-border bg-muted/40 hover:bg-muted"
+                    ? "text-primary bg-primary/10 hover:bg-primary/20"
+                    : "text-muted-foreground bg-muted/40 hover:bg-muted"
                 }`}
                 title={soundActive ? "Notification sound enabled (click to mute)" : "Notification sound muted (click to unmute)"}
               >
@@ -248,7 +249,7 @@ export function NotificationBell() {
                 type="button"
                 onClick={handleTestInApp}
                 disabled={isSendingInApp}
-                className="text-xs text-primary hover:text-primary-foreground hover:bg-primary border border-primary/25 rounded-lg px-2 py-1 transition-all flex items-center gap-1 font-medium shadow-2xs"
+                className="text-xs text-primary hover:text-primary-foreground hover:bg-primary rounded-lg px-2 py-1 transition-all flex items-center gap-1 font-medium"
                 title="Test real-time alert sound & toast"
               >
                 <Sparkles className="h-3 w-3" />
@@ -258,7 +259,7 @@ export function NotificationBell() {
                 <button
                   onClick={handleMarkAllRead}
                   disabled={isMarkingAll}
-                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border border-border/70 rounded-lg px-2 py-1 hover:bg-muted disabled:opacity-50 transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-muted disabled:opacity-50 transition-colors"
                 >
                   <CheckCheck className="h-3.5 w-3.5" />
                   Read all
@@ -267,7 +268,7 @@ export function NotificationBell() {
               {!isCustomer && (
                 <button
                   onClick={() => setShowSmsModal(true)}
-                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 border border-border/70 rounded-lg px-2 py-1 hover:bg-muted transition-colors"
+                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-muted transition-colors"
                   title="Send test SMS"
                 >
                   <Smartphone className="h-3 w-3 text-info" aria-hidden="true" />
@@ -278,7 +279,7 @@ export function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-border/50">
+          <div className="max-h-[380px] overflow-y-auto">
             {isLoading ? (
               <div className="py-12 flex flex-col items-center justify-center text-muted-foreground gap-2">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -303,7 +304,7 @@ export function NotificationBell() {
                       isUnread ? "bg-primary/5" : ""
                     }`}
                   >
-                    <div className="mt-0.5 h-fit rounded-lg border border-border bg-card p-1.5">
+                    <div className="mt-0.5 h-fit rounded-lg bg-card p-1.5">
                       {getTypeIcon(item.type)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -342,7 +343,7 @@ export function NotificationBell() {
       {/* Test SMS Modal */}
       {showSmsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4">
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-5 text-card-foreground">
+          <div className="relative w-full max-w-md rounded-xl bg-card p-5 text-card-foreground">
             <button
               onClick={() => setShowSmsModal(false)}
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
@@ -355,9 +356,9 @@ export function NotificationBell() {
                 <Smartphone className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-base">Simulated BD SMS Gateway</h3>
+                <h3 className="font-semibold text-base">Send a test SMS</h3>
                 <p className="text-xs text-muted-foreground">
-                  Test SMS formatting with Bangladeshi phone normalization (+8801...)
+                  Sends a real SMS through the configured gateway (limit 5 per minute).
                 </p>
               </div>
             </div>
@@ -373,7 +374,7 @@ export function NotificationBell() {
                   onChange={(e) => setTestPhone(e.target.value)}
                   placeholder="017XXXXXXXX"
                   required
-                  className="w-full text-sm border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full text-sm rounded-lg px-3 py-2 bg-field focus:outline-none focus:ring-2 focus:ring-primary/40 hover:bg-field-hover focus:bg-surface"
                 />
                 <span className="text-[11px] text-muted-foreground">
                   Accepts 017..., 88017..., or +88017...
@@ -389,7 +390,7 @@ export function NotificationBell() {
                   value={testMessage}
                   onChange={(e) => setTestMessage(e.target.value)}
                   required
-                  className="w-full text-sm border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full text-sm rounded-lg px-3 py-2 bg-field focus:outline-none focus:ring-2 focus:ring-primary/40 hover:bg-field-hover focus:bg-surface"
                 />
                 <span className="text-[11px] text-muted-foreground">
                   {testMessage.length} characters · {Math.ceil(testMessage.length / 160) || 1} SMS
@@ -399,10 +400,10 @@ export function NotificationBell() {
 
               {smsFeedback && (
                 <div
-                  className={`text-xs p-2.5 rounded-lg border ${
+                  className={`text-xs p-2.5 rounded-lg ${
                     smsFeedback.startsWith("SMS sent")
-                      ? "border-border bg-success-soft text-success-soft-foreground"
-                      : "border-border bg-danger-soft text-danger-soft-foreground"
+                      ? "bg-success-soft text-success-soft-foreground"
+                      : "bg-danger-soft text-danger-soft-foreground"
                   }`}
                 >
                   {smsFeedback}

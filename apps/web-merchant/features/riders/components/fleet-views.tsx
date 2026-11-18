@@ -110,10 +110,10 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                   currentPage={1}
                   itemsPerPage={riders.length}
                   emptyMessage={t("dashboard.noTasks")}
-                  className="border-0 shadow-none rounded-none"
+                  className="rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border/20 md:hidden">
+              <ul className="md:hidden">
                 {riders.map((rider) => (
                   <li key={rider.id} className="space-y-2 p-4">
                     <div className="flex items-center justify-between gap-2">
@@ -125,7 +125,7 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
                       </p>
                       <Badge
                         variant={rider.duty === "ON_DUTY" ? "success" : "secondary"}
-                        className="text-[10px] rounded-lg border-0"
+                        className="text-[10px] rounded-lg"
                       >
                         {rider.status}
                       </Badge>
@@ -153,7 +153,7 @@ export function FleetRidersView({ hubId }: { hubId?: string }) {
         open={selectedRider !== null}
         onOpenChange={(open) => !open && setSelectedRider(null)}
       >
-        <DialogContent className="max-w-lg rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
+        <DialogContent className="max-w-lg rounded-3xl bg-surface-elevated p-6">
           {selectedRider ? (
             <FleetRiderDetails riderId={selectedRider.id} onChanged={() => refetch()} />
           ) : null}

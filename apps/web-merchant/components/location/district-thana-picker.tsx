@@ -95,9 +95,9 @@ export function DistrictSelect({
           aria-label={ariaLabel ?? "District"}
           aria-expanded={isOpen}
           className={cn(
-            "h-11 w-full rounded-2xl border-0 bg-surface-muted/60 pl-10 pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
+            "h-11 w-full rounded-2xl bg-surface-muted/60 pl-10 pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
             "hover:bg-surface-muted focus:bg-background focus:ring-2 focus:ring-primary/20",
-            error && "ring-2 ring-destructive/40 bg-destructive/5",
+            error && "bg-destructive/5",
             disabled && "cursor-not-allowed opacity-50",
           )}
         />
@@ -133,7 +133,7 @@ export function DistrictSelect({
 
       {/* Popover Dropdown Panel */}
       {isOpen && (
-        <div className="absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-surface-elevated p-1.5 shadow-2xl border-0 ring-1 ring-black/5 animate-in fade-in-0 zoom-in-95">
+        <div className="absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-surface-elevated p-1.5 animate-in fade-in-0 zoom-in-95">
           {filteredDistricts.length === 0 ? (
             <div className="py-4 px-3 text-center text-xs text-muted-foreground">
               No preset districts matching "{inputValue}". Press Tab or Enter to keep custom text.
@@ -282,9 +282,9 @@ export function ThanaSelect({
           aria-label={ariaLabel ?? "Thana / Upazila"}
           aria-expanded={isOpen}
           className={cn(
-            "h-11 w-full rounded-2xl border-0 bg-surface-muted/60 pl-4 pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
+            "h-11 w-full rounded-2xl bg-surface-muted/60 pl-4 pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
             "hover:bg-surface-muted focus:bg-background focus:ring-2 focus:ring-primary/20",
-            error && "ring-2 ring-destructive/40 bg-destructive/5",
+            error && "bg-destructive/5",
             disabled && "cursor-not-allowed opacity-50",
           )}
         />
@@ -318,7 +318,7 @@ export function ThanaSelect({
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-surface-elevated p-1.5 shadow-2xl border-0 ring-1 ring-black/5 animate-in fade-in-0 zoom-in-95">
+        <div className="absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-surface-elevated p-1.5 animate-in fade-in-0 zoom-in-95">
           {availableThanas.length === 0 ? (
             <div className="py-4 px-3 text-center text-xs text-muted-foreground">
               {!districtName

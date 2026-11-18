@@ -39,8 +39,8 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
   const totalCod = trends.reduce((acc, t) => acc + t.codCollected, 0);
 
   return (
-    <Card className="shadow-soft border-primary/20">
-      <CardHeader className="border-b border-border/70 bg-surface-muted/40">
+    <Card>
+      <CardHeader className="bg-surface-muted/40">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
@@ -69,7 +69,7 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
 
       <CardContent className="pt-6 space-y-6">
         {/* Metric Badges Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-b pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs pb-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 font-medium">
               <span className="h-3 w-3 rounded-full bg-info inline-block" aria-hidden="true" />
@@ -92,7 +92,7 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
         </div>
 
         {/* Visual Bar Visualizer */}
-        <div className="h-64 flex items-end gap-2 pt-6 pb-2 px-2 relative border-b">
+        <div className="h-64 flex items-end gap-2 pt-6 pb-2 px-2 relative">
           {trends.map((point, index) => {
             const isHovered = hoveredIdx === index;
             const bookedHeight = Math.max(8, (point.booked / maxCount) * 100);
@@ -108,8 +108,8 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
               >
                 {/* Hover Tooltip */}
                 {isHovered && (
-                  <div className="absolute -top-20 z-20 bg-popover text-popover-foreground border shadow-lg rounded-lg p-2.5 text-xs whitespace-nowrap pointer-events-none transform -translate-x-1/2 left-1/2 min-w-[140px]">
-                    <div className="font-bold text-[11px] border-b pb-1 mb-1 font-mono text-foreground">
+                  <div className="absolute -top-20 z-20 bg-popover text-popover-foreground rounded-lg p-2.5 text-xs whitespace-nowrap pointer-events-none transform -translate-x-1/2 left-1/2 min-w-[140px]">
+                    <div className="font-bold text-[11px] pb-1 mb-1 font-mono text-foreground">
                       {point.date}
                     </div>
                     {metricType === "count" ? (
@@ -170,21 +170,21 @@ export function VolumeTrendChart({ trends }: VolumeTrendChartProps) {
 
         {/* Footer Statistics */}
         <div className="grid grid-cols-1 gap-3 pt-2 text-xs sm:grid-cols-3">
-          <div className="rounded-lg border border-border/70 bg-surface-muted/40 p-3">
+          <div className="rounded-lg bg-surface-muted/40 p-3">
             <span className="block text-muted-foreground">Period Total Deliveries</span>
             <span className="font-mono text-lg font-bold text-success-soft-foreground">
               {totalDelivered} orders
             </span>
           </div>
 
-          <div className="rounded-lg border border-border/70 bg-surface-muted/40 p-3">
+          <div className="rounded-lg bg-surface-muted/40 p-3">
             <span className="block text-muted-foreground">Period COD Collected</span>
             <span className="font-mono text-lg font-bold text-foreground">
               {formatBDT(totalCod)}
             </span>
           </div>
 
-          <div className="rounded-lg border border-border/70 bg-surface-muted/40 p-3">
+          <div className="rounded-lg bg-surface-muted/40 p-3">
             <span className="block text-muted-foreground">Daily Booking Velocity</span>
             <span className="font-mono text-lg font-bold text-info-soft-foreground">
               {(totalBooked / Math.max(1, trends.length)).toFixed(1)} / day

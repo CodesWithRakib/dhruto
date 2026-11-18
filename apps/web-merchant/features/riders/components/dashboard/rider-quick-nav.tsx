@@ -60,16 +60,12 @@ export function RiderQuickNav({
             <Link
               key={item.href}
               href={item.href}
-              className="group relative flex flex-col justify-between rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              className="group relative flex flex-col justify-between rounded-3xl bg-card/90 backdrop-blur-md p-4 transition-all duration-200 hover:-translate-y-0.5"
             >
               {/* Specular top highlight */}
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
-                aria-hidden="true"
-              />
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground shadow-2xs">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">

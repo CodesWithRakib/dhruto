@@ -79,7 +79,7 @@ export function RiderTasksView() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder={t("tasks.searchPlaceholder")}
             aria-label={t("tasks.searchPlaceholder")}
-            className="h-11 rounded-2xl border-0 bg-surface-muted/60 pl-10 pr-10 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary"
+            className="h-11 rounded-2xl bg-surface-muted/60 pl-10 pr-10 text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary"
           />
           {search ? (
             <button
@@ -104,7 +104,7 @@ export function RiderTasksView() {
                   onClick={() => setFilter(entry.key)}
                   className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-xs font-semibold transition-all duration-200 ${
                     isActive
-                      ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                      ? "bg-primary text-primary-foreground font-bold"
                       : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                   }`}
                 >

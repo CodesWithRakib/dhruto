@@ -34,12 +34,11 @@ export function ParcelProgressTrack({
   progress,
 }: ParcelProgressTrackProps) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 sm:p-8 shadow-sm backdrop-blur-md space-y-6">
+    <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 sm:p-8 backdrop-blur-md space-y-6">
       {/* Specular highlight border */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
       {/* Header bar */}
-      <div className="flex flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between border-b border-border/50">
+      <div className="flex flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <span className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
             {t("trackingCode")}
@@ -80,7 +79,7 @@ export function ParcelProgressTrack({
           >
             <div className="h-full w-full bg-surface-muted rounded-full" />
             <div
-              className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-500 ease-out shadow-sm shadow-primary/30"
+              className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-500 ease-out"
               style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
             />
           </div>
@@ -99,9 +98,9 @@ export function ParcelProgressTrack({
                   className={cn(
                     "flex h-8 w-8 items-center justify-center rounded-full text-caption font-bold transition-all duration-300",
                     isPassed
-                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                      : "bg-surface-muted text-muted-foreground border border-border/80",
-                    isCurrent && "ring-4 ring-primary/25 scale-110 shadow-lg shadow-primary/35",
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-surface-muted text-muted-foreground",
+                    isCurrent && "scale-110",
                   )}
                 >
                   {step}

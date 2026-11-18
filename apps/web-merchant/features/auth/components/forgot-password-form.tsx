@@ -36,7 +36,7 @@ export function ForgotPasswordForm() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary-soft-foreground shadow-xs">
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary-soft-foreground">
           <KeyRound className="h-6 w-6" />
         </div>
         <h1 className="text-display font-extrabold tracking-tight text-foreground">
@@ -49,9 +49,9 @@ export function ForgotPasswordForm() {
 
       {submitted ? (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/60 p-5 text-sm text-emerald-950 dark:bg-emerald-950/20 dark:text-emerald-100">
+          <div className="rounded-2xl bg-success-soft/60 p-5 text-sm text-success-soft-foreground">
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-success mt-0.5" />
               <div className="space-y-1">
                 <p className="font-bold">Check your inbox</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -62,7 +62,7 @@ export function ForgotPasswordForm() {
           </div>
 
           {devResetToken ? (
-            <div className="rounded-xl border border-border/80 bg-surface-muted/50 p-4 text-xs space-y-2">
+            <div className="rounded-xl bg-surface-muted/50 p-4 text-xs space-y-2">
               <p className="font-semibold text-foreground">Development Mode Shortcut:</p>
               <Link
                 href={`/reset-password?token=${devResetToken}`}
@@ -77,7 +77,7 @@ export function ForgotPasswordForm() {
           <div className="pt-2">
             <Link
               href="/login"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-semibold text-foreground transition-all hover:bg-surface-muted"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-surface px-4 py-3 text-sm font-semibold text-foreground transition-all hover:bg-surface-muted"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Sign In</span>
@@ -109,7 +109,7 @@ export function ForgotPasswordForm() {
           <Button
             type="submit"
             size="lg"
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold shadow-xs"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold"
             disabled={isLoading}
           >
             {isLoading ? (

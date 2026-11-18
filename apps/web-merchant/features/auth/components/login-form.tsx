@@ -68,7 +68,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-soft-foreground">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-soft-foreground">
         <Lock className="h-3.5 w-3.5" aria-hidden="true" />
         {t("welcomeBackBadge")}
       </span>
@@ -156,7 +156,7 @@ export function LoginForm() {
           id="login-submit"
           type="submit"
           size="lg"
-          className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold shadow-lg shadow-primary/25"
+          className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold"
           disabled={isLoading}
         >
           {isLoading ? t("signingIn") : t("signIn")}

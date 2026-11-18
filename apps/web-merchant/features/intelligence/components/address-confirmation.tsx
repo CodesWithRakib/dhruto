@@ -90,7 +90,7 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
           }}
           placeholder={t("placeholder")}
           aria-label={t("placeholder")}
-          className="h-10 flex-1 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-10 flex-1 rounded-lg bg-field px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 hover:bg-field-hover focus:bg-surface"
         />
         <Button
           size="sm"
@@ -106,7 +106,7 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
+          className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
         >
           {error}
         </div>
@@ -117,7 +117,7 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
           {result.hasConflict && (
             <div
               role="alert"
-              className="flex items-start gap-2 rounded-lg border border-warning bg-warning-soft px-3 py-2 text-xs text-warning-soft-foreground"
+              className="flex items-start gap-2 rounded-lg bg-warning-soft px-3 py-2 text-xs text-warning-soft-foreground"
             >
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span>{result.conflictDetail ?? t("conflictHint")}</span>
@@ -141,10 +141,10 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
                         setSelected(i);
                       }
                     }}
-                    className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
                       selected === i
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:bg-muted/50"
+                        ? "bg-primary/5"
+                        : "hover:bg-muted/50"
                     }`}
                   >
                     <span>
@@ -177,7 +177,7 @@ export function AddressConfirmation({ initialAddress, onConfirmed }: AddressConf
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 rounded-lg border border-success bg-success-soft px-3 py-2.5 text-sm text-success-soft-foreground">
+            <div className="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2.5 text-sm text-success-soft-foreground">
               <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>
                 {t("detected", {

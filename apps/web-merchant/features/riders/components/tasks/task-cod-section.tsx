@@ -35,9 +35,9 @@ export function TaskCodSection({
     (collectedAmount !== undefined && collectedAmount === codAmount);
 
   return (
-    <form onSubmit={onComplete} className="space-y-4 border-t border-border/20 pt-5">
+    <form onSubmit={onComplete} className="space-y-4 pt-5">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-200">
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/15 text-warning-soft-foreground">
           <DollarSign className="h-4 w-4" aria-hidden="true" />
         </span>
         <div>
@@ -74,7 +74,7 @@ export function TaskCodSection({
                   event.target.value === "" ? undefined : Number(event.target.value),
                 )
               }
-              className="h-12 rounded-2xl border-0 bg-surface-muted/60 pl-8 font-mono text-lg font-black focus:bg-background"
+              className="h-12 rounded-2xl bg-surface-muted/60 pl-8 font-mono text-lg font-black focus:bg-background"
               required
             />
           </div>
@@ -106,18 +106,18 @@ export function TaskCodSection({
           <p
             className={`flex items-center gap-1.5 text-xs ${
               codMatches
-                ? "text-emerald-700 dark:text-emerald-300 font-semibold"
-                : "text-amber-700 dark:text-amber-300 font-semibold"
+                ? "text-success-soft-foreground font-semibold"
+                : "text-warning-soft-foreground font-semibold"
             }`}
           >
             {codMatches ? (
               <>
-                <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <Check className="h-3.5 w-3.5 text-success" />
                 <span>Exact amount matches COD due.</span>
               </>
             ) : (
               <>
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                <AlertTriangle className="h-3.5 w-3.5 text-warning" />
                 <span>{t("details.codMustMatch")} ({bdt(codAmount)})</span>
               </>
             )}
@@ -139,7 +139,7 @@ export function TaskCodSection({
           onChange={(event) => setRemarks(event.target.value)}
           placeholder={t("details.remarksPlaceholder")}
           maxLength={500}
-          className="h-11 rounded-2xl border-0 bg-surface-muted/60 text-sm focus:bg-background"
+          className="h-11 rounded-2xl bg-surface-muted/60 text-sm focus:bg-background"
         />
       </div>
 
@@ -156,9 +156,9 @@ export function TaskCodSection({
           type="button"
           variant="ghost"
           onClick={onOpenFail}
-          className="h-12 flex-1 gap-2 rounded-2xl bg-amber-500/15 text-amber-800 dark:text-amber-200 hover:bg-amber-500/25"
+          className="h-12 flex-1 gap-2 rounded-2xl bg-warning/15 text-warning-soft-foreground hover:bg-warning/25"
         >
-          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" />
           <span>{t("details.failTitle")}</span>
         </Button>
       </div>

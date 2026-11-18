@@ -60,7 +60,7 @@ export function ParcelCancelDialog({
           </div>
         </DialogHeader>
 
-        <div className="rounded-xl border border-danger/20 bg-danger-soft/40 p-4 text-xs space-y-1.5 text-danger-soft-foreground">
+        <div className="rounded-xl bg-danger-soft/40 p-4 text-xs space-y-1.5 text-danger-soft-foreground">
           <p className="font-bold flex items-center gap-1.5 text-danger">
             <XCircle className="h-4 w-4" />
             Cancellation Policy Notice

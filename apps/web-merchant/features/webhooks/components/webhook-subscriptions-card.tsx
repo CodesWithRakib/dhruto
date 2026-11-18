@@ -59,7 +59,7 @@ export function WebhookSubscriptionsCard({
           <span className="text-xs">Loading webhook subscriptions...</span>
         </div>
       ) : subscriptions.length === 0 ? (
-        <div className="p-8 text-center rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md">
+        <div className="p-8 text-center rounded-3xl bg-surface-elevated/90 backdrop-blur-md">
           <Webhook className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
           <h3 className="font-bold text-body-md mb-1 text-foreground">No webhook endpoints configured</h3>
           <p className="text-body-sm text-muted-foreground max-w-md mx-auto mb-4">
@@ -69,7 +69,7 @@ export function WebhookSubscriptionsCard({
           <Button
             onClick={onRegisterClick}
             size="sm"
-            className="rounded-xl font-bold shadow-md shadow-primary/20"
+            className="rounded-xl font-bold"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Register Your First Webhook
@@ -85,9 +85,8 @@ export function WebhookSubscriptionsCard({
               <div
                 key={sub.id}
                 id={`webhook-sub-${sub.id}`}
-                className="relative overflow-hidden p-6 rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md"
+                className="relative overflow-hidden p-6 rounded-3xl bg-surface-elevated/90 backdrop-blur-md"
               >
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-2.5 flex-1 min-w-0">
@@ -95,11 +94,11 @@ export function WebhookSubscriptionsCard({
                       <span className="font-mono text-sm font-bold text-foreground break-all">
                         {sub.url}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-success/10 text-success">
                         {sub.status}
                       </span>
                       {sub.failureCount > 0 && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-danger/10 text-danger">
                           {sub.failureCount} recent failure(s)
                         </span>
                       )}
@@ -110,7 +109,7 @@ export function WebhookSubscriptionsCard({
                     )}
 
                     {/* Secret Key Bar */}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground border border-border/70 bg-surface-muted/60 p-2.5 rounded-2xl max-w-xl">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-surface-muted/60 p-2.5 rounded-2xl max-w-xl">
                       <ShieldCheck className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
                       <span className="font-semibold shrink-0">Signing Secret:</span>
                       <span
@@ -141,7 +140,7 @@ export function WebhookSubscriptionsCard({
                           aria-label="Copy masked secret preview"
                         >
                           {isCopied ? (
-                            <Check className="h-3.5 w-3.5 text-emerald-500" />
+                            <Check className="h-3.5 w-3.5 text-success" />
                           ) : (
                             <Copy className="h-3.5 w-3.5" />
                           )}
@@ -159,7 +158,7 @@ export function WebhookSubscriptionsCard({
                       {sub.events.map((evt) => (
                         <span
                           key={evt}
-                          className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium border border-border/60 bg-surface-muted text-foreground"
+                          className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium bg-surface-muted text-foreground"
                         >
                           {evt}
                         </span>
@@ -174,7 +173,7 @@ export function WebhookSubscriptionsCard({
                       variant="outline"
                       disabled={isPinging}
                       onClick={() => onPing(sub.id)}
-                      className="flex items-center gap-1.5 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-semibold"
+                      className="flex items-center gap-1.5 text-xs rounded-xl hover:bg-surface-elevated font-semibold"
                     >
                       <Send className="h-3.5 w-3.5 text-info" />
                       Test Ping
@@ -184,7 +183,7 @@ export function WebhookSubscriptionsCard({
                       variant="outline"
                       disabled={isRotating}
                       onClick={() => onRotate(sub.id)}
-                      className="flex items-center gap-1.5 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-semibold"
+                      className="flex items-center gap-1.5 text-xs rounded-xl hover:bg-surface-elevated font-semibold"
                       title="Rotate signing secret"
                     >
                       <RefreshCw className="h-3.5 w-3.5 text-primary" />
@@ -194,7 +193,7 @@ export function WebhookSubscriptionsCard({
                       size="sm"
                       variant="outline"
                       onClick={() => onToggleStatus(sub.id, sub.status)}
-                      className="flex items-center gap-1.5 text-xs rounded-xl border-border/80 hover:bg-surface-elevated font-semibold"
+                      className="flex items-center gap-1.5 text-xs rounded-xl hover:bg-surface-elevated font-semibold"
                     >
                       {sub.status === "ACTIVE" ? "Disable" : "Enable"}
                     </Button>

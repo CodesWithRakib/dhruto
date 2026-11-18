@@ -95,7 +95,7 @@ export function MerchantIllustrationBg({ className, opacity = 0.4, ...props }: I
       {...props}
     >
       <svg
-        className="absolute -top-32 -right-32 h-[550px] w-[550px] text-emerald-500/15 sm:h-[700px] sm:w-[700px]"
+        className="absolute -top-32 -right-32 h-[550px] w-[550px] text-success/15 sm:h-[700px] sm:w-[700px]"
         viewBox="0 0 700 700"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -151,7 +151,7 @@ export function HubIllustrationBg({ className, opacity = 0.45, ...props }: Illus
       {...props}
     >
       <svg
-        className="absolute -top-20 -right-20 h-[600px] w-[600px] text-cyan-600/15 sm:h-[750px] sm:w-[750px]"
+        className="absolute -top-20 -right-20 h-[600px] w-[600px] text-info/15 sm:h-[750px] sm:w-[750px]"
         viewBox="0 0 750 750"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -194,7 +194,7 @@ export function RiderIllustrationBg({ className, opacity = 0.4, ...props }: Illu
       {...props}
     >
       <svg
-        className="absolute -top-28 -right-28 h-[600px] w-[600px] text-amber-500/15 sm:h-[750px] sm:w-[750px]"
+        className="absolute -top-28 -right-28 h-[600px] w-[600px] text-warning/15 sm:h-[750px] sm:w-[750px]"
         viewBox="0 0 750 750"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -253,7 +253,7 @@ export function CustomerIllustrationBg({ className, opacity = 0.4, ...props }: I
       {...props}
     >
       <svg
-        className="absolute -top-24 -right-24 h-[580px] w-[580px] text-blue-500/15 sm:h-[720px] sm:w-[720px]"
+        className="absolute -top-24 -right-24 h-[580px] w-[580px] text-info/15 sm:h-[720px] sm:w-[720px]"
         viewBox="0 0 720 720"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -300,7 +300,7 @@ export function AdminIllustrationBg({ className, opacity = 0.35, ...props }: Ill
       {...props}
     >
       <svg
-        className="absolute -top-28 -right-28 h-[650px] w-[650px] text-indigo-500/15 sm:h-[800px] sm:w-[800px]"
+        className="absolute -top-28 -right-28 h-[650px] w-[650px] text-info/15 sm:h-[800px] sm:w-[800px]"
         viewBox="0 0 800 800"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

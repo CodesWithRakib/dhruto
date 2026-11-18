@@ -37,15 +37,15 @@ export function TaskAttemptsCard({ attempts }: TaskAttemptsCardProps) {
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border/20">
+        <ul>
           {attempts.map((attempt) => (
             <li key={attempt.id} className="space-y-1.5 p-4 text-xs transition-colors hover:bg-surface-muted/30">
               <div className="flex items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                     attempt.outcome === "DELIVERED"
-                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                      : "bg-rose-500/15 text-rose-700 dark:text-rose-300"
+                      ? "bg-success/15 text-success-soft-foreground"
+                      : "bg-danger/15 text-danger-soft-foreground"
                   }`}
                 >
                   #{attempt.attemptNumber} {attempt.outcome === "DELIVERED" ? "Delivered" : "Attempt Failed"}
@@ -63,7 +63,7 @@ export function TaskAttemptsCard({ attempts }: TaskAttemptsCardProps) {
               ) : null}
               {attempt.notes ? <p className="text-muted-foreground">{attempt.notes}</p> : null}
               {attempt.rescheduledFor ? (
-                <p className="inline-flex items-center gap-1 font-mono text-[11px] text-amber-700 dark:text-amber-300">
+                <p className="inline-flex items-center gap-1 font-mono text-[11px] text-warning-soft-foreground">
                   <span>Rescheduled:</span>
                   <span>{dateTime(attempt.rescheduledFor)}</span>
                 </p>

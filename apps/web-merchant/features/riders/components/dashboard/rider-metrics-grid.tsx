@@ -63,13 +63,9 @@ export function RiderMetricsGrid({
         {metricCards.map((card) => (
           <div
             key={card.label}
-            className="group relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+            className="group relative rounded-3xl bg-card/90 backdrop-blur-md p-5 transition-all duration-200 hover:-translate-y-0.5"
           >
             {/* Specular top highlight */}
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"
-              aria-hidden="true"
-            />
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -91,12 +87,8 @@ export function RiderMetricsGrid({
 
       {/* COD + Parcels in hand cards */}
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
-        <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-500/40 hover:shadow-md">
+        <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5">
           {/* Specular top highlight */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
-            aria-hidden="true"
-          />
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -109,18 +101,14 @@ export function RiderMetricsGrid({
                 Pending cash collection from current runsheet leg
               </p>
             </div>
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-warning-soft text-warning-soft-foreground shadow-2xs">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-warning-soft text-warning-soft-foreground">
               <Wallet className="h-6 w-6" aria-hidden="true" />
             </span>
           </div>
         </div>
 
-        <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+        <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5">
           {/* Specular top highlight */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-            aria-hidden="true"
-          />
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -133,7 +121,7 @@ export function RiderMetricsGrid({
                 Packages currently dispatched with you on the road
               </p>
             </div>
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary shadow-2xs">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
               <Bike className="h-6 w-6" aria-hidden="true" />
             </span>
           </div>

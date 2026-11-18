@@ -41,14 +41,14 @@ export function CTASection({
   return (
     <section className={cn("relative py-16 sm:py-24", className)}>
       <div className="dhruto-container">
-        <div className="dhruto-hero-dark relative overflow-hidden rounded-3xl border border-white/10 px-6 py-12 text-center shadow-lift sm:px-12 sm:py-16">
+        <div className="dhruto-hero-dark relative overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-12 sm:py-16">
           <div
             className="dhruto-route-pattern pointer-events-none absolute inset-0 opacity-40"
             aria-hidden="true"
           />
           <div className="relative z-10 mx-auto max-w-2xl space-y-4">
             {eyebrow ? (
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-semibold text-white/90">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold text-white/90">
                 <span>{eyebrow}</span>
               </div>
             ) : null}
@@ -67,7 +67,7 @@ export function CTASection({
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                 {primary ? (
                   <Link href={primary.href}>
-                    <Button size="lg" className="h-12 rounded-xl px-6 font-bold shadow-lg shadow-black/20">
+                    <Button size="lg" className="h-12 rounded-xl px-6 font-bold">
                       {PrimaryIcon ? <PrimaryIcon className="h-4 w-4" aria-hidden="true" /> : null}
                       {primary.label}
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -79,7 +79,7 @@ export function CTASection({
                     <Button
                       size="lg"
                       variant="outline"
-                      className="h-12 rounded-xl border-white/25 bg-white/5 px-6 font-semibold text-white hover:bg-white/10 hover:text-white"
+                      className="h-12 rounded-xl bg-white/5 px-6 font-semibold text-white hover:bg-white/10 hover:text-white"
                     >
                       {SecondaryIcon ? <SecondaryIcon className="h-4 w-4" aria-hidden="true" /> : null}
                       {secondary.label}
@@ -118,11 +118,11 @@ export function StatBand({
         return (
           <div
             key={stat.label}
-            className="group relative overflow-hidden rounded-2xl border border-border/60 bg-surface/70 p-4 shadow-soft backdrop-blur-sm transition-colors hover:border-primary/40 sm:p-5"
+            className="group relative overflow-hidden rounded-2xl bg-surface/70 p-4 backdrop-blur-sm transition-colors sm:p-5"
           >
             <div className="flex items-center gap-3">
               {Icon ? (
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
               ) : null}
@@ -172,7 +172,7 @@ export function FeatureShowcase({ items }: { items: ShowcaseItem[] }) {
           >
             <div className={cn("space-y-4", mediaFirst && "lg:order-2")}>
               {item.eyebrow ? (
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
                   {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
                   {item.eyebrow}
                 </div>
@@ -196,7 +196,7 @@ export function FeatureShowcase({ items }: { items: ShowcaseItem[] }) {
             </div>
 
             <div className={cn("relative", mediaFirst && "lg:order-1")}>
-              <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-2 shadow-lift">
+              <div className="relative overflow-hidden rounded-3xl bg-surface p-2">
                 {item.image ? (
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-surface-muted">
                     <Image

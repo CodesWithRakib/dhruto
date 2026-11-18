@@ -100,14 +100,14 @@ export function RtoRiskMeter({
       case "LOW":
         return {
           label: "Low Risk (Safe)",
-          color: "text-success-soft-foreground bg-success-soft border-success/30",
+          color: "text-success-soft-foreground bg-success-soft",
           icon: <ShieldCheck className="h-5 w-5 text-success-soft-foreground" />,
           progressColor: "bg-success",
         };
       case "MEDIUM":
         return {
           label: "Moderate Risk (Verify)",
-          color: "text-warning-soft-foreground bg-warning-soft border-warning/30",
+          color: "text-warning-soft-foreground bg-warning-soft",
           icon: <Shield className="h-5 w-5 text-warning-soft-foreground" />,
           progressColor: "bg-warning",
         };
@@ -115,7 +115,7 @@ export function RtoRiskMeter({
       default:
         return {
           label: "High Risk (Action Needed)",
-          color: "text-danger-soft-foreground bg-danger-soft border-danger/30",
+          color: "text-danger-soft-foreground bg-danger-soft",
           icon: <ShieldAlert className="h-5 w-5 text-danger-soft-foreground" />,
           progressColor: "bg-danger",
         };
@@ -152,8 +152,8 @@ export function RtoRiskMeter({
   };
 
   return (
-    <Card className=" border-primary/20">
-      <CardHeader className="bg-primary/5 border-b border-primary/10">
+    <Card>
+      <CardHeader className="bg-primary/5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-primary/10 text-primary rounded-lg">
@@ -190,7 +190,7 @@ export function RtoRiskMeter({
                     setAddress(scenario.address);
                     handleEvaluate(scenario.phone, scenario.cod, scenario.address);
                   }}
-                  className="text-xs px-2.5 py-1 rounded-full border border-border bg-muted/40 hover:bg-muted text-foreground transition-colors flex items-center gap-1 font-mono"
+                  className="text-xs px-2.5 py-1 rounded-full bg-muted/40 hover:bg-muted text-foreground transition-colors flex items-center gap-1 font-mono"
                 >
                   <span>{scenario.name}</span>
                 </button>
@@ -270,10 +270,10 @@ export function RtoRiskMeter({
 
         {/* Risk Assessment Result */}
         {riskResult && (
-          <div className="mt-6 border rounded-lg bg-card overflow-hidden">
+          <div className="mt-6 rounded-lg bg-card overflow-hidden">
             {/* Header with Risk Tier & Score */}
             <div
-              className={`p-4 border-b flex items-center justify-between flex-wrap gap-2 ${getTierDetails(riskResult.riskTier, riskResult.riskScore).color}`}
+              className={`p-4 flex items-center justify-between flex-wrap gap-2 ${getTierDetails(riskResult.riskTier, riskResult.riskScore).color}`}
             >
               <div className="flex items-center gap-2.5">
                 {getTierDetails(riskResult.riskTier, riskResult.riskScore).icon}
@@ -300,13 +300,13 @@ export function RtoRiskMeter({
             </div>
 
             {/* Risk Bar Meter */}
-            <div className="p-4 border-b space-y-2 bg-muted/20">
+            <div className="p-4 space-y-2 bg-muted/20">
               <div className="flex justify-between text-xs font-medium text-muted-foreground">
                 <span>0 (Safe)</span>
                 <span>Risk Index Gauge</span>
                 <span>100 (Critical)</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-3 overflow-hidden border">
+              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 ${getTierDetails(riskResult.riskTier, riskResult.riskScore).progressColor}`}
                   style={{ width: `${Math.min(100, Math.max(5, riskResult.riskScore))}%` }}
@@ -315,9 +315,9 @@ export function RtoRiskMeter({
             </div>
 
             {/* Action Badges */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-3 bg-muted/10 border-b text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-3 bg-muted/10 text-xs">
               <div
-                className={`p-2 rounded border flex items-center gap-2 ${riskResult.safeToDispatch ? "bg-success-soft text-success border-success  " : "bg-danger-soft text-danger border-danger  "}`}
+                className={`p-2 rounded flex items-center gap-2 ${riskResult.safeToDispatch ? "bg-success-soft text-success  " : "bg-danger-soft text-danger  "}`}
               >
                 {riskResult.safeToDispatch ? (
                   <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -330,7 +330,7 @@ export function RtoRiskMeter({
               </div>
 
               <div
-                className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresPhoneVerification ? "bg-warning-soft text-warning border-warning  " : "bg-muted text-muted-foreground"}`}
+                className={`p-2 rounded flex items-center gap-2 ${riskResult.requiresPhoneVerification ? "bg-warning-soft text-warning  " : "bg-muted text-muted-foreground"}`}
               >
                 <PhoneCall className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
@@ -341,7 +341,7 @@ export function RtoRiskMeter({
               </div>
 
               <div
-                className={`p-2 rounded border flex items-center gap-2 ${riskResult.requiresAdvancePayment ? "bg-primary-soft text-primary border-primary  " : "bg-muted text-muted-foreground"}`}
+                className={`p-2 rounded flex items-center gap-2 ${riskResult.requiresAdvancePayment ? "bg-primary-soft text-primary  " : "bg-muted text-muted-foreground"}`}
               >
                 <CreditCard className="h-4 w-4 shrink-0" />
                 <span className="font-medium">
@@ -353,31 +353,31 @@ export function RtoRiskMeter({
             </div>
 
             {/* Historical Delivery Profile */}
-            <div className="p-4 border-b">
+            <div className="p-4">
               <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                 <History className="h-3.5 w-3.5" />
                 <span>Customer Lifetime Shipping History</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-                <div className="p-2 border rounded bg-muted/20">
+                <div className="p-2 rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Total Orders</span>
                   <span className="text-base font-bold font-mono">
                     {riskResult.deliveryHistory.totalOrders}
                   </span>
                 </div>
-                <div className="p-2 border rounded bg-muted/20">
+                <div className="p-2 rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Delivered</span>
                   <span className="text-base font-bold font-mono text-success">
                     {riskResult.deliveryHistory.deliveredOrders}
                   </span>
                 </div>
-                <div className="p-2 border rounded bg-muted/20">
+                <div className="p-2 rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Returns / RTO</span>
                   <span className="text-base font-bold font-mono text-danger">
                     {riskResult.deliveryHistory.returnedOrders}
                   </span>
                 </div>
-                <div className="p-2 border rounded bg-muted/20">
+                <div className="p-2 rounded bg-muted/20">
                   <span className="text-muted-foreground block text-[10px]">Completion</span>
                   <span className="text-base font-bold font-mono text-info">
                     {riskResult.deliveryHistory.completionRate}%
@@ -388,7 +388,7 @@ export function RtoRiskMeter({
 
             {/* Risk Factors List */}
             {riskResult.riskFactors && riskResult.riskFactors.length > 0 && (
-              <div className="p-4 border-b space-y-2">
+              <div className="p-4 space-y-2">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
                   Identified Risk Signals & Signals
                 </span>
@@ -396,7 +396,7 @@ export function RtoRiskMeter({
                   {riskResult.riskFactors.map((factor, index) => (
                     <div
                       key={index}
-                      className="p-2 rounded border bg-card flex items-start justify-between gap-3 text-xs"
+                      className="p-2 rounded bg-card flex items-start justify-between gap-3 text-xs"
                     >
                       <div className="space-y-0.5">
                         <div className="font-semibold text-foreground flex items-center gap-1.5">

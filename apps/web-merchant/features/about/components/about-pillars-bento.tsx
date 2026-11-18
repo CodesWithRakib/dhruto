@@ -49,7 +49,7 @@ export function AboutPillarsBento() {
   const t = useTranslations("About");
 
   return (
-    <section className="py-20 sm:py-28 bg-muted/30 border-y border-border/40 relative overflow-hidden" id="pillars">
+    <section className="py-20 sm:py-28 bg-muted/30 relative overflow-hidden" id="pillars">
       <div className="dhruto-container relative z-10 max-w-6xl">
         <SectionHeading
           eyebrow={t("mission.eyebrow")}
@@ -71,10 +71,10 @@ export function AboutPillarsBento() {
 
                   <div>
                     <div className="flex items-center justify-between mb-5">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-[var(--acc)] group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-105 transition-all duration-300 shadow-sm">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-[var(--acc)] group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-105 transition-all duration-300">
                         <Icon className="h-6 w-6" aria-hidden="true" />
                       </span>
-                      <span className="rounded-full border border-border/80 bg-surface px-2.5 py-0.5 text-[11px] font-mono font-medium text-muted-foreground">
+                      <span className="rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-mono font-medium text-muted-foreground">
                         {p.badge}
                       </span>
                     </div>
@@ -87,7 +87,7 @@ export function AboutPillarsBento() {
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-border/60 flex items-baseline justify-between">
+                  <div className="mt-6 pt-4 flex items-baseline justify-between">
                     <div>
                       <div className="font-mono text-lg font-black text-foreground tracking-tight">
                         {p.metric}

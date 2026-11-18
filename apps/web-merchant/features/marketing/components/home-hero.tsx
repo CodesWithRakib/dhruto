@@ -25,7 +25,7 @@ export function HomeHero() {
       <div className="dhruto-container relative z-10">
         {/* Eyebrow Pill Badge */}
         <span className="pill mb-6">
-          Trusted by 12,000+ businesses across 64 districts
+          Delivering across all 64 districts of Bangladesh
         </span>
 
         {/* Headline with Instrument Serif Italic Highlight */}

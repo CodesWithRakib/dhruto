@@ -55,11 +55,10 @@ export function RecentShipments({
   const { bdt, dateTime } = useFormatters();
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
+    <div className="relative overflow-hidden rounded-3xl bg-card/90 backdrop-blur-md">
       {/* Top Specular Accent Line */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
-      <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border/60 px-5 py-4.5 bg-surface-muted/30 dark:bg-white/5 sm:px-6">
+      <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 px-5 py-4.5 bg-surface-muted/30 sm:px-6">
         <div className="min-w-0">
           <CardTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight">{t("recentOrders")}</CardTitle>
           <CardDescription className="mt-0.5 text-xs text-muted-foreground">{t("recentOrdersSubtitle")}</CardDescription>
@@ -95,7 +94,7 @@ export function RecentShipments({
             }
           />
         ) : (
-          <ul className="divide-y divide-border/50">
+          <ul>
             {rows.map((row) => {
               const href = MERCHANT_ROUTES.parcel(row.id);
               return (
@@ -108,7 +107,7 @@ export function RecentShipments({
                     {/* Mobile: stacked card */}
                     <div className="flex items-start justify-between gap-3 sm:hidden">
                       <div className="min-w-0">
-                        <span className="inline-flex items-center rounded-lg bg-primary-soft px-2 py-0.5 font-mono text-xs font-bold text-primary border border-primary/20">
+                        <span className="inline-flex items-center rounded-lg bg-primary-soft px-2 py-0.5 font-mono text-xs font-bold text-primary">
                           {row.trackingCode}
                         </span>
                         <p className="mt-1.5 truncate text-xs font-semibold text-foreground">
@@ -130,7 +129,7 @@ export function RecentShipments({
                     {/* Desktop: table-style row */}
                     <div className="hidden sm:grid sm:grid-cols-12 sm:items-center sm:gap-4">
                       <div className="min-w-0 sm:col-span-3">
-                        <span className="inline-flex items-center rounded-lg bg-primary-soft px-2.5 py-1 font-mono text-xs font-bold text-primary border border-primary/20 group-hover:border-primary/40 transition-colors">
+                        <span className="inline-flex items-center rounded-lg bg-primary-soft px-2.5 py-1 font-mono text-xs font-bold text-primary transition-colors">
                           {row.trackingCode}
                         </span>
                         <p className="mt-1 truncate text-[11px] text-muted-foreground">

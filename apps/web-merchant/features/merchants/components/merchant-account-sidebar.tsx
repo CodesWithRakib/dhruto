@@ -25,8 +25,7 @@ export function MerchantAccountSidebar({
   return (
     <div className="space-y-6">
       {/* Identity & Technical Info */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 space-y-4 shadow-sm backdrop-blur-md">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 space-y-4 backdrop-blur-md">
 
         <h3 className="text-body-md font-bold flex items-center gap-2 text-foreground">
           <ShieldCheck className="h-4 w-4 text-primary" />
@@ -36,7 +35,7 @@ export function MerchantAccountSidebar({
         <div className="space-y-4 text-xs">
           <div>
             <p className="text-muted-foreground text-caption font-bold uppercase tracking-wider">{t("merchantId")}</p>
-            <div className="mt-1 flex items-center justify-between rounded-xl border border-border/70 bg-surface-muted/60 px-3 py-2 font-mono text-[11px]">
+            <div className="mt-1 flex items-center justify-between rounded-xl bg-surface-muted/60 px-3 py-2 font-mono text-[11px]">
               <span className="truncate max-w-[180px] font-semibold text-foreground">{merchantId || "N/A"}</span>
               {merchantId ? (
                 <CopyButton
@@ -72,13 +71,13 @@ export function MerchantAccountSidebar({
       </div>
 
       {/* Connected Shortcuts */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 space-y-3 shadow-sm backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 space-y-3 backdrop-blur-md">
         <h3 className="text-body-md font-bold text-foreground">{t("quickLinks")}</h3>
 
         <div className="space-y-2">
           <Link
             href={MERCHANT_ROUTES.webhooks}
-            className="flex items-center justify-between rounded-2xl border border-border/60 bg-surface-muted/50 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted hover:border-border"
+            className="flex items-center justify-between rounded-2xl bg-surface-muted/50 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
           >
             <div className="flex items-center gap-2.5">
               <Webhook className="h-4 w-4 text-primary" />
@@ -89,7 +88,7 @@ export function MerchantAccountSidebar({
 
           <Link
             href={MERCHANT_ROUTES.finance}
-            className="flex items-center justify-between rounded-2xl border border-border/60 bg-surface-muted/50 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted hover:border-border"
+            className="flex items-center justify-between rounded-2xl bg-surface-muted/50 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
           >
             <div className="flex items-center gap-2.5">
               <Wallet className="h-4 w-4 text-primary" />
@@ -100,7 +99,7 @@ export function MerchantAccountSidebar({
 
           <Link
             href="/merchant/notifications"
-            className="flex items-center justify-between rounded-2xl border border-border/60 bg-surface-muted/50 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted hover:border-border"
+            className="flex items-center justify-between rounded-2xl bg-surface-muted/50 p-3.5 text-xs font-semibold text-foreground transition-all hover:bg-surface-muted"
           >
             <div className="flex items-center gap-2.5">
               <Bell className="h-4 w-4 text-primary" />

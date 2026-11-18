@@ -19,7 +19,7 @@ export function BagMobileList({ bags, onOpenSeal }: BagMobileListProps) {
   const t = useTranslations("Hub");
 
   return (
-    <ul className="divide-y divide-border/20 md:hidden">
+    <ul className="md:hidden">
       {bags.map((bag) => (
         <li key={bag.id} className="space-y-2 p-4 transition-colors hover:bg-surface-muted/30">
           <div className="flex items-center justify-between gap-2">

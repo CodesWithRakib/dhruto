@@ -56,7 +56,7 @@ const FLOWS_BY_ROLE: Record<
     roleDesc: "Track incoming orders, coordinate delivery time, share doorstep OTP, and view digital POD receipts.",
     badge: "Consumer Portal",
     icon: User,
-    accentColor: "from-blue-500/20 to-indigo-500/10 border-blue-500/30 text-blue-500",
+    accentColor: "from-info/20 to-info/10 text-info",
     steps: [
       {
         step: 1,
@@ -125,7 +125,7 @@ const FLOWS_BY_ROLE: Record<
     roleDesc: "Create bookings, print 4x6 labels, batch dispatch pickups, track returns, and receive automated COD payouts.",
     badge: "Commerce Engine",
     icon: Package,
-    accentColor: "from-emerald-500/20 to-teal-500/10 border-emerald-500/30 text-emerald-500",
+    accentColor: "from-success/20 to-success/10 text-success",
     steps: [
       {
         step: 1,
@@ -194,7 +194,7 @@ const FLOWS_BY_ROLE: Record<
     roleDesc: "Inbound barcode scanning, parcel sorting, bag manifest dispatch, exception management, and cash reconciliation.",
     badge: "Network Hub",
     icon: Building2,
-    accentColor: "from-amber-500/20 to-orange-500/10 border-amber-500/30 text-amber-500",
+    accentColor: "from-warning/20 to-warning/10 text-warning",
     steps: [
       {
         step: 1,
@@ -263,7 +263,7 @@ const FLOWS_BY_ROLE: Record<
     roleDesc: "Duty status management, pickup/delivery task execution, customer contact, doorstep OTP handshake, and COD return.",
     badge: "Field Fleet",
     icon: Bike,
-    accentColor: "from-green-500/20 to-emerald-500/10 border-green-500/30 text-green-500",
+    accentColor: "from-success/20 to-success/10 text-success",
     steps: [
       {
         step: 1,
@@ -332,7 +332,7 @@ const FLOWS_BY_ROLE: Record<
     roleDesc: "Global network telemetry, high-risk fraud AI intelligence, finance audits, hub governance, and developer integrations.",
     badge: "Global Controller",
     icon: ShieldCheck,
-    accentColor: "from-purple-500/20 to-pink-500/10 border-purple-500/30 text-purple-500",
+    accentColor: "from-primary/20 to-danger/10 text-primary",
     steps: [
       {
         step: 1,
@@ -371,7 +371,7 @@ const FLOWS_BY_ROLE: Record<
         systemAction: "Reconciles digital gateway collections, rider cash deposits, and dispatches automated bank payouts.",
         actionUrl: ADMIN_ROUTES.finance,
         actionLabel: "Financial Reconciliation",
-        securityGuarantee: "Double-entry accounting with 100% statutory escrow compliance.",
+        securityGuarantee: "Every COD collection, settlement and payout is recorded in a double-entry ledger.",
         icon: Wallet,
       },
       {
@@ -395,7 +395,7 @@ export function SystemFlowVisualizer() {
   return (
     <div className="space-y-6">
       {/* Role Navigation Pills */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/80 bg-surface/80 p-2 shadow-2xs backdrop-blur-md">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-surface/80 p-2 backdrop-blur-md">
         {(Object.keys(FLOWS_BY_ROLE) as RoleKey[]).map((key) => {
           const item = FLOWS_BY_ROLE[key];
           const isSelected = activeRole === key;
@@ -407,7 +407,7 @@ export function SystemFlowVisualizer() {
               onClick={() => setActiveRole(key)}
               className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${
                 isSelected
-                  ? "bg-primary text-primary-foreground shadow-xs scale-[1.02]"
+                  ? "bg-primary text-primary-foreground scale-[1.02]"
                   : "bg-surface hover:bg-surface-muted text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -426,11 +426,11 @@ export function SystemFlowVisualizer() {
       </div>
 
       {/* Role Flow Header Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface p-6 sm:p-7 shadow-soft">
+      <div className="relative overflow-hidden rounded-3xl bg-surface p-6 sm:p-7">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary border border-primary/20">
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
                 {currentFlow.badge}
               </span>
               <span className="text-xs text-muted-foreground font-semibold">End-to-End Operational Lifecycle</span>
@@ -443,7 +443,7 @@ export function SystemFlowVisualizer() {
             </p>
           </div>
 
-          <Badge variant="outline" className="self-start sm:self-center border-primary/30 text-primary font-bold px-3 py-1.5">
+          <Badge variant="outline" className="self-start sm:self-center text-primary font-bold px-3 py-1.5">
             Verified Production Flow
           </Badge>
         </div>
@@ -464,12 +464,12 @@ export function SystemFlowVisualizer() {
                 />
               ) : null}
 
-              <Card className="relative z-10 border border-border/80 bg-surface shadow-2xs hover:shadow-soft hover:border-primary/40 transition-all">
+              <Card className="relative z-10 bg-surface transition-all">
                 <CardContent className="p-5 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
                     {/* Step Number Badge */}
                     <div className="flex items-center gap-3 sm:flex-col sm:items-center">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-black text-base shadow-xs">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-black text-base">
                         {stepItem.step}
                       </div>
                       <span className="text-[11px] font-mono font-bold text-muted-foreground sm:text-center block">
@@ -479,7 +479,7 @@ export function SystemFlowVisualizer() {
 
                     {/* Step Details */}
                     <div className="flex-1 space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5">
                         <div className="flex items-center gap-2">
                           <StepIcon className="h-4.5 w-4.5 text-primary" />
                           <h3 className="text-sm font-extrabold text-foreground sm:text-base">
@@ -492,7 +492,7 @@ export function SystemFlowVisualizer() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 gap-1.5 text-xs font-semibold hover:border-primary/40"
+                              className="h-8 gap-1.5 text-xs font-semibold"
                             >
                               <span>{stepItem.actionLabel}</span>
                               <ExternalLink className="h-3 w-3 text-muted-foreground" />
@@ -502,7 +502,7 @@ export function SystemFlowVisualizer() {
                       </div>
 
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs">
-                        <div className="rounded-xl border border-border/70 bg-surface-muted/40 p-3 space-y-1">
+                        <div className="rounded-xl bg-surface-muted/40 p-3 space-y-1">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                             Trigger / Action
                           </span>
@@ -511,7 +511,7 @@ export function SystemFlowVisualizer() {
                           </p>
                         </div>
 
-                        <div className="rounded-xl border border-border/70 bg-surface-muted/40 p-3 space-y-1">
+                        <div className="rounded-xl bg-surface-muted/40 p-3 space-y-1">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                             System Automation & State
                           </span>
@@ -522,7 +522,7 @@ export function SystemFlowVisualizer() {
                       </div>
 
                       {/* Security & Escrow Guarantee */}
-                      <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary-soft/40 px-3.5 py-2 text-[11px] text-primary-soft-foreground">
+                      <div className="flex items-center gap-2 rounded-xl bg-primary-soft/40 px-3.5 py-2 text-[11px] text-primary-soft-foreground">
                         <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
                         <span>
                           <strong>Security & SLA Protocol:</strong> {stepItem.securityGuarantee}
@@ -538,7 +538,7 @@ export function SystemFlowVisualizer() {
       </div>
 
       {/* State Machine Journey Card */}
-      <Card className="border border-border/80 bg-surface shadow-2xs">
+      <Card className="bg-surface">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
@@ -573,10 +573,10 @@ export function SystemFlowVisualizer() {
                 <span
                   className={`rounded-lg px-2.5 py-1 text-[11px] font-mono font-bold ${
                     st === "DELIVERED"
-                      ? "bg-success-soft text-success border border-success/30"
+                      ? "bg-success-soft text-success"
                       : st === "CREATED"
-                        ? "bg-primary-soft text-primary border border-primary/30"
-                        : "bg-surface-muted border border-border/80 text-foreground"
+                        ? "bg-primary-soft text-primary"
+                        : "bg-surface-muted text-foreground"
                   }`}
                 >
                   {st}
@@ -588,7 +588,7 @@ export function SystemFlowVisualizer() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 rounded-xl border border-warning/30 bg-warning-soft/30 p-3 text-xs text-warning-soft-foreground">
+          <div className="flex items-center gap-2 rounded-xl bg-warning-soft/30 p-3 text-xs text-warning-soft-foreground">
             <RotateCcw className="h-4 w-4 shrink-0 text-warning" />
             <span>
               <strong>Return Loop (RTO):</strong> DELIVERY_ATTEMPTED → RTO_INITIATED → RETURN_IN_TRANSIT → RETURNED_TO_MERCHANT

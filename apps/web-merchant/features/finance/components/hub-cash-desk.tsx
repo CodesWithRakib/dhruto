@@ -134,7 +134,7 @@ export function HubCashDesk() {
                 refetchBatches();
                 refetchDiscrepancies();
               }}
-              className="gap-2 rounded-xl text-xs shadow-2xs"
+              className="gap-2 rounded-xl text-xs"
             >
               <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{t("refresh")}</span>
@@ -152,7 +152,7 @@ export function HubCashDesk() {
       ) : null}
 
       <div
-        className="flex w-fit flex-wrap items-center gap-1.5 rounded-2xl border border-border/50 bg-card/90 backdrop-blur-md p-1.5 shadow-2xs"
+        className="flex w-fit flex-wrap items-center gap-1.5 rounded-2xl bg-card/90 backdrop-blur-md p-1.5"
         role="tablist"
       >
         {(
@@ -172,7 +172,7 @@ export function HubCashDesk() {
             onClick={() => setTab(entry.key)}
             className={`rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
               tab === entry.key
-                ? "bg-primary text-primary-foreground shadow-xs"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >

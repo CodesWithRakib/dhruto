@@ -37,12 +37,8 @@ export function BagCreateCard({
   const t = useTranslations("Hub");
 
   return (
-    <div className="relative rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-md p-5 sm:p-6 shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
 
       <form onSubmit={onSubmit} className="space-y-4">
         <h3 className="text-sm font-bold text-foreground">{t("bags.create")}</h3>
@@ -57,11 +53,11 @@ export function BagCreateCard({
             <Select value={destHubId} onValueChange={setDestHubId} required>
               <SelectTrigger
                 id="bag-destination"
-                className="w-full rounded-2xl border border-border/50 bg-surface-muted/60 focus:bg-background"
+                className="w-full rounded-2xl bg-surface-muted/60 focus:bg-background"
               >
                 <SelectValue placeholder={t("bags.destination")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border border-border/60 bg-surface-elevated shadow-xl">
+              <SelectContent className="rounded-2xl bg-surface-elevated">
                 {destinations.map((hub) => (
                   <SelectItem key={hub.id} value={hub.id}>
                     {hub.name} ({hub.code})
@@ -81,7 +77,7 @@ export function BagCreateCard({
               onChange={(event) => setNotes(event.target.value)}
               placeholder={t("bags.notesPlaceholder")}
               maxLength={500}
-              className="w-full rounded-2xl border border-border/50 bg-surface-muted/60 p-3 text-xs outline-none focus:bg-background"
+              className="w-full rounded-2xl bg-field p-3 text-xs outline-none focus:bg-background hover:bg-field-hover"
             />
           </div>
         </div>

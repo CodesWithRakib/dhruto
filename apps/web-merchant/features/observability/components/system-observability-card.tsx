@@ -33,7 +33,7 @@ export function SystemObservabilityCard() {
 
   if (isError || !metrics) {
     return (
-      <Card className="border-danger/30">
+      <Card>
         <ErrorState
           title="Telemetry service probe unreachable. Verify API server health."
           action={<RetryButton label="Retry Connection" onRetry={() => refetch()} />}
@@ -57,8 +57,8 @@ export function SystemObservabilityCard() {
   return (
     <div className="space-y-6">
       {/* Primary Status Banner */}
-      <Card className="shadow-soft border-success/20 bg-gradient-to-r from-success-soft/40 via-card to-card">
-        <CardHeader className="border-b border-border/70 bg-success-soft/30 pb-4">
+      <Card className="bg-gradient-to-r from-success-soft/40 via-card to-card">
+        <CardHeader className="bg-success-soft/30 pb-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-3">
               <div className="p-2.5 bg-success-soft text-success-soft-foreground rounded-xl">
@@ -69,7 +69,7 @@ export function SystemObservabilityCard() {
                   <CardTitle className="text-lg">System Scale & Observability Center</CardTitle>
                   <Badge
                     variant="outline"
-                    className="bg-success-soft text-success-soft-foreground font-mono text-[11px] border-success/30"
+                    className="bg-success-soft text-success-soft-foreground font-mono text-[11px]"
                   >
                     {metrics.status.toUpperCase()}
                   </Badge>
@@ -98,7 +98,7 @@ export function SystemObservabilityCard() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Database Telemetry */}
-            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+            <div className="p-4 rounded-xl bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>PostgreSQL DB</span>
                 <Database className="h-4 w-4 text-info-soft-foreground" aria-hidden="true" />
@@ -110,7 +110,7 @@ export function SystemObservabilityCard() {
                 </span>
                 <Badge
                   variant="outline"
-                  className="text-[10px] text-success-soft-foreground border-success/30"
+                  className="text-[10px] text-success-soft-foreground"
                 >
                   {metrics.database.status.toUpperCase()}
                 </Badge>
@@ -122,7 +122,7 @@ export function SystemObservabilityCard() {
             </div>
 
             {/* Cache Layer Telemetry */}
-            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+            <div className="p-4 rounded-xl bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>Multi-Tier Cache</span>
                 <Zap className="h-4 w-4 text-warning-soft-foreground" aria-hidden="true" />
@@ -143,7 +143,7 @@ export function SystemObservabilityCard() {
             </div>
 
             {/* Memory Usage */}
-            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+            <div className="p-4 rounded-xl bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>Heap Memory</span>
                 <Cpu className="h-4 w-4 text-primary-soft-foreground" aria-hidden="true" />
@@ -168,7 +168,7 @@ export function SystemObservabilityCard() {
             </div>
 
             {/* Request Throughput */}
-            <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+            <div className="p-4 rounded-xl bg-surface space-y-2">
               <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 <span>Live Telemetry</span>
                 <Activity className="h-4 w-4 text-success" aria-hidden="true" />
@@ -178,7 +178,7 @@ export function SystemObservabilityCard() {
                   {metrics.telemetry.p95LatencyMs}{" "}
                   <span className="text-xs font-normal text-muted-foreground">ms p95</span>
                 </span>
-                <Badge variant="outline" className="text-[10px] font-mono text-info-soft-foreground border-info/30">
+                <Badge variant="outline" className="text-[10px] font-mono text-info-soft-foreground">
                   {metrics.telemetry.currentRps} RPS
                 </Badge>
               </div>
@@ -194,8 +194,8 @@ export function SystemObservabilityCard() {
       {/* Load Testing Benchmark & SLA Targets Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Load Test Results */}
-        <Card className="shadow-soft border-primary/20">
-          <CardHeader className="border-b border-border/70 bg-surface-muted/40">
+        <Card>
+          <CardHeader className="bg-surface-muted/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
@@ -212,7 +212,7 @@ export function SystemObservabilityCard() {
               </div>
               <Badge
                 variant="outline"
-                className="bg-success-soft text-success-soft-foreground font-mono text-xs border-success/30"
+                className="bg-success-soft text-success-soft-foreground font-mono text-xs"
               >
                 SLA PASSED
               </Badge>
@@ -220,7 +220,7 @@ export function SystemObservabilityCard() {
           </CardHeader>
 
           <CardContent className="pt-6 space-y-3">
-            <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">System Average Throughput</span>
                 <span className="text-xs text-muted-foreground">Target: &ge; 250 RPS</span>
@@ -231,7 +231,7 @@ export function SystemObservabilityCard() {
               </div>
             </div>
 
-            <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Dynamic Pricing Latency (p95)</span>
                 <span className="text-xs text-muted-foreground">Target: &lt; 300 ms</span>
@@ -242,7 +242,7 @@ export function SystemObservabilityCard() {
               </div>
             </div>
 
-            <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Error Rate Under Concurrency</span>
                 <span className="text-xs text-muted-foreground">Target: &lt; 1.00%</span>
@@ -256,8 +256,8 @@ export function SystemObservabilityCard() {
         </Card>
 
         {/* High-Availability & Disaster Recovery */}
-        <Card className="shadow-soft border-primary/20">
-          <CardHeader className="border-b border-border/70 bg-surface-muted/40">
+        <Card>
+          <CardHeader className="bg-surface-muted/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
@@ -270,14 +270,14 @@ export function SystemObservabilityCard() {
                   </CardDescription>
                 </div>
               </div>
-              <Badge variant="outline" className="bg-info-soft text-info-soft-foreground font-mono text-xs border-info/30">
+              <Badge variant="outline" className="bg-info-soft text-info-soft-foreground font-mono text-xs">
                 RPO &lt; 15m
               </Badge>
             </div>
           </CardHeader>
 
           <CardContent className="pt-6 space-y-3">
-            <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Recovery Point Objective (RPO)</span>
                 <span className="text-xs text-muted-foreground">
@@ -287,7 +287,7 @@ export function SystemObservabilityCard() {
               <span className="font-mono font-bold text-sm text-foreground">&lt; 15 Mins</span>
             </div>
 
-            <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Recovery Time Objective (RTO)</span>
                 <span className="text-xs text-muted-foreground">
@@ -297,7 +297,7 @@ export function SystemObservabilityCard() {
               <span className="font-mono font-bold text-sm text-foreground">&lt; 30 Mins</span>
             </div>
 
-            <div className="p-3 rounded-lg border bg-card flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
               <div>
                 <span className="font-bold text-sm block">Backup Integrity Verification</span>
                 <span className="text-xs text-muted-foreground">

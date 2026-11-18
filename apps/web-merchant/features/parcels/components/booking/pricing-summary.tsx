@@ -48,10 +48,9 @@ export function PricingSummary({
   return (
     <section
       aria-labelledby="pricing-summary-heading"
-      className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-surface-elevated/95 via-surface-elevated/70 to-surface-muted/40 p-5 shadow-sm backdrop-blur-md"
+      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-elevated/95 via-surface-elevated/70 to-surface-muted/40 p-5 backdrop-blur-md"
     >
       {/* Specular top highlight */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       {/* Ambient glow accent */}
       <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-2xl" />
 
@@ -60,13 +59,13 @@ export function PricingSummary({
           id="pricing-summary-heading"
           className="flex items-center gap-2 text-body-sm font-bold text-foreground tracking-tight"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary border border-primary/25 shadow-xs">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <Calculator className="h-4 w-4" aria-hidden="true" />
           </span>
           {t("pricingTitle")}
         </h3>
         {pricing ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-0.5 text-caption font-semibold text-primary">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-0.5 text-caption font-semibold text-primary">
             <Sparkles className="h-3 w-3" aria-hidden="true" />
             {t(ZONE_LABEL_KEY[pricing.zone])}
           </span>
@@ -96,7 +95,7 @@ export function PricingSummary({
 
         {pricing ? (
           <>
-            <dl className="space-y-2 border-b border-border/60 pb-3">
+            <dl className="space-y-2 pb-3">
               {rows.map((row) => (
                 <div key={row.labelKey} className="flex items-center justify-between text-body-sm">
                   <dt className="text-muted-foreground">{t(row.labelKey)}</dt>
@@ -107,7 +106,7 @@ export function PricingSummary({
               {pricing.discount > 0 ? (
                 <div className="flex items-center justify-between text-body-sm">
                   <dt className="text-muted-foreground">{t("discount")}</dt>
-                  <dd className="tabular-nums font-semibold text-emerald-600 dark:text-emerald-400">
+                  <dd className="tabular-nums font-semibold text-success">
                     −{bdt(pricing.discount)}
                   </dd>
                 </div>
@@ -128,10 +127,10 @@ export function PricingSummary({
               </span>
               <span
                 className={cn(
-                  "rounded-md px-2 py-0.5 font-semibold text-caption border",
+                  "rounded-md px-2 py-0.5 font-semibold text-caption",
                   codAmount > 0
-                    ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                    ? "bg-warning/10 text-warning"
+                    : "bg-success/10 text-success",
                 )}
               >
                 {codAmount > 0 ? t("collectCash") : t("prepaid")}

@@ -46,7 +46,7 @@ export default function AdminSettingsPage() {
 
             <div className="space-y-4">
               <div className="flex items-center gap-4 rounded-2xl bg-surface-muted/60 p-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xs">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                   <ShieldCheck className="h-7 w-7" />
                 </div>
                 <div className="space-y-1">
@@ -75,7 +75,7 @@ export default function AdminSettingsPage() {
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t("sessionSecurity")}
                   </p>
-                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{t("activeVerified")}</p>
+                  <p className="text-sm font-bold text-success">{t("activeVerified")}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("securityDescription")}
                   </p>

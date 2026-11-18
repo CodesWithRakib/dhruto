@@ -41,7 +41,7 @@ export function BookingParcelSection({ control, isLoading, t }: BookingParcelSec
                   inputMode="decimal"
                   placeholder={t("weightPlaceholder")}
                   disabled={isLoading}
-                  className="rounded-xl border-border/80 bg-surface-muted/50 focus:bg-surface-elevated transition-colors tabular-nums"
+                  className="rounded-xl bg-surface-muted/50 focus:bg-surface-elevated transition-colors tabular-nums"
                   {...field}
                 />
               </FormControl>
@@ -65,7 +65,7 @@ export function BookingParcelSection({ control, isLoading, t }: BookingParcelSec
                 <Input
                   placeholder={t("parcelDescriptionPlaceholder")}
                   disabled={isLoading}
-                  className="rounded-xl border-border/80 bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
+                  className="rounded-xl bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
                   {...field}
                 />
               </FormControl>

@@ -99,7 +99,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
 
   if (isError || !data?.data) {
     return (
-      <div className="rounded-3xl border border-destructive/20 bg-surface-elevated/90 p-8 shadow-sm backdrop-blur-md">
+      <div className="rounded-3xl bg-surface-elevated/90 p-8 backdrop-blur-md">
         <ErrorState
           title={t("notFoundTitle")}
           description={t("notFoundDescription")}
@@ -174,9 +174,9 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         bdt={bdt}
       />
 
-      <HighlightCard tone={nextStep.tone} className="p-5 rounded-3xl border border-border/80 bg-surface-elevated/85 shadow-sm backdrop-blur-md">
+      <HighlightCard tone={nextStep.tone} className="p-5 rounded-3xl bg-surface-elevated/85 backdrop-blur-md">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>

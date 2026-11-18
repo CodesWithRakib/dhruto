@@ -31,6 +31,8 @@ import { ParcelEditDialog } from "@/features/parcels/components/parcel-edit-dial
 import { ParcelCancelDialog } from "@/features/parcels/components/parcel-cancel-dialog";
 import { ParcelPickupDialog } from "@/features/parcels/components/parcel-pickup-dialog";
 
+type RiskTier = "HIGH" | "MEDIUM" | "LOW" | "UNSCORED";
+
 export function IntelligenceReviewQueue() {
   const t = useTranslations("Intelligence");
   const { bdt, date } = useFormatters();
@@ -67,57 +69,30 @@ export function IntelligenceReviewQueue() {
     search: search.trim() || undefined,
   });
 
-  const parcels = data?.data ?? [];
+  const parcels = useMemo(() => data?.data ?? [], [data]);
 
-  // Derive risk score & flags heuristically based on address quality and COD amount
+  // Risk comes from the server's booking-time intelligence snapshot (score,
+  // tier, RTO probability, address confidence). Parcels the engine has not
+  // scored are shown as such; the browser never invents a score.
   const reviewedParcels = useMemo(() => {
     return parcels.map((parcel) => {
-      let riskScore = 15;
+      const tier = parcel.riskTier?.toUpperCase();
+      const riskTier: RiskTier =
+        tier === "HIGH" || tier === "MEDIUM" || tier === "LOW" ? tier : "UNSCORED";
       const flags: string[] = [];
-
-      // Check high COD on first or unverified booking
-      if (parcel.codAmount > 3000) {
-        riskScore += 30;
-        flags.push("High COD value (>৳3,000)");
-      } else if (parcel.codAmount > 1500) {
-        riskScore += 15;
+      if (typeof parcel.rtoProbability === "number" && parcel.rtoProbability >= 40) {
+        flags.push(`Predicted return risk ${Math.round(parcel.rtoProbability)}%`);
       }
-
-      // Check address specificity
-      const addr = parcel.deliveryAddress?.toLowerCase() || "";
-      const hasHouseOrRoad =
-        addr.includes("house") ||
-        addr.includes("road") ||
-        addr.includes("basa") ||
-        addr.includes("sector") ||
-        addr.includes("lane") ||
-        addr.includes("নং") ||
-        addr.includes("রোড") ||
-        addr.includes("বাড়ি");
-
-      if (!hasHouseOrRoad) {
-        riskScore += 25;
-        flags.push("Vague street address (missing house/road numbers)");
-      }
-
-      if (addr.length < 15) {
-        riskScore += 20;
-        flags.push("Very short delivery address");
-      }
-
-      // Suburb or remote district
-      if (parcel.district?.toLowerCase() !== "dhaka") {
-        riskScore += 10;
-      }
-
-      const riskTier: "HIGH" | "MEDIUM" | "LOW" =
-        riskScore >= 55 ? "HIGH" : riskScore >= 35 ? "MEDIUM" : "LOW";
+      const confidence = parcel.addressConfidenceTier?.toUpperCase();
+      if (confidence === "LOW") flags.push("Low address confidence: confirm with recipient");
+      else if (confidence === "MEDIUM") flags.push("Address partly matched");
+      if (riskTier === "UNSCORED") flags.push("Not scored by the risk engine yet");
 
       return {
         ...parcel,
-        riskScore: Math.min(95, riskScore),
+        riskScore: typeof parcel.riskScore === "number" ? Math.round(parcel.riskScore) : null,
         riskTier,
-        flags: flags.length > 0 ? flags : ["Standard low-risk shipment"],
+        flags,
       };
     });
   }, [parcels]);
@@ -134,12 +109,13 @@ export function IntelligenceReviewQueue() {
 
   const highRiskCount = reviewedParcels.filter((p) => p.riskTier === "HIGH").length;
   const mediumRiskCount = reviewedParcels.filter((p) => p.riskTier === "MEDIUM").length;
+  const lowRiskCount = reviewedParcels.filter((p) => p.riskTier === "LOW").length;
 
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
+        <Card className="rounded-xl bg-surface">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -158,7 +134,7 @@ export function IntelligenceReviewQueue() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
+        <Card className="rounded-xl bg-surface">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -177,7 +153,7 @@ export function IntelligenceReviewQueue() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
+        <Card className="rounded-xl bg-surface">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -188,7 +164,7 @@ export function IntelligenceReviewQueue() {
               </div>
             </div>
             <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {reviewedParcels.length}
+              {lowRiskCount}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
               {t("safeDesc")}
@@ -198,8 +174,8 @@ export function IntelligenceReviewQueue() {
       </div>
 
       {/* Review Queue Table */}
-      <Card className="rounded-xl border border-border/80 bg-surface shadow-xs">
-        <CardHeader className="p-4 sm:p-5 border-b border-border/60">
+      <Card className="rounded-xl bg-surface">
+        <CardHeader className="p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-base font-bold text-foreground">
@@ -232,7 +208,7 @@ export function IntelligenceReviewQueue() {
                 onClick={() => setSelectedRiskFilter("ALL")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                   selectedRiskFilter === "ALL"
-                    ? "bg-primary text-primary-foreground shadow-xs"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                 }`}
               >
@@ -243,7 +219,7 @@ export function IntelligenceReviewQueue() {
                 onClick={() => setSelectedRiskFilter("HIGH")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                   selectedRiskFilter === "HIGH"
-                    ? "bg-danger text-danger-foreground shadow-xs"
+                    ? "bg-danger text-danger-foreground"
                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                 }`}
               >
@@ -254,7 +230,7 @@ export function IntelligenceReviewQueue() {
                 onClick={() => setSelectedRiskFilter("MEDIUM")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                   selectedRiskFilter === "MEDIUM"
-                    ? "bg-warning text-warning-foreground shadow-xs"
+                    ? "bg-warning text-warning-foreground"
                     : "bg-muted/50 text-muted-foreground hover:bg-muted"
                 }`}
               >
@@ -294,7 +270,7 @@ export function IntelligenceReviewQueue() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/60">
+            <div>
               {filtered.map((item) => {
                 const isHigh = item.riskTier === "HIGH";
                 const isMed = item.riskTier === "MEDIUM";
@@ -316,13 +292,17 @@ export function IntelligenceReviewQueue() {
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             isHigh
-                              ? "bg-danger/10 text-danger border border-danger/25"
+                              ? "bg-danger/10 text-danger"
                               : isMed
-                                ? "bg-warning/10 text-warning border border-warning/25"
-                                : "bg-success/10 text-success border border-success/25"
+                                ? "bg-warning/10 text-warning"
+                                : item.riskScore === null
+                                  ? "bg-muted text-muted-foreground"
+                                  : "bg-success/10 text-success"
                           }`}
                         >
-                          {isHigh ? t("holdReview") : isMed ? t("callNeeded") : t("safeDispatch")} · {t("riskScore")} {item.riskScore}
+                          {item.riskScore === null
+                            ? "Not scored"
+                            : `${isHigh ? t("holdReview") : isMed ? t("callNeeded") : t("safeDispatch")} · ${t("riskScore")} ${item.riskScore}`}
                         </span>
                         <span className="text-[11px] text-muted-foreground">
                           {date(item.createdAt)}
@@ -359,7 +339,7 @@ export function IntelligenceReviewQueue() {
                     </div>
 
                     {/* Right: COD & Actions */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between lg:justify-end gap-3 w-full lg:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between lg:justify-end gap-3 w-full lg:w-auto shrink-0 pt-3 sm:pt-0">
                       <div className="text-left sm:text-right">
                         <p className="text-xs font-bold text-foreground font-mono">
                           {bdt(item.codAmount)} COD

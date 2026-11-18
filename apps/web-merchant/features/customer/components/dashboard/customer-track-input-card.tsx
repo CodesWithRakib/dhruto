@@ -25,7 +25,7 @@ export function CustomerTrackInputCard({ onAddTrackingCode }: CustomerTrackInput
   };
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card dark:bg-card/90 p-5 shadow-xs">
+    <div className="rounded-2xl bg-card p-5">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Package className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
@@ -34,13 +34,13 @@ export function CustomerTrackInputCard({ onAddTrackingCode }: CustomerTrackInput
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value)}
             placeholder="Connect any tracking code (e.g. DHR-20261114-NNN27T)..."
-            className="pl-10 font-mono text-xs bg-muted/40 dark:bg-background rounded-xl border-border/70 focus:bg-background"
+            className="pl-10 font-mono text-xs bg-muted/40 rounded-xl focus:bg-background"
           />
         </div>
         <Button
           type="submit"
           disabled={isSubmitting || !codeInput.trim()}
-          className="h-10 shrink-0 text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
+          className="h-10 shrink-0 text-xs font-semibold gap-1.5 rounded-xl"
         >
           {isSubmitting ? (
             <RefreshCw className="h-3.5 w-3.5 animate-spin" />

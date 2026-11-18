@@ -25,7 +25,7 @@ export function TrackHero() {
 
       <div className="dhruto-container relative z-10 max-w-5xl mx-auto px-4">
         {/* Eyebrow Pill */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-[var(--acc)] mb-6 shadow-sm">
+        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold text-[var(--acc)] mb-6">
           <span className="h-2 w-2 rounded-full bg-[var(--acc)] animate-ping" />
           <span>{t("badge")}</span>
           <span className="hidden sm:inline text-white/40">•</span>

@@ -47,11 +47,10 @@ export function ShipmentPerformance({
   const metricLabel = metric === "delivered" ? t("performance.delivered") : t("performance.booked");
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
+    <div className="relative overflow-hidden rounded-3xl bg-card/90 backdrop-blur-md">
       {/* Top Specular Accent Line */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
 
-      <CardHeader className="flex flex-col gap-3 border-b border-border/60 px-5 py-4.5 bg-surface-muted/30 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
+      <CardHeader className="flex flex-col gap-3 px-5 py-4.5 bg-surface-muted/30 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
         <div className="min-w-0">
           <CardTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight">
             {t("performance.title")}
@@ -64,7 +63,7 @@ export function ShipmentPerformance({
         <div
           role="group"
           aria-label={t("performance.metricLabel")}
-          className="flex shrink-0 items-center gap-1 rounded-xl border border-border/80 bg-surface-muted/60 p-1 backdrop-blur-sm"
+          className="flex shrink-0 items-center gap-1 rounded-xl bg-surface-muted/60 p-1 backdrop-blur-sm"
         >
           {(["delivered", "booked"] as const).map((option) => (
             <button
@@ -75,7 +74,7 @@ export function ShipmentPerformance({
               className={cn(
                 "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                 metric === option
-                  ? "bg-surface text-foreground shadow-xs font-bold"
+                  ? "bg-surface text-foreground font-bold"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -87,7 +86,7 @@ export function ShipmentPerformance({
 
       <CardContent className="p-4 sm:p-5">
         {isLoading ? (
-          <ChartSkeleton className="border-0 p-0 shadow-none" />
+          <ChartSkeleton className="p-0" />
         ) : isError ? (
           <EmptyState
             title={t("performance.errorTitle")}
@@ -107,7 +106,7 @@ export function ShipmentPerformance({
               emptyMessage={t("performance.emptyTitle")}
               formatValue={(value) => number(value)}
             />
-            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border/50 pt-4">
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 pt-4">
               <div>
                 <p className="text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("performance.totalLabel", { metric: metricLabel })}

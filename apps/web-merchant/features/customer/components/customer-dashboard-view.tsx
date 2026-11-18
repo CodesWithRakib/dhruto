@@ -4,7 +4,6 @@ import * as React from "react";
 import { useCustomerDeliveries, type CustomerDelivery } from "../hooks/use-customer-deliveries";
 import { RescheduleModal } from "./reschedule-modal";
 import { PodModal } from "./pod-modal";
-import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import { CustomerIllustrationBg } from "@/components/visual/illustration-backgrounds";
 import { CustomerWelcomeHero } from "./dashboard/customer-welcome-hero";
@@ -13,7 +12,6 @@ import { CustomerActiveShipmentCard } from "./dashboard/customer-active-shipment
 import { CustomerDeliveriesList } from "./dashboard/customer-deliveries-list";
 
 export function CustomerDashboardView() {
-  const authUser = useAppSelector((s) => s.auth.user);
 
   const {
     deliveries,
@@ -78,11 +76,9 @@ export function CustomerDashboardView() {
           onOpenChange={setPodOpen}
           parcel={{
             trackingCode: selectedPodParcel.trackingCode,
-            recipientName: authUser?.name || "Verified Customer",
-            recipientPhone: authUser?.phone || "+8801700000005",
             deliveryAddress: selectedPodParcel.destination,
-            deliveredAt: selectedPodParcel.deliveredAt || "Today",
-            riderName: selectedPodParcel.riderName || "Dhruto Express Rider",
+            deliveredAt: selectedPodParcel.deliveredAt,
+            riderName: selectedPodParcel.riderName,
             merchantName: selectedPodParcel.merchantName,
             codAmount: selectedPodParcel.codAmount,
             description: selectedPodParcel.itemsDescription,

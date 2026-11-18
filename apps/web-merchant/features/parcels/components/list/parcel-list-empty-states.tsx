@@ -29,7 +29,7 @@ export function ParcelListEmptyStates({
 }: ParcelListEmptyStatesProps) {
   if (isError) {
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-destructive/20 bg-surface-elevated/90 p-8 shadow-sm backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-8 backdrop-blur-md">
         <ErrorState
           title={t("loadErrorTitle")}
           description={t("loadErrorDescription")}
@@ -40,7 +40,7 @@ export function ParcelListEmptyStates({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/80 p-8 shadow-sm backdrop-blur-md">
+    <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/80 p-8 backdrop-blur-md">
       {hasActiveFilters ? (
         <EmptyState
           icon={SearchX}
@@ -52,7 +52,7 @@ export function ParcelListEmptyStates({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 rounded-xl border-border/80"
+                  className="gap-1.5 rounded-xl"
                   onClick={onClearSearch}
                 >
                   <Search className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -63,7 +63,7 @@ export function ParcelListEmptyStates({
                 variant="outline"
                 size="sm"
                 onClick={onResetFilters}
-                className="rounded-xl border-border/80"
+                className="rounded-xl"
               >
                 {t("clearFilters")}
               </Button>
@@ -79,7 +79,7 @@ export function ParcelListEmptyStates({
             <div className="flex flex-col items-center gap-3">
               {createHref ? (
                 <Link href={createHref}>
-                  <Button size="sm" className="gap-2 rounded-xl shadow-md shadow-primary/20">
+                  <Button size="sm" className="gap-2 rounded-xl">
                     <Plus className="h-4 w-4" aria-hidden="true" />
                     <span>{t("create")}</span>
                   </Button>

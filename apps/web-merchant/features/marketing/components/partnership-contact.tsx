@@ -63,10 +63,10 @@ export function PartnershipContact() {
         </div>
 
         {/* Right Form */}
-        <form onSubmit={handleSubmit} className="fm text-[#140e1c]">
+        <form onSubmit={handleSubmit} className="fm text-foreground">
           <div>
             <h3 className="text-xl font-bold tracking-tight">Request Partnership Quote</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Fill in your details and we will reach out within 24 business hours.
             </p>
           </div>
@@ -80,7 +80,7 @@ export function PartnershipContact() {
                 placeholder="Rahim Uddin"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-[#f6f8f7] border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--ink)] focus:bg-white"
+                className="w-full bg-field rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:bg-white hover:bg-field-hover"
               />
             </div>
             <div className="f">
@@ -92,7 +92,7 @@ export function PartnershipContact() {
                 placeholder="rahim@store.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-[#f6f8f7] border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--ink)] focus:bg-white"
+                className="w-full bg-field rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:bg-white hover:bg-field-hover"
               />
             </div>
           </div>
@@ -105,12 +105,12 @@ export function PartnershipContact() {
               placeholder="+880 1700-000000"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full bg-[#f6f8f7] border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--ink)] focus:bg-white"
+              className="w-full bg-field rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:bg-white hover:bg-field-hover"
             />
           </div>
 
           <fieldset className="f chips">
-            <legend className="text-xs font-semibold text-gray-700">What service do you need?</legend>
+            <legend className="text-xs font-semibold text-foreground">What service do you need?</legend>
             {[
               "E-commerce Courier",
               "Enterprise Line-Haul",
@@ -140,7 +140,7 @@ export function PartnershipContact() {
               placeholder="e.g. 5,000 parcels/month inside Dhaka, expanding to Chittagong..."
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="w-full bg-[#f6f8f7] border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--ink)] focus:bg-white resize-y"
+              className="w-full bg-field rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:bg-white resize-y hover:bg-field-hover"
             />
           </div>
 
@@ -153,7 +153,7 @@ export function PartnershipContact() {
           </button>
 
           {sent && (
-            <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center gap-2">
+            <p className="text-xs text-success-soft-foreground bg-success-soft p-3 rounded-xl flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 flex-none" />
               Opening your default email client. If it doesn&apos;t open, email us directly at hello@dhruto.com.
             </p>

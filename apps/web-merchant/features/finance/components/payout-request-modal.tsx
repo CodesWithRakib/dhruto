@@ -119,7 +119,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-surface-elevated p-6 sm:p-8 shadow-2xl">
+      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-surface-elevated p-6 sm:p-8">
         <div className="flex items-center justify-between pb-4">
           <div>
             <h3 className="text-xl font-bold tracking-tight text-foreground">
@@ -176,7 +176,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                       aria-pressed={isSelected}
                       className={`flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition-all ${
                         isSelected
-                          ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                          ? "bg-primary text-primary-foreground font-bold"
                           : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                       }`}
                     >
@@ -206,7 +206,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                 placeholder="017XXXXXXXX"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-                className="mt-1.5 border-0 bg-surface-muted/60 focus-visible:ring-1"
+                className="mt-1.5 bg-surface-muted/60 focus-visible:ring-1"
               />
             </div>
 
@@ -244,7 +244,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                     type="text"
                     value={accountHolderName}
                     onChange={(e) => setAccountHolderName(e.target.value)}
-                    className="mt-1 text-xs border-0 bg-surface-muted/60"
+                    className="mt-1 text-xs bg-surface-muted/60"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -257,7 +257,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                       type="text"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      className="mt-1 text-xs border-0 bg-surface-muted/60"
+                      className="mt-1 text-xs bg-surface-muted/60"
                     />
                   </div>
                   <div>
@@ -269,7 +269,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                       type="text"
                       value={branchName}
                       onChange={(e) => setBranchName(e.target.value)}
-                      className="mt-1 text-xs border-0 bg-surface-muted/60"
+                      className="mt-1 text-xs bg-surface-muted/60"
                     />
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="border-0 bg-surface-muted/60 pl-9 text-lg font-bold"
+                  className="bg-surface-muted/60 pl-9 text-lg font-bold"
                 />
               </div>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">

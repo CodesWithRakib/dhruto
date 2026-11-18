@@ -84,7 +84,7 @@ export function BookingDestinationSection({
                 autoComplete="street-address"
                 placeholder={t("addressPlaceholder")}
                 disabled={isLoading}
-                className="rounded-xl border-border/80 bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
+                className="rounded-xl bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
                 {...field}
               />
             </FormControl>

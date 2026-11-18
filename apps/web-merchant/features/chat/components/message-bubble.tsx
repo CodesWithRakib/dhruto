@@ -101,10 +101,10 @@ function MessageBubbleImpl({
         <div
           className={cn(
             "relative min-w-0 rounded-2xl px-3 py-2 text-sm leading-relaxed transition-shadow",
-            mine ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-foreground",
+            mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
             mine && lastInGroup && "rounded-ee-md",
             !mine && lastInGroup && "rounded-es-md",
-            highlighted && "ring-2 ring-ring ring-offset-2 ring-offset-surface",
+            highlighted && "ring-offset-2 ring-offset-surface",
             message.localState === "failed" && "opacity-80",
           )}
         >
@@ -116,8 +116,8 @@ function MessageBubbleImpl({
               disabled={!replyTarget?.id}
               onClick={() => replyTarget?.id && handlers.onJumpTo(replyTarget.id)}
               className={cn(
-                "mb-1 block w-full rounded-lg border-s-2 px-2 py-1 text-start text-xs",
-                mine ? "border-primary-foreground/60 bg-primary-foreground/10" : "border-primary bg-surface/60",
+                "mb-1 block w-full rounded-lg px-2 py-1 text-start text-xs",
+                mine ? "bg-primary-foreground/10" : "bg-surface/60",
               )}
             >
               {replyTarget ? (

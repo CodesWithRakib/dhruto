@@ -51,7 +51,7 @@ export function ComparisonSection() {
       <div className="dhruto-container relative z-10">
         {/* Section Heading */}
         <div className="mx-auto max-w-2xl text-center space-y-3 mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary">
             <Award className="h-3.5 w-3.5" />
             <span>The Modern Competitive Edge</span>
           </div>
@@ -64,11 +64,11 @@ export function ComparisonSection() {
         </div>
 
         {/* Comparison Table Card */}
-        <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-xl">
+        <div className="overflow-hidden rounded-3xl bg-surface">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-muted/50">
+                <tr className="bg-surface-muted/50">
                   <th className="py-5 px-6 text-sm font-bold uppercase tracking-wider text-muted-foreground w-1/3">
                     Feature / Capability
                   </th>
@@ -83,7 +83,7 @@ export function ComparisonSection() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40 text-sm">
+              <tbody className="text-sm">
                 {COMPARISONS.map((row) => (
                   <tr
                     key={row.feature}
@@ -104,7 +104,7 @@ export function ComparisonSection() {
                     </td>
                     <td className="py-4 sm:py-5 px-6 bg-primary/5 text-foreground font-medium">
                       <div className="flex items-start gap-2.5">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground mt-0.5 shadow-sm shadow-primary/30">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground mt-0.5">
                           <Check className="h-3 w-3" />
                         </span>
                         <span className="leading-snug text-foreground font-semibold">{row.dhruto}</span>

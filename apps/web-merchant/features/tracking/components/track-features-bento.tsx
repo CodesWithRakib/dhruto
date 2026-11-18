@@ -73,10 +73,10 @@ export function TrackFeaturesBento() {
 
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-[var(--acc)] group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 group-hover:scale-105 shadow-sm">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-[var(--acc)] group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 group-hover:scale-105">
                         <Icon className="h-6 w-6" aria-hidden="true" />
                       </span>
-                      <span className="rounded-full border border-border/80 bg-surface px-2.5 py-0.5 text-[11px] font-mono font-medium text-muted-foreground">
+                      <span className="rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-mono font-medium text-muted-foreground">
                         {item.badge}
                       </span>
                     </div>
@@ -89,7 +89,7 @@ export function TrackFeaturesBento() {
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-border/60 flex items-baseline justify-between">
+                  <div className="mt-6 pt-4 flex items-baseline justify-between">
                     <div>
                       <div className="font-mono text-lg font-extrabold text-foreground tracking-tight">
                         {item.metric}

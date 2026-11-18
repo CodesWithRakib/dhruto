@@ -5,12 +5,12 @@ import { ShieldCheck } from "lucide-react";
 
 export function StatsStrip() {
   return (
-    <section className="py-12 sm:py-16 border-b border-[var(--line)] bg-[var(--soft-bg)]">
+    <section className="py-12 sm:py-16 bg-[var(--soft-bg)]">
       <div className="dhruto-container">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-12 pb-6">
           {/* Left statement with round icon */}
           <div className="flex items-center gap-5 max-w-md">
-            <span className="flex-none w-14 h-14 rounded-full bg-[var(--tint)] flex items-center justify-center text-[var(--dk)] shadow-sm">
+            <span className="flex-none w-14 h-14 rounded-full bg-[var(--tint)] flex items-center justify-center text-[var(--dk)]">
               <ShieldCheck className="h-6 w-6 text-[var(--acc2)]" />
             </span>
             <p className="text-lg sm:text-xl font-medium tracking-tight text-[var(--text)] leading-snug">

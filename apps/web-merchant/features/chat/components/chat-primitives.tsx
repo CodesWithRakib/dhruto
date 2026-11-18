@@ -39,7 +39,7 @@ export function PresenceDot({ online, label }: { online: boolean; label: string 
       role="img"
       aria-label={label}
       className={cn(
-        "absolute bottom-0 end-0 h-3 w-3 rounded-full border-2 border-surface",
+        "absolute bottom-0 end-0 h-3 w-3 rounded-full",
         online ? "bg-success" : "bg-muted-foreground/50",
       )}
     />

@@ -34,7 +34,7 @@ export function HubMetricsGrid({ metrics, isLoading }: HubMetricsGridProps) {
           {Array.from({ length: 9 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-3xl border border-border/50 bg-card/80 p-4 sm:p-5"
+              className="rounded-3xl bg-card/80 p-4 sm:p-5"
             >
               <div className="space-y-2">
                 <div className="h-3.5 w-2/3 animate-pulse rounded bg-surface-muted" />
@@ -110,13 +110,9 @@ export function HubMetricsGrid({ metrics, isLoading }: HubMetricsGridProps) {
         {metricCards.map((card) => (
           <div
             key={card.label}
-            className="group relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-4 sm:p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+            className="group relative rounded-3xl bg-card/90 backdrop-blur-md p-4 sm:p-5 transition-all duration-200 hover:-translate-y-0.5"
           >
             {/* Specular top highlight */}
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent"
-              aria-hidden="true"
-            />
 
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">

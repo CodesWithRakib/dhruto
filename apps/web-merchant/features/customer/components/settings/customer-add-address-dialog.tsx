@@ -49,7 +49,7 @@ export function CustomerAddAddressDialog({
 }: CustomerAddAddressDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 rounded-3xl border-0 bg-surface-elevated shadow-2xl">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 rounded-3xl bg-surface-elevated">
         <form onSubmit={onSubmit} className="space-y-4">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">
@@ -93,7 +93,7 @@ export function CustomerAddAddressDialog({
                 value={newAddressText}
                 onChange={(e) => setNewAddressText(e.target.value)}
                 placeholder="e.g. House 14, Road 5, Block B"
-                className="mt-1 h-10 w-full rounded-2xl border-0 bg-surface-muted/60 px-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
+                className="mt-1 h-10 w-full rounded-2xl bg-field px-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background hover:bg-field-hover"
               />
             </div>
 
@@ -134,7 +134,7 @@ export function CustomerAddAddressDialog({
                 value={newPhone}
                 onChange={(e) => setNewPhone(e.target.value)}
                 placeholder="e.g. 01700000005"
-                className="mt-1 h-10 w-full rounded-2xl border-0 bg-surface-muted/60 px-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
+                className="mt-1 h-10 w-full rounded-2xl bg-field px-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background hover:bg-field-hover"
               />
             </div>
 

@@ -75,6 +75,7 @@
       "avgDelivery": "Avg delivery time",
       "avgDeliveryHint": "From booking to doorstep",
       "hours": "{hours} hrs",
+      "minutes": "{minutes} min",
       "pendingCod": "Pending COD",
       "pendingCodHint": "Cash still to be collected and settled",
       "unavailable": "Some health metrics need the analytics service. They will appear once it responds."
@@ -1287,11 +1288,11 @@
     "predictRto": "Predict RTO Risk",
     "evaluating": "Calculating...",
     "highRiskAttention": "High Risk Attention",
-    "highRiskDesc": "Vague addresses or large COD exposure",
+    "highRiskDesc": "High risk tier from the booking risk engine",
     "moderateAttention": "Moderate Risk",
-    "moderateDesc": "Requires phone call verification",
+    "moderateDesc": "Medium risk tier: confirm by phone first",
     "safeToDispatch": "Safe to Dispatch",
-    "safeDesc": "Clear address & low risk score",
+    "safeDesc": "Low risk tier from the booking risk engine",
     "allRisks": "All Shipments",
     "highRiskOnly": "High Risk Only",
     "mediumRiskOnly": "Medium Risk",
@@ -2282,12 +2283,6 @@
       "title": "Rider operations",
       "description": "Last-mile task queues and cash collection."
     },
-    "networkStatusTitle": "Nationwide Logistics Network Status",
-    "allSystemsActive": "All Systems Active",
-    "networkStatusDescription": "All 14 hub locations, linehaul transfers, rider dispatch queues, and automated payout engines are operating within SLA.",
-    "slaBadge": "SLA: 99.8%",
-    "hubsOnline": "14 Hubs Online",
-    "fleetSync": "Fleet Synchronized",
     "systemGuide": "System Guide",
     "globalLookup": "Global Lookup",
     "commandDomains": "Operational Command Domains",
@@ -2299,7 +2294,7 @@
     "supervisoryNoticeText": "Administrative actions across parcels, hub manifests, and merchant financial payouts are permanently recorded in immutable audit logs with operator timestamp and IP fingerprinting.",
     "badges": {
       "realtimeTracking": "Real-Time Tracking",
-      "activeHubs": "14 Active Hubs",
+      "activeHubs": "Hub Network",
       "lastMileRunsheets": "Last-Mile Runsheets",
       "payoutApprovalQueue": "Payout Approval Queue",
       "executiveKpis": "Executive KPIs",
@@ -2337,6 +2332,26 @@
       "financialConsole": "Financial Console & Ledger",
       "riderFleet": "Rider Fleet Management",
       "hubInfrastructure": "Hub Infrastructure"
+    },
+    "networkStatus": {
+      "title": "Network status",
+      "state": {
+        "loading": "Checking",
+        "healthy": "Operational",
+        "degraded": "Degraded",
+        "unknown": "Status unavailable"
+      },
+      "description": {
+        "loading": "Checking platform health…",
+        "healthy": "Database and cache are responding normally.",
+        "degraded": "Some platform services are responding slowly. Check the status page.",
+        "unknown": "Platform health could not be retrieved."
+      },
+      "deliverySuccess": "Delivery success {rate}%",
+      "activeHubs": "{count, plural, one {# active hub} other {# active hubs}}",
+      "activeRiders": "{count, plural, one {# active rider} other {# active riders}}",
+      "loadingFigures": "Loading network figures…",
+      "figuresUnavailable": "Network figures unavailable"
     }
   },
   "Pwa": {

@@ -149,12 +149,12 @@ export function TermsProhibitedMatrix() {
   }, [currentCategory, searchQuery]);
 
   return (
-    <section id="prohibited-cargo" className="relative py-24 bg-muted/20 scroll-mt-20 border-b border-border/80">
+    <section id="prohibited-cargo" className="relative py-24 bg-muted/20 scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
+            <div className="inline-flex items-center gap-2 rounded-full bg-danger/10 px-3 py-1 text-xs font-semibold text-danger">
               <AlertTriangle className="h-3.5 w-3.5" />
               <span>CARGO SAFETY & COMPLIANCE MATRIX</span>
             </div>
@@ -174,13 +174,13 @@ export function TermsProhibitedMatrix() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter items or rules..."
-              className="w-full rounded-xl border border-border/80 bg-surface pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm"
+              className="w-full rounded-xl bg-field pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 hover:bg-field-hover focus:bg-surface"
             />
           </div>
         </div>
 
         {/* Category Tabs */}
-        <div className="mt-10 flex flex-wrap gap-2 border-b border-border/70 pb-4">
+        <div className="mt-10 flex flex-wrap gap-2 pb-4">
           {CARGO_CATEGORIES.map((cat) => {
             const isSelected = cat.id === activeTab;
             return (
@@ -193,12 +193,12 @@ export function TermsProhibitedMatrix() {
                 }}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${
                   isSelected
-                    ? "bg-foreground text-background shadow-md"
-                    : "bg-surface text-muted-foreground hover:bg-muted hover:text-foreground border border-border/60"
+                    ? "bg-foreground text-background"
+                    : "bg-surface text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                {cat.status === "prohibited" && <Ban className="h-3.5 w-3.5 text-rose-500" />}
-                {cat.status === "restricted" && <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />}
+                {cat.status === "prohibited" && <Ban className="h-3.5 w-3.5 text-danger" />}
+                {cat.status === "restricted" && <AlertTriangle className="h-3.5 w-3.5 text-warning" />}
                 {cat.status === "required" && <Box className="h-3.5 w-3.5 text-primary" />}
                 <span>{cat.label}</span>
               </button>
@@ -207,7 +207,7 @@ export function TermsProhibitedMatrix() {
         </div>
 
         {/* Tab Intro Banner */}
-        <div className="mt-6 rounded-2xl border border-border/70 bg-card p-5 text-xs text-muted-foreground flex items-center justify-between">
+        <div className="mt-6 rounded-2xl bg-card p-5 text-xs text-muted-foreground flex items-center justify-between">
           <p className="max-w-3xl leading-relaxed">
             <strong className="text-foreground">{currentCategory.label}: </strong>
             {currentCategory.description}
@@ -222,21 +222,21 @@ export function TermsProhibitedMatrix() {
           {filteredItems.map((item, idx) => (
             <div
               key={idx}
-              className="rounded-2xl border border-border/80 bg-surface p-6 shadow-sm transition hover:shadow-md hover:border-border"
+              className="rounded-2xl bg-surface p-6 transition"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
                   {item.allowed ? (
-                    <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                   ) : (
-                    <XCircle className="h-4 w-4 text-rose-500" />
+                    <XCircle className="h-4 w-4 text-danger" />
                   )}
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                     item.allowed
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                      ? "bg-success/10 text-success"
+                      : "bg-danger/10 text-danger"
                   }`}
                 >
                   {item.allowed ? "Allowed with SOP" : "Prohibited"}
@@ -250,7 +250,7 @@ export function TermsProhibitedMatrix() {
                 {item.description}
               </p>
 
-              <div className="mt-4 pt-3 border-t border-border/50 text-[11px] leading-relaxed">
+              <div className="mt-4 pt-3 text-[11px] leading-relaxed">
                 <span className="font-semibold text-foreground">Carrier Protocol: </span>
                 <span className="text-muted-foreground">{item.complianceNote}</span>
               </div>
@@ -259,7 +259,7 @@ export function TermsProhibitedMatrix() {
         </div>
 
         {filteredItems.length === 0 && (
-          <div className="mt-12 rounded-2xl border border-border/70 bg-card p-12 text-center text-sm text-muted-foreground">
+          <div className="mt-12 rounded-2xl bg-card p-12 text-center text-sm text-muted-foreground">
             No items matching your search query &quot;{searchQuery}&quot;. Please consult with Dhruto Legal Affairs.
           </div>
         )}

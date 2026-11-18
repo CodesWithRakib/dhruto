@@ -253,19 +253,19 @@ export function CoverageExplorer() {
 
         {/* 4 KPI Metric Strips */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto mb-10">
-          <div className="p-4 sm:p-5 rounded-2xl border border-[var(--line)] bg-[var(--bg)] text-center shadow-sm">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg)] text-center">
             <b className="block text-2xl sm:text-3xl font-extrabold font-mono text-[var(--text)]">64 / 64</b>
             <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Districts (100% Reach)</span>
           </div>
-          <div className="p-4 sm:p-5 rounded-2xl border border-[var(--line)] bg-[var(--bg)] text-center shadow-sm">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg)] text-center">
             <b className="block text-2xl sm:text-3xl font-extrabold font-mono text-[var(--text)]">495</b>
             <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Thanas &amp; Upazilas</span>
           </div>
-          <div className="p-4 sm:p-5 rounded-2xl border border-[var(--line)] bg-[var(--bg)] text-center shadow-sm">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg)] text-center">
             <b className="block text-2xl sm:text-3xl font-extrabold font-mono text-[var(--text)]">18+</b>
             <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Automated Sorting Hubs</span>
           </div>
-          <div className="p-4 sm:p-5 rounded-2xl border border-[var(--line)] bg-[var(--bg)] text-center shadow-sm">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg)] text-center">
             <b className="block text-2xl sm:text-3xl font-extrabold font-mono text-[var(--acc2)]">24–48h</b>
             <span className="text-xs sm:text-sm text-[var(--muted-text)] mt-1 block">Nationwide Delivery SLA</span>
           </div>
@@ -280,7 +280,7 @@ export function CoverageExplorer() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search any district or thana (e.g. Bogura, Cox's Bazar, Sylhet, Gazipur)..."
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-[var(--line)] bg-[var(--bg)] text-[var(--text)] placeholder:text-[var(--muted-text)] focus:outline-none focus:border-[var(--ink)] focus:ring-4 focus:ring-[var(--acc)]/20 shadow-sm transition-all"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg)] text-[var(--text)] placeholder:text-[var(--muted-text)] focus:outline-none focus:ring-4 focus:ring-[var(--acc)]/20 transition-all"
             />
             {searchQuery && (
               <button
@@ -296,8 +296,8 @@ export function CoverageExplorer() {
 
         {/* If Search is Active, Show Search Results Box */}
         {searchResults !== null ? (
-          <div className="max-w-4xl mx-auto rounded-3xl border border-[var(--line)] bg-[var(--bg)] p-6 sm:p-8 shadow-xl mb-8">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--line)] mb-4">
+          <div className="max-w-4xl mx-auto rounded-3xl bg-[var(--bg)] p-6 sm:p-8 mb-8">
+            <div className="flex items-center justify-between pb-4 mb-4">
               <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted-text)]">
                 Search Results ({searchResults.length} {searchResults.length === 1 ? "district" : "districts"} found)
               </span>
@@ -321,7 +321,7 @@ export function CoverageExplorer() {
                       setActiveDivision(division);
                       setSearchQuery("");
                     }}
-                    className="flex items-center justify-between p-3.5 rounded-xl border border-[var(--line)] bg-[var(--soft)]/50 hover:bg-[var(--tint)] hover:border-[var(--acc2)] text-left transition-all cursor-pointer group"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-[var(--soft)]/50 hover:bg-[var(--tint)] text-left transition-all cursor-pointer group"
                   >
                     <div>
                       <p className="font-bold text-sm text-[var(--text)] group-hover:text-[var(--tint-ink)]">
@@ -355,8 +355,8 @@ export function CoverageExplorer() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? "bg-[var(--dk)] text-white shadow-lg shadow-[rgba(var(--dk-rgb),0.25)] scale-105"
-                    : "border border-[var(--line)] bg-[var(--bg)] text-[var(--muted-text)] hover:bg-[var(--soft)] hover:text-[var(--text)]"
+                    ? "bg-[var(--dk)] text-white scale-105"
+                    : "bg-[var(--bg)] text-[var(--muted-text)] hover:bg-[var(--soft)] hover:text-[var(--text)]"
                 }`}
               >
                 <span>{div.name}</span>
@@ -370,12 +370,12 @@ export function CoverageExplorer() {
         </div>
 
         {/* Active Division Interactive Console */}
-        <div className="overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)] shadow-xl p-6 sm:p-10 max-w-5xl mx-auto">
+        <div className="overflow-hidden rounded-3xl bg-[var(--bg)] p-6 sm:p-10 max-w-5xl mx-auto">
           <div className="grid gap-8 lg:grid-cols-12 lg:gap-10 items-start">
             {/* Division Metrics & Line-Haul Route (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
               <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--tint)] text-[var(--tint-ink)] border border-[var(--acc2)]/30">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--tint)] text-[var(--tint-ink)]">
                   <MapPin className="h-6 w-6" />
                 </span>
                 <div>
@@ -390,29 +390,29 @@ export function CoverageExplorer() {
 
               {/* 3 Metric Pills */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] text-center">
+                <div className="p-3 rounded-2xl bg-[var(--soft)] text-center">
                   <p className="text-xl font-mono font-extrabold text-[var(--text)]">{activeDivision.districtsCount}</p>
                   <p className="text-[11px] text-[var(--muted-text)] font-medium">Districts</p>
                 </div>
-                <div className="p-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] text-center">
+                <div className="p-3 rounded-2xl bg-[var(--soft)] text-center">
                   <p className="text-xl font-mono font-extrabold text-[var(--text)]">{activeDivision.thanasCount}</p>
                   <p className="text-[11px] text-[var(--muted-text)] font-medium">Thanas</p>
                 </div>
-                <div className="p-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] text-center">
+                <div className="p-3 rounded-2xl bg-[var(--soft)] text-center">
                   <p className="text-xs font-mono font-extrabold text-[var(--acc2)] pt-1">{activeDivision.sla}</p>
                   <p className="text-[11px] text-[var(--muted-text)] font-medium">Guaranteed SLA</p>
                 </div>
               </div>
 
               {/* Simulated Line-Haul Pipeline Flow */}
-              <div className="p-4 rounded-2xl bg-[var(--soft)]/70 border border-[var(--line)] space-y-2.5">
+              <div className="p-4 rounded-2xl bg-[var(--soft)]/70 space-y-2.5">
                 <div className="flex items-center justify-between text-xs font-bold text-[var(--text)]">
                   <span className="flex items-center gap-1.5">
                     <Navigation className="h-3.5 w-3.5 text-[var(--acc2)]" />
                     Nightly Line-Haul Route
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/15 text-success-soft-foreground font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                     Active Nightly
                   </span>
                 </div>
@@ -434,12 +434,12 @@ export function CoverageExplorer() {
                   {activeDivision.hubs.map((hub) => (
                     <div
                       key={hub}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl border border-[var(--line)] bg-[var(--soft)]/50 text-xs font-medium text-[var(--text)]"
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[var(--soft)]/50 text-xs font-medium text-[var(--text)]"
                     >
                       <Building2 className="h-4 w-4 text-[var(--acc2)] shrink-0" />
                       <span className="line-clamp-1">{hub}</span>
-                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 shrink-0">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
+                      <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-success-soft-foreground shrink-0">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden="true" />
                         Live
                       </span>
                     </div>
@@ -449,8 +449,8 @@ export function CoverageExplorer() {
             </div>
 
             {/* Districts Grid (7 cols) */}
-            <div className="lg:col-span-7 space-y-4 rounded-2xl border border-[var(--line)] bg-[var(--soft)]/40 p-6 sm:p-8">
-              <div className="flex items-center justify-between border-b border-[var(--line)] pb-3">
+            <div className="lg:col-span-7 space-y-4 rounded-2xl bg-[var(--soft)]/40 p-6 sm:p-8">
+              <div className="flex items-center justify-between pb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted-text)]">
                   All {activeDivision.districts.length} Districts in {activeDivision.name}
                 </span>
@@ -465,10 +465,10 @@ export function CoverageExplorer() {
                 {activeDivision.districts.map((district) => (
                   <div
                     key={district.name}
-                    className="flex items-center justify-between p-3 rounded-xl border border-[var(--line)] bg-[var(--bg)] shadow-sm hover:border-[var(--acc2)]/60 hover:shadow-md transition-all group"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                       <div>
                         <p className="text-xs font-bold text-[var(--text)]">{district.name}</p>
                         <p className="text-[10px] text-[var(--muted-text)]">{district.bnName} • {district.thanas} thanas</p>
@@ -482,13 +482,13 @@ export function CoverageExplorer() {
               </div>
 
               {/* Line-Haul Schedule Note */}
-              <div className="mt-6 pt-4 border-t border-[var(--line)] flex items-center justify-between text-xs text-[var(--muted-text)]">
+              <div className="mt-6 pt-4 flex items-center justify-between text-xs text-[var(--muted-text)]">
                 <div className="flex items-center gap-2">
                   <Truck className="h-4 w-4 text-[var(--acc2)] shrink-0" />
                   <span>Nightly line-haul express dispatches departing daily at 10:00 PM</span>
                 </div>
-                <span className="text-[11px] font-semibold text-emerald-700 hidden sm:inline">
-                  99.98% On-Time SLA
+                <span className="text-[11px] font-semibold text-success-soft-foreground hidden sm:inline">
+                  Live parcel tracking
                 </span>
               </div>
             </div>

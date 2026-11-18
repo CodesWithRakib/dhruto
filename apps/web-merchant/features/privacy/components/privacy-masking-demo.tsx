@@ -15,7 +15,7 @@ export function PrivacyMaskingDemo() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
             <span>LIVE PII MASKING SPECIFICATION</span>
           </div>
@@ -29,13 +29,13 @@ export function PrivacyMaskingDemo() {
 
         {/* Interactive View Switcher Tabs */}
         <div className="mt-12 flex justify-center">
-          <div className="inline-flex rounded-2xl border border-border/80 bg-muted/40 p-1.5 shadow-sm">
+          <div className="inline-flex rounded-2xl bg-muted/40 p-1.5">
             <button
               type="button"
               onClick={() => setViewMode("public")}
               className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition-all ${
                 viewMode === "public"
-                  ? "bg-primary text-white shadow-md shadow-primary/25"
+                  ? "bg-primary text-white"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -47,7 +47,7 @@ export function PrivacyMaskingDemo() {
               onClick={() => setViewMode("internal")}
               className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition-all ${
                 viewMode === "internal"
-                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25"
+                  ? "bg-success text-white"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -61,20 +61,20 @@ export function PrivacyMaskingDemo() {
         <div className="mt-10 mx-auto max-w-4xl">
           <div className="prv-mask-card">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between border-b border-border/60 pb-4">
+            <div className="flex flex-wrap items-center justify-between pb-4">
               <div className="flex items-center gap-2.5">
-                <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                <span className="h-3 w-3 rounded-full bg-success" />
                 <span className="font-mono text-xs font-bold text-foreground">
                   PARCEL #DHR-8842-DH • IN TRANSIT
                 </span>
               </div>
               <div className="mt-2 sm:mt-0">
                 {viewMode === "public" ? (
-                  <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="rounded-full bg-success/15 px-3 py-1 text-[11px] font-bold text-success">
                     PROTECTED PUBLIC VIEW (ZERO LEAKS)
                   </span>
                 ) : (
-                  <span className="rounded-full bg-amber-500/15 px-3 py-1 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                  <span className="rounded-full bg-warning/15 px-3 py-1 text-[11px] font-bold text-warning">
                     MERCHANT AUTHENTICATED INTERNAL
                   </span>
                 )}
@@ -87,7 +87,7 @@ export function PrivacyMaskingDemo() {
                 <span className="text-muted-foreground">Recipient Name</span>
                 <span className="font-bold text-foreground mt-1 sm:mt-0">
                   {viewMode === "public" ? (
-                    <span className="text-emerald-600 dark:text-emerald-400">
+                    <span className="text-success">
                       Tanvir H*** <span className="text-[10px] text-muted-foreground font-sans">(Surname obscured)</span>
                     </span>
                   ) : (
@@ -100,7 +100,7 @@ export function PrivacyMaskingDemo() {
                 <span className="text-muted-foreground">Mobile Phone Number</span>
                 <span className="font-bold text-foreground mt-1 sm:mt-0">
                   {viewMode === "public" ? (
-                    <span className="text-emerald-600 dark:text-emerald-400">
+                    <span className="text-success">
                       +880 17***-**78 <span className="text-[10px] text-muted-foreground font-sans">(Digit-masked)</span>
                     </span>
                   ) : (
@@ -113,7 +113,7 @@ export function PrivacyMaskingDemo() {
                 <span className="text-muted-foreground">Doorstep Delivery Address</span>
                 <span className="font-bold text-foreground mt-1 sm:mt-0">
                   {viewMode === "public" ? (
-                    <span className="text-emerald-600 dark:text-emerald-400">
+                    <span className="text-success">
                       Banani, Dhaka <span className="text-[10px] text-muted-foreground font-sans">(House & Flat masked)</span>
                     </span>
                   ) : (
@@ -126,7 +126,7 @@ export function PrivacyMaskingDemo() {
                 <span className="text-muted-foreground">Order Value & COD Amount</span>
                 <span className="font-bold text-foreground mt-1 sm:mt-0">
                   {viewMode === "public" ? (
-                    <span className="text-emerald-600 dark:text-emerald-400">
+                    <span className="text-success">
                       Hidden <span className="text-[10px] text-muted-foreground font-sans">(Theft & extortion prevention)</span>
                     </span>
                   ) : (
@@ -137,12 +137,12 @@ export function PrivacyMaskingDemo() {
             </div>
 
             {/* Verification Footer */}
-            <div className="mt-6 border-t border-border/60 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground gap-2">
+            <div className="mt-6 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground gap-2">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                <ShieldCheck className="h-4 w-4 text-success" />
                 <span>Audited under Bangladesh Information & Communication Technology (ICT) Act</span>
               </div>
-              <div className="font-mono text-[11px] text-slate-400">
+              <div className="font-mono text-[11px] text-muted-foreground">
                 SHA-256 HMAC Verified
               </div>
             </div>

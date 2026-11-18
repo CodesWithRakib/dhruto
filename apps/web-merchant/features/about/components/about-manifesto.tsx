@@ -54,7 +54,7 @@ export function AboutManifesto() {
             />
 
             {/* Guiding Manifesto Card */}
-            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 space-y-3">
+            <div className="rounded-2xl bg-primary/5 p-6 space-y-3">
               <div className="flex items-center gap-2 text-primary font-mono text-xs font-bold uppercase tracking-wider">
                 <Quote className="h-4 w-4" />
                 <span>The Dhruto Engineering Thesis</span>
@@ -93,7 +93,7 @@ export function AboutManifesto() {
                       <span className="text-muted-foreground">•</span>
                       <span className="text-muted-foreground font-semibold">{chap.badge}</span>
                     </span>
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                       <Icon className="h-5 w-5" />
                     </span>
                   </div>
@@ -106,7 +106,7 @@ export function AboutManifesto() {
                     {chap.text}
                   </p>
 
-                  <div className="mt-6 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-3">
+                  <div className="mt-6 pt-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-xs font-mono font-semibold text-foreground/90">
                       <CheckCircle2 className="h-4 w-4 text-success" />
                       <span>{chap.metric}</span>

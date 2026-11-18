@@ -69,7 +69,7 @@ export function AttachmentReviewList({
   return (
     <>
       <ul
-        className="divide-y divide-border/60 overflow-hidden rounded-xl bg-card"
+        className="overflow-hidden rounded-xl bg-card"
         aria-label={t("attachments.results")}
       >
         {items.map((item) => {

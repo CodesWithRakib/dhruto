@@ -27,8 +27,8 @@ export function TrackingMilestoneHistory({ timeline, updatedAt }: TrackingMilest
   const { dateTime } = useFormatters();
 
   return (
-    <Card className="rounded-2xl border border-border/60 shadow-soft overflow-hidden bg-card">
-      <div className="border-b border-border/60 px-6 py-4.5 flex items-center justify-between">
+    <Card className="rounded-2xl overflow-hidden bg-card">
+      <div className="px-6 py-4.5 flex items-center justify-between">
         <div>
           <h2 className="text-base font-bold text-foreground">
             {t("timeline")}
@@ -37,7 +37,7 @@ export function TrackingMilestoneHistory({ timeline, updatedAt }: TrackingMilest
             Complete immutable scan sequence for this parcel
           </p>
         </div>
-        <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-[11px] font-semibold text-primary">
+        <span className="rounded-full bg-primary/10 px-3 py-1 font-mono text-[11px] font-semibold text-primary">
           {timeline.length} Scans Logged
         </span>
       </div>
@@ -55,7 +55,7 @@ export function TrackingMilestoneHistory({ timeline, updatedAt }: TrackingMilest
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-foreground">{label}</span>
                     {isLatest ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">
                         <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                         LATEST SCAN
                       </span>
@@ -89,7 +89,7 @@ export function TrackingMilestoneHistory({ timeline, updatedAt }: TrackingMilest
         </Timeline>
       </CardContent>
 
-      <div className="border-t border-border/60 bg-surface-muted/30 px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+      <div className="bg-surface-muted/30 px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
         <span>
           {t("lastUpdated", {
             date: dateTime(updatedAt),

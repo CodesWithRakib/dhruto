@@ -15,7 +15,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Delivery Success Rate */}
-      <Card className="border-success/20 bg-gradient-to-br from-card via-card to-success-soft/40 shadow-soft">
+      <Card className="bg-gradient-to-br from-card via-card to-success-soft/40">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -34,7 +34,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
               Optimal
             </span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/70">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2">
             <span>Delivered Shipments</span>
             <span className="font-mono font-bold text-foreground">
               {kpis.deliveredOrders} / {kpis.totalOrders}
@@ -44,7 +44,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
       </Card>
 
       {/* RTO Return Rate */}
-      <Card className="border-danger/20 bg-gradient-to-br from-card via-card to-danger-soft/40 shadow-soft">
+      <Card className="bg-gradient-to-br from-card via-card to-danger-soft/40">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -62,7 +62,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
               {kpis.rtoRate < 8 ? "Below Target (Good)" : "Action Advised"}
             </span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/70">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2">
             <span>Returned / Cancelled</span>
             <span className="font-mono font-bold text-foreground">
               {kpis.returnedOrders} Orders
@@ -72,7 +72,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
       </Card>
 
       {/* Total COD Collections */}
-      <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary-soft/40 shadow-soft">
+      <Card className="bg-gradient-to-br from-card via-card to-primary-soft/40">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -87,7 +87,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
               {formatBDT(financials.collectedCod)}
             </span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/70">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2">
             <span>Pending In-Transit COD</span>
             <span className="font-mono font-bold text-foreground">
               {formatBDT(financials.pendingCod)}
@@ -97,7 +97,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
       </Card>
 
       {/* Average Delivery Duration */}
-      <Card className="border-warning/20 bg-gradient-to-br from-card via-card to-warning-soft/40 shadow-soft">
+      <Card className="bg-gradient-to-br from-card via-card to-warning-soft/40">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -113,7 +113,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
             </span>
             <span className="text-xs text-muted-foreground">Hours</span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/70">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2">
             <span>Active Pipeline Volume</span>
             <span className="font-mono font-bold text-foreground flex items-center gap-1">
               <Package className="h-3.5 w-3.5 text-primary" />

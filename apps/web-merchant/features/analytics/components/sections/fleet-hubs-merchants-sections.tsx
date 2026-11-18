@@ -44,7 +44,7 @@ export function HubsSection({
           ])}
         />
         {hubs.map((h) => (
-          <Card key={h.hubId} className="p-4 rounded-2xl bg-surface-muted/50 border-0">
+          <Card key={h.hubId} className="p-4 rounded-2xl bg-surface-muted/50">
             <h4 className="mb-2 text-sm font-semibold">
               {h.hubName} · {t("backlogTitle")}
             </h4>

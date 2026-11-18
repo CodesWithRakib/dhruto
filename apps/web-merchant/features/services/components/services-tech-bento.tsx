@@ -57,7 +57,7 @@ export function ServicesTechBento() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
             <span>DEVELOPER & AUTOMATION ENGINE</span>
           </div>
@@ -72,27 +72,27 @@ export function ServicesTechBento() {
         {/* Bento Grid: Left Terminal, Right Feature Cards */}
         <div className="mt-16 grid items-stretch gap-8 lg:grid-cols-12">
           {/* Left: Interactive API Code Terminal (7 cols) */}
-          <div className="flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-[#080c14] shadow-2xl lg:col-span-7">
+          <div className="flex flex-col justify-between overflow-hidden rounded-3xl bg-inverse lg:col-span-7">
             {/* Terminal Header */}
-            <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-white/[0.03] px-5 py-3.5">
+            <div className="flex flex-wrap items-center justify-between bg-white/[0.03] px-5 py-3.5">
               <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-rose-500/80" />
-                <span className="h-3 w-3 rounded-full bg-amber-500/80" />
-                <span className="h-3 w-3 rounded-full bg-emerald-500/80" />
-                <span className="ml-3 font-mono text-xs text-slate-400">
+                <span className="h-3 w-3 rounded-full bg-danger/80" />
+                <span className="h-3 w-3 rounded-full bg-warning/80" />
+                <span className="h-3 w-3 rounded-full bg-success/80" />
+                <span className="ml-3 font-mono text-xs text-muted-foreground">
                   POST /api/v1/shipments
                 </span>
               </div>
 
               <div className="flex items-center gap-2 pt-2 sm:pt-0">
-                <div className="flex rounded-lg border border-white/10 bg-white/5 p-0.5">
+                <div className="flex rounded-lg bg-white/5 p-0.5">
                   <button
                     type="button"
                     onClick={() => setActiveCodeTab("curl")}
                     className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-all ${
                       activeCodeTab === "curl"
                         ? "bg-primary text-white font-bold"
-                        : "text-slate-400 hover:text-white"
+                        : "text-muted-foreground hover:text-white"
                     }`}
                   >
                     cURL Request
@@ -102,8 +102,8 @@ export function ServicesTechBento() {
                     onClick={() => setActiveCodeTab("response")}
                     className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-all ${
                       activeCodeTab === "response"
-                        ? "bg-emerald-600 text-white font-bold"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-success text-white font-bold"
+                        : "text-muted-foreground hover:text-white"
                     }`}
                   >
                     JSON 200 OK
@@ -113,12 +113,12 @@ export function ServicesTechBento() {
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300 transition hover:bg-white/10"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1 text-[11px] text-inverse-muted transition hover:bg-white/10"
                 >
                   {copied ? (
                     <>
-                      <Check className="h-3 w-3 text-emerald-400" />
-                      <span className="text-emerald-400">Copied</span>
+                      <Check className="h-3 w-3 text-success" />
+                      <span className="text-success">Copied</span>
                     </>
                   ) : (
                     <>
@@ -131,20 +131,20 @@ export function ServicesTechBento() {
             </div>
 
             {/* Terminal Body */}
-            <div className="flex-1 overflow-x-auto p-5 font-mono text-xs leading-relaxed text-slate-200">
-              <pre className="text-slate-300">
+            <div className="flex-1 overflow-x-auto p-5 font-mono text-xs leading-relaxed text-inverse-foreground">
+              <pre className="text-inverse-muted">
                 <code>{activeCodeTab === "curl" ? CURL_SNIPPET : JSON_RESPONSE_SNIPPET}</code>
               </pre>
             </div>
 
             {/* Terminal Status Footer */}
-            <div className="flex items-center justify-between border-t border-white/10 bg-white/[0.02] px-5 py-3 text-[11px] font-mono text-slate-400">
+            <div className="flex items-center justify-between bg-white/[0.02] px-5 py-3 text-[11px] font-mono text-muted-foreground">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
-                <span className="text-emerald-400">Production Cluster: Active</span>
+                <span className="text-success">Production Cluster: Active</span>
               </div>
               <div>Latency: ~142ms • TLS 1.3</div>
             </div>
@@ -153,9 +153,9 @@ export function ServicesTechBento() {
           {/* Right: 3 Automation Feature Bento Cards (5 cols) */}
           <div className="flex flex-col justify-between gap-4 lg:col-span-5">
             {/* Card 1: Webhook Subscriptions */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+            <div className="rounded-2xl bg-surface p-5 transition">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Webhook className="h-5 w-5" />
                 </div>
                 <div>
@@ -171,9 +171,9 @@ export function ServicesTechBento() {
             </div>
 
             {/* Card 2: Bulk CSV Upload */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+            <div className="rounded-2xl bg-surface p-5 transition">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success">
                   <FileSpreadsheet className="h-5 w-5" />
                 </div>
                 <div>
@@ -189,9 +189,9 @@ export function ServicesTechBento() {
             </div>
 
             {/* Card 3: Thermal 4x6 Labels */}
-            <div className="rounded-2xl border border-border/70 bg-surface p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+            <div className="rounded-2xl bg-surface p-5 transition">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10 text-info">
                   <Printer className="h-5 w-5" />
                 </div>
                 <div>

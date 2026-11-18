@@ -16,14 +16,10 @@ export function HubRecentScansCard({ recentScans }: HubRecentScansCardProps) {
   const { time: fmtTime } = useFormatters();
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl bg-card/90 backdrop-blur-md">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent"
-        aria-hidden="true"
-      />
 
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
+      <div className="flex items-center justify-between px-5 py-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           {t("dashboard.recentScans")}
         </h2>
@@ -40,7 +36,7 @@ export function HubRecentScansCard({ recentScans }: HubRecentScansCardProps) {
           {t("dashboard.noRecentScans")}
         </p>
       ) : (
-        <ul className="divide-y divide-border/20">
+        <ul>
           {recentScans.slice(0, 8).map((scan) => (
             <li
               key={scan.id}
@@ -52,10 +48,10 @@ export function HubRecentScansCard({ recentScans }: HubRecentScansCardProps) {
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                   scan.outcome === "APPLIED"
-                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    ? "bg-success/15 text-success-soft-foreground"
                     : scan.outcome === "DUPLICATE"
                       ? "bg-surface-muted text-muted-foreground"
-                      : "bg-rose-500/15 text-rose-700 dark:text-rose-300"
+                      : "bg-danger/15 text-danger-soft-foreground"
                 }`}
               >
                 {scan.scanType.replace(/_/g, " ")} · {scan.outcome}

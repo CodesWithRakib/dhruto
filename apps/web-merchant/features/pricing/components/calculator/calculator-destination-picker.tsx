@@ -51,7 +51,7 @@ export function CalculatorDestinationPicker({
       </div>
 
       {/* Dynamic District & Thana Cascaded Picker */}
-      <div className="mb-3.5 rounded-2xl border border-border/60 bg-surface-muted/40 p-3.5 space-y-2 backdrop-blur-xs">
+      <div className="mb-3.5 rounded-2xl bg-surface-muted/40 p-3.5 space-y-2 backdrop-blur-xs">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
           <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           <span>{t("choosePrompt")}</span>
@@ -84,10 +84,10 @@ export function CalculatorDestinationPicker({
               key={zone.id}
               type="button"
               onClick={() => onSelectZone(zone.id)}
-              className={`relative flex flex-col items-start rounded-2xl p-4 text-left border transition-all duration-200 ${
+              className={`relative flex flex-col items-start rounded-2xl p-4 text-left transition-all duration-200 ${
                 isSelected
-                  ? "bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/25 scale-[1.01]"
-                  : "bg-surface-muted/60 text-foreground border-border/70 hover:bg-surface-muted hover:border-border"
+                  ? "bg-primary text-primary-foreground scale-[1.01]"
+                  : "bg-surface-muted/60 text-foreground hover:bg-surface-muted"
               }`}
             >
               <div className="flex w-full items-center justify-between">

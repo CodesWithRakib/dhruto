@@ -25,12 +25,8 @@
 
 @keyframes prc-glow-border {
   0%, 100% {
-    border-color: rgba(16, 185, 129, 0.25);
-    box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.15);
   }
   50% {
-    border-color: rgba(16, 185, 129, 0.5);
-    box-shadow: 0 0 25px 2px rgba(16, 185, 129, 0.3);
   }
 }
 
@@ -53,9 +49,8 @@
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: hsl(var(--success) / 0.1);
+  color: hsl(var(--success));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -76,7 +71,7 @@
 }
 
 .light .prc-receipt {
-  background: var(--surface-elevated, #f8fafc);
+  background: var(--surface-elevated, hsl(var(--background)));
   border: none;
   box-shadow: none;
 }
@@ -88,7 +83,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #ff6b00, #10b981, #0ea5e9);
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--success)), #0ea5e9);
 }
 
 .prc-receipt-row {
@@ -97,11 +92,9 @@
   justify-content: space-between;
   padding: 0.625rem 0;
   font-size: 0.8125rem;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
 }
 
 .light .prc-receipt-row {
-  border-bottom: 1px dashed rgba(15, 23, 42, 0.08);
 }
 
 .prc-receipt-row:last-child {
@@ -125,7 +118,7 @@
 }
 
 .light .prc-range-slider {
-  background: rgba(15, 23, 42, 0.1);
+  background: hsl(var(--foreground) / 0.1);
 }
 
 .prc-range-slider::-webkit-slider-thumb {
@@ -134,9 +127,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #ff6b00;
-  border: 3px solid #ffffff;
-  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+  background: hsl(var(--primary));
   cursor: pointer;
   transition: transform 0.15s ease, background-color 0.15s ease;
 }
@@ -150,9 +141,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #ff6b00;
-  border: 3px solid #ffffff;
-  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+  background: hsl(var(--primary));
   cursor: pointer;
 }
 
@@ -163,39 +152,30 @@
 .prc-tier-card {
   position: relative;
   border-radius: 1.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--surface, #ffffff);
   padding: 2.25rem 2rem;
   display: flex;
   flex-direction: column;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
 }
 
 .light .prc-tier-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
   background: #ffffff;
 }
 
 .prc-tier-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(255, 107, 0, 0.35);
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.12);
 }
 
 .dark .prc-tier-card:hover {
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5), 0 0 25px -4px rgba(255, 107, 0, 0.2);
 }
 
 .prc-tier-card.featured {
-  border: 2px solid #ff6b00;
-  background: radial-gradient(ellipse at top right, rgba(255, 107, 0, 0.08), transparent 70%), var(--surface, #ffffff);
-  box-shadow: 0 20px 40px -10px rgba(255, 107, 0, 0.18);
+  background: radial-gradient(ellipse at top right, hsl(var(--primary) / 0.08), transparent 70%), var(--surface, #ffffff);
 }
 
 .dark .prc-tier-card.featured {
-  background: radial-gradient(ellipse at top right, rgba(255, 107, 0, 0.15), transparent 70%), #0d121c;
-  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6), 0 0 30px -5px rgba(255, 107, 0, 0.25);
+  background: radial-gradient(ellipse at top right, hsl(var(--primary) / 0.15), transparent 70%), #0d121c;
 }
 
 /* --------------------------------------------------------------------------
@@ -211,13 +191,13 @@
 }
 
 .light .prc-volume-track {
-  background: rgba(15, 23, 42, 0.08);
+  background: hsl(var(--foreground) / 0.08);
 }
 
 .prc-volume-fill {
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #ff6b00, #10b981);
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--success)));
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -231,9 +211,7 @@
   border-spacing: 0;
   border-radius: 1.5rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .light .prc-compare-table {
-  border: 1px solid rgba(15, 23, 42, 0.08);
 }

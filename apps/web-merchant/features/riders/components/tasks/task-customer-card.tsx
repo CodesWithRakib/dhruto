@@ -11,38 +11,38 @@ import { useFormatters } from "@/lib/format";
 export const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
   ASSIGNED_TO_RIDER: {
     label: "Assigned",
-    dot: "bg-blue-500 ring-blue-500/30",
-    badge: "border-blue-500/25 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+    dot: "bg-info",
+    badge: "bg-info/10 text-info-soft-foreground",
   },
   OUT_FOR_DELIVERY: {
     label: "Out for Delivery",
-    dot: "bg-amber-500 ring-amber-500/30 animate-pulse",
-    badge: "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200",
+    dot: "bg-warning animate-pulse",
+    badge: "bg-warning/10 text-warning-soft-foreground",
   },
   DELIVERED: {
     label: "Delivered",
-    dot: "bg-emerald-500 ring-emerald-500/30",
-    badge: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    dot: "bg-success",
+    badge: "bg-success/10 text-success-soft-foreground",
   },
   CASH_PENDING: {
     label: "Cash Pending Hand-In",
-    dot: "bg-amber-500 ring-amber-500/30",
-    badge: "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200",
+    dot: "bg-warning",
+    badge: "bg-warning/10 text-warning-soft-foreground",
   },
   CASH_VERIFIED: {
     label: "Cash Verified",
-    dot: "bg-emerald-500 ring-emerald-500/30",
-    badge: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    dot: "bg-success",
+    badge: "bg-success/10 text-success-soft-foreground",
   },
   FAILED_ATTEMPT: {
     label: "Failed Attempt",
-    dot: "bg-rose-500 ring-rose-500/30",
-    badge: "border-rose-500/25 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+    dot: "bg-danger",
+    badge: "bg-danger/10 text-danger-soft-foreground",
   },
   RETURNED_TO_HUB: {
     label: "Returned to Hub",
-    dot: "bg-slate-500 ring-slate-500/30",
-    badge: "border-border bg-surface-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
+    badge: "bg-surface-muted text-muted-foreground",
   },
 };
 
@@ -70,7 +70,7 @@ export function TaskCustomerCard({
 
   return (
     <div className="rounded-3xl bg-surface-elevated p-5 sm:p-6 space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/20 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
         <div className="flex items-center gap-2">
           <span className="font-mono text-base font-extrabold text-foreground">{task.trackingCode}</span>
           <button
@@ -91,8 +91,8 @@ export function TaskCustomerCard({
           }`}
         >
           <span
-            className={`h-2 w-2 rounded-full ring-2 ${
-              (STATUS_CONFIG[task.status] || { dot: "bg-primary ring-primary/30" }).dot
+            className={`h-2 w-2 rounded-full ${
+              (STATUS_CONFIG[task.status] || { dot: "bg-primary" }).dot
             }`}
           />
           <span>{(STATUS_CONFIG[task.status] || { label: task.status.replace(/_/g, " ") }).label}</span>
@@ -115,18 +115,18 @@ export function TaskCustomerCard({
             href={`tel:${task.recipientPhone}`}
             className="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
           >
-            <Phone className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <Phone className="h-3.5 w-3.5 text-success" />
             <span>{task.recipientPhone}</span>
           </a>
         </div>
 
-        <div className="rounded-2xl bg-amber-500/10 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+        <div className="rounded-2xl bg-warning/10 p-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-warning-soft-foreground">
             {t("details.codDue")}
           </p>
           <p className="mt-1 font-mono text-base font-extrabold text-foreground">
             {task.codAmount > 0 ? (
-              <span className="text-amber-900 dark:text-amber-100">{bdt(task.codAmount)}</span>
+              <span className="text-warning-soft-foreground">{bdt(task.codAmount)}</span>
             ) : (
               <span className="text-muted-foreground">Prepaid</span>
             )}
@@ -157,18 +157,18 @@ export function TaskCustomerCard({
       <div className="flex flex-wrap gap-2.5 sm:flex-nowrap">
         <a
           href={`tel:${task.recipientPhone}`}
-          className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-500/15 px-4 text-xs font-bold text-emerald-800 dark:text-emerald-200 transition-all hover:bg-emerald-500/25"
+          className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-success/15 px-4 text-xs font-bold text-success-soft-foreground transition-all hover:bg-success/25"
         >
-          <Phone className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+          <Phone className="h-4 w-4 text-success" aria-hidden="true" />
           <span>{t("tasks.callCustomer")}</span>
         </a>
         <a
           href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-500/15 px-4 text-xs font-bold text-blue-800 dark:text-blue-200 transition-all hover:bg-blue-500/25"
+          className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-info/15 px-4 text-xs font-bold text-info-soft-foreground transition-all hover:bg-info/25"
         >
-          <Navigation className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+          <Navigation className="h-4 w-4 text-info" aria-hidden="true" />
           <span>{t("tasks.openMap")}</span>
         </a>
       </div>

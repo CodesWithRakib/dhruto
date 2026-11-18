@@ -42,21 +42,17 @@ export function RiderNextTaskHero({ nextTask }: RiderNextTaskHeroProps) {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-card/90 backdrop-blur-md p-5 sm:p-6 shadow-sm transition-all duration-200">
+    <div className="relative overflow-hidden rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 transition-all duration-200">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-        aria-hidden="true"
-      />
 
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-primary shadow-2xs">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-primary">
             <Package className="h-6 w-6" aria-hidden="true" />
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-xl bg-primary/20 border border-primary/30 px-2.5 py-0.5 font-mono text-xs font-bold text-primary">
+              <span className="inline-flex items-center gap-1 rounded-xl bg-primary/20 px-2.5 py-0.5 font-mono text-xs font-bold text-primary">
                 {nextTask.trackingCode}
                 <button
                   type="button"
@@ -92,14 +88,14 @@ export function RiderNextTaskHero({ nextTask }: RiderNextTaskHeroProps) {
           {nextTask.recipientPhone && (
             <a
               href={`tel:${nextTask.recipientPhone}`}
-              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl border border-border/50 bg-surface-elevated px-4 text-xs font-bold text-foreground transition-colors hover:bg-surface-muted"
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-surface-elevated px-4 text-xs font-bold text-foreground transition-colors hover:bg-surface-muted"
             >
               <Phone className="h-4 w-4 text-success" aria-hidden="true" />
               <span className="hidden sm:inline">{t("tasks.callCustomer")}</span>
             </a>
           )}
           <Link href={RIDER_ROUTES.task(nextTask.id)} className="w-full sm:w-auto">
-            <Button className="h-11 w-full gap-2 rounded-2xl px-5 text-sm font-bold sm:w-auto shadow-xs">
+            <Button className="h-11 w-full gap-2 rounded-2xl px-5 text-sm font-bold sm:w-auto">
               <Play className="h-4 w-4" aria-hidden="true" />
               {nextTask.status === "OUT_FOR_DELIVERY"
                 ? t("details.attemptDelivery")

@@ -58,7 +58,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
             <span>INTELLIGENT INQUIRY DISPATCHER</span>
           </div>
@@ -81,8 +81,8 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                 onClick={() => setTopic(t.id)}
                 className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
                   isActive
-                    ? "bg-primary text-white shadow-md shadow-primary/30"
-                    : "border border-border/70 bg-surface text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    ? "bg-primary text-white"
+                    : "bg-surface text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {t.label}
@@ -94,10 +94,10 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
         {/* Main Grid: Left Form, Right Live Ticket Preview */}
         <div className="mt-12 grid items-start gap-8 lg:grid-cols-12">
           {/* Form Card (7 cols) */}
-          <div className="rounded-3xl border border-border/80 bg-surface p-6 sm:p-8 shadow-xl lg:col-span-7">
+          <div className="rounded-3xl bg-surface p-6 sm:p-8 lg:col-span-7">
             {isSubmitted ? (
               <div className="py-12 text-center">
-                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-success/20 text-success">
                   <CheckCircle2 className="h-8 w-8" />
                 </span>
                 <h3 className="mt-4 text-2xl font-bold text-foreground">
@@ -110,7 +110,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                   <button
                     type="button"
                     onClick={() => setIsSubmitted(false)}
-                    className="rounded-xl border border-border bg-muted px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/80"
+                    className="rounded-xl bg-muted px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/80"
                   >
                     Edit Message
                   </button>
@@ -133,7 +133,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Tanvir Hasan"
-                      className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                      className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                     />
                   </div>
                   <div>
@@ -144,7 +144,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="e.g. merchant@mystore.com"
-                      className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                      className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                     />
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+880 1712-XXXXXX"
-                      className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                      className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                     />
                   </div>
                   <div>
@@ -171,7 +171,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                         value={trackingId}
                         onChange={(e) => setTrackingId(e.target.value)}
                         placeholder="e.g. DHR-8842-DH"
-                        className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                       />
                     ) : (
                       <input
@@ -179,7 +179,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                         placeholder="e.g. Artisan Footwear BD"
-                        className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                       />
                     )}
                   </div>
@@ -194,7 +194,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                     <select
                       value={monthlyVolume}
                       onChange={(e) => setMonthlyVolume(e.target.value)}
-                      className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                      className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                     >
                       <option value="100-300">100 to 300 shipments / month (Starter)</option>
                       <option value="500-2000">300 to 2,000 shipments / month (Growth Brand)</option>
@@ -212,7 +212,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                     <select
                       value={techStack}
                       onChange={(e) => setTechStack(e.target.value)}
-                      className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                      className="mt-1.5 w-full rounded-xl bg-field px-3.5 py-2.5 text-sm text-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                     >
                       <option value="woocommerce">WooCommerce (WordPress Plugin)</option>
                       <option value="shopify">Shopify Storefront</option>
@@ -230,7 +230,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Describe your delivery locations, timeline, or parcel inquiry..."
-                    className="mt-1.5 w-full rounded-xl border border-border/80 bg-muted/30 p-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                    className="mt-1.5 w-full rounded-xl bg-field p-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                   />
                 </div>
 
@@ -240,7 +240,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                   </span>
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-md shadow-primary/25 transition hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <span>Dispatch Ticket</span>
                     <Send className="h-4 w-4" />
@@ -253,49 +253,49 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
           {/* Right Live Ticket Preview Card (5 cols) */}
           <div className="lg:col-span-5">
             <div className="cnt-ticket-preview">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 text-xs">
-                <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex items-center justify-between pb-3 text-xs">
+                <span className="text-success font-bold flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                   LIVE DISPATCH ROUTING
                 </span>
-                <span className="font-mono text-slate-400">#DHR-ROUTER</span>
+                <span className="font-mono text-muted-foreground">#DHR-ROUTER</span>
               </div>
 
               <div className="mt-4 space-y-2 text-xs">
-                <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-slate-400">Target Queue:</span>
+                <div className="flex justify-between py-1">
+                  <span className="text-muted-foreground">Target Queue:</span>
                   <span className="font-bold text-primary">{currentTopicObj.department}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-slate-400">Response SLA:</span>
-                  <span className="text-emerald-400 font-bold">&lt; 18 Minutes</span>
+                <div className="flex justify-between py-1">
+                  <span className="text-muted-foreground">Response SLA:</span>
+                  <span className="text-success font-bold">&lt; 18 Minutes</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-slate-400">Sender Identity:</span>
+                <div className="flex justify-between py-1">
+                  <span className="text-muted-foreground">Sender Identity:</span>
                   <span className="text-white font-mono">{name || "Pending input..."}</span>
                 </div>
                 {topic === "onboarding" && (
-                  <div className="flex justify-between py-1 border-b border-white/5">
-                    <span className="text-slate-400">Volume Tier:</span>
+                  <div className="flex justify-between py-1">
+                    <span className="text-muted-foreground">Volume Tier:</span>
                     <span className="text-white font-mono">{monthlyVolume}</span>
                   </div>
                 )}
                 {topic === "api" && (
-                  <div className="flex justify-between py-1 border-b border-white/5">
-                    <span className="text-slate-400">Tech Stack:</span>
+                  <div className="flex justify-between py-1">
+                    <span className="text-muted-foreground">Tech Stack:</span>
                     <span className="text-white font-mono">{techStack}</span>
                   </div>
                 )}
                 {topic === "escalation" && (
-                  <div className="flex justify-between py-1 border-b border-white/5">
-                    <span className="text-slate-400">Tracking Code:</span>
-                    <span className="text-amber-400 font-mono font-bold">{trackingId || "None"}</span>
+                  <div className="flex justify-between py-1">
+                    <span className="text-muted-foreground">Tracking Code:</span>
+                    <span className="text-warning font-mono font-bold">{trackingId || "None"}</span>
                   </div>
                 )}
               </div>
 
-              <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-3.5 text-[11px] text-slate-300">
-                <div className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+              <div className="mt-5 rounded-xl bg-white/5 p-3.5 text-[11px] text-inverse-muted">
+                <div className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
                   Live Dispatch Note:
                 </div>
                 <p className="mt-1 leading-relaxed">
@@ -303,7 +303,7 @@ export function ContactSmartForm({ initialTopic = "onboarding" }: SmartFormProps
                 </p>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+              <div className="mt-5 pt-3 flex items-center justify-between text-xs text-muted-foreground">
                 <span>Direct Hotline:</span>
                 <a
                   href="tel:+8809613347886"

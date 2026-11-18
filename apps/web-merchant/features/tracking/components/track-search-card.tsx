@@ -46,14 +46,14 @@ export function TrackSearchCard() {
             placeholder={t("inputPlaceholder")}
             aria-label={t("searchTitle")}
             autoComplete="off"
-            className="h-14 pl-12 pr-4 rounded-xl font-mono text-base tracking-wider bg-white/5 border-white/15 text-white placeholder:text-white/35 focus:border-[var(--acc)] focus:ring-2 focus:ring-[var(--acc)]/30 transition-all uppercase"
+            className="h-14 pl-12 pr-4 rounded-xl font-mono text-base tracking-wider bg-white/5 text-white placeholder:text-white/35 focus:ring-2 focus:ring-[var(--acc)]/30 transition-all uppercase"
             required
           />
         </div>
         <Button
           type="submit"
           size="lg"
-          className="btn-bl h-14 px-8 rounded-xl text-base font-semibold whitespace-nowrap shadow-lg shadow-[var(--acc)]/25 hover:shadow-xl hover:shadow-[var(--acc)]/35 inline-flex items-center justify-center gap-2"
+          className="btn-bl h-14 px-8 rounded-xl text-base font-semibold whitespace-nowrap inline-flex items-center justify-center gap-2"
         >
           <Search className="h-4 w-4" aria-hidden="true" />
           {t("trackBtn")}
@@ -61,7 +61,7 @@ export function TrackSearchCard() {
         </Button>
       </form>
 
-      <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 pt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Zap className="h-3.5 w-3.5 text-[var(--acc)]" />
           <span className="text-xs text-white/60 font-medium">Click real sample codes to track:</span>

@@ -31,10 +31,9 @@ export function MerchantDetailsForm({
   const t = useTranslations("Settings");
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-6 sm:p-8 space-y-6 shadow-sm backdrop-blur-md">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+    <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 sm:p-8 space-y-6 backdrop-blur-md">
 
-      <div className="border-b border-border/60 pb-3">
+      <div className="pb-3">
         <h3 className="text-body-md font-bold flex items-center gap-2 text-foreground">
           <Building2 className="h-4 w-4 text-primary" />
           <span>{t("businessDetails")}</span>
@@ -55,7 +54,7 @@ export function MerchantDetailsForm({
               value={businessName}
               onChange={(e) => onBusinessNameChange(e.target.value)}
               placeholder={t("businessNamePlaceholder")}
-              className="rounded-2xl border-border/80 bg-surface-muted/50 pl-10 text-sm focus:bg-surface-elevated transition-colors"
+              className="rounded-2xl bg-surface-muted/50 pl-10 text-sm focus:bg-surface-elevated transition-colors"
               required
             />
             <Building2 className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -72,7 +71,7 @@ export function MerchantDetailsForm({
               value={contactPhone}
               onChange={(e) => onContactPhoneChange(e.target.value)}
               placeholder={t("contactPhonePlaceholder")}
-              className="rounded-2xl border-border/80 bg-surface-muted/50 pl-10 text-sm focus:bg-surface-elevated transition-colors font-mono"
+              className="rounded-2xl bg-surface-muted/50 pl-10 text-sm focus:bg-surface-elevated transition-colors font-mono"
               required
             />
             <Phone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -93,7 +92,7 @@ export function MerchantDetailsForm({
               value={pickupAddress}
               onChange={(e) => onPickupAddressChange(e.target.value)}
               placeholder={t("pickupAddressPlaceholder")}
-              className="w-full rounded-2xl border border-border/80 bg-surface-muted/50 p-3.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-surface-elevated transition-colors resize-none"
+              className="w-full rounded-2xl bg-field p-3.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-surface-elevated transition-colors resize-none hover:bg-field-hover"
               required
             />
           </div>
@@ -106,7 +105,7 @@ export function MerchantDetailsForm({
           <Button
             type="submit"
             disabled={isUpdating || !isDirty}
-            className="gap-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
+            className="gap-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:scale-[1.01] active:scale-[0.99] transition-all"
           >
             {isUpdating ? (
               <RefreshCw className="h-4 w-4 animate-spin" />

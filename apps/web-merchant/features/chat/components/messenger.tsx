@@ -45,14 +45,14 @@ export function Messenger({ section }: { section: MessengerSection }) {
       <div
         className={cn(
           "relative -mx-4 -mt-6 flex h-[calc(100dvh-11rem)] flex-col overflow-hidden bg-surface/90 backdrop-blur-md sm:-mx-6",
-          "lg:mx-0 lg:mt-0 lg:h-[calc(100dvh-7rem)] lg:rounded-2xl lg:border lg:border-border lg:shadow-xl lg:shadow-emerald-950/5 dark:lg:shadow-black/20",
+          "lg:mx-0 lg:mt-0 lg:h-[calc(100dvh-7rem)] lg:rounded-2xl",
         )}
       >
         <ConnectionBanner />
         <div className="flex min-h-0 flex-1">
           <aside
             className={cn(
-              "min-h-0 w-full flex-col border-border md:flex md:w-80 md:border-e lg:w-96",
+              "min-h-0 w-full flex-col md:flex md:w-80 lg:w-96",
               activeId ? "hidden" : "flex",
             )}
           >

@@ -95,8 +95,8 @@ export function RateCalculatorPreview() {
         </div>
 
         {/* Calculator Widget Box */}
-        <div className="mx-auto max-w-5xl rounded-3xl border border-[var(--line)] bg-[var(--bg)] shadow-2xl overflow-hidden">
-          <div className="grid lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--line)]">
+        <div className="mx-auto max-w-5xl rounded-3xl bg-[var(--bg)] overflow-hidden">
+          <div className="grid lg:grid-cols-12">
             {/* Left Controls Column (7 cols) */}
             <div className="p-6 sm:p-10 lg:col-span-7 space-y-8">
               {/* Step 1: Destination Zone */}
@@ -118,17 +118,17 @@ export function RateCalculatorPreview() {
                         key={zone.id}
                         type="button"
                         onClick={() => setSelectedZone(zone)}
-                        className={`flex flex-col text-left p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                        className={`flex flex-col text-left p-4 rounded-2xl transition-all duration-200 cursor-pointer ${
                           isSelected
-                            ? "border-[var(--acc2)] bg-[var(--tint)] shadow-sm ring-2 ring-[var(--acc2)]/20"
-                            : "border-[var(--line)] bg-[var(--soft)]/50 hover:bg-[var(--soft)] hover:border-[var(--line)]"
+                            ? "bg-[var(--tint)]"
+                            : "bg-[var(--soft)]/50 hover:bg-[var(--soft)]"
                         }`}
                       >
                         <span className="font-bold text-sm text-[var(--text)]">{zone.label}</span>
                         <span className="text-[11px] text-[var(--muted-text)] mt-0.5 line-clamp-1">
                           {zone.sublabel}
                         </span>
-                        <div className="mt-3 pt-2 border-t border-[var(--line)]/60 flex items-center justify-between">
+                        <div className="mt-3 pt-2 flex items-center justify-between">
                           <span className="text-xs font-mono font-bold text-[var(--text)]">
                             ৳{zone.basePrice}
                           </span>
@@ -173,8 +173,8 @@ export function RateCalculatorPreview() {
                       onClick={() => setWeight(preset)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                         weight === preset
-                          ? "bg-[var(--dk)] text-white shadow-sm"
-                          : "border border-[var(--line)] bg-[var(--soft)]/80 text-[var(--text)] hover:bg-[var(--soft)]"
+                          ? "bg-[var(--dk)] text-white"
+                          : "bg-[var(--soft)]/80 text-[var(--text)] hover:bg-[var(--soft)]"
                       }`}
                     >
                       {preset} kg
@@ -209,7 +209,7 @@ export function RateCalculatorPreview() {
                     step={100}
                     value={codAmount}
                     onChange={(e) => setCodAmount(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-full pl-9 pr-4 py-3.5 rounded-2xl font-mono text-lg font-bold bg-[var(--soft)] border border-[var(--line)] text-[var(--text)] focus:outline-none focus:border-[var(--ink)] focus:bg-[var(--bg)] transition-all"
+                    className="w-full pl-9 pr-4 py-3.5 rounded-2xl font-mono text-lg font-bold bg-[var(--soft)] text-[var(--text)] focus:outline-none focus:bg-[var(--bg)] transition-all"
                   />
                 </div>
 
@@ -222,8 +222,8 @@ export function RateCalculatorPreview() {
                       onClick={() => setCodAmount(preset)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                         codAmount === preset
-                          ? "bg-[var(--dk)] text-white shadow-sm"
-                          : "border border-[var(--line)] bg-[var(--soft)]/80 text-[var(--text)] hover:bg-[var(--soft)]"
+                          ? "bg-[var(--dk)] text-white"
+                          : "bg-[var(--soft)]/80 text-[var(--text)] hover:bg-[var(--soft)]"
                       }`}
                     >
                       ৳{preset.toLocaleString()}
@@ -233,7 +233,7 @@ export function RateCalculatorPreview() {
               </div>
 
               {/* Delivery SLA Guarantee Banner */}
-              <div className="flex items-center gap-3 p-3.5 rounded-2xl border border-[var(--acc2)]/30 bg-[var(--tint)]/50 text-xs text-[var(--tint-ink)] font-medium">
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-[var(--tint)]/50 text-xs text-[var(--tint-ink)] font-medium">
                 <ShieldCheck className="h-4 w-4 text-[var(--ink)] shrink-0" />
                 <span>
                   Guaranteed SLA: <strong className="font-semibold text-[var(--text)]">{selectedZone.sla}</strong> with 100% Doorstep OTP Verification &amp; Free Return Protection.
@@ -244,18 +244,18 @@ export function RateCalculatorPreview() {
             {/* Right Summary Column: High-Contrast Dark Card (5 cols) */}
             <div className="p-6 sm:p-10 lg:col-span-5 bg-gradient-to-br from-[var(--dk3)] to-[var(--dk)] text-white flex flex-col justify-between space-y-8">
               <div>
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center justify-between pb-4">
                   <span className="text-xs font-semibold uppercase tracking-wider text-white/60">
                     Net Settlement Breakdown
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 text-emerald-300 px-3 py-1 text-xs font-semibold border border-emerald-500/30">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-success/20 text-success px-3 py-1 text-xs font-semibold">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     Verified Rates
                   </span>
                 </div>
 
                 {/* Net Payout Hero Value */}
-                <div className="mt-6 p-5 rounded-2xl bg-white/5 border border-white/10 text-center space-y-1.5 relative overflow-hidden">
+                <div className="mt-6 p-5 rounded-2xl bg-white/5 text-center space-y-1.5 relative overflow-hidden">
                   <span className="text-xs text-white/70 font-medium uppercase tracking-wider block">
                     Next-Morning Bank / bKash Disbursement
                   </span>
@@ -263,7 +263,7 @@ export function RateCalculatorPreview() {
                     ৳{netSettlement.toLocaleString()}
                   </div>
                   <div className="flex items-center justify-center gap-2 pt-1 text-xs text-white/60">
-                    <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                    <TrendingUp className="h-3.5 w-3.5 text-success" />
                     <span>{payoutRatio}% Net Payout Ratio</span>
                   </div>
                 </div>
@@ -289,17 +289,17 @@ export function RateCalculatorPreview() {
 
                   <div className="flex justify-between text-white/70">
                     <span>RTO &amp; Return Protection:</span>
-                    <span className="font-mono font-semibold text-emerald-400">FREE (৳0)</span>
+                    <span className="font-mono font-semibold text-success">FREE (৳0)</span>
                   </div>
 
-                  <div className="pt-3 border-t border-white/10 flex justify-between font-bold text-white text-base">
+                  <div className="pt-3 flex justify-between font-bold text-white text-base">
                     <span>Total Courier Fee:</span>
                     <span className="font-mono text-[var(--acc)]">৳{totalDeduction}</span>
                   </div>
                 </div>
 
                 {/* Instant Disbursement Channels */}
-                <div className="mt-6 pt-4 border-t border-white/10 space-y-2">
+                <div className="mt-6 pt-4 space-y-2">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-white/50 block">
                     Supported Daily Payout Rails:
                   </span>
@@ -320,7 +320,7 @@ export function RateCalculatorPreview() {
               <div className="pt-4">
                 <Link
                   href="/register"
-                  className="btn-bl w-full py-4 text-center font-bold text-base inline-flex items-center justify-center gap-2 rounded-2xl shadow-xl shadow-[rgba(var(--acc-rgb),0.2)] hover:scale-[1.01] transition-transform"
+                  className="btn-bl w-full py-4 text-center font-bold text-base inline-flex items-center justify-center gap-2 rounded-2xl hover:scale-[1.01] transition-transform"
                 >
                   <Sparkles className="h-4 w-4" />
                   <span>Ship at This Rate</span>

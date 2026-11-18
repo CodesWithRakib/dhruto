@@ -10,11 +10,9 @@ import { useCustomerDeliveries, type CustomerDelivery } from "../hooks/use-custo
 import { ParcelStatus } from "@dhruto/contracts";
 import { Link } from "@/lib/navigation";
 import { CUSTOMER_ROUTES } from "@/config/routes";
-import { useAppSelector } from "@/store/hooks";
 
 export function CustomerHistoryView() {
   const t = useTranslations("Customer");
-  const authUser = useAppSelector((s) => s.auth.user);
   const { deliveries } = useCustomerDeliveries();
 
   const [search, setSearch] = React.useState("");
@@ -58,11 +56,9 @@ export function CustomerHistoryView() {
           onOpenChange={setPodOpen}
           parcel={{
             trackingCode: selectedPod.trackingCode,
-            recipientName: authUser?.name || "Verified Customer",
-            recipientPhone: authUser?.phone || "+8801700000005",
             deliveryAddress: selectedPod.destination,
-            deliveredAt: selectedPod.deliveredAt || "Completed",
-            riderName: selectedPod.riderName || "Dhruto Express Rider",
+            deliveredAt: selectedPod.deliveredAt,
+            riderName: selectedPod.riderName,
             merchantName: selectedPod.merchantName,
             codAmount: selectedPod.codAmount,
             description: selectedPod.itemsDescription,
@@ -83,7 +79,7 @@ export function CustomerHistoryView() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search completed shipments..."
-            className="h-10 w-full rounded-2xl border-0 bg-surface-muted/60 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background"
+            className="h-10 w-full rounded-2xl bg-field pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:bg-background hover:bg-field-hover"
           />
         </div>
       </div>
@@ -124,7 +120,7 @@ export function CustomerHistoryView() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/20 pt-3 text-[11px] text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 text-[11px] text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 text-primary" />
                   <span>{item.deliveredAt || "Completed"}</span>

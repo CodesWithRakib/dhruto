@@ -18,7 +18,7 @@ export function HubPipelineStrip({ metrics }: HubPipelineStripProps) {
       title: "1. Inbound Scans",
       subtitle: `${metrics?.inboundToday ?? 0} packages received today`,
       icon: ArrowDownToLine,
-      color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+      color: "bg-success/10 text-success-soft-foreground",
       actionHref: HUB_ROUTES.scanner,
       actionText: "Scan Inbound",
     },
@@ -27,7 +27,7 @@ export function HubPipelineStrip({ metrics }: HubPipelineStripProps) {
       title: "2. Sorting & Bags",
       subtitle: `${metrics?.openBags ?? 0} open · ${metrics?.sealedBags ?? 0} sealed`,
       icon: PackageOpen,
-      color: "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200",
+      color: "bg-warning/10 text-warning-soft-foreground",
       actionHref: HUB_ROUTES.bags,
       actionText: "Manage Bags",
     },
@@ -36,7 +36,7 @@ export function HubPipelineStrip({ metrics }: HubPipelineStripProps) {
       title: "3. Linehaul Manifests",
       subtitle: `${metrics?.pendingManifests ?? 0} pending · ${metrics?.dispatchedManifests ?? 0} dispatched`,
       icon: Truck,
-      color: "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+      color: "bg-info/10 text-info-soft-foreground",
       actionHref: HUB_ROUTES.manifests,
       actionText: "Manifests",
     },
@@ -45,7 +45,7 @@ export function HubPipelineStrip({ metrics }: HubPipelineStripProps) {
       title: "4. Last-Mile Inventory",
       subtitle: `${metrics?.parcelsAtHub ?? 0} parcels currently at hub`,
       icon: Package,
-      color: "border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300",
+      color: "bg-primary/10 text-primary-soft-foreground",
       actionHref: HUB_ROUTES.parcels,
       actionText: "Floor Inventory",
     },
@@ -54,7 +54,7 @@ export function HubPipelineStrip({ metrics }: HubPipelineStripProps) {
       title: "5. Cash Desk & Audit",
       subtitle: `${metrics?.openExceptions ?? 0} exceptions · Cash hand-in`,
       icon: Wallet,
-      color: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+      color: "bg-danger/10 text-danger-soft-foreground",
       actionHref: HUB_ROUTES.cash,
       actionText: "Cash Desk",
     },
@@ -89,13 +89,9 @@ export function HubPipelineStrip({ metrics }: HubPipelineStripProps) {
           return (
             <div
               key={stage.step}
-              className="group relative flex flex-col justify-between rounded-2xl border border-border/60 bg-card/90 backdrop-blur-md p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              className="group relative flex flex-col justify-between rounded-2xl bg-card/90 backdrop-blur-md p-4 transition-all duration-200 hover:-translate-y-0.5"
             >
               {/* Specular top highlight */}
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-                aria-hidden="true"
-              />
 
               <div>
                 <div className="flex items-center justify-between">

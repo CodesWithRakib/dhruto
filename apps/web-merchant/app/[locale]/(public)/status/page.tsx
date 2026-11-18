@@ -57,10 +57,10 @@ export default function PublicStatusPage() {
           className={cn(
             "p-6 sm:p-8 rounded-3xl transition-all",
             isHealthy
-              ? "bg-emerald-500/10 text-emerald-950 dark:text-emerald-100"
+              ? "bg-success/10 text-success-soft-foreground"
               : isDegraded
-                ? "bg-amber-500/10 text-amber-950 dark:text-amber-100"
-                : "bg-rose-500/10 text-rose-950 dark:text-rose-100",
+                ? "bg-warning/10 text-warning-soft-foreground"
+                : "bg-danger/10 text-danger-soft-foreground",
           )}
         >
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -69,10 +69,10 @@ export default function PublicStatusPage() {
                 className={cn(
                   "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl",
                   isHealthy
-                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                    ? "bg-success/20 text-success"
                     : isDegraded
-                      ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                      : "bg-rose-500/20 text-rose-600 dark:text-rose-400",
+                      ? "bg-warning/20 text-warning"
+                      : "bg-danger/20 text-danger",
                 )}
               >
                 {isHealthy ? (
@@ -104,7 +104,7 @@ export default function PublicStatusPage() {
               size="sm"
               onClick={() => void refetch()}
               disabled={isLoading}
-              className="gap-2 h-10 px-4 rounded-xl text-xs font-semibold border-0 bg-background/80 hover:bg-background"
+              className="gap-2 h-10 px-4 rounded-xl text-xs font-semibold bg-background/80 hover:bg-background"
             >
               <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
               <span>{t("refreshLive")}</span>
@@ -139,7 +139,7 @@ export default function PublicStatusPage() {
           <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <Zap className="h-4 w-4 text-emerald-500" />
+                <Zap className="h-4 w-4 text-success" />
                 {t("redis")}
               </span>
               <Badge variant={metrics?.cache.status === "healthy" ? "default" : "warning"}>
@@ -158,7 +158,7 @@ export default function PublicStatusPage() {
           <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <Layers className="h-4 w-4 text-cyan-500" />
+                <Layers className="h-4 w-4 text-info" />
                 {t("queues")}
               </span>
               <Badge variant={metrics?.queue.status === "healthy" ? "default" : "warning"}>
@@ -177,18 +177,17 @@ export default function PublicStatusPage() {
           <div className="p-6 space-y-2 rounded-3xl bg-surface-elevated">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <Clock className="h-4 w-4 text-amber-500" />
+                <Clock className="h-4 w-4 text-warning" />
                 {t("uptime")}
               </span>
-              <Badge variant="outline" className="border-0 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-mono">
-                99.98% SLA
-              </Badge>
             </div>
             <div className="font-mono text-xl font-bold text-foreground">
               {formatUptime(metrics?.uptimeSeconds)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Heap: {metrics?.memory.heapUsedMb ?? 64} MB / {metrics?.memory.heapTotalMb ?? 128} MB
+              {metrics
+                ? `Heap: ${metrics.memory.heapUsedMb} MB / ${metrics.memory.heapTotalMb} MB`
+                : "Heap: —"}
             </p>
           </div>
         </div>
@@ -202,7 +201,7 @@ export default function PublicStatusPage() {
             </p>
           </div>
 
-          <div className="divide-y divide-border/20">
+          <div>
             {[
               {
                 name: "Merchant Portal & API Gateway",
@@ -245,8 +244,8 @@ export default function PublicStatusPage() {
                 </div>
                 <div className="flex items-center gap-3 self-start sm:self-auto">
                   <span className="font-mono text-xs text-muted-foreground">{component.latency}</span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success"></span>
                     {component.status}
                   </span>
                 </div>
@@ -259,10 +258,10 @@ export default function PublicStatusPage() {
         <div className="rounded-3xl bg-primary/5 p-6 text-center space-y-2">
           <div className="flex items-center justify-center gap-2 text-primary font-bold text-sm">
             <ShieldCheck className="h-5 w-5" />
-            <span>99.9% Uptime Commitment</span>
+            <span>How we keep the platform reliable</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-            Dhruto is engineered for zero downtime during peak seasonal sales and Eid campaigns. Multi-zone redundant PostgreSQL clustering, Redis outbox retry queues, and automated database backups safeguard every shipment.
+            The figures above are live health checks of our database and cache. Failed background jobs are retried through Redis queues, and the database is backed up automatically with checksum verification.
           </p>
         </div>
       </div>

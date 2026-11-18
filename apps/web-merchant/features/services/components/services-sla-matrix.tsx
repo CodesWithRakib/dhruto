@@ -91,7 +91,7 @@ export function ServicesSLAMatrix() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Compass className="h-3.5 w-3.5" aria-hidden="true" />
             <span>NATIONWIDE SLA COMMITMENT</span>
           </div>
@@ -128,8 +128,8 @@ export function ServicesSLAMatrix() {
         </div>
 
         {/* Interactive Route Specification Card */}
-        <div className="mt-10 overflow-hidden rounded-3xl border border-border/80 bg-surface shadow-xl">
-          <div className="border-b border-border/60 bg-muted/40 p-6 sm:p-8">
+        <div className="mt-10 overflow-hidden rounded-3xl bg-surface">
+          <div className="bg-muted/40 p-6 sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
@@ -141,7 +141,7 @@ export function ServicesSLAMatrix() {
                   {selectedTier.coverageHighlight}
                 </h3>
               </div>
-              <div className="flex items-baseline gap-1.5 rounded-2xl border border-primary/20 bg-primary/10 px-5 py-3">
+              <div className="flex items-baseline gap-1.5 rounded-2xl bg-primary/10 px-5 py-3">
                 <span className="text-xs text-muted-foreground">Starting from</span>
                 <span className="text-3xl font-extrabold text-primary">{selectedTier.startingRate}</span>
                 <span className="text-xs text-muted-foreground">/ parcel</span>
@@ -152,7 +152,7 @@ export function ServicesSLAMatrix() {
           <div className="p-6 sm:p-8">
             {/* 4 Core SLA Metrics */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                   <Clock className="h-4 w-4 text-primary" />
                   <span>Pickup Cutoff</span>
@@ -162,19 +162,19 @@ export function ServicesSLAMatrix() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <Zap className="h-4 w-4 text-emerald-500" />
+                  <Zap className="h-4 w-4 text-success" />
                   <span>Doorstep Delivery SLA</span>
                 </div>
-                <div className="mt-2 text-base font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="mt-2 text-base font-bold text-success">
                   {selectedTier.deliveryWindow}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <ShieldCheck className="h-4 w-4 text-amber-500" />
+                  <ShieldCheck className="h-4 w-4 text-warning" />
                   <span>COD Settlement</span>
                 </div>
                 <div className="mt-2 text-base font-bold text-foreground">
@@ -182,9 +182,9 @@ export function ServicesSLAMatrix() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+              <div className="rounded-2xl bg-muted/20 p-5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                  <Truck className="h-4 w-4 text-sky-500" />
+                  <Truck className="h-4 w-4 text-info" />
                   <span>Return SLA (RTO)</span>
                 </div>
                 <div className="mt-2 text-base font-bold text-foreground">
@@ -195,7 +195,7 @@ export function ServicesSLAMatrix() {
 
             {/* Key Service Areas & Operating Protocol */}
             <div className="mt-6 grid gap-6 lg:grid-cols-12">
-              <div className="rounded-2xl border border-border/60 bg-muted/15 p-5 lg:col-span-8">
+              <div className="rounded-2xl bg-muted/15 p-5 lg:col-span-8">
                 <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Key Hubs & Coverage Zones
                 </div>
@@ -203,7 +203,7 @@ export function ServicesSLAMatrix() {
                   {selectedTier.keyAreas.map((area) => (
                     <span
                       key={area}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-xs"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-foreground"
                     >
                       <MapPin className="h-3 w-3 text-primary" />
                       <span>{area}</span>
@@ -215,7 +215,7 @@ export function ServicesSLAMatrix() {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-2xl border border-primary/20 bg-primary/5 p-5 lg:col-span-4">
+              <div className="flex flex-col justify-between rounded-2xl bg-primary/5 p-5 lg:col-span-4">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wider text-primary">
                     Custom Weight Calculation?

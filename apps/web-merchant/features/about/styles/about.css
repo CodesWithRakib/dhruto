@@ -27,12 +27,8 @@
 
 @keyframes about-glow-border {
   0%, 100% {
-    border-color: rgba(255, 107, 0, 0.3);
-    box-shadow: 0 0 15px -3px rgba(255, 107, 0, 0.2);
   }
   50% {
-    border-color: rgba(255, 107, 0, 0.6);
-    box-shadow: 0 0 25px 2px rgba(255, 107, 0, 0.4);
   }
 }
 
@@ -44,14 +40,10 @@
   position: relative;
   border-radius: 2rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  background: rgba(18, 22, 32, 0.8);
+  background: hsl(var(--inverse) / 0.8);
 }
 
 .light .about-hero-frame {
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
   background: #ffffff;
 }
 
@@ -61,17 +53,13 @@
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
   border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(20, 26, 38, 0.85);
+  background: hsl(var(--inverse) / 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 .light .about-stat-pill {
-  border: 1px solid rgba(15, 23, 42, 0.1);
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
 }
 
 /* --------------------------------------------------------------------------
@@ -81,22 +69,17 @@
 .about-chapter-card {
   position: relative;
   border-radius: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--surface, #ffffff);
   padding: 2rem;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
 }
 
 .light .about-chapter-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
   background: #ffffff;
 }
 
 .about-chapter-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 107, 0, 0.35);
-  box-shadow: 0 20px 40px -12px rgba(255, 107, 0, 0.12);
 }
 
 /* --------------------------------------------------------------------------
@@ -106,7 +89,6 @@
 .about-pillar-card {
   position: relative;
   border-radius: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--surface, #ffffff);
   padding: 2rem;
   overflow: hidden;
@@ -117,14 +99,11 @@
 }
 
 .light .about-pillar-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
   background: #ffffff;
 }
 
 .about-pillar-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 107, 0, 0.4);
-  box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 107, 0, 0.15);
 }
 
 .about-pillar-watermark {
@@ -153,7 +132,6 @@
   gap: 0.875rem;
   padding: 1rem 1.25rem;
   border-radius: 1.125rem;
-  border: 1px solid transparent;
   background: transparent;
   color: var(--muted-foreground);
   text-align: left;
@@ -163,27 +141,21 @@
 }
 
 .about-showcase-tab:hover {
-  background: rgba(255, 107, 0, 0.05);
+  background: hsl(var(--primary) / 0.05);
   color: var(--foreground);
 }
 
 .about-showcase-tab.is-active {
-  background: rgba(255, 107, 0, 0.12);
-  border-color: rgba(255, 107, 0, 0.35);
+  background: hsl(var(--primary) / 0.12);
   color: var(--foreground);
-  box-shadow: 0 4px 20px -2px rgba(255, 107, 0, 0.15);
 }
 
 .about-showcase-frame {
   position: relative;
   border-radius: 1.75rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.25);
   background: var(--surface);
 }
 
 .light .about-showcase-frame {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.08);
 }

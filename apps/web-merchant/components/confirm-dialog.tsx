@@ -67,15 +67,15 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 sm:p-7 shadow-2xl rounded-3xl border border-border/80">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-6 sm:p-7 rounded-3xl">
         <DialogHeader className="gap-3">
           <div className="flex items-start gap-3.5">
             {tone === "danger" ? (
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-danger-soft border border-danger/20 text-danger shadow-2xs">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-danger-soft text-danger">
                 <TriangleAlert className="h-5 w-5" aria-hidden="true" />
               </span>
             ) : (
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft border border-primary/20 text-primary shadow-2xs">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
                 <Info className="h-5 w-5" aria-hidden="true" />
               </span>
             )}
@@ -94,7 +94,7 @@ export function ConfirmDialog({
         {error ? (
           <p
             role="alert"
-            className="rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-xs font-medium text-danger-soft-foreground"
+            className="rounded-xl bg-danger-soft px-3.5 py-2.5 text-xs font-medium text-danger-soft-foreground"
           >
             {error}
           </p>
@@ -111,7 +111,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             variant={tone === "danger" ? "destructive" : "default"}
-            className="w-full sm:w-auto h-10 px-5 text-xs font-semibold shadow-xs"
+            className="w-full sm:w-auto h-10 px-5 text-xs font-semibold"
             onClick={handleConfirm}
             disabled={loading}
           >

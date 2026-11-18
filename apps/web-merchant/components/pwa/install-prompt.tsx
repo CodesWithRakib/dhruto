@@ -75,7 +75,7 @@ export function InstallPrompt() {
       aria-label={t("installTitle")}
       className="fixed inset-x-0 bottom-0 z-50 px-4 pb-safe lg:hidden print:hidden"
     >
-      <div className="mx-auto mb-4 flex max-w-md items-start gap-3 rounded-xl border border-border bg-surface p-4">
+      <div className="mx-auto mb-4 flex max-w-md items-start gap-3 rounded-xl bg-surface p-4">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground">
           <Download className="h-5 w-5" aria-hidden="true" />
         </span>

@@ -13,8 +13,8 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
   if (!rto) return null;
 
   return (
-    <Card className="border-danger/20 shadow-soft">
-      <CardHeader className="border-b border-border/70 bg-danger-soft/40">
+    <Card>
+      <CardHeader className="bg-danger-soft/40">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-danger-soft text-danger-soft-foreground rounded-lg">
@@ -30,7 +30,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
           </div>
           <Badge
             variant="outline"
-            className="text-xs font-mono border-danger/30 text-danger-soft-foreground"
+            className="text-xs font-mono text-danger-soft-foreground"
           >
             Network RTO: {rto.overallRtoRate}%
           </Badge>
@@ -45,7 +45,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
           </span>
           <div className="space-y-2">
             {rto.topReasons.map((reason) => (
-              <div key={reason.reason} className="p-2.5 rounded-lg border bg-card space-y-1">
+              <div key={reason.reason} className="p-2.5 rounded-lg bg-card space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-foreground flex items-center gap-1.5">
                     <AlertTriangle className="h-3.5 w-3.5 text-warning-soft-foreground shrink-0" />
@@ -70,7 +70,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
         </div>
 
         {/* Section 2: Zone vs Risk Tier Correlation */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           {/* Zone RTO */}
           <div className="space-y-3">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -81,7 +81,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
               {rto.byZone.map((z) => (
                 <div
                   key={z.zone}
-                  className="p-2.5 rounded border bg-muted/20 flex items-center justify-between"
+                  className="p-2.5 rounded bg-muted/20 flex items-center justify-between"
                 >
                   <div>
                     <span className="font-semibold text-foreground">{z.zone}</span>
@@ -109,7 +109,7 @@ export function RtoDeepDiveCard({ rto }: RtoDeepDiveCardProps) {
               {rto.byRiskTier.map((rt) => (
                 <div
                   key={rt.tier}
-                  className="p-2.5 rounded border bg-muted/20 flex items-center justify-between"
+                  className="p-2.5 rounded bg-muted/20 flex items-center justify-between"
                 >
                   <div>
                     <span className="font-bold text-foreground">{rt.tier} Risk Tier</span>

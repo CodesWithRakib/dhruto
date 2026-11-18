@@ -41,7 +41,7 @@ export function PrivacyReader({ sections, footerNote }: PrivacyReaderProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
             <span>FULL LEGAL ARTICLES & CLAUSES</span>
           </div>
@@ -71,7 +71,7 @@ export function PrivacyReader({ sections, footerNote }: PrivacyReaderProps) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter clauses..."
-                  className="w-full rounded-xl border border-border/80 bg-muted/40 py-2 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                  className="w-full rounded-xl bg-field py-2 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none hover:bg-field-hover focus:bg-surface"
                 />
               </div>
 
@@ -91,7 +91,7 @@ export function PrivacyReader({ sections, footerNote }: PrivacyReaderProps) {
                 ))}
               </nav>
 
-              <div className="border-t border-border/60 pt-4 text-[11px] text-muted-foreground">
+              <div className="pt-4 text-[11px] text-muted-foreground">
                 Estimated Reading Time: <strong>~4 minutes</strong>
               </div>
             </div>
@@ -110,7 +110,7 @@ export function PrivacyReader({ sections, footerNote }: PrivacyReaderProps) {
                   className="prv-clause-card scroll-mt-28"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="rounded-md border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-xs font-bold text-primary">
+                    <span className="rounded-md bg-primary/10 px-2.5 py-0.5 font-mono text-xs font-bold text-primary">
                       ARTICLE {String(originalIndex + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[11px] font-mono text-muted-foreground">
@@ -128,7 +128,7 @@ export function PrivacyReader({ sections, footerNote }: PrivacyReaderProps) {
 
                   {/* Summary Takeaway Callout */}
                   {takeaway && (
-                    <div className="mt-5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4 text-xs font-medium text-emerald-800 dark:text-emerald-300">
+                    <div className="mt-5 rounded-xl bg-success/10 p-4 text-xs font-medium text-success-soft-foreground">
                       {takeaway}
                     </div>
                   )}
@@ -137,7 +137,7 @@ export function PrivacyReader({ sections, footerNote }: PrivacyReaderProps) {
             })}
 
             {footerNote && (
-              <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-xs text-foreground/90">
+              <div className="flex items-center gap-3 rounded-2xl bg-primary/5 p-5 text-xs text-foreground/90">
                 <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
                 <p>{footerNote}</p>
               </div>

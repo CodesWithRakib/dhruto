@@ -26,12 +26,11 @@ export function PublicFooter() {
   };
 
   return (
-    <footer className="relative mt-auto border-t border-white/10 bg-[var(--dk2)] text-white/70 overflow-hidden">
+    <footer className="relative mt-auto bg-[var(--dk2)] text-white/70 overflow-hidden">
       {/* Top accent radiant gradient line */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--acc)] to-transparent" />
 
       {/* 1. Pre-Footer Call-to-Action Bar */}
-      <div className="border-b border-white/10 py-10 sm:py-14">
+      <div className="py-10 sm:py-14">
         <div className="dhruto-container flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <span className="pill mb-3">Enterprise Logistics</span>
@@ -63,11 +62,11 @@ export function PublicFooter() {
       </div>
 
       {/* 2. Enterprise Trust & Service Guarantee Strip */}
-      <div className="border-b border-white/10 bg-white/[0.02] py-6">
+      <div className="bg-white/[0.02] py-6">
         <div className="dhruto-container">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[var(--acc)]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-[var(--acc)]">
                 <Clock className="h-5 w-5" />
               </span>
               <div>
@@ -77,7 +76,7 @@ export function PublicFooter() {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[var(--acc)]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-[var(--acc)]">
                 <Coins className="h-5 w-5" />
               </span>
               <div>
@@ -87,17 +86,17 @@ export function PublicFooter() {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[var(--acc)]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-[var(--acc)]">
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
                 <p className="text-xs font-bold text-white">Transit Protection</p>
-                <p className="text-[11px] text-white/60">100% Escrow Insurance</p>
+                <p className="text-[11px] text-white/60">COD tracked to settlement</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[var(--acc)]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-[var(--acc)]">
                 <MapPin className="h-5 w-5" />
               </span>
               <div>
@@ -123,12 +122,12 @@ export function PublicFooter() {
             </p>
 
             {/* Live operational beacon badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-[var(--acc)]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-[var(--acc)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--acc)] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--acc)]" />
               </span>
-              <span>99.98% Service Uptime • Live Line-Haul Radar</span>
+              <span>Live system status • Real-time parcel tracking</span>
             </div>
           </div>
 
@@ -205,7 +204,7 @@ export function PublicFooter() {
           {/* Enterprise Support & Hotline */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-white mb-4">Operations</h4>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
+            <div className="rounded-2xl bg-white/5 p-4 space-y-2">
               <div className="flex items-center gap-2 text-white font-semibold text-xs">
                 <PhoneCall className="h-3.5 w-3.5 text-[var(--acc)]" />
                 <span>24/7 Operations Hotline</span>
@@ -223,7 +222,7 @@ export function PublicFooter() {
             </div>
             <a
               href="mailto:support@dhruto.com"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/80 hover:text-white hover:border-[var(--acc)] transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-xs font-medium text-white/80 hover:text-white transition-colors"
             >
               <Mail className="h-3.5 w-3.5 text-[var(--acc)]" />
               support@dhruto.com
@@ -238,7 +237,7 @@ export function PublicFooter() {
       </div>
 
       {/* 5. Bottom Copyright & Back-to-Top Bar */}
-      <div className="dhruto-container relative z-10 border-t border-white/10 py-6">
+      <div className="dhruto-container relative z-10 py-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/60">
           <p>© {new Date().getFullYear()} Dhruto Technologies Ltd. All rights reserved.</p>
 
@@ -267,7 +266,7 @@ export function PublicFooter() {
             className="inline-flex items-center gap-2 text-white font-medium hover:text-[var(--acc)] transition-colors"
           >
             <span>Back to top</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20 hover:border-[var(--acc)] hover:bg-[var(--acc)] hover:text-[var(--dk)] transition-all">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-[var(--acc)] hover:text-[var(--dk)] transition-all">
               <ArrowUp className="h-3.5 w-3.5" />
             </span>
           </button>

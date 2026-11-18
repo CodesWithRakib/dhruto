@@ -51,7 +51,7 @@ export function ParcelDetailsActions({
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+          className="gap-1.5 rounded-xl hover:bg-surface-elevated font-medium"
           onClick={onRefresh}
         >
           <RefreshCw className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -61,13 +61,13 @@ export function ParcelDetailsActions({
         {/* Parcel-linked conversation (merchant, admin); eligibility is enforced by the API. */}
         <OpenConversationButton
           target={{ kind: "parcel", parcelId }}
-          className="gap-1.5 rounded-xl border-border/80 font-medium"
+          className="gap-1.5 rounded-xl font-medium"
         />
 
         {isPickupRequestable ? (
           <Button
             size="sm"
-            className="gap-1.5 rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all font-semibold"
+            className="gap-1.5 rounded-xl bg-primary text-primary-foreground hover:scale-[1.01] active:scale-[0.99] transition-all font-semibold"
             onClick={onRequestPickup}
           >
             <Truck className="h-4 w-4" aria-hidden="true" />
@@ -79,7 +79,7 @@ export function ParcelDetailsActions({
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+            className="gap-1.5 rounded-xl hover:bg-surface-elevated font-medium"
             onClick={onEditDetails}
           >
             <Edit3 className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -91,7 +91,7 @@ export function ParcelDetailsActions({
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive font-medium"
+            className="gap-1.5 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive font-medium"
             onClick={onCancelBooking}
           >
             <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
@@ -100,7 +100,7 @@ export function ParcelDetailsActions({
         ) : null}
 
         <Link href={printLabelHref}>
-          <Button size="sm" className="gap-1.5 rounded-xl font-semibold shadow-sm">
+          <Button size="sm" className="gap-1.5 rounded-xl font-semibold">
             <Printer className="h-4 w-4" aria-hidden="true" />
             <span>{t("printLabel")}</span>
           </Button>

@@ -282,7 +282,7 @@ function ReportRequestButton({
   const [format, setFormat] = React.useState<"csv" | "xlsx">("csv");
 
   return (
-    <span className="flex items-center gap-1.5 rounded-xl border border-border/80 bg-surface px-2.5 py-1.5 text-xs font-semibold">
+    <span className="flex items-center gap-1.5 rounded-xl bg-surface px-2.5 py-1.5 text-xs font-semibold">
       <span className="font-medium capitalize">{dataset}</span>
       <button
         type="button"

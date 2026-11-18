@@ -31,7 +31,7 @@ export function ActionGrid() {
       <div className="dhruto-container relative z-10">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
           {/* Left Card: Merchant Partnership Promo with Warehouse Background */}
-          <div className="group relative overflow-hidden rounded-3xl border border-border bg-surface p-6 sm:p-9 flex flex-col justify-between shadow-xl">
+          <div className="group relative overflow-hidden rounded-3xl bg-surface p-6 sm:p-9 flex flex-col justify-between">
             {/* Background image & gradient overlay */}
             <div className="absolute inset-0 z-0">
               <Image
@@ -46,10 +46,10 @@ export function ActionGrid() {
 
             <div className="relative z-10 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                   <ShieldCheck className="h-6 w-6" />
                 </div>
-                <span className="rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+                <span className="rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
                   Merchant Partnership • 0% Setup Fee
                 </span>
               </div>
@@ -84,7 +84,7 @@ export function ActionGrid() {
 
             <div className="relative z-10 mt-8 pt-2">
               <Link href="/register">
-                <Button size="lg" className="w-full sm:w-auto h-12 px-6 rounded-xl font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 transition-all inline-flex items-center gap-2">
+                <Button size="lg" className="w-full sm:w-auto h-12 px-6 rounded-xl font-semibold transition-all inline-flex items-center gap-2">
                   {t("merchantBanner.cta")}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -93,16 +93,15 @@ export function ActionGrid() {
           </div>
 
           {/* Right Card: Public Parcel Tracking Quick Search Terminal */}
-          <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/70 bg-surface p-6 shadow-soft sm:p-9">
-            {/* Top ambient glow */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl bg-surface p-6 sm:p-9">
+            {/* Top ambient glow */}
 
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <Search className="h-6 w-6" aria-hidden="true" />
                 </span>
-                <span className="rounded-full border border-success/30 bg-success-soft px-3.5 py-1 text-xs font-semibold text-success-soft-foreground">
+                <span className="rounded-full bg-success-soft px-3.5 py-1 text-xs font-semibold text-success-soft-foreground">
                   <span className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden="true" />
                   Live GPS Radar
                 </span>
@@ -124,7 +123,7 @@ export function ActionGrid() {
                       key={code}
                       type="button"
                       onClick={() => handleChipClick(code)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-surface px-2.5 py-1 text-xs font-mono font-semibold text-foreground/80 hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+                      className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-1 text-xs font-mono font-semibold text-foreground/80 hover:text-primary hover:bg-primary/5 transition-colors"
                     >
                       <Zap className="h-3 w-3 text-primary" />
                       {code}
@@ -142,11 +141,11 @@ export function ActionGrid() {
                   value={trackingCode}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTrackingCode(e.target.value)}
                   placeholder={t("trackingBanner.placeholder")}
-                  className="pl-12 h-14 rounded-xl text-base font-mono tracking-wider border-border/60 bg-surface/80 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="pl-12 h-14 rounded-xl text-base font-mono tracking-wider bg-surface/80 focus:ring-2 focus:ring-primary/20"
                   required
                 />
               </div>
-              <Button type="submit" size="lg" className="w-full h-14 rounded-xl text-base font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 transition-all">
+              <Button type="submit" size="lg" className="w-full h-14 rounded-xl text-base font-bold transition-all">
                 {t("trackingBanner.cta")}
               </Button>
             </form>

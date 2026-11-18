@@ -96,10 +96,10 @@ export function CustomerDeliveriesList({
               key={f.id}
               type="button"
               onClick={() => setActiveFilter(f.id as typeof activeFilter)}
-              className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all border ${
+              className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
                 activeFilter === f.id
-                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                  : "bg-card text-muted-foreground border-border/60 hover:bg-surface-muted hover:text-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card text-muted-foreground hover:bg-surface-muted hover:text-foreground"
               }`}
             >
               {f.label}
@@ -114,7 +114,7 @@ export function CustomerDeliveriesList({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter by code, merchant, item..."
-            className="h-10 w-full rounded-2xl border border-border/60 bg-card pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-2xs transition-all"
+            className="h-10 w-full rounded-2xl bg-field pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all hover:bg-field-hover focus:bg-surface"
           />
         </div>
       </div>
@@ -122,7 +122,7 @@ export function CustomerDeliveriesList({
       {/* Deliveries List */}
       <div className="space-y-3">
         {filteredDeliveries.length === 0 ? (
-          <div className="rounded-2xl border border-border/60 bg-card p-8 text-center text-xs text-muted-foreground shadow-2xs">
+          <div className="rounded-2xl bg-card p-8 text-center text-xs text-muted-foreground">
             No deliveries match your current search or filter criteria.
           </div>
         ) : (
@@ -133,10 +133,10 @@ export function CustomerDeliveriesList({
             return (
               <div
                 key={delivery.id}
-                className={`group relative flex flex-col justify-between gap-4 rounded-2xl border p-5 transition-all sm:flex-row sm:items-center ${
+                className={`group relative flex flex-col justify-between gap-4 rounded-2xl p-5 transition-all sm:flex-row sm:items-center ${
                   isSpotlighted
-                    ? "border-primary/50 bg-primary-soft/20 dark:bg-primary-soft/10 ring-1 ring-primary/25 shadow-soft"
-                    : "border-border/70 bg-card dark:bg-card/90 shadow-xs hover:border-primary/40 hover:shadow-soft"
+                    ? "bg-primary-soft/20"
+                    : "bg-card"
                 }`}
               >
                 <div className="flex items-start gap-3.5">
@@ -144,10 +144,10 @@ export function CustomerDeliveriesList({
                     type="button"
                     onClick={() => onSelectActive(delivery.trackingCode)}
                     title="Pin to spotlight"
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold transition-transform group-hover:scale-105 border ${
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-bold transition-transform group-hover:scale-105 ${
                       isDelivered
-                        ? "bg-success-soft text-success border-success/20"
-                        : "bg-primary-soft text-primary border-primary/20"
+                        ? "bg-success-soft text-success"
+                        : "bg-primary-soft text-primary"
                     }`}
                   >
                     {isDelivered ? (
@@ -187,7 +187,7 @@ export function CustomerDeliveriesList({
                     </p>
 
                     {delivery.deliveryNote ? (
-                      <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1">
+                      <p className="text-[11px] text-warning-soft-foreground font-medium flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
                         Note: {delivery.deliveryNote}
                       </p>
@@ -218,7 +218,7 @@ export function CustomerDeliveriesList({
                               onCopy(delivery.otp, `Delivery OTP for ${delivery.trackingCode}`);
                             }}
                             title="Click to copy delivery OTP"
-                            className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 hover:bg-primary-soft hover:border-primary/40 px-2 py-0.5 rounded-md font-bold border border-primary/20 transition-all cursor-pointer shadow-2xs group/otp"
+                            className="inline-flex items-center gap-1 font-mono text-[10px] text-primary bg-primary-soft/80 hover:bg-primary-soft px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer group/otp"
                           >
                             <ShieldCheck className="h-3 w-3 text-primary" />
                             <span>OTP: {delivery.otp}</span>
@@ -249,7 +249,7 @@ export function CustomerDeliveriesList({
                       variant="outline"
                       size="sm"
                       onClick={() => onOpenPod(delivery)}
-                      className="h-9 gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted text-xs font-semibold shadow-2xs"
+                      className="h-9 gap-1.5 rounded-xl bg-background/80 hover:bg-surface-muted text-xs font-semibold"
                     >
                       <FileCheck className="h-3.5 w-3.5" />
                       View POD
@@ -259,7 +259,7 @@ export function CustomerDeliveriesList({
                       variant="outline"
                       size="sm"
                       onClick={() => onOpenReschedule(delivery.trackingCode)}
-                      className="h-9 gap-1.5 rounded-xl border-border/60 bg-background/80 hover:bg-surface-muted text-xs font-semibold shadow-2xs"
+                      className="h-9 gap-1.5 rounded-xl bg-background/80 hover:bg-surface-muted text-xs font-semibold"
                     >
                       <Calendar className="h-3.5 w-3.5" />
                       Reschedule
@@ -295,7 +295,7 @@ export function CustomerDeliveriesList({
 
       {/* Centralized Pagination */}
       {filteredDeliveries.length > 0 && (
-        <div className="pt-2 rounded-2xl border border-border/60 bg-card p-2 shadow-2xs">
+        <div className="pt-2 rounded-2xl bg-card p-2">
           <Pagination
             page={currentPage}
             totalPages={totalPages}

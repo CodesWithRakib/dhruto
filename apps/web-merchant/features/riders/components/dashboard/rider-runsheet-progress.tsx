@@ -20,23 +20,19 @@ export function RiderRunsheetProgress({
   completionPercent,
 }: RiderRunsheetProgressProps) {
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-5 sm:p-6 shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-2xs">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Bike className="h-4 w-4" />
             </span>
             <h2 className="text-sm font-extrabold text-foreground">
               Today's Delivery Runsheet
             </h2>
-            <Badge variant="primary-soft" className="text-[10px] font-bold border-0">
+            <Badge variant="primary-soft" className="text-[10px] font-bold">
               {completionPercent}% Completed
             </Badge>
           </div>
@@ -46,7 +42,7 @@ export function RiderRunsheetProgress({
         </div>
 
         <Link href={RIDER_ROUTES.tasks}>
-          <Button size="sm" className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold shadow-xs">
+          <Button size="sm" className="h-9 gap-1.5 rounded-xl px-4 text-xs font-bold">
             <ClipboardList className="h-3.5 w-3.5" />
             <span>Open Runsheet</span>
           </Button>
@@ -57,7 +53,7 @@ export function RiderRunsheetProgress({
       <div className="mt-4 space-y-1.5">
         <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-muted">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500 shadow-xs"
+            className="h-full rounded-full bg-gradient-to-r from-primary to-success transition-all duration-500"
             style={{ width: `${Math.max(completionPercent, 4)}%` }}
           />
         </div>

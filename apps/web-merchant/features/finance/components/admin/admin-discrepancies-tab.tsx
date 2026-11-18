@@ -37,26 +37,26 @@ export function AdminDiscrepanciesTab({ discrepancies }: AdminDiscrepanciesTabPr
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 border-0">
-                <TableRow className="border-b-0 hover:bg-transparent">
-                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-100">
+              <TableHeader className="bg-inverse text-inverse-foreground">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-inverse-foreground">
                     {t("admin.headers.discrepancyType")}
                   </TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-100 text-center">
+                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-inverse-foreground text-center">
                     {t("admin.headers.status")}
                   </TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-100 text-right">
+                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-inverse-foreground text-right">
                     {t("admin.headers.expectedCash")}
                   </TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-100 text-right">
+                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-inverse-foreground text-right">
                     {t("admin.headers.verifiedCash")}
                   </TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-100 text-right">
+                  <TableHead className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-inverse-foreground text-right">
                     {t("admin.headers.netVariance")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-border/40">
+              <TableBody>
                 {discrepancies.map((d) => (
                   <TableRow key={d.id} className="hover:bg-surface-muted/50 transition-colors">
                     <TableCell className="px-4 py-3.5 font-bold text-xs text-foreground whitespace-nowrap">

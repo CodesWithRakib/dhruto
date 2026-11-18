@@ -108,10 +108,10 @@ export function ParcelPickupDialog({
                       key={slot.id}
                       type="button"
                       onClick={() => setSelectedWindow(slot.id)}
-                      className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-left text-xs transition-colors ${
+                      className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-xs transition-colors ${
                         isSelected
-                          ? "border-primary bg-primary/5 font-medium text-foreground"
-                          : "border-border hover:bg-muted/40 text-muted-foreground"
+                          ? "bg-primary/5 font-medium text-foreground"
+                          : "hover:bg-muted/40 text-muted-foreground"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -136,7 +136,7 @@ export function ParcelPickupDialog({
                 placeholder="e.g. Front desk warehouse, ask for Kabir, gate #3"
                 rows={2}
                 maxLength={200}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full rounded-md bg-field px-3 py-2 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:bg-field-hover focus:bg-surface"
               />
             </div>
           </div>

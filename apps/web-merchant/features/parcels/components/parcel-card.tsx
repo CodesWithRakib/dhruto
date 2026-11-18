@@ -67,7 +67,7 @@ export function ParcelCard({ parcel }: ParcelCardProps) {
         </div>
       </dl>
 
-      <div className="mt-3 flex items-end justify-between gap-3 border-t border-surface-muted pt-3">
+      <div className="mt-3 flex items-end justify-between gap-3 pt-3">
         <div>
           <span className="text-caption text-muted-foreground">{t("cod")}</span>
           <p className="font-semibold tabular-nums text-foreground">{bdt(parcel.codAmount)}</p>

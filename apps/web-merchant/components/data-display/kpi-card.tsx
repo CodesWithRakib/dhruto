@@ -14,24 +14,6 @@ const TONE_SURFACE: Record<KpiTone, string> = {
   danger: "bg-danger-soft text-danger-soft-foreground",
 };
 
-const TONE_TOP_LINE: Record<KpiTone, string> = {
-  neutral: "via-muted-foreground/30",
-  primary: "via-emerald-500/60",
-  info: "via-cyan-500/60",
-  success: "via-emerald-400/60",
-  warning: "via-amber-500/60",
-  danger: "via-rose-500/60",
-};
-
-const TONE_HOVER_BORDER: Record<KpiTone, string> = {
-  neutral: "hover:border-border",
-  primary: "hover:border-emerald-500/40",
-  info: "hover:border-cyan-500/40",
-  success: "hover:border-emerald-400/40",
-  warning: "hover:border-amber-500/40",
-  danger: "hover:border-rose-500/40",
-};
-
 export interface KpiCardProps {
   label: string;
   value: React.ReactNode;
@@ -47,9 +29,8 @@ export interface KpiCardProps {
 }
 
 /**
- * Tactical Bento KPI Card.
- * Features top specular highlight line, watermark icon, frosted surface,
- * and kinetic hover micro-elevation inspired by the Home Hero bento.
+ * KPI card: flat surface (no border, shadow or edge lines), tinted icon chip
+ * and a faint watermark icon. `emphasis` swaps to the primary-soft surface.
  */
 export function KpiCard({
   label,
@@ -63,25 +44,16 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 p-5 sm:p-6 backdrop-blur-md shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5",
+        "group relative overflow-hidden rounded-3xl p-5 sm:p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1",
         emphasis
-          ? "bg-primary-soft/40 dark:bg-primary/10 hover:bg-primary-soft/60"
-          : "bg-card/90 dark:bg-card/80 hover:bg-card",
-        TONE_HOVER_BORDER[tone],
+          ? "bg-primary-soft/40 hover:bg-primary-soft/60"
+          : "bg-card/90 hover:bg-card",
         className,
       )}
     >
-      {/* 1. Top Specular Accent Line */}
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent to-transparent opacity-75 group-hover:opacity-100 transition-opacity duration-300",
-          TONE_TOP_LINE[tone],
-        )}
-      />
-
       {/* 2. Faint Watermark Icon */}
       <Icon
-        className="pointer-events-none absolute -bottom-3 -right-3 h-20 w-20 opacity-[0.04] dark:opacity-[0.07] transition-transform duration-300 group-hover:scale-110"
+        className="pointer-events-none absolute -bottom-3 -right-3 h-20 w-20 opacity-[0.04] transition-transform duration-300 group-hover:scale-110"
         aria-hidden="true"
       />
 
@@ -99,7 +71,7 @@ export function KpiCard({
         </div>
         <span
           className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-xs transition-transform duration-300 group-hover:scale-105",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105",
             TONE_SURFACE[tone],
           )}
           aria-hidden="true"

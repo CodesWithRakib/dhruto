@@ -67,22 +67,18 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden">
         {/* Specular top highlight */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-          aria-hidden="true"
-        />
 
-        <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 border-b border-border/40">
+        <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-2.5">
-            <div className="rounded-2xl bg-warning/10 p-2 text-warning shadow-2xs">
+            <div className="rounded-2xl bg-warning/10 p-2 text-warning">
               <AlertTriangle className="h-5 w-5" aria-hidden="true" />
             </div>
             <h2 className="text-sm font-bold text-foreground">
               {t("exceptions.title")}
             </h2>
-            <span className="rounded-full bg-warning/10 border border-warning/20 px-2.5 py-0.5 text-xs font-semibold text-warning">
+            <span className="rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning">
               {exceptions.length}
             </span>
           </div>
@@ -128,7 +124,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
               />
             </div>
           ) : (
-            <ul className="divide-y divide-border/20">
+            <ul>
               {exceptions.map((exception) => (
                 <li key={exception.id} className="space-y-2.5 p-5 transition-colors hover:bg-surface-muted/30">
                   <div className="flex flex-wrap items-center gap-2">
@@ -175,7 +171,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
                     ) : null}
                   </div>
                   {exception.resolutionNote ? (
-                    <p className="rounded-2xl border border-border/40 bg-surface-muted/40 p-3 text-[11px] text-muted-foreground">
+                    <p className="rounded-2xl bg-surface-muted/40 p-3 text-[11px] text-muted-foreground">
                       {exception.resolutionNote}
                     </p>
                   ) : null}
@@ -187,7 +183,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
       </div>
 
       <Dialog open={resolvingId !== null} onOpenChange={(open) => !open && setResolvingId(null)}>
-        <DialogContent className="max-w-md rounded-3xl border border-border/60 bg-surface-elevated p-6 shadow-2xl">
+        <DialogContent className="max-w-md rounded-3xl bg-surface-elevated p-6">
           <DialogHeader>
             <DialogTitle>{t("exceptions.resolve")}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
@@ -208,7 +204,7 @@ export function ExceptionsView({ currentHubId }: ExceptionsViewProps) {
               placeholder={t("exceptions.resolutionNotePlaceholder")}
               maxLength={500}
               rows={3}
-              className="w-full rounded-2xl border border-border/50 bg-surface-muted/60 p-3.5 text-sm outline-none focus:bg-background"
+              className="w-full rounded-2xl bg-field p-3.5 text-sm outline-none focus:bg-background hover:bg-field-hover"
             />
           </div>
           <DialogFooter className="gap-2">

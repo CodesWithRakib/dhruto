@@ -33,7 +33,7 @@ export function BagSealDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border border-border/60 bg-surface-elevated p-6 shadow-2xl">
+      <DialogContent className="max-w-md rounded-3xl bg-surface-elevated p-6">
         <DialogHeader>
           <DialogTitle>{t("bags.sealConfirmTitle")}</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
@@ -51,7 +51,7 @@ export function BagSealDialog({
             onChange={(event) => setSealTagInput(event.target.value)}
             placeholder={t("bags.sealTagPlaceholder")}
             maxLength={100}
-            className="w-full rounded-2xl border border-border/50 bg-surface-muted/60 p-3.5 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder:text-muted-foreground outline-none focus:bg-background"
+            className="w-full rounded-2xl bg-field p-3.5 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-xs placeholder:text-muted-foreground outline-none focus:bg-background hover:bg-field-hover"
           />
         </div>
         <DialogFooter className="gap-2">

@@ -185,9 +185,9 @@ export function TaskDetailsView({ parcelId }: TaskDetailsViewProps) {
       {done ? (
         <div
           role="status"
-          className="flex items-center gap-3 rounded-3xl bg-emerald-500/10 px-5 py-4 text-sm font-bold text-emerald-800 dark:text-emerald-200"
+          className="flex items-center gap-3 rounded-3xl bg-success/10 px-5 py-4 text-sm font-bold text-success-soft-foreground"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-success text-white">
             <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>

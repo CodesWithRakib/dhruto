@@ -50,7 +50,7 @@ function QuarantineQueue({ profile }: { profile: ChatStaffProfile }) {
           <Label htmlFor="ca-scan">{t("attachments.scanFilter")}</Label>
           <select
             id="ca-scan"
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            className="h-10 rounded-md bg-field px-3 text-sm hover:bg-field-hover focus:bg-surface"
             value={scanStatus ?? ""}
             onChange={(event) =>
               setScanStatus(
@@ -138,7 +138,7 @@ function RetentionStatus() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody>
               {data.policies.map((policy) => (
                 <tr key={policy.category}>
                   <td className="py-2">{t(`retention.categories.${policy.category}`)}</td>

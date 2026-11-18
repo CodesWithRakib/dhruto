@@ -39,11 +39,7 @@ export function CashDeskBatchesTab({ batches, batchesColumns }: CashDeskBatchesT
   }, [filteredBatches, batchesPage, batchesLimit]);
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-4 shadow-sm">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden p-4">
       {filteredBatches.length === 0 ? (
         <div className="p-6">
           <EmptyState icon={Coins} title={t("cash.emptyBatches")} />
@@ -70,7 +66,7 @@ export function CashDeskBatchesTab({ batches, batchesColumns }: CashDeskBatchesT
               }}
               searchPlaceholder="Search batch code or rider..."
               emptyMessage={t("cash.emptyBatches")}
-              className="border-0 shadow-none rounded-none"
+              className="rounded-none"
             />
           </div>
           <div className="space-y-2 md:hidden">

@@ -132,7 +132,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       {bag.status === BagStatus.SEALED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-success-soft px-4 py-3 text-xs font-semibold text-success shadow-xs"
+          className="flex items-center gap-2 rounded-2xl bg-success-soft px-4 py-3 text-xs font-semibold text-success"
         >
           <Lock className="h-4 w-4" aria-hidden="true" />
           {t("bags.sealedBanner")}
@@ -141,7 +141,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       {bag.status === BagStatus.IN_TRANSIT ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl border border-sky-500/30 bg-info-soft px-4 py-3 text-xs font-semibold text-info shadow-xs"
+          className="flex items-center gap-2 rounded-2xl bg-info-soft px-4 py-3 text-xs font-semibold text-info"
         >
           <Truck className="h-4 w-4" aria-hidden="true" />
           {t("bags.inTransitBanner")}
@@ -150,7 +150,7 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       {bag.status === BagStatus.RECEIVED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-success-soft px-4 py-3 text-xs font-semibold text-success shadow-xs"
+          className="flex items-center gap-2 rounded-2xl bg-success-soft px-4 py-3 text-xs font-semibold text-success"
         >
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {t("bags.receivedBanner")}
@@ -173,20 +173,16 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
       ) : null}
 
       {/* Membership list */}
-      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden">
         {/* Specular top highlight */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-          aria-hidden="true"
-        />
 
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border/40">
+        <div className="flex items-center justify-between p-5 sm:p-6">
           <div className="flex items-center gap-2.5">
             <Package className="h-4 w-4 text-primary" aria-hidden="true" />
             <h2 className="text-sm font-bold text-foreground">
               {t("bags.parcelsInBag")}
             </h2>
-            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
               {bag.parcels.length}
             </span>
           </div>
@@ -208,10 +204,10 @@ export function BagDetailsView({ bagId }: BagDetailsViewProps) {
                   itemsPerPage={Math.max(10, bag.parcels.length)}
                   hidePagination={bag.parcels.length <= 10}
                   emptyMessage={t("bags.noParcels")}
-                  className="border-0 shadow-none rounded-none"
+                  className="rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border/20 md:hidden">
+              <ul className="md:hidden">
                 {bag.parcels.map((parcel) => (
                   <li key={parcel.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-xs">
                     <div>

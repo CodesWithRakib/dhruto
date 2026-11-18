@@ -59,7 +59,7 @@ export function ConversationPanelHeader({
   const t = useTranslations("Chat");
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/80 bg-surface/50 backdrop-blur px-2 sm:px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 bg-surface/50 backdrop-blur px-2 sm:px-4">
       <Button asChild variant="ghost" size="icon-sm" className="md:hidden">
         <Link href={routes.list} aria-label={t("backToList")}>
           <ArrowLeft className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />

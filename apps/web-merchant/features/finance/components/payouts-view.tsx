@@ -73,20 +73,20 @@ export function PayoutsView({ onChanged }: { onChanged: () => void }) {
       <div className="overflow-hidden rounded-3xl bg-surface-elevated p-2">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-900 dark:bg-slate-950">
-              <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="rounded-l-2xl font-semibold text-slate-100">{t("payout.payoutCode")}</TableHead>
-                <TableHead className="font-semibold text-slate-100">{t("date")}</TableHead>
-                <TableHead className="font-semibold text-slate-100">{t("payout.destination")}</TableHead>
-                <TableHead className="font-semibold text-slate-100">{t("reference")}</TableHead>
-                <TableHead className="text-right font-semibold text-slate-100">{t("statement.net")}</TableHead>
-                <TableHead className="text-center font-semibold text-slate-100">{t("status")}</TableHead>
-                <TableHead className="rounded-r-2xl text-right font-semibold text-slate-100">{t("actions")}</TableHead>
+            <TableHeader className="bg-inverse">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="rounded-l-2xl font-semibold text-inverse-foreground">{t("payout.payoutCode")}</TableHead>
+                <TableHead className="font-semibold text-inverse-foreground">{t("date")}</TableHead>
+                <TableHead className="font-semibold text-inverse-foreground">{t("payout.destination")}</TableHead>
+                <TableHead className="font-semibold text-inverse-foreground">{t("reference")}</TableHead>
+                <TableHead className="text-right font-semibold text-inverse-foreground">{t("statement.net")}</TableHead>
+                <TableHead className="text-center font-semibold text-inverse-foreground">{t("status")}</TableHead>
+                <TableHead className="rounded-r-2xl text-right font-semibold text-inverse-foreground">{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {payouts.map((payout) => (
-                <TableRow key={payout.id} className="border-0 hover:bg-surface-muted/40 transition-colors">
+                <TableRow key={payout.id} className="hover:bg-surface-muted/40 transition-colors">
                   <TableCell className="font-mono text-xs font-bold text-foreground">
                     <div className="flex items-center gap-2">
                       <span className="p-1 rounded-lg bg-surface-muted">

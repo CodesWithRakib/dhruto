@@ -92,13 +92,13 @@ export function ReturnsListView() {
             size="sm"
             onClick={() => void refetch()}
             disabled={isFetching}
-            className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated font-medium"
+            className="gap-1.5 rounded-xl hover:bg-surface-elevated font-medium"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin text-primary" : ""}`} />
             <span>{t("refresh")}</span>
           </Button>
           <Link href={routes.parcels}>
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated font-medium">
+            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl hover:bg-surface-elevated font-medium">
               {t("allShipments")}
             </Button>
           </Link>
@@ -114,7 +114,7 @@ export function ReturnsListView() {
       />
 
       {/* Filter and Lens Toolbar */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface-elevated/90 p-5 sm:p-6 shadow-sm backdrop-blur-md space-y-5">
+      <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-5 sm:p-6 backdrop-blur-md space-y-5">
         <ReturnsToolbar
           t={t}
           activeTab={activeTab}
@@ -132,7 +132,7 @@ export function ReturnsListView() {
             </div>
           ) : returnParcels.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shadow-xs">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/10 text-success">
                 <PackageCheck className="h-6 w-6" />
               </div>
               <h3 className="mt-3 text-body-sm font-bold text-foreground">
@@ -146,7 +146,7 @@ export function ReturnsListView() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSearch("")}
-                  className="mt-4 rounded-xl border-border/80 text-xs hover:bg-surface-elevated"
+                  className="mt-4 rounded-xl text-xs hover:bg-surface-elevated"
                 >
                   {t("clearSearch")}
                 </Button>

@@ -35,9 +35,9 @@ export function ReturnsItemCard({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between bg-surface-muted/40 hover:bg-surface-muted/70 rounded-2xl border border-border/50 hover:border-border transition-all">
+    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between bg-surface-muted/40 hover:bg-surface-muted/70 rounded-2xl transition-all">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <RotateCcw className="h-4 w-4" />
         </div>
 
@@ -56,7 +56,7 @@ export function ReturnsItemCard({
               title={t("copyCode")}
             >
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-emerald-500" />
+                <Check className="h-3.5 w-3.5 text-success" />
               ) : (
                 <Copy className="h-3.5 w-3.5" />
               )}
@@ -93,7 +93,7 @@ export function ReturnsItemCard({
             <Button
               variant="outline"
               size="sm"
-              className="h-8 rounded-xl border-border/80 hover:bg-surface-elevated text-xs font-semibold gap-1.5"
+              className="h-8 rounded-xl hover:bg-surface-elevated text-xs font-semibold gap-1.5"
             >
               <span>{t("details")}</span>
               <ArrowRight className="h-3 w-3" />

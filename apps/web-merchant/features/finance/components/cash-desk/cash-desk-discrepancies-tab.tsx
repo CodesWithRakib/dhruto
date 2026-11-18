@@ -38,11 +38,7 @@ export function CashDeskDiscrepanciesTab({
   }, [filteredDiscrepancies, discrepanciesPage, discrepanciesLimit]);
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-4 shadow-sm">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden p-4">
       {filteredDiscrepancies.length === 0 ? (
         <div className="p-6">
           <EmptyState
@@ -73,7 +69,7 @@ export function CashDeskDiscrepanciesTab({
               }}
               searchPlaceholder="Filter discrepancies..."
               emptyMessage={t("cash.emptyDiscrepancies")}
-              className="border-0 shadow-none rounded-none"
+              className="rounded-none"
             />
           </div>
           <div className="space-y-2 md:hidden">

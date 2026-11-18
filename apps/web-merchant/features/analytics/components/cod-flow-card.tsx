@@ -14,8 +14,8 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
   if (!codFlow) return null;
 
   return (
-    <Card className="border-primary/20 shadow-soft">
-      <CardHeader className="border-b border-border/70 bg-primary-soft/30">
+    <Card>
+      <CardHeader className="bg-primary-soft/30">
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
             <Wallet className="h-5 w-5" />
@@ -32,7 +32,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
       <CardContent className="pt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative">
           {/* Step 1: Booked COD */}
-          <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+          <div className="p-4 rounded-xl bg-surface space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
               <span>1. Booked COD</span>
               <Clock className="h-4 w-4 text-info-soft-foreground" aria-hidden="true" />
@@ -44,7 +44,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
           </div>
 
           {/* Step 2: In-Transit with Riders */}
-          <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+          <div className="p-4 rounded-xl bg-surface space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
               <span>2. With Delivery Riders</span>
               <Clock className="h-4 w-4 text-warning-soft-foreground" aria-hidden="true" />
@@ -56,7 +56,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
           </div>
 
           {/* Step 3: Hub Reconciliation */}
-          <div className="p-4 rounded-xl border border-border/70 bg-surface space-y-2">
+          <div className="p-4 rounded-xl bg-surface space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
               <span>3. Hub Reconciliation</span>
               <ShieldCheck className="h-4 w-4 text-primary-soft-foreground" aria-hidden="true" />
@@ -68,7 +68,7 @@ export function CodFlowCard({ codFlow }: CodFlowCardProps) {
           </div>
 
           {/* Step 4: Settled to Merchants */}
-          <div className="p-4 rounded-xl border border-success/25 bg-success-soft/40 space-y-2">
+          <div className="p-4 rounded-xl bg-success-soft/40 space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
               <span>4. Settled to Wallet</span>
               <CheckCircle2 className="h-4 w-4 text-success-soft-foreground" aria-hidden="true" />

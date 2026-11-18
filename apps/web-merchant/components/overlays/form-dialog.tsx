@@ -73,7 +73,7 @@ export function FormDialog({
           {error ? (
             <p
               role="alert"
-              className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
+              className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger-soft-foreground"
             >
               {error}
             </p>

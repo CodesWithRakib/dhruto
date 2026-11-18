@@ -175,7 +175,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       manifest.status === ManifestStatus.IN_TRANSIT ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl border border-sky-500/30 bg-info-soft px-4 py-3 text-xs font-semibold text-info shadow-xs"
+          className="flex items-center gap-2 rounded-2xl bg-info-soft px-4 py-3 text-xs font-semibold text-info"
         >
           <Truck className="h-4 w-4" aria-hidden="true" />
           {t("manifests.dispatchedBanner")}
@@ -184,7 +184,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       {manifest.status === ManifestStatus.RECEIVED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-success-soft px-4 py-3 text-xs font-semibold text-success shadow-xs"
+          className="flex items-center gap-2 rounded-2xl bg-success-soft px-4 py-3 text-xs font-semibold text-success"
         >
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {t("manifests.receivedBanner")}
@@ -193,7 +193,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       {manifest.status === ManifestStatus.RECONCILED ? (
         <p
           role="status"
-          className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-warning-soft px-4 py-3 text-xs font-semibold text-warning shadow-xs"
+          className="flex items-center gap-2 rounded-2xl bg-warning-soft px-4 py-3 text-xs font-semibold text-warning"
         >
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           {t("manifests.reconciledBanner")}
@@ -205,11 +205,11 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
 
       {/* Dispatch action card (while CREATED) */}
       {manifest.status === ManifestStatus.CREATED ? (
-        <div className="relative rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-md p-5 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+        <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">{t("manifests.dispatchConfirmMessage")}</p>
           <Button
             onClick={() => setDispatchConfirmOpen(true)}
-            className="gap-1.5 rounded-xl font-semibold shadow-xs"
+            className="gap-1.5 rounded-xl font-semibold"
           >
             <Send className="h-4 w-4" aria-hidden="true" />
             {t("manifests.dispatch")}
@@ -218,20 +218,16 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
       ) : null}
 
       {/* Bags in manifest DataTable */}
-      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden shadow-sm">
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden">
         {/* Specular top highlight */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-          aria-hidden="true"
-        />
 
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border/40">
+        <div className="flex items-center justify-between p-5 sm:p-6">
           <div className="flex items-center gap-2.5">
             <Truck className="h-4 w-4 text-primary" aria-hidden="true" />
             <h2 className="text-sm font-bold text-foreground">
               {t("manifests.bagsInManifest")}
             </h2>
-            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
               {manifest.bags.length}
             </span>
           </div>
@@ -253,10 +249,10 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
                   itemsPerPage={Math.max(10, manifest.bags.length)}
                   hidePagination={manifest.bags.length <= 10}
                   emptyMessage={t("bags.empty")}
-                  className="border-0 shadow-none rounded-none"
+                  className="rounded-none"
                 />
               </div>
-              <ul className="divide-y divide-border/20 md:hidden">
+              <ul className="md:hidden">
                 {manifest.bags.map((bag) => (
                   <li key={bag.id} className="space-y-2 p-4">
                     <div className="flex items-center justify-between gap-2">
@@ -306,7 +302,7 @@ export function ManifestDetailsView({ manifestId }: ManifestDetailsViewProps) {
 
       {/* Dispatch confirmation dialog */}
       <Dialog open={dispatchConfirmOpen} onOpenChange={setDispatchConfirmOpen}>
-        <DialogContent className="max-w-md rounded-3xl border border-border/60 bg-surface-elevated p-6 shadow-2xl">
+        <DialogContent className="max-w-md rounded-3xl bg-surface-elevated p-6">
           <DialogHeader>
             <DialogTitle>{t("manifests.dispatchConfirmTitle")}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">

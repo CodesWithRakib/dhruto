@@ -15,7 +15,7 @@ export function InteractiveCard({
   return (
     <Card
       className={cn(
-        "transition-all duration-fast ease-out hover:-translate-y-px hover:shadow-soft focus-within:shadow-soft focus-within:ring-2 focus-within:ring-ring/30",
+        "transition-all duration-fast ease-out hover:-translate-y-px focus-within:ring-2 focus-within:ring-ring/30",
         className,
       )}
       {...props}
@@ -35,14 +35,14 @@ export function HighlightCard({
   className?: string;
 }) {
   const tones = {
-    primary: "border-primary/20 bg-gradient-to-r from-primary-soft/50 via-primary-soft/20 to-transparent",
-    info: "border-info/20 bg-gradient-to-r from-info-soft/50 via-info-soft/20 to-transparent",
-    success: "border-success/20 bg-gradient-to-r from-success-soft/50 via-success-soft/20 to-transparent",
-    warning: "border-warning/20 bg-gradient-to-r from-warning-soft/50 via-warning-soft/20 to-transparent",
-    danger: "border-danger/20 bg-gradient-to-r from-danger-soft/50 via-danger-soft/20 to-transparent",
+    primary: "bg-gradient-to-r from-primary-soft/50 via-primary-soft/20 to-transparent",
+    info: "bg-gradient-to-r from-info-soft/50 via-info-soft/20 to-transparent",
+    success: "bg-gradient-to-r from-success-soft/50 via-success-soft/20 to-transparent",
+    warning: "bg-gradient-to-r from-warning-soft/50 via-warning-soft/20 to-transparent",
+    danger: "bg-gradient-to-r from-danger-soft/50 via-danger-soft/20 to-transparent",
   } as const;
   return (
-    <div className={cn("rounded-2xl border p-4 sm:p-5 shadow-2xs transition-colors", tones[tone], className)}>
+    <div className={cn("rounded-2xl p-4 sm:p-5 transition-colors", tones[tone], className)}>
       {children}
     </div>
   );
@@ -56,7 +56,7 @@ export function DeepCard({
   className?: string;
 }) {
   return (
-    <div className={cn("dhruto-hero-dark relative overflow-hidden rounded-2xl p-6 shadow-soft sm:p-8", className)}>
+    <div className={cn("dhruto-hero-dark relative overflow-hidden rounded-2xl p-6 sm:p-8", className)}>
       <div className="dhruto-route-pattern pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
       <div className="relative z-10">{children}</div>
     </div>
@@ -73,12 +73,12 @@ export function AlertCard({
   className?: string;
 }) {
   const tones = {
-    warning: "border-warning/30 bg-warning-soft text-warning-soft-foreground",
-    danger: "border-danger/30 bg-danger-soft text-danger-soft-foreground",
-    info: "border-info/30 bg-info-soft text-info-soft-foreground",
+    warning: "bg-warning-soft text-warning-soft-foreground",
+    danger: "bg-danger-soft text-danger-soft-foreground",
+    info: "bg-info-soft text-info-soft-foreground",
   } as const;
   return (
-    <div role="alert" className={cn("rounded-xl border px-4 py-3 text-body-sm", tones[tone], className)}>
+    <div role="alert" className={cn("rounded-xl px-4 py-3 text-body-sm", tones[tone], className)}>
       {children}
     </div>
   );

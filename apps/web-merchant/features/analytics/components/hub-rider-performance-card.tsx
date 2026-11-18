@@ -15,8 +15,8 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Hub Throughput */}
-      <Card className="shadow-sm border-primary/20">
-        <CardHeader className="border-b bg-muted/20">
+      <Card>
+        <CardHeader className="bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="p-2 bg-primary/10 text-primary rounded-lg">
@@ -37,7 +37,7 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
 
         <CardContent className="pt-6 space-y-4">
           {hubs.map((hub) => (
-            <div key={hub.hubId} className="p-3 rounded-lg border bg-card space-y-2">
+            <div key={hub.hubId} className="p-3 rounded-lg bg-card space-y-2">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-bold text-sm text-foreground">{hub.hubName}</h4>
@@ -59,7 +59,7 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
                 </div>
                 <div className="p-2 rounded bg-muted/30">
                   <span className="text-muted-foreground block text-[10px] uppercase">Sorted</span>
-                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  <span className="font-mono font-bold text-info">
                     {hub.totalSorted}
                   </span>
                 </div>
@@ -67,7 +67,7 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
                   <span className="text-muted-foreground block text-[10px] uppercase">
                     Dispatched
                   </span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="font-mono font-bold text-success">
                     {hub.totalDispatched}
                   </span>
                 </div>
@@ -78,8 +78,8 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
       </Card>
 
       {/* Rider Fleet Performance */}
-      <Card className="shadow-sm border-primary/20">
-        <CardHeader className="border-b bg-muted/20">
+      <Card>
+        <CardHeader className="bg-muted/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="p-2 bg-primary/10 text-primary rounded-lg">
@@ -102,7 +102,7 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
           {riders.map((rider, index) => (
             <div
               key={rider.riderId}
-              className="p-3 rounded-lg border bg-card flex items-center justify-between text-xs"
+              className="p-3 rounded-lg bg-card flex items-center justify-between text-xs"
             >
               <div className="flex items-center gap-3">
                 <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
@@ -117,7 +117,7 @@ export function HubRiderPerformanceCard({ hubs, riders }: HubRiderPerformanceCar
               </div>
 
               <div className="text-right space-y-0.5">
-                <div className="font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                <div className="font-bold font-mono text-success">
                   {rider.deliveredCount} Delivered ({rider.completionRate}%)
                 </div>
                 <span className="text-[11px] text-muted-foreground font-mono block">

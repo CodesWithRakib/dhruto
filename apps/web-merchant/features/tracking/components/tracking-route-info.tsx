@@ -30,7 +30,7 @@ export function TrackingRouteInfo({
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Destination */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
+      <div className="rounded-2xl bg-card p-5 transition-all">
         <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
           <MapPin className="h-4 w-4 text-primary" />
           <span>{t("destination")}</span>
@@ -44,7 +44,7 @@ export function TrackingRouteInfo({
       </div>
 
       {/* Current Location Hub */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
+      <div className="rounded-2xl bg-card p-5 transition-all">
         <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
           <Building2 className="h-4 w-4 text-primary" />
           <span>{t("location")}</span>
@@ -58,7 +58,7 @@ export function TrackingRouteInfo({
       </div>
 
       {/* Masked Contact */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
+      <div className="rounded-2xl bg-card p-5 transition-all">
         <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
           <Phone className="h-4 w-4 text-primary" />
           <span>{t("contact")}</span>
@@ -73,7 +73,7 @@ export function TrackingRouteInfo({
       </div>
 
       {/* Last Updated */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-2xs hover:border-primary/30 transition-all">
+      <div className="rounded-2xl bg-card p-5 transition-all">
         <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
           <Clock className="h-4 w-4 text-primary" />
           <span>Telemetry Sync</span>

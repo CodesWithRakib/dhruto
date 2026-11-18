@@ -27,7 +27,7 @@ export function AuditPanel({ conversationId }: { conversationId?: string }) {
           <Label htmlFor={selectId}>{t("audit.action")}</Label>
           <select
             id={selectId}
-            className="h-10 max-w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-10 max-w-full rounded-md bg-field px-3 text-sm hover:bg-field-hover focus:bg-surface"
             value={action ?? ""}
             onChange={(event) =>
               setAction((event.target.value || undefined) as ChatAuditAction | undefined)
@@ -53,7 +53,7 @@ export function AuditPanel({ conversationId }: { conversationId?: string }) {
         <EmptyState icon={ScrollText} title={t("audit.empty")} />
       ) : (
         <ol
-          className="divide-y divide-border/60 overflow-hidden rounded-xl bg-card"
+          className="overflow-hidden rounded-xl bg-card"
           aria-label={t("audit.results")}
         >
           {items.map((item) => (

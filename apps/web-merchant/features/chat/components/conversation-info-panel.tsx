@@ -36,7 +36,7 @@ export function ConversationInfoPanel({
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="flex flex-col items-center gap-2 border-b border-border px-4 py-6 text-center">
+      <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
         <ChatAvatar name={title} />
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         <dl className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -51,7 +51,7 @@ export function ConversationInfoPanel({
         </dl>
       </div>
 
-      <section className="border-b border-border px-4 py-4" aria-labelledby="chat-info-participants">
+      <section className="px-4 py-4" aria-labelledby="chat-info-participants">
         <h3 id="chat-info-participants" className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("participants")} ({detail.participants.length})
         </h3>

@@ -150,13 +150,13 @@ export default function WebhooksDeveloperPage() {
       {freshSecret && (
         <div
           role="alert"
-          className="relative z-10 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground shadow-sm backdrop-blur-md"
+          className="relative z-10 rounded-2xl bg-warning/10 p-4 text-sm text-foreground backdrop-blur-md"
         >
-          <p className="font-bold text-amber-700 dark:text-amber-300">
+          <p className="font-bold text-warning-soft-foreground">
             Signing secret — shown once. Copy it now; it will never be displayed again.
           </p>
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
-            <code className="break-all rounded-xl border border-border/80 bg-surface-elevated px-3 py-1.5 font-mono text-xs select-all font-semibold">
+            <code className="break-all rounded-xl bg-surface-elevated px-3 py-1.5 font-mono text-xs select-all font-semibold">
               {freshSecret.secret}
             </code>
             <Button
@@ -167,10 +167,10 @@ export default function WebhooksDeveloperPage() {
                 setCopiedSecretId(freshSecret.id);
                 setTimeout(() => setCopiedSecretId(null), 2000);
               }}
-              className="rounded-xl border-border/80 hover:bg-surface-elevated text-xs font-semibold gap-1.5"
+              className="rounded-xl hover:bg-surface-elevated text-xs font-semibold gap-1.5"
             >
               {copiedSecretId === freshSecret.id ? (
-                <Check className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
+                <Check className="h-3.5 w-3.5 text-success" aria-hidden="true" />
               ) : (
                 <Copy className="h-3.5 w-3.5" aria-hidden="true" />
               )}
@@ -185,10 +185,10 @@ export default function WebhooksDeveloperPage() {
       )}
 
       {/* Header */}
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border/60">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+            <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
               <Webhook className="h-6 w-6" />
             </div>
             <h1 className="text-display-xs sm:text-display-sm font-bold tracking-tight text-foreground">
@@ -196,7 +196,7 @@ export default function WebhooksDeveloperPage() {
             </h1>
             <Badge
               variant="outline"
-              className="text-xs bg-primary/10 text-primary border-primary/30 font-mono"
+              className="text-xs bg-primary/10 text-primary font-mono"
             >
               v1.0 Live
             </Badge>
@@ -215,7 +215,7 @@ export default function WebhooksDeveloperPage() {
               refetchSubs();
               refetchDeliveries();
             }}
-            className="flex items-center gap-1.5 rounded-xl border-border/80 hover:bg-surface-elevated text-xs font-semibold"
+            className="flex items-center gap-1.5 rounded-xl hover:bg-surface-elevated text-xs font-semibold"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             <span>Refresh</span>
@@ -224,7 +224,7 @@ export default function WebhooksDeveloperPage() {
             size="sm"
             onClick={() => setShowCreateModal(true)}
             id="register-webhook-btn"
-            className="flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
+            className="flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground font-bold hover:scale-[1.01] active:scale-[0.99] transition-all"
           >
             <Plus className="h-4 w-4" />
             <span>Register Webhook</span>

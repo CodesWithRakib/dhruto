@@ -90,7 +90,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-border/50 bg-surface-muted/30 p-4 sm:p-5">
+    <div className="space-y-4 rounded-2xl bg-surface-muted/30 p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
         <h3 className="text-sm font-semibold text-foreground">{t("title")}</h3>
@@ -100,7 +100,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-border/50 bg-background/80 p-3.5 shadow-2xs">
+        <div className="rounded-xl bg-background/80 p-3.5">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
             {t("address")}
@@ -116,7 +116,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
             {intel.address.hasConflict ? ` · ${t("conflict")}` : ""}
           </p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-background/80 p-3.5 shadow-2xs">
+        <div className="rounded-xl bg-background/80 p-3.5">
           <p className="text-xs text-muted-foreground">{t("deliveryRisk")}</p>
           <div className="mt-1 flex items-center gap-2">
             <LevelBadge level={intel.risk.level} />
@@ -126,7 +126,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
             {t("scoreScale", { version: intel.risk.scoringVersion })}
           </p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-background/80 p-3.5 shadow-2xs">
+        <div className="rounded-xl bg-background/80 p-3.5">
           <p className="text-xs text-muted-foreground">{t("rtoRisk")}</p>
           <div className="mt-1 flex items-center gap-2">
             <LevelBadge level={intel.rto.level} />
@@ -162,7 +162,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
               .map((rec) => (
                 <div
                   key={rec.id}
-                  className="rounded-xl border border-border/60 bg-background p-4 shadow-2xs transition-all hover:border-primary/30"
+                  className="rounded-xl bg-background p-4 transition-all"
                 >
                   <p className="text-sm font-semibold text-foreground">{t(`action_${rec.action}`)}</p>
                   {rec.reasons.length > 0 && (
@@ -176,7 +176,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
                         onChange={(e) => setOverrideReason(e.target.value)}
                         placeholder={t("overrideReasonPlaceholder")}
                         aria-label={t("overrideReasonPlaceholder")}
-                        className="h-9 w-full rounded-xl border border-border/60 bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="h-9 w-full rounded-xl bg-field px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 hover:bg-field-hover focus:bg-surface"
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button
@@ -247,7 +247,7 @@ export function ParcelIntelligencePanel({ parcelId }: { parcelId: string }) {
       {feedback && (
         <div
           role="alert"
-          className="rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-xs text-danger-soft-foreground"
+          className="rounded-xl bg-danger-soft px-3.5 py-2.5 text-xs text-danger-soft-foreground"
         >
           {feedback}
         </div>

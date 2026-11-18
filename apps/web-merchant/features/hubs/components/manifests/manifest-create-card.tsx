@@ -52,12 +52,8 @@ export function ManifestCreateCard({
   const t = useTranslations("Hub");
 
   return (
-    <div className="relative rounded-3xl border border-primary/20 bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-5 shadow-sm">
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-5 sm:p-6 space-y-5">
       {/* Specular top highlight */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
 
       <div>
         <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold text-foreground">
@@ -79,11 +75,11 @@ export function ManifestCreateCard({
             <Select value={destHubId} onValueChange={setDestHubId} required>
               <SelectTrigger
                 id="manifest-destination"
-                className="w-full rounded-2xl border border-border/50 bg-surface-muted/60 focus:bg-background"
+                className="w-full rounded-2xl bg-surface-muted/60 focus:bg-background"
               >
                 <SelectValue placeholder={t("manifests.destination")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border border-border/60 bg-surface-elevated shadow-xl">
+              <SelectContent className="rounded-2xl bg-surface-elevated">
                 {destinations.map((hub) => (
                   <SelectItem key={hub.id} value={hub.id}>
                     {hub.name} ({hub.code})
@@ -106,7 +102,7 @@ export function ManifestCreateCard({
               value={vehicleNumber}
               onChange={(event) => setVehicleNumber(event.target.value)}
               required
-              className="rounded-2xl border border-border/50 bg-surface-muted/60 font-mono uppercase focus:bg-background"
+              className="rounded-2xl bg-surface-muted/60 font-mono uppercase focus:bg-background"
             />
           </div>
 
@@ -121,7 +117,7 @@ export function ManifestCreateCard({
               id="manifest-driver"
               value={driverName}
               onChange={(event) => setDriverName(event.target.value)}
-              className="rounded-2xl border border-border/50 bg-surface-muted/60 focus:bg-background"
+              className="rounded-2xl bg-surface-muted/60 focus:bg-background"
             />
           </div>
 
@@ -136,7 +132,7 @@ export function ManifestCreateCard({
               id="manifest-driver-phone"
               value={driverPhone}
               onChange={(event) => setDriverPhone(event.target.value)}
-              className="rounded-2xl border border-border/50 bg-surface-muted/60 focus:bg-background"
+              className="rounded-2xl bg-surface-muted/60 focus:bg-background"
             />
           </div>
         </div>
@@ -150,12 +146,12 @@ export function ManifestCreateCard({
           </p>
 
           {availableBags.length === 0 ? (
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-center text-xs text-muted-foreground">
+            <div className="rounded-2xl bg-warning/10 p-4 text-center text-xs text-muted-foreground">
               <AlertCircle className="mx-auto mb-1.5 h-5 w-5 text-warning" aria-hidden="true" />
               {t("manifests.noSealedBags")}
             </div>
           ) : (
-            <div className="grid max-h-56 grid-cols-1 gap-2.5 overflow-y-auto rounded-2xl border border-border/50 bg-surface-muted/30 p-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid max-h-56 grid-cols-1 gap-2.5 overflow-y-auto rounded-2xl bg-surface-muted/30 p-3 sm:grid-cols-2 md:grid-cols-3">
               {availableBags.map((bag) => {
                 const isSelected = selectedBagIds.includes(bag.id);
                 return (
@@ -171,10 +167,10 @@ export function ManifestCreateCard({
                     role="checkbox"
                     aria-checked={isSelected}
                     tabIndex={0}
-                    className={`flex cursor-pointer items-start gap-2.5 rounded-2xl p-3 text-sm transition-all border ${
+                    className={`flex cursor-pointer items-start gap-2.5 rounded-2xl p-3 text-sm transition-all ${
                       isSelected
-                        ? "border-primary/40 bg-primary/10 text-primary shadow-2xs"
-                        : "border-border/40 bg-card hover:bg-surface-muted/60"
+                        ? "bg-primary/10 text-primary"
+                        : "bg-card hover:bg-surface-muted/60"
                     }`}
                   >
                     <input
@@ -212,7 +208,7 @@ export function ManifestCreateCard({
           <Button
             type="submit"
             disabled={isCreating || selectedBagIds.length === 0}
-            className="gap-2 rounded-xl text-xs font-semibold shadow-xs"
+            className="gap-2 rounded-xl text-xs font-semibold"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             {isCreating ? t("manifests.creating") : t("manifests.create")}

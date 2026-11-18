@@ -69,7 +69,7 @@ export function PayoutInvoiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl overflow-y-auto max-h-[92vh] p-0 sm:rounded-3xl border-0 bg-card shadow-2xl">
+      <DialogContent className="max-w-2xl overflow-y-auto max-h-[92vh] p-0 sm:rounded-3xl bg-card">
         <DialogHeader className="sr-only">
           <DialogTitle>{t("invoice.dialogTitle")}</DialogTitle>
           <DialogDescription>{t("invoice.dialogSubtitle")}</DialogDescription>
@@ -78,7 +78,7 @@ export function PayoutInvoiceDialog({
         {/* Printable Voucher Surface */}
         <div id="printable-payout-invoice" className="p-6 sm:p-8 space-y-6 text-foreground bg-card">
           {/* Header & Branding */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b border-surface-muted">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <Logo size="default" />
@@ -161,7 +161,7 @@ export function PayoutInvoiceDialog({
                   <dd>{fmtDate(payout.createdAt)}</dd>
                 </div>
                 {payout.transactionReference ? (
-                  <div className="pt-1.5 border-t border-surface-muted">
+                  <div className="pt-1.5">
                     <dt className="text-[11px] text-muted-foreground mb-0.5">
                       {t("invoice.trxReference")}:
                     </dt>
@@ -193,14 +193,14 @@ export function PayoutInvoiceDialog({
           {/* Itemized Table */}
           <div className="overflow-hidden rounded-2xl bg-surface-elevated">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 text-[11px] font-semibold uppercase tracking-wider">
+              <thead className="bg-inverse text-inverse-foreground text-[11px] font-semibold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4 rounded-tl-2xl">{t("invoice.description")}</th>
                   <th className="py-3 px-4 text-center">{t("invoice.channel")}</th>
                   <th className="py-3 px-4 text-right rounded-tr-2xl">{t("invoice.amount")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-surface-muted/50">
+              <tbody>
                 <tr>
                   <td className="py-3 px-4">
                     <p className="font-medium text-foreground">{t("invoice.disbursedDesc")}</p>
@@ -241,7 +241,7 @@ export function PayoutInvoiceDialog({
           </div>
 
           {/* Audit Verification Seal & Authorized Sign-off */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-dashed border-surface-muted">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-lg bg-success/10 text-success">
                 <ShieldCheck className="h-5 w-5" aria-hidden="true" />
@@ -268,7 +268,7 @@ export function PayoutInvoiceDialog({
         </div>
 
         {/* Modal Actions (Hidden in Print) */}
-        <DialogFooter className="no-print p-4 bg-surface-muted/50 border-t border-border flex flex-col sm:flex-row gap-2 sm:justify-end">
+        <DialogFooter className="no-print p-4 bg-surface-muted/50 flex flex-col sm:flex-row gap-2 sm:justify-end">
           <Button
             type="button"
             variant="outline"

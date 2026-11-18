@@ -58,12 +58,11 @@ function QuickAction({
   disabled?: boolean;
 }) {
   const content = (
-    <div className="group relative h-full overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 p-6 backdrop-blur-md shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5">
+    <div className="group relative h-full overflow-hidden rounded-3xl bg-card/90 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1">
       {/* Top Specular Line */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
       <div className="flex items-center justify-between">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground shadow-xs">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
         <ArrowRight className="h-4 w-4 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
@@ -75,7 +74,7 @@ function QuickAction({
       <p className="mt-1 text-xs text-muted-foreground leading-relaxed font-normal">{description}</p>
 
       {badge ? (
-        <span className="mt-3.5 inline-flex w-fit items-center rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
+        <span className="mt-3.5 inline-flex w-fit items-center rounded-full bg-primary/5 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
           {badge}
         </span>
       ) : null}
@@ -109,21 +108,21 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
     stats.totalCodAmount > 0 ? (stats.collectedCodAmount / stats.totalCodAmount) * 100 : 0;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-[#072a1d] via-[#051f15] to-[#0a3f2b] p-6 text-white shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-inverse via-inverse to-inverse-soft p-6 text-white">
       {/* Decorative Atmospheric Bloom */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-emerald-400/20 blur-3xl"
+        className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-success/20 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-cyan-400/15 blur-3xl"
+        className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-info/15 blur-3xl"
       />
 
       {/* Card Header */}
-      <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="relative z-10 flex items-center justify-between pb-4">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-400/20 text-emerald-300 ring-1 ring-emerald-400/30 shadow-xs">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-success/20 text-success">
             <Wallet className="h-4 w-4" aria-hidden="true" />
           </span>
           <div>
@@ -133,8 +132,8 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
             <p className="text-[11px] text-white/60">{t("codSettlementHint")}</p>
           </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/20 px-3 py-0.5 text-[10px] font-bold text-emerald-300 backdrop-blur-md">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-success/20 px-3 py-0.5 text-[10px] font-bold text-success backdrop-blur-md">
+          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
           T+1 Remittance
         </span>
       </div>
@@ -143,7 +142,7 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
       <div className="relative z-10 mt-5 space-y-5">
         <div>
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-success/80">
               {t("codCollected")}
             </p>
             <span className="text-[11px] font-semibold text-white/80">
@@ -156,21 +155,21 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
           
           {/* Neon Gradient Progress Bar */}
           <div
-            className="mt-3.5 h-2.5 w-full overflow-hidden rounded-full bg-black/40 p-0.5 border border-white/10"
+            className="mt-3.5 h-2.5 w-full overflow-hidden rounded-full bg-black/40 p-0.5"
             role="img"
             aria-label={`${t("codCollected")}: ${Math.round(collectedRatio)}%`}
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 transition-all duration-700 ease-out shadow-[0_0_12px_rgba(16,185,129,0.7)]"
+              className="h-full rounded-full bg-gradient-to-r from-success via-success-soft to-info transition-all duration-700 ease-out"
               style={{ width: `${Math.min(100, Math.max(0, collectedRatio))}%` }}
             />
           </div>
         </div>
 
         {/* Pending COD Glass Container */}
-        <div className="flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md text-xs">
+        <div className="flex items-center justify-between rounded-2xl bg-white/10 p-3.5 backdrop-blur-md text-xs">
           <span className="text-white/70 font-medium">{t("codPending")}</span>
-          <span className="font-bold tabular-nums text-emerald-300 text-sm sm:text-base">
+          <span className="font-bold tabular-nums text-success text-sm sm:text-base">
             {bdt(pendingCod)}
           </span>
         </div>
@@ -178,7 +177,7 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
         {/* Action Link */}
         <Link
           href={MERCHANT_ROUTES.finance}
-          className="group inline-flex items-center gap-2 text-xs font-bold text-emerald-300 hover:text-emerald-200 transition-colors"
+          className="group inline-flex items-center gap-2 text-xs font-bold text-success hover:text-success-soft transition-colors"
         >
           <span>{t("codStatement")}</span>
           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />

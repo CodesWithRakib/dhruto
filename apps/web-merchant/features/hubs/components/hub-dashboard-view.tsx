@@ -94,7 +94,7 @@ export function HubDashboardView() {
               variant="outline"
               size="sm"
               onClick={handleRefresh}
-              className="gap-1.5 rounded-xl shadow-2xs"
+              className="gap-1.5 rounded-xl"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${dashboardLoading ? "animate-spin" : ""}`} aria-hidden="true" />
               <span>{t("refresh")}</span>

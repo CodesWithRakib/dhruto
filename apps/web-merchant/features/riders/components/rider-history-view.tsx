@@ -29,8 +29,8 @@ function HistoryStatusBadge({ status }: { status: string }) {
   switch (status) {
     case "CASH_PENDING":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-200">
-          <Clock className="h-3 w-3 text-amber-500" />
+        <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-0.5 text-[10px] font-bold text-warning-soft-foreground">
+          <Clock className="h-3 w-3 text-warning" />
           Cash Pending
         </span>
       );
@@ -126,7 +126,7 @@ export function RiderHistoryView() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search history by tracking code, recipient or district..."
             aria-label="Search delivery history"
-            className="h-11 rounded-2xl border-0 bg-surface-muted/60 pl-10 pr-10 text-sm focus:bg-background"
+            className="h-11 rounded-2xl bg-surface-muted/60 pl-10 pr-10 text-sm focus:bg-background"
           />
           {search ? (
             <button
@@ -218,7 +218,7 @@ export function RiderHistoryView() {
               />
             </div>
           ) : (
-            <ul className="divide-y divide-border/20">
+            <ul>
               {filteredItems.map((item) => (
                 <li key={item.id}>
                   <Link
@@ -246,7 +246,7 @@ export function RiderHistoryView() {
 
                       <div className="flex items-center justify-between gap-3 pl-13 sm:justify-end sm:pl-0">
                         {item.codCollected !== null && item.codCollected > 0 ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-1 font-mono text-xs font-bold text-emerald-800 dark:text-emerald-200">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-3 py-1 font-mono text-xs font-bold text-success-soft-foreground">
                             Collected {bdt(item.codCollected)}
                           </span>
                         ) : null}

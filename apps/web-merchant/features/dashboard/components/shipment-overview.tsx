@@ -115,11 +115,10 @@ function HealthCell({
   tone?: "primary" | "success" | "danger" | "info";
 }) {
   const barTone = {
-    primary: "bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]",
-    success:
-      "bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]",
-    danger: "bg-gradient-to-r from-rose-500 to-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.4)]",
-    info: "bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]",
+    primary: "bg-primary",
+    success: "bg-success",
+    danger: "bg-danger",
+    info: "bg-info",
   }[tone];
 
   return (
@@ -132,7 +131,7 @@ function HealthCell({
       </p>
       {typeof progress === "number" ? (
         <div
-          className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-muted/70 p-0.5 border border-border/40"
+          className="mt-3.5 h-2 w-full overflow-hidden rounded-full bg-muted/70 p-0.5"
           role="img"
           aria-label={`${label}: ${value}`}
         >
@@ -174,33 +173,40 @@ export function DeliveryHealth({
   const pendingCod = pendingCodAmount(stats);
   const kpis = analytics?.kpis;
 
-  return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/70 dark:border-white/10 bg-card/90 dark:bg-card/75 backdrop-blur-md shadow-xs">
-      {/* Top Specular Gradient Line */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500/40 via-teal-400/40 to-cyan-500/40" />
+  // The API reports 0 when no delivered parcel can be measured, so 0 means
+  // "no data" (never a real zero-hour delivery). Sub-hour averages show minutes.
+  const formatLatency = (hours: number): string => {
+    if (!(hours > 0)) return PLACEHOLDER;
+    if (hours < 1) return t("health.minutes", { minutes: number(Math.max(1, Math.round(hours * 60))) });
+    return t("health.hours", { hours: number(Math.round(hours)) });
+  };
 
-      <div className="flex items-center justify-between border-b border-border/60 px-5 py-4 sm:px-6">
+  return (
+    <div className="relative overflow-hidden rounded-3xl bg-card/90 backdrop-blur-md">
+      {/* Top Specular Gradient Line */}
+
+      <div className="flex items-center justify-between px-5 py-4 sm:px-6">
         <div>
           <h2 className="text-h4 font-bold text-foreground">{t("health.title")}</h2>
           <p className="mt-0.5 text-caption text-muted-foreground">{t("health.description")}</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/5 px-2.5 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wider">
           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
           Live Radar
         </span>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 divide-x divide-y divide-border/50 sm:grid-cols-4 sm:divide-y-0">
+        <div className="grid grid-cols-2 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="p-4 sm:p-5">
-              <CardSkeleton className="border-0 bg-transparent p-0 shadow-none" />
+              <CardSkeleton className="bg-transparent p-0" />
             </div>
           ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 divide-x divide-y divide-border/50 sm:grid-cols-4 sm:divide-y-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4">
             <HealthCell
               label={t("health.successRate")}
               value={
@@ -224,9 +230,7 @@ export function DeliveryHealth({
             <HealthCell
               label={t("health.avgDelivery")}
               value={
-                isAnalyticsAvailable && kpis
-                  ? t("health.hours", { hours: number(Math.round(kpis.avgDeliveryHours)) })
-                  : PLACEHOLDER
+                isAnalyticsAvailable && kpis ? formatLatency(kpis.avgDeliveryHours) : PLACEHOLDER
               }
               tone="info"
               hint={t("health.avgDeliveryHint")}
@@ -240,7 +244,7 @@ export function DeliveryHealth({
           </div>
 
           {!isAnalyticsAvailable ? (
-            <p className="border-t border-border/50 px-5 py-3 text-caption text-muted-foreground">
+            <p className="px-5 py-3 text-caption text-muted-foreground">
               {t("health.unavailable")}
             </p>
           ) : null}

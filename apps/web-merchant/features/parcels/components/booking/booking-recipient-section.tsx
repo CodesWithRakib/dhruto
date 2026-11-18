@@ -37,7 +37,7 @@ export function BookingRecipientSection({ control, isLoading, t }: BookingRecipi
                   autoComplete="name"
                   placeholder={t("recipientNamePlaceholder")}
                   disabled={isLoading}
-                  className="rounded-xl border-border/80 bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
+                  className="rounded-xl bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
                   {...field}
                 />
               </FormControl>
@@ -59,7 +59,7 @@ export function BookingRecipientSection({ control, isLoading, t }: BookingRecipi
                   autoComplete="tel"
                   placeholder={t("recipientPhonePlaceholder")}
                   disabled={isLoading}
-                  className="rounded-xl border-border/80 bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
+                  className="rounded-xl bg-surface-muted/50 focus:bg-surface-elevated transition-colors"
                   {...field}
                 />
               </FormControl>

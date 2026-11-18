@@ -60,9 +60,9 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
     <section id="legal-clauses" className="relative py-24 bg-surface scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading & Search */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-border/80 pb-8">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               <BookOpen className="h-3.5 w-3.5" />
               <span>STATUTORY CLAUSES & ARTICLES</span>
             </div>
@@ -76,7 +76,7 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
 
           {/* Controls: Search & Reading Time */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex items-center gap-1.5 rounded-xl border border-border/70 bg-card px-3.5 py-2 text-xs text-muted-foreground">
+            <div className="inline-flex items-center gap-1.5 rounded-xl bg-card px-3.5 py-2 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5 text-primary" />
               <span>~4 min read</span>
             </div>
@@ -88,7 +88,7 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
                 value={activeQuery}
                 onChange={(e) => setActiveQuery(e.target.value)}
                 placeholder="Search legal articles..."
-                className="w-full rounded-xl border border-border/80 bg-surface pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-xl bg-field pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 hover:bg-field-hover focus:bg-surface"
               />
             </div>
           </div>
@@ -98,8 +98,8 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
         <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:items-start">
           {/* Left: Sticky Table of Contents */}
           <aside className="lg:col-span-4 lg:sticky lg:top-28">
-            <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
-              <div className="flex items-center justify-between border-b border-border/60 pb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="rounded-2xl bg-card p-5">
+              <div className="flex items-center justify-between pb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Filter className="h-3.5 w-3.5 text-primary" />
                   <span>Articles Index</span>
@@ -118,7 +118,7 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
                       onClick={() => scrollToClause(clauseNum)}
                       className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all ${
                         isCurrent
-                          ? "bg-primary/10 text-primary font-bold border border-primary/20 shadow-xs"
+                          ? "bg-primary/10 text-primary font-bold"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
@@ -131,7 +131,7 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
                 })}
               </nav>
 
-              <div className="mt-5 border-t border-border/60 pt-4 text-[11px] text-muted-foreground leading-relaxed">
+              <div className="mt-5 pt-4 text-[11px] text-muted-foreground leading-relaxed">
                 Legally effective across all 64 districts under Bangladesh jurisdiction.
               </div>
             </div>
@@ -147,9 +147,9 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
                 <article
                   key={clauseNum}
                   id={`clause-${clauseNum}`}
-                  className="scroll-mt-28 rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-sm transition hover:shadow-md hover:border-border"
+                  className="scroll-mt-28 rounded-3xl bg-card p-6 sm:p-8 transition"
                 >
-                  <div className="flex items-center justify-between border-b border-border/60 pb-4">
+                  <div className="flex items-center justify-between pb-4">
                     <div className="flex items-center gap-2">
                       <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 font-mono text-xs font-extrabold text-primary">
                         {String(clauseNum).padStart(2, "0")}
@@ -159,7 +159,7 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
                       </span>
                     </div>
 
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-[10px] font-semibold text-success">
                       <CheckCircle2 className="h-3 w-3" />
                       <span>Legally Enforced</span>
                     </span>
@@ -175,7 +175,7 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
 
                   {/* Summary Takeaway Callout */}
                   {takeaway && (
-                    <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs">
+                    <div className="mt-5 rounded-2xl bg-primary/5 p-4 text-xs">
                       <div className="flex items-center gap-1.5 font-bold text-primary">
                         <Sparkles className="h-3.5 w-3.5" />
                         <span>Key Carrier Takeaway</span>
@@ -190,14 +190,14 @@ export function TermsReader({ sections, footerNote }: TermsReaderProps) {
             })}
 
             {filteredSections.length === 0 && (
-              <div className="rounded-3xl border border-border/70 bg-card p-12 text-center text-sm text-muted-foreground">
+              <div className="rounded-3xl bg-card p-12 text-center text-sm text-muted-foreground">
                 No articles matching &quot;{activeQuery}&quot;. Clear search to view all clauses.
               </div>
             )}
 
             {/* Footer Note */}
             {footerNote && (
-              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-xs text-foreground/90 flex items-start gap-3">
+              <div className="rounded-2xl bg-primary/5 p-5 text-xs text-foreground/90 flex items-start gap-3">
                 <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <p className="leading-relaxed">{footerNote}</p>
               </div>

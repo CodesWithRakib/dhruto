@@ -114,7 +114,7 @@ export function ServicesJourney() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             <span>OPERATIONAL INTEGRITY</span>
           </div>
@@ -127,7 +127,7 @@ export function ServicesJourney() {
         </div>
 
         {/* Interactive Kinetic Journey Canvas */}
-        <div className="srv-journey-canvas mt-16 text-white shadow-2xl">
+        <div className="srv-journey-canvas mt-16 text-white">
           {/* Stage Step Selector Buttons */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
             {JOURNEY_STAGES.map((stage, idx) => {
@@ -139,16 +139,16 @@ export function ServicesJourney() {
                   onClick={() => setActiveStepIndex(idx)}
                   className={`group relative flex flex-col items-start rounded-xl p-3.5 text-left transition-all duration-300 ${
                     isSelected
-                      ? "border border-primary/50 bg-white/10 shadow-lg shadow-primary/20"
-                      : "border border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                      ? "bg-white/10"
+                      : "bg-white/5 hover:bg-white/10"
                   }`}
                 >
                   <div className="flex w-full items-center justify-between">
                     <span
                       className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold transition-all ${
                         isSelected
-                          ? "bg-primary text-white shadow-md shadow-primary/40"
-                          : "bg-white/10 text-slate-300 group-hover:text-white"
+                          ? "bg-primary text-white"
+                          : "bg-white/10 text-inverse-muted group-hover:text-white"
                       }`}
                     >
                       {stage.stepNumber}
@@ -163,7 +163,7 @@ export function ServicesJourney() {
                   <span className="mt-3 text-xs font-semibold tracking-tight text-white line-clamp-1">
                     {stage.id.toUpperCase()}
                   </span>
-                  <span className="text-[11px] text-slate-400 line-clamp-1">
+                  <span className="text-[11px] text-muted-foreground line-clamp-1">
                     {stage.title.split("&")[0]?.trim()}
                   </span>
                 </button>
@@ -179,8 +179,8 @@ export function ServicesJourney() {
                 <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-primary">
                   {activeStage.eyebrow}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-                  <FileCheck className="h-3 w-3 text-emerald-400" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1 text-xs text-inverse-muted">
+                  <FileCheck className="h-3 w-3 text-success" />
                   <span>{activeStage.artifact}</span>
                 </span>
               </div>
@@ -189,12 +189,12 @@ export function ServicesJourney() {
                 {activeStage.title}
               </h3>
 
-              <p className="text-sm leading-relaxed text-slate-300 sm:text-base">
+              <p className="text-sm leading-relaxed text-inverse-muted sm:text-base">
                 {activeStage.description}
               </p>
 
               {/* Checkmark Bullets */}
-              <ul className="space-y-2.5 pt-1 text-sm text-slate-200">
+              <ul className="space-y-2.5 pt-1 text-sm text-inverse-foreground">
                 {activeStage.bullets.map((bullet, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="h-4 w-4 flex-none text-primary mt-0.5" />
@@ -204,11 +204,11 @@ export function ServicesJourney() {
               </ul>
 
               {/* Metric Card */}
-              <div className="inline-flex items-center gap-4 rounded-xl border border-white/15 bg-white/5 px-4 py-3 backdrop-blur-md">
+              <div className="inline-flex items-center gap-4 rounded-xl bg-white/5 px-4 py-3 backdrop-blur-md">
                 <div className="text-2xl font-extrabold text-primary">
                   {activeStage.metric}
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-muted-foreground">
                   {activeStage.metricLabel}
                 </div>
               </div>
@@ -216,7 +216,7 @@ export function ServicesJourney() {
 
             {/* Right Photography Frame */}
             <div className="lg:col-span-5">
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/15 bg-slate-900 shadow-2xl">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-inverse">
                 <Image
                   src={activeStage.image}
                   alt={activeStage.title}
@@ -229,7 +229,7 @@ export function ServicesJourney() {
                   <span className="font-semibold tracking-wide">
                     {activeStage.title}
                   </span>
-                  <span className="rounded bg-black/60 px-2 py-0.5 text-[10px] text-emerald-400 font-mono">
+                  <span className="rounded bg-black/60 px-2 py-0.5 text-[10px] text-success font-mono">
                     VERIFIED STEP
                   </span>
                 </div>

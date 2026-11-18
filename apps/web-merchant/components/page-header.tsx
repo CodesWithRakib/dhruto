@@ -28,7 +28,7 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <header className={cn("dhruto-hero-dark relative mb-6 overflow-hidden rounded-2xl p-6 shadow-soft sm:mb-8 sm:p-8", className)}>
+    <header className={cn("dhruto-hero-dark relative mb-6 overflow-hidden rounded-2xl p-6 sm:mb-8 sm:p-8", className)}>
       {/* Background illustration */}
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 opacity-60 md:block" aria-hidden="true">
         <Image
@@ -81,7 +81,7 @@ export function PageHeader({
             ) : null}
           </div>
           {actions ? (
-            <div className="flex shrink-0 flex-wrap items-center gap-2.5 [&_button[class*='border-border']]:border-white/25 [&_button[class*='border-border']]:bg-white/10 [&_button[class*='border-border']]:text-white [&_button[class*='border-border']]:hover:bg-white/20">
+            <div className="flex shrink-0 flex-wrap items-center gap-2.5">
               {actions}
             </div>
           ) : null}

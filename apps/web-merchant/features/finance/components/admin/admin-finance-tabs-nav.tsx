@@ -32,7 +32,7 @@ export function AdminFinanceTabsNav({ tabs, currentTab, onTabChange }: AdminFina
             onClick={() => onTabChange(entry.key)}
             className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-bold transition-all duration-200 ${
               isActive
-                ? "bg-primary text-primary-foreground shadow-xs"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-surface-muted hover:text-foreground"
             }`}
           >

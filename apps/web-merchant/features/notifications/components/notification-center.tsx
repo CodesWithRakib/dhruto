@@ -188,7 +188,7 @@ export function NotificationCenter() {
       {actionError && (
         <div
           role="alert"
-          className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground"
+          className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground"
         >
           {actionError}
         </div>
@@ -197,7 +197,7 @@ export function NotificationCenter() {
       {isLoading ? (
         <ListSkeleton rows={5} />
       ) : (
-      <Card className="divide-y divide-border/50 overflow-hidden">
+      <Card className="overflow-hidden">
         {isError ? (
           <ErrorState
             title={t("loadErrorTitle")}
@@ -225,7 +225,7 @@ export function NotificationCenter() {
                 }`}
                 aria-label={`${item.title} — ${isUnread ? t("unread") : t("read")}`}
               >
-                <div className="mt-0.5 h-fit rounded-lg border border-border/70 bg-surface p-1.5">
+                <div className="mt-0.5 h-fit rounded-lg bg-surface p-1.5">
                   <TypeIcon type={item.type} />
                 </div>
                 <div className="min-w-0 flex-1">

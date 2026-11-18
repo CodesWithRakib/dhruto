@@ -52,6 +52,24 @@ describe("Customer dynamic deliveries & telemetry helpers", () => {
       expect(noRider.riderPhone).toBeUndefined();
     });
 
+    // Regression: the POD showed "Today" / the last update time instead of the real handoff.
+    it("uses the server handoff time for delivered parcels and never invents one", () => {
+      const delivered = {
+        ...parcel,
+        status: ParcelStatus.DELIVERED,
+        updatedAt: "2026-11-20T10:00:00.000Z",
+      } as ParcelListItem;
+      const withTime = mapParcelListItemToDelivery({
+        ...delivered,
+        deliveredAt: "2026-11-17T08:30:00.000Z",
+      });
+      expect(withTime.deliveredAt).toContain("17 Nov 2026");
+      expect(withTime.deliveredAt).toContain("14:30"); // Asia/Dhaka, UTC+6
+
+      expect(mapParcelListItemToDelivery({ ...delivered, deliveredAt: null }).deliveredAt).toBeUndefined();
+      expect(mapParcelListItemToDelivery(parcel).deliveredAt).toBeUndefined();
+    });
+
     it("reflects a saved delivery preference in the ETA and note", () => {
       const d = mapParcelListItemToDelivery({
         ...parcel,

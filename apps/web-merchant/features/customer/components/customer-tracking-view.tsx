@@ -24,7 +24,7 @@ export function CustomerTrackingView({ initialCode }: CustomerTrackingViewProps)
             <Button
               variant="outline"
               size="sm"
-              className="w-fit gap-2 rounded-xl border-border/70 bg-card hover:bg-surface-muted shadow-2xs font-semibold text-xs"
+              className="w-fit gap-2 rounded-xl bg-card hover:bg-surface-muted font-semibold text-xs"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>{t("backToDashboard")}</span>

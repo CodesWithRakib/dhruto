@@ -22,10 +22,10 @@ export function ParcelTimelineCard({
   historyEntries,
 }: ParcelTimelineCardProps) {
   return (
-    <Card className="rounded-3xl border border-border/80 bg-surface-elevated/90 shadow-sm backdrop-blur-md">
+    <Card className="rounded-3xl bg-surface-elevated/90 backdrop-blur-md">
       <CardHeader className="pb-3 pt-6 px-6">
         <CardTitle className="flex items-center gap-2.5 text-body font-bold text-foreground">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Clock className="h-4 w-4" aria-hidden="true" />
           </div>
           <span className="text-h4 font-bold tracking-tight">{t("statusHistory")}</span>

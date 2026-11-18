@@ -38,7 +38,7 @@ export function CalculatorReceiptSlip({
   const t = useTranslations("Calculator");
 
   return (
-    <div className="prc-receipt rounded-3xl border border-border/80 bg-surface-elevated/95 p-6 shadow-xl backdrop-blur-md">
+    <div className="prc-receipt rounded-3xl bg-surface-elevated/95 p-6 backdrop-blur-md">
       {/* Thermal Receipt Barcode & Header */}
       <div className="text-center">
         <div className="tracking-[0.25em] text-[10px] text-muted-foreground select-none">
@@ -83,32 +83,32 @@ export function CalculatorReceiptSlip({
             <span className="font-mono text-foreground">৳{packagingFee}</span>
           </div>
         )}
-        <div className="prc-receipt-row text-emerald-500 font-medium">
+        <div className="prc-receipt-row text-success font-medium">
           <span>{t("fuelSurcharge")}</span>
           <span className="font-mono font-bold">{t("zeroFee")}</span>
         </div>
       </div>
 
       {/* Total Delivery Fee */}
-      <div className="mt-5 border-t border-dashed border-border/80 pt-4 flex items-center justify-between text-sm font-bold">
+      <div className="mt-5 pt-4 flex items-center justify-between text-sm font-bold">
         <span className="text-muted-foreground">{t("totalLogisticsFee")}</span>
         <span className="font-mono text-primary text-base">৳{totalDeductions}</span>
       </div>
 
       {/* Net Merchant Settlement Box */}
-      <div className="mt-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+      <div className="mt-5 rounded-2xl bg-success/10 p-4">
         <div className="flex items-center justify-between">
-          <div className="text-caption font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+          <div className="text-caption font-bold uppercase tracking-wider text-success">
             {t("netMerchantPayout")}
           </div>
-          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-300">
+          <span className="rounded-full bg-success/20 px-2 py-0.5 text-[10px] font-bold text-success">
             {t("escrowReconciled")}
           </span>
         </div>
-        <div className="mt-2 text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono">
+        <div className="mt-2 text-3xl font-extrabold tracking-tight text-success font-mono">
           ৳{netMerchantPayout.toLocaleString()}
         </div>
-        <div className="mt-1 text-[11px] text-emerald-700/80 dark:text-emerald-300/80">
+        <div className="mt-1 text-[11px] text-success-soft-foreground/80">
           {t("disbursementSchedule")}
         </div>
       </div>
@@ -117,7 +117,7 @@ export function CalculatorReceiptSlip({
       <div className="mt-6">
         <Link
           href={ctaHref}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground transition-all hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98]"
         >
           <span>{ctaLabel || t("ctaLabel")}</span>
           <ArrowRight className="h-4 w-4" />

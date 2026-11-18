@@ -84,7 +84,7 @@ export function ExportButton({
   return (
     <div className="flex items-center gap-2">
       <div
-        className="flex rounded-lg border border-input p-0.5"
+        className="flex rounded-lg p-0.5"
         role="radiogroup"
         aria-label={t("formatLabel")}
       >

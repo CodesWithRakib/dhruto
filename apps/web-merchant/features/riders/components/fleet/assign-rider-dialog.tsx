@@ -72,7 +72,7 @@ export function AssignRiderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border-0 bg-surface-elevated p-6 shadow-2xl">
+      <DialogContent className="max-w-md rounded-3xl bg-surface-elevated p-6">
         <DialogHeader>
           <DialogTitle>{t("fleet.assignRider")}</DialogTitle>
           <DialogDescription className="font-mono text-xs text-muted-foreground">{trackingCode}</DialogDescription>
@@ -87,10 +87,10 @@ export function AssignRiderDialog({
               onValueChange={setRiderId}
               required
             >
-              <SelectTrigger id="assign-rider" className="w-full h-11 rounded-2xl border-0 bg-surface-muted/60 focus:bg-background">
+              <SelectTrigger id="assign-rider" className="w-full h-11 rounded-2xl bg-surface-muted/60 focus:bg-background">
                 <SelectValue placeholder={t("fleet.selectRider")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-0 bg-surface-elevated shadow-xl">
+              <SelectContent className="rounded-2xl bg-surface-elevated">
                 {riders.map((rider) => (
                   <SelectItem key={rider.id} value={rider.id} className="rounded-xl">
                     {rider.name} ({rider.riderCode}) ·{" "}

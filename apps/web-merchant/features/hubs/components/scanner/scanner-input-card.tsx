@@ -34,12 +34,8 @@ export const ScannerInputCard = forwardRef<HTMLInputElement, ScannerInputCardPro
     const t = useTranslations("Hub");
 
     return (
-      <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md p-6 space-y-5 shadow-sm">
+      <div className="relative rounded-3xl bg-card/90 backdrop-blur-md p-6 space-y-5">
         {/* Specular top highlight */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-          aria-hidden="true"
-        />
 
         <div className="flex items-center justify-between gap-2">
           <div>
@@ -51,7 +47,7 @@ export const ScannerInputCard = forwardRef<HTMLInputElement, ScannerInputCardPro
               {t("scanner.subtitle", { hub: hubName })}
             </p>
           </div>
-          <span className="inline-flex items-center rounded-xl bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-bold text-primary">
+          <span className="inline-flex items-center rounded-xl bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
             {scanType.replace(/_/g, " ")}
           </span>
         </div>
@@ -73,7 +69,7 @@ export const ScannerInputCard = forwardRef<HTMLInputElement, ScannerInputCardPro
               value={barcode}
               onChange={(event) => setBarcode(event.target.value)}
               disabled={isLoading}
-              className="h-12 rounded-2xl border border-border/50 bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground shadow-2xs"
+              className="h-12 rounded-2xl bg-surface-muted/60 pl-11 font-mono text-base uppercase tracking-wider placeholder:normal-case placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-sm placeholder:text-muted-foreground"
               autoFocus
             />
           </div>
@@ -81,7 +77,7 @@ export const ScannerInputCard = forwardRef<HTMLInputElement, ScannerInputCardPro
             type="submit"
             size="lg"
             disabled={isLoading || !barcode.trim()}
-            className="h-12 rounded-2xl px-8 font-bold shadow-xs"
+            className="h-12 rounded-2xl px-8 font-bold"
           >
             {isLoading ? t("scanner.processing") : t("scanner.processScan")}
           </Button>
@@ -93,8 +89,8 @@ export const ScannerInputCard = forwardRef<HTMLInputElement, ScannerInputCardPro
             role="status"
             className={
               lastAttempt.result.outcome === ScanOutcome.APPLIED
-                ? "flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-success-soft p-4 text-success"
-                : "flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-warning-soft p-4 text-warning"
+                ? "flex items-start gap-3 rounded-2xl bg-success-soft p-4 text-success"
+                : "flex items-start gap-3 rounded-2xl bg-warning-soft p-4 text-warning"
             }
           >
             {lastAttempt.result.outcome === ScanOutcome.APPLIED ? (
@@ -122,7 +118,7 @@ export const ScannerInputCard = forwardRef<HTMLInputElement, ScannerInputCardPro
         {lastAttempt?.error ? (
           <div
             role="alert"
-            className="flex items-start gap-3 rounded-2xl border border-danger/30 bg-danger-soft p-4 text-danger"
+            className="flex items-start gap-3 rounded-2xl bg-danger-soft p-4 text-danger"
           >
             <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-danger" aria-hidden="true" />
             <div className="flex-1 space-y-1">

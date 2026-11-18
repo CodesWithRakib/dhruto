@@ -153,16 +153,31 @@ export function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDel
     codAmount: Number(parcel.codAmount) || 0,
     isPaid,
     itemsDescription: parcel.parcelDescription || `Shipment Package (${parcel.trackingCode})`,
-    // The API exposes the assigned rider only while delivery is active.
+    // Rider name: while active and on delivered parcels; phone only while active.
     riderName: parcel.riderName ?? undefined,
     riderPhone: parcel.riderPhone ?? undefined,
     // Only the server issues delivery OTPs; an empty value renders as "not issued yet".
     otp: parcel.deliveryOtp ?? "",
-    deliveredAt: isDelivered ? new Date(parcel.updatedAt).toLocaleDateString() : undefined,
+    deliveredAt: isDelivered ? formatHandoff(parcel.deliveredAt) : undefined,
     deliveryNote: parcel.deliveryPreference?.note ?? undefined,
     updatedAt: parcel.updatedAt,
     isOwned: true,
   };
+}
+
+/** Formats a real handoff timestamp; unknown stays `undefined` (never invented). */
+function formatHandoff(iso: string | null | undefined): string | undefined {
+  if (!iso) return undefined;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toLocaleString("en-GB", {
+    timeZone: "Asia/Dhaka",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function mapTrackingResponseToDelivery(
@@ -195,8 +210,11 @@ function mapTrackingResponseToDelivery(
     riderPhone: fallback?.riderPhone,
     otp: fallback?.otp ?? "",
     deliveredAt: isDelivered
-      ? new Date(tracking.updatedAt).toLocaleDateString()
-      : fallback?.deliveredAt,
+      ? (fallback?.deliveredAt ??
+        formatHandoff(
+          tracking.timeline.find((event) => event.status === ParcelStatus.DELIVERED)?.timestamp,
+        ))
+      : undefined,
     deliveryNote: fallback?.deliveryNote,
     updatedAt: tracking.updatedAt,
     timeline: tracking.timeline,

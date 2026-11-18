@@ -14,13 +14,13 @@ export function BookingActionsBar({
   t,
 }: BookingActionsBarProps) {
   return (
-    <div className="flex flex-col-reverse gap-3 rounded-2xl border border-border/70 bg-surface-muted/40 p-4 sm:flex-row sm:items-center sm:justify-end">
+    <div className="flex flex-col-reverse gap-3 rounded-2xl bg-surface-muted/40 p-4 sm:flex-row sm:items-center sm:justify-end">
       <Button
         type="button"
         variant="outline"
         onClick={onReset}
         disabled={isLoading}
-        className="rounded-xl border-border/80 gap-2 hover:bg-surface-elevated transition-colors"
+        className="rounded-xl gap-2 hover:bg-surface-elevated transition-colors"
       >
         <RotateCcw className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         {t("reset")}
@@ -29,7 +29,7 @@ export function BookingActionsBar({
         type="submit"
         form="parcel-booking-form"
         disabled={isLoading}
-        className="gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+        className="gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground transition-all hover:scale-[1.01] active:scale-[0.99]"
       >
         {isLoading ? (
           <>

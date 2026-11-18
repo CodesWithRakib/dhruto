@@ -45,11 +45,7 @@ export function CashDeskPendingTab({
   }, [filteredPending, pendingPage, pendingLimit]);
 
   return (
-    <div className="relative rounded-3xl border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden p-4 shadow-sm">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
-        aria-hidden="true"
-      />
+    <div className="relative rounded-3xl bg-card/90 backdrop-blur-md overflow-hidden p-4">
       {isLoading ? (
         <p role="status" className="p-8 text-center text-xs text-muted-foreground">
           {t("loading")}
@@ -84,10 +80,10 @@ export function CashDeskPendingTab({
               }}
               searchPlaceholder="Search tracking ID, rider, or recipient..."
               emptyMessage={t("cash.emptyPending")}
-              className="border-0 shadow-none rounded-none"
+              className="rounded-none"
             />
           </div>
-          <ul className="divide-y divide-border/60 md:hidden">
+          <ul className="md:hidden">
             {pagedPending.map((item) => (
               <li key={item.id} className="space-y-2 p-4 transition-colors hover:bg-muted/30">
                 <div className="flex flex-wrap items-center gap-2">
@@ -108,7 +104,7 @@ export function CashDeskPendingTab({
                   <Button
                     size="sm"
                     onClick={() => onOpenVerify(item)}
-                    className="h-8 rounded-lg text-xs font-semibold shadow-xs"
+                    className="h-8 rounded-lg text-xs font-semibold"
                   >
                     {t("verifyCash")}
                   </Button>

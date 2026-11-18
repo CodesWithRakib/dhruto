@@ -189,7 +189,7 @@ export function MessageTimeline({
           if (row.kind === "date") {
             return (
               <div key={row.key} className="sticky top-0 z-10 flex justify-center py-2">
-                <span className="rounded-full bg-surface/90 px-3 py-0.5 text-xs font-medium text-muted-foreground shadow-2xs backdrop-blur">
+                <span className="rounded-full bg-surface/90 px-3 py-0.5 text-xs font-medium text-muted-foreground backdrop-blur">
                   {formatDayLabel(row.date, locale, t)}
                 </span>
               </div>

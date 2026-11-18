@@ -75,7 +75,7 @@ export function SimpleTable({
     <DataTable
       columns={columns}
       data={rows}
-      className="p-0 border-0 shadow-none"
+      className="p-0"
     />
   );
 }

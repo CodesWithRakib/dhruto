@@ -39,7 +39,7 @@ export function ReturnsToolbar({
               onClick={() => onTabChange(tab.id)}
               className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
                 isSelected
-                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 scale-[1.02]"
+                  ? "bg-primary text-primary-foreground scale-[1.02]"
                   : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
               }`}
             >
@@ -56,7 +56,7 @@ export function ReturnsToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("searchPlaceholder")}
-          className="h-9.5 border-border/80 bg-surface-muted/60 pl-9.5 text-xs rounded-xl focus:bg-surface-elevated transition-colors"
+          className="h-9.5 bg-surface-muted/60 pl-9.5 text-xs rounded-xl focus:bg-surface-elevated transition-colors"
         />
       </div>
     </div>

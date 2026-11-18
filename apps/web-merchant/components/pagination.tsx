@@ -156,7 +156,7 @@ export function Pagination({
             >
               <SelectTrigger
                 aria-labelledby="pagination-per-page"
-                className="h-8 w-[4.75rem] px-2 py-0 text-caption rounded-lg border-border/80 bg-surface shadow-2xs"
+                className="h-8 w-[4.75rem] px-2 py-0 text-caption rounded-lg bg-surface"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -234,7 +234,7 @@ export function Pagination({
                   aria-current={isCurrent ? "page" : undefined}
                   className={cn(
                     "h-8 min-w-[2rem] px-2 text-caption rounded-lg tabular-nums font-medium",
-                    isCurrent && "shadow-xs pointer-events-none"
+                    isCurrent && "pointer-events-none"
                   )}
                 >
                   {p}

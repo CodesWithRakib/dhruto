@@ -91,11 +91,11 @@ export function TermsSLACommitments() {
   const selectedSla = SLA_STANDARDS.find((s) => s.id === activeCard) ?? SLA_STANDARDS[0]!;
 
   return (
-    <section id="sla-commitments" className="relative py-24 bg-surface scroll-mt-20 border-b border-border/80">
+    <section id="sla-commitments" className="relative py-24 bg-surface scroll-mt-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
             <Zap className="h-3.5 w-3.5" />
             <span>CONTRACTUAL PERFORMANCE STANDARDS</span>
           </div>
@@ -118,10 +118,10 @@ export function TermsSLACommitments() {
                   key={item.id}
                   type="button"
                   onClick={() => setActiveCard(item.id)}
-                  className={`w-full text-left rounded-2xl p-5 border transition-all text-left ${
+                  className={`w-full text-left rounded-2xl p-5 transition-all text-left ${
                     isSelected
-                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
-                      : "border-border/70 bg-card hover:border-border hover:bg-muted/40"
+                      ? "bg-primary/5"
+                      : "bg-card hover:bg-muted/40"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -150,8 +150,8 @@ export function TermsSLACommitments() {
           </div>
 
           {/* Right: Detailed SLA Card */}
-          <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-10 shadow-xl lg:col-span-7">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-5">
+          <div className="rounded-3xl bg-card p-6 sm:p-10 lg:col-span-7">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   {selectedSla.category}
@@ -160,7 +160,7 @@ export function TermsSLACommitments() {
                   {selectedSla.metric}
                 </h3>
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>{selectedSla.guaranteeBadge}</span>
               </span>
@@ -191,24 +191,21 @@ export function TermsSLACommitments() {
             </div>
 
             {/* Penalty & Remedy Clause */}
-            <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-xs">
-              <div className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400">
+            <div className="mt-6 rounded-2xl bg-warning/10 p-5 text-xs">
+              <div className="flex items-center gap-2 font-bold text-warning-soft-foreground">
                 <ShieldAlert className="h-4 w-4 shrink-0" />
                 <span>Default Penalty & Merchant Remedy</span>
               </div>
-              <p className="mt-2 leading-relaxed text-amber-900/90 dark:text-amber-200/90">
+              <p className="mt-2 leading-relaxed text-warning-soft-foreground/90">
                 {selectedSla.penalties}
               </p>
             </div>
 
             {/* Summary Benchmark Bar */}
-            <div className="mt-6 pt-5 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="mt-6 pt-5 flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-primary" />
-                <span>Audited Daily by Dhruto Dispatch Engine</span>
-              </span>
-              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
-                SLA Compliance Rate: 99.4%
+                <span>Targets are measured from booking to doorstep handoff.</span>
               </span>
             </div>
           </div>

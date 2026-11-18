@@ -64,7 +64,7 @@ export function PrivacyDataLifecycle() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
             <Database className="h-3.5 w-3.5" aria-hidden="true" />
             <span>DATA LIFECYCLE & RETENTION</span>
           </div>
@@ -82,7 +82,7 @@ export function PrivacyDataLifecycle() {
             return (
               <div
                 key={stage.step}
-                className="group relative flex flex-col justify-between rounded-2xl border border-border/70 bg-surface p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-lg"
+                className="group relative flex flex-col justify-between rounded-2xl bg-surface p-6 transition-all duration-300 hover:-translate-y-1"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -102,10 +102,10 @@ export function PrivacyDataLifecycle() {
                   </p>
                 </div>
 
-                <ul className="mt-6 space-y-2 border-t border-border/60 pt-4 text-xs text-foreground/90">
+                <ul className="mt-6 space-y-2 pt-4 text-xs text-foreground/90">
                   {stage.bullets.map((b, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 flex-none" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 flex-none" />
                       <span>{b}</span>
                     </li>
                   ))}

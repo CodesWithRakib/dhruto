@@ -35,7 +35,7 @@ export function SectionHeading({
   return (
     <div className={cn("max-w-2xl space-y-3", align === "center" && "mx-auto text-center")}>
       {eyebrow ? (
-        <div className={cn("inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary", align === "center" && "mx-auto")}>
+        <div className={cn("inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary", align === "center" && "mx-auto")}>
           <span>{eyebrow}</span>
         </div>
       ) : null}
@@ -65,10 +65,9 @@ export function FeatureGrid({ items }: { items: FeatureItem[] }) {
         return (
           <li
             key={item.title}
-            className="group relative overflow-hidden rounded-2xl border border-border/50 bg-surface/50 p-6 backdrop-blur-xl shadow-lg transition-all duration-300 hover:border-primary/50 hover:bg-surface/80 hover:-translate-y-1"
+            className="group relative overflow-hidden rounded-2xl bg-surface/50 p-6 backdrop-blur-xl transition-all duration-300 hover:bg-surface/80 hover:-translate-y-1"
           >
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground">
               <Icon className="h-6 w-6" aria-hidden="true" />
             </span>
             <h3 className="mt-4 text-lg font-bold text-foreground">{item.title}</h3>
@@ -139,18 +138,18 @@ export function FaqList({ items }: { items: { question: string; answer: string }
       {items.map((item) => (
         <details
           key={item.question}
-          className="group overflow-hidden rounded-2xl border border-border/50 bg-surface/50 backdrop-blur-xl transition-all duration-200 hover:border-primary/40 open:border-primary/50 open:bg-surface/75 shadow-md"
+          className="group overflow-hidden rounded-2xl bg-surface/50 backdrop-blur-xl transition-all duration-200 open:bg-surface/75"
         >
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 sm:p-6 text-base sm:text-lg font-bold text-foreground select-none">
             <span>{item.question}</span>
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-surface-muted/50 text-muted-foreground transition-transform duration-200 group-open:rotate-180 group-open:text-primary group-open:bg-primary/10 group-open:border-primary/30"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-muted/50 text-muted-foreground transition-transform duration-200 group-open:rotate-180 group-open:text-primary group-open:bg-primary/10"
             >
               <ChevronDown className="h-4 w-4" />
             </span>
           </summary>
-          <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-0 border-t border-border/30 mt-1">
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-0 mt-1">
             <p className="text-body text-muted-foreground leading-relaxed pt-3">{item.answer}</p>
           </div>
         </details>

@@ -43,8 +43,8 @@ export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
           <p className="mt-1 text-body-sm text-muted-foreground">{t("successDescription")}</p>
         </div>
 
-        <div className="rounded-md border border-border bg-surface-muted p-4 text-left">
-          <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="rounded-md bg-surface-muted p-4 text-left">
+          <div className="flex items-center justify-between gap-3 pb-3">
             <div className="min-w-0">
               <span className="block text-caption font-semibold uppercase tracking-wider text-muted-foreground">
                 {t("trackingCode")}
@@ -92,7 +92,7 @@ export function BookingSuccess({ parcel, onBookAnother }: BookingSuccessProps) {
             </div>
           </dl>
 
-          <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-body-sm">
+          <div className="mt-3 flex items-center justify-between pt-3 text-body-sm">
             <span className="text-muted-foreground">{t("deliveryCharge")}</span>
             <span className="font-bold tabular-nums text-foreground">
               {bdt(parcel.deliveryFee)}

@@ -18,7 +18,7 @@ export function PublicStatusIndicator() {
     <Link
       href="/status"
       className={cn(
-        "hidden xl:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-white/90 hover:bg-white/10 hover:border-white/20 transition-all",
+        "hidden xl:inline-flex items-center gap-2 rounded-full bg-white/5 px-2.5 py-1 text-xs font-medium text-white/90 hover:bg-white/10 transition-all",
       )}
       title={
         metrics
@@ -31,20 +31,20 @@ export function PublicStatusIndicator() {
           className={cn(
             "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
             isHealthy
-              ? "bg-emerald-400"
+              ? "bg-success"
               : isDegraded
-                ? "bg-amber-400"
-                : "bg-rose-400",
+                ? "bg-warning"
+                : "bg-danger",
           )}
         />
         <span
           className={cn(
             "relative inline-flex rounded-full h-2 w-2",
             isHealthy
-              ? "bg-emerald-500"
+              ? "bg-success"
               : isDegraded
-                ? "bg-amber-500"
-                : "bg-rose-500",
+                ? "bg-warning"
+                : "bg-danger",
           )}
         />
       </span>
