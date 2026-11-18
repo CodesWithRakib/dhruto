@@ -1628,8 +1628,28 @@ export class ParcelsService {
       deliveryOtp:
         scope?.isCustomer || scope?.isAdmin ? (parcel.deliveryOtpCode ?? undefined) : undefined,
       ...this.recipientView(parcel, scope),
+      ...this.operationalRisk(parcel, scope),
       createdAt: parcel.createdAt.toISOString(),
       updatedAt: parcel.updatedAt.toISOString(),
+    };
+  }
+
+  /**
+   * Booking-time risk snapshot persisted by the intelligence engine, for
+   * operators (merchant, hub, admin). Risk internals are never shown to
+   * customers. Unscored parcels yield nulls rather than an invented score.
+   */
+  private operationalRisk(
+    parcel: Parcel,
+    scope?: ParcelAccessScope,
+  ): Pick<ParcelSummary, "riskScore" | "riskTier" | "rtoProbability" | "addressConfidenceTier"> {
+    if (!scope || scope.isCustomer) return {};
+    const intel = this.toAddressIntelligence(parcel);
+    return {
+      riskScore: intel.riskScore,
+      riskTier: intel.riskTier,
+      rtoProbability: intel.rtoProbability,
+      addressConfidenceTier: intel.confidenceTier,
     };
   }
 
@@ -1642,13 +1662,22 @@ export class ParcelsService {
   private recipientView(
     parcel: Parcel,
     scope?: ParcelAccessScope,
-  ): Pick<ParcelSummary, "merchantName" | "riderName" | "riderPhone" | "deliveryPreference"> {
+  ): Pick<
+    ParcelSummary,
+    "merchantName" | "riderName" | "riderPhone" | "deliveredAt" | "deliveryPreference"
+  > {
     if (!scope?.isCustomer && !scope?.isAdmin) return {};
-    const rider = RIDER_CONTACT_STATUSES.has(parcel.status) ? parcel.currentRider?.user : undefined;
+    const delivered = parcel.status === ParcelStatus.DELIVERED;
+    const active = RIDER_CONTACT_STATUSES.has(parcel.status);
+    // Rider phone only while the delivery is in progress; the name also stays
+    // on the proof of delivery once the parcel is delivered.
+    const rider = active || delivered ? parcel.currentRider?.user : undefined;
     return {
       merchantName: parcel.merchant?.businessName ?? null,
       riderName: rider?.name ?? null,
-      riderPhone: rider?.phone ?? null,
+      riderPhone: active ? (rider?.phone ?? null) : null,
+      // Completion requires OTP verification, so its timestamp is the handoff time.
+      deliveredAt: delivered && parcel.otpVerifiedAt ? parcel.otpVerifiedAt.toISOString() : null,
       deliveryPreference: parcel.deliveryPreferenceUpdatedAt
         ? {
             date: parcel.preferredDeliveryDate,

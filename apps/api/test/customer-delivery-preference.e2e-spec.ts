@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { type INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
+import { DataSource } from "typeorm";
 import type { ParcelListItem } from "@dhruto/contracts";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
@@ -31,6 +32,7 @@ describe("Customer delivery preference & recipient view E2E", () => {
   let riderToken: string;
   let ownParcelId: string;
   let foreignParcelId: string;
+  let customerPhone: string;
 
   const book = async (recipientPhone: string) => {
     const res = await request(app.getHttpServer())
@@ -66,7 +68,7 @@ describe("Customer delivery preference & recipient view E2E", () => {
       .send({ emailOrPhone: CUSTOMER, password: SEEDED_PASSWORD })
       .expect(200);
     customerToken = login.body.data.tokens.accessToken as string;
-    const customerPhone = login.body.data.user.phone as string;
+    customerPhone = login.body.data.user.phone as string;
     // The endpoint allows 10 req/min per user (shared in Redis); start this
     // suite with a clean bucket so back-to-back runs stay deterministic.
     await app
@@ -196,5 +198,57 @@ describe("Customer delivery preference & recipient view E2E", () => {
       .send({ reason: "Customer changed mind" })
       .expect((r) => expect(r.status).toBeLessThan(300));
     await setPref(closedId, customerToken, { date: dhakaDay(1), slot: "Any time" }).expect(409);
+  });
+
+  it("keeps the booking risk snapshot for operators and hides it from customers", async () => {
+    const [asMerchant, asCustomer] = await Promise.all([
+      request(app.getHttpServer()).get("/api/v1/parcels?limit=50").set(bearer(merchantToken)),
+      request(app.getHttpServer()).get("/api/v1/parcels?limit=50").set(bearer(customerToken)),
+    ]);
+    const merchantRow = (asMerchant.body.data as Array<Record<string, unknown>>).find(
+      (p) => p.id === ownParcelId,
+    );
+    expect(merchantRow).toBeDefined();
+    for (const key of ["riskScore", "riskTier", "rtoProbability", "addressConfidenceTier"]) {
+      expect(merchantRow).toHaveProperty(key);
+    }
+    for (const row of asCustomer.body.data as Array<Record<string, unknown>>) {
+      expect(row).not.toHaveProperty("riskScore");
+      expect(row).not.toHaveProperty("riskTier");
+      expect(row).not.toHaveProperty("rtoProbability");
+    }
+  });
+
+  it("shows the rider's name and real handoff time on delivered parcels, never the phone", async () => {
+    const deliveredId = await book(customerPhone);
+    const adminToken = await loginToken(app, SEEDED_ACCOUNTS.admin);
+    const riders = await request(app.getHttpServer())
+      .get("/api/v1/riders")
+      .set(bearer(adminToken))
+      .expect(200);
+    const riderId = ((riders.body.data?.items ?? riders.body.data) as Array<{ id: string }>)[0]?.id;
+    await request(app.getHttpServer())
+      .post(`/api/v1/parcels/${deliveredId}/assign-rider`)
+      .set(bearer(adminToken))
+      .send({ riderId })
+      .expect((r) => expect(r.status).toBeLessThan(300));
+    // Projection test: drive the stored state to an OTP-verified delivery directly.
+    const handoff = new Date("2026-11-17T08:30:00.000Z");
+    await app
+      .get(DataSource)
+      .query(`UPDATE parcels SET status = 'DELIVERED', otp_verified_at = $2 WHERE id = $1`, [
+        deliveredId,
+        handoff,
+      ]);
+
+    const res = await request(app.getHttpServer())
+      .get("/api/v1/parcels?limit=50")
+      .set(bearer(customerToken))
+      .expect(200);
+    const row = (res.body.data as ParcelListItem[]).find((p) => p.id === deliveredId);
+    expect(row?.status).toBe("DELIVERED");
+    expect(typeof row?.riderName).toBe("string");
+    expect(row?.riderPhone).toBeNull();
+    expect(row?.deliveredAt).toBe(handoff.toISOString());
   });
 });

@@ -142,9 +142,23 @@ export const parcelSummarySchema = z.object({
   deliveryOtp: z.string().nullable().optional(),
   /** Merchant business name (recipient/admin views). */
   merchantName: z.string().nullable().optional(),
-  /** Assigned rider, exposed to the recipient only while delivery is active. */
+  /**
+   * Assigned rider (recipient/admin views). The name is shown while delivery
+   * is active and on the proof of delivery; the phone only while active.
+   */
   riderName: z.string().nullable().optional(),
   riderPhone: z.string().nullable().optional(),
+  /** Doorstep handoff time (OTP-verified completion) for delivered parcels. */
+  deliveredAt: z.string().nullable().optional(),
+  /**
+   * Booking-time risk snapshot from the intelligence engine (operator views
+   * only; never sent to customers). `null` when the parcel was not scored.
+   */
+  riskScore: z.number().nullable().optional(),
+  riskTier: z.string().nullable().optional(),
+  /** Predicted return-to-origin probability, 0-100. */
+  rtoProbability: z.number().nullable().optional(),
+  addressConfidenceTier: z.string().nullable().optional(),
   /** Recipient's delivery preference (customer "Reschedule"). */
   deliveryPreference: z
     .object({
