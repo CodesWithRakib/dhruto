@@ -220,14 +220,14 @@ export const Sidebar = React.forwardRef<
             state === "expanded" ? "w-[--sidebar-width]" : "w-[--sidebar-width-icon]",
             variant === "floating"
               ? "p-2"
-              : "bg-surface/90 backdrop-blur-xl border-r border-border/70 shadow-2xs",
+              : "bg-surface/90 backdrop-blur-xl",
             className,
           )}
           {...props}
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col bg-sidebar overflow-x-hidden group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:border group-data-[variant=floating]:border-border group-data-[variant=floating]:shadow-md"
+            className="flex h-full w-full flex-col bg-sidebar overflow-x-hidden group-data-[variant=floating]:rounded-2xl"
           >
             {children}
           </div>
@@ -412,7 +412,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: "hover:bg-surface-muted hover:text-foreground",
         outline:
-          "bg-surface shadow-[0_0_0_1px_hsl(var(--border))] hover:bg-surface-muted hover:shadow-[0_0_0_1px_hsl(var(--primary))]",
+          "bg-surface hover:bg-surface-muted",
       },
       size: {
         default: "h-10 text-sm",
@@ -420,7 +420,7 @@ const sidebarMenuButtonVariants = cva(
         lg: "h-12 text-sm group-data-[collapsible=icon]:!size-12",
       },
       isActive: {
-        true: "bg-primary-soft text-primary font-semibold border border-primary/25 shadow-2xs",
+        true: "bg-primary-soft text-primary font-semibold",
         false: "text-muted-foreground",
       },
     },

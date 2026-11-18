@@ -10,21 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover hover:shadow-md hover:shadow-primary/20 active:shadow-xs",
+          "bg-primary text-primary-foreground hover:bg-primary-hover",
         secondary:
-          "bg-secondary text-secondary-foreground border border-border/50 hover:bg-secondary/80 hover:border-border",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         soft:
-          "bg-primary-soft text-primary-soft-foreground border border-primary/20 hover:bg-primary-soft/80",
+          "bg-primary-soft text-primary-soft-foreground hover:bg-primary-soft/80",
         outline:
-          "border border-border/80 bg-surface text-foreground shadow-2xs hover:bg-surface-muted hover:border-foreground/20 hover:text-foreground",
+          "bg-surface-muted text-foreground hover:bg-surface-hover hover:text-foreground",
         ghost:
           "text-foreground hover:bg-surface-muted hover:text-foreground",
         destructive:
-          "bg-danger text-danger-foreground shadow-xs hover:bg-danger/90 hover:shadow-md hover:shadow-danger/20",
+          "bg-danger text-danger-foreground hover:bg-danger/90",
         link:
           "text-primary underline-offset-4 hover:underline",
         elevated:
-          "bg-surface text-foreground border border-border/80 shadow-sm hover:shadow-md hover:-translate-y-0.5",
+          "bg-surface text-foreground hover:bg-surface-hover",
       },
       size: {
         /* Touch friendly accessible targets */

@@ -2,114 +2,130 @@
  * Dhruto — Centralized Design Tokens
  * ------------------------------------------------------------------
  * THIS FILE IS THE SINGLE SOURCE OF TRUTH FOR COLOR AND TYPOGRAPHY.
+ * The product ships exactly ONE theme ("Dhruto Purple"); there is no theme
+ * switcher and no dark mode. Change a value here and the whole product follows.
  *
  * Rules:
- *  - Application components must NEVER hard-code colors.
- *  - Tokens are stored as raw HSL triples (no `hsl()` wrapper) so that
- *    Tailwind can compose opacity: `hsl(var(--primary) / 0.5)`.
- *  - Semantic names only (background, surface, success, danger, ...).
- *  - Changing `--primary` here updates the entire product.
+ *  - Application components must NEVER hard-code colors (no bg-emerald-500,
+ *    no text-[#fff]); use the semantic Tailwind names from the preset.
+ *  - Tokens are raw HSL triples so Tailwind can compose opacity:
+ *    `hsl(var(--primary) / 0.5)`.
+ *  - FLAT SURFACES: no borders and no box-shadows. Components are told apart
+ *    by background tone only:
+ *        background (page canvas)  →  surface (cards/panels)
+ *        surface                   →  surface-muted (nested blocks)
+ *        any background            →  field (inputs, selects, textareas)
+ *        surface-muted             →  surface-hover / surface-selected
+ *    `--border` / `--input` exist only for third-party widgets and are kept
+ *    equal to the canvas tone so any stray hairline disappears.
  *
- * Palette mirrors the Dhruto design reference:
- *    Primary #16A34A · Background #F8FAFC · Surface #FFFFFF
- *    Text #0F172A · Secondary text #64748B · Border #E2E8F0
- *    Success #16A34A · Warning #F59E0B · Error #EF4444
+ * Palette:
+ *    Primary #8D46C4 · Canvas #F4F1F8 · Surface #FFFFFF · Text #140E1C
  */
 
 :root {
   /* ------------------------------------------------------------------
-   * 1. Base surfaces (Clean, Crisp, Professional High-Contrast Canvas)
+   * 1. Base surfaces — tonal layering instead of lines/elevation
    * ------------------------------------------------------------------ */
-  --background: 210 40% 98%; /* #F8FAFC — clean soft neutral */
-  --foreground: 222 47% 11%; /* #0F172A — deep slate text */
+  --background: 270 30% 96%; /* #F4F1F8 — lavender-grey page canvas */
+  --foreground: 268 35% 8%; /* #140E1C — ink */
 
-  --surface: 0 0% 100%; /* #FFFFFF — clean white cards, panels, sheets */
-  --surface-muted: 210 40% 96%; /* #F1F5F9 — subtle section wash */
-  --surface-elevated: 0 0% 100%; /* elevated panels — pair with shadow-soft */
-  --surface-hover: 210 40% 96%; /* row / interactive hover wash */
-  --surface-selected: 141 84% 93%; /* selected rows, active pills (primary-soft) */
+  --surface: 0 0% 100%; /* #FFFFFF — cards, panels, sheets */
+  --surface-muted: 270 30% 96%; /* #F4F1F8 — inputs & nested blocks inside a surface */
+  --surface-elevated: 0 0% 100%; /* dialogs / popovers (sit on the overlay scrim) */
+  --surface-hover: 272 38% 92%; /* #EAE2F3 — hover wash */
+  --surface-selected: 282 82% 93%; /* #F2DCFB — selected rows, active pills */
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 268 35% 8%;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover: 272 45% 91%; /* #E6DBF2 — menus get their own tone (no shadow) */
+  --popover-foreground: 268 35% 8%;
+
+  /* Form fields — a tint that reads on BOTH the canvas and white surfaces. */
+  --field: 272 32% 92%; /* #ECE5F3 */
+  --field-hover: 272 32% 88%;
+
+  /* Inverse surface — deep aubergine panels (table heads, toasts, hero bands). */
+  --inverse: 268 39% 11%; /* #1C1129 */
+  --inverse-foreground: 0 0% 100%;
+  --inverse-muted: 270 12% 72%;
+  --inverse-soft: 268 35% 18%; /* chips / nested blocks on an inverse surface */
 
   /* ------------------------------------------------------------------
    * 2. Text hierarchy
    * ------------------------------------------------------------------ */
-  --text-primary: 222 47% 11%; /* #0F172A */
-  --text-secondary: 215 16% 47%; /* #64748B */
-  --text-muted: 215 20% 65%; /* #94A3B8 */
+  --text-primary: 268 35% 8%;
+  --text-secondary: 268 8% 44%; /* #6F6879 */
+  --text-muted: 268 6% 62%;
   --text-inverse: 0 0% 100%;
 
   /* ------------------------------------------------------------------
-   * 3. Brand / primary — Centralized Palette (#0F5132, #0A3F26, #1E7A57)
+   * 3. Brand / primary
    * ------------------------------------------------------------------ */
-  --primary: 152 69% 19%; /* #0F5132 — Deep Forest Green */
-  --primary-hover: 152 73% 14%; /* #0A3F26 — Forest Green Dark */
+  --primary: 273 53% 52%; /* #8D46C4 */
+  --primary-hover: 273 53% 44%;
   --primary-foreground: 0 0% 100%;
-  --primary-soft: 141 84% 93%; /* #DCFCE7 — Soft Light Green */
-  --primary-soft-foreground: 152 69% 19%;
+  --primary-soft: 282 82% 93%; /* #F2DCFB */
+  --primary-soft-foreground: 271 51% 29%; /* #4C2470 */
 
-  /* Accent / mobile primary green (#10A34A) */
-  --brand-green: 142 72% 36%; /* #10A34A */
-  --brand-green-hover: 142 72% 30%; /* #15803D */
+  /* Brand accent (lilac). Name kept for backwards compatibility. */
+  --brand-green: 281 74% 86%; /* #E6C2F7 */
+  --brand-green-hover: 273 53% 52%;
 
   /* ------------------------------------------------------------------
    * 4. Neutral / secondary
    * ------------------------------------------------------------------ */
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 270 30% 96%;
+  --secondary-foreground: 268 35% 8%;
 
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 270 30% 96%;
+  --muted-foreground: 268 8% 44%;
 
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --accent: 272 38% 92%;
+  --accent-foreground: 268 35% 8%;
 
   /* ------------------------------------------------------------------
-   * 5. Semantic states
+   * 5. Semantic states (status colors stay universal: green/amber/red/blue)
    * ------------------------------------------------------------------ */
-  --success: 142 72% 36%;
+  --success: 142 72% 32%;
   --success-foreground: 0 0% 100%;
-  --success-soft: 141 84% 93%;
-  --success-soft-foreground: 142 72% 26%;
+  --success-soft: 141 70% 92%;
+  --success-soft-foreground: 142 72% 22%;
 
-  --warning: 38 92% 50%; /* #F59E0B */
+  --warning: 32 95% 44%;
   --warning-foreground: 0 0% 100%;
-  --warning-soft: 48 96% 89%; /* #FEF3C7 */
+  --warning-soft: 48 96% 89%;
   --warning-soft-foreground: 26 83% 24%;
 
-  --danger: 0 84% 60%; /* #EF4444 */
+  --danger: 0 72% 51%;
   --danger-foreground: 0 0% 100%;
-  --danger-soft: 0 93% 94%; /* #FEE2E2 */
-  --danger-soft-foreground: 0 74% 42%;
+  --danger-soft: 0 93% 94%;
+  --danger-soft-foreground: 0 74% 36%;
 
-  --info: 217 91% 60%; /* #3B82F6 */
+  --info: 217 91% 50%;
   --info-foreground: 0 0% 100%;
-  --info-soft: 214 95% 93%; /* #DBEAFE */
-  --info-soft-foreground: 224 76% 40%;
+  --info-soft: 214 95% 93%;
+  --info-soft-foreground: 224 76% 34%;
 
   /* Backwards-compatible alias (shadcn convention). */
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
   /* ------------------------------------------------------------------
-   * 6. Lines & focus
+   * 6. Lines & focus — no visible lines; focus stays highly visible.
    * ------------------------------------------------------------------ */
-  --border: 214 32% 91%; /* #E2E8F0 */
-  --input: 214 32% 91%;
-  --ring: 152 69% 19%;
-  --overlay: 222 47% 11%;
+  --border: 270 30% 96%; /* equals canvas: hairlines vanish */
+  --input: 270 30% 96%;
+  --ring: 273 53% 52%;
+  --overlay: 268 39% 11%;
 
-  /* Soft elevation — prefer surface contrast over shadows. Only `soft` and
-   * `lift` are allowed; never introduce heavy card shadows. */
-  --shadow-soft: 0 1px 2px hsl(222 47% 11% / 0.04);
-  --shadow-lift: 0 8px 24px -12px hsl(222 47% 11% / 0.18);
+  /* Flat design: elevation tokens resolve to nothing. */
+  --shadow-soft: none;
+  --shadow-lift: none;
 
   /* Skeleton + motion — one rhythm for the whole product. */
-  --skeleton: 214 32% 91%;
+  --skeleton: 272 38% 92%;
   --duration-fast: 120ms;
   --duration-base: 200ms;
   --duration-slow: 320ms;
@@ -145,7 +161,7 @@
   /* ------------------------------------------------------------------
    * 9. Hero / section background schemas
    * ------------------------------------------------------------------
-   * Schema A — "Deep Forest" (dark, teal-green radial glow)
+   * Schema A — "Aubergine" (dark band)
    */
   --hero-dark-base: 266 34% 7%; /* #120C19 — deep dark base */
   --hero-dark-mid: 268 39% 11%; /* #1C1129 — dark violet */
@@ -167,7 +183,7 @@
   --hero-light-chip: 0 0% 100%;
 
   /* ------------------------------------------------------------------
-   * Deshbyte Signature Variables (Default Purple Theme)
+   * Legacy marketing variables (same single palette; prefer semantic tokens)
    * ------------------------------------------------------------------ */
   --dk: #1c1129;
   --dk-rgb: 28, 17, 41;
@@ -190,185 +206,6 @@
   --soft: #f3eef9;
   --text: #140e1c;
   --muted-text: #6f6879;
-  --line: #e9e4ef;
+  --line: transparent; /* flat design: legacy hairline variable is disabled */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-/* ------------------------------------------------------------------
- * 10. Theme Overrides: Purple Theme (Explicit)
- * ------------------------------------------------------------------ */
-:root[data-theme="purple"],
-:root[data-color="purple"] {
-  --primary: 273 53% 52%; /* #8D46C4 */
-  --primary-hover: 273 53% 44%;
-  --primary-foreground: 0 0% 100%;
-  --primary-soft: 282 82% 93%; /* #F2DCFB */
-  --primary-soft-foreground: 271 51% 29%; /* #4C2470 */
-  --brand-green: 281 74% 86%;
-  --brand-green-hover: 273 53% 52%;
-  --ring: 273 53% 52%;
-
-  --hero-dark-base: 266 34% 7%;
-  --hero-dark-mid: 268 39% 11%;
-  --hero-dark-glow: 270 46% 20%;
-  --hero-dark-accent: 281 74% 86%;
-  --hero-dark-gold: 273 53% 52%;
-
-  --dk: #1c1129;
-  --dk-rgb: 28, 17, 41;
-  --dk2: #120c19;
-  --dk3: #341c4c;
-  --acc: #e6c2f7;
-  --acc-rgb: 230, 194, 247;
-  --acc2: #8d46c4;
-  --acc3: #f2dcfb;
-  --ink: #8d46c4;
-  --glow-rgb: 141, 70, 196;
-  --tint: #f5ebfb;
-  --tint2: #ecd9f8;
-  --tint-ink: #4c2470;
-  --soft2: #e2d6f1;
-  --soft-bg: #faf8fc;
-  --wm: #e3d0f3;
-  --cardgrad: linear-gradient(170deg, #8d46c4, #48286a 60%, #2a1740);
-  --soft: #f3eef9;
-  --text: #140e1c;
-  --muted-text: #6f6879;
-  --line: #e9e4ef;
-}
-
-/* ------------------------------------------------------------------
- * 11. Theme Overrides: Green Theme (Emerald / Lime)
- * ------------------------------------------------------------------ */
-:root[data-theme="green"],
-:root[data-color="green"] {
-  --primary: 151 66% 36%; /* #1F9A5F */
-  --primary-hover: 157 77% 17%; /* #0A4D33 */
-  --primary-foreground: 0 0% 100%;
-  --primary-soft: 85 75% 87%; /* #E3F8C4 */
-  --primary-soft-foreground: 156 81% 23%; /* #0B6B45 */
-  --brand-green: 83 87% 69%; /* #BFF56A */
-  --brand-green-hover: 84 75% 60%;
-  --ring: 151 66% 36%;
-
-  --hero-dark-base: 158 72% 7%; /* #051F15 */
-  --hero-dark-mid: 159 71% 10%; /* #072A1D */
-  --hero-dark-glow: 158 68% 14%; /* #0B3A28 */
-  --hero-dark-accent: 83 87% 69%; /* #BFF56A */
-  --hero-dark-gold: 84 75% 60%; /* #A9E84A */
-
-  --dk: #072a1d;
-  --dk-rgb: 7, 42, 29;
-  --dk2: #051f15;
-  --dk3: #0b3a28;
-  --acc: #bff56a;
-  --acc-rgb: 191, 245, 106;
-  --acc2: #a9e84a;
-  --acc3: #cdfa85;
-  --ink: #0b6b45;
-  --glow-rgb: 180, 244, 84;
-  --tint: #eff8e2;
-  --tint2: #e3f8c4;
-  --tint-ink: #2c6b0f;
-  --soft2: #d6e4f3;
-  --soft-bg: #f7faf8;
-  --wm: #d3efc6;
-  --cardgrad: linear-gradient(170deg, #1f9a5f, #0a4d33 60%, #06301f);
-  --soft: #eef4fb;
-  --text: #0e1512;
-  --muted-text: #6b7772;
-  --line: #e6ebe8;
-}
-
-/* ------------------------------------------------------------------
- * 12. Theme Overrides: Red Theme (Ruby Crimson)
- * ------------------------------------------------------------------ */
-:root[data-theme="red"],
-:root[data-color="red"] {
-  --primary: 347 77% 50%; /* #E11D48 - Crimson Red */
-  --primary-hover: 347 77% 40%;
-  --primary-foreground: 0 0% 100%;
-  --primary-soft: 350 84% 93%;
-  --primary-soft-foreground: 347 77% 50%;
-  --brand-green: 347 77% 50%;
-  --brand-green-hover: 347 77% 40%;
-  --ring: 347 77% 50%;
-
-  --hero-dark-base: 350 45% 7%;
-  --hero-dark-mid: 345 40% 11%;
-  --hero-dark-glow: 347 55% 18%;
-  --hero-dark-accent: 347 77% 50%;
-  --hero-dark-gold: 36 45% 66%;
-
-  --dk: #230811;
-  --dk-rgb: 35, 8, 17;
-  --dk2: #16040a;
-  --dk3: #3b0e1d;
-  --acc: #fecdd3;
-  --acc-rgb: 254, 205, 211;
-  --acc2: #e11d48;
-  --acc3: #ffe4e6;
-  --ink: #be123c;
-  --glow-rgb: 225, 29, 72;
-  --tint: #fff1f2;
-  --tint2: #ffe4e6;
-  --tint-ink: #881337;
-  --soft2: #fce7f3;
-  --soft-bg: #fffbfd;
-  --wm: #fecdd3;
-  --cardgrad: linear-gradient(170deg, #e11d48, #881337 60%, #4c0519);
-  --soft: #fff1f2;
-  --text: #19090e;
-  --muted-text: #705860;
-  --line: #fae0e4;
-}
-
-/* ------------------------------------------------------------------
- * 13. Dark Mode Universal System
- * ------------------------------------------------------------------ */
-.dark,
-[data-theme="dark"] {
-  --background: 222 47% 8%; /* #0B0F17 — luxury deep canvas */
-  --foreground: 210 40% 98%; /* #F8FAFC — high-contrast crisp text */
-
-  --surface: 222 47% 11%; /* #0F172A — elegant card background */
-  --surface-muted: 217 33% 14%;
-  --surface-elevated: 217 33% 16%;
-  --surface-hover: 217 33% 18%;
-  --surface-selected: 152 60% 15%;
-
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-
-  --popover: 222 47% 12%;
-  --popover-foreground: 210 40% 98%;
-
-  --text-primary: 210 40% 98%;
-  --text-secondary: 215 20% 75%;
-  --text-muted: 215 16% 60%;
-  --text-inverse: 222 47% 11%;
-
-  --secondary: 217 33% 16%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 217 33% 16%;
-  --muted-foreground: 215 20% 65%;
-
-  --accent: 217 33% 18%;
-  --accent-foreground: 210 40% 98%;
-
-  --border: 217 33% 20%;
-  --input: 217 33% 22%;
-  --ring: 152 69% 45%;
-  --overlay: 0 0% 0%;
-
-  --shadow-soft: 0 1px 3px hsl(0 0% 0% / 0.45);
-  --shadow-lift: 0 10px 30px -10px hsl(0 0% 0% / 0.7);
-  --skeleton: 217 33% 18%;
-
-  --bg: #0b0f17;
-  --text: #f8fafc;
-  --muted-text: #94a3b8;
-  --line: #1e293b;
-}
-

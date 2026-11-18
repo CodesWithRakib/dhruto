@@ -4,12 +4,33 @@
  * Consumes the design tokens from `src/styles/tokens.css`.
  * Components should use SEMANTIC names (bg-surface, text-muted-foreground,
  * bg-success-soft) and never raw palette colors (bg-green-500, text-[#fff]).
+ *
+ * Single theme, flat design: there is no dark mode and no elevation. Every
+ * `shadow-*` utility resolves to `none` so surfaces are separated by
+ * background tone only (see tokens.css).
  */
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // No `.dark` class is ever applied (single theme); "class" keeps any stray
+  // `dark:` utility inert instead of following the OS preference.
   darkMode: ["class"],
   theme: {
+    // Replaces (not extends) Tailwind's shadow scale: flat UI, no box-shadows.
+    boxShadow: {
+      DEFAULT: "none",
+      "2xs": "none",
+      xs: "none",
+      sm: "none",
+      md: "none",
+      lg: "none",
+      xl: "none",
+      "2xl": "none",
+      inner: "none",
+      soft: "none",
+      lift: "none",
+      none: "none",
+    },
     container: {
       center: true,
       padding: {
@@ -32,6 +53,18 @@ module.exports = {
           elevated: "hsl(var(--surface-elevated) / <alpha-value>)",
           hover: "hsl(var(--surface-hover) / <alpha-value>)",
           selected: "hsl(var(--surface-selected) / <alpha-value>)",
+        },
+
+        field: {
+          DEFAULT: "hsl(var(--field) / <alpha-value>)",
+          hover: "hsl(var(--field-hover) / <alpha-value>)",
+        },
+
+        inverse: {
+          DEFAULT: "hsl(var(--inverse) / <alpha-value>)",
+          foreground: "hsl(var(--inverse-foreground) / <alpha-value>)",
+          muted: "hsl(var(--inverse-muted) / <alpha-value>)",
+          soft: "hsl(var(--inverse-soft) / <alpha-value>)",
         },
 
         border: "hsl(var(--border) / <alpha-value>)",
@@ -135,11 +168,6 @@ module.exports = {
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
         DEFAULT: "var(--radius-md)",
-      },
-
-      boxShadow: {
-        soft: "var(--shadow-soft)",
-        lift: "var(--shadow-lift)",
       },
 
       transitionTimingFunction: {

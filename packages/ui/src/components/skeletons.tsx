@@ -42,11 +42,11 @@ export function TableSkeleton({
 }) {
   return (
     <div
-      className={cn("rounded-2xl border border-border/80 bg-surface shadow-2xs overflow-hidden", className)}
+      className={cn("rounded-2xl bg-surface overflow-hidden", className)}
       aria-hidden="true"
     >
       {showToolbar ? (
-        <div className="flex flex-col gap-3 border-b border-border/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <Skeleton className="h-10 w-full sm:w-80 rounded-xl" />
           <div className="flex gap-2">
             <Skeleton className="h-10 w-24 rounded-xl" />
@@ -54,7 +54,7 @@ export function TableSkeleton({
           </div>
         </div>
       ) : null}
-      <div className="space-y-0 divide-y divide-border/60 px-4 py-2 sm:px-5">
+      <div className="space-y-0 px-4 py-2 sm:px-5">
         {Array.from({ length: rows }).map((_, row) => (
           <div key={row} className="flex items-center gap-4 py-3.5">
             {Array.from({ length: columns }).map((_, col) => (
@@ -67,7 +67,7 @@ export function TableSkeleton({
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between border-t border-border/60 px-4 py-3 sm:px-5">
+      <div className="flex items-center justify-between px-4 py-3 sm:px-5">
         <Skeleton className="h-4 w-40 rounded-md" />
         <div className="flex gap-2">
           <Skeleton className="h-8 w-20 rounded-xl" />
@@ -80,7 +80,7 @@ export function TableSkeleton({
 
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("rounded-2xl border border-border/80 bg-card p-5 shadow-2xs", className)} aria-hidden="true">
+    <div className={cn("rounded-2xl bg-card p-5", className)} aria-hidden="true">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 space-y-2">
           <Skeleton className="h-3 w-24 rounded-md" />
@@ -124,7 +124,7 @@ export function ListSkeleton({
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
-          className="flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-3.5 sm:p-4 shadow-2xs"
+          className="flex items-center gap-3 rounded-2xl bg-card p-3.5 sm:p-4"
         >
           <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
           <div className="min-w-0 flex-1 space-y-2">
@@ -164,7 +164,7 @@ export function FormSkeleton({
 export function DetailsSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn("space-y-4", className)} aria-hidden="true">
-      <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8 shadow-2xs">
+      <div className="rounded-2xl bg-card p-6 sm:p-8">
         <div className="flex flex-col gap-4">
           <Skeleton className="h-4 w-40 rounded-md" />
           <Skeleton className="h-8 w-2/3 rounded-lg" />
@@ -172,14 +172,14 @@ export function DetailsSkeleton({ className }: { className?: string }) {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs">
+        <div className="rounded-2xl bg-card p-5">
           <SkeletonText lines={4} />
         </div>
-        <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs">
+        <div className="rounded-2xl bg-card p-5">
           <SkeletonText lines={4} />
         </div>
       </div>
-      <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs">
+      <div className="rounded-2xl bg-card p-5">
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="flex items-center gap-3">
@@ -198,7 +198,7 @@ export function DetailsSkeleton({ className }: { className?: string }) {
 
 export function ChartSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("rounded-2xl border border-border/80 bg-card p-5 shadow-2xs", className)} aria-hidden="true">
+    <div className={cn("rounded-2xl bg-card p-5", className)} aria-hidden="true">
       <div className="flex items-center justify-between pb-4">
         <Skeleton className="h-5 w-40 rounded-md" />
         <Skeleton className="h-8 w-28 rounded-xl" />

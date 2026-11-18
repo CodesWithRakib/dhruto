@@ -1,8 +1,9 @@
 /**
- * Dhruto — Premium Sonner Toast Design System
+ * Dhruto — Sonner Toast Design System
  * ------------------------------------------------------------------
- * Center-positioned, clean flat surface (no gradients, no borders),
- * refined soft elevation shadow, and precise right-aligned close button.
+ * Single theme, flat design: no borders, no shadows. Toasts float above
+ * page content, so they use the INVERSE (deep aubergine) surface to stand
+ * apart by background tone alone. All colors come from tokens.css.
  */
 
 /* ------------------------------------------------------------------
@@ -48,7 +49,7 @@
 }
 
 /* ------------------------------------------------------------------
- * 2. Toast Card Structure (No Borders, No Gradients, Pure Clean Shadow)
+ * 2. Toast Card Structure — inverse surface, no border, no shadow
  * ------------------------------------------------------------------ */
 [data-sonner-toast],
 .dhruto-toast {
@@ -64,23 +65,15 @@
   overflow: hidden !important;
   user-select: none;
   cursor: default;
-
-  /* Clean solid surface - no borders, no gradient */
   border: none !important;
   outline: none !important;
-  background: #ffffff !important;
+  box-shadow: none !important;
+  background: hsl(var(--inverse)) !important;
   background-image: none !important;
-  color: #0f172a !important;
-
-  /* Soft, clean, multi-layered elevation shadow */
-  box-shadow:
-    0 10px 28px -4px rgba(15, 23, 42, 0.12),
-    0 4px 12px -2px rgba(15, 23, 42, 0.06) !important;
-
+  color: hsl(var(--inverse-foreground)) !important;
   transition:
     transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.2s ease !important;
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Remove any pseudo-element bars or accents completely */
@@ -90,27 +83,6 @@
 .dhruto-toast::after {
   content: none !important;
   display: none !important;
-}
-
-/* Hover depth */
-[data-sonner-toast]:hover,
-.dhruto-toast:hover {
-  box-shadow:
-    0 14px 34px -4px rgba(15, 23, 42, 0.16),
-    0 6px 14px -2px rgba(15, 23, 42, 0.08) !important;
-}
-
-/* Dark theme / Themed surfaces adaptation */
-:root[data-theme="dark"] [data-sonner-toast],
-.dark [data-sonner-toast],
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] {
-  background: #181124 !important;
-  background-image: none !important;
-  border: none !important;
-  color: #f8fafc !important;
-  box-shadow:
-    0 14px 36px -4px rgba(0, 0, 0, 0.55),
-    0 6px 16px -2px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* ------------------------------------------------------------------
@@ -131,14 +103,8 @@
   font-size: 0.8875rem !important;
   font-weight: 600 !important;
   line-height: 1.35 !important;
-  color: #0f172a !important;
+  color: hsl(var(--inverse-foreground)) !important;
   letter-spacing: -0.012em !important;
-}
-
-:root[data-theme="dark"] [data-sonner-toast] [data-title],
-.dark [data-sonner-toast] [data-title],
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-title] {
-  color: #ffffff !important;
 }
 
 [data-sonner-toast] [data-description],
@@ -146,18 +112,12 @@
   font-size: 0.8125rem !important;
   font-weight: 450 !important;
   line-height: 1.4 !important;
-  color: #64748b !important;
+  color: hsl(var(--inverse-muted)) !important;
   word-break: break-word !important;
 }
 
-:root[data-theme="dark"] [data-sonner-toast] [data-description],
-.dark [data-sonner-toast] [data-description],
-[data-sonner-toaster][data-theme="dark"] [data-sonner-toast] [data-description] {
-  color: #94a3b8 !important;
-}
-
 /* ------------------------------------------------------------------
- * 4. Status Icons (Clean Flat Shapes, No Borders, No Gradients)
+ * 4. Status Icons — tinted discs on the inverse surface
  * ------------------------------------------------------------------ */
 [data-sonner-toast] [data-icon] {
   display: flex !important;
@@ -178,56 +138,26 @@
   stroke-width: 2.2 !important;
 }
 
-/* Success (Clean Flat Emerald) */
 [data-sonner-toast][data-type="success"] [data-icon] {
-  background: #ecfdf5 !important;
-  color: #059669 !important;
+  background: hsl(var(--success-soft)) !important;
+  color: hsl(var(--success)) !important;
 }
-:root[data-theme="dark"] [data-sonner-toast][data-type="success"] [data-icon] {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #34d399 !important;
-}
-
-/* Error / Destructive (Clean Flat Crimson) */
 [data-sonner-toast][data-type="error"] [data-icon] {
-  background: #fef2f2 !important;
-  color: #e11d48 !important;
+  background: hsl(var(--danger-soft)) !important;
+  color: hsl(var(--danger)) !important;
 }
-:root[data-theme="dark"] [data-sonner-toast][data-type="error"] [data-icon] {
-  background: rgba(244, 63, 94, 0.2) !important;
-  color: #fb7185 !important;
-}
-
-/* Warning (Clean Flat Amber) */
 [data-sonner-toast][data-type="warning"] [data-icon] {
-  background: #fffbeb !important;
-  color: #d97706 !important;
+  background: hsl(var(--warning-soft)) !important;
+  color: hsl(var(--warning)) !important;
 }
-:root[data-theme="dark"] [data-sonner-toast][data-type="warning"] [data-icon] {
-  background: rgba(245, 158, 11, 0.2) !important;
-  color: #fbbf24 !important;
-}
-
-/* Info (Clean Flat Violet/Brand) */
 [data-sonner-toast][data-type="info"] [data-icon] {
-  background: #f5f3ff !important;
-  color: #7c3aed !important;
+  background: hsl(var(--primary-soft)) !important;
+  color: hsl(var(--primary)) !important;
 }
-:root[data-theme="dark"] [data-sonner-toast][data-type="info"] [data-icon] {
-  background: rgba(124, 58, 237, 0.2) !important;
-  color: #a78bfa !important;
-}
-
-/* Loading */
-[data-sonner-toast][data-type="loading"] [data-icon] {
-  background: #f1f5f9 !important;
-  color: #3b82f6 !important;
-}
-
-/* Default / Neutral */
+[data-sonner-toast][data-type="loading"] [data-icon],
 [data-sonner-toast][data-type="default"] [data-icon] {
-  background: #f1f5f9 !important;
-  color: #475569 !important;
+  background: hsl(var(--inverse-soft)) !important;
+  color: hsl(var(--inverse-foreground)) !important;
 }
 
 /* ------------------------------------------------------------------
@@ -250,8 +180,8 @@
   height: 22px !important;
   border-radius: 50% !important;
   border: none !important;
-  background: #f1f5f9 !important;
-  color: #64748b !important;
+  background: hsl(var(--inverse-soft)) !important;
+  color: hsl(var(--inverse-muted)) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -272,8 +202,8 @@
 
 [data-sonner-toast] [data-close-button]:hover,
 .dhruto-toast-close:hover {
-  background: #e2e8f0 !important;
-  color: #0f172a !important;
+  background: hsl(var(--inverse-foreground) / 0.18) !important;
+  color: hsl(var(--inverse-foreground)) !important;
   opacity: 1 !important;
   transform: translateY(-50%) scale(1.08) !important;
 }
@@ -281,18 +211,6 @@
 [data-sonner-toast] [data-close-button]:active,
 .dhruto-toast-close:active {
   transform: translateY(-50%) scale(0.95) !important;
-}
-
-:root[data-theme="dark"] [data-sonner-toast] [data-close-button],
-.dark [data-sonner-toast] [data-close-button] {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #94a3b8 !important;
-}
-
-:root[data-theme="dark"] [data-sonner-toast] [data-close-button]:hover,
-.dark [data-sonner-toast] [data-close-button]:hover {
-  background: rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
 }
 
 /* ------------------------------------------------------------------
@@ -324,14 +242,14 @@
   font-size: 0.8125rem !important;
   font-weight: 500 !important;
   border-radius: 8px !important;
-  background: #f1f5f9 !important;
-  color: #475569 !important;
+  background: hsl(var(--inverse-soft)) !important;
+  color: hsl(var(--inverse-muted)) !important;
   border: none !important;
   cursor: pointer !important;
   transition: all 0.18s ease !important;
 }
 [data-sonner-toast] [data-cancel]:hover,
 .dhruto-toast-cancel:hover {
-  background: #e2e8f0 !important;
-  color: #0f172a !important;
+  background: hsl(var(--inverse-foreground) / 0.18) !important;
+  color: hsl(var(--inverse-foreground)) !important;
 }

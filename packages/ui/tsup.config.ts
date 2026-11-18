@@ -5,7 +5,7 @@ export default defineConfig({
   format: ["cjs", "esm"],
   dts: true,
   clean: true,
-  external: ["react", "react-dom", "next/navigation", "next-themes", "lucide-react"],
+  external: ["react", "react-dom", "next/navigation", "lucide-react"],
   esbuildOptions(options) {
     options.banner = {
       js: '"use client";',

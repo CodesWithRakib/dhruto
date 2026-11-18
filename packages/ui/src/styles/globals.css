@@ -9,7 +9,6 @@
   *,
   ::before,
   ::after {
-    border-color: hsl(var(--border));
   }
 
   html,
@@ -152,7 +151,6 @@
   .dhruto-hero-chip {
     @apply rounded-full px-3 py-1 text-xs font-semibold;
     background: hsl(var(--hero-chip));
-    border: 1px solid hsl(var(--hero-accent) / 0.3);
     color: hsl(var(--hero-muted));
   }
   .dhruto-hero-badge {
@@ -180,8 +178,19 @@
 
   /* Table polish shared by every DataTable instance — deep header background */
   .dhruto-table-header {
-    background: #0f172a;
-    color: #f8fafc;
+    background: hsl(var(--inverse));
+    color: hsl(var(--inverse-foreground));
+  }
+
+  /* Floating menus (dropdown, select, language picker). With no shadows the
+   * menu uses its own tone (--popover) and items highlight to white, so the
+   * nested hover/focus tokens are remapped inside the menu only. */
+  .dhruto-popover {
+    --accent: 0 0% 100%;
+    --accent-foreground: var(--foreground);
+    --surface-muted: 0 0% 100%;
+    --surface-hover: 0 0% 100%;
+    --primary-soft: 0 0% 100%;
   }
 
   /* Skeleton shimmer — single tone driven by --skeleton. */
@@ -314,11 +323,9 @@ header[class*="sticky"] {
   height: 6px;
   border-radius: 50%;
   background: currentColor;
-  box-shadow: 0 0 8px currentColor;
 }
 .dk .pill {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(var(--acc-rgb), 0.28);
   color: var(--acc);
 }
 
@@ -335,13 +342,11 @@ header[class*="sticky"] {
   color: var(--dk);
   font-weight: 600;
   font-size: 14.5px;
-  border: 1px solid transparent;
   cursor: pointer;
   transition: transform 0.25s var(--ease), background-color 0.2s, box-shadow 0.25s var(--ease);
 }
 .btn-bl:hover {
   background: var(--acc3);
-  box-shadow: 0 10px 28px rgba(var(--acc-rgb), 0.35);
   transform: translateY(-2px);
 }
 .btn-bl:active {
@@ -360,12 +365,10 @@ header[class*="sticky"] {
   color: var(--dk);
   font-weight: 600;
   font-size: 14.5px;
-  border: 1px solid transparent;
   cursor: pointer;
   transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 .btn-bw:hover {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
   transform: translateY(-2px);
 }
 .btn-bw:active {
@@ -380,7 +383,6 @@ header[class*="sticky"] {
   white-space: nowrap;
   padding: 11px 20px;
   border-radius: 12px;
-  border: 1px solid var(--acc);
   color: #fff;
   font-weight: 600;
   font-size: 14px;
@@ -405,13 +407,11 @@ header[class*="sticky"] {
   color: #fff;
   font-weight: 600;
   font-size: 14.5px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
   transition: transform 0.25s var(--ease), background-color 0.2s, box-shadow 0.25s var(--ease);
 }
 .btn-bd:hover {
   background: var(--dk3);
-  box-shadow: 0 10px 28px rgba(var(--dk-rgb), 0.35);
   transform: translateY(-2px);
 }
 
@@ -474,34 +474,6 @@ button:hover .ar {
 .ann button:hover {
   background: rgba(var(--dk-rgb), 0.12);
 }
-/* Color theme switch group */
-.sw {
-  display: inline-flex;
-  gap: 6px;
-  padding: 4px;
-  border-radius: 99px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(8px);
-}
-.sw button {
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--a) 50%, var(--b) 50%);
-  box-shadow: 0 0 0 0 #fff;
-  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
-}
-.sw button:hover {
-  transform: scale(1.15);
-}
-.sw button[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px var(--dk), 0 0 0 3.5px #fff;
-}
-
 /* Watermark brand text in footer */
 .fword {
   margin: 56px 0 -0.19em;

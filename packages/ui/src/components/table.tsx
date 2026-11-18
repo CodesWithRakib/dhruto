@@ -3,7 +3,7 @@ import { cn } from "../lib/utils.js";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-x-auto rounded-2xl bg-surface/90 dark:bg-card/70">
+    <div className="relative w-full overflow-x-auto rounded-2xl bg-surface/90">
       <table ref={ref} className={cn("w-full caption-bottom text-sm border-collapse", className)} {...props} />
     </div>
   ),
@@ -17,7 +17,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 [&_th]:text-slate-100 [&_th]:font-bold [&_th]:uppercase [&_th]:text-[11px] [&_th]:tracking-wider border-0 shadow-2xs",
+      "bg-inverse text-inverse-foreground [&_th]:text-inverse-foreground [&_th]:font-bold [&_th]:uppercase [&_th]:text-[11px] [&_th]:tracking-wider",
       className,
     )}
     {...props}
@@ -29,7 +29,11 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn("[&_tr:last-child]:border-0 divide-y divide-border/40", className)} {...props} />
+  <tbody
+    ref={ref}
+    className={cn("[&>tr:nth-child(even)]:bg-surface-muted/60", className)}
+    {...props}
+  />
 ));
 TableBody.displayName = "TableBody";
 
@@ -40,7 +44,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t border-border/50 bg-surface-muted/60 font-medium [&>tr]:last:border-b-0",
+      "bg-surface-muted/60 font-medium",
       className,
     )}
     {...props}
@@ -53,7 +57,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
     <tr
       ref={ref}
       className={cn(
-        "border-b border-border/40 transition-colors duration-fast ease-out hover:bg-surface-muted/70 data-[state=selected]:bg-primary-soft/40",
+        "transition-colors duration-fast ease-out hover:!bg-surface-hover data-[state=selected]:bg-surface-selected",
         className,
       )}
       {...props}
@@ -69,7 +73,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle text-xs font-bold uppercase tracking-wider text-slate-100 dark:text-slate-100 [&:has([role=checkbox])]:pr-0 whitespace-nowrap",
+      "h-12 px-4 text-left align-middle text-xs font-bold uppercase tracking-wider text-inverse-foreground [&:has([role=checkbox])]:pr-0 whitespace-nowrap",
       className,
     )}
     {...props}

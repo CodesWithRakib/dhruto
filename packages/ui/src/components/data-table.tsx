@@ -138,7 +138,7 @@ export function DataTable<TData, TValue>({
     >
       {/* Top Filters & Actions Toolbar */}
       {hasToolbar && (
-        <div className="flex flex-col gap-3 border-b border-surface-muted/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex w-full flex-1 flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center">
             {onSearchChange && (
               <div className="relative w-full sm:w-80">
@@ -184,13 +184,13 @@ export function DataTable<TData, TValue>({
       <div className="overflow-hidden bg-surface sm:rounded-b-none">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-900 text-slate-100 dark:bg-slate-950 dark:text-slate-100 border-0">
+            <TableHeader className="bg-inverse text-inverse-foreground">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b-0 hover:bg-transparent">
+                <TableRow key={headerGroup.id} className="hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="whitespace-nowrap px-4 py-3 text-caption font-bold uppercase tracking-wider text-slate-100 dark:text-slate-100"
+                      className="whitespace-nowrap px-4 py-3 text-caption font-bold uppercase tracking-wider text-inverse-foreground"
                     >
                       {header.isPlaceholder
                         ? null
@@ -200,7 +200,7 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody className="divide-y divide-border/60">
+            <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={`skeleton-${index}`} className="hover:bg-transparent">
@@ -234,7 +234,7 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="dhruto-animate-in hover:bg-surface-muted/50">
+                  <TableRow key={row.id} className="dhruto-animate-in">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="whitespace-nowrap px-4 py-3 text-table text-foreground">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -264,7 +264,7 @@ export function DataTable<TData, TValue>({
 
       {/* Pagination Bar */}
       {!hidePagination && effectiveTotalItems > 0 && (
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:px-5">
+        <div className="flex flex-col items-center justify-between gap-3 px-4 py-3 sm:flex-row sm:px-5">
           <div className="flex flex-wrap items-center justify-center gap-2 text-caption text-muted-foreground">
             <span aria-live="polite" className="tabular-nums">
               {fill(labels?.showingRange ?? "Showing {from} to {to} of {total} items", {
@@ -280,7 +280,7 @@ export function DataTable<TData, TValue>({
                   value={String(itemsPerPage)}
                   onValueChange={(val) => onLimitChange(Number(val))}
                 >
-                  <SelectTrigger className="h-8 w-[72px] rounded-lg border-input/80 bg-surface px-2.5 text-xs focus:ring-4 focus:ring-primary/15">
+                  <SelectTrigger className="h-8 w-[72px] rounded-lg px-2.5 text-xs focus:ring-4 focus:ring-primary/15">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

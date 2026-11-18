@@ -82,7 +82,7 @@ export function LanguageSwitcher({
           variant={variant}
           size={size}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-xl px-2.5 font-medium border border-border/60 hover:bg-surface-muted transition-all duration-200",
+            "inline-flex items-center gap-1.5 rounded-xl px-2.5 font-medium hover:bg-surface-muted transition-all duration-200",
             className,
           )}
           aria-label={`${label}. Current language: ${activeLang.label}`}
@@ -95,7 +95,7 @@ export function LanguageSwitcher({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-36 p-1.5 rounded-2xl border border-border/80 bg-popover/95 shadow-xl backdrop-blur-md"
+        className="w-36 p-1.5 rounded-2xl"
       >
         {LANGUAGES.map((lang) => {
           const isSelected = lang.code === currentLocale;
