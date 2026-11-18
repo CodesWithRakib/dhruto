@@ -53,7 +53,7 @@ const ROLES = {
     email: "admin@dhruto.com",
     group: "(admin)",
     home: "/en/admin/dashboard",
-    canAlsoOpen: ["MERCHANT", "HUB_MANAGER", "RIDER"],
+    canAlsoOpen: ["HUB_MANAGER", "RIDER"], // merchant pages redirect admins (config/roles.ts)
   },
 };
 
