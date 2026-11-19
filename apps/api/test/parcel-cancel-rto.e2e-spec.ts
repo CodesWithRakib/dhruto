@@ -6,6 +6,7 @@ import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { WebhookEvent } from "@dhruto/contracts";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Phase 3 Slice C (T-CANCEL-01, T-RTO-01): cancel + RTO initiation.
@@ -21,7 +22,6 @@ describe("Parcel cancel & RTO initiation (Phase 3 E2E)", () => {
   let riderToken: string;
   let riderId: string;
 
-  const unique = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -58,7 +58,7 @@ describe("Parcel cancel & RTO initiation (Phase 3 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey(`cancel-rto-${tag}`))
       .send({
-        recipientName: `Cancel RTO ${tag} ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

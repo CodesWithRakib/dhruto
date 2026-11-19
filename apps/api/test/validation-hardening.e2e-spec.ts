@@ -6,6 +6,7 @@ import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { HubScanType } from "@dhruto/contracts";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Phase 3 Slice B (T-VAL-01, T-EXC-01): input-validation hardening.
@@ -20,7 +21,6 @@ describe("Validation hardening (Phase 3 E2E)", () => {
   let ctgHubId: string;
   let bagId: string;
 
-  const unique = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -70,7 +70,7 @@ describe("Validation hardening (Phase 3 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("harden-assign"))
       .send({
-        recipientName: `Harden Assign ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",
@@ -111,7 +111,7 @@ describe("Validation hardening (Phase 3 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("harden-exc"))
       .send({
-        recipientName: `Harden Exc ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

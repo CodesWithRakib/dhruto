@@ -12,6 +12,11 @@ export const AVAILABLE_EVENTS = [
     desc: "Triggered whenever a merchant books a new parcel",
   },
   {
+    event: WebhookEvent.PARCEL_PICKED_UP,
+    label: "parcel.picked_up",
+    desc: "Dispatched when our rider collects the parcel from your pickup address",
+  },
+  {
     event: WebhookEvent.PARCEL_ASSIGNED,
     label: "parcel.assigned",
     desc: "Dispatched when a rider is assigned to the parcel",

@@ -1,5 +1,6 @@
 import { randomInt } from "node:crypto";
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -22,6 +23,7 @@ import {
   type PublicTrackingResponse,
   type ShippingLabelResponse,
   type TimelineEvent,
+  isDeliveredStatus,
 } from "@dhruto/contracts";
 import {
   Hub,
@@ -42,7 +44,12 @@ import {
 } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
-import type { BulkImportDto, BulkImportResult, BulkRowResult } from "./dto/bulk-import.dto.js";
+import {
+  validateBulkRow,
+  type BulkImportDto,
+  type BulkImportResult,
+  type BulkRowResult,
+} from "./dto/bulk-import.dto.js";
 import { UpdateParcelDto } from "./dto/update-parcel.dto.js";
 import {
   DomainEventPublisher,
@@ -126,6 +133,12 @@ const STATUS_DESCRIPTIONS: Record<string, { en: string; bn: string }> = {
 
 /** Tenant boundary for every parcel read/write. */
 /** Statuses in which the recipient may see the assigned rider's name and phone. */
+/** Internal cash-settlement steps after delivery (hidden from public tracking). */
+const CASH_SETTLEMENT_STATUSES: ReadonlySet<ParcelStatus> = new Set([
+  ParcelStatus.CASH_PENDING,
+  ParcelStatus.CASH_VERIFIED,
+]);
+
 const RIDER_CONTACT_STATUSES: ReadonlySet<ParcelStatus> = new Set([
   ParcelStatus.ASSIGNED_TO_RIDER,
   ParcelStatus.OUT_FOR_DELIVERY,
@@ -797,25 +810,31 @@ export class ParcelsService {
         order: { createdAt: "ASC" },
       });
 
-      const timeline: TimelineEvent[] = history.map((entry) => {
-        const copy = STATUS_DESCRIPTIONS[entry.toStatus] ?? {
-          en: entry.toStatus,
-          bn: entry.toStatus,
-        };
-        return {
-          status: entry.toStatus,
-          labelEn: copy.en,
-          labelBn: copy.bn,
-          timestamp: entry.createdAt.toISOString(),
-          note: entry.description ?? undefined,
-        };
-      });
+      // Public (unauthenticated) view: real status changes only. Edits,
+      // preference updates and OTP checks (same from/to status) and internal
+      // cash settlement are dropped, and free-text notes are never exposed —
+      // they can carry COD amounts, rider ids and failure remarks.
+      const timeline: TimelineEvent[] = history
+        .filter((entry) => entry.fromStatus !== entry.toStatus && !CASH_SETTLEMENT_STATUSES.has(entry.toStatus))
+        .map((entry) => {
+          const copy = STATUS_DESCRIPTIONS[entry.toStatus] ?? {
+            en: entry.toStatus,
+            bn: entry.toStatus,
+          };
+          return {
+            status: entry.toStatus,
+            labelEn: copy.en,
+            labelBn: copy.bn,
+            timestamp: entry.createdAt.toISOString(),
+          };
+        });
 
       const legacy = this.readLegacyAddress(parcel);
 
       return {
         trackingCode: parcel.trackingCode,
-        status: parcel.status,
+        // Cash settlement after the handoff is internal: the public sees "delivered".
+        status: isDeliveredStatus(parcel.status) ? ParcelStatus.DELIVERED : parcel.status,
         recipientDistrict: parcel.district ?? legacy.district,
         recipientThana: parcel.thana ?? legacy.thana,
         recipientPhoneMasked: this.maskPhone(parcel.recipientPhone),
@@ -907,7 +926,7 @@ export class ParcelsService {
       });
     }
 
-    const rider = await this.riderRepo.findOne({ where: { id: riderId } });
+    const rider = await this.riderRepo.findOne({ where: { id: riderId }, relations: ["user"] });
     if (!rider) {
       throw new NotFoundException({
         message: "Rider not found",
@@ -960,7 +979,25 @@ export class ParcelsService {
         });
       }
 
-      if (!reassigned) {
+      let localDelivery = false;
+      if (!reassigned && fromStatus === ParcelStatus.ORIGIN_HUB_RECEIVED) {
+        // Same-city parcel: the origin hub already serves the destination
+        // district, so there is no line-haul leg to bag and manifest.
+        const hub = await manager.findOne(Hub, {
+          where: { id: parcel.currentHubId },
+          select: ["id", "district"],
+        });
+        localDelivery = ParcelLifecycleService.isLocalDelivery(hub?.district, parcel.district);
+        if (!localDelivery) {
+          throw new BadRequestException({
+            message:
+              "This parcel is for another district. Bag it and dispatch it to the destination hub before assigning a delivery rider.",
+            error: ApiErrorCode.INVALID_STATUS_TRANSITION,
+          });
+        }
+      }
+
+      if (!reassigned && !localDelivery) {
         // Fresh assignment follows the delivery matrix (destination-hub
         // receipt or the documented pre-pickup shortcut).
         this.lifecycle.assertTransition(fromStatus, ParcelStatus.ASSIGNED_TO_RIDER);
@@ -998,9 +1035,13 @@ export class ParcelsService {
         eventType: reassigned ? "RIDER_REASSIGNED" : "STATUS_CHANGED",
         actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
         actorRole: DELIVERY_ACTOR_ROLE,
+        // Shown on merchant/customer timelines: use the rider's name and code;
+        // raw ids stay in `metadata` for audit.
         description: reassigned
-          ? `Reassigned from rider ${previousRiderId} to rider ${rider.id}`
-          : `Assigned to rider ${rider.id}`,
+          ? `Reassigned to ${riderLabel(rider)}`
+          : localDelivery
+            ? `Local delivery: assigned to ${riderLabel(rider)} at the origin hub`
+            : `Assigned to ${riderLabel(rider)}`,
         metadata: { riderId: rider.id, previousRiderId: previousRiderId ?? null },
       });
       await manager.save(history);
@@ -1151,12 +1192,38 @@ export class ParcelsService {
         });
       }
 
-      if (dto.recipientName !== undefined) parcel.recipientName = dto.recipientName;
-      if (dto.recipientPhone !== undefined) parcel.recipientPhone = dto.recipientPhone;
-      if (dto.deliveryAddress !== undefined) parcel.rawAddress = dto.deliveryAddress;
-      if (dto.notes !== undefined) parcel.parcelDescription = dto.notes?.trim() || null;
+      // Track which fields actually change so the edit is auditable. Field
+      // names only: the values themselves stay on the parcel row.
+      const changed: string[] = [];
+      const apply = <K extends "recipientName" | "recipientPhone" | "rawAddress" | "merchantNote">(
+        key: K,
+        label: string,
+        next: Parcel[K],
+      ) => {
+        if (parcel[key] !== next) {
+          parcel[key] = next;
+          changed.push(label);
+        }
+      };
+      if (dto.recipientName !== undefined) apply("recipientName", "recipient name", dto.recipientName);
+      if (dto.recipientPhone !== undefined) apply("recipientPhone", "recipient phone", dto.recipientPhone);
+      if (dto.deliveryAddress !== undefined) apply("rawAddress", "delivery address", dto.deliveryAddress);
+      // Delivery notes are the merchant's handling note, never the item description.
+      if (dto.notes !== undefined) apply("merchantNote", "delivery note", dto.notes?.trim() || null);
 
+      if (changed.length === 0) return parcel;
       const saved = await manager.save(parcel);
+      await manager.save(
+        manager.create(ParcelStatusHistory, {
+          parcelId: parcel.id,
+          fromStatus: parcel.status,
+          toStatus: parcel.status,
+          eventType: "PARCEL_UPDATED",
+          actorId: UUID_REGEX.test(actor.id) ? actor.id : BACKEND_UNKNOWN_ACTOR,
+          actorRole: actor.role,
+          description: `Booking edited: ${changed.join(", ")}`,
+        }),
+      );
       await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
       this.logger.log(`PARCEL_UPDATED parcel=${parcel.id} actor=${actor.id}`);
       return saved;
@@ -1195,11 +1262,8 @@ export class ParcelsService {
       const fromStatus = parcel.status;
       this.lifecycle.assertTransition(fromStatus, ParcelStatus.PICKUP_REQUESTED);
       parcel.status = ParcelStatus.PICKUP_REQUESTED;
-      if (notes?.trim()) {
-        parcel.parcelDescription = parcel.parcelDescription
-          ? `${parcel.parcelDescription} | Pickup notes: ${notes.trim()}`
-          : `Pickup notes: ${notes.trim()}`;
-      }
+      // Pickup instructions get their own column; the item description stays intact.
+      if (notes?.trim()) parcel.pickupInstructions = notes.trim();
       await manager.save(parcel);
 
       await manager.save(
@@ -1493,7 +1557,10 @@ export class ParcelsService {
     zone?: string;
     message?: string;
   }> {
-    return rows.map((row, index) => {
+    return rows.map((raw, index) => {
+      const checked = validateBulkRow(raw);
+      if (!checked.ok) return { index, ok: false, message: checked.message };
+      const row = checked.value;
       try {
         const pricing = this.pricingService.calculate({
           district: row.district,
@@ -1526,7 +1593,12 @@ export class ParcelsService {
   ): Promise<BulkImportResult> {
     const rows: BulkRowResult[] = [];
     for (let index = 0; index < dto.rows.length; index += 1) {
-      const row = dto.rows[index] as ParcelBooking;
+      const checked = validateBulkRow(dto.rows[index]!);
+      if (!checked.ok) {
+        rows.push({ index, ok: false, message: checked.message });
+        continue;
+      }
+      const row = checked.value as ParcelBooking;
       try {
         const created = await this.createParcel(row, {
           user,
@@ -1635,14 +1707,23 @@ export class ParcelsService {
   }
 
   /**
-   * Booking-time risk snapshot persisted by the intelligence engine, for
-   * operators (merchant, hub, admin). Risk internals are never shown to
-   * customers. Unscored parcels yield nulls rather than an invented score.
+   * Operator-only fields (merchant, hub, admin), never sent to customers:
+   * the booking-time risk snapshot from the intelligence engine (unscored
+   * parcels yield nulls rather than an invented score) and the merchant's
+   * handling notes.
    */
   private operationalRisk(
     parcel: Parcel,
     scope?: ParcelAccessScope,
-  ): Pick<ParcelSummary, "riskScore" | "riskTier" | "rtoProbability" | "addressConfidenceTier"> {
+  ): Pick<
+    ParcelSummary,
+    | "riskScore"
+    | "riskTier"
+    | "rtoProbability"
+    | "addressConfidenceTier"
+    | "merchantNote"
+    | "pickupInstructions"
+  > {
     if (!scope || scope.isCustomer) return {};
     const intel = this.toAddressIntelligence(parcel);
     return {
@@ -1650,6 +1731,8 @@ export class ParcelsService {
       riskTier: intel.riskTier,
       rtoProbability: intel.rtoProbability,
       addressConfidenceTier: intel.confidenceTier,
+      merchantNote: parcel.merchantNote ?? null,
+      pickupInstructions: parcel.pickupInstructions ?? null,
     };
   }
 
@@ -1667,7 +1750,8 @@ export class ParcelsService {
     "merchantName" | "riderName" | "riderPhone" | "deliveredAt" | "deliveryPreference"
   > {
     if (!scope?.isCustomer && !scope?.isAdmin) return {};
-    const delivered = parcel.status === ParcelStatus.DELIVERED;
+    // DELIVERED, CASH_PENDING and CASH_VERIFIED all mean the recipient has it.
+    const delivered = isDeliveredStatus(parcel.status);
     const active = RIDER_CONTACT_STATUSES.has(parcel.status);
     // Rider phone only while the delivery is in progress; the name also stays
     // on the proof of delivery once the parcel is delivered.
@@ -1785,4 +1869,10 @@ export function decodeParcelCursor(
   } catch {
     return null;
   }
+}
+
+/** "Karim Rider (RDR-000002)" for timeline text. */
+function riderLabel(rider: { user?: { name?: string | null } | null; riderCode?: string | null }): string {
+  const name = rider.user?.name?.trim() || "rider";
+  return rider.riderCode ? `${name} (${rider.riderCode})` : name;
 }

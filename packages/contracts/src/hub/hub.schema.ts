@@ -414,3 +414,42 @@ export const hubInventorySchema = z.object({
 });
 
 export type HubInventory = z.infer<typeof hubInventorySchema>;
+
+/* ------------------------------------------------------------------ */
+/* First-mile pickups                                                  */
+/* ------------------------------------------------------------------ */
+
+/** A parcel waiting to be collected from (or assigned for) a merchant pickup. */
+export interface PickupParcel {
+  id: string;
+  trackingCode: string;
+  status: string;
+  weightKg: number;
+  parcelDescription: string | null;
+  pickupInstructions: string | null;
+  requestedAt: string;
+}
+
+/** Pickup requests grouped per merchant visit (one rider collects them together). */
+export interface PickupRequestGroup {
+  merchantId: string;
+  merchantName: string;
+  contactPhone: string;
+  pickupAddress: string;
+  pickupThana: string | null;
+  /** Set when every parcel in the group is assigned to the same rider. */
+  assignedRiderId: string | null;
+  assignedRiderName: string | null;
+  parcels: PickupParcel[];
+}
+
+export const assignPickupSchema = z.object({
+  riderId: z.string().guid(),
+  parcelIds: z.array(z.string().guid()).min(1).max(200),
+});
+export type AssignPickupRequest = z.infer<typeof assignPickupSchema>;
+
+export const confirmPickupSchema = z.object({
+  parcelIds: z.array(z.string().guid()).min(1).max(200),
+});
+export type ConfirmPickupRequest = z.infer<typeof confirmPickupSchema>;

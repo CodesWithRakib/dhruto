@@ -22,6 +22,7 @@ import {
 
 export type TemplateKey =
   | "parcel_created"
+  | "parcel_picked_up"
   | "parcel_assigned"
   | "parcel_out_for_delivery"
   | "parcel_delivered"
@@ -38,6 +39,7 @@ export type TemplateKey =
 
 export const TEMPLATE_KEYS: readonly TemplateKey[] = [
   "parcel_created",
+  "parcel_picked_up",
   "parcel_assigned",
   "parcel_out_for_delivery",
   "parcel_delivered",
@@ -56,6 +58,7 @@ export const TEMPLATE_KEYS: readonly TemplateKey[] = [
 /** Maps a domain event to its template (events without a template stay silent). */
 export const EVENT_TEMPLATES: Readonly<Record<DomainEventType, TemplateKey | null>> = {
   [DomainEventType.PARCEL_CREATED]: "parcel_created",
+  [DomainEventType.PARCEL_PICKED_UP]: "parcel_picked_up",
   [DomainEventType.PARCEL_ASSIGNED]: "parcel_assigned",
   [DomainEventType.PARCEL_OUT_FOR_DELIVERY]: "parcel_out_for_delivery",
   [DomainEventType.PARCEL_DELIVERED]: "parcel_delivered",
@@ -100,6 +103,19 @@ export function renderParcelCreated(vars: ParcelCreatedVars): RenderedTemplate {
     bn: {
       title: "নতুন পার্সেল বুক হয়েছে",
       body: `Dhruto: ${vars.recipientName}-এর জন্য পার্সেল ${vars.trackingCode} বুক হয়েছে, পিকআপের অপেক্ষায়।`,
+    },
+  };
+}
+
+export function renderParcelPickedUp(vars: ParcelCreatedVars): RenderedTemplate {
+  return {
+    en: {
+      title: "Parcel picked up",
+      body: `Dhruto: parcel ${vars.trackingCode} for ${vars.recipientName} was collected by our rider and is heading to the hub.`,
+    },
+    bn: {
+      title: "পার্সেল পিকআপ হয়েছে",
+      body: `Dhruto: ${vars.recipientName}-এর পার্সেল ${vars.trackingCode} আমাদের রাইডার সংগ্রহ করেছেন, হাবে যাচ্ছে।`,
     },
   };
 }

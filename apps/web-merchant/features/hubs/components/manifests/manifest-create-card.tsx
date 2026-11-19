@@ -79,7 +79,7 @@ export function ManifestCreateCard({
               >
                 <SelectValue placeholder={t("manifests.destination")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl bg-surface-elevated">
+              <SelectContent className="rounded-2xl">
                 {destinations.map((hub) => (
                   <SelectItem key={hub.id} value={hub.id}>
                     {hub.name} ({hub.code})

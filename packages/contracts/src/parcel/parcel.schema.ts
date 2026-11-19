@@ -62,6 +62,22 @@ export enum ParcelStatus {
   DAMAGED = "DAMAGED",
 }
 
+/**
+ * Statuses in which the recipient already has the parcel. After the doorstep
+ * handoff the lifecycle continues with internal cash settlement
+ * (DELIVERED -> CASH_PENDING -> CASH_VERIFIED); to the recipient, all of
+ * these mean "delivered".
+ */
+export const DELIVERED_PARCEL_STATUSES: readonly ParcelStatus[] = [
+  ParcelStatus.DELIVERED,
+  ParcelStatus.CASH_PENDING,
+  ParcelStatus.CASH_VERIFIED,
+];
+
+export function isDeliveredStatus(status: string | null | undefined): boolean {
+  return DELIVERED_PARCEL_STATUSES.includes(status as ParcelStatus);
+}
+
 /** The status a parcel is created in. */
 export const INITIAL_PARCEL_STATUS = ParcelStatus.CREATED;
 
@@ -148,6 +164,10 @@ export const parcelSummarySchema = z.object({
    */
   riderName: z.string().nullable().optional(),
   riderPhone: z.string().nullable().optional(),
+  /** Merchant's delivery note for the rider (operator views only). */
+  merchantNote: z.string().nullable().optional(),
+  /** Merchant's instructions for the pickup rider (operator views only). */
+  pickupInstructions: z.string().nullable().optional(),
   /** Doorstep handoff time (OTP-verified completion) for delivered parcels. */
   deliveredAt: z.string().nullable().optional(),
   /**

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  customerFacingStatus,
   formatStatusLabel,
   mapParcelListItemToDelivery,
 } from "../../features/customer/hooks/use-customer-deliveries";
@@ -13,6 +14,25 @@ describe("Customer dynamic deliveries & telemetry helpers", () => {
     expect(formatStatusLabel(ParcelStatus.DESTINATION_HUB_RECEIVED)).toBe("Arrived at Local Hub");
     expect(formatStatusLabel(ParcelStatus.RESCHEDULED)).toBe("Delivery Rescheduled");
     expect(formatStatusLabel(ParcelStatus.PICKED_UP)).toBe("Picked Up from Merchant");
+  });
+
+  // Regression: after handoff parcels move to CASH_PENDING / CASH_VERIFIED;
+  // the customer portal treated them as active (OTP, reschedule, wrong counts).
+  it("shows internal cash-settlement states as delivered to the recipient", () => {
+    expect(customerFacingStatus(ParcelStatus.CASH_PENDING)).toBe(ParcelStatus.DELIVERED);
+    expect(customerFacingStatus(ParcelStatus.CASH_VERIFIED)).toBe(ParcelStatus.DELIVERED);
+    expect(customerFacingStatus(ParcelStatus.OUT_FOR_DELIVERY)).toBe(ParcelStatus.OUT_FOR_DELIVERY);
+    const mapped = mapParcelListItemToDelivery({
+      id: "p9",
+      trackingCode: "DHR-20261118-AAAAAA",
+      status: ParcelStatus.CASH_PENDING,
+      codAmount: 1850,
+      deliveredAt: "2026-11-18T16:30:00.000Z",
+      updatedAt: "2026-11-18T16:31:00.000Z",
+    } as unknown as ParcelListItem);
+    expect(mapped.status).toBe(ParcelStatus.DELIVERED);
+    expect(mapped.isPaid).toBe(true);
+    expect(mapped.deliveredAt).toBeDefined();
   });
 
   it("handles unknown or fallback statuses safely", () => {

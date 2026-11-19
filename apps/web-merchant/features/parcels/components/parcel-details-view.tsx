@@ -212,7 +212,7 @@ export function ParcelDetailsView({ parcelId }: ParcelDetailsViewProps) {
         initialRecipientName={parcel.recipientName}
         initialRecipientPhone={parcel.recipientPhone}
         initialDeliveryAddress={parcel.deliveryAddress}
-        initialNotes={parcel.parcelDescription}
+        initialNotes={parcel.merchantNote}
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         onSuccess={() => {

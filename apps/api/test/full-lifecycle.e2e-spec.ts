@@ -2,10 +2,10 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { type INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { DataSource } from "typeorm";
 import { AppModule } from "../src/app.module.js";
 import { BagStatus, HubScanType, ParcelStatus, ScanOutcome } from "@dhruto/contracts";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Enterprise Full Lifecycle End-to-End Simulation:
@@ -28,18 +28,15 @@ import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/aut
  */
 describe("Full Lifecycle End-to-End Simulation", () => {
   let app: INestApplication;
-  let dataSource: DataSource;
 
   let merchantToken: string;
   let dhkManagerToken: string;
   let ctgManagerToken: string;
   let ctgRiderToken: string;
-  let adminToken: string;
 
   let dhkHubId: string;
   let ctgHubId: string;
   let ctgRiderId: string;
-  let merchantId: string;
 
   const unique = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
@@ -53,16 +50,14 @@ describe("Full Lifecycle End-to-End Simulation", () => {
     app.setGlobalPrefix("api/v1");
     app.enableShutdownHooks();
     await app.init();
-    dataSource = moduleFixture.get(DataSource);
 
     // Authenticate all operational personas
-    [merchantToken, dhkManagerToken, ctgManagerToken, ctgRiderToken, adminToken] =
+    [merchantToken, dhkManagerToken, ctgManagerToken, ctgRiderToken] =
       await Promise.all([
         loginToken(app, SEEDED_ACCOUNTS.merchant),
         loginToken(app, SEEDED_ACCOUNTS.hubManager),
         loginToken(app, SEEDED_ACCOUNTS.hubManagerCtg),
         loginToken(app, "rider3@dhruto.com"),
-        loginToken(app, SEEDED_ACCOUNTS.admin),
       ]);
 
     // Discover Origin Hub (Dhaka)
@@ -88,13 +83,6 @@ describe("Full Lifecycle End-to-End Simulation", () => {
       .set(bearer(ctgRiderToken))
       .expect(200);
     ctgRiderId = meRider.body.data.rider.id;
-
-    // Discover Merchant ID
-    const meMerchant = await request(app.getHttpServer())
-      .get("/api/v1/auth/me")
-      .set(bearer(merchantToken))
-      .expect(200);
-    merchantId = meMerchant.body.data.merchant.id;
   });
 
   afterAll(async () => {
@@ -104,7 +92,7 @@ describe("Full Lifecycle End-to-End Simulation", () => {
   it("executes the complete 14-stage lifecycle across Bangladesh flawlessly", async () => {
     const codAmount = 2500;
     const recipientPhone = "01812345678";
-    const recipientName = `LifeCycle Recipient ${unique()}`;
+    const recipientName = realisticName();
 
     // =========================================================================
     // STAGE 1: MERCHANT BOOKING

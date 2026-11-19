@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { TaskCustomerCard } from "./tasks/task-customer-card";
 import { TaskOtpSection } from "./tasks/task-otp-section";
 import { TaskCodSection } from "./tasks/task-cod-section";
+import { TaskInstructionsCard } from "./tasks/task-instructions-card";
 import { TaskAttemptsCard } from "./tasks/task-attempts-card";
 import { TaskFailDialog } from "./tasks/task-fail-dialog";
 
@@ -207,6 +208,9 @@ export function TaskDetailsView({ parcelId }: TaskDetailsViewProps) {
         isStarting={isStarting}
         onStart={handleStart}
       />
+
+      {/* Instructions from the recipient and merchant */}
+      <TaskInstructionsCard task={task} />
 
       {/* Handoff: OTP + COD + complete */}
       {started && !done ? (

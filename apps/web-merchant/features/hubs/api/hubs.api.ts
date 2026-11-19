@@ -5,6 +5,9 @@ import {
   type BagDetails,
   type BagListItem,
   type BagStatus,
+  type PickupRequestGroup,
+  type AssignPickupRequest,
+  type ManifestStatus,
   type CreateBagDto,
   type CreateManifestDto,
   type ExceptionStatus,
@@ -65,6 +68,8 @@ export interface HubParcelLookup {
   weightKg: number;
   status: string;
   currentHubId: string | null;
+  /** True when the parcel's hub serves its destination district (no line-haul). */
+  localDelivery: boolean;
 }
 
 export const hubsApi = baseApi.injectEndpoints({
@@ -112,6 +117,18 @@ export const hubsApi = baseApi.injectEndpoints({
       query: ({ hubId, params }) => `/hubs/${hubId}/scans${toScanQuery(params ?? {})}`,
       providesTags: (_result, _error, { hubId }) => [{ type: HUB_TAG, id: `SCANS_${hubId}` }],
     }),
+    /* ---------------------------- Pickups ----------------------------- */
+    getPickupRequests: builder.query<ApiResponse<PickupRequestGroup[]>, string>({
+      query: (hubId) => `/hubs/${hubId}/pickup-requests`,
+      providesTags: (_r, _e, hubId) => [{ type: HUB_TAG, id: `PICKUPS_${hubId}` }],
+    }),
+    assignPickupRider: builder.mutation<
+      ApiResponse<{ assigned: number; riderId: string; riderName: string }>,
+      { hubId: string } & AssignPickupRequest
+    >({
+      query: ({ hubId, ...body }) => ({ url: `/hubs/${hubId}/pickups/assign`, method: "POST", body }),
+      invalidatesTags: (_r, _e, { hubId }) => [{ type: HUB_TAG, id: `PICKUPS_${hubId}` }],
+    }),
     lookupParcel: builder.query<
       ApiResponse<HubParcelLookup>,
       { hubId: string; trackingCode: string }
@@ -132,11 +149,19 @@ export const hubsApi = baseApi.injectEndpoints({
         { type: HUB_TAG, id: `DASHBOARD_${hubId}` },
       ],
     }),
-    getBags: builder.query<ApiResponse<BagListItem[]>, { hubId?: string; status?: BagStatus }>({
+    getBags: builder.query<
+      ApiResponse<BagListItem[]> & {
+        meta?: { total?: number; totalPages?: number; statusCounts?: Partial<Record<BagStatus, number>> };
+      },
+      { hubId?: string; status?: BagStatus; search?: string; page?: number; limit?: number }
+    >({
       query: (params) => {
         const query = new URLSearchParams();
         if (params?.hubId) query.set("hubId", params.hubId);
         if (params?.status) query.set("status", params.status);
+        if (params?.search?.trim()) query.set("search", params.search.trim());
+        if (params?.page) query.set("page", String(params.page));
+        if (params?.limit) query.set("limit", String(params.limit));
         const qs = query.toString();
         return `/bags${qs ? `?${qs}` : ""}`;
       },
@@ -189,9 +214,26 @@ export const hubsApi = baseApi.injectEndpoints({
         { type: HUB_TAG, id: `DASHBOARD_${hubId}` },
       ],
     }),
-    getManifests: builder.query<ApiResponse<ManifestListItem[]>, string>({
-      query: (hubId) => `/hubs/${hubId}/manifests`,
-      providesTags: (_result, _error, hubId) => [{ type: HUB_TAG, id: `MANIFEST_LIST_${hubId}` }],
+    getManifests: builder.query<
+      ApiResponse<ManifestListItem[]> & {
+        meta?: {
+          total?: number;
+          totalPages?: number;
+          statusCounts?: Partial<Record<ManifestStatus, number>>;
+        };
+      },
+      { hubId: string; status?: ManifestStatus; search?: string; page?: number; limit?: number }
+    >({
+      query: ({ hubId, status, search, page, limit }) => {
+        const query = new URLSearchParams();
+        if (status) query.set("status", status);
+        if (search?.trim()) query.set("search", search.trim());
+        if (page) query.set("page", String(page));
+        if (limit) query.set("limit", String(limit));
+        const qs = query.toString();
+        return `/hubs/${hubId}/manifests${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: (_result, _error, { hubId }) => [{ type: HUB_TAG, id: `MANIFEST_LIST_${hubId}` }],
     }),
     getManifestById: builder.query<ApiResponse<ManifestDetails>, string>({
       query: (id) => `/manifests/${id}`,
@@ -253,6 +295,8 @@ export const hubsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetPickupRequestsQuery,
+  useAssignPickupRiderMutation,
   useGetHubsQuery,
   useGetHubByIdQuery,
   useGetDestinationHubsQuery,

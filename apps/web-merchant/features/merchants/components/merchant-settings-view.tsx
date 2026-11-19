@@ -25,6 +25,8 @@ export function MerchantSettingsView() {
   const [businessName, setBusinessName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupDistrict, setPickupDistrict] = useState("");
+  const [pickupThana, setPickupThana] = useState("");
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
@@ -32,13 +34,15 @@ export function MerchantSettingsView() {
       setBusinessName(merchant.businessName || "");
       setContactPhone(merchant.contactPhone || "");
       setPickupAddress(merchant.pickupAddress || "");
+      setPickupDistrict(merchant.pickupDistrict || "");
+      setPickupThana(merchant.pickupThana || "");
       setIsDirty(false);
     }
   }, [merchant]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessName.trim() || !contactPhone.trim() || !pickupAddress.trim()) {
+    if (!businessName.trim() || !contactPhone.trim() || !pickupAddress.trim() || !pickupDistrict.trim()) {
       toast.error(t("validationError"));
       return;
     }
@@ -48,6 +52,8 @@ export function MerchantSettingsView() {
         businessName: businessName.trim(),
         contactPhone: contactPhone.trim(),
         pickupAddress: pickupAddress.trim(),
+        pickupDistrict: pickupDistrict.trim(),
+        pickupThana: pickupThana.trim(),
       }).unwrap();
 
       toast.success(t("saved"));
@@ -90,6 +96,17 @@ export function MerchantSettingsView() {
             contactPhone={contactPhone}
             onContactPhoneChange={(val) => {
               setContactPhone(val);
+              setIsDirty(true);
+            }}
+            pickupDistrict={pickupDistrict}
+            onPickupDistrictChange={(val) => {
+              setPickupDistrict(val);
+              setPickupThana("");
+              setIsDirty(true);
+            }}
+            pickupThana={pickupThana}
+            onPickupThanaChange={(val) => {
+              setPickupThana(val);
               setIsDirty(true);
             }}
             pickupAddress={pickupAddress}

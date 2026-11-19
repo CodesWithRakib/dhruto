@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { idempotencyKey } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 describe("Parcel cursor pagination (Phase 8)", () => {
   let app: INestApplication;
@@ -35,7 +36,7 @@ describe("Parcel cursor pagination (Phase 8)", () => {
       .set("Authorization", `Bearer ${merchantToken}`)
       .set("Idempotency-Key", idempotencyKey(`cursor-${tag}`))
       .send({
-        recipientName: "Cursor Probe",
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

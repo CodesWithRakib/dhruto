@@ -56,6 +56,18 @@ export class RegisterDto {
   @IsString({ message: "Pickup address must be a string" })
   pickupAddress?: string;
 
+  @ApiPropertyOptional({ example: "Dhaka", description: "Pickup district (first-mile routing)" })
+  @IsOptional()
+  @IsString({ message: "Pickup district must be a string" })
+  @MaxLength(100)
+  pickupDistrict?: string;
+
+  @ApiPropertyOptional({ example: "Dhanmondi" })
+  @IsOptional()
+  @IsString({ message: "Pickup thana must be a string" })
+  @MaxLength(100)
+  pickupThana?: string;
+
   @ApiPropertyOptional({ example: "a0000000-0000-0000-0000-000000000001" })
   @IsOptional()
   @IsUUID("4", { message: "Invalid hub ID format" })

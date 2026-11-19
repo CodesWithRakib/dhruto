@@ -21,6 +21,8 @@ import {
   type StartDeliveryResult,
   type VerifyOtpDto,
   type VerifyOtpResult,
+  type PickupRequestGroup,
+  type ConfirmPickupRequest,
 } from "@dhruto/contracts";
 
 /**
@@ -181,11 +183,28 @@ export const ridersApi = baseApi.injectEndpoints({
       providesTags: [{ type: RIDER_TAG, id: "CASH" }],
     }),
 
+    /* ---------------------------- Pickups ----------------------------- */
+    getMyPickups: builder.query<ApiResponse<PickupRequestGroup[]>, void>({
+      query: () => "/riders/me/pickups",
+      providesTags: [{ type: RIDER_TAG, id: "PICKUPS" }],
+    }),
+    confirmPickup: builder.mutation<ApiResponse<{ pickedUp: number }>, ConfirmPickupRequest>({
+      query: (body) => ({ url: "/riders/me/pickups/confirm", method: "POST", body }),
+      invalidatesTags: [{ type: RIDER_TAG, id: "PICKUPS" }],
+    }),
+
     /* --------------------- Hub/admin fleet operations --------------------- */
-    getFleetRiders: builder.query<ApiResponse<RiderListItem[]>, { hubId?: string } | void>({
+    getFleetRiders: builder.query<
+      ApiResponse<RiderListItem[]>,
+      { hubId?: string; search?: string; limit?: number } | void
+    >({
       query: (params) => {
-        const qs = params?.hubId ? `?hubId=${params.hubId}` : "";
-        return `/riders${qs}`;
+        const qs = new URLSearchParams();
+        if (params?.hubId) qs.set("hubId", params.hubId);
+        if (params?.search?.trim()) qs.set("search", params.search.trim());
+        if (params?.limit) qs.set("limit", String(params.limit));
+        const s = qs.toString();
+        return `/riders${s ? `?${s}` : ""}`;
       },
       providesTags: [{ type: RIDER_TAG, id: "FLEET" }],
     }),
@@ -211,6 +230,8 @@ export const ridersApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetMyPickupsQuery,
+  useConfirmPickupMutation,
   useGetRiderDashboardQuery,
   useGetRiderTasksQuery,
   useGetRiderTaskDetailsQuery,

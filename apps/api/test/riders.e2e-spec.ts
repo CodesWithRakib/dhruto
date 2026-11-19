@@ -189,12 +189,15 @@ describe("Rider Delivery & Cash Reconciliation (E2E / Integration)", () => {
       .expect(200);
 
     expect(res.body.success).toBe(true);
-    expect(res.body.data.status).toBe("CASH_PENDING");
+    // Cash settlement is internal; the public tracking page shows "delivered".
+    expect(res.body.data.status).toBe("DELIVERED");
+    expect(JSON.stringify(res.body.data)).not.toContain("CASH_PENDING");
 
     const statuses = res.body.data.timeline.map((t: { status: string }) => t.status);
     expect(statuses).toContain("CREATED");
     expect(statuses).toContain("ASSIGNED_TO_RIDER");
     expect(statuses).toContain("OUT_FOR_DELIVERY");
-    expect(statuses).toContain("CASH_PENDING");
+    expect(statuses).toContain("DELIVERED");
+    expect(statuses).not.toContain("CASH_PENDING");
   });
 });

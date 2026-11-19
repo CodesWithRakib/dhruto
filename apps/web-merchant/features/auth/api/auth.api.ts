@@ -13,6 +13,7 @@ export interface RegisterPayload {
   role: "MERCHANT";
   businessName?: string;
   pickupAddress?: string;
+  pickupDistrict?: string;
 }
 
 export interface AuthUser {

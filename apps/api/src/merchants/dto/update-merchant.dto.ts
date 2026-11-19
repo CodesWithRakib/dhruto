@@ -26,4 +26,19 @@ export class UpdateMerchantDto {
   @MinLength(5)
   @MaxLength(500)
   pickupAddress?: string;
+
+  @ApiPropertyOptional({ example: "Dhaka", description: "Pickup district (routes pickups to that hub)" })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
+  pickupDistrict?: string;
+
+  @ApiPropertyOptional({ example: "Gulshan" })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @MaxLength(100)
+  pickupThana?: string;
 }

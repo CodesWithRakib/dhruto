@@ -34,14 +34,31 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
   const [driverPhone, setDriverPhone] = React.useState("");
   const [selectedBagIds, setSelectedBagIds] = React.useState<string[]>([]);
 
+  const [search, setSearch] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<"ALL" | ManifestStatus>("ALL");
+  const [page, setPage] = React.useState(1);
+  const [limit, setLimit] = React.useState(10);
+  React.useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
+  // Server-side paging, filtering and counts (the API returns one page only).
   const {
     data: manifestsData,
     isLoading: isLoadingManifests,
     refetch: refetchManifests,
-  } = useGetManifestsQuery(currentHubId);
+  } = useGetManifestsQuery({
+    hubId: currentHubId,
+    status: statusFilter === "ALL" ? undefined : statusFilter,
+    search: debouncedSearch,
+    page,
+    limit,
+  });
   const { data: bagsData, refetch: refetchBags } = useGetBagsQuery({
     hubId: currentHubId,
     status: BagStatus.SEALED,
+    limit: 100,
   });
   const { data: destinationsData } = useGetDestinationHubsQuery();
 
@@ -125,53 +142,22 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
     }
   };
 
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"ALL" | ManifestStatus>("ALL");
-  const [page, setPage] = React.useState(1);
-  const [limit, setLimit] = React.useState(10);
-
   const statusCounts = React.useMemo(() => {
-    let created = 0;
-    let dispatched = 0;
-    let inTransit = 0;
-    let received = 0;
-    let reconciled = 0;
-    for (const m of manifests) {
-      if (m.status === ManifestStatus.CREATED) created++;
-      else if (m.status === ManifestStatus.DISPATCHED) dispatched++;
-      else if (m.status === ManifestStatus.IN_TRANSIT) inTransit++;
-      else if (m.status === ManifestStatus.RECEIVED) received++;
-      else if (m.status === ManifestStatus.RECONCILED) reconciled++;
-    }
+    const counts = manifestsData?.meta?.statusCounts ?? {};
+    const get = (k: ManifestStatus) => counts[k] ?? 0;
     return {
-      ALL: manifests.length,
-      [ManifestStatus.CREATED]: created,
-      [ManifestStatus.DISPATCHED]: dispatched,
-      [ManifestStatus.IN_TRANSIT]: inTransit,
-      [ManifestStatus.RECEIVED]: received,
-      [ManifestStatus.RECONCILED]: reconciled,
+      ALL: Object.values(counts).reduce<number>((sum, n) => sum + (n ?? 0), 0),
+      [ManifestStatus.CREATED]: get(ManifestStatus.CREATED),
+      [ManifestStatus.DISPATCHED]: get(ManifestStatus.DISPATCHED),
+      [ManifestStatus.IN_TRANSIT]: get(ManifestStatus.IN_TRANSIT),
+      [ManifestStatus.RECEIVED]: get(ManifestStatus.RECEIVED),
+      [ManifestStatus.RECONCILED]: get(ManifestStatus.RECONCILED),
     };
-  }, [manifests]);
+  }, [manifestsData]);
 
-  const filteredManifests = React.useMemo(() => {
-    return manifests.filter((item) => {
-      if (statusFilter !== "ALL" && item.status !== statusFilter) return false;
-      if (!search.trim()) return true;
-      const q = search.trim().toLowerCase();
-      return (
-        item.manifestCode.toLowerCase().includes(q) ||
-        item.vehicleNumber.toLowerCase().includes(q) ||
-        (item.driverName?.toLowerCase().includes(q) ?? false) ||
-        item.originHubName.toLowerCase().includes(q) ||
-        item.destinationHubName.toLowerCase().includes(q)
-      );
-    });
-  }, [manifests, statusFilter, search]);
-
-  const pagedManifests = React.useMemo(() => {
-    const start = (page - 1) * limit;
-    return filteredManifests.slice(start, start + limit);
-  }, [filteredManifests, page, limit]);
+  const filteredManifests = manifests;
+  const pagedManifests = manifests;
+  const totalItems = manifestsData?.meta?.total ?? manifests.length;
 
   const columns = React.useMemo(
     () =>
@@ -264,8 +250,8 @@ export function ManifestManager({ currentHubId }: ManifestManagerProps) {
                 <DataTable
                   columns={columns}
                   data={pagedManifests}
-                  totalItems={filteredManifests.length}
-                  pageCount={Math.max(1, Math.ceil(filteredManifests.length / limit))}
+                  totalItems={totalItems}
+                  pageCount={Math.max(1, manifestsData?.meta?.totalPages ?? Math.ceil(totalItems / limit))}
                   currentPage={page}
                   itemsPerPage={limit}
                   onPageChange={setPage}

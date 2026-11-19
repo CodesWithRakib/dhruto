@@ -589,7 +589,13 @@ export class WebhooksService {
   async listDeliveries(
     merchantId: string,
     options: { page?: number; limit?: number; status?: WebhookDeliveryStatus } = {},
-  ): Promise<{ items: WebhookDeliveryItem[]; total: number; page: number; limit: number }> {
+  ): Promise<{
+    items: WebhookDeliveryItem[];
+    total: number;
+    page: number;
+    limit: number;
+    statusCounts: Partial<Record<WebhookDeliveryStatus, number>>;
+  }> {
     const page = Math.max(1, options.page ?? 1);
     const limit = Math.min(200, Math.max(1, options.limit ?? 50));
     const query = this.deliveryRepo
@@ -607,11 +613,21 @@ export class WebhooksService {
       .skip((page - 1) * limit)
       .getMany();
 
+    // Real per-status totals for the filter tabs (not just the loaded page).
+    const counts = await this.deliveryRepo
+      .createQueryBuilder("d")
+      .select("d.status", "status")
+      .addSelect("COUNT(*)::int", "count")
+      .where("d.merchant_id = :merchantId", { merchantId })
+      .groupBy("d.status")
+      .getRawMany<{ status: WebhookDeliveryStatus; count: number }>();
+
     return {
       items: deliveries.map(toDeliveryItem),
       total,
       page,
       limit,
+      statusCounts: Object.fromEntries(counts.map((r) => [r.status, Number(r.count)])),
     };
   }
 

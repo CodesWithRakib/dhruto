@@ -16,6 +16,11 @@ import type { DataTableRow } from "@/lib/data-table";
 
 interface WebhookDeliveriesTableProps {
   deliveries: WebhookDeliveryItem[];
+  /** Server-side totals for the filter tabs (the list holds only the latest page). */
+  counts: { all: number; delivered: number; failed: number; deadLetter: number };
+  /** Selected tab; the page refetches deliveries for it (server-side filter). */
+  filterStatus: "ALL" | WebhookDeliveryStatus;
+  onFilterChange: (status: "ALL" | WebhookDeliveryStatus) => void;
   isLoading: boolean;
   onRetry: (deliveryId: string) => void;
   isRetrying: boolean;
@@ -23,24 +28,20 @@ interface WebhookDeliveriesTableProps {
 
 export function WebhookDeliveriesTable({
   deliveries,
+  counts,
+  filterStatus,
+  onFilterChange,
   isLoading,
   onRetry,
   isRetrying,
 }: WebhookDeliveriesTableProps) {
-  const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [inspectDelivery, setInspectDelivery] = useState<WebhookDeliveryItem | null>(null);
 
-  const filteredDeliveries = deliveries.filter((d) => {
-    if (filterStatus === "ALL") return true;
-    return d.status === filterStatus;
-  });
+  // Already filtered by the server for the selected tab.
+  const filteredDeliveries = deliveries;
 
-  const deliveredCount = deliveries.filter(
-    (d) => d.status === WebhookDeliveryStatus.DELIVERED,
-  ).length;
-  const deadLetterCount = deliveries.filter(
-    (d) => d.status === WebhookDeliveryStatus.DEAD_LETTER,
-  ).length;
+  const deliveredCount = counts.delivered;
+  const deadLetterCount = counts.deadLetter;
 
   return (
     <div className="space-y-4 pt-4">
@@ -58,17 +59,17 @@ export function WebhookDeliveriesTable({
         {/* Filter Tabs */}
         <div className="flex items-center gap-1 bg-surface-elevated/90 p-1.5 rounded-2xl text-xs backdrop-blur-md">
           <button
-            onClick={() => setFilterStatus("ALL")}
+            onClick={() => onFilterChange("ALL")}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === "ALL"
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
-            All ({deliveries.length})
+            All ({counts.all})
           </button>
           <button
-            onClick={() => setFilterStatus(WebhookDeliveryStatus.DELIVERED)}
+            onClick={() => onFilterChange(WebhookDeliveryStatus.DELIVERED)}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === WebhookDeliveryStatus.DELIVERED
                 ? "bg-success/15 text-success"
@@ -78,17 +79,17 @@ export function WebhookDeliveriesTable({
             Delivered ({deliveredCount})
           </button>
           <button
-            onClick={() => setFilterStatus(WebhookDeliveryStatus.FAILED)}
+            onClick={() => onFilterChange(WebhookDeliveryStatus.FAILED)}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === WebhookDeliveryStatus.FAILED
                 ? "bg-danger/15 text-danger"
                 : "text-muted-foreground hover:bg-surface-muted/60 hover:text-foreground"
             }`}
           >
-            Failed ({deliveries.filter((d) => d.status === WebhookDeliveryStatus.FAILED).length})
+            Failed ({counts.failed})
           </button>
           <button
-            onClick={() => setFilterStatus(WebhookDeliveryStatus.DEAD_LETTER)}
+            onClick={() => onFilterChange(WebhookDeliveryStatus.DEAD_LETTER)}
             className={`px-3 py-1.5 rounded-xl transition-all font-semibold ${
               filterStatus === WebhookDeliveryStatus.DEAD_LETTER
                 ? "bg-warning/15 text-warning"

@@ -82,6 +82,7 @@ export const HUB_ROUTES = {
   dashboard: "/hub/dashboard",
   scanner: "/hub/scanner",
   parcels: "/hub/parcels",
+  pickups: "/hub/pickups",
   bags: "/hub/bags",
   bag: (id: string) => `/hub/bags/${id}`,
   manifests: "/hub/manifests",

@@ -3,6 +3,7 @@ import { z } from "zod";
 export enum WebhookEvent {
   PING = "webhook.ping",
   PARCEL_CREATED = "parcel.created",
+  PARCEL_PICKED_UP = "parcel.picked_up",
   PARCEL_ASSIGNED = "parcel.assigned",
   PARCEL_OUT_FOR_DELIVERY = "parcel.out_for_delivery",
   PARCEL_DELIVERED = "parcel.delivered",

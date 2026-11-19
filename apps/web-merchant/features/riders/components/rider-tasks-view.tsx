@@ -8,6 +8,7 @@ import { useGetRiderTasksQuery, useStartDeliveryMutation } from "../api/riders.a
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
 import { RiderTaskCard } from "./rider-task-card";
+import { RiderPickupsCard } from "./tasks/rider-pickups-card";
 import { toast } from "sonner";
 
 type TaskFilter = "ALL" | "ASSIGNED_TO_RIDER" | "OUT_FOR_DELIVERY" | "ATTEMPTED";
@@ -68,6 +69,8 @@ export function RiderTasksView() {
 
   return (
     <div className="space-y-4">
+      {/* First-mile pickups assigned to this rider (hidden when none) */}
+      <RiderPickupsCard />
       <div className="rounded-3xl bg-surface-elevated p-5 space-y-3.5">
         <div className="relative">
           <Search

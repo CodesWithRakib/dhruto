@@ -4,12 +4,17 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { Building2, Phone, RefreshCw, Save } from "lucide-react";
 import { Button, Input, Label } from "@dhruto/ui";
+import { DistrictSelect, ThanaSelect } from "@/components/location/district-thana-picker";
 
 interface MerchantDetailsFormProps {
   businessName: string;
   onBusinessNameChange: (val: string) => void;
   contactPhone: string;
   onContactPhoneChange: (val: string) => void;
+  pickupDistrict: string;
+  onPickupDistrictChange: (val: string) => void;
+  pickupThana: string;
+  onPickupThanaChange: (val: string) => void;
   pickupAddress: string;
   onPickupAddressChange: (val: string) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -22,6 +27,10 @@ export function MerchantDetailsForm({
   onBusinessNameChange,
   contactPhone,
   onContactPhoneChange,
+  pickupDistrict,
+  onPickupDistrictChange,
+  pickupThana,
+  onPickupThanaChange,
   pickupAddress,
   onPickupAddressChange,
   onSubmit,
@@ -79,6 +88,35 @@ export function MerchantDetailsForm({
           <p className="text-caption text-muted-foreground">
             {t("contactPhoneDesc")}
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="pickupDistrict" className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
+              {t("pickupDistrict")} <span className="text-destructive">*</span>
+            </Label>
+            <DistrictSelect
+              id="pickupDistrict"
+              name="pickupDistrict"
+              value={pickupDistrict}
+              onChange={onPickupDistrictChange}
+              aria-label={t("pickupDistrict")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pickupThana" className="text-caption font-bold uppercase tracking-wider text-muted-foreground">
+              {t("pickupThana")}
+            </Label>
+            <ThanaSelect
+              id="pickupThana"
+              name="pickupThana"
+              districtName={pickupDistrict}
+              value={pickupThana}
+              onChange={onPickupThanaChange}
+              aria-label={t("pickupThana")}
+            />
+          </div>
+          <p className="text-caption text-muted-foreground sm:col-span-2">{t("pickupDistrictDesc")}</p>
         </div>
 
         <div className="space-y-2">

@@ -361,7 +361,7 @@ export function IntelligenceReviewQueue() {
                               recipientName: item.recipientName,
                               recipientPhone: item.recipientPhone,
                               deliveryAddress: item.deliveryAddress,
-                              notes: item.parcelDescription,
+                              notes: item.merchantNote,
                             })
                           }
                         >

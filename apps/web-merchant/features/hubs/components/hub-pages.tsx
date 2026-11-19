@@ -8,6 +8,7 @@ import { BagDetailsView } from "./bag-details-view";
 import { ManifestManager } from "./manifest-manager";
 import { ManifestDetailsView } from "./manifest-details-view";
 import { ParcelLookupView } from "./parcel-lookup-view";
+import { PickupQueue } from "./pickup-queue";
 import { ExceptionsView } from "./exceptions-view";
 
 /** Client wrappers so route pages stay server components with metadata. */
@@ -74,6 +75,15 @@ export function HubExceptionsPage() {
   return (
     <HubPageShell title={t("exceptions.title")} description={t("exceptions.subtitle")}>
       {(hub) => <ExceptionsView currentHubId={hub.id} />}
+    </HubPageShell>
+  );
+}
+
+export function HubPickupsPage() {
+  const t = useTranslations("Hub");
+  return (
+    <HubPageShell title={t("pickups.title")} description={t("pickups.subtitle")}>
+      {(hub) => <PickupQueue hubId={hub.id} />}
     </HubPageShell>
   );
 }

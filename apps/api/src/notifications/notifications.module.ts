@@ -11,6 +11,7 @@ import {
 import { NotificationsService } from "./notifications.service.js";
 import { NotificationsController } from "./notifications.controller.js";
 import { NotificationsProcessor } from "./notifications.processor.js";
+import { NotificationsSweepScheduler } from "./notifications-sweep.scheduler.js";
 import { NotificationsGateway } from "./gateways/notifications.gateway.js";
 import { SmsService } from "./services/sms.service.js";
 import { EmailService } from "./services/email.service.js";
@@ -38,6 +39,7 @@ import { createEmailProvider, createSmsProvider } from "../integrations/provider
   providers: [
     NotificationsService,
     NotificationsProcessor,
+    NotificationsSweepScheduler,
     NotificationsGateway,
     SmsService,
     EmailService,

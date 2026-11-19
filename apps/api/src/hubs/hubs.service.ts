@@ -424,6 +424,13 @@ export class HubsService {
 
             parcel.status = ParcelStatus.ORIGIN_HUB_RECEIVED;
             parcel.currentHubId = hub.id;
+            // The pickup rider's custody ends at the hub door.
+            if (
+              previousStatus === ParcelStatus.PICKUP_ASSIGNED ||
+              previousStatus === ParcelStatus.PICKED_UP
+            ) {
+              parcel.currentRiderId = null;
+            }
             await manager.getRepository(Parcel).save(parcel);
 
             await this.appendHistory(manager, {
@@ -531,7 +538,9 @@ export class HubsService {
         const bag = await manager
           .getRepository(Bag)
           .createQueryBuilder("bag")
-          .setLock("pessimistic_write")
+          // Lock only the bag row: PostgreSQL rejects FOR UPDATE on the nullable
+          // side of the hub LEFT JOINs, which made every bag scan return 500.
+          .setLock("pessimistic_write", undefined, ["bag"])
           .leftJoinAndSelect("bag.originHub", "originHub")
           .leftJoinAndSelect("bag.destinationHub", "destinationHub")
           .where("bag.bag_code = :barcode", { barcode })
@@ -806,6 +815,10 @@ export class HubsService {
       });
     }
 
+    const currentHub = parcel.currentHubId
+      ? await this.hubRepo.findOne({ where: { id: parcel.currentHubId }, select: ["id", "district"] })
+      : null;
+
     return {
       id: parcel.id,
       trackingCode: parcel.trackingCode,
@@ -815,6 +828,8 @@ export class HubsService {
       weightKg: Number(parcel.weight),
       status: parcel.status,
       currentHubId: parcel.currentHubId,
+      // Same-city parcel: deliverable straight from the hub it is sitting in.
+      localDelivery: ParcelLifecycleService.isLocalDelivery(currentHub?.district, parcel.district),
     };
   }
 
@@ -866,7 +881,11 @@ export class HubsService {
           limit?: number;
         },
     legacyStatus?: BagStatus,
-  ): Promise<{ items: BagListItem[]; pagination: PaginationMeta }> {
+  ): Promise<{
+    items: BagListItem[];
+    pagination: PaginationMeta;
+    statusCounts: Partial<Record<BagStatus, number>>;
+  }> {
     let hubId: string | undefined;
     let status: BagStatus | undefined;
     let search: string | undefined;
@@ -887,7 +906,7 @@ export class HubsService {
 
     const hubIds = await this.authorizedHubIdsOrThrow(user, hubId);
     if (hubIds.length === 0) {
-      return { items: [], pagination: buildPaginationMeta(page, limit, 0) };
+      return { items: [], pagination: buildPaginationMeta(page, limit, 0), statusCounts: {} };
     }
 
     const qb = this.bagRepo
@@ -920,9 +939,37 @@ export class HubsService {
     const skip = (page - 1) * limit;
     const [bags, total] = await qb.skip(skip).take(limit).getManyAndCount();
 
+    // Per-status totals for the filter tabs: same hub + search scope, but not
+    // narrowed by the selected status, so every tab shows its real count.
+    const countsQb = this.bagRepo
+      .createQueryBuilder("bag")
+      .leftJoin("bag.originHub", "originHub")
+      .leftJoin("bag.destinationHub", "destinationHub")
+      .select("bag.status", "status")
+      .addSelect("COUNT(*)::int", "count")
+      .where("(bag.origin_hub_id IN (:...hubIds) OR bag.destination_hub_id IN (:...hubIds))", {
+        hubIds,
+      })
+      .groupBy("bag.status");
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      countsQb.andWhere(
+        new Brackets((b) => {
+          b.where("bag.bagCode ILIKE :term", { term })
+            .orWhere("bag.sealTag ILIKE :term", { term })
+            .orWhere("originHub.name ILIKE :term", { term })
+            .orWhere("destinationHub.name ILIKE :term", { term });
+        }),
+      );
+    }
+    const statusCounts = Object.fromEntries(
+      (await countsQb.getRawMany<{ status: string; count: number }>()).map((r) => [r.status, Number(r.count)]),
+    ) as Partial<Record<BagStatus, number>>;
+
     return {
       items: bags.map((bag) => this.toBagListItem(bag)),
       pagination: buildPaginationMeta(page, limit, total),
+      statusCounts,
     };
   }
 
@@ -1288,7 +1335,11 @@ export class HubsService {
           page?: number;
           limit?: number;
         },
-  ): Promise<{ items: ManifestListItem[]; pagination: PaginationMeta }> {
+  ): Promise<{
+    items: ManifestListItem[];
+    pagination: PaginationMeta;
+    statusCounts: Partial<Record<ManifestStatus, number>>;
+  }> {
     let hubId: string | undefined;
     let status: ManifestStatus | undefined;
     let search: string | undefined;
@@ -1308,7 +1359,7 @@ export class HubsService {
 
     const hubIds = await this.authorizedHubIdsOrThrow(user, hubId);
     if (hubIds.length === 0) {
-      return { items: [], pagination: buildPaginationMeta(page, limit, 0) };
+      return { items: [], pagination: buildPaginationMeta(page, limit, 0), statusCounts: {} };
     }
 
     const qb = this.manifestRepo
@@ -1351,7 +1402,39 @@ export class HubsService {
         this.toManifestListItem(manifest, parcelCounts.get(manifest.id) ?? 0),
       ),
       pagination: buildPaginationMeta(page, limit, total),
+      statusCounts: await this.manifestStatusCounts(hubIds, search),
     };
+  }
+
+  /** Per-status manifest totals for filter tabs (hub + search scope, any status). */
+  private async manifestStatusCounts(
+    hubIds: string[],
+    search?: string,
+  ): Promise<Partial<Record<ManifestStatus, number>>> {
+    const qb = this.manifestRepo
+      .createQueryBuilder("manifest")
+      .leftJoin("manifest.originHub", "originHub")
+      .leftJoin("manifest.destinationHub", "destinationHub")
+      .select("manifest.status", "status")
+      .addSelect("COUNT(*)::int", "count")
+      .where(
+        "(manifest.origin_hub_id IN (:...hubIds) OR manifest.destination_hub_id IN (:...hubIds))",
+        { hubIds },
+      )
+      .groupBy("manifest.status");
+    if (search && search.trim()) {
+      const term = `%${search.trim()}%`;
+      qb.andWhere(
+        new Brackets((b) => {
+          b.where("manifest.manifestCode ILIKE :term", { term })
+            .orWhere("manifest.vehicleNumber ILIKE :term", { term })
+            .orWhere("originHub.name ILIKE :term", { term })
+            .orWhere("destinationHub.name ILIKE :term", { term });
+        }),
+      );
+    }
+    const rows = await qb.getRawMany<{ status: ManifestStatus; count: number }>();
+    return Object.fromEntries(rows.map((r) => [r.status, Number(r.count)]));
   }
 
   async getManifest(user: AuthenticatedUser, manifestId: string): Promise<ManifestDetails> {

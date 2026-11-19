@@ -153,7 +153,8 @@
     "emailPlaceholder": "e.g. merchant@mystore.com",
     "phonePlaceholder": "01712345678",
     "businessNamePlaceholder": "e.g. Dhaka Artisan Crafts",
-    "pickupAddressPlaceholder": "e.g. House 14, Road 5, Dhanmondi, Dhaka"
+    "pickupAddressPlaceholder": "e.g. House 14, Road 5, Dhanmondi, Dhaka",
+    "pickupDistrict": "Pickup district"
   },
   "BookingForm": {
     "title": "Create New Parcel Booking",
@@ -192,7 +193,7 @@
     "createFailed": "Failed to create parcel booking. Please check your inputs and try again.",
     "pageTitle": "Book a Parcel",
     "pageSubtitle": "Fill in the recipient and package details. Delivery fees are calculated by Dhruto and shown before you confirm.",
-    "engineOnline": "Express Engine Online",
+    "engineOnline": "Live pricing",
     "sectionRecipient": "Recipient",
     "sectionRecipientHint": "Who will receive this parcel?",
     "sectionDestination": "Destination",
@@ -385,7 +386,9 @@
     "exceptionNext": "This shipment needs attention. Contact support with the tracking code.",
     "copyTrackingCode": "Copy tracking ID",
     "trackingCopied": "Tracking ID copied",
-    "copyFailed": "Could not copy to clipboard"
+    "copyFailed": "Could not copy to clipboard",
+    "deliveryNote": "Delivery note for rider",
+    "pickupInstructions": "Pickup instructions"
   },
   "ShippingLabel": {
     "title": "Shipping Label",
@@ -689,6 +692,57 @@
       "bagManagement": "Bag Management",
       "manifestsTransit": "Manifests & Transit",
       "cashDesk": "Cash Desk & Hand-in"
+    },
+    "returns": {
+      "initiate": {
+        "action": "Start return to merchant",
+        "title": "Return {code} to the merchant?",
+        "description": "Use this when delivery cannot be completed. The parcel stops delivery attempts and starts its return leg.",
+        "confirm": "Start return",
+        "done": "Return started for {code}",
+        "failed": "Could not start the return"
+      },
+      "advance": {
+        "action": "Dispatch return",
+        "title": "Dispatch return for {code}?",
+        "description": "Confirms the parcel has left the hub on its way back to the merchant.",
+        "confirm": "Dispatch",
+        "done": "Return dispatched for {code}",
+        "failed": "Could not dispatch the return"
+      },
+      "complete": {
+        "action": "Mark returned to merchant",
+        "title": "Confirm {code} was returned?",
+        "description": "Confirms the merchant has received the parcel back. This closes the parcel.",
+        "confirm": "Confirm return",
+        "done": "{code} returned to merchant",
+        "failed": "Could not complete the return"
+      }
+    },
+    "pickups": {
+      "title": "Merchant pickups",
+      "subtitle": "Pickup requests from merchants in this hub's district. Assign a rider to collect each merchant's parcels.",
+      "loading": "Loading pickup requests…",
+      "loadFailed": "Could not load pickup requests.",
+      "retry": "Retry",
+      "emptyTitle": "No pickups waiting",
+      "emptyDescription": "When merchants in this district request a pickup, it appears here.",
+      "assignedTo": "Assigned to {rider}",
+      "awaitingRider": "Awaiting rider",
+      "assign": "Assign pickup rider",
+      "reassign": "Change rider",
+      "dialogTitle": "Pickup from {merchant}",
+      "dialogDescription": "{count, plural, one {# parcel} other {# parcels}} will be assigned to the rider.",
+      "findRider": "Find rider",
+      "findRiderPlaceholder": "Search by name or rider code",
+      "rider": "Rider",
+      "selectRider": "Select rider",
+      "activeTasks": "{count} active",
+      "cancel": "Cancel",
+      "assigning": "Assigning…",
+      "confirmAssign": "Assign rider",
+      "assignedToast": "{count} parcels assigned to {rider}",
+      "assignFailed": "Could not assign the pickup rider"
     }
   },
   "Rider": {
@@ -782,7 +836,12 @@
       "rescheduleLabel": "Reschedule date (optional)",
       "submitFailure": "Submit attempt",
       "submitting": "Submitting…",
-      "subtitle": "Verify recipient OTP, collect payment, and complete the package handover."
+      "subtitle": "Verify recipient OTP, collect payment, and complete the package handover.",
+      "instructionsTitle": "Delivery instructions",
+      "preferredTime": "Recipient's preferred time",
+      "customerNote": "Recipient's instruction",
+      "merchantNote": "Merchant's note",
+      "itemDescription": "Item"
     },
     "failReasons": {
       "CUSTOMER_UNAVAILABLE": "Customer unavailable",
@@ -830,7 +889,16 @@
       "deliveredToday": "{count} today",
       "assignmentsTitle": "Assignment history",
       "noAssignments": "No assignments recorded.",
-      "reassignedNote": "Reassigned"
+      "reassignedNote": "Reassigned",
+      "searchRider": "Find rider",
+      "searchRiderPlaceholder": "Search by name or rider code"
+    },
+    "pickups": {
+      "title": "Pickups to collect ({count})",
+      "confirm": "Confirm pickup ({count})",
+      "confirming": "Confirming…",
+      "confirmed": "{count} parcels picked up",
+      "confirmFailed": "Could not confirm the pickup"
     }
   },
   "Finance": {
@@ -1054,7 +1122,9 @@
     "merchant": "Merchant",
     "bank": "Bank",
     "branch": "Branch",
-    "maxAmount": "Max ({amount})"
+    "maxAmount": "Max ({amount})",
+    "amountOverBalance": "Amount is more than your available balance of {amount}.",
+    "amountBelowMinimum": "Minimum payout is {amount}."
   },
   "Webhooks": {
     "title": "Webhooks & Real-time Integrations",
@@ -1265,7 +1335,7 @@
     "holdReview": "Hold for Review",
     "callNeeded": "Call Verification Needed",
     "advanceNeeded": "Advance Fee Suggested",
-    "eyebrow": "Dhruto Cognitive Intelligence Engine v2.0",
+    "eyebrow": "Address & risk intelligence",
     "bookWithAi": "Book With AI Auto-Fill",
     "districtCoverage": "District Coverage",
     "districtCoverageDesc": "All Bangladesh divisions & hubs",
@@ -1388,7 +1458,8 @@
     "settings": "Settings",
     "faq": "Help",
     "status": "System Status",
-    "communications": "Communication Center"
+    "communications": "Communication Center",
+    "pickups": "Pickups"
   },
   "Footer": {
     "tagline": "Next-Gen Logistics & Courier OS",
@@ -2291,7 +2362,7 @@
     "telemetryAutomation": "Telemetry & Automation",
     "exploreTelemetry": "Explore Telemetry",
     "supervisoryNotice": "Supervisory Notice:",
-    "supervisoryNoticeText": "Administrative actions across parcels, hub manifests, and merchant financial payouts are permanently recorded in immutable audit logs with operator timestamp and IP fingerprinting.",
+    "supervisoryNoticeText": "Administrative actions on parcels, hub manifests and merchant payouts are recorded in the parcel history and finance journal with the operator and time.",
     "badges": {
       "realtimeTracking": "Real-Time Tracking",
       "activeHubs": "Hub Network",
@@ -2924,7 +2995,10 @@
     "notifications": "Notifications",
     "registeredAccount": "Registered Merchant Account",
     "activeStatus": "Active",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "pickupDistrict": "Pickup district",
+    "pickupThana": "Pickup thana / area",
+    "pickupDistrictDesc": "Pickup requests go to the Dhruto hub that serves this district."
   },
   "ChatAdmin": {
     "loading": "Loading…",

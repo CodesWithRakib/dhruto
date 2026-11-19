@@ -11,6 +11,8 @@ import {
 } from "../database/entities/index.js";
 import { getErrorMessage } from "../common/utils/error.util.js";
 
+export const NOTIFICATION_SWEEP_JOB = "sweep-stale-pending";
+
 interface NotificationSendJob {
   notificationId: string;
 }
@@ -37,6 +39,10 @@ export class NotificationsProcessor extends WorkerHost {
   }
 
   async process(job: Job<NotificationSendJob>): Promise<void> {
+    if (job.name === NOTIFICATION_SWEEP_JOB) {
+      await this.notificationsService.redispatchStalePending();
+      return;
+    }
     this.logger.log(
       `NOTIFICATION_JOB_START job=${job.id} notification=${job.data.notificationId} attempt=${job.attemptsMade + 1}`,
     );
@@ -47,9 +53,17 @@ export class NotificationsProcessor extends WorkerHost {
   @OnWorkerEvent("failed")
   async onFailed(job: Job<NotificationSendJob> | undefined, error: Error): Promise<void> {
     if (!job) return;
+    if (job.name === NOTIFICATION_SWEEP_JOB) {
+      this.logger.warn(`NOTIFICATION_SWEEP_JOB_FAILED error=${getErrorMessage(error, "unknown")}`);
+      return;
+    }
     this.logger.warn(
       `NOTIFICATION_JOB_FAILED job=${job.id} attempts=${job.attemptsMade} error=${getErrorMessage(error, "unknown")}`,
     );
+    // BullMQ fires "failed" after every attempt. Only a job with no retries
+    // left is a dead letter; recording earlier attempts flooded the admin
+    // failure queue with OPEN rows for SMS that were delivered on retry.
+    if (job.attemptsMade < (job.opts.attempts ?? 1)) return;
     try {
       const row = await this.notificationsService.findById(job.data.notificationId);
       await this.failureRepo.save(

@@ -136,7 +136,7 @@ export function FaqInteractiveDirectory({
       {
         id: "faq-12",
         question: "Do you support real-time Webhook event notifications?",
-        answer: "Yes. Our REST API delivers HMAC-SHA256 signed webhooks for lifecycle events including 'parcel.picked_up', 'parcel.in_transit', 'parcel.out_for_delivery', 'parcel.delivered', and 'parcel.rto_initiated'.",
+        answer: "Yes. Our REST API delivers HMAC-SHA256 signed webhooks for lifecycle events including 'parcel.picked_up', 'parcel.out_for_delivery', 'parcel.delivered', 'parcel.failed', and 'parcel.returned'.",
         category: "api",
         badge: "Webhooks",
         actionLink: { href: "/contact", label: "Contact Engineering Team" },

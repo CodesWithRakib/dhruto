@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectQueue } from "@nestjs/bullmq";
 import type { Queue } from "bullmq";
-import { IsNull, Repository, type FindOptionsWhere } from "typeorm";
+import { Between, In, IsNull, LessThan, Repository, type FindOptionsWhere } from "typeorm";
 import {
   Notification,
   NotificationChannel,
@@ -46,6 +46,11 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
  * is unreachable); IN_APP rows complete immediately. Bodies are never
  * logged and OTPs never persisted outside the SMS body itself.
  */
+/** Stuck-PENDING sweep window: older than 2 minutes, younger than 6 hours. */
+const STALE_PENDING_MIN_AGE_MS = 2 * 60 * 1000;
+const STALE_PENDING_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const STALE_PENDING_MAX_ATTEMPTS = 4;
+
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
@@ -152,11 +157,47 @@ export class NotificationsService {
    * job as FAILED without retry; transient failures throw so BullMQ retries
    * with backoff. Never throws for IN_APP.
    */
+  /**
+   * Safety net for SMS/email stuck in PENDING (e.g. a lost queue job). Only
+   * recent rows are retried: re-sending day-old "out for delivery" texts would
+   * confuse recipients, so older rows are left for an operator to replay.
+   */
+  async redispatchStalePending(now = new Date()): Promise<number> {
+    const stale = await this.notificationRepo.find({
+      where: {
+        status: NotificationStatus.PENDING,
+        channel: In([NotificationChannel.SMS, NotificationChannel.EMAIL]),
+        createdAt: Between(
+          new Date(now.getTime() - STALE_PENDING_MAX_AGE_MS),
+          new Date(now.getTime() - STALE_PENDING_MIN_AGE_MS),
+        ),
+        attemptCount: LessThan(STALE_PENDING_MAX_ATTEMPTS),
+      },
+      order: { createdAt: "ASC" },
+      take: 50,
+    });
+    for (const row of stale) {
+      await this.transportNotification(row.id).catch((error: unknown) =>
+        this.logger.warn(
+          `NOTIFICATION_SWEEP_FAILED notification=${row.id} error=${getErrorMessage(error, "unknown")}`,
+        ),
+      );
+    }
+    if (stale.length > 0) this.logger.log(`NOTIFICATION_SWEEP redispatched=${stale.length}`);
+    return stale.length;
+  }
+
   async transportNotification(notificationId: string): Promise<void> {
     const notification = await this.notificationRepo.findOne({
       where: { id: notificationId },
     });
-    if (!notification) return;
+    if (!notification) {
+      // Jobs are enqueued inside the producer's transaction (outbox relay), so
+      // the worker can run before the row is committed. Returning here used to
+      // complete the job silently and leave the SMS PENDING forever; throwing
+      // lets BullMQ retry with backoff until the row is visible.
+      throw new Error(`NOTIFICATION_NOT_VISIBLE notification=${notificationId}`);
+    }
     if (notification.status === NotificationStatus.SENT) return;
 
     notification.attemptCount += 1;

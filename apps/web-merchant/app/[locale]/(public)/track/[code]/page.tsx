@@ -54,9 +54,9 @@ export default async function TrackCodePage({
       </div>
 
       {/* Main Tracking Results Cockpit */}
-      <main className="py-6">
+      <div className="py-6">
         <PublicTrackingView initialCode={code} showIntro={false} />
-      </main>
+      </div>
     </div>
   );
 }

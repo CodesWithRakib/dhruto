@@ -8,7 +8,12 @@ import {
   useRefreshDeliveryOtpMutation,
   useSetDeliveryPreferenceMutation,
 } from "@/features/parcels/api/parcels.api";
-import { ParcelStatus, type ParcelListItem, type PublicTrackingResponse } from "@dhruto/contracts";
+import {
+  ParcelStatus,
+  isDeliveredStatus,
+  type ParcelListItem,
+  type PublicTrackingResponse,
+} from "@dhruto/contracts";
 
 export interface CustomerDelivery {
   id: string;
@@ -129,8 +134,17 @@ function etaFromPreference(pref: NonNullable<ParcelListItem["deliveryPreference"
   return pref.slot ? `${day} (${pref.slot})` : day;
 }
 
+/**
+ * Recipient-facing status: internal cash settlement after the handoff
+ * (CASH_PENDING / CASH_VERIFIED) is shown as DELIVERED, so delivered parcels
+ * are never treated as active (no OTP, no reschedule, correct filters).
+ */
+export function customerFacingStatus(status: string): string {
+  return isDeliveredStatus(status) ? ParcelStatus.DELIVERED : status;
+}
+
 export function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDelivery {
-  const isDelivered = parcel.status === ParcelStatus.DELIVERED;
+  const isDelivered = isDeliveredStatus(parcel.status);
   const isPaid = isDelivered || Number(parcel.codAmount) === 0;
   const destination =
     parcel.thana && parcel.district
@@ -144,8 +158,8 @@ export function mapParcelListItemToDelivery(parcel: ParcelListItem): CustomerDel
     destination,
     district: parcel.district,
     thana: parcel.thana,
-    status: parcel.status,
-    statusLabel: formatStatusLabel(parcel.status),
+    status: customerFacingStatus(parcel.status),
+    statusLabel: formatStatusLabel(customerFacingStatus(parcel.status)),
     eta:
       parcel.deliveryPreference && !isDelivered
         ? etaFromPreference(parcel.deliveryPreference)
@@ -184,7 +198,7 @@ function mapTrackingResponseToDelivery(
   tracking: PublicTrackingResponse,
   fallback?: Partial<CustomerDelivery>,
 ): CustomerDelivery {
-  const isDelivered = tracking.status === ParcelStatus.DELIVERED;
+  const isDelivered = isDeliveredStatus(tracking.status);
   const destination =
     tracking.recipientThana && tracking.recipientDistrict
       ? `${tracking.recipientThana}, ${tracking.recipientDistrict}`
@@ -197,8 +211,8 @@ function mapTrackingResponseToDelivery(
     destination,
     district: tracking.recipientDistrict ?? fallback?.district,
     thana: tracking.recipientThana ?? fallback?.thana,
-    status: tracking.status,
-    statusLabel: formatStatusLabel(tracking.status),
+    status: customerFacingStatus(tracking.status),
+    statusLabel: formatStatusLabel(customerFacingStatus(tracking.status)),
     // Keep a preference-based ETA from the owned record while not delivered.
     eta: isDelivered ? "Delivered" : fallback?.eta || estimateEtaFromStatus(tracking.status),
     // Public tracking does not disclose COD: unknown unless the owned record had it.

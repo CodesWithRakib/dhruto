@@ -68,7 +68,8 @@ export const ALLOWED_PARCEL_TRANSITIONS: Readonly<Record<ParcelStatus, readonly 
     ParcelStatus.OUT_FOR_DELIVERY,
     ParcelStatus.RTO_INITIATED,
   ],
-  [ParcelStatus.RESCHEDULED]: [ParcelStatus.OUT_FOR_DELIVERY],
+  // A rescheduled parcel can still be sent back (customer refuses later, merchant recalls).
+  [ParcelStatus.RESCHEDULED]: [ParcelStatus.OUT_FOR_DELIVERY, ParcelStatus.RTO_INITIATED],
   [ParcelStatus.DELIVERED]: [ParcelStatus.CASH_PENDING],
   [ParcelStatus.CASH_PENDING]: [ParcelStatus.CASH_VERIFIED],
   [ParcelStatus.RTO_INITIATED]: [ParcelStatus.RETURN_IN_TRANSIT],
@@ -100,6 +101,20 @@ export class ParcelLifecycleService {
       return true;
     }
     return (ALLOWED_PARCEL_TRANSITIONS[from] ?? []).includes(to);
+  }
+
+  /**
+   * Same-city delivery: a parcel received at its origin hub may go straight to
+   * a delivery rider (ORIGIN_HUB_RECEIVED -> ASSIGNED_TO_RIDER) when that hub
+   * serves the parcel's destination district. Inter-district parcels still
+   * need BAGGED -> IN_TRANSIT -> DESTINATION_HUB_RECEIVED.
+   */
+  static isLocalDelivery(
+    hubDistrict: string | null | undefined,
+    parcelDistrict: string | null | undefined,
+  ): boolean {
+    const norm = (v: string | null | undefined) => (v ?? "").trim().toLowerCase();
+    return norm(hubDistrict) !== "" && norm(hubDistrict) === norm(parcelDistrict);
   }
 
   /** Throws a 400 with a machine-readable code when a transition is illegal. */

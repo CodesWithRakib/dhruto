@@ -15,6 +15,8 @@ export const DOMAIN_EVENT_VERSION = 1 as const;
 export enum DomainEventType {
   PARCEL_CREATED = "parcel.created.v1",
   PARCEL_ASSIGNED = "parcel.assigned.v1",
+  /** First-mile: the pickup rider collected the parcel from the merchant. */
+  PARCEL_PICKED_UP = "parcel.picked_up.v1",
   PARCEL_OUT_FOR_DELIVERY = "parcel.out_for_delivery.v1",
   PARCEL_DELIVERED = "parcel.delivered.v1",
   PARCEL_FAILED = "parcel.failed.v1",

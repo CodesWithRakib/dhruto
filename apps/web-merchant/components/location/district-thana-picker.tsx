@@ -1,12 +1,249 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
-import {
-  getAllDistricts,
-  getThanasForDistrict,
-} from "@/lib/data/bangladesh-locations";
-import { ChevronDown, Check, MapPin, X } from "lucide-react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import { getAllDistricts, getThanasForDistrict } from "@/lib/data/bangladesh-locations";
+import { Check, ChevronDown, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/cn";
+
+/* ------------------------------------------------------------------ */
+/* Shared accessible combobox (WAI-ARIA combobox + listbox pattern).    */
+/* Free text is always allowed; options are suggestions.               */
+/* ------------------------------------------------------------------ */
+
+interface ComboOption {
+  value: string;
+  secondary?: string;
+  badge?: string;
+  badgeMono?: boolean;
+}
+
+interface LocationComboboxProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: ComboOption[];
+  emptyMessage: React.ReactNode;
+  placeholder: string;
+  ariaLabel: string;
+  clearLabel: string;
+  toggleLabel: string;
+  disabled?: boolean;
+  error?: boolean;
+  id?: string;
+  name: string;
+  title?: string;
+  withIcon?: boolean;
+  className?: string;
+}
+
+function LocationCombobox({
+  value,
+  onChange,
+  options,
+  emptyMessage,
+  placeholder,
+  ariaLabel,
+  clearLabel,
+  toggleLabel,
+  disabled = false,
+  error = false,
+  id,
+  name,
+  title,
+  withIcon = false,
+  className,
+}: LocationComboboxProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
+
+  useEffect(() => setInputValue(value), [value]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Keep the highlighted option in view while moving with the keyboard.
+  useEffect(() => {
+    if (activeIndex < 0) return;
+    listRef.current
+      ?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex]);
+
+  const select = (next: string) => {
+    setInputValue(next);
+    onChange(next);
+    setIsOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!isOpen) setIsOpen(true);
+      if (options.length === 0) return;
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setActiveIndex((i) => (i + step + options.length) % options.length);
+    } else if (e.key === "Enter" && isOpen && activeIndex >= 0 && options[activeIndex]) {
+      e.preventDefault();
+      select(options[activeIndex].value);
+    } else if (e.key === "Escape" && isOpen) {
+      e.preventDefault();
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
+
+  const activeId = activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined;
+
+  return (
+    <div ref={containerRef} className={cn("relative w-full", className)}>
+      <div className="relative">
+        <input
+          type="text"
+          id={id}
+          name={name}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            onChange(e.target.value);
+            setActiveIndex(-1);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          title={title}
+          disabled={disabled}
+          autoComplete="off"
+          role="combobox"
+          aria-label={ariaLabel}
+          aria-expanded={isOpen}
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          aria-activedescendant={isOpen ? activeId : undefined}
+          aria-invalid={error || undefined}
+          className={cn(
+            "h-11 w-full rounded-2xl bg-field pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
+            "hover:bg-field-hover focus:bg-surface focus:ring-2 focus:ring-primary/20",
+            withIcon ? "pl-10" : "pl-4",
+            error && "bg-danger-soft/60",
+            disabled && "cursor-not-allowed opacity-50",
+          )}
+        />
+        {withIcon && (
+          <MapPin className="absolute left-3.5 top-3.5 h-4 w-4 text-primary pointer-events-none" />
+        )}
+        <div className="absolute right-2.5 top-2.5 flex items-center gap-1">
+          {inputValue && (
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => select("")}
+              className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
+              aria-label={clearLabel}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
+            aria-label={toggleLabel}
+          >
+            <ChevronDown
+              className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")}
+            />
+          </button>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div
+          ref={listRef}
+          id={listboxId}
+          role="listbox"
+          aria-label={ariaLabel}
+          className="dhruto-popover absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-popover p-1.5 animate-in fade-in-0 zoom-in-95"
+        >
+          {options.length === 0 ? (
+            <div className="py-4 px-3 text-center text-xs text-muted-foreground">{emptyMessage}</div>
+          ) : (
+            options.map((option, index) => {
+              const isSelected =
+                inputValue.trim().toLowerCase() === option.value.toLowerCase() ||
+                (option.secondary !== undefined && inputValue.trim() === option.secondary);
+              const isActive = index === activeIndex;
+              return (
+                <div
+                  key={option.value}
+                  id={`${listboxId}-opt-${index}`}
+                  data-index={index}
+                  role="option"
+                  aria-selected={isSelected}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    select(option.value);
+                  }}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  className={cn(
+                    "flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-xs transition-colors text-left",
+                    isSelected
+                      ? "bg-primary text-primary-foreground font-bold"
+                      : isActive
+                        ? "bg-surface text-foreground"
+                        : "text-foreground",
+                  )}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="font-semibold">{option.value}</span>
+                    {option.secondary && (
+                      <span
+                        className={cn(
+                          "text-[11px]",
+                          isSelected ? "text-primary-foreground/80" : "text-muted-foreground",
+                        )}
+                      >
+                        {option.secondary}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {option.badge && (
+                      <span
+                        className={cn(
+                          "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
+                          option.badgeMono && "font-mono rounded-md",
+                          isSelected ? "bg-white/20 text-white" : "bg-surface-muted text-muted-foreground",
+                        )}
+                      >
+                        {option.badge}
+                      </span>
+                    )}
+                    {isSelected && <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 
 export interface DistrictSelectProps {
   value?: string;
@@ -31,166 +268,44 @@ export function DistrictSelect({
   className,
   "aria-label": ariaLabel,
 }: DistrictSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Sync internal input value if external value changes
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
+  const [query, setQuery] = useState(value);
+  useEffect(() => setQuery(value), [value]);
   const allDistricts = useMemo(() => getAllDistricts(), []);
 
-  // Filter districts based on what user has typed
-  const filteredDistricts = useMemo(() => {
-    const q = inputValue.trim().toLowerCase();
-    if (!q) return allDistricts;
-    return allDistricts.filter(
-      (d) =>
-        d.name.toLowerCase().includes(q) ||
-        d.nameBn.includes(q) ||
-        d.aliases.some((a) => a.toLowerCase().includes(q)) ||
-        (d.division && d.division.toLowerCase().includes(q)),
-    );
-  }, [allDistricts, inputValue]);
-
-  const handleSelect = (districtName: string) => {
-    setInputValue(districtName);
-    onChange(districtName);
-    setIsOpen(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const text = e.target.value;
-    setInputValue(text);
-    onChange(text);
-    if (!isOpen) setIsOpen(true);
-  };
+  const options = useMemo<ComboOption[]>(() => {
+    const q = query.trim().toLowerCase();
+    return allDistricts
+      .filter(
+        (d) =>
+          !q ||
+          d.name.toLowerCase().includes(q) ||
+          d.nameBn.includes(q) ||
+          d.aliases.some((a) => a.toLowerCase().includes(q)) ||
+          (d.division && d.division.toLowerCase().includes(q)),
+      )
+      .map((d) => ({ value: d.name, secondary: d.nameBn, badge: d.division ?? undefined }));
+  }, [allDistricts, query]);
 
   return (
-    <div ref={containerRef} className={cn("relative w-full", className)}>
-      <div className="relative">
-        <input
-          type="text"
-          id={id}
-          name={name}
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
-          disabled={disabled}
-          autoComplete="off"
-          aria-label={ariaLabel ?? "District"}
-          aria-expanded={isOpen}
-          className={cn(
-            "h-11 w-full rounded-2xl bg-surface-muted/60 pl-10 pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
-            "hover:bg-surface-muted focus:bg-background focus:ring-2 focus:ring-primary/20",
-            error && "bg-destructive/5",
-            disabled && "cursor-not-allowed opacity-50",
-          )}
-        />
-        <MapPin className="absolute left-3.5 top-3.5 h-4 w-4 text-primary pointer-events-none" />
-        <div className="absolute right-2.5 top-2.5 flex items-center gap-1">
-          {inputValue && (
-            <button
-              type="button"
-              tabIndex={-1}
-              onClick={() => {
-                setInputValue("");
-                onChange("");
-              }}
-              className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
-              aria-label="Clear district"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-          <button
-            type="button"
-            tabIndex={-1}
-            onClick={() => setIsOpen((prev) => !prev)}
-            className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
-            aria-label="Toggle district dropdown"
-          >
-            <ChevronDown
-              className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* Popover Dropdown Panel */}
-      {isOpen && (
-        <div className="absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-surface-elevated p-1.5 animate-in fade-in-0 zoom-in-95">
-          {filteredDistricts.length === 0 ? (
-            <div className="py-4 px-3 text-center text-xs text-muted-foreground">
-              No preset districts matching "{inputValue}". Press Tab or Enter to keep custom text.
-            </div>
-          ) : (
-            filteredDistricts.map((d) => {
-              const isSelected =
-                inputValue.trim().toLowerCase() === d.name.toLowerCase() ||
-                inputValue.trim() === d.nameBn;
-              return (
-                <button
-                  key={d.name}
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelect(d.name);
-                  }}
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs transition-colors text-left",
-                    isSelected
-                      ? "bg-primary text-primary-foreground font-bold"
-                      : "text-foreground hover:bg-surface-muted/80",
-                  )}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="font-semibold">{d.name}</span>
-                    <span
-                      className={cn(
-                        "text-[11px]",
-                        isSelected ? "text-primary-foreground/80" : "text-muted-foreground",
-                      )}
-                    >
-                      {d.nameBn}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-2">
-                    {d.division && (
-                      <span
-                        className={cn(
-                          "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
-                          isSelected
-                            ? "bg-white/20 text-white"
-                            : "bg-surface-muted text-muted-foreground",
-                        )}
-                      >
-                        {d.division}
-                      </span>
-                    )}
-                    {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}
-                  </div>
-                </button>
-              );
-            })
-          )}
-        </div>
-      )}
-    </div>
+    <LocationCombobox
+      value={value}
+      onChange={(next) => {
+        setQuery(next);
+        onChange(next);
+      }}
+      options={options}
+      emptyMessage={`No preset districts matching "${query}". Press Tab or Enter to keep custom text.`}
+      placeholder={placeholder}
+      ariaLabel={ariaLabel ?? "District"}
+      clearLabel="Clear district"
+      toggleLabel="Toggle district dropdown"
+      disabled={disabled}
+      error={error}
+      id={id}
+      name={name}
+      withIcon
+      className={className}
+    />
   );
 }
 
@@ -219,169 +334,61 @@ export function ThanaSelect({
   className,
   "aria-label": ariaLabel,
 }: ThanaSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState(value);
+  useEffect(() => setQuery(value), [value]);
+  const availableThanas = useMemo(() => getThanasForDistrict(districtName), [districtName]);
 
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+  const options = useMemo<ComboOption[]>(() => {
+    const q = query.trim().toLowerCase();
+    return availableThanas
+      .filter(
+        (t) =>
+          !q ||
+          t.name.toLowerCase().includes(q) ||
+          t.nameBn.includes(q) ||
+          (t.postalCode && t.postalCode.includes(q)),
+      )
+      .map((t) => ({
+        value: t.name,
+        secondary: t.nameBn,
+        badge: t.postalCode || undefined,
+        badgeMono: true,
+      }));
+  }, [availableThanas, query]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const availableThanas = useMemo(() => {
-    return getThanasForDistrict(districtName);
-  }, [districtName]);
-
-  const filteredThanas = useMemo(() => {
-    const q = inputValue.trim().toLowerCase();
-    if (!q) return availableThanas;
-    return availableThanas.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.nameBn.includes(q) ||
-        (t.postalCode && t.postalCode.includes(q)),
+  const emptyMessage =
+    availableThanas.length === 0 ? (
+      !districtName ? (
+        "Select a district above to view its thanas, or type an area name."
+      ) : (
+        `Custom thana mode active. You can type any area or thana in ${districtName}.`
+      )
+    ) : (
+      <span className="space-y-1 block">
+        <span className="block">No preset thanas found for &quot;{query}&quot;.</span>
+        <span className="block text-[11px] text-primary">Custom name will be saved.</span>
+      </span>
     );
-  }, [availableThanas, inputValue]);
-
-  const handleSelect = (thanaName: string) => {
-    setInputValue(thanaName);
-    onChange(thanaName);
-    setIsOpen(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const text = e.target.value;
-    setInputValue(text);
-    onChange(text);
-    if (!isOpen) setIsOpen(true);
-  };
 
   return (
-    <div ref={containerRef} className={cn("relative w-full", className)}>
-      <div className="relative">
-        <input
-          type="text"
-          id={id}
-          name={name}
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
-          title={!districtName ? "Select a district first to view suggested thanas" : undefined}
-          disabled={disabled}
-          autoComplete="off"
-          aria-label={ariaLabel ?? "Thana / Upazila"}
-          aria-expanded={isOpen}
-          className={cn(
-            "h-11 w-full rounded-2xl bg-surface-muted/60 pl-4 pr-9 text-xs font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground placeholder:font-normal",
-            "hover:bg-surface-muted focus:bg-background focus:ring-2 focus:ring-primary/20",
-            error && "bg-destructive/5",
-            disabled && "cursor-not-allowed opacity-50",
-          )}
-        />
-        <div className="absolute right-2.5 top-2.5 flex items-center gap-1">
-          {inputValue && (
-            <button
-              type="button"
-              tabIndex={-1}
-              onClick={() => {
-                setInputValue("");
-                onChange("");
-              }}
-              className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
-              aria-label="Clear thana"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-          <button
-            type="button"
-            tabIndex={-1}
-            onClick={() => setIsOpen((prev) => !prev)}
-            className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
-            aria-label="Toggle thana dropdown"
-          >
-            <ChevronDown
-              className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")}
-            />
-          </button>
-        </div>
-      </div>
-
-      {isOpen && (
-        <div className="absolute z-50 mt-1.5 max-h-64 w-full overflow-y-auto rounded-2xl bg-surface-elevated p-1.5 animate-in fade-in-0 zoom-in-95">
-          {availableThanas.length === 0 ? (
-            <div className="py-4 px-3 text-center text-xs text-muted-foreground">
-              {!districtName
-                ? "Select a district above to view its thanas, or type an area name."
-                : `Custom thana mode active. You can type any area or thana in ${districtName}.`}
-            </div>
-          ) : filteredThanas.length === 0 ? (
-            <div className="py-3 px-3 text-center text-xs text-muted-foreground space-y-1">
-              <p>No preset thanas found for "{inputValue}".</p>
-              <p className="text-[11px] text-primary">Custom name will be saved.</p>
-            </div>
-          ) : (
-            filteredThanas.map((t) => {
-              const isSelected =
-                inputValue.trim().toLowerCase() === t.name.toLowerCase() ||
-                inputValue.trim() === t.nameBn;
-              return (
-                <button
-                  key={t.name}
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelect(t.name);
-                  }}
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs transition-colors text-left",
-                    isSelected
-                      ? "bg-primary text-primary-foreground font-bold"
-                      : "text-foreground hover:bg-surface-muted/80",
-                  )}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="font-semibold">{t.name}</span>
-                    <span
-                      className={cn(
-                        "text-[11px]",
-                        isSelected ? "text-primary-foreground/80" : "text-muted-foreground",
-                      )}
-                    >
-                      {t.nameBn}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                    {t.postalCode && (
-                      <span
-                        className={cn(
-                          "text-[10px] font-mono px-1.5 py-0.5 rounded-md",
-                          isSelected
-                            ? "bg-white/20 text-white"
-                            : "bg-surface-muted text-muted-foreground",
-                        )}
-                      >
-                        {t.postalCode}
-                      </span>
-                    )}
-                    {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}
-                  </div>
-                </button>
-              );
-            })
-          )}
-        </div>
-      )}
-    </div>
+    <LocationCombobox
+      value={value}
+      onChange={(next) => {
+        setQuery(next);
+        onChange(next);
+      }}
+      options={options}
+      emptyMessage={emptyMessage}
+      placeholder={placeholder}
+      ariaLabel={ariaLabel ?? "Thana / Upazila"}
+      clearLabel="Clear thana"
+      toggleLabel="Toggle thana dropdown"
+      title={!districtName ? "Select a district first to view suggested thanas" : undefined}
+      disabled={disabled}
+      error={error}
+      id={id}
+      name={name}
+      className={className}
+    />
   );
 }

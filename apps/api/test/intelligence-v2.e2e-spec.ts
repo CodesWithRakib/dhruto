@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { idempotencyKey } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 describe("Intelligence v2 — address confirm, parcel intelligence, overrides (Phase 6 E2E)", () => {
   let app: INestApplication;
@@ -107,7 +108,7 @@ describe("Intelligence v2 — address confirm, parcel intelligence, overrides (P
       .set("Authorization", `Bearer ${merchantToken}`)
       .set("Idempotency-Key", idempotencyKey("intel-parcel"))
       .send({
-        recipientName: "E2E Receiver",
+        recipientName: realisticName(),
         recipientPhone: "01799001122",
         district: "Dhaka",
         thana: "Mirpur",

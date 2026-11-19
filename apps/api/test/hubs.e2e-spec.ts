@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { BagStatus, HubScanType, ParcelStatus, ScanOutcome } from "@dhruto/contracts";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Phase 2 hub operations, end-to-end against the real database and the real
@@ -64,7 +65,7 @@ describe("Hub Operations (Phase 2 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("phase2"))
       .send({
-        recipientName: `Hub Recipient ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Chittagong",
         thana: "Panchlaish",

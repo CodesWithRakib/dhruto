@@ -8,10 +8,7 @@ import {
   Zap,
   Cpu,
   Activity,
-  ShieldCheck,
   RefreshCw,
-  Gauge,
-  CheckCircle2,
 } from "lucide-react";
 import { useGetSystemMetricsQuery } from "../api/observability.api";
 import { ErrorState, RetryButton } from "@/components/feedback/states";
@@ -190,128 +187,8 @@ export function SystemObservabilityCard() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Load Testing Benchmark & SLA Targets Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Load Test Results */}
-        <Card>
-          <CardHeader className="bg-surface-muted/40">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
-                  <Gauge className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">
-                    Load Testing & High-Throughput Baseline
-                  </CardTitle>
-                  <CardDescription>
-                    Automated benchmark validating concurrency and SLA targets
-                  </CardDescription>
-                </div>
-              </div>
-              <Badge
-                variant="outline"
-                className="bg-success-soft text-success-soft-foreground font-mono text-xs"
-              >
-                SLA PASSED
-              </Badge>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-6 space-y-3">
-            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
-              <div>
-                <span className="font-bold text-sm block">System Average Throughput</span>
-                <span className="text-xs text-muted-foreground">Target: &ge; 250 RPS</span>
-              </div>
-              <div className="text-right font-mono font-bold text-success-soft-foreground text-lg">
-                600 RPS{" "}
-                <span className="text-xs font-normal text-muted-foreground">(2.4x Target)</span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
-              <div>
-                <span className="font-bold text-sm block">Dynamic Pricing Latency (p95)</span>
-                <span className="text-xs text-muted-foreground">Target: &lt; 300 ms</span>
-              </div>
-              <div className="text-right font-mono font-bold text-success-soft-foreground text-lg">
-                45.8 ms{" "}
-                <span className="text-xs font-normal text-muted-foreground">(-84% lower)</span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
-              <div>
-                <span className="font-bold text-sm block">Error Rate Under Concurrency</span>
-                <span className="text-xs text-muted-foreground">Target: &lt; 1.00%</span>
-              </div>
-              <div className="text-right font-mono font-bold text-success-soft-foreground text-lg">
-                0.00%{" "}
-                <span className="text-xs font-normal text-muted-foreground">(Zero Faults)</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* High-Availability & Disaster Recovery */}
-        <Card>
-          <CardHeader className="bg-surface-muted/40">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary-soft text-primary-soft-foreground rounded-lg">
-                  <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Disaster Recovery & High Availability</CardTitle>
-                  <CardDescription>
-                    RPO, RTO, automated checksum verification, and backup runbook
-                  </CardDescription>
-                </div>
-              </div>
-              <Badge variant="outline" className="bg-info-soft text-info-soft-foreground font-mono text-xs">
-                RPO &lt; 15m
-              </Badge>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-6 space-y-3">
-            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
-              <div>
-                <span className="font-bold text-sm block">Recovery Point Objective (RPO)</span>
-                <span className="text-xs text-muted-foreground">
-                  WAL Streaming & automated daily snapshots
-                </span>
-              </div>
-              <span className="font-mono font-bold text-sm text-foreground">&lt; 15 Mins</span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
-              <div>
-                <span className="font-bold text-sm block">Recovery Time Objective (RTO)</span>
-                <span className="text-xs text-muted-foreground">
-                  Automated replica promotion & DNS edge failover
-                </span>
-              </div>
-              <span className="font-mono font-bold text-sm text-foreground">&lt; 30 Mins</span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-card flex items-center justify-between">
-              <div>
-                <span className="font-bold text-sm block">Backup Integrity Verification</span>
-                <span className="text-xs text-muted-foreground">
-                  SHA-256 cryptographic tamper check
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-success-soft-foreground font-bold text-xs font-mono">
-                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                <span>VERIFIED</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Load-test and disaster-recovery cards removed: their figures (600 RPS, RPO < 15 min,
+          replica failover) were hard-coded and not measured by this system. */}
     </div>
   );
 }

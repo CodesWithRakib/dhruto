@@ -7,6 +7,7 @@ import { Search, Package, AlertTriangle, UserCheck } from "lucide-react";
 import { useLazyLookupParcelQuery, useGetHubInventoryQuery } from "../api/hubs.api";
 import type { HubInventory } from "@dhruto/contracts";
 import { AssignRiderDialog } from "@/features/riders/components/fleet-views";
+import { HubReturnActions } from "./hub-return-actions";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
 import { StatusBadge } from "@/components/data-display/status-badge";
@@ -169,7 +170,8 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {ASSIGNABLE_STATUSES.includes(parcel.status) ? (
+              {ASSIGNABLE_STATUSES.includes(parcel.status) ||
+              (parcel.status === "ORIGIN_HUB_RECEIVED" && parcel.localDelivery) ? (
                 <Button
                   type="button"
                   variant="ghost"
@@ -180,6 +182,12 @@ export function ParcelLookupView({ currentHubId }: ParcelLookupViewProps) {
                   {t("assignRider")}
                 </Button>
               ) : null}
+              <HubReturnActions
+                parcelId={parcel.id}
+                trackingCode={parcel.trackingCode}
+                status={parcel.status}
+                onDone={() => void triggerLookup({ hubId: currentHubId, trackingCode: parcel.trackingCode })}
+              />
               {/* Parcel thread (rider ↔ hub); the API checks the manager's hub assignment. */}
               <OpenConversationButton
                 target={{ kind: "parcel", parcelId: parcel.id }}

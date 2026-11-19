@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { SEEDED_ACCOUNTS, bearer, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Phase 6 (Q-BULK): JSON bulk import — template, dry-run validation,
@@ -14,13 +15,12 @@ describe("Parcel bulk import (Phase 6 E2E)", () => {
   let app: INestApplication;
   let merchantToken: string;
 
-  const unique = () => Math.random().toString(36).slice(2, 8).toUpperCase();
   const batchKey = () =>
     `bulk-${Date.now()}-${Math.random().toString(16).slice(2, 10)}-testkey!`;
 
   function row(tag: string, overrides: Record<string, unknown> = {}) {
     return {
-      recipientName: `Bulk ${tag} ${unique()}`,
+      recipientName: realisticName(),
       recipientPhone: "01712345678",
       district: "Dhaka",
       thana: "Mirpur",
@@ -132,12 +132,29 @@ describe("Parcel bulk import (Phase 6 E2E)", () => {
     expect(big.body.success).toBe(false);
   });
 
-  it("rejects invalid rows at the boundary with 422", async () => {
-    // Via the validate endpoint (separate 10/min budget): same DTO gate.
-    await request(app.getHttpServer())
+  // Product rule: "one bad row never blocks the rest". Previously the batch
+  // DTO validated nested rows, so any bad row rejected the whole file (422).
+  it("reports invalid rows per row instead of rejecting the batch", async () => {
+    const res = await request(app.getHttpServer())
       .post("/api/v1/parcels/bulk/validate")
       .set(bearer(merchantToken))
-      .send({ rows: [row("bad", { recipientPhone: "011" })] })
-      .expect(422);
+      .send({ rows: [row("goodv"), row("bad", { recipientPhone: "011" })] })
+      .expect(200);
+    const [good, bad] = res.body.data.rows;
+    expect(good.ok).toBe(true);
+    expect(bad.ok).toBe(false);
+    expect(bad.message).toMatch(/mobile number/i);
+  });
+
+  it("imports the valid rows of a mixed batch and reports the bad one", async () => {
+    const res = await request(app.getHttpServer())
+      .post("/api/v1/parcels/bulk/import")
+      .set(bearer(merchantToken))
+      .set("Idempotency-Key", batchKey())
+      .send({ rows: [row("mixgood"), row("mixbad", { district: "" })] })
+      .expect((r) => expect(r.status).toBeLessThan(300));
+    expect(res.body.data.created).toBe(1);
+    expect(res.body.data.failed).toBe(1);
+    expect(res.body.data.rows[1].ok).toBe(false);
   });
 });

@@ -6,6 +6,7 @@ import { DataSource } from "typeorm";
 import { AppModule } from "../src/app.module.js";
 import { Parcel } from "../src/database/entities/index.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Phase 3 rider delivery, end-to-end against the real database.
@@ -76,7 +77,7 @@ describe("Rider Delivery (Phase 3 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("phase3"))
       .send({
-        recipientName: `Phase3 Recipient ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

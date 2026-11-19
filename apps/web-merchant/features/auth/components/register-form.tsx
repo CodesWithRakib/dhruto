@@ -13,6 +13,7 @@ import {
   CardContent,
   CardFooter,
 } from "@dhruto/ui";
+import { DistrictSelect } from "@/components/location/district-thana-picker";
 import { UserPlus, AlertCircle, ArrowRight } from "lucide-react";
 import { useRegisterMutation } from "../api/auth.api";
 import { useAppDispatch } from "../../../store/hooks";
@@ -32,6 +33,7 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupDistrict, setPickupDistrict] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [registerMutation, { isLoading }] = useRegisterMutation();
@@ -40,7 +42,7 @@ export function RegisterForm() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!name || !email || !phone || !password || !businessName || !pickupAddress) {
+    if (!name || !email || !phone || !password || !businessName || !pickupAddress || !pickupDistrict) {
       setErrorMessage(t("requiredFields"));
       return;
     }
@@ -54,6 +56,7 @@ export function RegisterForm() {
         role: "MERCHANT",
         businessName: businessName.trim(),
         pickupAddress: pickupAddress.trim(),
+        pickupDistrict: pickupDistrict.trim(),
       }).unwrap();
 
       if (res.success && res.data) {
@@ -103,8 +106,9 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-label leading-none">{t("fullName")} *</label>
+              <label htmlFor="register-full-name" className="text-label leading-none">{t("fullName")} *</label>
               <Input
+                id="register-full-name"
                 type="text"
                 placeholder={t("fullNamePlaceholder")}
                 value={name}
@@ -115,8 +119,9 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-label leading-none">{t("email")} *</label>
+              <label htmlFor="register-email" className="text-label leading-none">{t("email")} *</label>
               <Input
+                id="register-email"
                 type="email"
                 placeholder={t("emailPlaceholder")}
                 value={email}
@@ -129,8 +134,9 @@ export function RegisterForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-label leading-none">{t("phone")} *</label>
+              <label htmlFor="register-phone" className="text-label leading-none">{t("phone")} *</label>
               <Input
+                id="register-phone"
                 type="tel"
                 placeholder={t("phonePlaceholder")}
                 value={phone}
@@ -141,8 +147,9 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-label leading-none">{t("password")} *</label>
+              <label htmlFor="register-password" className="text-label leading-none">{t("password")} *</label>
               <Input
+                id="register-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
@@ -154,8 +161,9 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-label leading-none">{t("businessName")} *</label>
+            <label htmlFor="register-business-name" className="text-label leading-none">{t("businessName")} *</label>
               <Input
+                id="register-business-name"
                 type="text"
                 placeholder={t("businessNamePlaceholder")}
               value={businessName}
@@ -166,8 +174,21 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-label leading-none">{t("pickupAddress")} *</label>
+            <label htmlFor="register-pickup-district" className="text-label leading-none">{t("pickupDistrict")} *</label>
+            <DistrictSelect
+              id="register-pickup-district"
+              name="pickupDistrict"
+              value={pickupDistrict}
+              onChange={setPickupDistrict}
+              disabled={isLoading}
+              aria-label={t("pickupDistrict")}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="register-pickup-address" className="text-label leading-none">{t("pickupAddress")} *</label>
               <Input
+                id="register-pickup-address"
                 type="text"
                 placeholder={t("pickupAddressPlaceholder")}
               value={pickupAddress}

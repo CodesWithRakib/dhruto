@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
   Button,
+  Input,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -44,12 +45,24 @@ export function AssignRiderDialog({
 }: AssignRiderDialogProps) {
   const t = useTranslations("Rider");
   const [riderId, setRiderId] = React.useState("");
-  const { data } = useGetFleetRidersQuery(hubId ? { hubId } : undefined, { skip: !open });
+  const [search, setSearch] = React.useState("");
+  const [debounced, setDebounced] = React.useState("");
+  React.useEffect(() => {
+    const id = setTimeout(() => setDebounced(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
+  // The API pages riders (default 20). Ask for the maximum and let staff search
+  // by name or rider code, so riders beyond the first page stay assignable.
+  const { data, isFetching } = useGetFleetRidersQuery(
+    { hubId, search: debounced, limit: 100 },
+    { skip: !open },
+  );
   const [assign, { isLoading }] = useAssignParcelToRiderMutation();
 
-  const riders = (data?.data ?? []).filter(
-    (rider) => rider.status === "ACTIVE" || rider.status === "ON_DUTY",
-  );
+  // Eligible riders, least busy first (spreads the day's workload).
+  const riders = (data?.data ?? [])
+    .filter((rider) => rider.status === "ACTIVE" || rider.status === "ON_DUTY")
+    .sort((a, b) => a.activeTaskCount - b.activeTaskCount || a.name.localeCompare(b.name));
 
   const handleAssign = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -79,6 +92,19 @@ export function AssignRiderDialog({
         </DialogHeader>
         <form onSubmit={handleAssign} className="space-y-4 pt-2">
           <div className="space-y-1.5">
+            <label htmlFor="assign-rider-search" className="text-xs font-semibold text-muted-foreground">
+              {t("fleet.searchRider")}
+            </label>
+            <Input
+              id="assign-rider-search"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("fleet.searchRiderPlaceholder")}
+              aria-busy={isFetching || undefined}
+            />
+          </div>
+          <div className="space-y-1.5">
             <label htmlFor="assign-rider" className="text-xs font-semibold text-muted-foreground">
               {t("fleet.selectRider")} *
             </label>
@@ -87,10 +113,10 @@ export function AssignRiderDialog({
               onValueChange={setRiderId}
               required
             >
-              <SelectTrigger id="assign-rider" className="w-full h-11 rounded-2xl bg-surface-muted/60 focus:bg-background">
+              <SelectTrigger id="assign-rider" className="w-full h-11 rounded-2xl">
                 <SelectValue placeholder={t("fleet.selectRider")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl bg-surface-elevated">
+              <SelectContent className="rounded-2xl">
                 {riders.map((rider) => (
                   <SelectItem key={rider.id} value={rider.id} className="rounded-xl">
                     {rider.name} ({rider.riderCode}) ·{" "}

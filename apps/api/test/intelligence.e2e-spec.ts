@@ -6,6 +6,7 @@ import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { DeliveryZone } from "@dhruto/contracts";
 import { idempotencyKey } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6 E2E)", () => {
   let app: INestApplication;
@@ -191,7 +192,7 @@ describe("Intelligence Engine: Address Parsing & Recipient Risk Scoring (Phase 6
       .set("Authorization", `Bearer ${merchantToken}`)
       .set("Idempotency-Key", idempotencyKey("intelligence-parcel"))
       .send({
-        recipientName: "Smart Delivery Test",
+        recipientName: realisticName(),
         recipientPhone: "01788776655",
         deliveryAddress: "House 10, Road 4, Banani, Dhaka-1213",
         district: "Dhaka",

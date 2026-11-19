@@ -39,7 +39,24 @@ export function BagManager({ currentHubId }: BagManagerProps) {
   const [sealingBagId, setSealingBagId] = React.useState<string | null>(null);
   const [confirmSealOpen, setConfirmSealOpen] = React.useState(false);
 
-  const { data, isLoading, refetch } = useGetBagsQuery({ hubId: currentHubId });
+  const [search, setSearch] = React.useState("");
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<"ALL" | BagStatus>("ALL");
+  const [page, setPage] = React.useState(1);
+  const [limit, setLimit] = React.useState(10);
+  React.useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(id);
+  }, [search]);
+  // Server-side paging, filtering and counts: the API only returns one page,
+  // so filtering/counting client-side hid older bags and showed wrong totals.
+  const { data, isLoading, refetch } = useGetBagsQuery({
+    hubId: currentHubId,
+    status: statusFilter === "ALL" ? undefined : statusFilter,
+    search: debouncedSearch,
+    page,
+    limit,
+  });
   const { data: destinationsData } = useGetDestinationHubsQuery();
   const [createBagMutation, { isLoading: isCreatingBag }] = useCreateBagMutation();
   const [sealBagMutation, { isLoading: isSealing }] = useSealBagMutation();
@@ -103,48 +120,22 @@ export function BagManager({ currentHubId }: BagManagerProps) {
     }
   };
 
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"ALL" | BagStatus>("ALL");
-  const [page, setPage] = React.useState(1);
-  const [limit, setLimit] = React.useState(10);
-
   const statusCounts = React.useMemo(() => {
-    let open = 0;
-    let sealed = 0;
-    let inTransit = 0;
-    let received = 0;
-    for (const b of bags) {
-      if (b.status === BagStatus.OPEN) open++;
-      else if (b.status === BagStatus.SEALED) sealed++;
-      else if (b.status === BagStatus.IN_TRANSIT) inTransit++;
-      else if (b.status === BagStatus.RECEIVED) received++;
-    }
+    const counts = data?.meta?.statusCounts ?? {};
+    const get = (k: BagStatus) => counts[k] ?? 0;
     return {
-      ALL: bags.length,
-      [BagStatus.OPEN]: open,
-      [BagStatus.SEALED]: sealed,
-      [BagStatus.IN_TRANSIT]: inTransit,
-      [BagStatus.RECEIVED]: received,
+      ALL: Object.values(counts).reduce<number>((sum, n) => sum + (n ?? 0), 0),
+      [BagStatus.OPEN]: get(BagStatus.OPEN),
+      [BagStatus.SEALED]: get(BagStatus.SEALED),
+      [BagStatus.IN_TRANSIT]: get(BagStatus.IN_TRANSIT),
+      [BagStatus.RECEIVED]: get(BagStatus.RECEIVED),
     };
-  }, [bags]);
+  }, [data]);
 
-  const filteredBags = React.useMemo(() => {
-    return bags.filter((bag) => {
-      if (statusFilter !== "ALL" && bag.status !== statusFilter) return false;
-      if (!search.trim()) return true;
-      const q = search.trim().toLowerCase();
-      return (
-        bag.bagCode.toLowerCase().includes(q) ||
-        (bag.sealTag?.toLowerCase().includes(q) ?? false) ||
-        bag.destinationHubName.toLowerCase().includes(q)
-      );
-    });
-  }, [bags, statusFilter, search]);
-
-  const pagedBags = React.useMemo(() => {
-    const start = (page - 1) * limit;
-    return filteredBags.slice(start, start + limit);
-  }, [filteredBags, page, limit]);
+  // The server already applied status, search and paging.
+  const filteredBags = bags;
+  const pagedBags = bags;
+  const totalItems = data?.meta?.total ?? bags.length;
 
   const columns = React.useMemo(
     () =>
@@ -229,8 +220,8 @@ export function BagManager({ currentHubId }: BagManagerProps) {
                 <DataTable
                   columns={columns}
                   data={pagedBags}
-                  totalItems={filteredBags.length}
-                  pageCount={Math.max(1, Math.ceil(filteredBags.length / limit))}
+                  totalItems={totalItems}
+                  pageCount={Math.max(1, data?.meta?.totalPages ?? Math.ceil(totalItems / limit))}
                   currentPage={page}
                   itemsPerPage={limit}
                   onPageChange={setPage}

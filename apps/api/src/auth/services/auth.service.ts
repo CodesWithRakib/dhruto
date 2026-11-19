@@ -251,6 +251,8 @@ export class AuthService implements OnModuleInit {  private readonly logger = ne
         businessName: dto.businessName || `${dto.name}'s Shop`,
         contactPhone: dto.phone,
         pickupAddress: dto.pickupAddress || "Dhaka, Bangladesh",
+        pickupDistrict: dto.pickupDistrict?.trim() || null,
+        pickupThana: dto.pickupThana?.trim() || null,
         status: MerchantStatus.ACTIVE,
       });
       await this.merchantRepo.save(merchant);

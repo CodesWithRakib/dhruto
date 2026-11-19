@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
   let app: INestApplication;
@@ -88,7 +89,7 @@ describe("Financial Settlement & Wallet Payouts (Phase 4 E2E)", () => {
       .set("Authorization", `Bearer ${merchantToken}`)
       .set("Idempotency-Key", idempotencyKey("finance-parcel"))
       .send({
-        recipientName: "Finance Test Customer",
+        recipientName: realisticName(),
         recipientPhone: "01711223344",
         district: "Dhaka",
         thana: "Mirpur",

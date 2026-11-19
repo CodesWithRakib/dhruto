@@ -110,8 +110,22 @@ export interface RiderTaskItem {
   attemptCount: number;
   otpVerified: boolean;
   otpExpiresAt: string | null;
+  /** What is inside the parcel (merchant-entered). */
+  parcelDescription: string | null;
+  /** Handoff instructions the rider must see before arriving. */
+  deliveryInstructions: RiderDeliveryInstructions;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface RiderDeliveryInstructions {
+  /** Merchant's delivery note (set when booking/editing). */
+  merchantNote: string | null;
+  /** Recipient's doorstep instruction from the customer portal. */
+  customerNote: string | null;
+  /** Recipient's preferred day (YYYY-MM-DD) and time slot. */
+  preferredDate: string | null;
+  preferredSlot: string | null;
 }
 
 export interface RiderTaskDetails extends RiderTaskItem {

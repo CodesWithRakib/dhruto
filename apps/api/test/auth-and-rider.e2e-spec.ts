@@ -5,8 +5,11 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticEmail, realisticName } from "./utils/realistic.js";
 
 describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
+  // Realistic recipient (suites run on the dev DB); reused in assertions below.
+  const sifatName = realisticName();
   let app: INestApplication;
   let riderToken: string;
   let merchantToken: string;
@@ -16,7 +19,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
   let testParcelId: string;
   let generatedOtp: string;
 
-  const merchantEmail = `merchant_${Date.now()}@dhruto.com`;
+  const merchantEmail = realisticEmail();
   const merchantPhone = `017${Math.floor(10000000 + Math.random() * 90000000)}`;
   const merchantPassword = "merchantPassword123";
 
@@ -54,7 +57,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
       const res = await request(app.getHttpServer())
         .post("/api/v1/auth/register")
         .send({
-          name: "Test Merchant Rahim",
+          name: realisticName(),
           email: merchantEmail,
           phone: merchantPhone,
           password: merchantPassword,
@@ -76,8 +79,8 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
         const res = await request(app.getHttpServer())
           .post("/api/v1/auth/register")
           .send({
-            name: `Escalation ${role}`,
-            email: `escalate_${role}_${Date.now()}@dhruto.com`,
+            name: realisticName(),
+            email: realisticEmail(),
             phone: `017${Math.floor(10000000 + Math.random() * 90000000)}`,
             password: "escalation123",
             role,
@@ -92,8 +95,8 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
       await request(app.getHttpServer())
         .post("/api/v1/auth/register")
         .send({
-          name: "Bad Role",
-          email: `badrole_${Date.now()}@dhruto.com`,
+          name: realisticName(),
+          email: realisticEmail(),
           phone: `017${Math.floor(10000000 + Math.random() * 90000000)}`,
           password: "badrole123",
           role: "SUPER_ADMIN",
@@ -159,7 +162,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
         .set(bearer(merchantToken))
         .set("Idempotency-Key", idempotencyKey("auth-rider-parcel"))
         .send({
-          recipientName: "Customer Sifat",
+          recipientName: sifatName,
           recipientPhone: "01812345678",
           district: "Dhaka",
           thana: "Gulshan",
@@ -193,7 +196,7 @@ describe("Custom JWT Auth & Rider App API (E2E / Integration)", () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       const task = res.body.data.find((p: { id: string }) => p.id === testParcelId);
       expect(task).toBeDefined();
-      expect(task.recipientName).toBe("Customer Sifat");
+      expect(task.recipientName).toBe(sifatName);
       expect(task.codAmount).toBe(2500);
     });
 

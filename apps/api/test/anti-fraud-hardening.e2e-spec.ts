@@ -4,8 +4,9 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
-import { ParcelStatus, HubScanType } from "@dhruto/contracts";
+import { ParcelStatus } from "@dhruto/contracts";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Enterprise Anti-Fraud & Edge Case Hardening Suite:
@@ -23,11 +24,8 @@ describe("Anti-Fraud & Edge Case Hardening Suite", () => {
   let dhkManagerToken: string;
   let riderToken: string;
   let rider2Token: string;
-  let dhkHubId: string;
   let riderId: string;
-  let rider2Id: string;
 
-  const unique = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -46,26 +44,12 @@ describe("Anti-Fraud & Edge Case Hardening Suite", () => {
       loginToken(app, "rider3@dhruto.com"),
     ]);
 
-    // Discover Dhaka Hub
-    const dhkHubs = await request(app.getHttpServer())
-      .get("/api/v1/hubs")
-      .set(bearer(dhkManagerToken))
-      .expect(200);
-    dhkHubId = dhkHubs.body.data[0].id;
-
     // Discover Rider 1 ID
     const meRider = await request(app.getHttpServer())
       .get("/api/v1/auth/me")
       .set(bearer(riderToken))
       .expect(200);
     riderId = meRider.body.data.rider.id;
-
-    // Discover Rider 2 ID
-    const meRider2 = await request(app.getHttpServer())
-      .get("/api/v1/auth/me")
-      .set(bearer(rider2Token))
-      .expect(200);
-    rider2Id = meRider2.body.data.rider.id;
   });
 
   afterAll(async () => {
@@ -79,7 +63,7 @@ describe("Anti-Fraud & Edge Case Hardening Suite", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("fraud-parcel"))
       .send({
-        recipientName: `Fraud Test ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",
@@ -311,7 +295,7 @@ describe("Anti-Fraud & Edge Case Hardening Suite", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("illegal-jump"))
       .send({
-        recipientName: "Jump Test",
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

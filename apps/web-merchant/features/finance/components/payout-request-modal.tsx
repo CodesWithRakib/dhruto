@@ -56,6 +56,15 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
 
   const numAmount = Number(amount) || 0;
   const isOverBalance = numAmount > availableBalance;
+  // Explain why "Review" is disabled instead of silently greying it out.
+  const amountError =
+    amount.trim() === ""
+      ? null
+      : isOverBalance
+        ? t("amountOverBalance", { amount: bdt(availableBalance) })
+        : numAmount < 100
+          ? t("amountBelowMinimum", { amount: bdt(100) })
+          : null;
   const isUnderMin = numAmount < 100 && numAmount > 0;
 
   const handleQuickAmount = (val: number) => {
@@ -308,9 +317,16 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="bg-surface-muted/60 pl-9 text-lg font-bold"
+                  aria-invalid={amountError ? true : undefined}
+                  aria-describedby={amountError ? "payout-amount-error" : undefined}
+                  className="pl-9 text-lg font-bold"
                 />
               </div>
+              {amountError ? (
+                <p id="payout-amount-error" role="alert" className="mt-2 text-xs font-medium text-danger">
+                  {amountError}
+                </p>
+              ) : null}
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 {[500, 1000, 2000, 5000].map((val) => (
                   <button
@@ -320,7 +336,7 @@ export function PayoutRequestModal({ isOpen, onClose, availableBalance }: Payout
                     disabled={val > availableBalance}
                     className="rounded-xl bg-surface-muted/60 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface-muted disabled:opacity-40"
                   >
-                    +{bdt(val)}
+                    {bdt(val)}
                   </button>
                 ))}
                 <button

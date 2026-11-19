@@ -5,6 +5,7 @@ import request from "supertest";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { AppModule } from "../src/app.module.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 const VALID_BOOKING = {
   recipientName: "Rafiqul Islam",
@@ -283,7 +284,7 @@ describe("Parcels API — Phase 1 merchant parcel core (E2E / Integration)", () 
         .post("/api/v1/parcels")
         .set(bearer(merchantToken))
         .set("Idempotency-Key", idempotencyKey("ownership"))
-        .send({ ...VALID_BOOKING, recipientName: "Ownership Fixture" })
+        .send({ ...VALID_BOOKING, recipientName: realisticName() })
         .expect(201);
 
       merchantOneParcelId = res.body.data.id;

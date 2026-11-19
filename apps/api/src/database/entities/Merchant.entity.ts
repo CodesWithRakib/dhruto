@@ -28,4 +28,11 @@ export class Merchant extends BaseEntity {
 
   @Column({ type: "text", name: "pickup_address" })
   pickupAddress: string;
+
+  /** Routing key for first-mile pickups: the hub serving this district collects. */
+  @Column({ type: "varchar", length: 100, name: "pickup_district", nullable: true })
+  pickupDistrict: string | null;
+
+  @Column({ type: "varchar", length: 100, name: "pickup_thana", nullable: true })
+  pickupThana: string | null;
 }

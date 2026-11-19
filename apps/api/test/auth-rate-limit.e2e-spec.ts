@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { applyTrustProxy } from "../src/common/http/trust-proxy.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
+import { realisticEmail, realisticName } from "./utils/realistic.js";
 
 /**
  * T-SEC-02: authentication rate limiting over HTTP.
@@ -41,14 +42,13 @@ describe("Auth rate limiting (T-SEC-02 E2E)", () => {
 
   it("allows registrations below the limit", async () => {
     const client = ip();
-    const stamp = Date.now();
     for (let i = 0; i < 3; i += 1) {
       await request(app.getHttpServer())
         .post("/api/v1/auth/register")
         .set("x-forwarded-for", client)
         .send({
-          name: "Rate Test",
-          email: `ratelimit_ok_${stamp}_${i}@dhruto.com`,
+          name: realisticName(),
+          email: realisticEmail(),
           phone: phone(),
           password: "rateLimit123",
         })
@@ -58,14 +58,13 @@ describe("Auth rate limiting (T-SEC-02 E2E)", () => {
 
   it("throttles registrations above 10/min with 429 + Retry-After", async () => {
     const client = ip();
-    const stamp = Date.now();
     for (let i = 0; i < 10; i += 1) {
       await request(app.getHttpServer())
         .post("/api/v1/auth/register")
         .set("x-forwarded-for", client)
         .send({
-          name: "Rate Flood",
-          email: `ratelimit_flood_${stamp}_${i}@dhruto.com`,
+          name: realisticName(),
+          email: realisticEmail(),
           phone: phone(),
           password: "rateLimit123",
         })
@@ -75,8 +74,8 @@ describe("Auth rate limiting (T-SEC-02 E2E)", () => {
       .post("/api/v1/auth/register")
       .set("x-forwarded-for", client)
       .send({
-        name: "Rate Flood",
-        email: `ratelimit_flood_${stamp}_over@dhruto.com`,
+        name: realisticName(),
+        email: realisticEmail(),
         phone: phone(),
         password: "rateLimit123",
       })
@@ -90,8 +89,8 @@ describe("Auth rate limiting (T-SEC-02 E2E)", () => {
       .post("/api/v1/auth/register")
       .set("x-forwarded-for", ip())
       .send({
-        name: "Rate Fresh",
-        email: `ratelimit_fresh_${Date.now()}@dhruto.com`,
+        name: realisticName(),
+        email: realisticEmail(),
         phone: phone(),
         password: "rateLimit123",
       })

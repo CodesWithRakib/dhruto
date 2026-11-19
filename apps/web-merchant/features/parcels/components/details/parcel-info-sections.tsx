@@ -140,6 +140,23 @@ export function ParcelInfoSections({
           <p className="text-foreground font-medium">{parcel.pickupAddress}</p>
         </div>
 
+        {parcel.merchantNote || parcel.pickupInstructions ? (
+          <div className="rounded-2xl bg-surface-elevated/80 p-5 text-body-sm space-y-3">
+            {parcel.merchantNote ? (
+              <div>
+                <p className="text-caption text-muted-foreground font-medium">{t("deliveryNote")}</p>
+                <p className="text-foreground font-medium">{parcel.merchantNote}</p>
+              </div>
+            ) : null}
+            {parcel.pickupInstructions ? (
+              <div>
+                <p className="text-caption text-muted-foreground font-medium">{t("pickupInstructions")}</p>
+                <p className="text-foreground font-medium">{parcel.pickupInstructions}</p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {intelligence && (intelligence.confidenceScore !== null || intelligence.riskTier !== null) ? (
           <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-elevated/80 p-4 sm:p-5 text-caption backdrop-blur-sm">
             <span className="flex items-center gap-1.5 font-bold text-foreground">

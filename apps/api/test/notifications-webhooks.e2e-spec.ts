@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { WebhookEvent, NotificationChannel } from "@dhruto/contracts";
+import { realisticName } from "./utils/realistic.js";
 
 describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
   let app: INestApplication;
@@ -165,7 +166,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
       .set("Authorization", `Bearer ${merchantToken}`)
       .set("Idempotency-Key", `webhook-parcel-${Date.now()}`)
       .send({
-        recipientName: "Webhook Recipient",
+        recipientName: realisticName(),
         recipientPhone: "01899998888",
         deliveryAddress: "House 10, Road 4, Dhanmondi",
         district: "Dhaka",

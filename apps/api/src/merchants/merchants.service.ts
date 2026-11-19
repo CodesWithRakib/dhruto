@@ -127,6 +127,12 @@ export class MerchantsService {
     if (dto.pickupAddress !== undefined) {
       merchant.pickupAddress = dto.pickupAddress;
     }
+    if (dto.pickupDistrict !== undefined) {
+      merchant.pickupDistrict = dto.pickupDistrict || null;
+    }
+    if (dto.pickupThana !== undefined) {
+      merchant.pickupThana = dto.pickupThana || null;
+    }
 
     return this.merchantRepo.save(merchant);
   }

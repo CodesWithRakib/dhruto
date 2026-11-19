@@ -20,9 +20,9 @@ import {
 import { DomainEventType } from "@dhruto/contracts";
 
 describe("notification templates (bilingual, strictly typed)", () => {
-  it("exposes all 14 template keys", () => {
-    expect(TEMPLATE_KEYS).toHaveLength(14);
-    expect(new Set(TEMPLATE_KEYS).size).toBe(14);
+  it("exposes all 15 template keys", () => {
+    expect(TEMPLATE_KEYS).toHaveLength(15);
+    expect(new Set(TEMPLATE_KEYS).size).toBe(15);
   });
 
   it("maps every domain event except DISCREPANCY_RESOLVED and chat events", () => {

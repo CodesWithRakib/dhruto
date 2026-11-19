@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Bell,
   CheckCheck,
@@ -267,7 +268,10 @@ export function NotificationBell() {
               )}
               {!isCustomer && (
                 <button
-                  onClick={() => setShowSmsModal(true)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setShowSmsModal(true);
+                  }}
                   className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-muted transition-colors"
                   title="Send test SMS"
                 >
@@ -340,9 +344,15 @@ export function NotificationBell() {
         </div>
       )}
 
-      {/* Test SMS Modal */}
-      {showSmsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4">
+      {/* Test SMS Modal — portalled to <body>: inside the sticky header its
+          "fixed" box was positioned relative to the header and got clipped. */}
+      {showSmsModal && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-overlay p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Send a test SMS"
+        >
           <div className="relative w-full max-w-md rounded-xl bg-card p-5 text-card-foreground">
             <button
               onClick={() => setShowSmsModal(false)}
@@ -435,7 +445,8 @@ export function NotificationBell() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

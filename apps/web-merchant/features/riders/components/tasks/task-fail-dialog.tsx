@@ -85,7 +85,7 @@ export function TaskFailDialog({
               >
                 <SelectValue placeholder={t("details.failReason")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl bg-surface-elevated">
+              <SelectContent className="rounded-2xl">
                 {FAILURE_REASONS.map((reason) => (
                   <SelectItem key={reason} value={reason} className="rounded-xl">
                     {t(`failReasons.${reason}` as "failReasons.CUSTOMER_UNAVAILABLE")}

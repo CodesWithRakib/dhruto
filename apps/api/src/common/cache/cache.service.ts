@@ -4,6 +4,20 @@ import { Redis } from "ioredis";
 import { type CacheHealth } from "@dhruto/contracts";
 import { type RedisConfig } from "../../config/redis.config.js";
 
+/**
+ * KEYS[1] = counter key, ARGV[1] = window seconds.
+ * Increments and guarantees a TTL in one atomic step; returns {count, ttl}.
+ */
+export const INCR_WITH_WINDOW_LUA = `
+local count = redis.call('INCR', KEYS[1])
+local ttl = redis.call('TTL', KEYS[1])
+if ttl < 0 then
+  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[1]))
+  ttl = tonumber(ARGV[1])
+end
+return {count, ttl}
+`;
+
 interface MemoryCacheEntry {
   value: unknown;
   expiresAt: number | null; // null means no expiration
@@ -193,11 +207,17 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   ): Promise<{ count: number; ttlSeconds: number } | null> {
     if (this.isRedisConnected && this.redisClient) {
       try {
-        const count = await this.redisClient.incr(key);
-        if (count === 1) {
-          await this.redisClient.expire(key, windowSeconds);
-        }
-        const ttl = await this.redisClient.ttl(key);
+        // Atomic INCR + EXPIRE. The old "expire only when count === 1" sequence
+        // could leave a counter without a TTL (crash/restart or a failed EXPIRE
+        // between the two calls); such a key never resets and locks the user
+        // out permanently. Setting the TTL whenever it is missing also heals
+        // keys left behind by that bug.
+        const [count, ttl] = (await this.redisClient.eval(
+          INCR_WITH_WINDOW_LUA,
+          1,
+          key,
+          String(windowSeconds),
+        )) as [number, number];
         return { count, ttlSeconds: ttl > 0 ? ttl : windowSeconds };
       } catch (err) {
         this.logger.warn(`Cache incr error for key "${key}": ${(err as Error).message}`);

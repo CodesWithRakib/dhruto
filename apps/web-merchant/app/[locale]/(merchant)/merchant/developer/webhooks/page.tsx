@@ -47,11 +47,12 @@ export default function WebhooksDeveloperPage() {
     isLoading: isLoadingSubs,
     refetch: refetchSubs,
   } = useListWebhookSubscriptionsQuery();
+  const [deliveryFilter, setDeliveryFilter] = React.useState<"ALL" | WebhookDeliveryStatus>("ALL");
   const {
     data: deliveriesData,
     isLoading: isLoadingDeliveries,
     refetch: refetchDeliveries,
-  } = useListWebhookDeliveriesQuery(undefined, {
+  } = useListWebhookDeliveriesQuery(deliveryFilter === "ALL" ? undefined : { status: deliveryFilter }, {
     pollingInterval: 10000,
     skipPollingIfUnfocused: true,
   });
@@ -65,18 +66,28 @@ export default function WebhooksDeveloperPage() {
 
   const subscriptions = subsData?.data || [];
   const deliveryPayload = deliveriesData?.data as
-    { items: WebhookDeliveryItem[]; total: number } | WebhookDeliveryItem[] | undefined;
+    | {
+        items: WebhookDeliveryItem[];
+        total: number;
+        statusCounts?: Partial<Record<WebhookDeliveryStatus, number>>;
+      }
+    | WebhookDeliveryItem[]
+    | undefined;
   const deliveries: WebhookDeliveryItem[] = Array.isArray(deliveryPayload)
     ? deliveryPayload
     : (deliveryPayload?.items ?? []);
 
-  const totalDeliveries = deliveries.length;
-  const deliveredCount = deliveries.filter(
-    (d) => d.status === WebhookDeliveryStatus.DELIVERED,
-  ).length;
-  const deadLetterCount = deliveries.filter(
-    (d) => d.status === WebhookDeliveryStatus.DEAD_LETTER,
-  ).length;
+  // KPIs and tabs use server totals; the list itself is only the latest page.
+  const statusCounts = Array.isArray(deliveryPayload) ? undefined : deliveryPayload?.statusCounts;
+  const countOf = (status: WebhookDeliveryStatus) =>
+    statusCounts?.[status] ?? deliveries.filter((d) => d.status === status).length;
+  // "All" = every status (the server's `total` is narrowed by the active tab).
+  const totalDeliveries = statusCounts
+    ? Object.values(statusCounts).reduce<number>((sum, n) => sum + (n ?? 0), 0)
+    : deliveries.length;
+  const deliveredCount = countOf(WebhookDeliveryStatus.DELIVERED);
+  const deadLetterCount = countOf(WebhookDeliveryStatus.DEAD_LETTER);
+  const failedCount = countOf(WebhookDeliveryStatus.FAILED);
   const successRate =
     totalDeliveries > 0 ? Math.round((deliveredCount / totalDeliveries) * 100) : 100;
 
@@ -259,6 +270,14 @@ export default function WebhooksDeveloperPage() {
         {/* Delivery Logs & Dead Letter Queue */}
         <WebhookDeliveriesTable
           deliveries={deliveries}
+          filterStatus={deliveryFilter}
+          onFilterChange={setDeliveryFilter}
+          counts={{
+            all: totalDeliveries,
+            delivered: deliveredCount,
+            failed: failedCount,
+            deadLetter: deadLetterCount,
+          }}
           isLoading={isLoadingDeliveries}
           onRetry={handleRetry}
           isRetrying={isRetrying}

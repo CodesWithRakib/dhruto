@@ -277,7 +277,7 @@ export class HubsController {
       statusCode: HttpStatus.OK,
       message: "Bags retrieved successfully",
       data: result.items,
-      meta: result.pagination,
+      meta: { ...result.pagination, statusCounts: result.statusCounts },
     };
   }
 
@@ -393,7 +393,7 @@ export class HubsController {
       statusCode: HttpStatus.OK,
       message: "Manifests retrieved successfully",
       data: result.items,
-      meta: result.pagination,
+      meta: { ...result.pagination, statusCounts: result.statusCounts },
     };
   }
 

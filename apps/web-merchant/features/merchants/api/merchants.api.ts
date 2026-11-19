@@ -6,6 +6,9 @@ export interface MerchantProfile {
   businessName: string;
   contactPhone: string;
   pickupAddress: string;
+  /** Routes pickup requests to the hub serving this district. */
+  pickupDistrict?: string | null;
+  pickupThana?: string | null;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -54,7 +57,13 @@ export const merchantsApi = baseApi.injectEndpoints({
     }),
     updateMerchantProfile: builder.mutation<
       { data: MerchantProfile; success: boolean; message: string },
-      { businessName?: string; contactPhone?: string; pickupAddress?: string }
+      {
+        businessName?: string;
+        contactPhone?: string;
+        pickupAddress?: string;
+        pickupDistrict?: string;
+        pickupThana?: string;
+      }
     >({
       query: (body) => ({
         url: "/merchants/me",

@@ -6,6 +6,7 @@ import { AppModule } from "../src/app.module.js";
 import { applyTrustProxy } from "../src/common/http/trust-proxy.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * T-SEC-04: global default-deny guards over HTTP.
@@ -56,7 +57,7 @@ describe("Global auth guards (T-SEC-04 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("guards"))
       .send({
-        recipientName: "Guard Probe",
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

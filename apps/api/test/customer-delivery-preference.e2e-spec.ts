@@ -14,6 +14,7 @@ import {
   idempotencyKey,
   loginToken,
 } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 const CUSTOMER = "customer@dhruto.com";
 
@@ -40,7 +41,7 @@ describe("Customer delivery preference & recipient view E2E", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("pref"))
       .send({
-        recipientName: "Preference Probe",
+        recipientName: realisticName(),
         recipientPhone,
         district: "Dhaka",
         thana: "Mirpur",

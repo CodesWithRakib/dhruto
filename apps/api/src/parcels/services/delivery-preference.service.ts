@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 import { DataSource } from "typeorm";
 import {
   ApiErrorCode,
+  DELIVERED_PARCEL_STATUSES,
   DELIVERY_PREFERENCE_MAX_DAYS_AHEAD,
   ParcelStatus,
   type ParcelSummary,
@@ -12,7 +13,9 @@ import { type DeliveryPreferenceDto } from "../dto/delivery-preference.dto.js";
 
 /** Parcels that are finished or heading back to the merchant accept no preference. */
 const CLOSED_STATUSES: ReadonlySet<ParcelStatus> = new Set([
-  ParcelStatus.DELIVERED,
+  ...DELIVERED_PARCEL_STATUSES,
+  ParcelStatus.LOST,
+  ParcelStatus.DAMAGED,
   ParcelStatus.CANCELLED,
   ParcelStatus.RTO_INITIATED,
   ParcelStatus.RETURN_IN_TRANSIT,

@@ -126,4 +126,12 @@ export class Parcel extends BaseEntity {
 
   @Column({ name: "delivery_preference_updated_at", type: "timestamptz", nullable: true })
   deliveryPreferenceUpdatedAt: Date | null;
+
+  /** Merchant's delivery note for the rider (kept apart from the item description). */
+  @Column({ name: "merchant_note", type: "varchar", length: 500, nullable: true })
+  merchantNote: string | null;
+
+  /** Merchant's instructions for the pickup rider. */
+  @Column({ name: "pickup_instructions", type: "varchar", length: 500, nullable: true })
+  pickupInstructions: string | null;
 }

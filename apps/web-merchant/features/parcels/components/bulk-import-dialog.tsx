@@ -193,11 +193,17 @@ export function BulkImportDialog({ open, onOpenChange }: BulkImportDialogProps) 
                 className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm"
               >
                 <span className="truncate font-medium">{row.recipientName}</span>
-                <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                <span
+                  className={
+                    quote && !quote.ok
+                      ? "max-w-[60%] text-right text-xs text-danger"
+                      : "shrink-0 font-mono text-xs text-muted-foreground"
+                  }
+                >
                   {quote && quote.ok && quote.deliveryFee !== undefined
                     ? t("bulkFee", { fee: quote.deliveryFee })
                     : quote && !quote.ok
-                      ? t("bulkQuoteFailed")
+                      ? (quote.message ?? t("bulkQuoteFailed"))
                       : row.district}
                 </span>
               </div>

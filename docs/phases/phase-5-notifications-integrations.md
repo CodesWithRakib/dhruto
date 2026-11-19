@@ -27,7 +27,8 @@ retries with exponential backoff (8 attempts, then FAILED for manual replay).
 
 ## Domain events (versioned, secret-free)
 
-`parcel.created.v1`, `parcel.assigned.v1`, `parcel.out_for_delivery.v1`,
+`parcel.created.v1`, `parcel.picked_up.v1` (first-mile pickup confirmed by
+the rider), `parcel.assigned.v1`, `parcel.out_for_delivery.v1`,
 `parcel.delivered.v1`, `parcel.failed.v1`, `parcel.returned.v1`,
 `cash.hand_in_submitted.v1`, `cash.verified.v1`, `settlement.created.v1`,
 `payout.requested/approved/completed/failed.v1`,
@@ -137,7 +138,7 @@ Subscriptions: `GET/POST /webhooks/subscriptions`, `PATCH :id` (URL re-runs
 SSRF validation, secrets immutable here), `DELETE :id`, `POST
 :id/rotate-secret` (10/min, new secret returned once), `POST :id/ping`
 (synthetic `webhook.ping`, no parcel/financial state). Events: `parcel.created/
-assigned/out_for_delivery/delivered/failed/returned`, `cash.verified`,
+picked_up/assigned/out_for_delivery/delivered/failed/returned`, `cash.verified`,
 `settlement.created`, `payout.requested/approved/completed/failed`, `*`.
 Each endpoint has a `dhr_whsec_…` secret; list responses carry only
 `secretPreview` (`abcd***wxyz`).

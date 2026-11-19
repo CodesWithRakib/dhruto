@@ -351,7 +351,7 @@ const FLOWS_BY_ROLE: Record<
         systemAction: "Admin can view immutable status history, audit trails, and reassign hubs or riders (/admin/parcels).",
         actionUrl: ADMIN_ROUTES.parcels,
         actionLabel: "Global Parcel Registry",
-        securityGuarantee: "Every admin action is recorded in immutable audit logs with admin user ID and timestamp.",
+        securityGuarantee: "Admin actions on parcels and payouts are recorded in the parcel history and finance journal with the operator and time.",
         icon: Package,
       },
       {

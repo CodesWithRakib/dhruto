@@ -58,6 +58,7 @@ import {
   type CashHandInDto,
   type RequestOtpResult,
   type RiderDashboard,
+  type RiderDeliveryInstructions,
   type RiderHistoryItem,
   type RiderListItem,
   type RiderDetails,
@@ -238,6 +239,8 @@ export class RidersService {
       attemptCount: attemptCounts.get(parcel.id) ?? 0,
       otpVerified: parcel.otpVerifiedAt !== null,
       otpExpiresAt: parcel.otpExpiresAt?.toISOString() ?? null,
+      parcelDescription: parcel.parcelDescription ?? null,
+      deliveryInstructions: deliveryInstructionsOf(parcel),
       createdAt: parcel.createdAt,
       updatedAt: parcel.updatedAt,
     }));
@@ -275,6 +278,8 @@ export class RidersService {
       attemptCount: attempts.length,
       otpVerified: parcel.otpVerifiedAt !== null,
       otpExpiresAt: parcel.otpExpiresAt?.toISOString() ?? null,
+      parcelDescription: parcel.parcelDescription ?? null,
+      deliveryInstructions: deliveryInstructionsOf(parcel),
       createdAt: parcel.createdAt,
       updatedAt: parcel.updatedAt,
       attempts: attempts.map((attempt) => ({
@@ -1098,7 +1103,7 @@ export class RidersService {
         toStatus: ParcelStatus.DELIVERY_ATTEMPTED,
         actorId: userId,
         actorRole: "RIDER",
-        description: `Delivery failed: ${dto.reason}. ${dto.notes?.trim() || ""}`.trim(),
+        description: `Delivery failed: ${failureReasonLabel(dto.reason)}. ${dto.notes?.trim() || ""}`.trim(),
         metadata: {
           riderId,
           attemptId: attempt.id,
@@ -1118,7 +1123,7 @@ export class RidersService {
           toStatus: ParcelStatus.RESCHEDULED,
           actorId: userId,
           actorRole: "RIDER",
-          description: `Rescheduled for ${rescheduledFor.toISOString()}`,
+          description: `Rescheduled for ${formatDhakaDateTime(rescheduledFor)} (Dhaka)`,
           metadata: {
             riderId,
             attemptId: attempt.id,
@@ -1946,4 +1951,36 @@ function startOfToday(): Date {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
   return date;
+}
+
+/**
+ * Everything the rider must know before knocking: the merchant's note and the
+ * recipient's own doorstep instruction / preferred slot from the customer portal.
+ */
+function deliveryInstructionsOf(parcel: Parcel): RiderDeliveryInstructions {
+  return {
+    merchantNote: parcel.merchantNote ?? null,
+    customerNote: parcel.customerDeliveryNote ?? null,
+    preferredDate: parcel.preferredDeliveryDate ?? null,
+    preferredSlot: parcel.preferredDeliverySlot ?? null,
+  };
+}
+
+/** Human-readable failure reason for history/timeline text (shown to merchants). */
+function failureReasonLabel(reason: string): string {
+  const text = reason.toLowerCase().replace(/_/g, " ");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** e.g. "19 Nov 2026, 10:00" in Asia/Dhaka. */
+function formatDhakaDateTime(date: Date): string {
+  return date.toLocaleString("en-GB", {
+    timeZone: "Asia/Dhaka",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }

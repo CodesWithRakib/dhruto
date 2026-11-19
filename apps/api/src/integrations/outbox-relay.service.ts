@@ -46,6 +46,7 @@ import {
   renderParcelDelivered,
   renderParcelFailed,
   renderParcelOutForDelivery,
+  renderParcelPickedUp,
   renderParcelReturned,
   renderPayoutApproved,
   renderPayoutCompleted,
@@ -163,6 +164,16 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       templateKey: "parcel_created",
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_CREATED },
+  ],
+  [DomainEventType.PARCEL_PICKED_UP]: [
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "parcel_picked_up",
+      route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
+    },
+    { kind: "webhook", event: WebhookEvent.PARCEL_PICKED_UP },
   ],
   [DomainEventType.PARCEL_ASSIGNED]: [
     {
@@ -401,6 +412,11 @@ function renderTemplate(key: TemplateKey, payload: Payload): RenderedTemplate {
   switch (key) {
     case "parcel_created":
       return renderParcelCreated({
+        trackingCode: str(payload.trackingCode),
+        recipientName: str(payload.recipientName),
+      });
+    case "parcel_picked_up":
+      return renderParcelPickedUp({
         trackingCode: str(payload.trackingCode),
         recipientName: str(payload.recipientName),
       });

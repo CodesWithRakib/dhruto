@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { idempotencyKey } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 describe("Scale & isolation — idempotent concurrency + cross-tenant denial (Phase 8)", () => {
   let app: INestApplication;
@@ -40,7 +41,7 @@ describe("Scale & isolation — idempotent concurrency + cross-tenant denial (Ph
     // burst tests idempotency, not the rate limiter (covered separately).
     const key = idempotencyKey("race-parcel");
     const payload = {
-      recipientName: "Race Probe",
+      recipientName: realisticName(),
       recipientPhone: "01712345678",
       district: "Dhaka",
       thana: "Mirpur",
@@ -76,7 +77,7 @@ describe("Scale & isolation — idempotent concurrency + cross-tenant denial (Ph
           .set("Authorization", `Bearer ${merchant2Token}`)
           .set("Idempotency-Key", idempotencyKey(`burst-${i}`))
           .send({
-            recipientName: "Burst Probe",
+            recipientName: realisticName(),
             recipientPhone: "01712345678",
             district: "Dhaka",
             thana: "Mirpur",
@@ -123,7 +124,7 @@ describe("Scale & isolation — idempotent concurrency + cross-tenant denial (Ph
       .set("Authorization", `Bearer ${merchantToken}`)
       .set("Idempotency-Key", idempotencyKey("idor-parcel"))
       .send({
-        recipientName: "IDOR Probe",
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

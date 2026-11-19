@@ -5,6 +5,7 @@ import request from "supertest";
 import { DataSource } from "typeorm";
 import { AppModule } from "../src/app.module.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
+import { realisticName } from "./utils/realistic.js";
 
 /**
  * Phase 4 finance ledger, end-to-end against the real database.
@@ -78,7 +79,7 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
       .set(bearer(merchantToken))
       .set("Idempotency-Key", idempotencyKey("fin4"))
       .send({
-        recipientName: `Finance Four ${unique()}`,
+        recipientName: realisticName(),
         recipientPhone: "01712345678",
         district: "Dhaka",
         thana: "Mirpur",

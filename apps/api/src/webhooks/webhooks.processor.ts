@@ -38,6 +38,8 @@ export class WebhooksProcessor extends WorkerHost {
     this.logger.warn(
       `WEBHOOK_JOB_FAILED job=${job.id} attempts=${job.attemptsMade} error=${getErrorMessage(error, "unknown")}`,
     );
+    // "failed" fires after every attempt; dead-letter only once retries are exhausted.
+    if (job.attemptsMade < (job.opts.attempts ?? 1)) return;
     await this.webhooksService.markDeadLetter(
       job.data.deliveryId,
       `Worker exhausted after ${job.attemptsMade} attempts: ${getErrorMessage(error, "unknown")}`,
