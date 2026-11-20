@@ -16,7 +16,7 @@ const buttonVariants = cva(
         soft:
           "bg-primary-soft text-primary-soft-foreground hover:bg-primary-soft/80",
         outline:
-          "bg-surface-muted text-foreground hover:bg-surface-hover hover:text-foreground",
+          "border border-border/80 bg-surface text-foreground shadow-xs hover:bg-surface-hover hover:text-foreground hover:border-border active:bg-surface-muted",
         ghost:
           "text-foreground hover:bg-surface-muted hover:text-foreground",
         destructive:

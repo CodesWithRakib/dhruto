@@ -44,7 +44,7 @@ export function AdminTodayKpis() {
         <KpiCard label={t("delivered")} value={number(k.delivered.value)} hint={delta(k.delivered.changePct)} icon={CheckCircle2} tone="success" />
         <KpiCard
           label={t("successRate")}
-          value={k.successRate.noData ? "—" : `${k.successRate.value}%`}
+          value={k.successRate.value != null ? `${k.successRate.value}%` : "—"}
           hint={t("inTransit", { count: k.inTransit })}
           icon={TrendingUp}
           tone="info"

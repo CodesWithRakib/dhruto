@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { BookingForm } from "@/features/parcels/components/booking-form";
 import { DashboardCanvasBg } from "@/features/dashboard/components/dashboard-canvas-bg";
-import { Zap } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
+import { Link } from "@/lib/navigation";
+import { Button } from "@dhruto/ui";
+import { ArrowLeft } from "lucide-react";
+import { MERCHANT_ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -15,30 +19,24 @@ export default async function NewBookingPage() {
   const t = await getTranslations("BookingForm");
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] space-y-6 py-6 sm:py-8">
-      {/* Tactical Canvas Background with dot matrix & ambient glows */}
+    <div className="relative min-h-[calc(100vh-4rem)] space-y-6 pb-12">
       <DashboardCanvasBg />
 
-      {/* Atmospheric Header & Engine Status Badge */}
-      <div className="relative mx-auto max-w-3xl text-center space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-caption font-semibold text-primary backdrop-blur-md">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-          </span>
-          <Zap className="h-3 w-3" />
-          <span>{t("engineOnline")}</span>
-        </div>
+      <PageHeader
+        title={t("pageTitle")}
+        description={t("pageSubtitle")}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link href={MERCHANT_ROUTES.parcels}>
+              <Button variant="outline" size="sm" className="h-9 gap-2 text-xs rounded-xl">
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                <span>All Shipments</span>
+              </Button>
+            </Link>
+          </div>
+        }
+      />
 
-        <h1 className="text-display-sm sm:text-display-md font-bold text-foreground tracking-tight">
-          {t("pageTitle")}
-        </h1>
-        <p className="mx-auto max-w-xl text-body-sm sm:text-body-md text-muted-foreground">
-          {t("pageSubtitle")}
-        </p>
-      </div>
-
-      {/* Booking Form Cockpit */}
       <div className="relative z-10">
         <BookingForm />
       </div>

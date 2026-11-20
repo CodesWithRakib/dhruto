@@ -30,7 +30,7 @@ export function RiderProfileHeaderCard({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-success font-extrabold text-xl text-white">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary font-extrabold text-xl text-primary-foreground shadow-xs">
               {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="h-8 w-8" />}
             </span>
             <span

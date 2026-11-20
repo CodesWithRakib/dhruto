@@ -45,7 +45,12 @@ export function AdminNetworkStatus() {
     ? [
         {
           dot: "bg-success",
-          label: t("deliverySuccess", { rate: summary.networkSuccessRate.toFixed(1) }),
+          label: t("deliverySuccess", {
+            rate:
+              typeof summary.networkSuccessRate === "number" && !isNaN(summary.networkSuccessRate)
+                ? summary.networkSuccessRate.toFixed(1)
+                : "0.0",
+          }),
         },
         { dot: "bg-info", label: t("activeHubs", { count: summary.activeHubsCount }) },
         { dot: "bg-primary", label: t("activeRiders", { count: summary.activeRidersCount }) },

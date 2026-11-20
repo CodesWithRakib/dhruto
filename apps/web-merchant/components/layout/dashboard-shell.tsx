@@ -239,7 +239,7 @@ export function DashboardShell({
                     className="flex items-center gap-2.5 rounded-xl p-1.5 text-left transition-all duration-200 hover:bg-surface-muted focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 pl-3 ml-1"
                     aria-label={t("accountMenu")}
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-success text-xs font-bold text-white">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-xs">
                       {(user?.name || "M").charAt(0).toUpperCase()}
                     </div>
                     <div className="hidden flex-col text-left sm:flex">

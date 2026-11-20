@@ -27,7 +27,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-black font-mono tabular-nums text-foreground">
-              {kpis.deliverySuccessRate}%
+              {kpis.deliverySuccessRate != null ? `${kpis.deliverySuccessRate}%` : "—"}
             </span>
             <span className="text-xs text-success-soft-foreground font-medium flex items-center">
               <TrendingUp className="h-3.5 w-3.5 mr-0.5 inline" aria-hidden="true" />

@@ -17,7 +17,7 @@ const TableHeader = React.forwardRef<
   <thead
     ref={ref}
     className={cn(
-      "bg-inverse text-inverse-foreground [&_th]:text-inverse-foreground [&_th]:font-bold [&_th]:uppercase [&_th]:text-[11px] [&_th]:tracking-wider",
+      "bg-inverse text-inverse-foreground [&_th]:text-inverse-foreground [&_th]:font-bold [&_th]:uppercase [&_th]:text-[11px] [&_th]:tracking-wider [&_tr]:hover:!bg-transparent [&_tr]:hover:bg-transparent [&_tr]:bg-transparent",
       className,
     )}
     {...props}
@@ -44,7 +44,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "bg-surface-muted/60 font-medium",
+      "bg-surface-muted/60 font-medium [&_tr]:hover:!bg-transparent [&_tr]:hover:bg-transparent",
       className,
     )}
     {...props}
@@ -57,7 +57,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
     <tr
       ref={ref}
       className={cn(
-        "transition-colors duration-fast ease-out hover:!bg-surface-hover data-[state=selected]:bg-surface-selected",
+        "transition-colors duration-fast ease-out [tbody_&]:hover:bg-surface-hover [thead_&]:hover:!bg-transparent [tfoot_&]:hover:!bg-transparent data-[state=selected]:bg-surface-selected",
         className,
       )}
       {...props}
@@ -73,7 +73,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle text-xs font-bold uppercase tracking-wider text-inverse-foreground [&:has([role=checkbox])]:pr-0 whitespace-nowrap",
+      "h-12 px-4 text-left align-middle text-xs font-bold uppercase tracking-wider text-inverse-foreground [&:has([role=checkbox])]:pr-0 whitespace-nowrap [&_button]:text-inverse-foreground [&_button]:hover:bg-white/10 [&_button]:hover:text-inverse-foreground",
       className,
     )}
     {...props}
