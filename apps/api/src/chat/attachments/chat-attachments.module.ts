@@ -20,6 +20,8 @@ import {
   ChatAttachmentScanScheduler,
 } from "./chat-attachment-scan.scheduler.js";
 import { ClamAvScanner, loadClamAvConfig } from "./clamav-scanner.js";
+import { DevPassThroughMalwareScanner } from "./dev-passthrough-scanner.js";
+import { LocalObjectStorage } from "./local-object-storage.js";
 import { CHAT_MALWARE_SCANNER, ChatMalwareScannerHolder } from "./malware-scanner.port.js";
 import { CHAT_OBJECT_STORAGE } from "./object-storage.port.js";
 import { S3ObjectStorage } from "./s3-object-storage.js";
@@ -30,8 +32,7 @@ const logger = new Logger("ChatAttachmentsModule");
  * Phase 6 attachments: upload lifecycle, authorized downloads and storage
  * cleanup on top of the existing chat module, Redis/BullMQ and the single
  * object-storage port. Phase 7 adds the malware-scan gate (ClamAV adapter,
- * fail closed when unconfigured), staff attachment review and retention. Without `CHAT_STORAGE_BUCKET` the endpoints return
- * 503 (fail closed) and cleanup is a no-op.
+ * fail closed when unconfigured), staff attachment review and retention.
  */
 @Module({
   imports: [
@@ -50,9 +51,16 @@ const logger = new Logger("ChatAttachmentsModule");
       provide: CHAT_OBJECT_STORAGE,
       useFactory: () => {
         const config = loadChatStorageConfig();
-        if (!config)
-          logger.warn("CHAT_STORAGE_BUCKET not set: chat attachments are disabled (503)");
-        return new ChatStorageHolder(config ? new S3ObjectStorage(config) : null);
+        if (config) {
+          logger.log(`Chat attachments using S3ObjectStorage (bucket: ${config.bucket})`);
+          return new ChatStorageHolder(new S3ObjectStorage(config));
+        }
+        if (process.env.CHAT_STORAGE_DISABLED === "true") {
+          logger.warn("CHAT_STORAGE_DISABLED=true: chat attachments disabled");
+          return new ChatStorageHolder(null);
+        }
+        logger.log("Chat attachments using LocalObjectStorage fallback for development");
+        return new ChatStorageHolder(new LocalObjectStorage());
       },
     },
     ChatAttachmentMetrics,
@@ -64,12 +72,17 @@ const logger = new Logger("ChatAttachmentsModule");
       provide: CHAT_MALWARE_SCANNER,
       useFactory: () => {
         const config = loadClamAvConfig();
-        if (!config) {
-          logger.warn(
-            "CHAT_CLAMAV_HOST not set: no malware scanner; attachments stay pending (not downloadable)",
-          );
+        if (config) {
+          return new ChatMalwareScannerHolder(new ClamAvScanner(config));
         }
-        return new ChatMalwareScannerHolder(config ? new ClamAvScanner(config) : null);
+        if (process.env.NODE_ENV === "production" && process.env.CHAT_ALLOW_DEV_SCANNER !== "true") {
+          logger.warn(
+            "CHAT_CLAMAV_HOST not set in production: no malware scanner; attachments stay pending",
+          );
+          return new ChatMalwareScannerHolder(null);
+        }
+        logger.log("Chat malware scanner using DevPassThroughMalwareScanner for development");
+        return new ChatMalwareScannerHolder(new DevPassThroughMalwareScanner());
       },
     },
     ChatAttachmentScanService,

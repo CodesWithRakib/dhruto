@@ -70,16 +70,20 @@ function envOptionalSeconds(name: string, min: number): number | null {
 }
 
 export function loadChatStorageConfig(): ChatStorageConfig | null {
-  const bucket = envString("CHAT_STORAGE_BUCKET");
+  const bucket =
+    envString("CHAT_STORAGE_BUCKET") ??
+    envString("AWS_S3_BUCKET") ??
+    envString("S3_BUCKET");
   if (!bucket) return null;
   return {
     bucket,
-    region: envString("CHAT_STORAGE_REGION") ?? "us-east-1",
-    endpoint: envString("CHAT_STORAGE_ENDPOINT"),
+    region: envString("CHAT_STORAGE_REGION") ?? envString("AWS_REGION") ?? "auto",
+    endpoint: envString("CHAT_STORAGE_ENDPOINT") ?? envString("AWS_ENDPOINT_URL_S3"),
     publicEndpoint: envString("CHAT_STORAGE_PUBLIC_ENDPOINT"),
     forcePathStyle: process.env.CHAT_STORAGE_FORCE_PATH_STYLE === "true",
-    accessKeyId: envString("CHAT_STORAGE_ACCESS_KEY_ID"),
-    secretAccessKey: envString("CHAT_STORAGE_SECRET_ACCESS_KEY"),
+    accessKeyId: envString("CHAT_STORAGE_ACCESS_KEY_ID") ?? envString("AWS_ACCESS_KEY_ID"),
+    secretAccessKey:
+      envString("CHAT_STORAGE_SECRET_ACCESS_KEY") ?? envString("AWS_SECRET_ACCESS_KEY"),
   };
 }
 

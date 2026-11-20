@@ -96,8 +96,14 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
         duration: 7000,
       });
 
-      // 3. Immediately refresh Redux RTK notification cache (0ms delay)
-      dispatch(notificationsApi.util.invalidateTags(["Notification"]));
+      // 3. Immediately update unread count in Redux cache directly without extra HTTP request
+      dispatch(
+        notificationsApi.util.updateQueryData("getUnreadNotificationCount", undefined, (draft) => {
+          if (draft && draft.data) {
+            draft.data.unreadCount = (draft.data.unreadCount || 0) + 1;
+          }
+        }),
+      );
 
       // 4. Invalidate related entities for instant screen reactivity. Rider
       //    task lists / pickups and hub queues cache under Rider/Hub tags, so
@@ -109,8 +115,15 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       }
     };
 
-    const onUnreadCount = (_data: { unreadCount: number }) => {
-      dispatch(notificationsApi.util.invalidateTags(["Notification"]));
+    const onUnreadCount = (data: { unreadCount: number }) => {
+      // Direct cache update from websocket event (zero HTTP calls)
+      dispatch(
+        notificationsApi.util.updateQueryData("getUnreadNotificationCount", undefined, (draft) => {
+          if (draft && draft.data) {
+            draft.data.unreadCount = data.unreadCount;
+          }
+        }),
+      );
     };
 
     socket.on("connect", onConnect);

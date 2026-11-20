@@ -51,10 +51,7 @@ export function NotificationBell() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { data: countData, refetch: refetchCount } = useGetUnreadNotificationCountQuery(undefined, {
-    pollingInterval: 15000,
-    skipPollingIfUnfocused: true,
-  });
+  const { data: countData, refetch: refetchCount } = useGetUnreadNotificationCountQuery(undefined);
   const {
     data: notifsData,
     isLoading,
