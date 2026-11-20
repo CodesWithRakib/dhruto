@@ -97,7 +97,7 @@ export function CustomerWelcomeHero({
             <CheckCircle2 className="h-4 w-4 text-success" />
           </div>
           <div className="mt-2 text-2xl font-black text-foreground">{deliveredCount}</div>
-          <span className="text-[11px] text-muted-foreground">Doorstep handoffs logged</span>
+          <span className="text-[11px] text-muted-foreground">{t("statDeliveredHint")}</span>
         </div>
 
         <div className="rounded-2xl bg-card p-4 transition-all">
@@ -108,7 +108,7 @@ export function CustomerWelcomeHero({
           <div className="mt-2 text-2xl font-black text-foreground font-mono">
             {bdt(totalCodDue)}
           </div>
-          <span className="text-[11px] text-muted-foreground">Cash ready for delivery rider</span>
+          <span className="text-[11px] text-muted-foreground">{t("statCodDueHint")}</span>
         </div>
 
         <div className="rounded-2xl bg-card p-4 transition-all">
@@ -117,7 +117,7 @@ export function CustomerWelcomeHero({
             <MapPin className="h-4 w-4 text-primary" />
           </div>
           <div className="mt-2 text-2xl font-black text-foreground truncate">{primaryLocation}</div>
-          <span className="text-[11px] text-muted-foreground">Primary Destination</span>
+          <span className="text-[11px] text-muted-foreground">{t("statAddressHint")}</span>
         </div>
       </div>
     </div>

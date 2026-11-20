@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- CLI report script: printing results to stdout is its purpose */
 // Communication Phase 8 — database ↔ object-storage consistency report (read-only).
 //
 //   DATABASE_URL=… CHAT_STORAGE_BUCKET=… [CHAT_STORAGE_ENDPOINT=… CHAT_STORAGE_FORCE_PATH_STYLE=true

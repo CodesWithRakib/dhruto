@@ -59,7 +59,9 @@ export function KpiCard({
 
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1.5">
-          <p className="truncate text-caption font-bold uppercase tracking-wider text-muted-foreground">
+          {/* Wrap (max 2 lines) instead of truncating: on 5-up rows labels like
+              "Returns & RTO" were cut to "RETURNS & RT…". */}
+          <p className="line-clamp-2 text-caption font-bold uppercase leading-snug tracking-wide text-muted-foreground" title={label}>
             {label}
           </p>
           <p className="text-2xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-3xl">
@@ -71,7 +73,7 @@ export function KpiCard({
         </div>
         <span
           className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11",
             TONE_SURFACE[tone],
           )}
           aria-hidden="true"

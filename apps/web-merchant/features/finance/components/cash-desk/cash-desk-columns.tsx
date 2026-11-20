@@ -1,11 +1,15 @@
 "use client";
 
 import React from "react";
-import { Badge, Button, ColumnDef } from "@dhruto/ui";
+import { Button, ColumnDef } from "@dhruto/ui";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Link } from "@/lib/navigation";
 import { EnumBadge } from "@/components/data-display/enum-badge";
-import { CASH_HANDIN_STATUS_TONE, CASH_DISCREPANCY_STATUS_TONE } from "@/config/status";
+import {
+  CASH_HANDIN_STATUS_TONE,
+  CASH_DISCREPANCY_STATUS_TONE,
+  CASH_LEDGER_STATUS_TONE,
+} from "@/config/status";
 import type {
   PendingReconciliationItem,
   CashHandInBatchItem,
@@ -77,9 +81,12 @@ export function getPendingColumns({
       header: () => <div className="text-center">{statusHeader}</div>,
       cell: ({ row }) => (
         <div className="text-center">
-          <Badge variant="secondary" className="text-[10px]">
-            {row.original.handInStatus}
-          </Badge>
+          <EnumBadge
+            namespace="CashLedgerStatus"
+            value={row.original.handInStatus}
+            tones={CASH_LEDGER_STATUS_TONE}
+            className="text-[10px]"
+          />
         </div>
       ),
     },

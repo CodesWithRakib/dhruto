@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/navigation";
+import { resolveNotificationRoute } from "../lib/notification-route";
 import {
   Bell,
   CheckCheck,
@@ -10,8 +11,6 @@ import {
   Truck,
   Wallet,
   Info,
-  Smartphone,
-  Mail,
   RefreshCw,
 } from "lucide-react";
 import { Button, Badge, Card, ListSkeleton } from "@dhruto/ui";
@@ -20,7 +19,7 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
 } from "../api/notifications.api";
-import { NotificationChannel, NotificationType } from "@dhruto/contracts";
+import { NotificationType } from "@dhruto/contracts";
 import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
 import { EmptyState, ErrorState, RetryButton } from "@/components/feedback/states";
@@ -29,24 +28,7 @@ import { useFormatters } from "@/lib/format";
 
 const PAGE_SIZE = 20;
 
-/** Resolves a safe in-app route for a notification's metadata. */
-function resolveRoute(metadata: Record<string, unknown> | undefined): string | null {
-  const route = metadata?.route;
-  if (typeof route !== "string" || route.length === 0) return null;
-  // Only allow known in-app destinations — never open redirects or externals.
-  if (
-    route.startsWith("/merchant/") ||
-    route.startsWith("/admin/") ||
-    route.startsWith("/hub/") ||
-    route.startsWith("/rider/") ||
-    route.startsWith("/customer/") ||
-    route === "/merchant/parcels" ||
-    route === "/merchant/finance"
-  ) {
-    return route;
-  }
-  return null;
-}
+const resolveRoute = resolveNotificationRoute;
 
 function TypeIcon({ type }: { type: string }) {
   if (type === NotificationType.CASH_COLLECTED || type === NotificationType.PAYOUT_UPDATE) {
@@ -56,16 +38,6 @@ function TypeIcon({ type }: { type: string }) {
     return <Truck className="h-4 w-4 text-info-soft-foreground" aria-hidden="true" />;
   }
   return <Info className="h-4 w-4 text-muted-foreground" aria-hidden="true" />;
-}
-
-function ChannelIcon({ channel }: { channel: string }) {
-  if (channel === NotificationChannel.SMS) {
-    return <Smartphone className="h-3.5 w-3.5 text-info-soft-foreground" aria-label="SMS" />;
-  }
-  if (channel === NotificationChannel.EMAIL) {
-    return <Mail className="h-3.5 w-3.5 text-info-soft-foreground" aria-label="Email" />;
-  }
-  return <Bell className="h-3.5 w-3.5 text-primary-soft-foreground" aria-label="In-app" />;
 }
 
 /**
@@ -232,10 +204,6 @@ export function NotificationCenter() {
                   <div className="mb-0.5 flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-medium text-foreground">
                       {item.title}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-1">
-                      <ChannelIcon channel={item.channel} />
-                      <span className="text-[10px] text-muted-foreground">{item.channel}</span>
                     </span>
                   </div>
                   <p className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">

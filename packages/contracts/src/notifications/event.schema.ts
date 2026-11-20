@@ -17,10 +17,16 @@ export enum DomainEventType {
   PARCEL_ASSIGNED = "parcel.assigned.v1",
   /** First-mile: the pickup rider collected the parcel from the merchant. */
   PARCEL_PICKED_UP = "parcel.picked_up.v1",
+  /** First-mile: merchant asked for a pickup (hub managers act on it). */
+  PARCEL_PICKUP_REQUESTED = "parcel.pickup_requested.v1",
+  /** First-mile: hub assigned a pickup rider to one merchant visit (batch). */
+  PARCEL_PICKUP_ASSIGNED = "parcel.pickup_assigned.v1",
   PARCEL_OUT_FOR_DELIVERY = "parcel.out_for_delivery.v1",
   PARCEL_DELIVERED = "parcel.delivered.v1",
   PARCEL_FAILED = "parcel.failed.v1",
   PARCEL_RETURNED = "parcel.returned.v1",
+  /** Linehaul: a manifest left the origin hub for the destination hub. */
+  MANIFEST_DISPATCHED = "manifest.dispatched.v1",
   CASH_HAND_IN_SUBMITTED = "cash.hand_in_submitted.v1",
   CASH_VERIFIED = "cash.verified.v1",
   SETTLEMENT_CREATED = "settlement.created.v1",

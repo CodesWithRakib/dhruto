@@ -12,6 +12,9 @@ vi.hoisted(() => {
     process.env.OUTBOX_POLL_MS = "600000"; // relay driven manually
     process.env.CHAT_ROOM_REVALIDATE_MS = "600000"; // revalidation driven manually
     process.env.CHAT_REALTIME_REDIS_PROBE_MS = "500";
+    // This suite exercises the multi-instance Redis adapter, which defaults
+    // to OFF under NODE_ENV=test (single-instance mode).
+    process.env.CHAT_REALTIME_REDIS_ENABLED = "true";
     process.env.CHAT_SOCKET_CONNECTIONS_PER_MINUTE = "1000";
     process.env.CHAT_RATE_LIMIT_SEND_PER_MIN = "1000";
   }

@@ -569,6 +569,9 @@ export class ParcelsService {
         merchantId: scope.merchantId,
       });
     }
+    if (query.statuses?.length) {
+      qb.andWhere("parcel.status IN (:...statuses)", { statuses: query.statuses });
+    }
     if (query.status) {
       qb.andWhere("parcel.status = :status", { status: query.status });
     }
@@ -1277,6 +1280,25 @@ export class ParcelsService {
           description: notes ? `Pickup requested: ${notes}` : "Pickup requested by merchant",
         }),
       );
+
+      // Tell the hub serving the merchant's pickup district (transactional outbox).
+      const merchant = await manager.getRepository(Merchant).findOne({
+        where: { id: parcel.merchantId },
+        select: { id: true, businessName: true, pickupDistrict: true },
+      });
+      await this.outboxService.append(manager, {
+        eventType: DomainEventType.PARCEL_PICKUP_REQUESTED,
+        aggregateType: "parcel",
+        aggregateId: parcel.id,
+        actorId: UUID_REGEX.test(actor.id) ? actor.id : null,
+        payload: {
+          parcelId: parcel.id,
+          trackingCode: parcel.trackingCode,
+          merchantId: parcel.merchantId,
+          merchantName: merchant?.businessName ?? null,
+          pickupDistrict: merchant?.pickupDistrict ?? null,
+        },
+      });
 
       await this.cacheService?.del(`tracking:${parcel.trackingCode}`);
       this.logger.log(`PARCEL_PICKUP_REQUESTED parcel=${parcel.id} actor=${actor.id}`);

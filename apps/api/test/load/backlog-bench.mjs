@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- CLI report script: printing results to stdout is its purpose */
 // Communication Phase 8 — backlog scan throughput with a REAL clamd (DISPOSABLE environment only).
 //
 //   BENCH_DATABASE_URL=…test BENCH_BUCKET=… BENCH_S3_ENDPOINT=… node test/load/backlog-bench.mjs <files> <kb>

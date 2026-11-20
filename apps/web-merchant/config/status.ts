@@ -213,6 +213,14 @@ export const CASH_HANDIN_STATUS_TONE: Record<CashHandInStatus, StatusTone> = {
   [CashHandInStatus.RESOLVED]: "info",
 };
 
+/** Per-parcel cash ledger states (API `CashLedger.handInStatus`). */
+export const CASH_LEDGER_STATUS_TONE: Record<string, StatusTone> = {
+  PENDING: "warning",
+  HANDED_IN: "info",
+  VERIFIED: "success",
+  DISCREPANCY: "danger",
+};
+
 export const CASH_DISCREPANCY_STATUS_TONE: Record<CashDiscrepancyStatus, StatusTone> = {
   [CashDiscrepancyStatus.OPEN]: "danger",
   [CashDiscrepancyStatus.RESOLVED]: "success",

@@ -32,16 +32,22 @@ export function ReturnsListView() {
   const [search, setSearch] = useState("");
 
   const queryParams = useMemo(() => {
+    // Filter on the server: fetching the newest 100 parcels of any status and
+    // filtering here only found returns among recent bookings (3 of 16).
     return {
       limit: 100,
-      status: activeTab === "ALL" ? undefined : activeTab,
+      ...(activeTab === "ALL" ? { statuses: RTO_STATUSES } : { status: activeTab }),
       search: search.trim() || undefined,
     };
   }, [activeTab, search]);
 
   const { data, isLoading, isFetching, refetch } = useGetParcelsQuery(queryParams);
+  // KPI cards always describe every return, whichever tab is open (deduped
+  // with the list query when the All tab has no search).
+  const { data: allReturnsData } = useGetParcelsQuery({ limit: 100, statuses: RTO_STATUSES });
+  const allReturns = useMemo(() => allReturnsData?.data ?? [], [allReturnsData]);
 
-  const allParcels = data?.data ?? [];
+  const allParcels = useMemo(() => data?.data ?? [], [data]);
   const returnParcels = useMemo(() => {
     if (activeTab === "ALL") {
       return allParcels.filter((p) => RTO_STATUSES.includes(p.status as ParcelStatus));
@@ -50,10 +56,10 @@ export function ReturnsListView() {
   }, [allParcels, activeTab]);
 
   const stats = useMemo(() => {
-    const initiated = allParcels.filter((p) => p.status === ParcelStatus.RTO_INITIATED).length;
-    const inTransit = allParcels.filter((p) => p.status === ParcelStatus.RETURN_IN_TRANSIT).length;
-    const completed = allParcels.filter((p) => p.status === ParcelStatus.RETURNED_TO_MERCHANT).length;
-    const totalCod = allParcels
+    const initiated = allReturns.filter((p) => p.status === ParcelStatus.RTO_INITIATED).length;
+    const inTransit = allReturns.filter((p) => p.status === ParcelStatus.RETURN_IN_TRANSIT).length;
+    const completed = allReturns.filter((p) => p.status === ParcelStatus.RETURNED_TO_MERCHANT).length;
+    const totalCod = allReturns
       .filter((p) => RTO_STATUSES.includes(p.status as ParcelStatus))
       .reduce((sum, p) => sum + (p.codAmount || 0), 0);
 
@@ -64,7 +70,7 @@ export function ReturnsListView() {
       completed,
       totalCod,
     };
-  }, [allParcels]);
+  }, [allReturns]);
 
   return (
     <div className="w-full space-y-6">

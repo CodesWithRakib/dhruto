@@ -24,6 +24,9 @@ export function MobileBottomNav({ onOpenMore, className }: MobileBottomNavProps)
   const bottomItems = bottomNavForRole(role);
   const showMore = hasMoreForRole(role);
 
+  // Bottom-bar labels must fit ~75px: prefer a short variant (Nav.<key>Short).
+  const barLabel = (key: string) => (t.has(`${key}Short`) ? t(`${key}Short`) : t(key));
+
   if (!bottomItems || bottomItems.length === 0) {
     return null;
   }
@@ -41,7 +44,7 @@ export function MobileBottomNav({ onOpenMore, className }: MobileBottomNavProps)
           const active = isActiveRoute(pathname, item.href);
           const Icon = item.icon;
           return (
-            <li key={item.href} className="flex-1">
+            <li key={item.href} className="min-w-0 flex-1">
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
@@ -58,14 +61,14 @@ export function MobileBottomNav({ onOpenMore, className }: MobileBottomNavProps)
                     <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary" />
                   )}
                 </div>
-                <span className="truncate text-[11px] leading-none">{t(item.labelKey)}</span>
+                <span className="max-w-full truncate text-[11px] leading-none">{barLabel(item.labelKey)}</span>
               </Link>
             </li>
           );
         })}
 
         {showMore && onOpenMore ? (
-          <li className="flex-1">
+          <li className="min-w-0 flex-1">
             <button
               type="button"
               onClick={onOpenMore}

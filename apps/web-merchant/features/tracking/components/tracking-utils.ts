@@ -74,8 +74,8 @@ export function getStatusTheme(status: ParcelStatus | string): TrackingStatusThe
 
 export const TRACKING_MILESTONES = [
   { step: 1, titleEn: "Order Created", titleBn: "অর্ডার তৈরি", icon: Package },
-  { step: 2, titleEn: "Hub Inbound", titleBn: "হাবে গৃহীত", icon: Building2 },
-  { step: 3, titleEn: "Line-Haul", titleBn: "ট্রানজিট", icon: Truck },
+  { step: 2, titleEn: "Picked up", titleBn: "পিকআপ হয়েছে", icon: Building2 },
+  { step: 3, titleEn: "In transit", titleBn: "ট্রানজিটে", icon: Truck },
   { step: 4, titleEn: "Out for Delivery", titleBn: "ডেলিভারিতে", icon: Radio },
   { step: 5, titleEn: "Delivered", titleBn: "ডেলিভার্ড", icon: CheckCircle2 },
 ] as const;

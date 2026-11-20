@@ -5,7 +5,7 @@ import request from "supertest";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { AppModule } from "../src/app.module.js";
 import { SEEDED_ACCOUNTS, bearer, idempotencyKey, loginToken } from "./utils/auth.js";
-import { realisticName } from "./utils/realistic.js";
+import { realisticName, realisticPhone } from "./utils/realistic.js";
 
 const VALID_BOOKING = {
   recipientName: "Rafiqul Islam",
@@ -238,9 +238,10 @@ describe("Parcels API — Phase 1 merchant parcel core (E2E / Integration)", () 
 
     it("creates exactly one parcel for concurrent duplicate submissions", async () => {
       const key = idempotencyKey("concurrent");
-      // Unique per run so the assertion is not polluted by earlier test data.
-      const marker = `Concurrent Duplicate ${key}`;
-      const payload = { ...VALID_BOOKING, recipientName: marker };
+      // A fresh realistic phone keeps the search unique per run without
+      // leaving test-looking names in the dev database.
+      const marker = realisticPhone();
+      const payload = { ...VALID_BOOKING, recipientName: realisticName(), recipientPhone: marker };
 
       const [a, b] = await Promise.all([
         request(app.getHttpServer())

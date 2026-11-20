@@ -5,13 +5,16 @@ import request from "supertest";
 import { AppModule } from "../src/app.module.js";
 import { DhrutoValidationPipe } from "../src/common/pipes/validation.pipe.js";
 import { WebhookEvent, NotificationChannel } from "@dhruto/contracts";
-import { realisticName } from "./utils/realistic.js";
+import { DataSource } from "typeorm";
+import { realisticName, realisticPhone } from "./utils/realistic.js";
 
 describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
   let app: INestApplication;
   let merchantToken: string;
   let subscriptionId: string;
   let deliveryId: string;
+  let adminToken: string;
+  let merchantId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -34,9 +37,25 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
 
     merchantToken = merchantLogin.body.data.tokens.accessToken;
     expect(merchantToken).toBeDefined();
+    merchantId = merchantLogin.body.data.user.merchantId ??
+      (await request(app.getHttpServer()).get("/api/v1/auth/me").set("Authorization", `Bearer ${merchantToken}`))
+        .body.data.merchant.id;
+
+    const adminLogin = await request(app.getHttpServer())
+      .post("/api/v1/auth/login")
+      .send({ emailOrPhone: "admin@dhruto.com", password: "dhruto123" })
+      .expect(200);
+    adminToken = adminLogin.body.data.tokens.accessToken;
   });
 
   afterAll(async () => {
+    // Remove only what this run created, so dev never accumulates endpoints
+    // that dead-letter every parcel event.
+    if (subscriptionId) {
+      await request(app.getHttpServer())
+        .delete(`/api/v1/webhooks/subscriptions/${subscriptionId}`)
+        .set("Authorization", `Bearer ${merchantToken}`);
+    }
     await app.close();
   });
 
@@ -76,16 +95,27 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
     expect(typeof listRes.body.data.total).toBe("number");
   });
 
-  it("2. Dispatch a simulated SMS notification via POST /api/v1/notifications/test-sms", async () => {
-    const res = await request(app.getHttpServer())
+  it("2. The SMS gateway test is admin-only (arbitrary text to any number)", async () => {
+    const payload = {
+      phone: realisticPhone(),
+      message: "Dhruto Express: your parcel is out for delivery today.",
+    };
+    await request(app.getHttpServer())
       .post("/api/v1/notifications/test-sms")
       .set("Authorization", `Bearer ${merchantToken}`)
-      .send({
-        phone: "01712345678",
-        message: "Dhruto Express: Test E2E SMS Notification",
-      })
-      .expect(200);
+      .send(payload)
+      .expect(403);
+    await request(app.getHttpServer())
+      .post("/api/v1/notifications/test-inapp")
+      .set("Authorization", `Bearer ${merchantToken}`)
+      .send({})
+      .expect(403);
 
+    const res = await request(app.getHttpServer())
+      .post("/api/v1/notifications/test-sms")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send(payload)
+      .expect(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.channel).toBe(NotificationChannel.SMS);
     expect(res.body.data.recipientTarget).toMatch(/^(?:\+?880|880|0)1\d{9}$/);
@@ -103,7 +133,7 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
           WebhookEvent.CASH_VERIFIED,
           WebhookEvent.PING,
         ],
-        description: "Primary Production Integration Webhook",
+        description: "Order sync for Rahim Enterprise storefront",
       })
       .expect(201);
 
@@ -236,5 +266,32 @@ describe("Notifications & Webhooks Integration (Phase 5 E2E)", () => {
       .expect(200);
 
     expect(unreadRes.body.data.unreadCount).toBe(0);
+  });
+
+  it("10. The inbox is in-app only and read-all never rewrites SMS delivery status", async () => {
+    const listRes = await request(app.getHttpServer())
+      .get("/api/v1/notifications/me?limit=100")
+      .set("Authorization", `Bearer ${merchantToken}`)
+      .expect(200);
+    const channels = new Set(
+      (listRes.body.data.items as Array<{ channel: string }>).map((n) => n.channel),
+    );
+    expect([...channels]).toEqual([NotificationChannel.IN_APP]);
+
+    // A delivered SMS record attributed to this merchant (e.g. a customer SMS).
+    const ds = app.get(DataSource);
+    const [{ id: smsId }] = await ds.query(
+      `INSERT INTO notifications (merchant_id, channel, type, title, message, recipient_target, status, sent_at)
+       VALUES ($1, 'SMS', 'PARCEL_STATUS_UPDATE', 'Parcel delivered', 'Dhruto: your parcel was delivered.', $2, 'SENT', now())
+       RETURNING id`,
+      [merchantId, realisticPhone()],
+    );
+    await request(app.getHttpServer())
+      .post("/api/v1/notifications/read-all")
+      .set("Authorization", `Bearer ${merchantToken}`)
+      .expect(200);
+    const [sms] = await ds.query("SELECT status, read_at FROM notifications WHERE id = $1", [smsId]);
+    expect(sms.status).toBe("SENT");
+    expect(sms.read_at).toBeNull();
   });
 });

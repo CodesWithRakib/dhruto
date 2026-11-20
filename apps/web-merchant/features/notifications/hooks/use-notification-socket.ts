@@ -67,6 +67,10 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
         reconnectionDelay: 2000,
         reconnectionAttempts: 10,
       });
+    } else {
+      // Token rotated (refresh): the live connection stays authenticated, but
+      // a later reconnect must present the fresh JWT or the server rejects it.
+      sharedSocket.auth = { token };
     }
 
     const socket = sharedSocket;
@@ -95,11 +99,13 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       // 3. Immediately refresh Redux RTK notification cache (0ms delay)
       dispatch(notificationsApi.util.invalidateTags(["Notification"]));
 
-      // 4. Invalidate related entities for instant dashboard reactivity
+      // 4. Invalidate related entities for instant screen reactivity. Rider
+      //    task lists / pickups and hub queues cache under Rider/Hub tags, so
+      //    parcel events refresh those too (only mounted queries refetch).
       if (data.type === "PARCEL_STATUS_UPDATE") {
-        dispatch(baseApi.util.invalidateTags(["Parcel", "Analytics"]));
+        dispatch(baseApi.util.invalidateTags(["Parcel", "Analytics", "Rider", "Hub"]));
       } else if (data.type === "CASH_COLLECTED" || data.type === "PAYOUT_UPDATE") {
-        dispatch(baseApi.util.invalidateTags(["Wallet", "Finance"]));
+        dispatch(baseApi.util.invalidateTags(["Wallet", "Finance", "Rider", "Hub"]));
       }
     };
 

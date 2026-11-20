@@ -316,7 +316,10 @@ export interface MerchantWalletData {
   merchantId: string;
   balance: number;
   pendingBalance: number;
+  /** Money actually paid out: sum of COMPLETED payouts. */
   withdrawnTotal: number;
+  /** Requested/approved/processing payouts not yet paid (already debited from balance). */
+  payoutsInProgress: number;
   currency: string;
   updatedAt: string;
 }

@@ -14,6 +14,14 @@ import { EnumBadge } from "@/components/data-display/enum-badge";
 import { WALLET_TRANSACTION_TONE } from "@/config/status";
 import { useFormatters } from "@/lib/format";
 
+/** Wallet entries that reduce the balance (amounts are stored unsigned). */
+const DEBIT_TYPES: ReadonlySet<WalletTransactionType> = new Set([
+  WalletTransactionType.DELIVERY_FEE,
+  WalletTransactionType.RETURN_FEE,
+  WalletTransactionType.PAYOUT_DEBIT,
+  WalletTransactionType.ADJUSTMENT_DEBIT,
+]);
+
 /** `ALL` keeps the URL readable while the API only knows concrete types. */
 export const ALL_TRANSACTION_TYPES = "ALL";
 
@@ -104,8 +112,14 @@ export function TransactionsTable({
         accessorKey: "amount",
         header: () => <span className="block text-right">{t("statement.net")}</span>,
         cell: ({ row }) => (
-          <div className="text-right text-body-sm font-semibold tabular-nums text-foreground">
-            {bdt(row.original.amount)}
+          // Stored amounts are unsigned; the type carries the direction.
+          <div
+            className={`text-right text-body-sm font-semibold tabular-nums ${
+              DEBIT_TYPES.has(row.original.type) ? "text-danger" : "text-success"
+            }`}
+          >
+            {DEBIT_TYPES.has(row.original.type) ? "−" : "+"}
+            {bdt(Math.abs(row.original.amount))}
           </div>
         ),
       },
@@ -136,7 +150,7 @@ export function TransactionsTable({
             {t("statement.title")}
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            {t("subtitle")}
+            {t("statement.description")}
           </p>
         </div>
       </div>
@@ -147,6 +161,8 @@ export function TransactionsTable({
           data={transactions}
           isLoading={isLoading}
           emptyMessage={t("statement.empty")}
+          // Server-paginated: the Previous/Next bar below pages the API.
+          hidePagination
           filterSlot={
             <div
               className="flex flex-wrap items-center gap-1.5"

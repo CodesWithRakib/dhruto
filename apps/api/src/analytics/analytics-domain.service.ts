@@ -195,7 +195,7 @@ export class AnalyticsDomainService {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    const bucket = this.ranges.bucketSql("p.createdAt", range.granularity);
+    const bucket = this.ranges.bucketKeySql("p.createdAt", range.granularity);
     const overTimeRows = await this.metrics
       .scopedParcels(scope)
       .select(`${bucket}`, "bucket")
@@ -205,11 +205,11 @@ export class AnalyticsDomainService {
       .setParameters({ rto: RTO_STATUSES, eligible: [...DELIVERED_STATUSES, ...RTO_STATUSES] })
       .groupBy("bucket")
       .orderBy("bucket", "ASC")
-      .getRawMany<{ bucket: Date; rto: string; eligible: string }>();
+      .getRawMany<{ bucket: string; rto: string; eligible: string }>();
     const overTime = overTimeRows.map((r) => {
       const e = Number(r.eligible);
       return {
-        bucket: new Date(r.bucket).toISOString().slice(0, 10),
+        bucket: r.bucket,
         count: Number(r.rto),
         rate: e > 0 ? Math.round((Number(r.rto) / e) * 1000) / 10 : null,
       };
@@ -289,7 +289,7 @@ export class AnalyticsDomainService {
     const collected = num(collectedRow?.sum);
     const failed = num(rtoParcels?.sum);
 
-    const bucket = this.ranges.bucketSql("p.createdAt", range.granularity);
+    const bucket = this.ranges.bucketKeySql("p.createdAt", range.granularity);
     const overTimeRows = await this.metrics
       .scopedParcels(scope)
       .select(`${bucket}`, "bucket")
@@ -302,7 +302,7 @@ export class AnalyticsDomainService {
       .setParameters({ delivered: DELIVERED_STATUSES })
       .groupBy("bucket")
       .orderBy("bucket", "ASC")
-      .getRawMany<{ bucket: Date; booked: string | null; collected: string | null }>();
+      .getRawMany<{ bucket: string; booked: string | null; collected: string | null }>();
 
     return {
       booked: num(bookedRow?.sum),
@@ -312,7 +312,7 @@ export class AnalyticsDomainService {
       collectionRate:
         collected + failed > 0 ? Math.round((collected / (collected + failed)) * 1000) / 10 : null,
       overTime: overTimeRows.map((r) => ({
-        bucket: new Date(r.bucket).toISOString().slice(0, 10),
+        bucket: r.bucket,
         booked: num(r.booked),
         collected: num(r.collected),
       })),

@@ -106,8 +106,24 @@ export function DataTable<TData, TValue>({
   hidePagination = false,
   className,
 }: DataTableProps<TData, TValue>) {
+  // Uncontrolled tables (no page handler, no server total) page their rows
+  // client-side. Previously they rendered every row under a footer claiming
+  // "Showing 1 to 10 of 22 · Page 1 of 1".
+  const isClientPaged = !onPageChange && !onPaginationChange && totalItems === undefined;
+  const [clientPage, setClientPage] = React.useState(1);
+  const clientPages = Math.max(1, Math.ceil(data.length / itemsPerPage));
+  React.useEffect(() => {
+    if (clientPage > clientPages) setClientPage(clientPages);
+  }, [clientPage, clientPages]);
+  const page = isClientPaged ? Math.min(clientPage, clientPages) : currentPage;
+  const goToPage = (next: number) => (isClientPaged ? setClientPage(next) : onPageChange?.(next));
+  const rows = React.useMemo(
+    () => (isClientPaged && !hidePagination ? data.slice((page - 1) * itemsPerPage, page * itemsPerPage) : data),
+    [isClientPaged, hidePagination, data, page, itemsPerPage],
+  );
+
   const table = useReactTable({
-    data,
+    data: rows,
     columns,
     pageCount: pageCount > 0 ? pageCount : 1,
     state: {
@@ -120,7 +136,9 @@ export function DataTable<TData, TValue>({
 
   const hasToolbar = Boolean(onSearchChange || filterSlot || actionSlot);
   const effectiveTotalItems = totalItems ?? data.length;
-  const totalPages = Math.max(1, pageCount || Math.ceil(effectiveTotalItems / itemsPerPage));
+  const totalPages = isClientPaged
+    ? clientPages
+    : Math.max(1, pageCount || Math.ceil(effectiveTotalItems / itemsPerPage));
 
   // `labels` wins over the props/defaults so callers can localize every string
   // the table owns without replacing the component.
@@ -268,8 +286,8 @@ export function DataTable<TData, TValue>({
           <div className="flex flex-wrap items-center justify-center gap-2 text-caption text-muted-foreground">
             <span aria-live="polite" className="tabular-nums">
               {fill(labels?.showingRange ?? "Showing {from} to {to} of {total} items", {
-                from: num(Math.min(effectiveTotalItems, (currentPage - 1) * itemsPerPage + 1)),
-                to: num(Math.min(effectiveTotalItems, currentPage * itemsPerPage)),
+                from: num(Math.min(effectiveTotalItems, (page - 1) * itemsPerPage + 1)),
+                to: num(Math.min(effectiveTotalItems, page * itemsPerPage)),
                 total: num(effectiveTotalItems),
               })}
             </span>
@@ -299,8 +317,8 @@ export function DataTable<TData, TValue>({
             <Button
               variant="outline"
               size="sm"
-              disabled={currentPage <= 1 || isLoading}
-              onClick={() => onPageChange?.(currentPage - 1)}
+              disabled={page <= 1 || isLoading}
+              onClick={() => goToPage(page - 1)}
               className="h-8.5 gap-1 rounded-xl px-3 text-xs font-semibold"
             >
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
@@ -308,15 +326,15 @@ export function DataTable<TData, TValue>({
             </Button>
             <span className="min-w-24 px-2 text-center text-xs font-semibold tabular-nums text-foreground" aria-live="polite">
               {fill(labels?.pageOf ?? "Page {page} of {totalPages}", {
-                page: num(currentPage),
+                page: num(page),
                 totalPages: num(totalPages),
               })}
             </span>
             <Button
               variant="outline"
               size="sm"
-              disabled={currentPage >= totalPages || isLoading}
-              onClick={() => onPageChange?.(currentPage + 1)}
+              disabled={page >= totalPages || isLoading}
+              onClick={() => goToPage(page + 1)}
               className="h-8.5 gap-1 rounded-xl px-3 text-xs font-semibold"
             >
               {labels?.next ?? "Next"}

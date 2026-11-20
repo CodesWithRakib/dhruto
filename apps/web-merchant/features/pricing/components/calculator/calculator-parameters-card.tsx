@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Box, Minus, Plus, Scale } from "lucide-react";
+import { Minus, Plus, Scale } from "lucide-react";
 import type { ZoneOption } from "./calculator-destination-picker";
 
 interface CalculatorParametersCardProps {
@@ -10,8 +10,6 @@ interface CalculatorParametersCardProps {
   onWeightChange: (weight: number) => void;
   codAmount: number;
   onCodChange: (cod: number) => void;
-  isFragileBox: boolean;
-  onFragileBoxChange: (fragile: boolean) => void;
   extraKg: number;
   extraWeightFee: number;
   selectedZone: ZoneOption;
@@ -22,8 +20,6 @@ export function CalculatorParametersCard({
   onWeightChange,
   codAmount,
   onCodChange,
-  isFragileBox,
-  onFragileBoxChange,
   extraKg,
   extraWeightFee,
   selectedZone,
@@ -141,31 +137,6 @@ export function CalculatorParametersCard({
         </div>
       </div>
 
-      {/* 4. Packaging & Fragile Add-on Option */}
-      <div className="mt-8 pt-6">
-        <label className="flex items-center justify-between rounded-2xl bg-surface-muted/60 p-4 cursor-pointer transition hover:bg-surface-muted">
-          <div className="flex items-center gap-3">
-            <Box className="h-5 w-5 text-primary" />
-            <div>
-              <div className="text-sm font-bold text-foreground">
-                {t("fragileTitle")}
-              </div>
-              <div className="text-caption text-muted-foreground">
-                {t("fragileDesc")}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs font-semibold text-foreground">+৳20</span>
-            <input
-              type="checkbox"
-              checked={isFragileBox}
-              onChange={(e) => onFragileBoxChange(e.target.checked)}
-              className="h-4 w-4 rounded text-primary focus:ring-primary"
-            />
-          </div>
-        </label>
-      </div>
     </>
   );
 }

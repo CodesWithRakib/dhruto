@@ -6,6 +6,7 @@
 // Inputs: /work/load-tokens.json from seed-load.mjs. PROFILE = baseline | ramp | burst | sustained.
 // Requests are tagged by endpoint (`name`) so percentiles are reported per endpoint.
 // No thresholds: proposed targets live in PHASE-8-LOAD-TEST-REPORT.md and need approval.
+/* global __ENV, open -- k6 runtime globals (not Node), provided by the k6 engine */
 import http from "k6/http";
 import { check } from "k6";
 import { SharedArray } from "k6/data";

@@ -62,11 +62,11 @@ describe("First-mile pickups E2E", () => {
       loginToken(app, SEEDED_ACCOUNTS.hubManagerCtg),
       loginToken(app, SEEDED_ACCOUNTS.rider),
     ]);
-    // The seeded merchant picks up in Dhaka.
+    // The seeded merchant picks up from its Uttara (Dhaka) warehouse.
     await request(app.getHttpServer())
       .patch("/api/v1/merchants/me")
       .set(bearer(merchantToken))
-      .send({ pickupDistrict: "Dhaka", pickupThana: "Dhanmondi" })
+      .send({ pickupDistrict: "Dhaka", pickupThana: "Uttara" })
       .expect((r) => expect(r.status).toBeLessThan(300));
     dhkHubId = (await request(app.getHttpServer()).get("/api/v1/hubs").set(bearer(dhkToken))).body.data[0].id;
     ctgHubId = (await request(app.getHttpServer()).get("/api/v1/hubs").set(bearer(ctgToken))).body.data[0].id;
@@ -115,15 +115,22 @@ describe("First-mile pickups E2E", () => {
     let p = (await request(app.getHttpServer()).get(`/api/v1/parcels/${parcel.id}`).set(bearer(merchantToken))).body.data;
     expect(p.status).toBe(ParcelStatus.PICKED_UP);
     expect(p.currentRiderName).toBeTruthy();
-    // The pickup is announced to the merchant (in-app + webhook) via the outbox.
-    const events = await app
-      .get(DataSource)
-      .query("SELECT payload FROM event_outbox WHERE aggregate_id = $1 AND event_type = $2", [
-        parcel.id,
-        DomainEventType.PARCEL_PICKED_UP,
-      ]);
-    expect(events).toHaveLength(1);
-    expect(events[0].payload.trackingCode).toBe(parcel.code);
+    // Every first-mile step is announced through the transactional outbox:
+    // request → serving hub, assignment → rider + merchant, pickup → merchant.
+    const eventsOf = (type: DomainEventType) =>
+      app
+        .get(DataSource)
+        .query("SELECT payload FROM event_outbox WHERE aggregate_id = $1 AND event_type = $2", [
+          parcel.id,
+          type,
+        ]) as Promise<Array<{ payload: Record<string, unknown> }>>;
+    const [requested] = await eventsOf(DomainEventType.PARCEL_PICKUP_REQUESTED);
+    expect(requested?.payload.pickupDistrict).toBe("Dhaka");
+    const [assigned] = await eventsOf(DomainEventType.PARCEL_PICKUP_ASSIGNED);
+    expect(assigned?.payload).toMatchObject({ riderId, parcelCount: 1, hubId: dhkHubId });
+    const pickedUp = await eventsOf(DomainEventType.PARCEL_PICKED_UP);
+    expect(pickedUp).toHaveLength(1);
+    expect(pickedUp[0]!.payload.trackingCode).toBe(parcel.code);
 
     await request(app.getHttpServer())
       .post(`/api/v1/hubs/${dhkHubId}/scans`)

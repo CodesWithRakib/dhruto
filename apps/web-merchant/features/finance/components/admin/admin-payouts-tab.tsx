@@ -122,8 +122,8 @@ export function AdminPayoutsTab({
                         tones={PAYOUT_STATUS_TONE}
                       />
                     </TableCell>
-                    <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <TableCell className="px-4 py-3.5 text-right">
+                      <div className="flex flex-wrap items-center justify-end gap-1.5">
                         {payout.status === "REQUESTED" ? (
                           <Button
                             size="sm"
@@ -141,7 +141,7 @@ export function AdminPayoutsTab({
                               className="h-8 text-xs font-bold"
                               onClick={() => onComplete(payout)}
                             >
-                              {t("confirm")}
+                              {t("payout.markPaid")}
                             </Button>
                             <Button
                               size="sm"
@@ -149,7 +149,7 @@ export function AdminPayoutsTab({
                               className="h-8 text-xs font-bold text-danger hover:bg-danger-soft"
                               onClick={() => onFail(payout)}
                             >
-                              {t("payout.failTitle")}
+                              {t("payout.markFailed")}
                             </Button>
                           </>
                         ) : null}
@@ -163,7 +163,7 @@ export function AdminPayoutsTab({
                             {t("payout.reject")}
                           </Button>
                         ) : null}
-                        {payout.status === "COMPLETED" || payout.status === "APPROVED" ? (
+                        {payout.status === "COMPLETED" ? (
                           <Button
                             size="sm"
                             variant="outline"

@@ -34,6 +34,7 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
       balance: 14500,
       pendingBalance: 3200,
       withdrawnTotal: 50000,
+      payoutsInProgress: 1500,
       currency: "BDT",
       updatedAt: new Date().toISOString(),
     };
@@ -99,8 +100,9 @@ describe("Finance Components (Phase 4 Unit Tests)", () => {
     // Status labels are translated from the centralized WalletTransactionType namespace.
     expect(screen.getAllByText("COD credit").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Delivery fee").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("৳3,000")).toBeDefined();
-    expect(screen.getByText("৳120")).toBeDefined();
+    // Net column is signed by direction: credits +, fees/payouts −.
+    expect(screen.getByText("+৳3,000")).toBeDefined();
+    expect(screen.getByText("−৳120")).toBeDefined();
     expect(screen.getAllByText(/DHR-20261004-TEST01/).length).toBeGreaterThanOrEqual(2);
   });
 

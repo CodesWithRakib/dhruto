@@ -171,6 +171,8 @@ export class NotificationsController {
   }
 
   @Post("test-sms")
+  // Operator tool: arbitrary text to any number through the paid gateway.
+  @Roles(UserRole.ADMIN)
   @RateLimit({ limit: 5, windowSeconds: 60, scope: "notif-test-sms" })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -179,6 +181,7 @@ export class NotificationsController {
       "Rate-limited. The attempt is persisted before transport, honestly reported after.",
   })
   @ApiResponse({ status: 200, description: "Test SMS attempted." })
+  @ApiResponse({ status: 403, description: "Admins only." })
   @ApiResponse({ status: 429, description: "Too many test sends." })
   async testSms(
     @Body() dto: TestSmsDto,
@@ -200,6 +203,7 @@ export class NotificationsController {
   }
 
   @Post("test-inapp")
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @RateLimit({ limit: 20, windowSeconds: 60, scope: "notification-test" })
   @ApiOperation({ summary: "Dispatch test in-app notification to verify real-time socket & audio chime" })

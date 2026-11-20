@@ -89,7 +89,8 @@ export default function WebhooksDeveloperPage() {
   const deadLetterCount = countOf(WebhookDeliveryStatus.DEAD_LETTER);
   const failedCount = countOf(WebhookDeliveryStatus.FAILED);
   const successRate =
-    totalDeliveries > 0 ? Math.round((deliveredCount / totalDeliveries) * 100) : 100;
+    // No deliveries yet means no rate, not a perfect one.
+    totalDeliveries > 0 ? Math.round((deliveredCount / totalDeliveries) * 100) : null;
 
   const handleCreateSubscription = async (formData: {
     url: string;

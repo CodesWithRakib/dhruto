@@ -9,7 +9,7 @@ import {
 import { InjectQueue } from "@nestjs/bullmq";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Queue } from "bullmq";
-import { DataSource, EntityManager, IsNull, Repository } from "typeorm";
+import { DataSource, EntityManager, In, IsNull, Repository } from "typeorm";
 import {
   DomainEventType,
   LOCKED_CATEGORIES,
@@ -24,11 +24,14 @@ import {
 } from "@dhruto/contracts";
 import {
   EventOutbox,
+  Hub,
   HubUserAssignment,
   Merchant,
   Notification,
   NotificationPreference,
   Rider,
+  User,
+  UserRole,
   WebhookDelivery,
   WebhookDeliveryStatus,
   WebhookSubscription,
@@ -47,12 +50,18 @@ import {
   renderParcelFailed,
   renderParcelOutForDelivery,
   renderParcelPickedUp,
+  renderPickupAssignedMerchant,
+  renderManifestDispatched,
+  renderCustomerParcel,
+  renderPickupAssignedRider,
+  renderPickupRequested,
   renderParcelReturned,
   renderPayoutApproved,
   renderPayoutCompleted,
   renderPayoutFailed,
   renderPayoutRequested,
   renderSettlementCreated,
+  type CustomerParcelKind,
   type TemplateKey,
 } from "../notifications/templates.js";
 import { getErrorMessage } from "../common/utils/error.util.js";
@@ -89,6 +98,11 @@ interface RiderInAppTarget extends BaseTarget {
   route: (payload: Payload) => string;
 }
 
+/** The recipient's customer-portal account (matched by recipient phone). */
+interface CustomerInAppTarget extends BaseTarget {
+  kind: "customer-inapp";
+  route: (payload: Payload) => string;
+}
 interface HubInAppTarget extends BaseTarget {
   kind: "hub-inapp";
   route: (payload: Payload) => string;
@@ -131,6 +145,7 @@ type FanoutTarget =
   | MerchantSmsTarget
   | CustomerSmsTarget
   | RiderInAppTarget
+  | CustomerInAppTarget
   | HubInAppTarget
   | WebhookTarget
   | ChatRealtimeTarget
@@ -148,6 +163,14 @@ interface ResolvedRecipient {
  * Who gets told what, per domain event. Financial and security categories
  * are locked on; parcel updates can be disabled per channel in preferences.
  */
+/** Customer-portal copy of a parcel update; deep-links to the tracking page. */
+const CUSTOMER_INAPP = (templateKey: TemplateKey): CustomerInAppTarget => ({
+  kind: "customer-inapp",
+  category: NotificationCategory.PARCEL_UPDATES,
+  type: NotificationType.PARCEL_STATUS_UPDATE,
+  templateKey,
+  route: (p) => `/customer/track/${String(p.trackingCode)}`,
+});
 const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
   [DomainEventType.PARCEL_CREATED]: [
     {
@@ -174,6 +197,32 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_PICKED_UP },
+    CUSTOMER_INAPP("customer_picked_up"),
+  ],
+  [DomainEventType.PARCEL_PICKUP_REQUESTED]: [
+    {
+      kind: "hub-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "pickup_requested",
+      route: () => "/hub/pickups",
+    },
+  ],
+  [DomainEventType.PARCEL_PICKUP_ASSIGNED]: [
+    {
+      kind: "rider-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "pickup_assigned_rider",
+      route: () => "/rider/tasks",
+    },
+    {
+      kind: "merchant-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "pickup_assigned_merchant",
+      route: () => "/merchant/parcels",
+    },
   ],
   [DomainEventType.PARCEL_ASSIGNED]: [
     {
@@ -207,6 +256,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/merchant/parcels/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_OUT_FOR_DELIVERY },
+    CUSTOMER_INAPP("customer_out_for_delivery"),
     CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_DELIVERED]: [
@@ -230,6 +280,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       templateKey: "parcel_delivered",
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_DELIVERED },
+    CUSTOMER_INAPP("customer_delivered"),
     CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_FAILED]: [
@@ -254,6 +305,7 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
       route: (p) => `/rider/tasks/${String(p.parcelId)}`,
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_FAILED },
+    CUSTOMER_INAPP("customer_failed"),
     CHAT_LOGISTICS,
   ],
   [DomainEventType.PARCEL_RETURNED]: [
@@ -266,6 +318,15 @@ const FANOUT: Readonly<Record<DomainEventType, readonly FanoutTarget[]>> = {
     },
     { kind: "webhook", event: WebhookEvent.PARCEL_RETURNED },
     CHAT_LOGISTICS,
+  ],
+  [DomainEventType.MANIFEST_DISPATCHED]: [
+    {
+      kind: "hub-inapp",
+      category: NotificationCategory.PARCEL_UPDATES,
+      type: NotificationType.PARCEL_STATUS_UPDATE,
+      templateKey: "manifest_dispatched",
+      route: (p) => `/hub/manifests/${String(p.manifestId)}`,
+    },
   ],
   [DomainEventType.CASH_HAND_IN_SUBMITTED]: [
     {
@@ -419,6 +480,37 @@ function renderTemplate(key: TemplateKey, payload: Payload): RenderedTemplate {
       return renderParcelPickedUp({
         trackingCode: str(payload.trackingCode),
         recipientName: str(payload.recipientName),
+      });
+    case "pickup_requested":
+      return renderPickupRequested({
+        trackingCode: str(payload.trackingCode),
+        merchantName: str(payload.merchantName, "A merchant"),
+      });
+    case "pickup_assigned_rider":
+    case "pickup_assigned_merchant": {
+      const vars = {
+        merchantName: str(payload.merchantName, "the merchant"),
+        riderName: str(payload.riderName, "Your rider"),
+        parcelCount: num(payload.parcelCount, 1),
+      };
+      return key === "pickup_assigned_rider"
+        ? renderPickupAssignedRider(vars)
+        : renderPickupAssignedMerchant(vars);
+    }
+    case "manifest_dispatched":
+      return renderManifestDispatched({
+        manifestCode: str(payload.manifestCode),
+        originHubName: str(payload.originHubName, "the origin hub"),
+        bagCount: num(payload.bagCount, 1),
+      });
+    case "customer_picked_up":
+    case "customer_out_for_delivery":
+    case "customer_delivered":
+    case "customer_failed":
+      return renderCustomerParcel(key.replace("customer_", "") as CustomerParcelKind, {
+        trackingCode: str(payload.trackingCode),
+        merchantName: typeof payload.merchantName === "string" ? payload.merchantName : undefined,
+        reason: typeof payload.reason === "string" ? payload.reason : undefined,
       });
     case "parcel_assigned":
       return renderParcelAssigned({
@@ -723,10 +815,22 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     target: HubInAppTarget,
     payload: Payload,
   ): Promise<void> {
-    const hubId = typeof payload.hubId === "string" ? payload.hubId : null;
-    if (!hubId) return;
+    let hubIds: string[] = typeof payload.hubId === "string" ? [payload.hubId] : [];
+    if (hubIds.length === 0 && typeof payload.pickupDistrict === "string" && payload.pickupDistrict.trim()) {
+      // First-mile events are addressed to whichever hub serves the district.
+      const hubs = await manager
+        .getRepository(Hub)
+        .createQueryBuilder("h")
+        .select("h.id", "id")
+        .where("LOWER(TRIM(h.district)) = :district", {
+          district: payload.pickupDistrict.trim().toLowerCase(),
+        })
+        .getRawMany<{ id: string }>();
+      hubIds = hubs.map((h) => h.id);
+    }
+    if (hubIds.length === 0) return;
     const assignments = await manager.getRepository(HubUserAssignment).find({
-      where: { hubId, isActive: true },
+      where: { hubId: In(hubIds), isActive: true },
     });
     for (const assignment of assignments) {
       await this.deliverNotification(manager, row, { ...target, kind: "rider-inapp" }, payload, {
@@ -746,7 +850,8 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
       | MerchantEmailTarget
       | MerchantSmsTarget
       | CustomerSmsTarget
-      | RiderInAppTarget,
+      | RiderInAppTarget
+      | CustomerInAppTarget,
     payload: Payload,
   ): Promise<ResolvedRecipient | null> {
     switch (target.kind) {
@@ -795,6 +900,22 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
         const merchantId = typeof payload.merchantId === "string" ? payload.merchantId : null;
         return { key: `customer:${phone}`, merchantId, userId: null, target: phone, route: null };
       }
+      case "customer-inapp": {
+        // Same rule as the customer parcel scope: exact recipient phone match.
+        const phone = typeof payload.recipientPhone === "string" ? payload.recipientPhone : null;
+        if (!phone) return null;
+        const customer = await manager
+          .getRepository(User)
+          .findOne({ where: { phone, role: UserRole.CUSTOMER }, select: { id: true } });
+        if (!customer) return null;
+        return {
+          key: `user:${customer.id}`,
+          merchantId: null,
+          userId: customer.id,
+          target: null,
+          route: target.route(payload),
+        };
+      }
       case "rider-inapp": {
         const riderId = typeof payload.riderId === "string" ? payload.riderId : null;
         if (!riderId) return null;
@@ -819,7 +940,8 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
       | MerchantEmailTarget
       | MerchantSmsTarget
       | CustomerSmsTarget
-      | RiderInAppTarget,
+      | RiderInAppTarget
+      | CustomerInAppTarget,
     payload: Payload,
     recipient: ResolvedRecipient,
   ): Promise<void> {

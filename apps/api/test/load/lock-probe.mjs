@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- CLI report script: printing results to stdout is its purpose */
 // Communication Phase 8 — lock-impact probe for migration rehearsals (DISPOSABLE databases only).
 //
 //   PROBE_DATABASE_URL=postgres://…/<name containing "test"> node test/load/lock-probe.mjs <seconds>

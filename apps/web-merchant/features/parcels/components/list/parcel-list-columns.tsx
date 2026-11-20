@@ -75,7 +75,7 @@ export function buildParcelListColumns({
             </span>
           </p>
           <p
-            className="mt-0.5 max-w-[240px] truncate text-caption text-muted-foreground"
+            className="mt-0.5 max-w-[200px] truncate text-caption text-muted-foreground"
             title={row.original.deliveryAddress}
           >
             {row.original.deliveryAddress}
@@ -115,31 +115,37 @@ export function buildParcelListColumns({
     {
       id: "actions",
       header: () => <span className="block text-right">{t("actions")}</span>,
+      // Links rendered as buttons (asChild) — no <button> nested in <a>.
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <Link
-            href={routes.parcelLabel(row.original.id)}
-            aria-label={t("printLabel")}
-            title={t("printLabel")}
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon-sm"
+            className="rounded-lg text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
           >
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("printLabel")}
-              className="rounded-lg hover:bg-surface-elevated text-muted-foreground hover:text-foreground"
+            <Link
+              href={routes.parcelLabel(row.original.id)}
+              aria-label={`${t("printLabel")} ${row.original.trackingCode}`}
+              title={t("printLabel")}
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </Link>
-          <Link
-            href={routes.parcel(row.original.id)}
-            aria-label={`${t("view")} ${row.original.trackingCode}`}
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+            size="icon-sm"
+            className="rounded-lg text-primary hover:bg-primary-soft"
           >
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-lg text-xs font-semibold hover:bg-surface-elevated">
-              <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-              {t("view")}
-            </Button>
-          </Link>
+            <Link
+              href={routes.parcel(row.original.id)}
+              aria-label={`${t("view")} ${row.original.trackingCode}`}
+              title={t("view")}
+            >
+              <Eye className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
       ),
     },

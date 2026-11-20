@@ -13,6 +13,11 @@ import { Phase8ParcelListIndex1700000000009 } from "../../src/database/migration
 import { CommunicationPhase1Foundation1700000000010 } from "../../src/database/migrations/1700000000010-CommunicationPhase1Foundation.js";
 import { CommunicationPhase2Backend1700000000011 } from "../../src/database/migrations/1700000000011-CommunicationPhase2Backend.js";
 import { CommunicationPhase7AdminCenter1700000000012 } from "../../src/database/migrations/1700000000012-CommunicationPhase7AdminCenter.js";
+import { CustomerDeliveryPreference1700000000013 } from "../../src/database/migrations/1700000000013-CustomerDeliveryPreference.js";
+import { ParcelHandlingNotes1700000000014 } from "../../src/database/migrations/1700000000014-ParcelHandlingNotes.js";
+import { MerchantPickupLocation1700000000015 } from "../../src/database/migrations/1700000000015-MerchantPickupLocation.js";
+import { readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 /**
  * Disposable-database harness for schema/migration tests.
@@ -47,7 +52,24 @@ export const ALL_MIGRATIONS = [
   CommunicationPhase1Foundation1700000000010,
   CommunicationPhase2Backend1700000000011,
   CommunicationPhase7AdminCenter1700000000012,
+  CustomerDeliveryPreference1700000000013,
+  ParcelHandlingNotes1700000000014,
+  MerchantPickupLocation1700000000015,
 ];
+
+/**
+ * Guard against drift: the disposable schema must match production. Every
+ * migration file needs an entry above (this list fell behind once, leaving
+ * the throwaway DB without columns the entities expect).
+ */
+const MIGRATION_FILES = readdirSync(
+  fileURLToPath(new URL("../../src/database/migrations/", import.meta.url)),
+).filter((f) => /^\d+-.+\.ts$/.test(f));
+if (MIGRATION_FILES.length !== ALL_MIGRATIONS.length) {
+  throw new Error(
+    `chat-test-db: ${MIGRATION_FILES.length} migration files but ${ALL_MIGRATIONS.length} registered in ALL_MIGRATIONS — add the missing ones.`,
+  );
+}
 
 /** Every class exported from the entity barrel that TypeORM knows as an entity. */
 export function allEntityClasses(): Array<new () => unknown> {

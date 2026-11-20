@@ -21,6 +21,8 @@ export interface ParcelListParams {
   sort?: "createdAt" | "updatedAt" | "codAmount" | "deliveryFee";
   order?: "ASC" | "DESC";
   status?: ParcelStatus | "";
+  /** Any-of status filter (server-side), e.g. the whole RTO family. */
+  statuses?: readonly ParcelStatus[];
   search?: string;
   district?: string;
   thana?: string;
@@ -41,6 +43,7 @@ function toQueryString(params: ParcelListParams): string {
   assign("sort", params.sort);
   assign("order", params.order);
   assign("status", params.status || undefined);
+  assign("statuses", params.statuses?.length ? params.statuses.join(",") : undefined);
   assign("search", params.search?.trim() || undefined);
   assign("district", params.district?.trim() || undefined);
   assign("thana", params.thana?.trim() || undefined);

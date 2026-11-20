@@ -5,6 +5,7 @@ import { RecommendationEngineService } from "./recommendation.service.js";
 import {
   FEATURE_VERSION,
   RecommendationAction,
+  RISK_REASON_CODES,
   RiskLevel,
   type RecipientFeatureSnapshot,
 } from "@dhruto/contracts";
@@ -53,6 +54,12 @@ describe("risk engine (rule-risk-v1)", () => {
     expect(out.score).toBeGreaterThanOrEqual(70);
     expect(out.reasons.map((r) => r.code)).toContain("HIGH_RTO_HISTORY");
     expect(out.reasons.map((r) => r.code)).toContain("MULTIPLE_RECENT_FAILED_DELIVERIES");
+  });
+
+  it("does not count in-flight orders as failed deliveries", () => {
+    const out = engine.score(features({ totalOrders: 4, deliveredOrders: 0, returnedOrders: 0, recentOrderCount: 4 }));
+    expect(out.level).toBe(RiskLevel.UNKNOWN);
+    expect(out.reasons.map((r) => r.code)).not.toContain(RISK_REASON_CODES.LOW_DELIVERY_COMPLETION_RATE);
   });
 
   it("rewards proven buyers with LOW risk", () => {

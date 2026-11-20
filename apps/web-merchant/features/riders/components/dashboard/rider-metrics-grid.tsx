@@ -68,7 +68,7 @@ export function RiderMetricsGrid({
             {/* Specular top highlight */}
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="truncate text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <p className="line-clamp-2 text-xs font-bold uppercase leading-snug tracking-wide text-muted-foreground">
                   {card.label}
                 </p>
                 <p className="mt-2 text-3xl font-extrabold tabular-nums tracking-tight text-foreground">

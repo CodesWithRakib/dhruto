@@ -5,7 +5,8 @@ import { Radio } from "lucide-react";
 
 interface WebhookKpiStripProps {
   subscriptionCount: number;
-  successRate: number;
+  /** null until at least one delivery exists. */
+  successRate: number | null;
   deliveredCount: number;
   totalDeliveries: number;
   deadLetterCount: number;
@@ -26,9 +27,11 @@ export function WebhookKpiStrip({
         </span>
         <div className="flex items-baseline justify-between mt-2">
           <span className="text-2xl font-black tabular-nums text-foreground">{subscriptionCount}</span>
-          <span className="text-caption font-bold text-success bg-success/10 px-2.5 py-0.5 rounded-full">
-            Active
-          </span>
+          {subscriptionCount > 0 ? (
+            <span className="text-caption font-bold text-success bg-success/10 px-2.5 py-0.5 rounded-full">
+              Active
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -37,7 +40,9 @@ export function WebhookKpiStrip({
           Delivery Success Rate
         </span>
         <div className="flex items-baseline justify-between mt-2">
-          <span className="text-2xl font-black tabular-nums text-success">{successRate}%</span>
+          <span className={`text-2xl font-black tabular-nums ${successRate === null ? "text-muted-foreground" : "text-success"}`}>
+            {successRate === null ? "—" : `${successRate}%`}
+          </span>
           <span className="text-caption text-muted-foreground font-medium">
             {deliveredCount}/{totalDeliveries} delivered
           </span>

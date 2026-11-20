@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Button, Input } from "@dhruto/ui";
 import { Package, Search, Zap, History, X } from "lucide-react";
 import { useGetParcelsQuery } from "@/features/parcels/api/parcels.api";
+import { statusConfig } from "@/config/status";
+import type { ParcelStatus } from "@dhruto/contracts";
 
 interface TrackingSearchBarProps {
   inputCode: string;
@@ -24,6 +26,7 @@ export function TrackingSearchBar({
   isFetching = false,
 }: TrackingSearchBarProps) {
   const t = useTranslations("Tracking");
+  const tStatus = useTranslations("ParcelStatus");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   // Safely attempt to fetch real merchant parcels if authenticated
@@ -106,7 +109,7 @@ export function TrackingSearchBar({
         <div className="mt-4 pt-4 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
             <Zap className="h-3.5 w-3.5 text-primary" />
-            Your active shipments:
+            {t("activeShipments")}
           </span>
           <div className="flex flex-wrap gap-2">
             {merchantParcels.map((parcel) => (
@@ -118,7 +121,7 @@ export function TrackingSearchBar({
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 <span>{parcel.trackingCode}</span>
-                <span className="text-[10px] text-muted-foreground">({parcel.status})</span>
+                <span className="text-[10px] text-muted-foreground">({tStatus(statusConfig(parcel.status as ParcelStatus).labelKey)})</span>
               </button>
             ))}
           </div>
@@ -127,7 +130,7 @@ export function TrackingSearchBar({
         <div className="mt-4 pt-4 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
             <History className="h-3.5 w-3.5 text-primary" />
-            Recent searches:
+            {t("recentSearches")}
           </span>
           <div className="flex flex-wrap items-center gap-2">
             {recentSearches.map((code) => (

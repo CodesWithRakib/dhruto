@@ -209,7 +209,9 @@ export class AnalyticsMetricsService {
     if (sorted.length === 0) return null;
     const idx = Math.min(sorted.length - 1, Math.ceil((p / 100) * sorted.length) - 1);
     const v = sorted[Math.max(0, idx)];
-    return v === undefined ? null : Math.round(v * 10) / 10;
+    // Hours to 2 decimals (~36s): 1-decimal rounding showed every sub-3-minute
+    // delivery as "0h".
+    return v === undefined ? null : Math.round(v * 100) / 100;
   }
 
   /* ---------------- trends (Dhaka-day buckets) ---------------- */
@@ -226,7 +228,7 @@ export class AnalyticsMetricsService {
       codCollected: number;
     }>
   > {
-    const bucket = this.ranges.bucketSql("p.createdAt", range.granularity);
+    const bucket = this.ranges.bucketKeySql("p.createdAt", range.granularity);
     const rows = await this.scopedParcels(scope)
       .select(`${bucket}`, "bucket")
       .addSelect("COUNT(*)", "booked")
@@ -238,14 +240,14 @@ export class AnalyticsMetricsService {
       .groupBy("bucket")
       .orderBy("bucket", "ASC")
       .getRawMany<{
-        bucket: Date;
+        bucket: string;
         booked: string;
         delivered: string;
         returned: string;
         cod: string;
       }>();
     return rows.map((r) => ({
-      bucket: new Date(r.bucket).toISOString().slice(0, range.granularity === "hour" ? 13 : 10),
+      bucket: r.bucket,
       booked: Number(r.booked),
       delivered: Number(r.delivered),
       returned: Number(r.returned),

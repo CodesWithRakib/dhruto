@@ -224,11 +224,13 @@ export function ConversationListItem({
   const last = conversation.lastMessage;
   const preview = !last
     ? t("noMessages")
-    : last.preview === null
-      ? t("deletedMessage")
-      : last.senderId === myUserId
-        ? `${t("you")}: ${last.preview}`
-        : last.preview;
+    : last.senderId === null
+      ? t("systemEvent") // server events (no sender) store a raw "[System]" preview
+      : last.preview === null
+        ? t("deletedMessage")
+        : last.senderId === myUserId
+          ? `${t("you")}: ${last.preview}`
+          : last.preview;
   const unread = conversation.unreadCount;
   const readOnly = conversation.status !== ChatConversationStatus.ACTIVE;
 

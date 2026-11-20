@@ -21,9 +21,10 @@ import {
   type FilterState,
 } from "./filter-bar";
 import { ExportButton } from "./export-button";
+import { CodBreakdownCard, DeliveryBreakdownCard, RtoBreakdownCard } from "./analytics-breakdown-cards";
 import { PageHeader } from "@/components/page-header";
 import { useFormatters } from "@/lib/format";
-import { RefreshCw, TrendingUp, AlertTriangle, Wallet, FileText, Truck } from "lucide-react";
+import { RefreshCw, TrendingUp, FileText } from "lucide-react";
 
 /** Merchant analytics: own data only, mobile-first stacked cards. */
 export function MerchantAnalyticsDashboard() {
@@ -131,65 +132,11 @@ export function MerchantAnalyticsDashboard() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            {/* Delivery Performance Bento Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-3">
-              <div className="flex items-center gap-2.5 pb-1">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Truck className="h-4 w-4" />
-                </span>
-                <h3 className="text-body font-bold text-foreground">{t("deliveryTitle")}</h3>
-              </div>
-              <p className="text-body-sm text-muted-foreground font-medium">
-                {t("deliverySummary", {
-                  p50: deliveryData?.latency.p50 ?? "—",
-                  first: deliveryData?.firstAttemptSuccess ?? "—",
-                })}
-              </p>
-            </div>
-
-            {/* RTO Deep Dive Bento Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-3">
-              <div className="flex items-center gap-2.5 pb-1">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/10 text-warning">
-                  <AlertTriangle className="h-4 w-4" />
-                </span>
-                <h3 className="text-body font-bold text-foreground">{t("rtoTitle")}</h3>
-              </div>
-              <p className="text-body-sm text-muted-foreground font-medium">
-                {t("rtoSummary", {
-                  count: rtoData?.rtoCount ?? 0,
-                  rate: rtoData?.rtoRate.value ?? "—",
-                })}
-              </p>
-              <div className="space-y-1.5 pt-1">
-                {(rtoData?.byReason ?? []).slice(0, 3).map((r) => (
-                  <div key={r.reason} className="flex items-center justify-between text-caption rounded-xl bg-surface-muted/50 px-3 py-1.5">
-                    <span className="font-mono font-medium text-foreground">{r.reason}</span>
-                    <span className="text-muted-foreground font-semibold">
-                      {r.count} ({r.percentage}%)
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <DeliveryBreakdownCard data={deliveryData} />
+            <RtoBreakdownCard data={rtoData} />
           </div>
 
-          {/* COD Settlement Analytics Card */}
-          <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-3">
-            <div className="flex items-center gap-2.5 pb-1">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Wallet className="h-4 w-4" />
-              </span>
-              <h3 className="text-body font-bold text-foreground">{t("codTitle")}</h3>
-            </div>
-            <p className="text-body-sm text-muted-foreground font-medium">
-              {t("codSummary", {
-                collected: codData ? bdt(codData.collected) : "—",
-                pending: codData ? bdt(codData.pending) : "—",
-                rate: codData?.collectionRate ?? "—",
-              })}
-            </p>
-          </div>
+          <CodBreakdownCard data={codData} />
 
           {/* Generated Reports History Card */}
           <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/85 p-6 backdrop-blur-md space-y-4">

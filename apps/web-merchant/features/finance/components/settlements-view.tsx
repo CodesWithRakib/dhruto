@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { ColumnDef, DataTable } from "@dhruto/ui";
 import { type SettlementItem } from "@dhruto/contracts";
-import { ReceiptText, Clock, ShieldCheck } from "lucide-react";
+import { ReceiptText, Clock } from "lucide-react";
 import { useGetMySettlementsQuery } from "../api/finance.api";
 import { EmptyState, ErrorState, LoadingState, RetryButton } from "@/components/feedback/states";
 import { Pagination } from "@/components/pagination";
@@ -105,13 +105,7 @@ export function SettlementsView() {
             <Clock className="h-4 w-4" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-bold text-foreground flex items-center gap-1.5">
-              <span>{t("schedule.title")}</span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success bg-success-soft px-2 py-0.5 rounded-full">
-                <ShieldCheck className="h-3 w-3" />
-                {t("zeroFeeGuaranteed")}
-              </span>
-            </p>
+            <p className="font-bold text-foreground">{t("schedule.title")}</p>
             <p className="text-muted-foreground mt-0.5 max-w-2xl leading-relaxed">
               {t("schedule.desc")}
             </p>

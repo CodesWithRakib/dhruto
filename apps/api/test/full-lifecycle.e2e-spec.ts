@@ -199,6 +199,22 @@ describe("Full Lifecycle End-to-End Simulation", () => {
       .expect(200);
     expect(dispatched.body.data.status).toBe("DISPATCHED");
 
+    // The destination hub's manager is told the linehaul is on its way.
+    const manifestCode = manifestRes.body.data.manifestCode as string;
+    const deadline = Date.now() + 20000;
+    let heardOf = false;
+    while (!heardOf && Date.now() < deadline) {
+      const inbox = await request(app.getHttpServer())
+        .get("/api/v1/notifications/me?limit=50")
+        .set(bearer(ctgManagerToken))
+        .expect(200);
+      heardOf = (inbox.body.data.items as Array<{ message: string }>).some((n) =>
+        n.message.includes(manifestCode),
+      );
+      if (!heardOf) await new Promise((r) => setTimeout(r, 500));
+    }
+    expect(heardOf).toBe(true);
+
     // Verify parcel status transitioned to IN_TRANSIT
     const inTransitParcel = await request(app.getHttpServer())
       .get(`/api/v1/parcels/${parcelId}`)

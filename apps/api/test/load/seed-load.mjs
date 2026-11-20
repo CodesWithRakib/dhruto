@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- CLI report script: printing results to stdout is its purpose */
 // Communication Phase 8 — synthetic load dataset for a DISPOSABLE database.
 //
 //   LOAD_DATABASE_URL=postgres://…/<name containing "test">  LOAD_JWT_SECRET=<test secret> \
@@ -8,7 +9,7 @@
 // customer MEMBER), messages with gap-free sequences and CLEAN attachments,
 // then prints counts and writes tokens signed with LOAD_JWT_SECRET (the same
 // HS256 scheme as CustomJwtService) for the load tools. No real data.
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 

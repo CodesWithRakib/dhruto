@@ -312,6 +312,11 @@ export class NotificationsService {
   /**
    * Retrieves in-app notifications for a recipient scope (merchant owner or
    * user), newest first with offset pagination.
+   *
+   * SMS/EMAIL rows share this table as delivery records (incl. customer SMS
+   * attributed to the merchant), so every inbox read/write is IN_APP-only —
+   * otherwise one event shows up to three times and "mark all read" would
+   * overwrite SMS/EMAIL delivery status (hiding PENDING/FAILED from retries).
    */
   async getNotifications(
     scope: { merchantId?: string; userId?: string },
@@ -329,7 +334,8 @@ export class NotificationsService {
       .where(where.map(() => "(n.merchant_id = :merchantId OR n.user_id = :userId)").join(" OR "), {
         merchantId: scope.merchantId ?? "00000000-0000-0000-0000-000000000000",
         userId: scope.userId ?? "00000000-0000-0000-0000-000000000000",
-      });
+      })
+      .andWhere("n.channel = :inApp", { inApp: NotificationChannel.IN_APP });
     if (options.unreadOnly) {
       query.andWhere("n.status != :readStatus", { readStatus: NotificationStatus.READ });
     }
@@ -367,8 +373,17 @@ export class NotificationsService {
       typeof merchantIdOrScope === "string" ? { merchantId: merchantIdOrScope } : merchantIdOrScope;
     const conditions: FindOptionsWhere<Notification>[] = [];
     if (scope.merchantId)
-      conditions.push({ merchantId: scope.merchantId, status: NotificationStatus.SENT });
-    if (scope.userId) conditions.push({ userId: scope.userId, status: NotificationStatus.SENT });
+      conditions.push({
+        merchantId: scope.merchantId,
+        channel: NotificationChannel.IN_APP,
+        status: NotificationStatus.SENT,
+      });
+    if (scope.userId)
+      conditions.push({
+        userId: scope.userId,
+        channel: NotificationChannel.IN_APP,
+        status: NotificationStatus.SENT,
+      });
     if (conditions.length === 0) return 0;
     return this.notificationRepo.count({ where: conditions });
   }
@@ -386,6 +401,7 @@ export class NotificationsService {
     });
     const owned =
       !!notification &&
+      notification.channel === NotificationChannel.IN_APP &&
       ((!!scope?.merchantId &&
         notification.merchantId !== null &&
         notification.merchantId === scope.merchantId) ||
@@ -420,7 +436,8 @@ export class NotificationsService {
       .createQueryBuilder()
       .update(Notification)
       .set({ status: NotificationStatus.READ, readAt: new Date() })
-      .where("status != :readStatus", { readStatus: NotificationStatus.READ });
+      .where("status != :readStatus", { readStatus: NotificationStatus.READ })
+      .andWhere("channel = :inApp", { inApp: NotificationChannel.IN_APP });
     if (scope.merchantId) {
       query.andWhere("merchant_id = :merchantId", { merchantId: scope.merchantId });
     } else if (scope.userId) {

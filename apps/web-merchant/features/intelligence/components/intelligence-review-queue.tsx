@@ -31,6 +31,8 @@ import { ParcelEditDialog } from "@/features/parcels/components/parcel-edit-dial
 import { ParcelCancelDialog } from "@/features/parcels/components/parcel-cancel-dialog";
 import { ParcelPickupDialog } from "@/features/parcels/components/parcel-pickup-dialog";
 
+const QUEUE_PAGE_SIZE = 10;
+
 type RiskTier = "HIGH" | "MEDIUM" | "LOW" | "UNSCORED";
 
 export function IntelligenceReviewQueue() {
@@ -40,6 +42,10 @@ export function IntelligenceReviewQueue() {
 
   const [search, setSearch] = useState("");
   const [selectedRiskFilter, setSelectedRiskFilter] = useState<"ALL" | "HIGH" | "MEDIUM">("ALL");
+  // Render the queue in pages of 10 cards; every card is tall, so 50 at once
+  // made a ~7000px page. Reset whenever the filter or search changes.
+  const [visibleCount, setVisibleCount] = useState(QUEUE_PAGE_SIZE);
+  React.useEffect(() => setVisibleCount(QUEUE_PAGE_SIZE), [selectedRiskFilter, search]);
 
   // Selected parcel for modals
   const [editParcel, setEditParcel] = useState<{
@@ -271,7 +277,7 @@ export function IntelligenceReviewQueue() {
             </div>
           ) : (
             <div>
-              {filtered.map((item) => {
+              {filtered.slice(0, visibleCount).map((item) => {
                 const isHigh = item.riskTier === "HIGH";
                 const isMed = item.riskTier === "MEDIUM";
 
@@ -402,6 +408,13 @@ export function IntelligenceReviewQueue() {
                   </div>
                 );
               })}
+              {filtered.length > visibleCount ? (
+                <div className="flex justify-center pt-4">
+                  <Button variant="outline" onClick={() => setVisibleCount((n) => n + QUEUE_PAGE_SIZE)}>
+                    {t("showMore", { count: filtered.length - visibleCount })}
+                  </Button>
+                </div>
+              ) : null}
             </div>
           )}
         </CardContent>

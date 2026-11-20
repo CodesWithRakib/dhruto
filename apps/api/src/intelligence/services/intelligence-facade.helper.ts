@@ -67,11 +67,12 @@ export function buildRtoFeatureSet(
   platformFeatures: RecipientFeatureSnapshot,
   addressConfidence: number,
 ): RtoFeatureSet {
-  const total = platformFeatures.totalOrders;
+  // Rates over orders with an outcome only (in-flight parcels are not failures).
+  const resolved = platformFeatures.deliveredOrders + platformFeatures.returnedOrders;
   const codTotal = platformFeatures.codCollectedMinor + platformFeatures.codFailedMinor;
   return {
-    deliverySuccessRate: total > 0 ? platformFeatures.deliveredOrders / total : 0,
-    rtoRate: total > 0 ? platformFeatures.returnedOrders / total : 0,
+    deliverySuccessRate: resolved > 0 ? platformFeatures.deliveredOrders / resolved : 1,
+    rtoRate: resolved > 0 ? platformFeatures.returnedOrders / resolved : 0,
     codFailureRate: codTotal > 0 ? platformFeatures.codFailedMinor / codTotal : 0,
     recentOrderCount: platformFeatures.recentOrderCount,
     recentFailureCount: platformFeatures.recentFailedDeliveries,

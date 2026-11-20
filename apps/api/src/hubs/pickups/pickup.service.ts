@@ -127,6 +127,31 @@ export class PickupService {
           }),
         );
       }
+      // One notification per merchant visit: the rider gets the job, the
+      // merchant learns who is coming. Assignments are validated per merchant
+      // above, so grouping here only splits multi-merchant batches.
+      const byMerchant = new Map<string, Parcel[]>();
+      for (const parcel of parcels) {
+        byMerchant.set(parcel.merchantId, [...(byMerchant.get(parcel.merchantId) ?? []), parcel]);
+      }
+      for (const [merchantId, visit] of byMerchant) {
+        await this.outbox.append(manager, {
+          eventType: DomainEventType.PARCEL_PICKUP_ASSIGNED,
+          aggregateType: "parcel",
+          aggregateId: visit[0]!.id,
+          actorId: user.id,
+          payload: {
+            parcelIds: visit.map((p) => p.id),
+            trackingCode: visit[0]!.trackingCode,
+            merchantId,
+            merchantName: visit[0]!.merchant.businessName,
+            riderId: rider.id,
+            riderName: label,
+            hubId: hub.id,
+            parcelCount: visit.length,
+          },
+        });
+      }
       return { assigned: parcels.length, riderId: rider.id, riderName: label };
     });
   }
@@ -194,6 +219,8 @@ export class PickupService {
             trackingCode: parcel.trackingCode,
             merchantId: parcel.merchantId,
             recipientName: parcel.recipientName,
+            recipientPhone: parcel.recipientPhone,
+            merchantName: parcel.merchant.businessName,
             riderId: rider.id,
           },
         });

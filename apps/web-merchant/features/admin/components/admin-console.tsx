@@ -21,6 +21,7 @@ import { ADMIN_ROUTES } from "@/config/routes";
 import { PageHeader } from "@/components/page-header";
 import { AdminIllustrationBg } from "@/components/visual/illustration-backgrounds";
 import { AdminNetworkStatus } from "./admin-network-status";
+import { AdminTodayKpis } from "./admin-today-kpis";
 
 /**
  * Admin operations supervision command center.
@@ -121,6 +122,8 @@ export function AdminConsole() {
 
       {/* Live network status (system health + operations analytics) */}
       <AdminNetworkStatus />
+
+      <AdminTodayKpis />
 
       {/* Primary Operational Command Pillars (4 Columns) */}
       <section aria-label="Operational Domains">

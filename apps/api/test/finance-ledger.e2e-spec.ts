@@ -433,7 +433,7 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
       await request(app.getHttpServer())
         .post(`/api/v1/admin/finance/payouts/${requested.body.data.id}/process`)
         .set(bearer(adminToken))
-        .send({ status: "REJECTED", rejectionReason: "Test rejection" })
+        .send({ status: "REJECTED", rejectionReason: "bKash account name does not match the merchant profile" })
         .expect(200);
 
       const after = await request(app.getHttpServer())
@@ -533,7 +533,7 @@ describe("Finance Ledger (Phase 4 E2E)", () => {
       await request(app.getHttpServer())
         .post(`/api/v1/admin/finance/transactions/${txn.id}/reverse`)
         .set(bearer(adminToken))
-        .send({ reason: "Test reversal of settlement posting" })
+        .send({ reason: "COD amount corrected after hub recount" })
         .expect(200);
       const walletAfter = await request(app.getHttpServer())
         .get("/api/v1/finance/wallet/me")

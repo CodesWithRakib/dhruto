@@ -12,8 +12,6 @@ interface CalculatorReceiptSlipProps {
   extraKg: number;
   extraWeightFee: number;
   codFee: number;
-  isFragileBox: boolean;
-  packagingFee: number;
   totalDeductions: number;
   netMerchantPayout: number;
   ctaHref: string;
@@ -27,8 +25,6 @@ export function CalculatorReceiptSlip({
   extraKg,
   extraWeightFee,
   codFee,
-  isFragileBox,
-  packagingFee,
   totalDeductions,
   netMerchantPayout,
   ctaHref,
@@ -76,16 +72,6 @@ export function CalculatorReceiptSlip({
         <div className="prc-receipt-row">
           <span className="text-muted-foreground">{t("codCollectionFee")}</span>
           <span className="font-mono text-foreground">৳{codFee}</span>
-        </div>
-        {isFragileBox && (
-          <div className="prc-receipt-row">
-            <span className="text-muted-foreground">{t("packagingBubble")}</span>
-            <span className="font-mono text-foreground">৳{packagingFee}</span>
-          </div>
-        )}
-        <div className="prc-receipt-row text-success font-medium">
-          <span>{t("fuelSurcharge")}</span>
-          <span className="font-mono font-bold">{t("zeroFee")}</span>
         </div>
       </div>
 

@@ -272,6 +272,8 @@ export const parcelListQuerySchema = z.object({
   sort: z.enum(PARCEL_LIST_SORT_FIELDS).default("createdAt"),
   order: z.enum(["ASC", "DESC"]).default("DESC"),
   status: z.nativeEnum(ParcelStatus).optional(),
+  /** Any-of status filter (comma-separated in the query string), e.g. the RTO family. */
+  statuses: z.array(z.nativeEnum(ParcelStatus)).min(1).max(20).optional(),
   search: z.string().trim().min(1).max(100).optional(),
   district: z.string().trim().min(1).max(50).optional(),
   thana: z.string().trim().min(1).max(50).optional(),

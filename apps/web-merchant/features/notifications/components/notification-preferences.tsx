@@ -147,6 +147,7 @@ export function NotificationPreferences() {
         columns={columns}
         data={CATEGORIES}
         className="p-0"
+        hidePagination
       />
 
       <div className="flex flex-wrap items-center gap-2">

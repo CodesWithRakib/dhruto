@@ -278,12 +278,18 @@ export class IntegrationsAdminService {
     const deadLetterCount = await this.failureRepo.count({
       where: { status: IntegrationFailureStatus.OPEN },
     });
-    const dayAgo = new Date(Date.now() - 24 * 3600_1000);
+    // 24h window (was `3600_1000` — a digit-separator typo that meant ~10 days).
+    const dayAgo = new Date(Date.now() - 24 * 3_600_000);
+    // Numerator and denominator both come from deliveries: dividing
+    // dead-letter rows (kept after their delivery is deleted) by live
+    // deliveries produced rates above 100%.
     const [webhookFailed24h, notificationFailed24h] = await Promise.all([
-      this.failureRepo
-        .createQueryBuilder("f")
-        .where("f.kind = :kind", { kind: IntegrationFailureKind.WEBHOOK })
-        .andWhere("f.createdAt >= :since", { since: dayAgo })
+      this.deliveryRepo
+        .createQueryBuilder("d")
+        .where("d.createdAt >= :since", { since: dayAgo })
+        .andWhere("d.status IN (:...failed)", {
+          failed: [WebhookDeliveryStatus.FAILED, WebhookDeliveryStatus.DEAD_LETTER],
+        })
         .getCount(),
       this.failureRepo
         .createQueryBuilder("f")

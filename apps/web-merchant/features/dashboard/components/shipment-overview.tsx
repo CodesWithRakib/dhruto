@@ -123,7 +123,7 @@ function HealthCell({
 
   return (
     <div className="min-w-0 p-5 sm:p-6 transition-colors hover:bg-surface-muted/50">
-      <p className="truncate text-caption font-bold uppercase tracking-wider text-muted-foreground">
+      <p className="line-clamp-2 text-caption font-bold uppercase leading-snug tracking-wide text-muted-foreground">
         {label}
       </p>
       <p className="mt-1 text-2xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-3xl">

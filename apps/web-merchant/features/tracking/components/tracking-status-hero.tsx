@@ -79,9 +79,6 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
               {t("trackingId")}
             </span>
-            <span className="text-[11px] font-mono text-muted-foreground/60 hidden sm:inline">
-              • WAYBILL PROTOCOL
-            </span>
           </div>
           <div className="flex items-center gap-3 mt-1.5">
             <h2 className="font-mono text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
@@ -134,10 +131,10 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
         <div className="flex items-center justify-between mb-4 text-xs font-mono uppercase tracking-wider text-muted-foreground">
           <span className="flex items-center gap-2 text-foreground font-semibold">
             <Radio className="h-4 w-4 text-primary animate-pulse" />
-            Shipment Journey Milestone
+            {t("journeyTitle")}
           </span>
           <span className="font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
-            Stage {currentLevel} of 5
+            {t("stageOf", { current: currentLevel, total: 5 })}
           </span>
         </div>
 

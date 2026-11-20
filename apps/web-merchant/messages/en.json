@@ -354,6 +354,7 @@
     "netReceivable": "Estimated payout",
     "operations": "Operations",
     "assignedRider": "Delivery rider",
+    "pickupRider": "Pickup rider",
     "currentHub": "Current hub",
     "notAssigned": "Not assigned",
     "statusHistory": "Status history",
@@ -484,7 +485,16 @@
       "primary": "Create merchant account",
       "secondary": "Contact support",
       "note": "Free registration · no account needed to track"
-    }
+    },
+    "journeyTitle": "Delivery progress",
+    "stageOf": "Step {current} of {total}",
+    "districtSuffix": "{district} district",
+    "atHub": "Scanned at this hub",
+    "notAtHubYet": "Not at a hub yet",
+    "maskedPrivacy": "Masked for privacy",
+    "activeShipments": "Your active shipments:",
+    "recentSearches": "Recent searches:",
+    "lastUpdatedLabel": "Last updated"
   },
   "Hub": {
     "title": "Hub Operations Center",
@@ -907,6 +917,10 @@
     "availableBalance": "Available Balance",
     "pendingSettlement": "Pending Settlements",
     "lifetimeWithdrawn": "Lifetime Withdrawn",
+    "availableHint": "Ready to withdraw. Minimum withdrawal ৳100.",
+    "pendingHint": "COD collected by riders, awaiting hub verification.",
+    "withdrawnHint": "Paid out to your account so far.",
+    "payoutsInProgress": "{amount} in payout processing",
     "requestPayout": "Withdraw Funds",
     "payoutModalTitle": "Request Payout Withdrawal",
     "payoutModalDesc": "Transfer available funds to your bKash, Nagad, Rocket or Bank Account.",
@@ -941,7 +955,8 @@
       "gross": "Gross",
       "fee": "Fee",
       "net": "Net",
-      "balanceAfter": "Balance"
+      "balanceAfter": "Balance",
+      "description": "Every credit and debit on your wallet, newest first."
     },
     "settlements": {
       "title": "Parcel settlements",
@@ -981,7 +996,9 @@
       "providerReference": "Provider reference",
       "failTitle": "Mark payout failed?",
       "failMessage": "Reserved funds return to the merchant wallet through a reversal posting.",
-      "failureReason": "Failure reason"
+      "failureReason": "Failure reason",
+      "markPaid": "Mark paid",
+      "markFailed": "Mark failed"
     },
     "invoice": {
       "viewInvoice": "View Invoice",
@@ -1016,7 +1033,7 @@
     },
     "schedule": {
       "title": "Automated COD Settlement Policy",
-      "desc": "Verified cash collections are settled to your wallet daily at 23:59 BST. Instant withdrawals to bKash / Nagad are processed 24/7, and scheduled bank transfers are cleared on T+1 banking days with zero platform fee."
+      "desc": "Verified cash collections are credited to your wallet. Request a withdrawal any time — Dhruto finance reviews it and pays to your bKash, Nagad, Rocket or bank account."
     },
     "cash": {
       "title": "Hub cash desk",
@@ -1375,7 +1392,8 @@
     "cancelBooking": "Cancel Order",
     "requestPickup": "Request Pickup",
     "noQueueItems": "No pending pre-dispatch shipments found.",
-    "noQueueItemsDesc": "All recent parcels have passed cognitive validation and dispatched safely."
+    "noQueueItemsDesc": "All recent parcels have passed cognitive validation and dispatched safely.",
+    "showMore": "Show more ({count} remaining)"
   },
   "Nav": {
     "messages": "Messages",
@@ -1459,7 +1477,11 @@
     "faq": "Help",
     "status": "System Status",
     "communications": "Communication Center",
-    "pickups": "Pickups"
+    "pickups": "Pickups",
+    "customerDashboardShort": "Deliveries",
+    "customerTrackingShort": "Track",
+    "customerHistoryShort": "History",
+    "customerSettingsShort": "Settings"
   },
   "Footer": {
     "tagline": "Next-Gen Logistics & Courier OS",
@@ -2423,6 +2445,18 @@
       "activeRiders": "{count, plural, one {# active rider} other {# active riders}}",
       "loadingFigures": "Loading network figures…",
       "figuresUnavailable": "Network figures unavailable"
+    },
+    "today": {
+      "title": "Today",
+      "booked": "Parcels booked",
+      "delivered": "Delivered",
+      "successRate": "Delivery success",
+      "inTransit": "{count} in the network now",
+      "codCollected": "COD collected",
+      "pendingSettlement": "Pending settlement",
+      "pendingSettlementHint": "Collected, not yet settled",
+      "vsYesterday": "{pct}% vs yesterday",
+      "unavailable": "Today’s numbers are unavailable right now."
     }
   },
   "Pwa": {
@@ -2559,7 +2593,7 @@
   },
   "MerchantAnalytics": {
     "title": "Store Analytics",
-    "subtitle": "Your orders, delivery performance, RTO and COD. Asia/Dhaka buckets.",
+    "subtitle": "Your orders, delivery speed, returns and cash collection.",
     "refresh": "Refresh",
     "loading": "Loading analytics…",
     "loadErrorTitle": "Could not load analytics",
@@ -2577,7 +2611,27 @@
     "codTitle": "COD",
     "codSummary": "Collected {collected} · pending {pending} · {rate}% rate",
     "reportsTitle": "Recent reports ({count})",
-    "reportsEmpty": "No reports yet. Use Export on any section."
+    "reportsEmpty": "No reports yet. Use Export on any section.",
+    "deliveryMedian": "Typical delivery time",
+    "deliveryMedianHint": "Half of parcels arrive faster",
+    "deliveryP90": "90% delivered within",
+    "deliveryP90Hint": "Slowest 10% take longer",
+    "deliveryFirstAttempt": "Delivered on first attempt",
+    "deliveredCount": "Delivered parcels",
+    "rtoReturns": "Returned parcels",
+    "rtoRateLabel": "Return rate",
+    "rtoReasonsTitle": "Why delivery attempts failed",
+    "rtoByDistrict": "Returns by district",
+    "rtoDistrictRow": "{count} returns · {rate}%",
+    "codBooked": "COD booked",
+    "codCollected": "Collected",
+    "codPending": "Pending",
+    "codRate": "Collection rate",
+    "durUnderMinute": "< 1 min",
+    "durMinutes": "{n} min",
+    "durHours": "{n} h",
+    "durDays": "{n} days",
+    "rtoDistrictCount": "{count} returns"
   },
   "SystemStatus": {
     "title": "System Status & Service Health",
@@ -2625,10 +2679,25 @@
     "trackingPageSubtitle": "Monitor the real-time movement and dispatch history of your package.",
     "historyPageTitle": "Delivery History",
     "historyPageSubtitle": "All delivered and completed packages received by your account.",
-    "settingsPageTitle": "Customer Delivery Settings",
-    "settingsPageSubtitle": "Manage your primary delivery destinations, phone number, and SMS alerts.",
+    "settingsPageTitle": "Settings",
+    "settingsPageSubtitle": "Your recipient profile and how Dhruto contacts you about deliveries.",
     "backToDashboard": "Back to deliveries",
-    "defaultRecipientName": "Valued Customer"
+    "defaultRecipientName": "Valued Customer",
+    "settings": {
+      "accountTitle": "Your profile",
+      "accountSubtitle": "Parcels sent to this phone number appear in your account.",
+      "name": "Name",
+      "phone": "Phone",
+      "contactTitle": "How we contact you",
+      "contactSubtitle": "Delivery SMS go to {phone}.",
+      "smsOutForDelivery": "Out for delivery — includes your one-time delivery code (OTP)",
+      "smsDelivered": "Delivered — confirmation with the amount paid",
+      "smsFailed": "Delivery attempt failed — the reason and what happens next",
+      "contactPerParcel": "To change a delivery time or leave instructions, open the parcel from My Deliveries."
+    },
+    "statDeliveredHint": "Received at your door",
+    "statCodDueHint": "Cash to keep ready for the rider",
+    "statAddressHint": "Where most of your parcels go"
   },
   "Returns": {
     "title": "Returns & RTO Operations",
@@ -2907,7 +2976,7 @@
   },
   "Calculator": {
     "eyebrow": "INTERACTIVE FREIGHT & ESCROW COCKPIT",
-    "title": "Freight & Escrow Simulator",
+    "title": "Delivery Charge Calculator",
     "subtitle": "Simulate accurate shipping fees across all 64 districts, COD collection commissions, and net daily settlement payouts before booking.",
     "ctaLabel": "Create Parcel with These Parameters",
     "ctaSubtext": "Pre-fills rate specifications into the merchant shipment booking form",
@@ -2920,25 +2989,20 @@
     "baseCovers": "Base rate covers up to 1.0 kg",
     "extraWeightNote": "+{extraKg} kg over 1kg @ ৳{rate}/kg = ৳{fee} extra weight fee",
     "stepCod": "3. Cash on Delivery (COD) Amount",
-    "codNote": "1.0% cash collection & counting fee",
+    "codNote": "Cash the rider collects; credited to your wallet after hub verification",
     "prepaid": "৳0 (Prepaid)",
-    "fragileTitle": "Reinforced Padded Box / Bubble Security",
-    "fragileDesc": "Extra protection for fragile electronics or glassware",
     "slipBarcode": "*DHR-SIMULATOR-2026*",
     "slipTitle": "Dhruto Settlement Slip",
-    "slipSubtitle": "Digital Escrow Breakdown",
+    "slipSubtitle": "Charge breakdown",
     "destinationZone": "Destination Zone",
     "transitSla": "Transit SLA",
     "baseFreight": "Base Freight (Up to 1kg)",
     "extraWeight": "Extra Weight ({kg}kg)",
-    "codCollectionFee": "COD Collection Fee (1%)",
-    "packagingBubble": "Packaging & Bubble",
-    "fuelSurcharge": "Fuel & Unannounced Surcharge",
-    "zeroFee": "৳0.00 (Zero)",
+    "codCollectionFee": "COD collection fee",
     "totalLogisticsFee": "Total Logistics Fee:",
     "netMerchantPayout": "Net Merchant Payout",
     "escrowReconciled": "ESCROW RECONCILED",
-    "disbursementSchedule": "Disbursed daily by 23:59 BST via bKash, Nagad, or BEFTN Bank Transfer",
+    "disbursementSchedule": "Withdraw to bKash, Nagad, Rocket or bank; payouts are reviewed by Dhruto finance",
     "authoritativeQuote": "Authoritative Live API Quote"
   },
   "Developer": {
@@ -3239,5 +3303,11 @@
       "audit": "Audit trail",
       "joined": "You joined this conversation. Participants were notified."
     }
+  },
+  "CashLedgerStatus": {
+    "PENDING": "With rider",
+    "HANDED_IN": "Handed in",
+    "VERIFIED": "Verified",
+    "DISCREPANCY": "Discrepancy"
   }
 }

@@ -18,6 +18,7 @@ import {
 import { randomUUID } from "node:crypto";
 import {
   ApiErrorCode,
+  DomainEventType,
   BagStatus,
   ExceptionStatus,
   HubPermission,
@@ -58,6 +59,7 @@ import {
   User,
 } from "../database/entities/index.js";
 import { type AuthenticatedUser } from "../auth/jwt/jwt.interface.js";
+import { OutboxService } from "../integrations/outbox.service.js";
 import { ParcelLifecycleService } from "../parcels/lifecycle/parcel-lifecycle.service.js";
 import { HubAuthorizationService } from "./hub-authorization.service.js";
 
@@ -113,6 +115,7 @@ export class HubsService {
     private readonly dataSource: DataSource,
     private readonly authz: HubAuthorizationService,
     private readonly lifecycle: ParcelLifecycleService,
+    private readonly outbox: OutboxService,
   ) {}
 
   /* ================================================================== */
@@ -1571,6 +1574,22 @@ export class HubsService {
       locked.dispatchedAt = new Date();
       locked.dispatchedBy = user.id;
       await manager.getRepository(Manifest).save(locked);
+
+      // Destination hub managers get a heads-up (transactional outbox).
+      await this.outbox.append(manager, {
+        eventType: DomainEventType.MANIFEST_DISPATCHED,
+        aggregateType: "manifest",
+        aggregateId: locked.id,
+        actorId: user.id,
+        payload: {
+          manifestId: locked.id,
+          manifestCode: locked.manifestCode,
+          hubId: destination.id,
+          originHubId: hub.id,
+          originHubName: hub.name,
+          bagCount: items.length,
+        },
+      });
     });
 
     this.logger.log(

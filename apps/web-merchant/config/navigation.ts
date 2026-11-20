@@ -1,4 +1,5 @@
 import {
+  Bell,
   Bike,
   Calculator,
   ClipboardList,
@@ -247,6 +248,11 @@ export const NAV_BY_ROLE: Record<AppRole, NavGroup[]> = {
           labelKey: "messages",
           icon: MessagesSquare,
           indicator: "chat-unread",
+        },
+        {
+          href: CUSTOMER_ROUTES.notifications,
+          labelKey: "notifications",
+          icon: Bell,
         },
       ],
     },

@@ -58,8 +58,25 @@ export class RiskEngineService implements RiskScorerEngine {
     }
 
     const total = features.totalOrders;
-    const rtoRate = features.returnedOrders / total;
-    const completionRate = features.deliveredOrders / total;
+    // Outcome rates only count orders that reached an outcome. In-flight
+    // parcels are neither successes nor failures — counting them made every
+    // repeat buyer with fresh bookings look like a 0%-success recipient.
+    const resolved = features.deliveredOrders + features.returnedOrders;
+    if (resolved === 0 && features.recentOrderCount < t.velocityOrderCount) {
+      return {
+        score: 20,
+        level: RiskLevel.UNKNOWN,
+        reasons: [
+          {
+            code: RISK_REASON_CODES.INSUFFICIENT_HISTORY,
+            detail: `No completed deliveries yet for this recipient (${total} in progress) — treat as unrated.`,
+          },
+        ],
+        riskConfidence: "LOW",
+      };
+    }
+    const rtoRate = resolved > 0 ? features.returnedOrders / resolved : 0;
+    const completionRate = resolved > 0 ? features.deliveredOrders / resolved : 1;
     const codTotal = features.codCollectedMinor + features.codFailedMinor;
     const codFailureRate = codTotal > 0 ? features.codFailedMinor / codTotal : 0;
 
@@ -89,7 +106,7 @@ export class RiskEngineService implements RiskScorerEngine {
       score += 10;
       reasons.push({
         code: RISK_REASON_CODES.LOW_DELIVERY_COMPLETION_RATE,
-        detail: `Successful delivery rate is ${Math.round(completionRate * 100)}% across ${total} order(s).`,
+        detail: `Successful delivery rate is ${Math.round(completionRate * 100)}% across ${resolved} completed order(s).`,
       });
     }
     if (features.recentOrderCount >= t.velocityOrderCount) {
@@ -99,7 +116,7 @@ export class RiskEngineService implements RiskScorerEngine {
         detail: `${features.recentOrderCount} orders in the recent window — unusual ordering velocity.`,
       });
     }
-    if (features.scope === "MERCHANT" && rtoRate >= 0.34 && total >= 3) {
+    if (features.scope === "MERCHANT" && rtoRate >= 0.34 && resolved >= 3) {
       score += 5;
       reasons.push({
         code: RISK_REASON_CODES.MERCHANT_SPECIFIC_RISK,
@@ -113,7 +130,7 @@ export class RiskEngineService implements RiskScorerEngine {
     score = Math.max(0, Math.min(100, Math.round(score)));
     const level =
       score < t.riskLow ? RiskLevel.LOW : score < t.riskHigh ? RiskLevel.MEDIUM : RiskLevel.HIGH;
-    const riskConfidence: RiskConfidence = total >= 5 ? "HIGH" : total >= 2 ? "MEDIUM" : "LOW";
+    const riskConfidence: RiskConfidence = resolved >= 5 ? "HIGH" : resolved >= 2 ? "MEDIUM" : "LOW";
     return { score, level, reasons, riskConfidence };
   }
 

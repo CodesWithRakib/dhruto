@@ -19,6 +19,7 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
   const balance = Number(wallet?.balance || 0);
   const pending = Number(wallet?.pendingBalance || 0);
   const withdrawn = Number(wallet?.withdrawnTotal || 0);
+  const inProgress = Number(wallet?.payoutsInProgress || 0);
   const currency = wallet?.currency || "BDT";
 
   return (
@@ -52,7 +53,7 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
 
           <p className="mt-3 flex items-center gap-1.5 text-caption font-medium text-primary">
             <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            <span>{t("subtitle")}</span>
+            <span>{t("availableHint")}</span>
           </p>
         </div>
 
@@ -85,12 +86,10 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
           </div>
 
           <div className="mt-6">
-            <p className="text-caption font-bold uppercase tracking-wider text-muted-foreground">{t("pendingSettlement")}</p>
-            <div className="mt-1.5 flex items-baseline gap-2">
-              <span className="text-3xl font-black tabular-nums tracking-tight text-foreground sm:text-4xl">
-                {bdt(isLoading ? "…" : pending)}
-              </span>
-            </div>
+            <span className="block text-3xl font-black tabular-nums tracking-tight text-foreground sm:text-4xl">
+              {bdt(isLoading ? "…" : pending)}
+            </span>
+            <p className="mt-2 text-caption text-muted-foreground">{t("pendingHint")}</p>
           </div>
         </div>
 
@@ -108,12 +107,15 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
           </div>
 
           <div className="mt-6">
-            <p className="text-caption font-bold uppercase tracking-wider text-muted-foreground">{t("lifetimeWithdrawn")}</p>
-            <div className="mt-1.5 flex items-baseline gap-2">
-              <span className="text-3xl font-black tabular-nums tracking-tight text-foreground sm:text-4xl">
-                {bdt(isLoading ? "…" : withdrawn)}
-              </span>
-            </div>
+            <span className="block text-3xl font-black tabular-nums tracking-tight text-foreground sm:text-4xl">
+              {bdt(isLoading ? "…" : withdrawn)}
+            </span>
+            <p className="mt-2 text-caption text-muted-foreground">{t("withdrawnHint")}</p>
+            {inProgress > 0 ? (
+              <p className="mt-1.5 inline-flex rounded-full bg-info-soft px-2.5 py-0.5 text-caption font-semibold text-info-soft-foreground">
+                {t("payoutsInProgress", { amount: bdt(inProgress) })}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

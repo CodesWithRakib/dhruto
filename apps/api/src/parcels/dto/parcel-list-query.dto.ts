@@ -1,5 +1,8 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsEnum,
   IsIn,
   IsInt,
@@ -44,6 +47,24 @@ export class ParcelListQueryDto implements ParcelListQuery {
   @IsOptional()
   @IsEnum(ParcelStatus)
   status?: ParcelStatus;
+
+  @ApiPropertyOptional({
+    description: "Any-of status filter, comma-separated (e.g. RTO_INITIATED,RETURN_IN_TRANSIT)",
+    type: String,
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === "string"
+      ? value.split(",").map((v) => v.trim()).filter(Boolean)
+      : Array.isArray(value)
+        ? value
+        : value,
+  )
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(20)
+  @IsEnum(ParcelStatus, { each: true })
+  statuses?: ParcelStatus[];
 
   @ApiPropertyOptional()
   @IsOptional()

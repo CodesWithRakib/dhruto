@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- CLI report script: printing results to stdout is its purpose */
 // Communication Phase 8 — realtime load & recovery harness (isolated environments only).
 //
 //   node test/load/realtime-load.mjs <tokens.json> <baseA> <baseB> <users> <messages> [redisContainer]
@@ -215,7 +216,10 @@ if (redisContainer) {
       { headers: { Authorization: `Bearer ${d.thread.customer.token}` } },
     );
     const items = (await res.json()).data.items.map((m) => m.id);
-    for (const m of missing) items.includes(m.id) ? (recoveredViaRest += 1) : (stillMissing += 1);
+    for (const m of missing) {
+      if (items.includes(m.id)) recoveredViaRest += 1;
+      else stillMissing += 1;
+    }
   }
   redis = {
     sentDuringOutage: phase2.size,

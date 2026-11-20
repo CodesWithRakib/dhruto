@@ -48,7 +48,14 @@ describe("Parcel cancel & RTO initiation (Phase 3 E2E)", () => {
     riderId = me.body.data.rider.id as string;
   });
 
+  let rtoSubscriptionId: string | undefined;
+
   afterAll(async () => {
+    if (rtoSubscriptionId) {
+      await request(app.getHttpServer())
+        .delete(`/api/v1/webhooks/subscriptions/${rtoSubscriptionId}`)
+        .set(bearer(merchantToken));
+    }
     await app.close();
   });
 
@@ -196,29 +203,19 @@ describe("Parcel cancel & RTO initiation (Phase 3 E2E)", () => {
   });
 
   it("advances RTO to transit and completes the return with event fan-out", async () => {
-    // Test-hygiene: remove stale subscriptions from earlier runs so this
-    // run fans out to exactly one subscription (otherwise every parcel
-    // event multiplies across accumulated subs and slows the relay).
-    const existing = await request(app.getHttpServer())
-      .get("/api/v1/webhooks/subscriptions")
-      .set(bearer(merchantToken))
-      .expect(200);
-    for (const sub of existing.body.data as Array<{ id: string }>) {
-      await request(app.getHttpServer())
-        .delete(`/api/v1/webhooks/subscriptions/${sub.id}`)
-        .set(bearer(merchantToken))
-        .expect(200);
-    }
-    // Merchant webhook subscription so the PARCEL_RETURNED fan-out is observable.
-    await request(app.getHttpServer())
+    // Merchant webhook subscription so the PARCEL_RETURNED fan-out is
+    // observable. Only this run's subscription is removed afterwards — the
+    // merchant's own endpoints are never touched.
+    const created = await request(app.getHttpServer())
       .post("/api/v1/webhooks/subscriptions")
       .set(bearer(merchantToken))
       .send({
         url: "https://example.com/rto-receiver",
         events: [WebhookEvent.PARCEL_RETURNED],
-        description: "RTO test subscription",
+        description: "Return notifications for warehouse restocking",
       })
       .expect(201);
+    rtoSubscriptionId = created.body.data.id;
 
     const parcel = await book("rto-full");
 

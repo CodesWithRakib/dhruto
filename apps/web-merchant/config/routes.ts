@@ -113,6 +113,7 @@ export const CUSTOMER_ROUTES = {
   settings: "/customer/settings",
   messages: "/customer/messages",
   messageThread: (id: string) => `/customer/messages/${id}`,
+  notifications: "/customer/notifications",
 } as const;
 
 export const ROUTES = {

@@ -6,7 +6,6 @@ import {
   Bell,
   CheckCheck,
   Smartphone,
-  Mail,
   Truck,
   Wallet,
   Clock,
@@ -19,24 +18,28 @@ import {
   VolumeX,
 } from "lucide-react";
 import { Badge, Button } from "@dhruto/ui";
+import { toast } from "sonner";
 import {
   useGetUnreadNotificationCountQuery,
   useGetMyNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
   useTestSmsNotificationMutation,
-  useTestInAppNotificationMutation,
 } from "../features/notifications/api/notifications.api";
-import { NotificationChannel, NotificationType } from "@dhruto/contracts";
+import { NotificationType } from "@dhruto/contracts";
 import { getApiErrorMessage } from "../lib/api-error";
 import { formatDate } from "@/lib/format";
 import { useAppSelector } from "@/store/hooks";
+import { useRouter } from "@/lib/navigation";
+import { resolveNotificationRoute } from "../features/notifications/lib/notification-route";
 import { useNotificationSocket } from "../features/notifications/hooks/use-notification-socket";
 import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
 
 export function NotificationBell() {
   const authUser = useAppSelector((s) => s.auth.user);
-  const isCustomer = authUser?.role === "CUSTOMER";
+  // The SMS gateway test is an operator tool (paid, arbitrary text): admins only.
+  const isAdmin = authUser?.role === "ADMIN";
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [showSmsModal, setShowSmsModal] = useState(false);
   // Real gateway send: default to the signed-in user's own number, never a stranger's.
@@ -61,7 +64,6 @@ export function NotificationBell() {
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllNotificationsAsReadMutation();
   const [testSms, { isLoading: isSendingSms }] = useTestSmsNotificationMutation();
-  const [testInApp, { isLoading: isSendingInApp }] = useTestInAppNotificationMutation();
 
   const { isConnected } = useNotificationSocket();
   const [soundActive, setSoundActive] = useState(isSoundEnabled());
@@ -75,15 +77,12 @@ export function NotificationBell() {
     }
   };
 
-  const handleTestInApp = async () => {
-    try {
-      await testInApp({
-        title: "Real-Time Test Alert",
-        message: "Your real-time socket and sound chime notification is working!",
-      }).unwrap();
-    } catch {
-      playNotificationSound(true);
-    }
+  /** Local preview of the alert sound + toast — writes nothing to the inbox. */
+  const handleTestInApp = () => {
+    playNotificationSound(true);
+    toast.info("Notification sound check", {
+      description: "This is how new parcel and payout alerts will sound.",
+    });
   };
 
   const unreadCount = countData?.data?.unreadCount || 0;
@@ -142,6 +141,16 @@ export function NotificationBell() {
     }
   };
 
+  /** Marks read, then opens the page the notification is about (if any). */
+  const handleOpen = (item: { id: string; status: string; metadata?: Record<string, unknown> | null }) => {
+    void handleMarkAsRead(item.id, item.status);
+    const route = resolveNotificationRoute(item.metadata ?? undefined);
+    if (route) {
+      setIsOpen(false);
+      router.push(route as never);
+    }
+  };
+
   const handleMarkAllRead = async () => {
     try {
       await markAllAsRead().unwrap();
@@ -165,17 +174,6 @@ export function NotificationBell() {
       }, 2000);
     } catch (err) {
       setSmsFeedback(`Failed: ${getApiErrorMessage(err, "Could not dispatch SMS")}`);
-    }
-  };
-
-  const getChannelIcon = (channel: string) => {
-    switch (channel) {
-      case NotificationChannel.SMS:
-        return <Smartphone className="h-3.5 w-3.5 text-info" aria-hidden="true" />;
-      case NotificationChannel.EMAIL:
-        return <Mail className="h-3.5 w-3.5 text-info" aria-hidden="true" />;
-      default:
-        return <Bell className="h-3.5 w-3.5 text-primary" />;
     }
   };
 
@@ -249,7 +247,6 @@ export function NotificationBell() {
               <button
                 type="button"
                 onClick={handleTestInApp}
-                disabled={isSendingInApp}
                 className="text-xs text-primary hover:text-primary-foreground hover:bg-primary rounded-lg px-2 py-1 transition-all flex items-center gap-1 font-medium"
                 title="Test real-time alert sound & toast"
               >
@@ -266,7 +263,7 @@ export function NotificationBell() {
                   Read all
                 </button>
               )}
-              {!isCustomer && (
+              {isAdmin && (
                 <button
                   onClick={() => {
                     setIsOpen(false);
@@ -303,7 +300,15 @@ export function NotificationBell() {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => handleMarkAsRead(item.id, item.status)}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleOpen(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleOpen(item);
+                      }
+                    }}
                     className={`p-3.5 hover:bg-muted/50 cursor-pointer transition-colors relative flex gap-3 ${
                       isUnread ? "bg-primary/5" : ""
                     }`}
@@ -316,10 +321,6 @@ export function NotificationBell() {
                         <span className="text-xs font-medium text-foreground truncate">
                           {item.title}
                         </span>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {getChannelIcon(item.channel)}
-                          <span className="text-[10px] text-muted-foreground">{item.channel}</span>
-                        </div>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                         {item.message}

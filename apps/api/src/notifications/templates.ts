@@ -23,6 +23,14 @@ import {
 export type TemplateKey =
   | "parcel_created"
   | "parcel_picked_up"
+  | "pickup_requested"
+  | "pickup_assigned_rider"
+  | "pickup_assigned_merchant"
+  | "manifest_dispatched"
+  | "customer_picked_up"
+  | "customer_out_for_delivery"
+  | "customer_delivered"
+  | "customer_failed"
   | "parcel_assigned"
   | "parcel_out_for_delivery"
   | "parcel_delivered"
@@ -40,6 +48,14 @@ export type TemplateKey =
 export const TEMPLATE_KEYS: readonly TemplateKey[] = [
   "parcel_created",
   "parcel_picked_up",
+  "pickup_requested",
+  "pickup_assigned_rider",
+  "pickup_assigned_merchant",
+  "manifest_dispatched",
+  "customer_picked_up",
+  "customer_out_for_delivery",
+  "customer_delivered",
+  "customer_failed",
   "parcel_assigned",
   "parcel_out_for_delivery",
   "parcel_delivered",
@@ -59,6 +75,10 @@ export const TEMPLATE_KEYS: readonly TemplateKey[] = [
 export const EVENT_TEMPLATES: Readonly<Record<DomainEventType, TemplateKey | null>> = {
   [DomainEventType.PARCEL_CREATED]: "parcel_created",
   [DomainEventType.PARCEL_PICKED_UP]: "parcel_picked_up",
+  [DomainEventType.PARCEL_PICKUP_REQUESTED]: "pickup_requested",
+  // The rider is the primary audience; the merchant copy uses pickup_assigned_merchant.
+  [DomainEventType.PARCEL_PICKUP_ASSIGNED]: "pickup_assigned_rider",
+  [DomainEventType.MANIFEST_DISPATCHED]: "manifest_dispatched",
   [DomainEventType.PARCEL_ASSIGNED]: "parcel_assigned",
   [DomainEventType.PARCEL_OUT_FOR_DELIVERY]: "parcel_out_for_delivery",
   [DomainEventType.PARCEL_DELIVERED]: "parcel_delivered",
@@ -105,6 +125,113 @@ export function renderParcelCreated(vars: ParcelCreatedVars): RenderedTemplate {
       body: `Dhruto: ${vars.recipientName}-এর জন্য পার্সেল ${vars.trackingCode} বুক হয়েছে, পিকআপের অপেক্ষায়।`,
     },
   };
+}
+
+export interface PickupRequestedVars {
+  trackingCode: string;
+  merchantName: string;
+}
+
+export interface PickupAssignedVars {
+  merchantName: string;
+  riderName: string;
+  parcelCount: number;
+}
+
+export function renderPickupRequested(vars: PickupRequestedVars): RenderedTemplate {
+  return {
+    en: {
+      title: "New pickup request",
+      body: `Dhruto: ${vars.merchantName} requested a pickup for ${vars.trackingCode}. Assign a pickup rider.`,
+    },
+    bn: {
+      title: "নতুন পিকআপ অনুরোধ",
+      body: `Dhruto: ${vars.merchantName} ${vars.trackingCode}-এর পিকআপ চেয়েছেন। একজন পিকআপ রাইডার নির্ধারণ করুন।`,
+    },
+  };
+}
+
+export function renderPickupAssignedRider(vars: PickupAssignedVars): RenderedTemplate {
+  return {
+    en: {
+      title: "New pickup",
+      body: `Dhruto: collect ${vars.parcelCount} parcel(s) from ${vars.merchantName}.`,
+    },
+    bn: {
+      title: "নতুন পিকআপ",
+      body: `Dhruto: ${vars.merchantName} থেকে ${vars.parcelCount}টি পার্সেল সংগ্রহ করুন।`,
+    },
+  };
+}
+
+export function renderPickupAssignedMerchant(vars: PickupAssignedVars): RenderedTemplate {
+  return {
+    en: {
+      title: "Pickup rider assigned",
+      body: `Dhruto: ${vars.riderName} will collect ${vars.parcelCount} parcel(s) from your pickup address.`,
+    },
+    bn: {
+      title: "পিকআপ রাইডার নির্ধারিত",
+      body: `Dhruto: ${vars.riderName} আপনার পিকআপ ঠিকানা থেকে ${vars.parcelCount}টি পার্সেল সংগ্রহ করবেন।`,
+    },
+  };
+}
+
+export interface ManifestDispatchedVars {
+  manifestCode: string;
+  originHubName: string;
+  bagCount: number;
+}
+
+export function renderManifestDispatched(vars: ManifestDispatchedVars): RenderedTemplate {
+  return {
+    en: {
+      title: "Inbound linehaul on the way",
+      body: `Dhruto: manifest ${vars.manifestCode} with ${vars.bagCount} bag(s) left ${vars.originHubName} for your hub. Prepare to receive it.`,
+    },
+    bn: {
+      title: "আগত লাইনহল পথে",
+      body: `Dhruto: ${vars.originHubName} থেকে ${vars.bagCount}টি ব্যাগসহ ম্যানিফেস্ট ${vars.manifestCode} আপনার হাবের দিকে রওনা হয়েছে। গ্রহণের প্রস্তুতি নিন।`,
+    },
+  };
+}
+
+/** Recipient-facing (customer portal) parcel updates. Never includes the OTP. */
+export interface CustomerParcelVars {
+  trackingCode: string;
+  merchantName?: string;
+  reason?: string;
+}
+
+export type CustomerParcelKind = "picked_up" | "out_for_delivery" | "delivered" | "failed";
+
+const humanReason = (code?: string): string => (code ? code.replace(/_/g, " ").toLowerCase() : "unknown");
+
+export function renderCustomerParcel(kind: CustomerParcelKind, vars: CustomerParcelVars): RenderedTemplate {
+  const from = vars.merchantName ? ` from ${vars.merchantName}` : "";
+  const fromBn = vars.merchantName ? `${vars.merchantName}-এর ` : "";
+  switch (kind) {
+    case "picked_up":
+      return {
+        en: { title: "Your parcel is on its way", body: `Your parcel${from} (${vars.trackingCode}) was picked up and is heading to our hub.` },
+        bn: { title: "আপনার পার্সেল পথে", body: `${fromBn}পার্সেল (${vars.trackingCode}) পিকআপ হয়েছে, হাবের দিকে যাচ্ছে।` },
+      };
+    case "out_for_delivery":
+      return {
+        en: { title: "Out for delivery today", body: `Your parcel ${vars.trackingCode} is out for delivery. Keep the delivery code we sent by SMS ready for the rider.` },
+        bn: { title: "আজ ডেলিভারিতে", body: `আপনার পার্সেল ${vars.trackingCode} ডেলিভারিতে বের হয়েছে। রাইডারের জন্য SMS-এ পাঠানো ডেলিভারি কোড প্রস্তুত রাখুন।` },
+      };
+    case "delivered":
+      return {
+        en: { title: "Parcel delivered", body: `Your parcel ${vars.trackingCode} was delivered. Thank you for choosing Dhruto.` },
+        bn: { title: "পার্সেল ডেলিভারি হয়েছে", body: `আপনার পার্সেল ${vars.trackingCode} ডেলিভারি হয়েছে। Dhruto বেছে নেওয়ার জন্য ধন্যবাদ।` },
+      };
+    case "failed":
+      return {
+        en: { title: "Delivery attempt missed", body: `We couldn't deliver ${vars.trackingCode} (${humanReason(vars.reason)}). Open the parcel to choose a new delivery time.` },
+        bn: { title: "ডেলিভারি চেষ্টা ব্যর্থ", body: `${vars.trackingCode} ডেলিভারি করা যায়নি (${humanReason(vars.reason)})। নতুন ডেলিভারির সময় বেছে নিতে পার্সেলটি খুলুন।` },
+      };
+  }
 }
 
 export function renderParcelPickedUp(vars: ParcelCreatedVars): RenderedTemplate {

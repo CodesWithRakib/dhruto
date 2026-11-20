@@ -3,8 +3,11 @@
 import React from "react";
 import { Building2, MapPin, Package, ShieldCheck, Truck, User, Wallet } from "lucide-react";
 import { Badge } from "@dhruto/ui";
-import type { ParcelDetailsResponse } from "@dhruto/contracts";
+import { ParcelStatus, type ParcelDetailsResponse } from "@dhruto/contracts";
 import { ParcelIntelligencePanel } from "@/features/intelligence/components/parcel-intelligence-panel";
+
+/** While the parcel is on its first-mile leg, the assigned rider is the pickup rider. */
+const PICKUP_LEG_STATUSES: ReadonlySet<string> = new Set([ParcelStatus.PICKUP_ASSIGNED, ParcelStatus.PICKED_UP]);
 
 interface ParcelInfoSectionsProps {
   t: (key: string, values?: Record<string, string | number>) => string;
@@ -111,7 +114,9 @@ export function ParcelInfoSections({
               <Truck className="h-6 w-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <span className="text-caption text-muted-foreground font-medium">{t("assignedRider")}</span>
+              <span className="text-caption text-muted-foreground font-medium">
+                {PICKUP_LEG_STATUSES.has(parcel.status) ? t("pickupRider") : t("assignedRider")}
+              </span>
               <p className="font-semibold text-foreground truncate mt-0.5">
                 {parcel.currentRiderName ?? t("notAssigned")}
               </p>

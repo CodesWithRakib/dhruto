@@ -408,7 +408,7 @@ export class AnalyticsController {
             count: latencies.length,
             avgHours:
               latencies.length > 0
-                ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10
+                ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 100) / 100
                 : null,
             p50: this.metrics.percentile(latencies, 50),
             p75: this.metrics.percentile(latencies, 75),
@@ -453,7 +453,7 @@ export class AnalyticsController {
             count: latencies.length,
             avgHours:
               latencies.length > 0
-                ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 10) / 10
+                ? Math.round((latencies.reduce((a, b) => a + b, 0) / latencies.length) * 100) / 100
                 : null,
             p50: this.metrics.percentile(latencies, 50),
             p75: this.metrics.percentile(latencies, 75),

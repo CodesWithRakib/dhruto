@@ -190,7 +190,9 @@ export class FinanceService {
   /**
    * Retrieves merchant wallet summary data. `pendingBalance` is derived from
    * unsettled CASH_PENDING parcels — the ledger (not this field) is the
-   * source of truth for available funds.
+   * source of truth for available funds. Payout totals are derived from
+   * payout rows: the stored `withdrawnTotal` counter grows at *request* time,
+   * so it reported unpaid requests as "withdrawn".
    */
   async getMerchantWallet(merchantId: string): Promise<MerchantWalletData> {
     const wallet = await this.getOrCreateWallet(merchantId);
@@ -205,12 +207,36 @@ export class FinanceService {
       0,
     );
 
+    const payoutTotals = await this.payoutRepo
+      .createQueryBuilder("pr")
+      .select("pr.status", "status")
+      .addSelect("COALESCE(SUM(pr.amount), 0)", "total")
+      .where("pr.merchant_id = :merchantId", { merchantId })
+      .andWhere("pr.status IN (:...statuses)", {
+        statuses: [
+          PayoutStatus.COMPLETED,
+          PayoutStatus.REQUESTED,
+          PayoutStatus.APPROVED,
+          PayoutStatus.PROCESSING,
+        ],
+      })
+      .groupBy("pr.status")
+      .getRawMany<{ status: PayoutStatus; total: string }>();
+    let paidMinor = 0;
+    let inProgressMinor = 0;
+    for (const row of payoutTotals) {
+      const minor = toMinor(row.total);
+      if (row.status === PayoutStatus.COMPLETED) paidMinor += minor;
+      else inProgressMinor += minor;
+    }
+
     return {
       id: wallet.id,
       merchantId: wallet.merchantId,
       balance: Number(wallet.balance),
       pendingBalance: toMajor(pendingMinor),
-      withdrawnTotal: Number(wallet.withdrawnTotal),
+      withdrawnTotal: toMajor(paidMinor),
+      payoutsInProgress: toMajor(inProgressMinor),
       currency: wallet.currency,
       updatedAt: wallet.updatedAt.toISOString(),
     };

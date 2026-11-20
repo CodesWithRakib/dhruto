@@ -12,6 +12,7 @@ import {
 import { CHAT_ENTITIES } from "../src/chat/chat.module.js";
 import { CommunicationPhase1Foundation1700000000010 } from "../src/database/migrations/1700000000010-CommunicationPhase1Foundation.js";
 import {
+  ALL_MIGRATIONS,
   CHAT_TEST_DATABASE_URL,
   allEntityClasses,
   createChatTestDataSource,
@@ -609,10 +610,13 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
     it("removes only chat objects, preserves existing data, and can be re-applied", async () => {
       const [{ count: usersBefore }] = await ds.query(`SELECT count(*)::int AS count FROM "users"`);
 
-      // Revert Phase 7, Phase 2 (indexes) then Phase 1 (tables), newest first.
-      await ds.undoLastMigration({ transaction: "each" });
-      await ds.undoLastMigration({ transaction: "each" });
-      await ds.undoLastMigration({ transaction: "each" });
+      // Revert newest first down to (and including) chat Phase 1. Later
+      // non-chat migrations are reverted too, then re-applied below.
+      const fromChat = ALL_MIGRATIONS.indexOf(CommunicationPhase1Foundation1700000000010);
+      const tail = ALL_MIGRATIONS.slice(fromChat).map((m) => m.name);
+      for (let i = 0; i < tail.length; i += 1) {
+        await ds.undoLastMigration({ transaction: "each" });
+      }
 
       const chatTables = await ds.query(
         `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE 'chat\\_%'`,
@@ -636,7 +640,8 @@ describe.skipIf(!CHAT_TEST_DATABASE_URL)("Communication Phase 1 database foundat
       expect(preserved).toHaveLength(3);
 
       const reapplied = await ds.runMigrations({ transaction: "each" });
-      expect(reapplied.map((m) => m.name)).toEqual([
+      expect(reapplied.map((m) => m.name)).toEqual(tail);
+      expect(tail.slice(0, 3)).toEqual([
         "CommunicationPhase1Foundation1700000000010",
         "CommunicationPhase2Backend1700000000011",
         "CommunicationPhase7AdminCenter1700000000012",

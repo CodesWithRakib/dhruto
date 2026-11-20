@@ -135,6 +135,17 @@ export class AnalyticsRangeService {
     }
   }
 
+  /**
+   * Bucket label as text, formatted inside Postgres. `bucketSql` yields a
+   * timezone-less local timestamp; letting the pg driver turn that into a JS
+   * Date reads it in the *server's* timezone, which shifted every Dhaka day
+   * back by one on non-UTC hosts. Text labels sort chronologically.
+   */
+  bucketKeySql(column: string, granularity: ResolvedRange["granularity"]): string {
+    const format = granularity === "hour" ? `'YYYY-MM-DD"T"HH24'` : "'YYYY-MM-DD'";
+    return `to_char(${this.bucketSql(column, granularity)}, ${format})`;
+  }
+
   private toDhakaParts(date: Date): { year: number; month: number; day: number } {
     const fmt = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Dhaka",

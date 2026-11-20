@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Badge } from "@dhruto/ui";
+import { StatusBadge } from "@/components/data-display/status-badge";
 import { Building2, Clock, MapPin, Phone, ShieldCheck } from "lucide-react";
 import { useFormatters } from "@/lib/format";
 import { ParcelStatus } from "@dhruto/contracts";
@@ -39,7 +39,7 @@ export function TrackingRouteInfo({
           {recipientThana}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {recipientDistrict} District
+          {t("districtSuffix", { district: recipientDistrict })}
         </p>
       </div>
 
@@ -53,7 +53,7 @@ export function TrackingRouteInfo({
           {currentHubName ?? t("locationPending")}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {currentHubName ? "Active Gateway Scan" : "Awaiting Inbound"}
+          {currentHubName ? t("atHub") : t("notAtHubYet")}
         </p>
       </div>
 
@@ -68,7 +68,7 @@ export function TrackingRouteInfo({
         </p>
         <div className="flex items-center gap-1 text-[11px] text-success font-medium mt-0.5">
           <ShieldCheck className="h-3 w-3" />
-          <span>Masked for privacy</span>
+          <span>{t("maskedPrivacy")}</span>
         </div>
       </div>
 
@@ -76,14 +76,14 @@ export function TrackingRouteInfo({
       <div className="rounded-2xl bg-card p-5 transition-all">
         <div className="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-muted-foreground">
           <Clock className="h-4 w-4 text-primary" />
-          <span>Telemetry Sync</span>
+          <span>{t("lastUpdatedLabel")}</span>
         </div>
         <p className="text-xs font-semibold text-foreground leading-snug">
           {dateTime(updatedAt)}
         </p>
-        <Badge variant="secondary" className="mt-2 text-[10px] font-mono">
-          {status}
-        </Badge>
+        <div className="mt-2">
+          <StatusBadge status={status} />
+        </div>
       </div>
     </div>
   );

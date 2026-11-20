@@ -77,7 +77,6 @@ export function PricingCalculatorCockpit({
   const [calcThana, setCalcThana] = useState<string>("");
   const [weightKg, setWeightKg] = useState<number>(1.0);
   const [codAmount, setCodAmount] = useState<number>(3500);
-  const [isFragileBox, setIsFragileBox] = useState<boolean>(false);
 
   useEffect(() => {
     if (!calcDistrict) return;
@@ -129,10 +128,9 @@ export function PricingCalculatorCockpit({
   const extraKg = Math.max(0, Math.ceil(weightKg - 1));
   const baseDeliveryFee = pricing?.baseFee ?? selectedZone.baseRate;
   const extraWeightFee = pricing?.weightFee ?? extraKg * selectedZone.perKg;
-  const packagingFee = isFragileBox ? 20 : 0;
-  const codFee = pricing?.codFee ?? (codAmount > 0 ? Math.round(codAmount * 0.01) : 0);
-  const totalDeductions =
-    (pricing ? pricing.totalFee : baseDeliveryFee + extraWeightFee + codFee) + packagingFee;
+  // COD fee follows the live rate card (codRateBps); no guessed percentage.
+  const codFee = pricing?.codFee ?? 0;
+  const totalDeductions = pricing ? pricing.totalFee : baseDeliveryFee + extraWeightFee + codFee;
   const netMerchantPayout = Math.max(0, codAmount - totalDeductions);
 
   return (
@@ -186,8 +184,6 @@ export function PricingCalculatorCockpit({
               onWeightChange={setWeightKg}
               codAmount={codAmount}
               onCodChange={setCodAmount}
-              isFragileBox={isFragileBox}
-              onFragileBoxChange={setIsFragileBox}
               extraKg={extraKg}
               extraWeightFee={extraWeightFee}
               selectedZone={selectedZone}
@@ -202,8 +198,6 @@ export function PricingCalculatorCockpit({
               extraKg={extraKg}
               extraWeightFee={extraWeightFee}
               codFee={codFee}
-              isFragileBox={isFragileBox}
-              packagingFee={packagingFee}
               totalDeductions={totalDeductions}
               netMerchantPayout={netMerchantPayout}
               ctaHref={ctaHref}
