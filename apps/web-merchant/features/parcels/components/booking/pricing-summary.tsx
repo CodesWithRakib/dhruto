@@ -48,11 +48,8 @@ export function PricingSummary({
   return (
     <section
       aria-labelledby="pricing-summary-heading"
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-elevated/95 via-surface-elevated/70 to-surface-muted/40 p-5 backdrop-blur-md"
+      className="relative overflow-hidden rounded-2xl bg-surface-elevated p-4.5"
     >
-      {/* Specular top highlight */}
-      {/* Ambient glow accent */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-2xl" />
 
       <header className="relative flex items-center justify-between gap-3">
         <h3

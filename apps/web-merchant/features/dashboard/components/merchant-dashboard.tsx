@@ -108,16 +108,7 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
     stats.totalCodAmount > 0 ? (stats.collectedCodAmount / stats.totalCodAmount) * 100 : 0;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-inverse via-inverse to-inverse-soft p-6 text-white">
-      {/* Decorative Atmospheric Bloom */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-success/20 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-info/15 blur-3xl"
-      />
+    <div className="relative overflow-hidden rounded-2xl bg-inverse p-6 text-white">
 
       {/* Card Header */}
       <div className="relative z-10 flex items-center justify-between pb-4">
@@ -160,7 +151,7 @@ function CodSummaryCard({ stats }: { stats: DashboardStats }) {
             aria-label={`${t("codCollected")}: ${Math.round(collectedRatio)}%`}
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-success via-success-soft to-info transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-success transition-all duration-700 ease-out"
               style={{ width: `${Math.min(100, Math.max(0, collectedRatio))}%` }}
             />
           </div>

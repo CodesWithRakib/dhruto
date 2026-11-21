@@ -33,7 +33,7 @@ export function CustomerWelcomeHero({
   const { bdt } = useFormatters();
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-surface to-surface-muted/30 p-6 sm:p-8">
+    <div className="relative overflow-hidden rounded-2xl bg-card p-6 sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">

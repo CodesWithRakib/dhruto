@@ -35,11 +35,11 @@ export function HighlightCard({
   className?: string;
 }) {
   const tones = {
-    primary: "bg-gradient-to-r from-primary-soft/50 via-primary-soft/20 to-transparent",
-    info: "bg-gradient-to-r from-info-soft/50 via-info-soft/20 to-transparent",
-    success: "bg-gradient-to-r from-success-soft/50 via-success-soft/20 to-transparent",
-    warning: "bg-gradient-to-r from-warning-soft/50 via-warning-soft/20 to-transparent",
-    danger: "bg-gradient-to-r from-danger-soft/50 via-danger-soft/20 to-transparent",
+    primary: "bg-primary-soft/30 text-foreground",
+    info: "bg-info-soft/30 text-foreground",
+    success: "bg-success-soft/30 text-foreground",
+    warning: "bg-warning-soft/30 text-foreground",
+    danger: "bg-danger-soft/30 text-foreground",
   } as const;
   return (
     <div className={cn("rounded-2xl p-4 sm:p-5 transition-colors", tones[tone], className)}>

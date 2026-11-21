@@ -53,7 +53,7 @@ export function RiderRunsheetProgress({
       <div className="mt-4 space-y-1.5">
         <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-muted">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-success transition-all duration-500"
+            className="h-full rounded-full bg-primary transition-all duration-500"
             style={{ width: `${Math.max(completionPercent, 4)}%` }}
           />
         </div>

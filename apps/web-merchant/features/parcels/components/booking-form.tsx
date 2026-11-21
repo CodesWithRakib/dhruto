@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertCircle, ArrowRight, Loader2, Package, RotateCcw, Sparkles } from "lucide-react";
+import { AlertCircle, ArrowRight, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { Button, Form } from "@dhruto/ui";
 import type { AddressParseResult } from "@dhruto/contracts";
 import { AlertCard } from "@/components/data-display/cards";
@@ -59,26 +59,20 @@ export function BookingForm() {
         <form id="parcel-booking-form" onSubmit={onSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Form Details */}
-            <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-              <div className="relative overflow-hidden rounded-3xl bg-surface-elevated/90 p-6 sm:p-8 backdrop-blur-md space-y-6">
-                {/* Cockpit Card Header */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-border/40">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary shrink-0">
-                      <Package className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <h2 className="text-h4 font-bold text-foreground tracking-tight">{t("title")}</h2>
-                      <p className="text-body-sm text-muted-foreground">{t("description")}</p>
-                    </div>
-                  </div>
+            <div className="lg:col-span-7 xl:col-span-8 space-y-5">
+              <div className="relative overflow-hidden rounded-2xl bg-surface-elevated p-5 sm:p-6 space-y-5">
+                {/* Form Toolbar */}
+                <div className="flex items-center justify-between pb-2 border-b border-border/40">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Shipment Specifications
+                  </span>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="soft"
                     size="sm"
                     aria-expanded={showSmartFill}
                     onClick={() => setShowSmartFill((open) => !open)}
-                    className="rounded-xl gap-2 self-start sm:self-auto text-xs"
+                    className="h-8 rounded-lg gap-1.5 text-xs font-semibold"
                   >
                     <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                     {showSmartFill ? t("smartFillHide") : t("smartFillToggle")}
@@ -136,12 +130,12 @@ export function BookingForm() {
                 codAmount={codAmount}
               />
 
-              <div className="rounded-2xl bg-surface-elevated/90 p-5 space-y-3 backdrop-blur-md">
+              <div className="rounded-2xl bg-surface-elevated p-4.5 space-y-3">
                 <Button
                   type="submit"
                   form="parcel-booking-form"
                   disabled={isLoading}
-                  className="w-full h-12 gap-2 rounded-xl bg-primary font-bold text-primary-foreground shadow-md hover:bg-primary-hover active:scale-[0.99] transition-all"
+                  className="w-full h-11 gap-2 rounded-xl bg-primary font-bold text-primary-foreground hover:bg-primary-hover active:scale-[0.98] transition-all"
                 >
                   {isLoading ? (
                     <>

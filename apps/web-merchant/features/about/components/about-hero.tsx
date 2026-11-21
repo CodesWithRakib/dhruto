@@ -108,7 +108,7 @@ export function AboutHero() {
                   <Activity className="h-5 w-5 text-success" />
                   <div>
                     <div className="text-xs font-mono font-bold text-white">METRO NEXT-DAY</div>
-                    <div className="text-[11px] text-white/60">Automated Next-Day Metro Delivery</div>
+                    <div className="text-[11px] text-white/80">Automated Next-Day Metro Delivery</div>
                   </div>
                 </div>
               </div>
@@ -123,7 +123,7 @@ export function AboutHero() {
               </span>
               <div>
                 <div className="text-xl font-mono font-black text-white">{t("stats.coverage")}</div>
-                <div className="text-xs text-white/60 font-medium">{t("stats.coverageLabel")}</div>
+                <div className="text-xs text-white/85 font-medium">{t("stats.coverageLabel")}</div>
               </div>
             </div>
 
@@ -133,7 +133,7 @@ export function AboutHero() {
               </span>
               <div>
                 <div className="text-xl font-mono font-black text-white">{t("stats.thanas")}</div>
-                <div className="text-xs text-white/60 font-medium">{t("stats.thanasLabel")}</div>
+                <div className="text-xs text-white/85 font-medium">{t("stats.thanasLabel")}</div>
               </div>
             </div>
 
@@ -143,7 +143,7 @@ export function AboutHero() {
               </span>
               <div>
                 <div className="text-xl font-mono font-black text-white">{t("stats.auditable")}</div>
-                <div className="text-xs text-white/60 font-medium">{t("stats.auditableLabel")}</div>
+                <div className="text-xs text-white/85 font-medium">{t("stats.auditableLabel")}</div>
               </div>
             </div>
 
@@ -153,7 +153,7 @@ export function AboutHero() {
               </span>
               <div>
                 <div className="text-xl font-mono font-black text-white">{t("stats.operations")}</div>
-                <div className="text-xs text-white/60 font-medium">{t("stats.operationsLabel")}</div>
+                <div className="text-xs text-white/85 font-medium">{t("stats.operationsLabel")}</div>
               </div>
             </div>
           </div>

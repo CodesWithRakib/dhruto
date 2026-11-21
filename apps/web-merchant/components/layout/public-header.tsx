@@ -116,7 +116,11 @@ export function PublicHeader() {
         <div className="flex items-center gap-2 sm:gap-3">
           <PublicStatusIndicator />
           <div className="text-white">
-            <LanguageSwitcher currentLocale={locale} label={t("language")} />
+            <LanguageSwitcher
+              currentLocale={locale}
+              label={t("language")}
+              className="text-white hover:text-white hover:bg-white/10 [&_svg]:text-white/80"
+            />
           </div>
 
           {isAuthenticated ? (
@@ -190,7 +194,7 @@ export function PublicHeader() {
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={open ? t("closeMenu") : t("openMenu")}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-foreground hover:bg-surface-muted lg:hidden transition-colors"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-white hover:bg-white/10 lg:hidden transition-colors"
           >
             {open ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -252,7 +256,7 @@ export function PublicHeader() {
               })}
             </ul>
 
-            <div className="pt-2 sm:hidden space-y-2">
+            <div className="pt-2 space-y-2">
               <Link href={ctaHref} className="block">
                 <button type="button" className="w-full h-11 rounded-xl font-semibold btn-bl flex items-center justify-center gap-2">
                   {isAuthenticated ? t("openApp") : t("signIn")}

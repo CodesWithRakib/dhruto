@@ -72,7 +72,7 @@ export function ComparisonSection() {
                   <th className="py-5 px-6 text-sm font-bold uppercase tracking-wider text-muted-foreground w-1/3">
                     Feature / Capability
                   </th>
-                  <th className="py-5 px-6 text-sm font-bold uppercase tracking-wider text-muted-foreground/70 w-1/3">
+                  <th className="py-5 px-6 text-sm font-bold uppercase tracking-wider text-muted-foreground w-1/3">
                     Traditional Couriers
                   </th>
                   <th className="py-5 px-6 text-sm font-bold uppercase tracking-wider text-primary w-1/3 bg-primary/10">

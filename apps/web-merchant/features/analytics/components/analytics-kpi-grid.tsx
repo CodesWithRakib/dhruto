@@ -15,7 +15,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Delivery Success Rate */}
-      <Card className="bg-gradient-to-br from-card via-card to-success-soft/40">
+      <Card className="bg-card">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -44,7 +44,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
       </Card>
 
       {/* RTO Return Rate */}
-      <Card className="bg-gradient-to-br from-card via-card to-danger-soft/40">
+      <Card className="bg-card">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -72,7 +72,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
       </Card>
 
       {/* Total COD Collections */}
-      <Card className="bg-gradient-to-br from-card via-card to-primary-soft/40">
+      <Card className="bg-card">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -97,7 +97,7 @@ export function AnalyticsKpiGrid({ kpis, financials }: AnalyticsKpiGridProps) {
       </Card>
 
       {/* Average Delivery Duration */}
-      <Card className="bg-gradient-to-br from-card via-card to-warning-soft/40">
+      <Card className="bg-card">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">

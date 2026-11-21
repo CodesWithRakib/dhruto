@@ -84,7 +84,7 @@ export function CustomerActiveShipmentCard({
 
   return (
     <div className="overflow-hidden rounded-3xl bg-card">
-      <div className="bg-gradient-to-r from-primary-soft/60 via-primary-soft/30 to-card px-5 py-4 sm:px-7 flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-primary-soft/30 px-5 py-4 sm:px-7 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
@@ -158,7 +158,7 @@ export function CustomerActiveShipmentCard({
               </div>
               <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-muted">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-success transition-all duration-500"
+                  className="h-full rounded-full bg-primary transition-all duration-500"
                   style={{ width: `${currentStep.percentage}%` }}
                 />
               </div>

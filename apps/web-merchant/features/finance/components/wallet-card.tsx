@@ -24,11 +24,8 @@ export function WalletCard({ wallet, isLoading, onRequestPayout }: WalletCardPro
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      {/* Primary Wallet Bento Card (Executive Obsidian / Emerald Glow) */}
-      <div className="relative overflow-hidden flex flex-col justify-between rounded-3xl bg-gradient-to-br from-surface-elevated/95 via-surface-elevated/80 to-surface-muted/60 p-6 sm:p-7 backdrop-blur-md">
-        {/* Top specular highlight line */}
-        {/* Ambient radial glow */}
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/15 blur-2xl" />
+      {/* Primary Wallet Bento Card */}
+      <div className="relative overflow-hidden flex flex-col justify-between rounded-2xl bg-surface-elevated p-6 sm:p-7">
 
         <div className="relative z-10">
           <div className="mb-5 flex items-center justify-between">

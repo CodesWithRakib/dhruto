@@ -15,16 +15,16 @@ export function BookingSectionWrapper({
   children,
 }: BookingSectionWrapperProps) {
   return (
-    <fieldset className="space-y-4 p-0">
+    <fieldset className="space-y-3.5 p-0 border-0">
       <legend className="sr-only">{title}</legend>
-      <div className="flex items-start gap-3 pb-1">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5">
-          <Icon className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div>
-          <p className="text-body-sm font-bold text-foreground tracking-tight">{title}</p>
-          <p className="text-caption text-muted-foreground">{description}</p>
+      <div className="flex items-center justify-between pb-1">
+        <div className="flex items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+          </span>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{title}</p>
         </div>
+        <p className="text-[11px] text-muted-foreground hidden sm:block">{description}</p>
       </div>
       {children}
     </fieldset>

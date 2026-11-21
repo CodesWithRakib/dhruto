@@ -242,10 +242,10 @@ export function RateCalculatorPreview() {
             </div>
 
             {/* Right Summary Column: High-Contrast Dark Card (5 cols) */}
-            <div className="p-6 sm:p-10 lg:col-span-5 bg-gradient-to-br from-[var(--dk3)] to-[var(--dk)] text-white flex flex-col justify-between space-y-8">
+            <div className="p-6 sm:p-10 lg:col-span-5 bg-[var(--dk)] text-white flex flex-col justify-between space-y-8">
               <div>
                 <div className="flex items-center justify-between pb-4">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-white/60">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-white/80">
                     Net Settlement Breakdown
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-success/20 text-success px-3 py-1 text-xs font-semibold">
@@ -256,13 +256,13 @@ export function RateCalculatorPreview() {
 
                 {/* Net Payout Hero Value */}
                 <div className="mt-6 p-5 rounded-2xl bg-white/5 text-center space-y-1.5 relative overflow-hidden">
-                  <span className="text-xs text-white/70 font-medium uppercase tracking-wider block">
+                  <span className="text-xs text-white/80 font-medium uppercase tracking-wider block">
                     Next-Morning Bank / bKash Disbursement
                   </span>
                   <div className="text-4xl sm:text-5xl font-extrabold font-mono tracking-tight text-[var(--acc)]">
                     ৳{netSettlement.toLocaleString()}
                   </div>
-                  <div className="flex items-center justify-center gap-2 pt-1 text-xs text-white/60">
+                  <div className="flex items-center justify-center gap-2 pt-1 text-xs text-white/80">
                     <TrendingUp className="h-3.5 w-3.5 text-success" />
                     <span>{payoutRatio}% Net Payout Ratio</span>
                   </div>
@@ -270,24 +270,24 @@ export function RateCalculatorPreview() {
 
                 {/* Itemized Cost Breakdown Table */}
                 <div className="mt-6 space-y-3 text-sm">
-                  <div className="flex justify-between text-white/70">
+                  <div className="flex justify-between text-white/85">
                     <span>Base Delivery ({selectedZone.label}):</span>
                     <span className="font-mono font-medium text-white">৳{selectedZone.basePrice}</span>
                   </div>
 
                   {extraWeightCharge > 0 && (
-                    <div className="flex justify-between text-white/70">
+                    <div className="flex justify-between text-white/85">
                       <span>Extra Weight ({extraWeight.toFixed(1)} kg):</span>
                       <span className="font-mono font-medium text-white">+৳{extraWeightCharge}</span>
                     </div>
                   )}
 
-                  <div className="flex justify-between text-white/70">
+                  <div className="flex justify-between text-white/85">
                     <span>COD Fee (1% of ৳{codAmount.toLocaleString()}):</span>
                     <span className="font-mono font-medium text-white">+৳{codFee}</span>
                   </div>
 
-                  <div className="flex justify-between text-white/70">
+                  <div className="flex justify-between text-white/85">
                     <span>RTO &amp; Return Protection:</span>
                     <span className="font-mono font-semibold text-success">FREE (৳0)</span>
                   </div>

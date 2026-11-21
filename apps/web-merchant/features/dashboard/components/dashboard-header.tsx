@@ -30,7 +30,7 @@ export function DashboardHeader({
     : t("dashboardTitle");
 
   return (
-    <header className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-inverse via-inverse to-inverse-soft p-6 sm:p-8 lg:p-9 text-white">
+    <header className="relative overflow-hidden rounded-2xl bg-inverse p-6 sm:p-7 text-white">
       {/* 1. Coordinate Grid Pattern */}
       <div
         aria-hidden="true"

@@ -19,7 +19,7 @@ export default async function NewBookingPage() {
   const t = await getTranslations("BookingForm");
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] space-y-6 pb-12">
+    <div className="relative space-y-4 pb-8">
       <DashboardCanvasBg />
 
       <PageHeader

@@ -54,7 +54,7 @@ export function SystemObservabilityCard() {
   return (
     <div className="space-y-6">
       {/* Primary Status Banner */}
-      <Card className="bg-gradient-to-r from-success-soft/40 via-card to-card">
+      <Card className="bg-card">
         <CardHeader className="bg-success-soft/30 pb-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-3">

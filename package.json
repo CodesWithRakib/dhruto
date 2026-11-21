@@ -16,6 +16,7 @@
     "test:e2e": "turbo test:e2e",
     "test:browser:full": "node scripts/run-all-routes-live-browser-test.mjs",
     "test:browser:live": "node scripts/run-all-users-simultaneous-live.mjs",
+    "capture-screenshots": "node scripts/capture-all-screenshots.mjs",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -23,6 +24,8 @@
   },
   "devDependencies": {
     "prettier": "^3.5.3",
+    "puppeteer": "^25.18.1",
+    "puppeteer-core": "^25.18.1",
     "turbo": "^2.11.7",
     "typescript": "~5.8.2"
   }

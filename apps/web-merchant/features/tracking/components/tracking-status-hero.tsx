@@ -148,7 +148,7 @@ export function TrackingStatusHero({ trackingCode, status }: TrackingStatusHeroP
             <div className="h-full w-full bg-border/70 rounded-full" />
             {/* Active Filled Line */}
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-success via-primary to-primary rounded-full transition-all duration-700 ease-out"
+              className="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-700 ease-out"
               style={{
                 width: `${Math.min(100, Math.max(0, ((currentLevel - 1) / 4) * 100))}%`,
               }}
