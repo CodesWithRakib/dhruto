@@ -20,6 +20,7 @@ import { RiderMetricsGrid } from "./dashboard/rider-metrics-grid";
 import { RiderQuickNav } from "./dashboard/rider-quick-nav";
 import { RiderSafetySop } from "./dashboard/rider-safety-sop";
 import { RiderNextTaskHero } from "./dashboard/rider-next-task-hero";
+import { RiderRunsheetQueue } from "./dashboard/rider-runsheet-queue";
 
 /**
  * Rider dashboard: live task counts, COD still to collect and the next delivery CTA.
@@ -142,6 +143,9 @@ export function RiderDashboard() {
         }
       />
 
+      {/* High-Priority Active Delivery Stop (Rider Top Action Hero) */}
+      <RiderNextTaskHero nextTask={nextTask} />
+
       {/* Daily Runsheet Completion Tracker */}
       <RiderRunsheetProgress
         completedTasks={completedTasks}
@@ -149,6 +153,9 @@ export function RiderDashboard() {
         inProgressTasks={dashboard.counts.inProgress}
         completionPercent={completionPercent}
       />
+
+      {/* Today's Active Delivery Stops Runsheet Queue */}
+      <RiderRunsheetQueue tasks={tasks} />
 
       {/* Live metrics & COD status */}
       <RiderMetricsGrid
@@ -171,9 +178,6 @@ export function RiderDashboard() {
 
       {/* Doorstep Delivery & Safety SOP Handbook */}
       <RiderSafetySop />
-
-      {/* Next delivery CTA */}
-      <RiderNextTaskHero nextTask={nextTask} />
     </div>
   );
 }

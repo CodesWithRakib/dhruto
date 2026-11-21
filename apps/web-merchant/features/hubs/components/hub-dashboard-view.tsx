@@ -16,6 +16,7 @@ import { HubQuickActions } from "./dashboard/hub-quick-actions";
 import { HubMetricsGrid } from "./dashboard/hub-metrics-grid";
 import { HubExceptionsAlert } from "./dashboard/hub-exceptions-alert";
 import { HubRecentScansCard } from "./dashboard/hub-recent-scans-card";
+import { HubTerminalQuickScanner } from "./dashboard/hub-terminal-quick-scanner";
 
 /**
  * Hub operations dashboard.
@@ -117,23 +118,32 @@ export function HubDashboardView() {
         />
       ) : null}
 
-      {/* Hub Operational Pipeline Overview */}
+      {/* High-Velocity In-Terminal Scan & Sorting Dock */}
+      {activeHub ? (
+        <HubTerminalQuickScanner
+          hubId={activeHub.id}
+          hubName={activeHub.name}
+          onScanSuccess={handleRefresh}
+        />
+      ) : null}
+
+      {/* Hub Operational Pipeline Overview (5-Stage Sortation Conveyor) */}
       <HubPipelineStrip metrics={metrics} />
 
-      {/* Hub Operating SOP & Guidelines */}
-      <HubSopGuide />
-
-      {/* Quick actions - 5 columns */}
-      <HubQuickActions />
-
-      {/* Live metrics */}
+      {/* Live Floor Telemetry & Inventory Metrics */}
       <HubMetricsGrid metrics={metrics} isLoading={dashboardLoading} />
 
       {/* Exceptions needing attention */}
       <HubExceptionsAlert openExceptions={openExceptions} />
 
-      {/* Recent scans */}
+      {/* Real-Time Scan Activity Feed */}
       <HubRecentScansCard recentScans={recentScans} />
+
+      {/* Quick Actions Shortcuts */}
+      <HubQuickActions />
+
+      {/* Hub Operating SOP & Guidelines */}
+      <HubSopGuide />
     </div>
   );
 }

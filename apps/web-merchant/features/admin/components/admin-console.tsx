@@ -22,6 +22,7 @@ import { PageHeader } from "@/components/page-header";
 import { AdminIllustrationBg } from "@/components/visual/illustration-backgrounds";
 import { AdminNetworkStatus } from "./admin-network-status";
 import { AdminTodayKpis } from "./admin-today-kpis";
+import { AdminSupervisoryQueues } from "./admin-supervisory-queues";
 
 /**
  * Admin operations supervision command center.
@@ -124,6 +125,9 @@ export function AdminConsole() {
       <AdminNetworkStatus />
 
       <AdminTodayKpis />
+
+      {/* Real-time Supervisory Action Queues */}
+      <AdminSupervisoryQueues />
 
       {/* Primary Operational Command Pillars (4 Columns) */}
       <section aria-label="Operational Domains">
