@@ -3,6 +3,7 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { IntegrationsModule } from "../integrations/integrations.module.js";
 import { DomainEventPublisher } from "./publishers/domain-event-publisher.service.js";
 import { AuditEventListener } from "./listeners/audit-event.listener.js";
+import { LogisticsSocketListener } from "./listeners/logistics-socket.listener.js";
 
 @Global()
 @Module({
@@ -15,7 +16,7 @@ import { AuditEventListener } from "./listeners/audit-event.listener.js";
     }),
     IntegrationsModule,
   ],
-  providers: [DomainEventPublisher, AuditEventListener],
-  exports: [DomainEventPublisher, AuditEventListener],
+  providers: [DomainEventPublisher, AuditEventListener, LogisticsSocketListener],
+  exports: [DomainEventPublisher, AuditEventListener, LogisticsSocketListener],
 })
 export class EventsModule {}

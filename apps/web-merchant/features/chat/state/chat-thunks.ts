@@ -110,12 +110,29 @@ export function syncToHead(conversationId: string, head: string): Thunk {
 const UNREAD_REFRESH_WINDOW_MS = 1500;
 let unreadRefreshTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** Schedules a `ChatUnread` refresh (nav badge) at most once per window. */
+/** Schedules a `ChatUnread` refresh (nav badge) in-memory without HTTP polling. */
 export function refreshUnreadSoon(dispatch: AppDispatch): void {
   if (unreadRefreshTimer) return;
   unreadRefreshTimer = setTimeout(() => {
     unreadRefreshTimer = null;
-    dispatch(chatApi.util.invalidateTags(["ChatUnread"]));
+    dispatch(
+      chatApi.util.updateQueryData("getConversations", INBOX_ARGS, (draft) => {
+        let unreadTotal = 0;
+        for (const page of draft.pages) {
+          for (const item of page.items) {
+            if ((item.unreadCount ?? 0) > 0) {
+              unreadTotal += 1;
+            }
+          }
+        }
+        dispatch(
+          chatApi.util.updateQueryData("getUnreadSummary", undefined, (summary) => {
+            summary.unreadConversations = unreadTotal;
+            summary.capped = unreadTotal > 99;
+          }),
+        );
+      }),
+    );
   }, UNREAD_REFRESH_WINDOW_MS);
 }
 

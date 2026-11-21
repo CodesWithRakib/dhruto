@@ -73,7 +73,7 @@ export const chatApi = baseApi
       openConversation: builder.mutation<ChatConversationDetail, CreateChatConversationRequest>({
         query: (body) => ({ url: "/chat/conversations", method: "POST", body }),
         transformResponse: (response: ApiResponse<ChatConversationDetail>) => unwrap(response),
-        invalidatesTags: ["ChatConversations", "ChatUnread"],
+        invalidatesTags: ["ChatConversations"],
       }),
 
       /* --------------------------- Attachments (Phase 6) --------------------------- */
@@ -117,11 +117,11 @@ export const chatApi = baseApi
         keepUnusedDataFor: 0,
       }),
 
-      /** Global unread indicator (nav badge). Polled lightly; realtime invalidates it. */
+      /** Global unread indicator (nav badge). Fetched once on mount; real-time in-memory updates via sockets without polling. */
       getUnreadSummary: builder.query<ChatUnreadSummary, void>({
         query: () => "/chat/conversations/unread-summary",
         transformResponse: (response: ApiResponse<ChatUnreadSummary>) => unwrap(response),
-        providesTags: ["ChatUnread"],
+        keepUnusedDataFor: 86400,
       }),
 
       /** Keyset-paginated inbox (backend opaque cursor). */

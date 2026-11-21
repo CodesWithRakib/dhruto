@@ -18,7 +18,7 @@ export const notificationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getUnreadNotificationCount: builder.query<ApiResponse<UnreadNotificationCountResponse>, void>({
       query: () => "/notifications/unread-count",
-      providesTags: ["Notification"],
+      keepUnusedDataFor: 86400,
     }),
 
     getMyNotifications: builder.query<
@@ -39,6 +39,20 @@ export const notificationsApi = baseApi.injectEndpoints({
         url: `/notifications/${id}/read`,
         method: "PATCH",
       }),
+      async onQueryStarted(_id, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          notificationsApi.util.updateQueryData("getUnreadNotificationCount", undefined, (draft) => {
+            if (draft?.data && draft.data.unreadCount > 0) {
+              draft.data.unreadCount -= 1;
+            }
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Notification"],
     }),
 
@@ -47,6 +61,20 @@ export const notificationsApi = baseApi.injectEndpoints({
         url: "/notifications/read-all",
         method: "POST",
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          notificationsApi.util.updateQueryData("getUnreadNotificationCount", undefined, (draft) => {
+            if (draft?.data) {
+              draft.data.unreadCount = 0;
+            }
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Notification"],
     }),
 

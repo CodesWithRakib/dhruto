@@ -133,6 +133,24 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   /**
+   * Emits a real-time event to an entire hub facility.
+   */
+  emitToHub(hubId: string, event: string, payload: unknown): boolean {
+    if (!this.server) return false;
+    this.server.to(`hub:${hubId}`).emit(event, payload);
+    return true;
+  }
+
+  /**
+   * Emits a real-time event to a specific field rider.
+   */
+  emitToRider(riderId: string, event: string, payload: unknown): boolean {
+    if (!this.server) return false;
+    this.server.to(`rider:${riderId}`).emit(event, payload);
+    return true;
+  }
+
+  /**
    * Emits a notification to all active users with a specific role.
    */
   emitToRole(role: string, event: string, payload: unknown): boolean {

@@ -10,6 +10,9 @@ export function ChatUnreadBadge({ className }: { className?: string }) {
   const signedIn = useAppSelector((state) => Boolean(state.auth.accessToken && state.auth.user));
   const { data } = useGetUnreadSummaryQuery(undefined, {
     skip: !signedIn,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMountOrArgChange: false,
   });
   if (!data || data.unreadConversations === 0) return null;
   const label = data.capped ? "99+" : String(data.unreadConversations);

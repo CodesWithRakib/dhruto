@@ -126,10 +126,35 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       );
     };
 
+    const onParcelStatusChanged = (payload: {
+      trackingCode: string;
+      status: string;
+      parcelId?: string;
+      codCollected?: number;
+    }) => {
+      // 1. Immediately invalidate Parcel, Analytics, Rider, and Hub query tags for live screen updates
+      dispatch(baseApi.util.invalidateTags(["Parcel", "Analytics", "Rider", "Hub"]));
+
+      // 2. Audible chime & feedback toast for milestone status updates
+      if (payload.status === "DELIVERED") {
+        playNotificationSound();
+        toast.success(`Parcel ${payload.trackingCode} Delivered!`, {
+          description: payload.codCollected
+            ? `Collected: ৳${payload.codCollected.toLocaleString()}`
+            : "Delivery completed & verified by rider.",
+        });
+      } else if (payload.status === "OUT_FOR_DELIVERY") {
+        toast.info(`Parcel ${payload.trackingCode} Out for Delivery`, {
+          description: "Rider is en route to recipient destination.",
+        });
+      }
+    };
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("notification:new", onNewNotification);
     socket.on("notification:unread_count", onUnreadCount);
+    socket.on("parcel:status_changed", onParcelStatusChanged);
 
     if (socket.connected) {
       setIsConnected(true);
@@ -141,6 +166,7 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       socket.off("disconnect", onDisconnect);
       socket.off("notification:new", onNewNotification);
       socket.off("notification:unread_count", onUnreadCount);
+      socket.off("parcel:status_changed", onParcelStatusChanged);
 
       if (activeConnectionCount <= 0 && sharedSocket) {
         sharedSocket.disconnect();
