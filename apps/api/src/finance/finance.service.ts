@@ -52,6 +52,8 @@ import {
   type VerifyCashLedgerDto,
   type ProcessPayoutDto,
   type ApprovePayoutDto,
+  type BulkDisbursePayoutsDto,
+  type BulkDisburseResult,
   type CreateAdjustmentDto,
   type ReverseTransactionDto,
   type CreateSettlementBatchDto,
@@ -765,6 +767,140 @@ export class FinanceService {
       message: `Unsupported payout decision "${dto.status}"`,
       error: "PAYOUT_INVALID_STATE",
     });
+  }
+
+  /**
+   * Bulk disburse multiple payouts in a single batch.
+   * Auto-approves REQUESTED payouts, executes completion, and writes double-entry ledger entries.
+   */
+  async bulkDisbursePayouts(
+    adminId: string,
+    dto: BulkDisbursePayoutsDto,
+  ): Promise<BulkDisburseResult> {
+    const batchRef = dto.batchReference?.trim() || `BATCH-MFS-${Date.now()}`;
+    const results: BulkDisburseResult["results"] = [];
+    let completed = 0;
+    let failed = 0;
+
+    for (const payoutId of dto.payoutIds) {
+      try {
+        await this.dataSource.transaction(async (manager) => {
+          const payout = await manager.getRepository(PayoutRequest).findOne({
+            where: { id: payoutId },
+            lock: { mode: "pessimistic_write" },
+          });
+
+          if (!payout) {
+            throw new NotFoundException(`Payout ${payoutId} not found`);
+          }
+
+          // If it's REQUESTED, auto-approve it
+          if (payout.status === PayoutStatus.REQUESTED) {
+            payout.status = PayoutStatus.APPROVED;
+            payout.approvedBy = adminId;
+            payout.approvedAt = new Date();
+            await manager.getRepository(PayoutRequest).save(payout);
+          }
+
+          if (
+            payout.status !== PayoutStatus.APPROVED &&
+            payout.status !== PayoutStatus.PROCESSING
+          ) {
+            throw new BadRequestException(
+              `Payout is in ${payout.status} state, cannot disburse`,
+            );
+          }
+
+          const amountMinor = toMinor(payout.amount);
+          payout.status = PayoutStatus.COMPLETED;
+          payout.processedBy = adminId;
+          payout.processedAt = new Date();
+          const txnRef = `${batchRef}-${payout.payoutCode}`;
+          payout.transactionReference = txnRef;
+          await manager.getRepository(PayoutRequest).save(payout);
+
+          await this.ledger.post(manager, {
+            type: FinancialTransactionType.PAYOUT_COMPLETION,
+            referenceType: "PAYOUT",
+            referenceId: payout.id,
+            description: `Batch payout ${payout.payoutCode} disbursed via ${payout.payoutMethod} (${batchRef})`,
+            entries: [
+              {
+                account: FinancialAccount.MERCHANT_PAYOUT_IN_TRANSIT,
+                direction: EntryDirection.DEBIT,
+                amountMinor,
+                merchantId: payout.merchantId,
+              },
+              {
+                account: FinancialAccount.PLATFORM_CASH,
+                direction: EntryDirection.CREDIT,
+                amountMinor,
+              },
+            ],
+            createdBy: adminId,
+          });
+
+          if (this.eventPublisher) {
+            await this.eventPublisher.publish(
+              manager,
+              new PayoutCompletedEvent(
+                { aggregateId: payout.id, merchantId: payout.merchantId },
+                {
+                  payoutId: payout.id,
+                  payoutCode: payout.payoutCode,
+                  merchantId: payout.merchantId,
+                  amountPaisa: amountMinor,
+                  amountMinor,
+                  method: payout.payoutMethod,
+                  transactionRef: txnRef,
+                },
+              ),
+            );
+          } else {
+            await this.outbox.append(manager, {
+              eventType: DomainEventType.PAYOUT_COMPLETED,
+              aggregateType: "payout",
+              aggregateId: payout.id,
+              actorId: adminId,
+              payload: {
+                payoutId: payout.id,
+                payoutCode: payout.payoutCode,
+                merchantId: payout.merchantId,
+                amountMinor,
+                method: payout.payoutMethod,
+                transactionReference: txnRef,
+              },
+            });
+          }
+
+          results.push({
+            id: payout.id,
+            payoutCode: payout.payoutCode ?? payout.id,
+            ok: true,
+            amount: Number(payout.amount),
+          });
+          completed++;
+        });
+      } catch (err: any) {
+        this.logger.error(`Failed to bulk disburse payout ${payoutId}: ${err?.message}`);
+        results.push({
+          id: payoutId,
+          payoutCode: "UNKNOWN",
+          ok: false,
+          amount: 0,
+          error: err?.message || "Disbursement failed",
+        });
+        failed++;
+      }
+    }
+
+    return {
+      total: dto.payoutIds.length,
+      completed,
+      failed,
+      batchReference: batchRef,
+      results,
+    };
   }
 
   /* ================================================================== */

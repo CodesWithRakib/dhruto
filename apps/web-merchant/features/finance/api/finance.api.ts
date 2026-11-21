@@ -21,6 +21,8 @@ import {
   type VerifyCashLedgerDto,
   type WalletTransactionItem,
   type WalletTransactionType,
+  type BulkDisbursePayoutsDto,
+  type BulkDisburseResult,
   type ApiResponse,
 } from "@dhruto/contracts";
 
@@ -214,6 +216,18 @@ export const financeApi = baseApi.injectEndpoints({
       invalidatesTags: [FINANCE_TAG, WALLET_TAG],
     }),
 
+    bulkDisbursePayouts: builder.mutation<
+      ApiResponse<BulkDisburseResult>,
+      BulkDisbursePayoutsDto
+    >({
+      query: (dto) => ({
+        url: "/admin/finance/payouts/bulk/disburse",
+        method: "POST",
+        body: dto,
+      }),
+      invalidatesTags: [FINANCE_TAG, WALLET_TAG],
+    }),
+
     getAdminSettlements: builder.query<
       ApiResponse<{ items: SettlementItem[]; total: number; page: number; limit: number }>,
       PageArgs & { merchantId?: string; status?: SettlementStatus }
@@ -356,6 +370,7 @@ export const {
   useGetAdminPayoutsQuery,
   useApprovePayoutMutation,
   useProcessPayoutMutation,
+  useBulkDisbursePayoutsMutation,
   useGetAdminSettlementsQuery,
   useCreateSettlementBatchMutation,
   useGetSettlementBatchesQuery,

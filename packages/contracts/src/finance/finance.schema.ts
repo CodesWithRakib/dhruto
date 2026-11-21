@@ -263,6 +263,27 @@ export const approvePayoutSchema = z.object({
 
 export type ApprovePayoutDto = z.infer<typeof approvePayoutSchema>;
 
+export const bulkDisbursePayoutsSchema = z.object({
+  payoutIds: z.array(z.string().guid()).min(1).max(100),
+  batchReference: z.string().trim().max(100).optional(),
+});
+
+export type BulkDisbursePayoutsDto = z.infer<typeof bulkDisbursePayoutsSchema>;
+
+export interface BulkDisburseResult {
+  total: number;
+  completed: number;
+  failed: number;
+  batchReference: string;
+  results: Array<{
+    id: string;
+    payoutCode: string;
+    ok: boolean;
+    amount: number;
+    error?: string;
+  }>;
+}
+
 export const createAdjustmentSchema = z.object({
   merchantId: z.string().guid("Invalid merchant ID"),
   direction: z.enum(["CREDIT", "DEBIT"]),

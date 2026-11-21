@@ -27,6 +27,7 @@ import {
   VerifyCashLedgerDto,
   ProcessPayoutDto,
   ApprovePayoutDto,
+  BulkDisbursePayoutsDto,
   CreateAdjustmentDto,
   ReverseTransactionDto,
   CreateSettlementBatchDto,
@@ -491,6 +492,23 @@ export class FinanceAdminController {
   ) {
     const payout = await this.financeService.processPayout(id, dto, user.id);
     return envelope(HttpStatus.OK, `Payout marked as ${payout.status}`, payout, req);
+  }
+
+  @Post("payouts/bulk/disburse")
+  @RateLimit({ limit: 10, windowSeconds: 60, scope: "payout-bulk-disburse" })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Bulk disburse multiple approved/requested payouts in a batch",
+    description: "Executes payout completion and double-entry ledger postings for multiple payouts.",
+  })
+  @ApiResponse({ status: 200, description: "Batch payout results." })
+  async bulkDisbursePayouts(
+    @Body() dto: BulkDisbursePayoutsDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req?: RequestWithId,
+  ) {
+    const result = await this.financeService.bulkDisbursePayouts(user.id, dto);
+    return envelope(HttpStatus.OK, `Disbursed ${result.completed}/${result.total} payouts`, result, req);
   }
 
   @Get("settlements")

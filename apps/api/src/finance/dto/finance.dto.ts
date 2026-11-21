@@ -22,6 +22,7 @@ import {
   PayoutMethod,
   PayoutStatus,
   type ApprovePayoutDto as IApprovePayoutDto,
+  type BulkDisbursePayoutsDto as IBulkDisbursePayoutsDto,
   type CreateAdjustmentDto as ICreateAdjustmentDto,
   type CreateSettlementBatchDto as ICreateSettlementBatchDto,
   type ProcessPayoutDto as IProcessPayoutDto,
@@ -143,6 +144,22 @@ export class ApprovePayoutDto implements IApprovePayoutDto {
   notes?: string;
 }
 
+export class BulkDisbursePayoutsDto implements IBulkDisbursePayoutsDto {
+  @ApiProperty({ type: [String], description: "List of payout UUIDs to disburse" })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(100)
+  @IsUUID("4", { each: true })
+  payoutIds: string[];
+
+  @ApiPropertyOptional({ example: "BATCH-MFS-20261121-001" })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @MaxLength(100)
+  batchReference?: string;
+}
+
 export class CreateAdjustmentDto implements ICreateAdjustmentDto {
   @ApiProperty({ format: "uuid" })
   @IsUUID("4", { message: "Invalid merchant ID" })
@@ -231,3 +248,5 @@ export class ResolveDiscrepancyDto implements IResolveDiscrepancyDto {
   @MaxLength(500)
   reason: string;
 }
+
+
