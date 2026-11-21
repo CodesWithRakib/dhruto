@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, Copy, Package, Phone, Play } from "lucide-react";
+import { CheckCircle2, Copy, Navigation, Package, Phone, Play } from "lucide-react";
 import { Button } from "@dhruto/ui";
 import { Link } from "@/lib/navigation";
 import { RIDER_ROUTES } from "@/config/routes";
@@ -85,6 +85,20 @@ export function RiderNextTaskHero({ nextTask }: RiderNextTaskHeroProps) {
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-nowrap">
+          {/* 1-Tap Navigation */}
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+              `${nextTask.deliveryAddress}, ${nextTask.thana || ""}, ${nextTask.district || ""}, Bangladesh`,
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-info/10 px-4 text-xs font-bold text-info transition-colors hover:bg-info/20"
+            title="Open GPS Navigation in Google Maps"
+          >
+            <Navigation className="h-4 w-4 fill-current" aria-hidden="true" />
+            <span>Directions</span>
+          </a>
+
           {nextTask.recipientPhone && (
             <a
               href={`tel:${nextTask.recipientPhone}`}

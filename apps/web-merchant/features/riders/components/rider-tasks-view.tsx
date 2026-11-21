@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input } from "@dhruto/ui";
-import { Search, RefreshCw, Package, X, RotateCcw } from "lucide-react";
+import { Search, RefreshCw, Package, X, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useGetRiderTasksQuery, useStartDeliveryMutation } from "../api/riders.api";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/feedback/states";
@@ -12,13 +12,15 @@ import { RiderPickupsCard } from "./tasks/rider-pickups-card";
 import { toast } from "sonner";
 
 type TaskFilter = "ALL" | "ASSIGNED_TO_RIDER" | "OUT_FOR_DELIVERY" | "ATTEMPTED";
+type SortOption = "DEFAULT" | "AREA_CLUSTER" | "HIGH_COD" | "ATTEMPTS";
 
 const ATTEMPTED_STATUSES = ["DELIVERY_ATTEMPTED", "RESCHEDULED"];
 
-/** Assigned delivery tasks with search and status filters. */
+/** Assigned delivery tasks with route optimization, search and status filters. */
 export function RiderTasksView() {
   const t = useTranslations("Rider");
   const [filter, setFilter] = React.useState<TaskFilter>("ALL");
+  const [sortOption, setSortOption] = React.useState<SortOption>("AREA_CLUSTER");
   const [search, setSearch] = React.useState("");
 
   const { data, isLoading, isFetching, refetch } = useGetRiderTasksQuery();
@@ -41,12 +43,38 @@ export function RiderTasksView() {
       query === "" ||
       task.trackingCode.toLowerCase().includes(query) ||
       task.recipientName.toLowerCase().includes(query) ||
-      task.deliveryAddress.toLowerCase().includes(query);
+      task.deliveryAddress.toLowerCase().includes(query) ||
+      (task.thana && task.thana.toLowerCase().includes(query));
     const matchesFilter =
       filter === "ALL" ||
       (filter === "ATTEMPTED" ? ATTEMPTED_STATUSES.includes(task.status) : task.status === filter);
     return matchesSearch && matchesFilter;
   });
+
+  const sortedTasks = React.useMemo(() => {
+    const list = [...filtered];
+    if (sortOption === "HIGH_COD") {
+      return list.sort((a, b) => b.codAmount - a.codAmount);
+    }
+    if (sortOption === "ATTEMPTS") {
+      return list.sort((a, b) => b.attemptCount - a.attemptCount);
+    }
+    if (sortOption === "AREA_CLUSTER") {
+      return list.sort((a, b) => {
+        if (a.status === "OUT_FOR_DELIVERY" && b.status !== "OUT_FOR_DELIVERY") return -1;
+        if (b.status === "OUT_FOR_DELIVERY" && a.status !== "OUT_FOR_DELIVERY") return 1;
+
+        const thanaA = (a.thana || "").toLowerCase();
+        const thanaB = (b.thana || "").toLowerCase();
+        if (thanaA !== thanaB) return thanaA.localeCompare(thanaB);
+
+        const distA = (a.district || "").toLowerCase();
+        const distB = (b.district || "").toLowerCase();
+        return distA.localeCompare(distB);
+      });
+    }
+    return list;
+  }, [filtered, sortOption]);
 
   const handleStart = async (parcelId: string) => {
     try {
@@ -71,7 +99,7 @@ export function RiderTasksView() {
     <div className="space-y-4">
       {/* First-mile pickups assigned to this rider (hidden when none) */}
       <RiderPickupsCard />
-      <div className="rounded-3xl bg-surface-elevated p-5 space-y-3.5">
+      <div className="rounded-3xl bg-surface-elevated p-5 space-y-3.5 border border-border/40 shadow-xs">
         <div className="relative">
           <Search
             className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -107,7 +135,7 @@ export function RiderTasksView() {
                   onClick={() => setFilter(entry.key)}
                   className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-xs font-semibold transition-all duration-200 ${
                     isActive
-                      ? "bg-primary text-primary-foreground font-bold"
+                      ? "bg-primary text-primary-foreground font-bold shadow-xs"
                       : "bg-surface-muted/60 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                   }`}
                 >
@@ -136,6 +164,64 @@ export function RiderTasksView() {
             <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
           </Button>
         </div>
+
+        {/* Route Sorting Selector */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/30">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
+            <span className="font-semibold text-foreground">Sort Runsheet:</span>
+          </div>
+          <div className="flex items-center rounded-xl bg-surface-muted/60 p-0.5 text-[11px] font-medium border border-border/40">
+            <button
+              type="button"
+              onClick={() => setSortOption("AREA_CLUSTER")}
+              className={`rounded-lg px-2.5 py-1 transition-all ${
+                sortOption === "AREA_CLUSTER"
+                  ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Cluster nearby stops in same Thana together"
+            >
+              Area Cluster
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortOption("DEFAULT")}
+              className={`rounded-lg px-2.5 py-1 transition-all ${
+                sortOption === "DEFAULT"
+                  ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Original assignment sequence"
+            >
+              Sequence
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortOption("HIGH_COD")}
+              className={`rounded-lg px-2.5 py-1 transition-all ${
+                sortOption === "HIGH_COD"
+                  ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Highest COD collection first"
+            >
+              High COD
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortOption("ATTEMPTS")}
+              className={`rounded-lg px-2.5 py-1 transition-all ${
+                sortOption === "ATTEMPTS"
+                  ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Prioritize packages needing re-attempts"
+            >
+              Urgent
+            </button>
+          </div>
+        </div>
       </div>
 
       {isLoading ? (
@@ -143,7 +229,7 @@ export function RiderTasksView() {
           <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-primary" />
           <p>{t("loading")}</p>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : sortedTasks.length === 0 ? (
         <EmptyState
           icon={Package}
           title={search || filter !== "ALL" ? "No matching delivery tasks" : t("tasks.empty")}
@@ -171,7 +257,7 @@ export function RiderTasksView() {
         />
       ) : (
         <ul className="space-y-3.5">
-          {filtered.map((task) => (
+          {sortedTasks.map((task) => (
             <li key={task.id}>
               <RiderTaskCard task={task} onStartDelivery={handleStart} isStarting={isStarting} />
             </li>

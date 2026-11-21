@@ -98,7 +98,7 @@ export function RiderTaskCard({ task, onStartDelivery, isStarting = false }: Rid
     toast.success(task.trackingCode);
   };
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     `${task.deliveryAddress}, ${task.thana || ""}, ${task.district || ""}, Bangladesh`,
   )}`;
 
