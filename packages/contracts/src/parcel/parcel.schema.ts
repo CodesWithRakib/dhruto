@@ -367,6 +367,7 @@ export type ParcelDetailsResponse = z.infer<typeof parcelDetailsResponseSchema>;
 export const shippingLabelResponseSchema = z.object({
   trackingCode: z.string(),
   barcodeSvg: z.string(),
+  qrCodeSvg: z.string().optional(),
   merchantName: z.string(),
   merchantPhone: z.string(),
   pickupAddress: z.string(),
@@ -381,6 +382,13 @@ export const shippingLabelResponseSchema = z.object({
   zone: z.string(),
   createdDate: z.string(),
   routingHub: z.string(),
+  originHub: z.string().optional(),
 });
 
 export type ShippingLabelResponse = z.infer<typeof shippingLabelResponseSchema>;
+
+export const bulkShippingLabelsDtoSchema = z.object({
+  parcelIds: z.array(z.string().trim().min(1)).min(1).max(50),
+});
+
+export type BulkShippingLabelsDto = z.infer<typeof bulkShippingLabelsDtoSchema>;

@@ -316,6 +316,33 @@ export class ParcelsController {
     };
   }
 
+  @Post("labels/bulk")
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ limit: 30, windowSeconds: 60, scope: "parcel-bulk-labels" })
+  @ApiOperation({
+    summary: "Get multiple 4x6 shipping labels for continuous thermal printing",
+  })
+  async getBulkShippingLabels(
+    @Body() body: { parcelIds: string[] },
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: RequestWithId,
+  ) {
+    const scope = await this.parcelsService.resolveScope(user);
+    const ids = Array.isArray(body?.parcelIds) ? body.parcelIds : [];
+    const data = await this.parcelsService.getBulkShippingLabels(ids, scope);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Retrieved ${data.length} shipping labels`,
+      data,
+      meta: {
+        requestId: req.requestId || "unknown",
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
   @Get(":id/label")
   @HttpCode(HttpStatus.OK)
   @RateLimit({ limit: 60, windowSeconds: 60, scope: "parcel-label" })

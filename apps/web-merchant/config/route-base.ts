@@ -16,6 +16,7 @@ export interface RouteBase {
   parcels: string;
   parcel: (id: string) => string;
   parcelLabel: (id: string) => string;
+  bulkLabels: (ids?: string[]) => string;
   /** Omitted when the role cannot create bookings from this surface. */
   createBooking?: string;
   returns?: string;
@@ -26,6 +27,7 @@ export const MERCHANT_ROUTE_BASE: RouteBase = {
   parcels: MERCHANT_ROUTES.parcels,
   parcel: MERCHANT_ROUTES.parcel,
   parcelLabel: MERCHANT_ROUTES.parcelLabel,
+  bulkLabels: MERCHANT_ROUTES.bulkLabels,
   createBooking: MERCHANT_ROUTES.createBooking,
   returns: MERCHANT_ROUTES.returns,
 };
@@ -35,6 +37,7 @@ export const ADMIN_ROUTE_BASE: RouteBase = {
   parcels: ADMIN_ROUTES.parcels,
   parcel: ADMIN_ROUTES.parcel,
   parcelLabel: ADMIN_ROUTES.parcelLabel,
+  bulkLabels: ADMIN_ROUTES.bulkLabels,
 };
 
 /** Resolves the active link base from the current pathname. */

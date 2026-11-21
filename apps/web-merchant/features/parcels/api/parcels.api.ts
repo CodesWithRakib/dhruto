@@ -142,6 +142,14 @@ export const parcelsApi = baseApi.injectEndpoints({
       providesTags: (_result, _err, id) => [{ type: PARCEL_TAG, id }],
     }),
 
+    getBulkShippingLabels: builder.mutation<ApiResponse<ShippingLabelResponse[]>, { parcelIds: string[] }>({
+      query: (body) => ({
+        url: "/parcels/labels/bulk",
+        method: "POST",
+        body,
+      }),
+    }),
+
     getPublicTracking: builder.query<ApiResponse<PublicTrackingResponse>, string>({
       query: (trackingCode) => ({
         url: `/tracking/${encodeURIComponent(trackingCode.trim().toUpperCase())}`,
@@ -378,6 +386,7 @@ export const {
   useGetParcelByIdQuery,
   useGetParcelHistoryQuery,
   useGetShippingLabelQuery,
+  useGetBulkShippingLabelsMutation,
   useGetPublicTrackingQuery,
   useLazyGetPublicTrackingQuery,
   useGetDeliveryOtpQuery,

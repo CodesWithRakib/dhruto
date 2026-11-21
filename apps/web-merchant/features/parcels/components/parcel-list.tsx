@@ -2,8 +2,10 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { DataTable, type DataTableLabels } from "@dhruto/ui";
+import { Printer } from "lucide-react";
+import { Button, DataTable, type DataTableLabels } from "@dhruto/ui";
 import { ParcelStatus } from "@dhruto/contracts";
+import { Link } from "@/lib/navigation";
 import { useRouteBase } from "@/config/route-base";
 import { statusConfig } from "@/config/status";
 import { ActiveFilters, type ActiveFilter } from "@/components/active-filters";
@@ -73,9 +75,65 @@ export function ParcelList() {
   const hasActiveFilters = activeFilterCount > 0;
   const hasNoResults = !isLoading && !isError && parcels.length === 0;
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const isAllSelected = useMemo(
+    () => parcels.length > 0 && parcels.every((p) => selectedIds.has(p.id)),
+    [parcels, selectedIds],
+  );
+
+  const handleToggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (isAllSelected) {
+        parcels.forEach((p) => next.delete(p.id));
+      } else {
+        parcels.forEach((p) => next.add(p.id));
+      }
+      return next;
+    });
+  }, [isAllSelected, parcels]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
   const columns = useMemo(
-    () => buildParcelListColumns({ t, bdt, date, time, routes }),
-    [bdt, date, time, t, routes],
+    () =>
+      buildParcelListColumns({
+        t,
+        bdt,
+        date,
+        time,
+        routes,
+        selectedIds,
+        onToggleSelect: handleToggleSelect,
+        onToggleSelectAll: handleToggleSelectAll,
+        isAllSelected,
+      }),
+    [
+      bdt,
+      date,
+      time,
+      t,
+      routes,
+      selectedIds,
+      handleToggleSelect,
+      handleToggleSelectAll,
+      isAllSelected,
+    ],
   );
 
   const tableLabels: DataTableLabels = useMemo(
@@ -274,6 +332,39 @@ export function ParcelList() {
           className="space-y-1.5"
         />
       </FilterSheet>
+
+      {/* Bulk selection action bar */}
+      {selectedIds.size > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-elevated/95 border border-primary/40 p-3.5 backdrop-blur-md shadow-xs animate-in fade-in-50">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1 text-primary-foreground text-caption font-bold">
+              {selectedIds.size}
+            </span>
+            <span className="text-body-sm font-semibold text-foreground">
+              {selectedIds.size === 1
+                ? "1 shipment selected"
+                : `${selectedIds.size} shipments selected`}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearSelection}
+              className="text-xs text-muted-foreground hover:text-foreground rounded-xl"
+            >
+              Deselect
+            </Button>
+            <Link href={routes.bulkLabels(Array.from(selectedIds))}>
+              <Button size="sm" className="gap-2 rounded-xl text-xs font-semibold">
+                <Printer className="h-4 w-4" aria-hidden="true" />
+                Print Thermal Labels ({selectedIds.size})
+              </Button>
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {/* Main Content States */}
       {isError || hasNoResults ? (

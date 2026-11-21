@@ -44,6 +44,8 @@ export const MERCHANT_ROUTES = {
   parcels: "/merchant/parcels",
   parcel: (id: string) => `/merchant/parcels/${id}`,
   parcelLabel: (id: string) => `/merchant/parcels/${id}/label`,
+  bulkLabels: (ids?: string[]) =>
+    ids && ids.length ? `/merchant/parcels/bulk-labels?ids=${ids.join(",")}` : "/merchant/parcels/bulk-labels",
   returns: "/merchant/returns",
   finance: "/merchant/finance",
   intelligence: "/merchant/intelligence",
@@ -62,6 +64,8 @@ export const ADMIN_ROUTES = {
   parcels: "/admin/parcels",
   parcel: (id: string) => `/admin/parcels/${id}`,
   parcelLabel: (id: string) => `/admin/parcels/${id}/label`,
+  bulkLabels: (ids?: string[]) =>
+    ids && ids.length ? `/admin/parcels/bulk-labels?ids=${ids.join(",")}` : "/admin/parcels/bulk-labels",
   finance: "/admin/finance",
   hub: "/admin/hub",
   rider: "/admin/rider",

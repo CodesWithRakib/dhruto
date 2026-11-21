@@ -18,6 +18,10 @@ interface ColumnOptions {
     parcel: (id: string) => string;
     parcelLabel: (id: string) => string;
   };
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onToggleSelectAll?: () => void;
+  isAllSelected?: boolean;
 }
 
 export function buildParcelListColumns({
@@ -26,8 +30,42 @@ export function buildParcelListColumns({
   date,
   time,
   routes,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
+  isAllSelected,
 }: ColumnOptions): ColumnDef<ParcelListItem>[] {
-  return [
+  const cols: ColumnDef<ParcelListItem>[] = [];
+
+  if (onToggleSelect && onToggleSelectAll) {
+    cols.push({
+      id: "select",
+      header: () => (
+        <div className="flex items-center justify-center">
+          <input
+            type="checkbox"
+            checked={Boolean(isAllSelected)}
+            onChange={onToggleSelectAll}
+            aria-label="Select all shipments on this page"
+            className="h-4 w-4 rounded border-border/70 text-primary accent-primary cursor-pointer"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <input
+            type="checkbox"
+            checked={Boolean(selectedIds?.has(row.original.id))}
+            onChange={() => onToggleSelect(row.original.id)}
+            aria-label={`Select shipment ${row.original.trackingCode}`}
+            className="h-4 w-4 rounded border-border/70 text-primary accent-primary cursor-pointer"
+          />
+        </div>
+      ),
+    });
+  }
+
+  cols.push(
     {
       accessorKey: "trackingCode",
       header: t("tracking"),
@@ -115,7 +153,6 @@ export function buildParcelListColumns({
     {
       id: "actions",
       header: () => <span className="block text-right">{t("actions")}</span>,
-      // Links rendered as buttons (asChild) — no <button> nested in <a>.
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <Button
@@ -149,5 +186,7 @@ export function buildParcelListColumns({
         </div>
       ),
     },
-  ];
+  );
+
+  return cols;
 }

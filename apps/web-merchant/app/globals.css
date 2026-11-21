@@ -20,9 +20,9 @@
 @media print {
   html,
   body {
-    margin: 0;
-    padding: 0;
-    background: white;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
   }
 
   /* Hide the whole application, then reveal only the label subtree. */
@@ -30,20 +30,41 @@
     visibility: hidden;
   }
 
+  .dhruto-print-container,
+  .dhruto-print-container *,
   .dhruto-label,
   .dhruto-label * {
     visibility: visible;
   }
 
-  .dhruto-label {
+  .dhruto-print-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 4in;
-    height: 6in;
     margin: 0;
-    border: none;
-    padding: 0.12in;
+    padding: 0;
+  }
+
+  .dhruto-label {
+    width: 4in;
+    height: 5.95in;
+    margin: 0 auto;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    box-sizing: border-box;
+    position: relative;
+    border: 2px solid black !important;
+    padding: 0.15in;
+    background: white !important;
+    color: black !important;
+  }
+
+  .dhruto-label:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 
   .dhruto-print-hidden {

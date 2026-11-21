@@ -43,6 +43,7 @@ import {
   IdempotencyService,
 } from "../common/idempotency/idempotency.service.js";
 import { generateBarcodeSvg } from "../common/utils/barcode.util.js";
+import { generateQrCodeSvg } from "../common/utils/qr-code.util.js";
 import { OutboxService } from "../integrations/outbox.service.js";
 import {
   validateBulkRow,
@@ -871,12 +872,21 @@ export class ParcelsService {
 
     this.logger.log(`LABEL_GENERATED parcel=${parcel.id} trackingCode=${parcel.trackingCode}`);
 
+    const appBaseUrl =
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === "production" ? "https://dhruto.com" : "http://localhost:5000");
+    const trackingUrl = `${appBaseUrl.replace(/\/+$/, "")}/track/${parcel.trackingCode}`;
+
+    const qrCodeSvg = await generateQrCodeSvg(trackingUrl, 90);
+
     return {
       trackingCode: parcel.trackingCode,
       barcodeSvg: generateBarcodeSvg(parcel.trackingCode, {
         height: 50,
         barWidth: 2,
       }),
+      qrCodeSvg,
       merchantName: parcel.merchant?.businessName ?? "Dhruto Merchant",
       merchantPhone: parcel.merchant?.contactPhone ?? "",
       pickupAddress: parcel.merchant?.pickupAddress ?? "",
@@ -891,7 +901,24 @@ export class ParcelsService {
       zone,
       createdDate: parcel.createdAt.toISOString(),
       routingHub,
+      originHub: parcel.currentHub?.name ?? "DHRUTO CENTRAL HUB",
     };
+  }
+
+  async getBulkShippingLabels(
+    idsOrCodes: string[],
+    scope: ParcelAccessScope,
+  ): Promise<ShippingLabelResponse[]> {
+    const labels: ShippingLabelResponse[] = [];
+    for (const id of idsOrCodes.slice(0, 50)) {
+      try {
+        const label = await this.getShippingLabel(id, scope);
+        labels.push(label);
+      } catch (err) {
+        this.logger.warn(`Failed to generate label for parcel ${id}: ${err}`);
+      }
+    }
+    return labels;
   }
 
   /* ------------------------------------------------------------------ */
